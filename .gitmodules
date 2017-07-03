@@ -1,0 +1,3 @@
+[submodule "sunbird-common"]
+	path = sunbird-common
+	url = https://github.com/project-sunbird/sunbird-common.git

@@ -1,5 +1,5 @@
 ## Pre-requisites
-1. Akka middleware actors should be up and running. Follow these [instructions](https://github.com/ekstep/sunbird-mw/blob/alpha2/actors/learner-state-mw/setup.md) to run the akka actors.
+1. LMS middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the akka actors.
 
 ## Configuration
 1. Environment Variabls
@@ -7,9 +7,10 @@
     2. sunbird_learnerstate_actor_port
 
 ## Build
-1. Run "mvn clean install" from "sunbird-mw/services" to build the services.
-2. Go to "sunbird-mw/services/learner-state-service" and run the command "mvn play2:dist" to generate the dist file for services.
-3. The build file "learner-state-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-mw/services/learning-service/target" folder.
+1. 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
+2. Run "mvn clean install" to build the services.
+3. Go to "service/" folder and run the command "mvn play2:dist" to generate the dist file for services.
+4. The build file "learner-state-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-lms-service/service/target" folder.
 
 ## Run
 1. Unzip the dist file "learning-service-1.0-SNAPSHOT-dist.zip".
