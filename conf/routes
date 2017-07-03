@@ -1,0 +1,47 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
+# ~~~~
+GET      /v1/user/courses/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
+POST     /v1/user/courses/enroll	    @controllers.LearnerController.enrollCourse()
+POST     /v1/user/content/state	        @controllers.LearnerController.getContentState()
+PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
+
+#user management api 
+POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
+PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
+POST	/v1/user/login					@controllers.usermanagement.UserController.login()
+POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
+POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
+GET  	/v1/user/getProfile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
+
+#course management api
+POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
+PATCH	/v1/course/update		@controllers.coursemanagement.CourseController.updateCourse()
+POST	/v1/course/publish      @controllers.coursemanagement.CourseController.publishCourse()
+POST	/v1/course/search       @controllers.coursemanagement.CourseController.searchCourse()
+POST	/v1/course/delete       @controllers.coursemanagement.CourseController.deleteCourse()
+GET	    /v1/course/:courseId     @controllers.coursemanagement.CourseController.getCourseById(courseId:String)
+POST 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
+
+#organisation management api
+POST	/v1/organisation/create		@controllers.organisationmanagement.OrganisationController.createOrg()
+PATCH	/v1/organisation/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
+POST	/v1/organisation/getOrg     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
+
+#page management api
+POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
+PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
+GET	    /v1/page/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
+GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
+GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageController.getPageData(pageName:String)
+
+#Section management
+POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()
+PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.updatePageSection()
+GET	    /v1/page/section/all/settings			  @controllers.pagemanagement.PageController.getSections()
+GET     /v1/page/section/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
+
+#Assessment management
+POST   /v1/assessment/save					 @controllers.assessment.AssessmentController.saveAssessment()
+POST   /v1/assessment/result					 @controllers.assessment.AssessmentController.getAssessment()
