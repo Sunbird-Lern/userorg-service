@@ -9,8 +9,8 @@
 ## Build
 1. Run "mvn clean install" from "sunbird-mw/services" to build the services.
 2. Go to "sunbird-mw/services/learner-state-service" and run the command "mvn play2:dist" to generate the dist file for services.
-3. The build file "learner-state-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-mw/services/learner-state-service/target" folder.
+3. The build file "learner-state-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-mw/services/learning-service/target" folder.
 
 ## Run
-1. Unzip the dist file "learner-state-service-1.0-SNAPSHOT-dist.zip".
-2. Run the command "java -cp 'learner-state-service-1.0-SNAPSHOT/lib/*' play.core.server.ProdServerStart learner-state-service-1.0-SNAPSHOT" to start the service.
+1. Unzip the dist file "learning-service-1.0-SNAPSHOT-dist.zip".
+2. Run the command "java -cp 'learning-service-1.0-SNAPSHOT/lib/*' play.core.server.ProdServerStart learning-service-1.0-SNAPSHOT" to start the service.
