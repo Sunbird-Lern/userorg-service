@@ -48,10 +48,10 @@ private LogHelper logger = LogHelper.getInstance(OrganisationController.class.ge
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -73,10 +73,10 @@ private LogHelper logger = LogHelper.getInstance(OrganisationController.class.ge
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -97,10 +97,10 @@ private LogHelper logger = LogHelper.getInstance(OrganisationController.class.ge
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 

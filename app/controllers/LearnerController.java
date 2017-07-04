@@ -46,10 +46,10 @@ public class LearnerController extends BaseController {
 			request.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
 			request.setRequest_id(ExecutionContext.getRequestId());
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),request,timeout,JsonKey.COURSES);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),request,timeout,JsonKey.COURSES,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -72,10 +72,10 @@ public class LearnerController extends BaseController {
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -96,10 +96,10 @@ public class LearnerController extends BaseController {
 			Map<String, Object> innerMap = createRequest(reqObj);
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, JsonKey.CONTENT_LIST);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, JsonKey.CONTENT_LIST,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 
 	}
@@ -152,10 +152,10 @@ public class LearnerController extends BaseController {
 		innerMap.put(JsonKey.USER_ID ,reqObj.getRequest().get(JsonKey.USER_ID));
 		reqObj.setRequest(innerMap);
 		Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-		Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null);
+		Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null,request());
 		return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	

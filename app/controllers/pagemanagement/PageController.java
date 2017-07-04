@@ -47,10 +47,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 			map.put(JsonKey.PAGE, reqObj.getRequest());
 			reqObj.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
      
@@ -73,10 +73,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 			map.put(JsonKey.PAGE, reqObj.getRequest());
 			reqObj.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -93,10 +93,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	        reqObj.setEnv(getEnvironment());
 	        reqObj.getRequest().put(JsonKey.ID, pageId);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -114,10 +114,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
 	        reqObj.setEnv(getEnvironment());
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -138,10 +138,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	        RequestValidator.validateGetPageData(request().getHeader(JsonKey.SOURCE_HEADER));
 	        reqObj.getRequest().put(JsonKey.ORG_CODE, request().getHeader(JsonKey.ORG_CODE_HEADER));
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -163,10 +163,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 			map.put(JsonKey.SECTION, reqObj.getRequest());
 			reqObj.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
      
@@ -189,10 +189,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 			innerMap.put(JsonKey.SECTION, reqObj.getRequest());
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 	
@@ -209,10 +209,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	        reqObj.setEnv(getEnvironment());
 	        reqObj.getRequest().put(JsonKey.ID, sectionId);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -230,10 +230,10 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
 	        reqObj.setEnv(getEnvironment());
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 

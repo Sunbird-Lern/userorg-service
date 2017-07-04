@@ -64,7 +64,7 @@ public class ApplicationTest {
 	public void testcreateCommonExceptionResponse() {
 		ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
 		code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
-		Result result = new BaseController().createCommonExceptionResponse(new Exception());
+		Result result = new BaseController().createCommonExceptionResponse(new Exception(),null);
 		assertEquals(ResponseCode.OK.getResponseCode(), result.status());
 	}
 }
