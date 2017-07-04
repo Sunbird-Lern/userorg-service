@@ -9,7 +9,7 @@
 ## Build
 1. Run "mvn clean install" from "sunbird-mw/services" to build the services.
 2. Go to "sunbird-mw/services/learning-service" and run the command "mvn play2:dist" to generate the dist file for services.
-3. The build file "learner-state-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-mw/services/learning-service/target" folder.
+3. The build file "learning-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-mw/services/learning-service/target" folder.
 
 ## Run
 1. Unzip the dist file "learning-service-1.0-SNAPSHOT-dist.zip".
