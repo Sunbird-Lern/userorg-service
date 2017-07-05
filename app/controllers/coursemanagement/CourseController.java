@@ -50,10 +50,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
      
@@ -79,10 +79,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -107,10 +107,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -133,10 +133,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
     
@@ -157,10 +157,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -183,10 +183,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 
@@ -199,7 +199,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 		try {
 			logger.info("Method Started # RECOMMENDED COURSES");
 			JsonNode requestData = request().body().asJson();
-			//Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			Request reqObj = new Request();
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setEnv(getEnvironment());
@@ -208,12 +207,10 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
-			System.out.println("RESPONSE IS "+res);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
-			System.out.println("EXCEPTION IS "+e.getMessage());
-			return Promise.<Result> pure(createCommonExceptionResponse(e));
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
 }
