@@ -199,17 +199,20 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 		try {
 			logger.info("Method Started # RECOMMENDED COURSES");
 			JsonNode requestData = request().body().asJson();
-			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			//Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			Request reqObj = new Request();
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setEnv(getEnvironment());
 			reqObj.setOperation(ActorOperations.GET_RECOMMENDED_COURSES.getValue());
-			HashMap<String, Object> innerMap = (HashMap<String, Object>) reqObj.getRequest();
+			HashMap<String, Object> innerMap = new HashMap<String, Object>();
 			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 			reqObj.setRequest(innerMap);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
 			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null);
+			System.out.println("RESPONSE IS "+res);
 			return res;
 		} catch (Exception e) {
+			System.out.println("EXCEPTION IS "+e.getMessage());
 			return Promise.<Result> pure(createCommonExceptionResponse(e));
 		}
 	}
