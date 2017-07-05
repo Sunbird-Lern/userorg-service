@@ -68,7 +68,7 @@ public class BaseController extends Controller {
 	public static Response createFailureResponse(Request request,ResponseCode code , ResponseCode headerCode) {
 		Response response = new Response();
 		response.setVer(getApiVersion(request.path()));
-		response.setId(ExecutionContext.getRequestId());
+		response.setId(getApiResponseId(request));
 		response.setTs(ProjectUtil.getFormattedDate());
 		response.setResponseCode(headerCode);
 		response.setParams(createResponseParamObj(code));
@@ -97,9 +97,13 @@ public class BaseController extends Controller {
 	 * @param response Response
 	 * @return Response
 	 */
-	public static Response createSuccessResponse(String request, Response response) {
-		response.setVer(getApiVersion(request));
-		response.setId(ExecutionContext.getRequestId());
+	public static Response createSuccessResponse(play.mvc.Http.Request request, Response response) {
+	    if(request !=null) { 
+		response.setVer(getApiVersion(request.path()));
+	    } else {
+	      response.setVer(""); 
+	    }
+		response.setId(getApiResponseId(request));
 		response.setTs(ProjectUtil.getFormattedDate());
 		ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
 		code.setResponseCode(ResponseCode.OK.getResponseCode());
@@ -123,16 +127,41 @@ public class BaseController extends Controller {
    * @param exception ProjectCommonException
    * @return Response
    */
-	public static Response createResponseOnException(String request, ProjectCommonException exception) {
+	public static Response createResponseOnException(play.mvc.Http.Request request, ProjectCommonException exception) {
 		Response response = new Response();
-		response.setVer(getApiVersion(request));
-		response.setId(ExecutionContext.getRequestId());
+		if(request !=null) {
+		  response.setVer(getApiVersion(request.path()));
+		}else {
+		  response.setVer("");
+		}
+		response.setId(getApiResponseId(request));
 		response.setTs(ProjectUtil.getFormattedDate());
 		response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
 		ResponseCode code = ResponseCode.getResponse(exception.getCode());
 		response.setParams(createResponseParamObj(code));
 		return response;
 	}
+	
+	
+	 /**
+     * 
+     * @param path
+     * @param method
+     * @param t
+     * @return
+     */
+  public static Response createResponseOnException(String path, String method,
+      ProjectCommonException exception) {
+    Response response = new Response();
+    response.setVer(getApiVersion(path));
+    response.setId(getApiResponseId(path, method));
+    response.setTs(ProjectUtil.getFormattedDate());
+    response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
+    ResponseCode code = ResponseCode.getResponse(exception.getCode());
+    response.setParams(createResponseParamObj(code));
+    return response;
+  }
+	
 	
 	/**
 	 * This method will create common response for all controller method
@@ -147,10 +176,10 @@ public class BaseController extends Controller {
 				courseResponse.getResult().remove(JsonKey.RESPONSE);
 				courseResponse.getResult().put(key, value);
 			}
-		    return Results.ok(Json.toJson(BaseController.createSuccessResponse(request.path(), (Response) courseResponse)));
+		    return Results.ok(Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
 		} else {
 			 ProjectCommonException exception = (ProjectCommonException) response;
-			 return Results.ok(Json.toJson(BaseController.createResponseOnException(request.path(), exception)));
+			 return Results.ok(Json.toJson(BaseController.createResponseOnException(request, exception)));
 		}
 	}
 	
@@ -172,9 +201,14 @@ public class BaseController extends Controller {
          exception = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
                 ResponseCode.internalError.getErrorMessage(), ResponseCode.SERVER_ERROR.getResponseCode());
         }
-        return Results.ok(Json.toJson(BaseController.createResponseOnException(request().path(), exception)));
+        return Results.ok(Json.toJson(BaseController.createResponseOnException(request(), exception)));
     }
 	
+    
+   
+    
+    
+    
 	/**
 	 * This method will make a call to Akka actor and return promise.
 	 * @param selection ActorSelection
@@ -218,5 +252,65 @@ public class BaseController extends Controller {
 		return AuthenticationHelper.verifyUserAccesToken(token);
 		
 	}
+
 	
+/**
+ * 	
+ * @param requerst play.mvc.Http.Request
+ * @return 
+ */
+  private static String getApiResponseId(play.mvc.Http.Request requerst) {
+    String val = "";
+    if (requerst != null) {
+      String path = requerst.path();
+      if (requerst.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
+        val = Global.apiMap.get(path);
+        if (ProjectUtil.isStringNullOREmpty(val)) {
+          String[] splitedpath = path.split("[/]");
+          path = removelastvalue(splitedpath);
+          val = Global.apiMap.get(path);
+        }
+      } else {
+        val = Global.apiMap.get(path);
+      }
+    }
+    return val;
+  }
+
+  
+  /**
+   *  
+   * @param path String
+   * @param method String
+   * @return  Stirng
+   */
+  private static String getApiResponseId(String path, String method) {
+    String val = "";
+    if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
+      val = Global.apiMap.get(path);
+      if (ProjectUtil.isStringNullOREmpty(val)) {
+        String[] splitedpath = path.split("[/]");
+        path = removelastvalue(splitedpath);
+        val = Global.apiMap.get(path);
+      }
+    } else {
+      val = Global.apiMap.get(path);
+    }
+    return val;
+  }
+     
+/**
+ * 	
+ * @param splited String []
+ * @return String 
+ */
+  private static String removelastvalue(String splited[]) {
+    StringBuilder builder = new StringBuilder();
+    if (splited != null && splited.length > 0) {
+      for (int i = 1; i < splited.length - 1; i++) {
+        builder.append("/" + splited[i]);
+      }
+    }
+    return builder.toString();
+  }
 }

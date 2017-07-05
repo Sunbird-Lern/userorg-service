@@ -1,5 +1,7 @@
 package util;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +15,6 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 
-
 import controllers.BaseController;
 import play.Application;
 import play.GlobalSettings;
@@ -24,7 +25,6 @@ import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
-import util.AuthenticationHelper;
 
 /**
  * This class will work as a filter.
@@ -35,7 +35,7 @@ public class Global extends GlobalSettings {
 	private LogHelper logger = LogHelper.getInstance(Global.class.getName());
 	public static ProjectUtil.Environment env;
 	private static ConcurrentHashMap<String , Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
-	
+	public static Map<String,String> apiMap = new HashMap<>(); 
 	
 	 private class ActionWrapper extends Action.Simple {
 		    public ActionWrapper(Action<?> action) {
@@ -74,6 +74,7 @@ public class Global extends GlobalSettings {
 	public void onStart(Application app) {
 		   setEnvironment();
 		   addApiListToMap();
+		   createApiMap();
 		logger.info("Server started.. with Environment --" + env.name());
 	}
     
@@ -117,11 +118,11 @@ public class Global extends GlobalSettings {
     public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
     	Response response = null;
     	if(t instanceof ProjectCommonException){
-    		response = BaseController.createResponseOnException(request.path(), (ProjectCommonException)t);
+    		response = BaseController.createResponseOnException(request.path(),request.method(), (ProjectCommonException)t);
     	}else {
     	 ProjectCommonException	exception = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
     				ResponseCode.internalError.getErrorMessage(), ResponseCode.SERVER_ERROR.getResponseCode());
-    	 response = BaseController.createResponseOnException(request.path(), exception);
+    	 response = BaseController.createResponseOnException(request.path(),request.method(), exception);
     	}
 	  return   Promise.<Result>pure(Results.internalServerError(Json.toJson(response)));
     }
@@ -150,9 +151,7 @@ public class Global extends GlobalSettings {
 			String userId = AuthenticationHelper.verifyUserAccesToken(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()));
 			if (ProjectUtil.isStringNullOREmpty(userId)) {
 				return ResponseCode.invalidAuthToken.getErrorCode();
-			} else {
-				request.setUsername(userId);
-			}
+			} 
 		}
 		return "";
 	}
@@ -179,4 +178,41 @@ public class Global extends GlobalSettings {
 		apiHeaderIgnoreMap.put("/v1/user/create", var);
 		apiHeaderIgnoreMap.put("/v1/user/login", var);
 	}
+
+ /**
+  * This method will create api url and id for the url.
+  * this id we will use while sending api response to client.	
+  */
+  private static void createApiMap() {
+    apiMap.put("/v1/user/courses/enroll", "api.course.enroll");
+    apiMap.put("/v1/course/update", "api.course.update");
+    apiMap.put("/v1/course/publish", "api.course.publish");
+    apiMap.put("/v1/course/search", "api.course.search");
+    apiMap.put("/v1/course/delete", "api.course.delete");
+    apiMap.put("/v1/course", "api.course.getbycourseid");
+    apiMap.put("/v1/course/recommended/courses", "api.recomend");
+    apiMap.put("/v1/user/courses", "api.course.getbyuser");
+    apiMap.put("/v1/user/content/state", "api.content.state");
+    apiMap.put("/v1/user/create", "api.user.create");
+    apiMap.put("/v1/user/update", "api.user.update");
+    apiMap.put("/v1/user/login", "api.user.login");
+    apiMap.put("/v1/user/logout", "api.user.logout");
+    apiMap.put("/v1/user/changepassword", "api.user.cp");
+    apiMap.put("/v1/user/getProfile/", "api.user.profile");
+    apiMap.put("/v1/course/create", "api.user.create");
+    apiMap.put("/v1/organisation/create", "api.organisation.create");
+    apiMap.put("/v1/organisation/update", "api.organisation.update");
+    apiMap.put("/v1/organisation/getOrg", "api.organisation.details");
+    apiMap.put("/v1/page/create", "api.page.create");
+    apiMap.put("/v1/page/update", "api.page.update");
+    apiMap.put("/v1/page", "api.page.get");
+    apiMap.put("/v1/page/all/settings", "api.page.settings");
+    apiMap.put("/v1/page/assemble", "api.page.assemble");
+    apiMap.put("/v1/page/section/create", "api.page.section.create");
+    apiMap.put("/v1/page/section/update", "api.page.section.update");
+    apiMap.put("/v1/page/section/all/settings", "api.page.section.settings");
+    apiMap.put("/v1/page/section", "api.page.section.get");
+    apiMap.put("/v1/assessment/save", "api.assessment.save");
+    apiMap.put("/v1/assessment/result", "api.assessment.result");
+  }
 }
