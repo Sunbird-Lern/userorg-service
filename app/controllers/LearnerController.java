@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import akka.util.Timeout;
 import play.libs.F.Promise;
 import play.mvc.Result;
+import play.mvc.Results;
 /**
  * This controller will handler all the request related 
  * to learner state.
@@ -157,6 +158,10 @@ public class LearnerController extends BaseController {
 		} catch (Exception e) {
 			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
+	}
+
+	public Result getHealth() {
+		return Results.ok("ok");
 	}
 	
 	 /**

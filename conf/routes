@@ -3,9 +3,13 @@
 OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
 # ~~~~
 GET      /v1/user/courses/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
+GET      /v1/user/courses/list/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
 POST     /v1/user/courses/enroll	    @controllers.LearnerController.enrollCourse()
+POST     /v1/course/enrol	    		@controllers.LearnerController.enrollCourse()
 POST     /v1/user/content/state	        @controllers.LearnerController.getContentState()
+POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
+PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
 #user management api 
 POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
@@ -14,6 +18,7 @@ POST	/v1/user/login					@controllers.usermanagement.UserController.login()
 POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
 POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
 GET  	/v1/user/getProfile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
+GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 
 #course management api
 POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
@@ -33,15 +38,34 @@ POST	/v1/organisation/getOrg     @controllers.organisationmanagement.Organisatio
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
 GET	    /v1/page/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
+GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
 GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
 GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageController.getPageData(pageName:String)
 
 #Section management
 POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()
 PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.updatePageSection()
-GET	    /v1/page/section/all/settings			  @controllers.pagemanagement.PageController.getSections()
+GET	    /v1/page/section/all/settings			@controllers.pagemanagement.PageController.getSections()
 GET     /v1/page/section/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
 #Assessment management
 POST   /v1/assessment/save					 @controllers.assessment.AssessmentController.saveAssessment()
 POST   /v1/assessment/result					 @controllers.assessment.AssessmentController.getAssessment()
+
+#Mock APIs to finish API Gateway onboarding
+GET /v1/user/search							@controllers.LearnerController.getHealth()
+GET /v1/user/retire							@controllers.LearnerController.getHealth()
+GET /v1/org/create							@controllers.LearnerController.getHealth()
+GET /v1/org/update							@controllers.LearnerController.getHealth()
+GET /v1/org/read							@controllers.LearnerController.getHealth()
+GET /v1/org/search							@controllers.LearnerController.getHealth()
+GET /v1/org/member/add						@controllers.LearnerController.getHealth()
+GET /v1/org/member/remove					@controllers.LearnerController.getHealth()
+GET /v1/org/member/suspend					@controllers.LearnerController.getHealth()
+GET /v1/org/search							@controllers.LearnerController.getHealth()
+GET /health									@controllers.LearnerController.getHealth()
+
+
+
+
+
