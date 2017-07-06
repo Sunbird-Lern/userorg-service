@@ -182,4 +182,28 @@ public class UserController  extends BaseController{
 			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
+	
+	/**
+     * This method will provide complet role details list.
+     * @return Promise<Result>
+     */
+    public Promise<Result> getRoles(String userId) {
+        try {
+            Request reqObj = new Request();
+            reqObj.setOperation(ActorOperations.GET_PROFILE.getValue());
+            reqObj.setRequest_id(ExecutionContext.getRequestId());
+            reqObj.setEnv(getEnvironment());
+            HashMap<String, Object> innerMap = new HashMap<>();
+            reqObj.getRequest().put(JsonKey.USER_ID, userId);
+            innerMap.put(JsonKey.USER, reqObj.getRequest());
+            innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+            reqObj.setRequest(innerMap);
+            Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+            Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
+            return res;
+        } catch (Exception e) {
+            return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
+        }
+    }
+	
 }

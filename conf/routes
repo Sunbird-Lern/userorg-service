@@ -17,7 +17,7 @@ PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserP
 POST	/v1/user/login					@controllers.usermanagement.UserController.login()
 POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
 POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
-GET  	/v1/user/getProfile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
+GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 
 #course management api
@@ -51,6 +51,10 @@ GET     /v1/page/section/:sectionId		      @controllers.pagemanagement.PageContr
 #Assessment management
 POST   /v1/assessment/save					 @controllers.assessment.AssessmentController.saveAssessment()
 POST   /v1/assessment/result					 @controllers.assessment.AssessmentController.getAssessment()
+
+#permission
+
+GET   /v1/permission/data						@controllers.usermanagement.UserController.getRoles()
 
 #Mock APIs to finish API Gateway onboarding
 GET /v1/user/search							@controllers.LearnerController.getHealth()
