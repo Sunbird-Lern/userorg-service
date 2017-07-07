@@ -214,5 +214,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/page/section", "api.page.section.get");
     apiMap.put("/v1/assessment/save", "api.assessment.save");
     apiMap.put("/v1/assessment/result", "api.assessment.result");
+    apiMap.put("v1/permission/data", "api.role.permission");
   }
 }
