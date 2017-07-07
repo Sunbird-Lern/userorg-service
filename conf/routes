@@ -30,9 +30,9 @@ GET	    /v1/course/:courseId     @controllers.coursemanagement.CourseController.
 GET 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
 
 #organisation management api
-POST	/v1/organisation/create		@controllers.organisationmanagement.OrganisationController.createOrg()
-PATCH	/v1/organisation/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
-POST	/v1/organisation/getOrg     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
+POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
+PATCH	 /v1/org/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
+POST	 /v1/org/read     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
