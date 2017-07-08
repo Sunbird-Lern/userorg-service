@@ -205,14 +205,15 @@ public class UserController  extends BaseController{
   }
 
 	/**
-	 * This method will provide user profile details based on requested userId.
+	 * Method to perform the user join organisation operation .
 	 * @return Promise<Result>
 	 */
 	public Promise<Result> joinUserOrganisation() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user change password data=" + requestData);
+			logger.info(" join user organisation =" + requestData);
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			RequestValidator.validateUserOrg(reqObj);
 			reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setEnv(getEnvironment());
@@ -229,14 +230,15 @@ public class UserController  extends BaseController{
 	}
 
 	/**
-	 * This method will provide user profile details based on requested userId.
+	 * Method to approve the user joined organisation .
 	 * @return Promise<Result>
 	 */
 	public Promise<Result> approveUserOrganisation() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user change password data=" + requestData);
+			logger.info(" approve user organisation =" + requestData);
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			RequestValidator.validateUserOrg(reqObj);
 			reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setEnv(getEnvironment());
