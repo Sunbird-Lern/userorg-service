@@ -46,9 +46,6 @@ private LogHelper logger = LogHelper.getInstance(SearchController.class.getName(
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
 	        reqObj.getRequest().put(JsonKey.CREATED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
 	        reqObj.setEnv(getEnvironment());
-			HashMap<String, Object> map = new HashMap<>();
-			map.put(JsonKey.PAGE, reqObj.getRequest());
-			reqObj.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
 			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
