@@ -198,11 +198,11 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/user/login", "api.user.login");
     apiMap.put("/v1/user/logout", "api.user.logout");
     apiMap.put("/v1/user/changepassword", "api.user.cp");
-    apiMap.put("/v1/user/getprofile/", "api.user.profile");
+    apiMap.put("/v1/user/getprofile", "api.user.profile");
     apiMap.put("/v1/course/create", "api.user.create");
-    apiMap.put("/v1/organisation/create", "api.organisation.create");
-    apiMap.put("/v1/organisation/update", "api.organisation.update");
-    apiMap.put("/v1/organisation/getOrg", "api.organisation.details");
+    apiMap.put("/v1/org/create", "api.org.create");
+    apiMap.put("/v1/org/update", "api.org.update");
+    apiMap.put("/v1/org/read", "api.org.read");
     apiMap.put("/v1/page/create", "api.page.create");
     apiMap.put("/v1/page/update", "api.page.update");
     apiMap.put("/v1/page", "api.page.get");
@@ -214,5 +214,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/page/section", "api.page.section.get");
     apiMap.put("/v1/assessment/save", "api.assessment.save");
     apiMap.put("/v1/assessment/result", "api.assessment.result");
+    apiMap.put("/v1/permission/data", "api.role.permission");
   }
 }
