@@ -41,9 +41,13 @@ public class BaseController extends Controller {
 			path = play.Play.application().configuration().getString("remote.actor.path");
 			if (!ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_IP))
 					&& !ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_PORT))) {
+			  logger.debug("value is taking from system evn");
 				path = MessageFormat.format(play.Play.application().configuration().getString("remote.actor.env.path"),
 						System.getenv(JsonKey.SUNBIRD_ACTOR_IP), System.getenv(JsonKey.SUNBIRD_ACTOR_PORT));
 			}
+			
+			 logger.debug("Actor path is ==" + path);
+			
 		} catch (Exception e) {
 
 		}
