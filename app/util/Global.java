@@ -115,17 +115,26 @@ public class Global extends GlobalSettings {
      * This method will be used to send the request header missing error message.
      */
     @Override
-    public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
-    	Response response = null;
-    	if(t instanceof ProjectCommonException){
-    		response = BaseController.createResponseOnException(request.path(),request.method(), (ProjectCommonException)t);
-    	}else {
-    	 ProjectCommonException	exception = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
-    				ResponseCode.internalError.getErrorMessage(), ResponseCode.SERVER_ERROR.getResponseCode());
-    	 response = BaseController.createResponseOnException(request.path(),request.method(), exception);
-    	}
-	  return   Promise.<Result>pure(Results.internalServerError(Json.toJson(response)));
+  public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
+    Response response = null;
+    ProjectCommonException commonException = null;
+    if (t instanceof ProjectCommonException) {
+      commonException = (ProjectCommonException) t;
+      response = BaseController.createResponseOnException(request.path(), request.method(),
+          (ProjectCommonException) t);
+    } else if (t instanceof akka.pattern.AskTimeoutException) {
+      commonException = new ProjectCommonException(ResponseCode.actorConnectionError.getErrorCode(),
+          ResponseCode.actorConnectionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    } else {
+      commonException = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
+          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
+    response =
+        BaseController.createResponseOnException(request.path(), request.method(), commonException);
+    return Promise.<Result>pure(Results.internalServerError(Json.toJson(response)));
+  }
 	
 	
 	/**
