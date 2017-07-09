@@ -211,7 +211,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/course/create", "api.user.create");
     apiMap.put("/v1/org/create", "api.org.create");
     apiMap.put("/v1/org/update", "api.org.update");
-    apiMap.put("/v1/org/updateStatus", "api.org.update.status");
+    apiMap.put("/v1/org/update/status", "api.org.update.status");
     apiMap.put("/v1/org/approve", "api.org.approve");
     apiMap.put("/v1/org/read", "api.org.read");
     apiMap.put("/v1/page/create", "api.page.create");
