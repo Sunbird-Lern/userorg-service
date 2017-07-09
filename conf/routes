@@ -36,6 +36,8 @@ GET 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseCont
 POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
 PATCH	 /v1/org/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
 POST	 /v1/org/read     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
+PATCH	/v1/org/update/status		@controllers.organisationmanagement.OrganisationController.updateOrgStatus()
+POST    /v1/org/approve             @controllers.organisationmanagement.OrganisationController.approveOrg()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
