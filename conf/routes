@@ -60,7 +60,11 @@ POST   /v1/assessment/result					 @controllers.assessment.AssessmentController.g
 
 #permission
 
-GET   /v1/permission/data						@controllers.usermanagement.UserController.getRoles()
+GET   /v1/role/read						@controllers.usermanagement.UserController.getRoles()
+
+#search
+POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
+
 
 #Mock APIs to finish API Gateway onboarding
 GET /v1/user/search							@controllers.LearnerController.getHealth()
