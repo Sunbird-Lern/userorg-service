@@ -186,6 +186,7 @@ public class Global extends GlobalSettings {
 		short var =1;
 		apiHeaderIgnoreMap.put("/v1/user/create", var);
 		apiHeaderIgnoreMap.put("/v1/user/login", var);
+		apiHeaderIgnoreMap.put("/v1/user/verify", var);
 	}
 
  /**
