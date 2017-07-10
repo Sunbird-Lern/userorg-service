@@ -52,7 +52,7 @@ public class IntegrationTest {
 		  RequestBuilder req = new RequestBuilder().uri("/v1/user/courses/id").method(GET);
 		    req.headers(headerMap);
 			Result result = route(req);
-			assertEquals(200, result.status());
+			assertEquals(400, result.status());
 	  }
 	  
 	  @AfterClass

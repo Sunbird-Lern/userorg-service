@@ -197,7 +197,7 @@ public class BaseController extends Controller {
           Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
     } else {
       ProjectCommonException exception = (ProjectCommonException) response;
-      return Results.ok(Json.toJson(BaseController.createResponseOnException(request, exception)));
+      return Results.status(exception.getResponseCode(), Json.toJson(BaseController.createResponseOnException(request, exception)));
     }
   }
 
@@ -221,7 +221,7 @@ public class BaseController extends Controller {
           ResponseCode.internalError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
-    return Results.ok(Json.toJson(BaseController.createResponseOnException(request(), exception)));
+    return Results.status(exception.getResponseCode(),Json.toJson(BaseController.createResponseOnException(request(), exception)));
   }
 
 

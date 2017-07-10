@@ -3,7 +3,6 @@
  */
 package controllers.search;
 
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;

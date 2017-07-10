@@ -102,13 +102,13 @@ public class Global extends GlobalSettings {
       *This method will do request data validation for GET method only.
      * As a GET request user must send some key in header.
      */
-      public Promise<Result> onDataValidationError(Request request,String errorMessage) {
-          logger.info("Data error found--");
-          ResponseCode code = ResponseCode.getResponse(errorMessage);
-          ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
-          Response resp = BaseController.createFailureResponse(request, code,headerCode);
-      return   Promise.<Result>pure(Results.ok(Json.toJson(resp)));
-      }
+  public Promise<Result> onDataValidationError(Request request, String errorMessage) {
+    logger.info("Data error found--");
+    ResponseCode code = ResponseCode.getResponse(errorMessage);
+    ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
+    Response resp = BaseController.createFailureResponse(request, code, headerCode);
+    return Promise.<Result>pure(Results.status(headerCode.getResponseCode(), Json.toJson(resp)));
+  }
     
     
      /**
@@ -226,7 +226,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/page/section", "api.page.section.get");
     apiMap.put("/v1/assessment/save", "api.assessment.save");
     apiMap.put("/v1/assessment/result", "api.assessment.result");
-    apiMap.put("/v1/permission/data", "api.role.permission");
+    apiMap.put("/v1/role/read", "api.role.read");
     apiMap.put("/v1/user/getuser", "api.role.getuser");
   }
 }
