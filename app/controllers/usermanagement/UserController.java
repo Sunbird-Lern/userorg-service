@@ -254,4 +254,29 @@ public class UserController  extends BaseController{
 		}
 	}
 	
+	/**
+     * Method to verify user existence in our db.
+     * @return Promise<Result>
+     */
+    public Promise<Result> verifyUserExistence() {
+        try {
+            JsonNode requestData = request().body().asJson();
+            logger.info(" verify user existence =" + requestData);
+            Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+            RequestValidator.validateVerifyUser(reqObj);
+            reqObj.setOperation(ActorOperations.VERIFY_USER_EXISTENCE.getValue());
+            reqObj.setRequest_id(ExecutionContext.getRequestId());
+            reqObj.setEnv(getEnvironment());
+            HashMap<String, Object> innerMap = new HashMap<>();
+            innerMap.put(JsonKey.USER, reqObj.getRequest());
+            innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+            reqObj.setRequest(innerMap);
+            Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+            Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
+            return res;
+        } catch (Exception e) {
+            return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
+        }
+    }
+	
 }
