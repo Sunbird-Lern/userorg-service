@@ -258,13 +258,13 @@ public class UserController  extends BaseController{
      * Method to verify user existence in our db.
      * @return Promise<Result>
      */
-    public Promise<Result> verifyUserExistence() {
+    public Promise<Result> getUserDetailsByLoginId() {
         try {
             JsonNode requestData = request().body().asJson();
             logger.info(" verify user existence =" + requestData);
             Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
             RequestValidator.validateVerifyUser(reqObj);
-            reqObj.setOperation(ActorOperations.VERIFY_USER_EXISTENCE.getValue());
+            reqObj.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
             reqObj.setRequest_id(ExecutionContext.getRequestId());
             reqObj.setEnv(getEnvironment());
             HashMap<String, Object> innerMap = new HashMap<>();

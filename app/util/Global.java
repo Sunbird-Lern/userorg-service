@@ -186,7 +186,7 @@ public class Global extends GlobalSettings {
 		short var =1;
 		apiHeaderIgnoreMap.put("/v1/user/create", var);
 		apiHeaderIgnoreMap.put("/v1/user/login", var);
-		apiHeaderIgnoreMap.put("/v1/user/verify", var);
+		apiHeaderIgnoreMap.put("/v1/user/getUser", var);
 	}
 
  /**
@@ -227,5 +227,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/assessment/save", "api.assessment.save");
     apiMap.put("/v1/assessment/result", "api.assessment.result");
     apiMap.put("/v1/permission/data", "api.role.permission");
+    apiMap.put("/v1/user/getuser", "api.role.getuser");
   }
 }
