@@ -21,7 +21,7 @@ GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getU
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/org/joinOrg            @controllers.usermanagement.UserController.joinUserOrganisation()
 POST    /v1/user/org/approveOrg         @controllers.usermanagement.UserController.approveUserOrganisation()
-POST    /v1/user/verify                 @controllers.usermanagement.UserController.verifyUserExistence()
+POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
 
 
 #course management api
