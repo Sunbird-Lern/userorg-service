@@ -102,13 +102,13 @@ public class Global extends GlobalSettings {
       *This method will do request data validation for GET method only.
      * As a GET request user must send some key in header.
      */
-      public Promise<Result> onDataValidationError(Request request,String errorMessage) {
-          logger.info("Data error found--");
-          ResponseCode code = ResponseCode.getResponse(errorMessage);
-          ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
-          Response resp = BaseController.createFailureResponse(request, code,headerCode);
-      return   Promise.<Result>pure(Results.ok(Json.toJson(resp)));
-      }
+  public Promise<Result> onDataValidationError(Request request, String errorMessage) {
+    logger.info("Data error found--");
+    ResponseCode code = ResponseCode.getResponse(errorMessage);
+    ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
+    Response resp = BaseController.createFailureResponse(request, code, headerCode);
+    return Promise.<Result>pure(Results.status(headerCode.getResponseCode(), Json.toJson(resp)));
+  }
     
     
      /**
