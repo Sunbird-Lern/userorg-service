@@ -44,7 +44,8 @@ public class Global extends GlobalSettings {
 
             @Override
             public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
-              Promise<Result> result = this.delegate.call(ctx);
+              //Promise<Result> result = this.delegate.call(ctx);
+              Promise<Result> result = null;
               Http.Response response = ctx.response();
               response.setHeader("Access-Control-Allow-Origin", "*");
               String message = verifyRequestData(ctx.request(),RequestMethod.GET.name());
