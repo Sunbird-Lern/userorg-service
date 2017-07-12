@@ -51,7 +51,7 @@ public class BaseController extends Controller {
       }
        logger.debug("Actor path is ==" + path);
     } catch (Exception e) {
-
+       logger.error(e);
     }
 
     selection = system.actorSelection(path);
