@@ -50,9 +50,8 @@ public class BaseController extends Controller {
             System.getenv(JsonKey.SUNBIRD_ACTOR_IP), System.getenv(JsonKey.SUNBIRD_ACTOR_PORT));
       }
        logger.debug("Actor path is ==" + path);
-       System.out.println("Actor path is: " + path);
     } catch (Exception e) {
-
+       logger.error(e);
     }
 
     selection = system.actorSelection(path);
