@@ -37,13 +37,12 @@ POST 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseCon
 POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
 PATCH	 /v1/org/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
 POST	 /v1/org/read     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
-PATCH	/v1/org/update/status		@controllers.organisationmanagement.OrganisationController.updateOrgStatus()
+PATCH	/v1/org/status/update		@controllers.organisationmanagement.OrganisationController.updateOrgStatus()
 POST    /v1/org/approve             @controllers.organisationmanagement.OrganisationController.approveOrg()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
-GET	    /v1/page/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
 GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
 GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
 GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageController.getPageData(pageName:String)
@@ -51,12 +50,12 @@ GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageControlle
 #Section management
 POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()
 PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.updatePageSection()
-GET	    /v1/page/section/all/settings			@controllers.pagemanagement.PageController.getSections()
-GET     /v1/page/section/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
+GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
+GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
 #Assessment management
-POST   /v1/assessment/save					 @controllers.assessment.AssessmentController.saveAssessment()
-POST   /v1/assessment/result					 @controllers.assessment.AssessmentController.getAssessment()
+POST   /v1/assessment/update					 @controllers.assessment.AssessmentController.saveAssessment()
+POST   /v1/assessment/result/read					 @controllers.assessment.AssessmentController.getAssessment()
 
 #permission
 

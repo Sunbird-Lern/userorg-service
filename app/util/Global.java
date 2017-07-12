@@ -213,20 +213,20 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/course/create", "api.user.create");
     apiMap.put("/v1/org/create", "api.org.create");
     apiMap.put("/v1/org/update", "api.org.update");
-    apiMap.put("/v1/org/update/status", "api.org.update.status");
+    apiMap.put("/v1/org/status/update", "api.org.update.status");
     apiMap.put("/v1/org/approve", "api.org.approve");
     apiMap.put("/v1/org/read", "api.org.read");
     apiMap.put("/v1/page/create", "api.page.create");
     apiMap.put("/v1/page/update", "api.page.update");
-    apiMap.put("/v1/page", "api.page.get");
+    apiMap.put("/v1/page/read", "api.page.get");
     apiMap.put("/v1/page/all/settings", "api.page.settings");
     apiMap.put("/v1/page/assemble", "api.page.assemble");
     apiMap.put("/v1/page/section/create", "api.page.section.create");
     apiMap.put("/v1/page/section/update", "api.page.section.update");
-    apiMap.put("/v1/page/section/all/settings", "api.page.section.settings");
-    apiMap.put("/v1/page/section", "api.page.section.get");
-    apiMap.put("/v1/assessment/save", "api.assessment.save");
-    apiMap.put("/v1/assessment/result", "api.assessment.result");
+    apiMap.put("/v1/page/section/list", "api.page.section.settings");
+    apiMap.put("/v1/page/section/read", "api.page.section.get");
+    apiMap.put("/v1/assessment/update", "api.assessment.save");
+    apiMap.put("/v1/assessment/result/read", "api.assessment.result");
     apiMap.put("/v1/role/read", "api.role.read");
     apiMap.put("/v1/user/getuser", "api.role.getuser");
   }
