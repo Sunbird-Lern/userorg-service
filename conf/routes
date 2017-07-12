@@ -31,7 +31,7 @@ POST	/v1/course/publish      @controllers.coursemanagement.CourseController.publ
 POST	/v1/course/search       @controllers.coursemanagement.CourseController.searchCourse()
 POST	/v1/course/delete       @controllers.coursemanagement.CourseController.deleteCourse()
 GET	    /v1/course/:courseId     @controllers.coursemanagement.CourseController.getCourseById(courseId:String)
-POST 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
+GET 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
 
 #organisation management api
 POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
