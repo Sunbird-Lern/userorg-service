@@ -7,7 +7,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -39,6 +41,7 @@ private LogHelper logger = LogHelper.getInstance(SearchController.class.getName(
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("getting search request data=" + requestData);
+			ProjectLogger.log("getting search request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateCompositeSearch(reqObj);
 			reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());

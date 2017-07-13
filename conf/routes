@@ -19,10 +19,8 @@ POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
 POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
 GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/org/joinOrg            @controllers.usermanagement.UserController.joinUserOrganisation()
-POST    /v1/user/org/approveOrg         @controllers.usermanagement.UserController.approveUserOrganisation()
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST    /v1/user/org/rejectOrg         @controllers.usermanagement.UserController.rejectUserOrganisation()
+
 
 #course management api
 POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
@@ -39,13 +37,16 @@ PATCH	 /v1/org/update		@controllers.organisationmanagement.OrganisationControlle
 POST	 /v1/org/read     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
 PATCH	/v1/org/status/update		@controllers.organisationmanagement.OrganisationController.updateOrgStatus()
 POST    /v1/org/approve             @controllers.organisationmanagement.OrganisationController.approveOrg()
+POST    /v1/org/member/join            @controllers.organisationmanagement.OrganisationController.joinUserOrganisation()
+POST    /v1/org/member/approve         @controllers.organisationmanagement.OrganisationController.approveUserOrganisation()
+POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
 GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
 GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
-GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageController.getPageData(pageName:String)
+POST     /v1/page/assemble		  @controllers.pagemanagement.PageController.getPageData()
 
 #Section management
 POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()

@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -38,6 +40,7 @@ private LogHelper logger = LogHelper.getInstance(AssessmentController.class.getN
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("add new assessment data=" + requestData);
+			ProjectLogger.log("add new assessment data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateSaveAssessment(reqObj);
 			reqObj.setOperation(ActorOperations.SAVE_ASSESSMENT.getValue());
@@ -66,6 +69,7 @@ private LogHelper logger = LogHelper.getInstance(AssessmentController.class.getN
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("get assessment request=" + requestData);
+			ProjectLogger.log("get assessment request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateGetAssessment(reqObj);
 			reqObj.setOperation(ActorOperations.GET_ASSESSMENT.getValue());
