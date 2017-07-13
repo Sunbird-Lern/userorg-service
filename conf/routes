@@ -19,10 +19,10 @@ POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
 POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
 GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/org/joinOrg            @controllers.usermanagement.UserController.joinUserOrganisation()
-POST    /v1/user/org/approveOrg         @controllers.usermanagement.UserController.approveUserOrganisation()
+POST    /v1/user/org/join            @controllers.usermanagement.UserController.joinUserOrganisation()
+POST    /v1/user/org/approve         @controllers.usermanagement.UserController.approveUserOrganisation()
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST    /v1/user/org/rejectOrg         @controllers.usermanagement.UserController.rejectUserOrganisation()
+POST    /v1/user/org/reject         @controllers.usermanagement.UserController.rejectUserOrganisation()
 
 #course management api
 POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
