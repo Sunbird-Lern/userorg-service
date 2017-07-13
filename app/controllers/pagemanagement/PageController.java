@@ -135,7 +135,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 		try {
 		    JsonNode requestData = request().body().asJson();
 			logger.debug("requested data for get page  =" + requestData);
-			ProjectLogger.log("requested data for get page  =" + pageName, LoggerEnum.INFO.name());
+			ProjectLogger.log("requested data for get page  =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
             RequestValidator.validateGetPageData(reqObj);
 			reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
