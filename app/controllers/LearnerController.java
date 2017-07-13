@@ -8,7 +8,9 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -63,6 +65,7 @@ public class LearnerController extends BaseController {
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get course request data=" + requestData);
+			ProjectLogger.log(" get course request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateEnrollCourse(reqObj);
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -90,6 +93,7 @@ public class LearnerController extends BaseController {
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get course request data=" + requestData);
+			ProjectLogger.log(" get course request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setOperation(ActorOperations.GET_CONTENT.getValue());
@@ -142,6 +146,7 @@ public class LearnerController extends BaseController {
 		try {
 		JsonNode requestData = request().body().asJson();
         logger.info(" get content request data=" + requestData);
+		ProjectLogger.log(" get content request data=" + requestData, LoggerEnum.INFO.name());
         Request reqObj  = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
         RequestValidator.validateUpdateContent(reqObj);
         reqObj.setOperation(ActorOperations.ADD_CONTENT.getValue());
