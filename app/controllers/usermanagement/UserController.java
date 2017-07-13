@@ -8,7 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -38,6 +40,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user registration request data=" + requestData);
+			ProjectLogger.log(" get user registration request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateCreateUser(reqObj);
 			reqObj.setOperation(ActorOperations.CREATE_USER.getValue());
@@ -64,6 +67,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user update profile data=" + requestData);
+			ProjectLogger.log(" get user update profile data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUpdateUser(reqObj);
 			reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
@@ -91,6 +95,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user login data=" + requestData);
+			ProjectLogger.log(" get user login data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUserLogin(reqObj);
 			reqObj.setOperation(ActorOperations.LOGIN.getValue());
@@ -115,6 +120,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user logout data=" + requestData);
+			ProjectLogger.log(" get user logout data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setOperation(ActorOperations.LOGOUT.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -140,6 +146,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user change password data=" + requestData);
+			ProjectLogger.log(" get user change password data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateChangePassword(reqObj);
 			reqObj.setOperation(ActorOperations.CHANGE_PASSWORD.getValue());
@@ -166,6 +173,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" get user profile data by id = " + requestData);
+			ProjectLogger.log(" get user profile data by id =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PROFILE.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -212,6 +220,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" join user organisation =" + requestData);
+			ProjectLogger.log(" join user organisation =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUserOrg(reqObj);
 			reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
@@ -237,6 +246,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" approve user organisation =" + requestData);
+			ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUserOrg(reqObj);
 			reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
@@ -262,6 +272,7 @@ public class UserController  extends BaseController{
         try {
             JsonNode requestData = request().body().asJson();
             logger.info(" verify user details by loginId data =" + requestData);
+            ProjectLogger.log(" verify user details by loginId data =" + requestData, LoggerEnum.INFO.name());
             Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
             RequestValidator.validateVerifyUser(reqObj);
             reqObj.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
@@ -287,6 +298,7 @@ public class UserController  extends BaseController{
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info(" approve user organisation =" + requestData);
+			ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUserOrg(reqObj);
 			reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());

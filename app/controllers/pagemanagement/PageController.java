@@ -8,7 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -37,6 +39,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("getting create page data request=" + requestData);
+			ProjectLogger.log("getting create page data request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateCreatePage(reqObj);
 			reqObj.setOperation(ActorOperations.CREATE_PAGE.getValue());
@@ -63,6 +66,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("getting update page data request=" + requestData);
+			ProjectLogger.log("getting update page data request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUpdatepage(reqObj);
 			reqObj.setOperation(ActorOperations.UPDATE_PAGE.getValue());
@@ -87,6 +91,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	public Promise<Result> getPageSetting(String pageId) {
 		try {
 			logger.info("getting data for particular page settings=" + pageId);
+		    ProjectLogger.log("getting data for particular page settings=" + pageId, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PAGE_SETTING.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -109,6 +114,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	public Promise<Result> getPageSettings() {
 		try {
 			logger.info("getting page settings api called=");
+		    ProjectLogger.log("getting page settings api called=", LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PAGE_SETTINGS.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -128,6 +134,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	public Promise<Result> getPageData(String pageName) {
 		try {
 			logger.info("requested data for get page  =" + pageName);
+		    ProjectLogger.log("requested data for get page  =" + pageName, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -153,6 +160,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("getting create page section data request=" + requestData);
+			ProjectLogger.log("getting create page section data request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateCreateSection(reqObj);
 			reqObj.setOperation(ActorOperations.CREATE_SECTION.getValue());
@@ -179,6 +187,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 		try {
 			JsonNode requestData = request().body().asJson();
 			logger.info("getting update page section data request=" + requestData);
+			ProjectLogger.log("getting update page section data request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUpdateSection(reqObj);
 			reqObj.setOperation(ActorOperations.UPDATE_SECTION.getValue());
@@ -203,6 +212,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	public Promise<Result> getSection(String sectionId) {
 		try {
 			logger.info("getting data for particular page section =" + sectionId);
+		    ProjectLogger.log("getting data for particular page section =" + sectionId, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_SECTION.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -225,6 +235,7 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	public Promise<Result> getSections() {
 		try {
 			logger.info("get page all section method called =");
+		    ProjectLogger.log("get page all section method called =", LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_ALL_SECTION.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());

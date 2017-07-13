@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -41,6 +43,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       logger.info("Create organisation request: " + requestData);
+      ProjectLogger.log("Create organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreateOrg(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_ORG.getValue());
@@ -75,6 +78,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       logger.info("Approve organisation request: " + requestData);
+      ProjectLogger.log("Approve organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateApproveOrg(reqObj);
       reqObj.setOperation(ActorOperations.APPROVE_ORG.getValue());
@@ -103,6 +107,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       logger.info("Update organisation request: " + requestData);
+      ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrg(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG.getValue());
@@ -138,6 +143,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       logger.info("Update organisation request: " + requestData);
+      ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrgStatus(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG_STATUS.getValue());
@@ -165,6 +171,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       logger.info("Get Organisation details request: " + requestData);
+      ProjectLogger.log("Get Organisation details request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetOrg(reqObj);
       reqObj.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());

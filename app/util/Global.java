@@ -8,7 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LogHelper;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
@@ -77,6 +79,7 @@ public class Global extends GlobalSettings {
            addApiListToMap();
            createApiMap();
         logger.info("Server started.. with Environment --" + env.name());
+           ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
     }
     
     /**
@@ -89,10 +92,12 @@ public class Global extends GlobalSettings {
     public Action onRequest(Request request, Method actionMethod) {
         String messageId = request.getHeader(JsonKey.MESSAGE_ID);
         logger.info("method call start.." + request.path() + " " + actionMethod + " " + messageId);
+        ProjectLogger.log("method call start.." + request.path() + " " + actionMethod + " " + messageId, LoggerEnum.INFO.name());
         if (ProjectUtil.isStringNullOREmpty(messageId)) {
             UUID uuid = UUID.randomUUID();
             messageId = uuid.toString();
             logger.info("message id is not provided by client.." + messageId);
+            ProjectLogger.log("message id is not provided by client.." + messageId);
         }
         ExecutionContext.setRequestId(messageId);
         return new ActionWrapper(super.onRequest(request, actionMethod));
@@ -105,6 +110,7 @@ public class Global extends GlobalSettings {
      */
   public Promise<Result> onDataValidationError(Request request, String errorMessage) {
     logger.info("Data error found--");
+    ProjectLogger.log("Data error found--");
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
