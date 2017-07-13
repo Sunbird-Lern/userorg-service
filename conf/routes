@@ -45,7 +45,7 @@ POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage(
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
 GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
 GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
-GET     /v1/page/assemble/:pageName		  @controllers.pagemanagement.PageController.getPageData(pageName:String)
+POST     /v1/page/assemble		  @controllers.pagemanagement.PageController.getPageData()
 
 #Section management
 POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()

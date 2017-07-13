@@ -125,18 +125,19 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
 	 * This method will provide completed data for a particular page.
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> getPageData(String pageName) {
+	public Promise<Result> getPageData() {
 		try {
-			logger.info("requested data for get page  =" + pageName);
-			Request reqObj = new Request();
+		    JsonNode requestData = request().body().asJson();
+			logger.info("requested data for get page  =" + requestData);
+			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+            RequestValidator.validateGetPageData(reqObj);
 			reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
 	        reqObj.setEnv(getEnvironment());
-	        reqObj.getRequest().put(JsonKey.ID, pageName);
-	        reqObj.getRequest().put(JsonKey.USER_ID, request().getHeader(JsonKey.AUTH_USER_HEADER));
-	        reqObj.getRequest().put(JsonKey.SOURCE, request().getHeader(JsonKey.SOURCE_HEADER));
-	        RequestValidator.validateGetPageData(request().getHeader(JsonKey.SOURCE_HEADER));
-	        reqObj.getRequest().put(JsonKey.ORG_CODE, request().getHeader(JsonKey.ORG_CODE_HEADER));
+            reqObj.getRequest().put(JsonKey.CREATED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+            HashMap<String, Object> map = new HashMap<>();
+            map.put(JsonKey.PAGE, reqObj.getRequest());
+            reqObj.setRequest(map);
 			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
 			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
