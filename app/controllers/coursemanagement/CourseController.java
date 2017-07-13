@@ -198,7 +198,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> recommendedCourses() {
 		try {
 			logger.info("Method Started # RECOMMENDED COURSES");
-			JsonNode requestData = request().body().asJson();
 			Request reqObj = new Request();
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
 			reqObj.setEnv(getEnvironment());

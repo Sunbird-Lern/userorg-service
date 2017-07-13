@@ -165,7 +165,7 @@ public class UserController  extends BaseController{
 	public Promise<Result> getUserProfile(String userId) {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user change password data=" + requestData);
+			logger.info(" get user profile data by id = " + requestData);
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PROFILE.getValue());
 	        reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -261,7 +261,7 @@ public class UserController  extends BaseController{
     public Promise<Result> getUserDetailsByLoginId() {
         try {
             JsonNode requestData = request().body().asJson();
-            logger.info(" verify user existence =" + requestData);
+            logger.info(" verify user details by loginId data =" + requestData);
             Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
             RequestValidator.validateVerifyUser(reqObj);
             reqObj.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
@@ -278,5 +278,30 @@ public class UserController  extends BaseController{
             return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
         }
     }
+
+	/**
+	 * Method to reject the user organisation .
+	 * @return Promise<Result>
+	 */
+	public Promise<Result> rejectUserOrganisation() {
+		try {
+			JsonNode requestData = request().body().asJson();
+			logger.info(" approve user organisation =" + requestData);
+			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			RequestValidator.validateUserOrg(reqObj);
+			reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());
+			reqObj.setRequest_id(ExecutionContext.getRequestId());
+			reqObj.setEnv(getEnvironment());
+			HashMap<String, Object> innerMap = new HashMap<>();
+			innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+			innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+			reqObj.setRequest(innerMap);
+			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
+			return res;
+		} catch (Exception e) {
+			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
+		}
+	}
 	
 }
