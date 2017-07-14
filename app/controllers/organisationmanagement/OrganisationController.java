@@ -80,7 +80,7 @@ public class OrganisationController extends BaseController {
       logger.info("Approve organisation request: " + requestData);
       ProjectLogger.log("Approve organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateApproveOrg(reqObj);
+      RequestValidator.validateOrg(reqObj);
       reqObj.setOperation(ActorOperations.APPROVE_ORG.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -173,7 +173,7 @@ public class OrganisationController extends BaseController {
       logger.info("Get Organisation details request: " + requestData);
       ProjectLogger.log("Get Organisation details request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateGetOrg(reqObj);
+      RequestValidator.validateOrg(reqObj);
       reqObj.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
