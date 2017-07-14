@@ -40,6 +40,8 @@ POST    /v1/org/approve             @controllers.organisationmanagement.Organisa
 POST    /v1/org/member/join            @controllers.organisationmanagement.OrganisationController.joinUserOrganisation()
 POST    /v1/org/member/approve         @controllers.organisationmanagement.OrganisationController.approveUserOrganisation()
 POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
+POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
+POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
@@ -69,12 +71,6 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 #Mock APIs to finish API Gateway onboarding
 GET /v1/user/search							@controllers.LearnerController.getHealth()
 GET /v1/user/retire							@controllers.LearnerController.getHealth()
-GET /v1/org/create							@controllers.LearnerController.getHealth()
-GET /v1/org/update							@controllers.LearnerController.getHealth()
-GET /v1/org/read							@controllers.LearnerController.getHealth()
-GET /v1/org/search							@controllers.LearnerController.getHealth()
-GET /v1/org/member/add						@controllers.LearnerController.getHealth()
-GET /v1/org/member/remove					@controllers.LearnerController.getHealth()
 GET /v1/org/member/suspend					@controllers.LearnerController.getHealth()
 GET /v1/org/search							@controllers.LearnerController.getHealth()
 GET /health									@controllers.LearnerController.getHealth()

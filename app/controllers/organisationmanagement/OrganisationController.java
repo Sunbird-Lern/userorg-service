@@ -190,6 +190,58 @@ public class OrganisationController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  /**
+   * Method to add an user to the organisation
+   * @return Promise<Result>
+   */
+  public Promise<Result> addMemberToOrganisation() {
+      try {
+          JsonNode requestData = request().body().asJson();
+          logger.info(" add member to organisation =" + requestData);
+          ProjectLogger.log(" add member to organisation =" + requestData, LoggerEnum.INFO.name());
+          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+          RequestValidator.validateAddMember(reqObj);
+          reqObj.setOperation(ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
+          reqObj.setRequest_id(ExecutionContext.getRequestId());
+          reqObj.setEnv(getEnvironment());
+          HashMap<String, Object> innerMap = new HashMap<>();
+          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+          reqObj.setRequest(innerMap);
+          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
+          return res;
+      } catch (Exception e) {
+          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
+      }
+  }
+  
+  /**
+   * Method to remove an user to the organisation
+   * @return Promise<Result>
+   */
+  public Promise<Result> removeMemberFromOrganisation() {
+      try {
+          JsonNode requestData = request().body().asJson();
+          logger.info(" remove member from organisation =" + requestData);
+          ProjectLogger.log(" remove member from organisation =" + requestData, LoggerEnum.INFO.name());
+          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+          RequestValidator.validateUserOrg(reqObj);
+          reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
+          reqObj.setRequest_id(ExecutionContext.getRequestId());
+          reqObj.setEnv(getEnvironment());
+          HashMap<String, Object> innerMap = new HashMap<>();
+          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+          reqObj.setRequest(innerMap);
+          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
+          return res;
+      } catch (Exception e) {
+          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
+      }
+  }
 
   /**
    * Method to perform the user join organisation operation .
