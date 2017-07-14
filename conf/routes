@@ -29,7 +29,7 @@ POST	/v1/course/publish      @controllers.coursemanagement.CourseController.publ
 POST	/v1/course/search       @controllers.coursemanagement.CourseController.searchCourse()
 POST	/v1/course/delete       @controllers.coursemanagement.CourseController.deleteCourse()
 GET	    /v1/course/:courseId     @controllers.coursemanagement.CourseController.getCourseById(courseId:String)
-GET 	/v1/course/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
+GET 	/v1/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
 
 #organisation management api
 POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
@@ -40,6 +40,8 @@ POST    /v1/org/approve             @controllers.organisationmanagement.Organisa
 POST    /v1/org/member/join            @controllers.organisationmanagement.OrganisationController.joinUserOrganisation()
 POST    /v1/org/member/approve         @controllers.organisationmanagement.OrganisationController.approveUserOrganisation()
 POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
+POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
+POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
@@ -69,12 +71,6 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 #Mock APIs to finish API Gateway onboarding
 GET /v1/user/search							@controllers.LearnerController.getHealth()
 GET /v1/user/retire							@controllers.LearnerController.getHealth()
-GET /v1/org/create							@controllers.LearnerController.getHealth()
-GET /v1/org/update							@controllers.LearnerController.getHealth()
-GET /v1/org/read							@controllers.LearnerController.getHealth()
-GET /v1/org/search							@controllers.LearnerController.getHealth()
-GET /v1/org/member/add						@controllers.LearnerController.getHealth()
-GET /v1/org/member/remove					@controllers.LearnerController.getHealth()
 GET /v1/org/member/suspend					@controllers.LearnerController.getHealth()
 GET /v1/org/search							@controllers.LearnerController.getHealth()
 GET /health									@controllers.LearnerController.getHealth()
