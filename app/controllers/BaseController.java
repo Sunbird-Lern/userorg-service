@@ -159,6 +159,10 @@ public class BaseController extends Controller {
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
     ResponseCode code = ResponseCode.getResponse(exception.getCode());
     response.setParams(createResponseParamObj(code));
+    if(response.getParams() != null && !ProjectUtil.isStringNullOREmpty(response.getParams().getErrmsg())
+        && response.getParams().getErrmsg().contains("{0}")){
+      response.getParams().setErrmsg(exception.getMessage());
+    }
     return response;
   }
 
