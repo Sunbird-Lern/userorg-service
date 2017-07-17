@@ -50,13 +50,14 @@ public class Global extends GlobalSettings {
               Promise<Result> result = null;
               Http.Response response = ctx.response();
               response.setHeader("Access-Control-Allow-Origin", "*");
-              String message = verifyRequestData(ctx.request(),RequestMethod.GET.name());
+              //removing check for headers
+            /*  String message = verifyRequestData(ctx.request(),RequestMethod.GET.name());
                 if (!ProjectUtil.isStringNullOREmpty(message)) {
                     result = onDataValidationError(ctx.request(), message);
                 } else {
                     result = delegate.call(ctx);
-                }
-              return result;
+                }*/
+              return delegate.call(ctx);
             }
           }
 

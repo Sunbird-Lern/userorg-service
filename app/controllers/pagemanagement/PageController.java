@@ -145,13 +145,30 @@ private LogHelper logger = LogHelper.getInstance(PageController.class.getName())
             HashMap<String, Object> map = new HashMap<>();
             map.put(JsonKey.PAGE, reqObj.getRequest());
             reqObj.setRequest(map);
-			Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+            map.put(JsonKey.HEADER, getAllRequestHeaders(request()))
+            Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
 			Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
 			return res;
 		} catch (Exception e) {
 			return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
 		}
 	}
+	
+	/**
+	   * 
+	   * @param request
+	   * @return Map<String, String>
+	   */
+	  private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+	    Map<String, String> map = new HashMap<>();
+	    Map<String, String[]> headers = request.headers();
+	    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
+	    while (itr.hasNext()) {
+	      Entry<String, String[]> entry = itr.next();
+	      map.put(entry.getKey(), entry.getValue()[0]);
+	    }
+	    return map;
+	  }
 	
 	/**
 	 * This method will allow admin to create sections for page view
