@@ -110,8 +110,7 @@ public class OrganisationController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       Map<String, Object> address = (Map<String, Object>) reqObj.getRequest().get(JsonKey.ADDRESS);
-      Map<String, Object> orgData =
-          (Map<String, Object>) reqObj.getRequest();
+      Map<String, Object> orgData = (Map<String, Object>) reqObj.getRequest();
       if (null != address && address.size() > 0 && orgData.containsKey(JsonKey.ADDRESS)) {
         innerMap.put(JsonKey.ADDRESS, address);
         orgData.remove(JsonKey.ADDRESS);
@@ -183,130 +182,145 @@ public class OrganisationController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
    * Method to add an user to the organisation
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> addMemberToOrganisation() {
-      try {
-          JsonNode requestData = request().body().asJson();
-          ProjectLogger.log(" add member to organisation =" + requestData, LoggerEnum.INFO.name());
-          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-          RequestValidator.validateAddMember(reqObj);
-          reqObj.setOperation(ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
-          reqObj.setRequest_id(ExecutionContext.getRequestId());
-          reqObj.setEnv(getEnvironment());
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-          reqObj.setRequest(innerMap);
-          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
-          return res;
-      } catch (Exception e) {
-          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
-      }
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" add member to organisation =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateAddMember(reqObj);
+      reqObj.setOperation(ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
-  
+
   /**
    * Method to remove an user to the organisation
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> removeMemberFromOrganisation() {
-      try {
-          JsonNode requestData = request().body().asJson();
-          ProjectLogger.log(" remove member from organisation =" + requestData, LoggerEnum.INFO.name());
-          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-          RequestValidator.validateUserOrg(reqObj);
-          reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
-          reqObj.setRequest_id(ExecutionContext.getRequestId());
-          reqObj.setEnv(getEnvironment());
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-          reqObj.setRequest(innerMap);
-          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
-          return res;
-      } catch (Exception e) {
-          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
-      }
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" remove member from organisation =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateUserOrg(reqObj);
+      reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   /**
    * Method to perform the user join organisation operation .
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> joinUserOrganisation() {
-      try {
-          JsonNode requestData = request().body().asJson();
-          ProjectLogger.log(" join user organisation =" + requestData, LoggerEnum.INFO.name());
-          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-          RequestValidator.validateUserOrg(reqObj);
-          reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
-          reqObj.setRequest_id(ExecutionContext.getRequestId());
-          reqObj.setEnv(getEnvironment());
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-          reqObj.setRequest(innerMap);
-          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
-          return res;
-      } catch (Exception e) {
-          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
-      }
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" join user organisation =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateUserOrg(reqObj);
+      reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   /**
    * Method to approve the user joined organisation .
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> approveUserOrganisation() {
-      try {
-          JsonNode requestData = request().body().asJson();
-          ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
-          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-          RequestValidator.validateUserOrg(reqObj);
-          reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
-          reqObj.setRequest_id(ExecutionContext.getRequestId());
-          reqObj.setEnv(getEnvironment());
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-          reqObj.setRequest(innerMap);
-          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
-          return res;
-      } catch (Exception e) {
-          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
-      }
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateUserOrg(reqObj);
+      reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
-  
+
   /**
    * Method to reject the user organisation .
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> rejectUserOrganisation() {
-      try {
-          JsonNode requestData = request().body().asJson();
-          ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
-          Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-          RequestValidator.validateUserOrg(reqObj);
-          reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());
-          reqObj.setRequest_id(ExecutionContext.getRequestId());
-          reqObj.setEnv(getEnvironment());
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-          innerMap.put(JsonKey.REQUESTED_BY,getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-          reqObj.setRequest(innerMap);
-          Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-          Promise<Result> res = actorResponseHandler(getRemoteActor(),reqObj,timeout,null,request());
-          return res;
-      } catch (Exception e) {
-          return Promise.<Result> pure(createCommonExceptionResponse(e,request()));
-      }
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateUserOrg(reqObj);
+      reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
-  
+
 }

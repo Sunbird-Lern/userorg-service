@@ -49,9 +49,9 @@ public class BaseController extends Controller {
             play.Play.application().configuration().getString("remote.actor.env.path"),
             System.getenv(JsonKey.SUNBIRD_ACTOR_IP), System.getenv(JsonKey.SUNBIRD_ACTOR_PORT));
       }
-       ProjectLogger.log("Actor path is ==" + path, LoggerEnum.INFO.name());
+      ProjectLogger.log("Actor path is ==" + path, LoggerEnum.INFO.name());
     } catch (Exception e) {
-       ProjectLogger.log(e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
 
     selection = system.actorSelection(path);
@@ -205,7 +205,8 @@ public class BaseController extends Controller {
           Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
     } else {
       ProjectCommonException exception = (ProjectCommonException) response;
-      return Results.status(exception.getResponseCode(), Json.toJson(BaseController.createResponseOnException(request, exception)));
+      return Results.status(exception.getResponseCode(),
+          Json.toJson(BaseController.createResponseOnException(request, exception)));
     }
   }
 
@@ -229,7 +230,8 @@ public class BaseController extends Controller {
           ResponseCode.internalError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
-    return Results.status(exception.getResponseCode(),Json.toJson(BaseController.createResponseOnException(request(), exception)));
+    return Results.status(exception.getResponseCode(),
+        Json.toJson(BaseController.createResponseOnException(request(), exception)));
   }
 
 
