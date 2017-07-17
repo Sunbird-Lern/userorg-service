@@ -1,10 +1,13 @@
 package controllers;
 
+import akka.util.Timeout;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -15,10 +18,6 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import akka.util.Timeout;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -75,6 +74,7 @@ public class LearnerController extends BaseController {
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       Promise<Result> res =
@@ -85,6 +85,23 @@ public class LearnerController extends BaseController {
     }
   }
 
+  /**
+   * 
+   * @param request
+   * @return Map<String, String>
+   */
+  private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+    Map<String, String> map = new HashMap<>();
+    Map<String, String[]> headers = request.headers();
+    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
+    while (itr.hasNext()) {
+      Entry<String, String[]> entry = itr.next();
+      map.put(entry.getKey(), entry.getValue()[0]);
+    }
+    return map;
+  }
+  
+  
   /**
    * This method will provide list of user content state. Content refer user activity {started,half
    * completed ,completed} against TOC (table of content).

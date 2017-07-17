@@ -35,7 +35,6 @@ import play.mvc.Results;
  *
  */
 public class Global extends GlobalSettings {
-    private LogHelper logger = LogHelper.getInstance(Global.class.getName());
     public static ProjectUtil.Environment env;
     private static ConcurrentHashMap<String , Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
     public static Map<String,String> apiMap = new HashMap<>(); 
