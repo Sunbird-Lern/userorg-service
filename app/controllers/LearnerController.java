@@ -1,13 +1,19 @@
+/**
+ * 
+ */
 package controllers;
 
 import akka.util.Timeout;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -18,6 +24,7 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
+
 import play.libs.F.Promise;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -100,8 +107,8 @@ public class LearnerController extends BaseController {
     }
     return map;
   }
-  
-  
+
+
   /**
    * This method will provide list of user content state. Content refer user activity {started,half
    * completed ,completed} against TOC (table of content).

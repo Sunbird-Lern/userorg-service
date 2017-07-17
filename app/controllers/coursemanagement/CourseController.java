@@ -3,6 +3,12 @@
  */
 package controllers.coursemanagement;
 
+import akka.util.Timeout;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
+
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -15,16 +21,12 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller will handle all the api related to course , add course , published course, update
- * course , search course.
+ * This controller will handle all the API related to course, add course, published course, update
+ * course, search course.
  * 
  * @author Manzarul
  * @author Amit Kumar
@@ -32,11 +34,12 @@ import play.mvc.Result;
 public class CourseController extends BaseController {
 
   /**
-   * This method will add a new course entry into cassandra db.
+   * This method will add a new course entry into cassandra DB.
    * 
    * @return Promise<Result>
    */
   public Promise<Result> createCourse() {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add new course data=" + requestData, LoggerEnum.INFO.name());

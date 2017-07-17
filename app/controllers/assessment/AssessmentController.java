@@ -3,6 +3,12 @@
  */
 package controllers.assessment;
 
+import akka.util.Timeout;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
+
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -15,15 +21,11 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller will handle all the api related to Assessment
+ * This controller will handle all the API related to Assessment
  * 
  * @author Manzarul
  */
@@ -31,11 +33,12 @@ public class AssessmentController extends BaseController {
 
 
   /**
-   * This method will add assessment entry into cassandra db.
+   * This method will add assessment entry into cassandra DB.
    * 
    * @return Promise<Result>
    */
   public Promise<Result> saveAssessment() {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add new assessment data=" + requestData, LoggerEnum.INFO.name());
@@ -66,6 +69,7 @@ public class AssessmentController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getAssessment() {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("get assessment request=" + requestData, LoggerEnum.INFO.name());

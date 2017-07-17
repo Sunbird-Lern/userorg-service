@@ -1,5 +1,12 @@
 package controllers;
 
+import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+
+import com.typesafe.config.ConfigFactory;
+
 import java.text.MessageFormat;
 
 import org.sunbird.common.exception.ProjectCommonException;
@@ -12,12 +19,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
-import com.typesafe.config.ConfigFactory;
-
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -25,6 +26,7 @@ import play.mvc.Controller;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
+
 import util.AuthenticationHelper;
 import util.Global;
 
@@ -34,9 +36,12 @@ import util.Global;
  * @author Manzarul
  */
 public class BaseController extends Controller {
+
   public static final int Akka_wait_time = 6;
   private static ActorSelection selection = null;
+
   static {
+
     ActorSystem system =
         ActorSystem.create("ActorApplication", ConfigFactory.load().getConfig("ActorConfig"));
     String path = "akka.tcp://RemoteMiddlewareSystem@127.0.1.1:8088/user/RequestRouterActor";
@@ -60,9 +65,10 @@ public class BaseController extends Controller {
   /**
    * This method will provide remote Actor selection
    * 
-   * @return
+   * @return ActorSelection
    */
   public ActorSelection getRemoteActor() {
+
     return selection;
   }
 
@@ -76,6 +82,7 @@ public class BaseController extends Controller {
    */
   public static Response createFailureResponse(Request request, ResponseCode code,
       ResponseCode headerCode) {
+
     Response response = new Response();
     response.setVer(getApiVersion(request.path()));
     response.setId(getApiResponseId(request));
@@ -86,12 +93,13 @@ public class BaseController extends Controller {
   }
 
   /**
-   * This method will create response param
+   * This method will create response parameter
    * 
    * @param code ResponseCode
    * @return ResponseParams
    */
   public static ResponseParams createResponseParamObj(ResponseCode code) {
+
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
@@ -105,11 +113,12 @@ public class BaseController extends Controller {
   /**
    * This method will create data for success response.
    * 
-   * @param request String
+   * @param request play.mvc.Http.Request
    * @param response Response
    * @return Response
    */
   public static Response createSuccessResponse(play.mvc.Http.Request request, Response response) {
+
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
     } else {
@@ -130,6 +139,7 @@ public class BaseController extends Controller {
    * @return String
    */
   public static String getApiVersion(String request) {
+
     return request.split("[/]")[1];
   }
 
@@ -137,12 +147,13 @@ public class BaseController extends Controller {
   /**
    * This method will handle response in case of exception
    * 
-   * @param request String
+   * @param request play.mvc.Http.Request
    * @param exception ProjectCommonException
    * @return Response
    */
   public static Response createResponseOnException(play.mvc.Http.Request request,
       ProjectCommonException exception) {
+
     Response response = new Response();
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -169,13 +180,14 @@ public class BaseController extends Controller {
 
   /**
    * 
-   * @param path
-   * @param method
-   * @param t
-   * @return
+   * @param path String
+   * @param method String
+   * @param exception ProjectCommonException
+   * @return Response
    */
   public static Response createResponseOnException(String path, String method,
       ProjectCommonException exception) {
+
     Response response = new Response();
     response.setVer(getApiVersion(path));
     response.setId(getApiResponseId(path, method));
@@ -191,9 +203,12 @@ public class BaseController extends Controller {
    * This method will create common response for all controller method
    * 
    * @param response Object
+   * @param key String
+   * @param request play.mvc.Http.Request
    * @return Result
    */
   public Result createCommonResponse(Object response, String key, play.mvc.Http.Request request) {
+
     if (response instanceof Response) {
       Response courseResponse = (Response) response;
       if (!ProjectUtil.isStringNullOREmpty(key)) {
@@ -215,12 +230,14 @@ public class BaseController extends Controller {
    * Common exception response handler method.
    * 
    * @param e Exception
+   * @param request play.mvc.Http.Request
    * @return Result
    */
-  public Result createCommonExceptionResponse(Exception e, play.mvc.Http.Request requerst) {
+  public Result createCommonExceptionResponse(Exception e, play.mvc.Http.Request request) {
+
     ProjectLogger.log(e.getMessage(), e);
-    if (requerst == null) {
-      requerst = request();
+    if (request == null) {
+      request = request();
     }
     ProjectCommonException exception = null;
     if (e instanceof ProjectCommonException) {
@@ -243,11 +260,13 @@ public class BaseController extends Controller {
    * @param request Request
    * @param timeout Timeout
    * @param responseKey String
+   * @param httpReq play.mvc.Http.Request
    * @return Promise<Result>
    */
   public Promise<Result> actorResponseHandler(ActorSelection selection,
       org.sunbird.common.request.Request request, Timeout timeout, String responseKey,
       play.mvc.Http.Request httpReq) {
+
     Promise<Result> res =
         Promise.wrap(Patterns.ask(selection, request, timeout)).map(new Function<Object, Result>() {
           public Result apply(Object result) {
@@ -271,32 +290,41 @@ public class BaseController extends Controller {
    * @return int
    */
   public int getEnvironment() {
+
     if (Global.env != null) {
       return Global.env.getValue();
     }
     return ProjectUtil.Environment.prod.getValue();
   }
 
+  /**
+   * Method to get UserId by AuthToken
+   * 
+   * @param token
+   * @return String
+   */
   public String getUserIdByAuthToken(String token) {
-    return AuthenticationHelper.verifyUserAccesToken(token);
 
+    return AuthenticationHelper.verifyUserAccesToken(token);
   }
 
 
   /**
+   * Method to get API response Id
    * 
    * @param requerst play.mvc.Http.Request
-   * @return
+   * @return String
    */
-  private static String getApiResponseId(play.mvc.Http.Request requerst) {
+  private static String getApiResponseId(play.mvc.Http.Request request) {
+
     String val = "";
-    if (requerst != null) {
-      String path = requerst.path();
-      if (requerst.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
+    if (request != null) {
+      String path = request.path();
+      if (request.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
         val = Global.apiMap.get(path);
         if (ProjectUtil.isStringNullOREmpty(val)) {
           String[] splitedpath = path.split("[/]");
-          path = removelastvalue(splitedpath);
+          path = removeLastValue(splitedpath);
           val = Global.apiMap.get(path);
         }
       } else {
@@ -308,18 +336,20 @@ public class BaseController extends Controller {
 
 
   /**
+   * Method to get API response Id
    * 
    * @param path String
    * @param method String
-   * @return Stirng
+   * @return String
    */
   private static String getApiResponseId(String path, String method) {
+
     String val = "";
     if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
       val = Global.apiMap.get(path);
       if (ProjectUtil.isStringNullOREmpty(val)) {
         String[] splitedpath = path.split("[/]");
-        path = removelastvalue(splitedpath);
+        path = removeLastValue(splitedpath);
         val = Global.apiMap.get(path);
       }
     } else {
@@ -329,11 +359,13 @@ public class BaseController extends Controller {
   }
 
   /**
+   * Method to remove last value
    * 
    * @param splited String []
    * @return String
    */
-  private static String removelastvalue(String splited[]) {
+  private static String removeLastValue(String splited[]) {
+
     StringBuilder builder = new StringBuilder();
     if (splited != null && splited.length > 0) {
       for (int i = 1; i < splited.length - 1; i++) {

@@ -3,6 +3,12 @@
  */
 package controllers.search;
 
+import akka.util.Timeout;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
+
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
@@ -14,10 +20,6 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -38,7 +40,7 @@ public class SearchController extends BaseController {
   public Promise<Result> compositeSearch() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting search request data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCompositeSearch(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());

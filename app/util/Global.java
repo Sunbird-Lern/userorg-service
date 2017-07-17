@@ -1,4 +1,9 @@
+/**
+ * 
+ */
 package util;
+
+import controllers.BaseController;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -17,7 +22,6 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 
-import controllers.BaseController;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
@@ -35,30 +39,30 @@ import play.mvc.Results;
  *
  */
 public class Global extends GlobalSettings {
-    public static ProjectUtil.Environment env;
-    private static ConcurrentHashMap<String , Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
-    public static Map<String,String> apiMap = new HashMap<>(); 
-    
-     private class ActionWrapper extends Action.Simple {
-            public ActionWrapper(Action<?> action) {
-              this.delegate = action;
-            }
 
-      @Override
-      public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
-        Promise<Result> result = null;
-        Http.Response response = ctx.response();
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        //removing check for headers
-      /*  String message = verifyRequestData(ctx.request(),RequestMethod.GET.name());
-          if (!ProjectUtil.isStringNullOREmpty(message)) {
-              result = onDataValidationError(ctx.request(), message);
-          } else {
-              result = delegate.call(ctx);
-          }*/
-        return delegate.call(ctx);
-      }
+  public static ProjectUtil.Environment env;
+  private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
+  public static Map<String, String> apiMap = new HashMap<>();
+
+  private class ActionWrapper extends Action.Simple {
+    public ActionWrapper(Action<?> action) {
+      this.delegate = action;
     }
+
+    @Override
+    public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
+      Promise<Result> result = null;
+      Http.Response response = ctx.response();
+      response.setHeader("Access-Control-Allow-Origin", "*");
+      // removing check for headers
+      /*
+       * String message = verifyRequestData(ctx.request(),RequestMethod.GET.name()); if
+       * (!ProjectUtil.isStringNullOREmpty(message)) { result = onDataValidationError(ctx.request(),
+       * message); } else { result = delegate.call(ctx); }
+       */
+      return delegate.call(ctx);
+    }
+  }
 
 
   /**
@@ -77,6 +81,7 @@ public class Global extends GlobalSettings {
    * @param app Application
    */
   public void onStart(Application app) {
+
     setEnvironment();
     addApiListToMap();
     createApiMap();
@@ -92,6 +97,7 @@ public class Global extends GlobalSettings {
    */
   @SuppressWarnings("rawtypes")
   public Action onRequest(Request request, Method actionMethod) {
+
     String messageId = request.getHeader(JsonKey.MESSAGE_ID);
     ProjectLogger.log("method call start.." + request.path() + " " + actionMethod + " " + messageId,
         LoggerEnum.INFO.name());
@@ -108,8 +114,13 @@ public class Global extends GlobalSettings {
   /**
    * This method will do request data validation for GET method only. As a GET request user must
    * send some key in header.
+   * 
+   * @param request Request
+   * @param errorMessage String
+   * @return Promise<Result>
    */
   public Promise<Result> onDataValidationError(Request request, String errorMessage) {
+
     ProjectLogger.log("Data error found--");
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
@@ -120,9 +131,14 @@ public class Global extends GlobalSettings {
 
   /**
    * This method will be used to send the request header missing error message.
+   * 
+   * @param request Http.RequestHeader
+   * @param t Throwable
+   * @return Promise<Result>
    */
   @Override
   public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
+
     Response response = null;
     ProjectCommonException commonException = null;
     if (t instanceof ProjectCommonException) {
@@ -155,6 +171,7 @@ public class Global extends GlobalSettings {
    */
   @SuppressWarnings("deprecation")
   private String verifyRequestData(Request request, String method) {
+
     if (ProjectUtil.isStringNullOREmpty(
         request.getHeader(HeaderParam.X_Consumer_ID.getName().toLowerCase()))) {
       return ResponseCode.customerIdRequired.getErrorCode();
@@ -183,6 +200,7 @@ public class Global extends GlobalSettings {
    * @return Environment
    */
   public Environment setEnvironment() {
+
     if (play.Play.isDev()) {
       return env = Environment.dev;
     } else if (play.Play.isTest()) {
@@ -193,9 +211,10 @@ public class Global extends GlobalSettings {
   }
 
   /**
-   * 
+   * Method to add API list to Map
    */
   private void addApiListToMap() {
+
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v1/user/login", var);
@@ -207,6 +226,7 @@ public class Global extends GlobalSettings {
    * response to client.
    */
   private static void createApiMap() {
+
     apiMap.put("/v1/user/courses/enroll", "api.course.enroll");
     apiMap.put("/v1/course/update", "api.course.update");
     apiMap.put("/v1/course/publish", "api.course.publish");

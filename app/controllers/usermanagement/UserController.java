@@ -3,6 +3,12 @@
  */
 package controllers.usermanagement;
 
+import akka.util.Timeout;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
+
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -15,10 +21,6 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -36,9 +38,10 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> createUser() {
+
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user registration request data=" + requestData,
+      ProjectLogger.log(" get user registration request data = " + requestData,
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreateUser(reqObj);
@@ -47,7 +50,6 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      // reqObj.getRequest().put(JsonKey.USERNAME, reqObj.getRequest().get(JsonKey.EMAIL));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       Promise<Result> res =
@@ -64,9 +66,10 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> updateUserProfile() {
+
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user update profile data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateUser(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
@@ -94,6 +97,7 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> login() {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user login data=" + requestData, LoggerEnum.INFO.name());
@@ -120,9 +124,10 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> logout() {
+
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user logout data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(" get user logout data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.LOGOUT.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -149,9 +154,10 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> changePassword() {
+
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user change password data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(" get user change password data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateChangePassword(reqObj);
       reqObj.setOperation(ActorOperations.CHANGE_PASSWORD.getValue());
@@ -179,6 +185,7 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getUserProfile(String userId) {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user profile data by id =" + requestData, LoggerEnum.INFO.name());
@@ -207,6 +214,7 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getRoles() {
+
     try {
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_ROLES.getValue());
@@ -226,11 +234,12 @@ public class UserController extends BaseController {
 
 
   /**
-   * Method to verify user existence in our db.
+   * Method to verify user existence in our DB.
    * 
    * @return Promise<Result>
    */
   public Promise<Result> getUserDetailsByLoginId() {
+
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" verify user details by loginId data =" + requestData,
