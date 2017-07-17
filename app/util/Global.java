@@ -9,7 +9,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.Environment;
@@ -34,7 +33,6 @@ import play.mvc.Results;
  *
  */
 public class Global extends GlobalSettings {
-    private LogHelper logger = LogHelper.getInstance(Global.class.getName());
     public static ProjectUtil.Environment env;
     private static ConcurrentHashMap<String , Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
     public static Map<String,String> apiMap = new HashMap<>(); 
@@ -78,7 +76,6 @@ public class Global extends GlobalSettings {
            setEnvironment();
            addApiListToMap();
            createApiMap();
-        logger.info("Server started.. with Environment --" + env.name());
            ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
     }
     
@@ -91,12 +88,10 @@ public class Global extends GlobalSettings {
     @SuppressWarnings("rawtypes")
     public Action onRequest(Request request, Method actionMethod) {
         String messageId = request.getHeader(JsonKey.MESSAGE_ID);
-        logger.info("method call start.." + request.path() + " " + actionMethod + " " + messageId);
         ProjectLogger.log("method call start.." + request.path() + " " + actionMethod + " " + messageId, LoggerEnum.INFO.name());
         if (ProjectUtil.isStringNullOREmpty(messageId)) {
             UUID uuid = UUID.randomUUID();
             messageId = uuid.toString();
-            logger.info("message id is not provided by client.." + messageId);
             ProjectLogger.log("message id is not provided by client.." + messageId);
         }
         ExecutionContext.setRequestId(messageId);
@@ -109,7 +104,6 @@ public class Global extends GlobalSettings {
      * As a GET request user must send some key in header.
      */
   public Promise<Result> onDataValidationError(Request request, String errorMessage) {
-    logger.info("Data error found--");
     ProjectLogger.log("Data error found--");
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;

@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
@@ -31,9 +30,7 @@ import play.mvc.Result;
  * @author Amit Kumar
  */
 public class CourseController  extends BaseController{
-	
-private LogHelper logger = LogHelper.getInstance(CourseController.class.getName());
-	
+		
 	/**
 	 * This method will add a new course entry into cassandra db.
 	 * @return Promise<Result>
@@ -41,7 +38,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> createCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("add new course data=" + requestData);
 			ProjectLogger.log("add new course data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateAddCourse(reqObj);
@@ -71,7 +67,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> updateCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("update course request=" + requestData);
 			ProjectLogger.log("update course request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUpdateCourse(reqObj);
@@ -100,7 +95,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> publishCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("published course request =" + requestData);
 			ProjectLogger.log("published course request =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validatePublishCourse(reqObj);
@@ -128,7 +122,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> searchCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("search course request =" + requestData);
 			ProjectLogger.log("search course request =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -153,7 +146,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	public Promise<Result> deleteCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("delete course request =" + requestData);
 			ProjectLogger.log("delete course request =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setOperation(ActorOperations.DELETE_COURSE.getValue());
@@ -180,7 +172,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	 */
 	public Promise<Result> getCourseById(String courseId) {
 		try {
-			logger.info("get course request =" + courseId);
 			ProjectLogger.log("get course request =" + courseId, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -205,7 +196,6 @@ private LogHelper logger = LogHelper.getInstance(CourseController.class.getName(
 	 */
 	public Promise<Result> recommendedCourses() {
 		try {
-			logger.info("Method Started # RECOMMENDED COURSES");
 			ProjectLogger.log("Method Started # RECOMMENDED COURSES");
 			Request reqObj = new Request();
 			reqObj.setRequest_id(ExecutionContext.getRequestId());

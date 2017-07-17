@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
@@ -29,7 +28,6 @@ import play.mvc.Result;
  * @author Manzarul
  */
 public class UserController  extends BaseController{
-	private LogHelper logger = LogHelper.getInstance(UserController.class.getName());
 	
 	/**
 	 * This method will do the registration process.
@@ -39,7 +37,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> createUser() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user registration request data=" + requestData);
 			ProjectLogger.log(" get user registration request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateCreateUser(reqObj);
@@ -66,7 +63,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> updateUserProfile() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user update profile data=" + requestData);
 			ProjectLogger.log(" get user update profile data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUpdateUser(reqObj);
@@ -94,7 +90,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> login() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user login data=" + requestData);
 			ProjectLogger.log(" get user login data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateUserLogin(reqObj);
@@ -119,7 +114,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> logout() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user logout data=" + requestData);
 			ProjectLogger.log(" get user logout data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setOperation(ActorOperations.LOGOUT.getValue());
@@ -145,7 +139,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> changePassword() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user change password data=" + requestData);
 			ProjectLogger.log(" get user change password data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateChangePassword(reqObj);
@@ -172,7 +165,6 @@ public class UserController  extends BaseController{
 	public Promise<Result> getUserProfile(String userId) {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get user profile data by id = " + requestData);
 			ProjectLogger.log(" get user profile data by id =" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = new Request();
 			reqObj.setOperation(ActorOperations.GET_PROFILE.getValue());
@@ -221,7 +213,6 @@ public class UserController  extends BaseController{
     public Promise<Result> getUserDetailsByLoginId() {
         try {
             JsonNode requestData = request().body().asJson();
-            logger.info(" verify user details by loginId data =" + requestData);
             ProjectLogger.log(" verify user details by loginId data =" + requestData, LoggerEnum.INFO.name());
             Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
             RequestValidator.validateVerifyUser(reqObj);

@@ -7,7 +7,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
@@ -35,7 +34,6 @@ import util.Global;
  * @author Manzarul
  */
 public class BaseController extends Controller {
-  private static final LogHelper logger = LogHelper.getInstance(BaseController.class.getName());
   public static final int Akka_wait_time = 6;
   private static ActorSelection selection = null;
   static {
@@ -46,16 +44,13 @@ public class BaseController extends Controller {
       path = play.Play.application().configuration().getString("remote.actor.path");
       if (!ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_IP))
           && !ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_PORT))) {
-          logger.debug("value is taking from system evn");
         ProjectLogger.log("value is taking from system evn");
         path = MessageFormat.format(
             play.Play.application().configuration().getString("remote.actor.env.path"),
             System.getenv(JsonKey.SUNBIRD_ACTOR_IP), System.getenv(JsonKey.SUNBIRD_ACTOR_PORT));
       }
-       logger.debug("Actor path is ==" + path);
-      ProjectLogger.log("Actor path is ==" + path, LoggerEnum.INFO.name());
+       ProjectLogger.log("Actor path is ==" + path, LoggerEnum.INFO.name());
     } catch (Exception e) {
-       logger.error(e);
        ProjectLogger.log(e.getMessage(), e);
     }
 
@@ -222,7 +217,6 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonExceptionResponse(Exception e, play.mvc.Http.Request requerst) {
-    logger.error(e);
     ProjectLogger.log(e.getMessage(), e);
     if (requerst == null) {
       requerst = request();
@@ -261,7 +255,6 @@ public class BaseController extends Controller {
             } else if (result instanceof ProjectCommonException) {
               return createCommonExceptionResponse((ProjectCommonException) result, request());
             } else {
-              logger.info("Unsupported Actor Response format");
               ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }

@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
@@ -30,7 +29,6 @@ import play.mvc.Result;
  */
 public class AssessmentController  extends BaseController{
 	
-private LogHelper logger = LogHelper.getInstance(AssessmentController.class.getName());
 	
 	/**
 	 * This method will add assessment entry into cassandra db.
@@ -39,7 +37,6 @@ private LogHelper logger = LogHelper.getInstance(AssessmentController.class.getN
 	public Promise<Result> saveAssessment() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("add new assessment data=" + requestData);
 			ProjectLogger.log("add new assessment data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateSaveAssessment(reqObj);
@@ -68,7 +65,6 @@ private LogHelper logger = LogHelper.getInstance(AssessmentController.class.getN
 	public Promise<Result> getAssessment() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info("get assessment request=" + requestData);
 			ProjectLogger.log("get assessment request=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateGetAssessment(reqObj);

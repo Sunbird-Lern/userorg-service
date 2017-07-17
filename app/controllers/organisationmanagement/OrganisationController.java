@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
@@ -29,7 +28,6 @@ import play.mvc.Result;
  */
 public class OrganisationController extends BaseController {
 
-  private LogHelper logger = LogHelper.getInstance(OrganisationController.class.getName());
 
 
   /**
@@ -42,7 +40,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> createOrg() {
     try {
       JsonNode requestData = request().body().asJson();
-      logger.info("Create organisation request: " + requestData);
       ProjectLogger.log("Create organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreateOrg(reqObj);
@@ -77,7 +74,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> approveOrg() {
     try {
       JsonNode requestData = request().body().asJson();
-      logger.info("Approve organisation request: " + requestData);
       ProjectLogger.log("Approve organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateOrg(reqObj);
@@ -106,7 +102,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> updateOrg() {
     try {
       JsonNode requestData = request().body().asJson();
-      logger.info("Update organisation request: " + requestData);
       ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrg(reqObj);
@@ -142,7 +137,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> updateOrgStatus() {
     try {
       JsonNode requestData = request().body().asJson();
-      logger.info("Update organisation request: " + requestData);
       ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrgStatus(reqObj);
@@ -170,7 +164,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> getOrgDetails() {
     try {
       JsonNode requestData = request().body().asJson();
-      logger.info("Get Organisation details request: " + requestData);
       ProjectLogger.log("Get Organisation details request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateOrg(reqObj);
@@ -198,7 +191,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> addMemberToOrganisation() {
       try {
           JsonNode requestData = request().body().asJson();
-          logger.info(" add member to organisation =" + requestData);
           ProjectLogger.log(" add member to organisation =" + requestData, LoggerEnum.INFO.name());
           Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
           RequestValidator.validateAddMember(reqObj);
@@ -224,7 +216,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> removeMemberFromOrganisation() {
       try {
           JsonNode requestData = request().body().asJson();
-          logger.info(" remove member from organisation =" + requestData);
           ProjectLogger.log(" remove member from organisation =" + requestData, LoggerEnum.INFO.name());
           Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
           RequestValidator.validateUserOrg(reqObj);
@@ -250,7 +241,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> joinUserOrganisation() {
       try {
           JsonNode requestData = request().body().asJson();
-          logger.info(" join user organisation =" + requestData);
           ProjectLogger.log(" join user organisation =" + requestData, LoggerEnum.INFO.name());
           Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
           RequestValidator.validateUserOrg(reqObj);
@@ -276,7 +266,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> approveUserOrganisation() {
       try {
           JsonNode requestData = request().body().asJson();
-          logger.info(" approve user organisation =" + requestData);
           ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
           Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
           RequestValidator.validateUserOrg(reqObj);
@@ -302,7 +291,6 @@ public class OrganisationController extends BaseController {
   public Promise<Result> rejectUserOrganisation() {
       try {
           JsonNode requestData = request().body().asJson();
-          logger.info(" approve user organisation =" + requestData);
           ProjectLogger.log(" approve user organisation =" + requestData, LoggerEnum.INFO.name());
           Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
           RequestValidator.validateUserOrg(reqObj);

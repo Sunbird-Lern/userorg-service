@@ -9,7 +9,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.LogHelper;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
@@ -29,7 +28,6 @@ import play.mvc.Results;
  * @author Manzarul
  */
 public class LearnerController extends BaseController {
-	private LogHelper logger = LogHelper.getInstance(LearnerController.class.getName());
 	/**
 	 * This method will provide list of enrolled courses
 	 * for a user. User courses are stored in Cassandra db.
@@ -64,7 +62,6 @@ public class LearnerController extends BaseController {
 	public Promise<Result> enrollCourse() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get course request data=" + requestData);
 			ProjectLogger.log(" get course request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			RequestValidator.validateEnrollCourse(reqObj);
@@ -92,7 +89,6 @@ public class LearnerController extends BaseController {
 	public Promise<Result> getContentState() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			logger.info(" get course request data=" + requestData);
 			ProjectLogger.log(" get course request data=" + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -145,7 +141,6 @@ public class LearnerController extends BaseController {
 	public Promise<Result> updateContentState() {
 		try {
 		JsonNode requestData = request().body().asJson();
-        logger.info(" get content request data=" + requestData);
 		ProjectLogger.log(" get content request data=" + requestData, LoggerEnum.INFO.name());
         Request reqObj  = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
         RequestValidator.validateUpdateContent(reqObj);
