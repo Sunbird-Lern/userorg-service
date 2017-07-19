@@ -172,6 +172,10 @@ public class Global extends GlobalSettings {
   @SuppressWarnings("deprecation")
   private String verifyRequestData(Request request, String method) {
 
+    if(ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.Content_Type.getName())) 
+        ||!request.getHeader(HeaderParam.Content_Type.getName()).equals("application/json") ){
+      return ResponseCode.contentTypeRequiredError.getErrorCode();
+    }
     if (ProjectUtil.isStringNullOREmpty(
         request.getHeader(HeaderParam.X_Consumer_ID.getName().toLowerCase()))) {
       return ResponseCode.customerIdRequired.getErrorCode();
