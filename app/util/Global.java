@@ -54,9 +54,10 @@ public class Global extends GlobalSettings {
       Promise<Result> result = null;
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
+      
       // removing check for headers
       /*
-       * String message = verifyRequestData(ctx.request(),RequestMethod.GET.name()); if
+       * String message = verifyRequestData(ctx.request(),ctx.request().method()); if
        * (!ProjectUtil.isStringNullOREmpty(message)) { result = onDataValidationError(ctx.request(),
        * message); } else { result = delegate.call(ctx); }
        */
@@ -71,7 +72,7 @@ public class Global extends GlobalSettings {
    *
    */
   public enum RequestMethod {
-    GET, POST, PUT, DELETE;
+    GET, POST, PUT, DELETE,PATCH;
   }
 
   /**
@@ -171,11 +172,13 @@ public class Global extends GlobalSettings {
    */
   @SuppressWarnings("deprecation")
   private String verifyRequestData(Request request, String method) {
-
+     if(RequestMethod.POST.name().equalsIgnoreCase(method) || RequestMethod.PUT.name().equalsIgnoreCase(method)
+         || RequestMethod.PATCH.name().equalsIgnoreCase(method)) {
     if(ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.Content_Type.getName())) 
         ||!request.getHeader(HeaderParam.Content_Type.getName()).equals("application/json") ){
       return ResponseCode.contentTypeRequiredError.getErrorCode();
     }
+     }
     if (ProjectUtil.isStringNullOREmpty(
         request.getHeader(HeaderParam.X_Consumer_ID.getName().toLowerCase()))) {
       return ResponseCode.customerIdRequired.getErrorCode();
