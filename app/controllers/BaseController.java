@@ -37,7 +37,7 @@ import util.Global;
  */
 public class BaseController extends Controller {
 
-  public static final int Akka_wait_time = 6;
+  public static final int Akka_wait_time = 10;
   private static ActorSelection selection = null;
 
   static {
