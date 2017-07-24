@@ -17,12 +17,15 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.ProjectUtil.OrgStatus;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
 import play.libs.F.Promise;
+import play.libs.Json;
 import play.mvc.Result;
 
 /**
@@ -58,6 +61,13 @@ public class OrganisationController extends BaseController {
       if (null != address && address.size() > 0 && orgData.containsKey(JsonKey.ADDRESS)) {
         innerMap.put(JsonKey.ADDRESS, address);
         orgData.remove(JsonKey.ADDRESS);
+      }
+      if(orgData.containsKey(JsonKey.SOURCE)) {
+        orgData.put(JsonKey.SOURCE, ((String) orgData.get(JsonKey.SOURCE)).toLowerCase());
+      } if(orgData.containsKey(JsonKey.PROVIDER)) {
+        orgData.put(JsonKey.PROVIDER, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
+      }if(orgData.containsKey(JsonKey.EXTERNAL_ID)) {
+        orgData.put(JsonKey.EXTERNAL_ID, ((String) orgData.get(JsonKey.EXTERNAL_ID)).toLowerCase());
       }
       innerMap.put(JsonKey.ORGANISATION, orgData);
       innerMap.put(JsonKey.REQUESTED_BY,
@@ -152,13 +162,7 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
-        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
-      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
-        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
-        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
-      }
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -187,13 +191,7 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
-        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
-      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
-        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
-        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
-      }
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -223,17 +221,7 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
-        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
-      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
-        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.USERNAME) !=null) {
-        reqObj.getRequest().put(JsonKey.USERNAME, ((String)reqObj.getRequest().get(JsonKey.USERNAME)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.USER_NAME) !=null) {
-        reqObj.getRequest().put(JsonKey.USER_NAME, ((String)reqObj.getRequest().get(JsonKey.USER_NAME)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
-        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
-      }
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -264,17 +252,7 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
-        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
-      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
-        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.USERNAME) !=null) {
-        reqObj.getRequest().put(JsonKey.USERNAME, ((String)reqObj.getRequest().get(JsonKey.USERNAME)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.USER_NAME) !=null) {
-        reqObj.getRequest().put(JsonKey.USER_NAME, ((String)reqObj.getRequest().get(JsonKey.USER_NAME)).toLowerCase());
-      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
-        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
-      }
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
