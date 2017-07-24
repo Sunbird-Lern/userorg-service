@@ -81,6 +81,12 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
+      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) &&
+          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)) {
+        reqObj.getRequest()
+            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      }
+      reqObj.getRequest().remove(JsonKey.PHONE_VERIFIED);
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
