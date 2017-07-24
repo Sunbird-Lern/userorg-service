@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package controllers.usermanagement;
 
@@ -26,7 +26,7 @@ import play.mvc.Result;
 
 /**
  * This controller will handle all the request and responses for user management.
- * 
+ *
  * @author Manzarul
  */
 public class UserController extends BaseController {
@@ -34,7 +34,7 @@ public class UserController extends BaseController {
   /**
    * This method will do the registration process. registered user data will be store inside
    * cassandra db.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> createUser() {
@@ -50,9 +50,10 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      if(reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) && 
-          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)){
-        reqObj.getRequest().put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) &&
+          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)) {
+        reqObj.getRequest()
+            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
       }
       reqObj.getRequest().remove(JsonKey.PHONE_VERIFIED);
       reqObj.setRequest(innerMap);
@@ -65,7 +66,7 @@ public class UserController extends BaseController {
 
   /**
    * This method will update user profile data. user can update all the data except email.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> updateUserProfile() {
@@ -96,7 +97,7 @@ public class UserController extends BaseController {
   /**
    * This method will do the user authentication based on login type key. login can be done with
    * following ways (simple login , Google plus login , Facebook login , Aadhaar login)
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> login() {
@@ -123,7 +124,7 @@ public class UserController extends BaseController {
 
   /**
    * This method will invalidate user auth token .
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> logout() {
@@ -153,7 +154,7 @@ public class UserController extends BaseController {
 
   /**
    * This method will allow user to change their password.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> changePassword() {
@@ -184,7 +185,7 @@ public class UserController extends BaseController {
 
   /**
    * This method will provide user profile details based on requested userId.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getUserProfile(String userId) {
@@ -213,7 +214,7 @@ public class UserController extends BaseController {
 
   /**
    * This method will provide complete role details list.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getRoles() {
@@ -235,10 +236,9 @@ public class UserController extends BaseController {
   }
 
 
-
   /**
    * Method to verify user existence in our DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getUserDetailsByLoginId() {
