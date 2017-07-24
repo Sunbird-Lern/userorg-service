@@ -209,6 +209,17 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
+      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
+        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
+      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
+        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.USERNAME) !=null) {
+        reqObj.getRequest().put(JsonKey.USERNAME, ((String)reqObj.getRequest().get(JsonKey.USERNAME)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.USER_NAME) !=null) {
+        reqObj.getRequest().put(JsonKey.USER_NAME, ((String)reqObj.getRequest().get(JsonKey.USER_NAME)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
+        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
+      }
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -239,6 +250,17 @@ public class OrganisationController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
+      if(reqObj.getRequest().get(JsonKey.SOURCE) !=null) {
+        reqObj.getRequest().put(JsonKey.SOURCE, ((String)reqObj.getRequest().get(JsonKey.SOURCE)).toLowerCase());
+      } if (reqObj.getRequest().get(JsonKey.EXTERNAL_ID) !=null) {
+        reqObj.getRequest().put(JsonKey.EXTERNAL_ID, ((String)reqObj.getRequest().get(JsonKey.EXTERNAL_ID)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.USERNAME) !=null) {
+        reqObj.getRequest().put(JsonKey.USERNAME, ((String)reqObj.getRequest().get(JsonKey.USERNAME)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.USER_NAME) !=null) {
+        reqObj.getRequest().put(JsonKey.USER_NAME, ((String)reqObj.getRequest().get(JsonKey.USER_NAME)).toLowerCase());
+      }if (reqObj.getRequest().get(JsonKey.PROVIDER) !=null) {
+        reqObj.getRequest().put(JsonKey.PROVIDER, ((String)reqObj.getRequest().get(JsonKey.PROVIDER)).toLowerCase());
+      }
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
