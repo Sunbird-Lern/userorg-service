@@ -50,11 +50,14 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
+      if(reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) && 
+          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)){
+        reqObj.getRequest().put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      }
+      reqObj.getRequest().remove(JsonKey.PHONE_VERIFIED);
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
