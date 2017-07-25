@@ -65,7 +65,8 @@ public class OrganisationController extends BaseController {
       if(orgData.containsKey(JsonKey.SOURCE)) {
         orgData.put(JsonKey.SOURCE, ((String) orgData.get(JsonKey.SOURCE)).toLowerCase());
       } if(orgData.containsKey(JsonKey.PROVIDER)) {
-        orgData.put(JsonKey.PROVIDER, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
+        orgData.put(JsonKey.SOURCE, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
+        orgData.remove(JsonKey.PROVIDER);
       }if(orgData.containsKey(JsonKey.EXTERNAL_ID)) {
         orgData.put(JsonKey.EXTERNAL_ID, ((String) orgData.get(JsonKey.EXTERNAL_ID)).toLowerCase());
       }
