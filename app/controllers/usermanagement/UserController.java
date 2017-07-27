@@ -45,18 +45,23 @@ public class UserController extends BaseController {
       ProjectLogger.log(" get user registration request data = " + requestData,
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED)) {
+        reqObj.getRequest()
+            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      }
       RequestValidator.validateCreateUser(reqObj);
+      
+      if(ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))){
+        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
+        reqObj.getRequest().put(JsonKey.PHONE_NUMBER_VERIFIED, false);
+      }
       reqObj.setOperation(ActorOperations.CREATE_USER.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) &&
-          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)) {
-        reqObj.getRequest()
-            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
-      }
+     
       reqObj.getRequest().remove(JsonKey.PHONE_VERIFIED);
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
@@ -77,16 +82,21 @@ public class UserController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) &&
+          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)) {
+        reqObj.getRequest()
+            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      }
       RequestValidator.validateUpdateUser(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      if (reqObj.getRequest().containsKey(JsonKey.PHONE_VERIFIED) &&
-          (reqObj.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean)) {
-        reqObj.getRequest()
-            .put(JsonKey.PHONE_NUMBER_VERIFIED, reqObj.getRequest().get(JsonKey.PHONE_VERIFIED));
+      
+      if(ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))){
+        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
+        reqObj.getRequest().put(JsonKey.PHONE_NUMBER_VERIFIED, false);
       }
       reqObj.getRequest().remove(JsonKey.PHONE_VERIFIED);
       innerMap.put(JsonKey.REQUESTED_BY,
