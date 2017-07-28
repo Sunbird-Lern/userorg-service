@@ -99,7 +99,6 @@ public class BaseController extends Controller {
    * @return ResponseParams
    */
   public static ResponseParams createResponseParamObj(ResponseCode code) {
-
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
@@ -153,7 +152,7 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(play.mvc.Http.Request request,
       ProjectCommonException exception) {
-
+   ProjectLogger.log(exception !=null?exception.getMessage():"Message is not coming", exception);
     Response response = new Response();
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -164,6 +163,9 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
     ResponseCode code = ResponseCode.getResponse(exception.getCode());
+    if(code == null) {
+      code = ResponseCode.SERVER_ERROR;
+    }
     response.setParams(createResponseParamObj(code));
     if (response.getParams() != null && response.getParams().getStatus() != null) {
       response.getParams().setStatus(
