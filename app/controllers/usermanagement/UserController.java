@@ -324,4 +324,31 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  /**
+   * This method will assign either user role directly or user org role.
+   * @return Promise<Result>
+   */
+  public Promise<Result> assignRoles() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" Assign roles api request body =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateAssignRole(reqObj);
+      reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  
 }
