@@ -260,4 +260,31 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
+  /**
+   * This method will provide user profile details based on requested userId.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> blockUser() {
+
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" blockuser =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.DELETE_USER.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
 }
