@@ -20,6 +20,7 @@ POST	/v1/user/changepassword			@controllers.usermanagement.UserController.change
 GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
+POST  	/v1/user/block			@controllers.usermanagement.UserController.blockUser()
 
 
 #course management api
