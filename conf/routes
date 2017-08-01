@@ -20,6 +20,7 @@ POST	/v1/user/changepassword			@controllers.usermanagement.UserController.change
 GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
+POST    /v1/user/download				@controllers.usermanagement.UserController.downloadUsers()
 
 
 #course management api
@@ -42,6 +43,7 @@ POST    /v1/org/member/approve         @controllers.organisationmanagement.Organ
 POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
 POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
 POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
+POST	/v1/org/download		@controllers.organisationmanagement.OrganisationController.downloadOrgs()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
