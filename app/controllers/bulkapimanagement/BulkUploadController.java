@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +31,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
  * 
  * @author Amit Kumar
  */
-public class BulkUserUploadController extends BaseController {
+public class BulkUploadController extends BaseController {
   
   /**
    * This method will allow to upload bulk user.
@@ -40,33 +41,37 @@ public class BulkUserUploadController extends BaseController {
   public Promise<Result> uploadUser() {
 
     try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting bulk user upload data request = " + requestData,
-          LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateUploadUser(reqObj);
-      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> map = new HashMap<>();
-      map.put(JsonKey.DATA, reqObj.getRequest());
-      reqObj.getRequest().put(JsonKey.OBJECT_TYPE, JsonKey.USER);
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      reqObj.setRequest(map);
-      
       MultipartFormData body = request().body().asMultipartFormData();
       File file = null;
+      Map<String,Object> map = new HashMap<>();
+      byte[] byteArray = null;
       if (body != null) {
+          Map<String,String[]> data = body.asFormUrlEncoded();
+          for(Entry<String, String[]> entry : data.entrySet()){
+            map.put(entry.getKey(), entry.getValue()[0]);
+          }
           List<FilePart> filePart = body.getFiles();
-          file = new File("user_csv");
+          file = new File("bulkCsv");
           InputStream is = new FileInputStream(filePart.get(0).getFile());
-          byte[] byteArray = IOUtils.toByteArray(is);
+          byteArray = IOUtils.toByteArray(is);
           FileUtils.writeByteArrayToFile(file, byteArray);
       } else{
         //read data as string from request
       }
-      reqObj.getRequest().put(JsonKey.FILE, file);
+      Request reqObj = new Request();
+      reqObj.getRequest().putAll(map);
+      
+     // RequestValidator.validateUploadUser(reqObj);
+      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      map.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+      map.put(JsonKey.CREATED_BY,
+         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      map.put(JsonKey.FILE, byteArray);
       
       
       Timeout timeout = new Timeout(300, TimeUnit.SECONDS);
