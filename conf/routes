@@ -23,6 +23,7 @@ POST    /v1/user/getuser                 @controllers.usermanagement.UserControl
 POST    /v1/user/download				@controllers.usermanagement.UserController.downloadUsers()
 POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
 POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
+POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
 
 
 #course management api
