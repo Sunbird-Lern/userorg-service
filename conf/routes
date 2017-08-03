@@ -81,4 +81,5 @@ GET /v1/org/search							@controllers.LearnerController.getHealth()
 GET /health									@controllers.LearnerController.getHealth()
 
 #bulk upload
-POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
+POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
+GET  /v1/bulk/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
