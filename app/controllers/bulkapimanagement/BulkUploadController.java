@@ -69,8 +69,8 @@ public class BulkUploadController extends BaseController {
          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
-      
-      
+
+
       Timeout timeout = new Timeout(300, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -83,57 +83,42 @@ public class BulkUploadController extends BaseController {
    *
    * @return Promise<Result>
    */
-  public Promise<Result> uploadOrg1() {
+  public Promise<Result> uploadOrg() {
 
     try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting bulk organisation upload data request = " + requestData,
-          LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateUploadUser(reqObj);
-      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> map = new HashMap<>();
-      map.put(JsonKey.DATA, reqObj.getRequest());
-      reqObj.getRequest().put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      reqObj.setRequest(map);
-
       MultipartFormData body = request().body().asMultipartFormData();
-      File file = null;
+      Map<String,Object> map = new HashMap<>();
+      byte[] byteArray = null;
       if (body != null) {
+        Map<String,String[]> data = body.asFormUrlEncoded();
+        for(Entry<String, String[]> entry : data.entrySet()){
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
         List<FilePart> filePart = body.getFiles();
-        file = new File("BULK_FILE");
         InputStream is = new FileInputStream(filePart.get(0).getFile());
-        byte[] byteArray = IOUtils.toByteArray(is);
-        FileUtils.writeByteArrayToFile(file, byteArray);
+        byteArray = IOUtils.toByteArray(is);
       } else{
         //read data as string from request
       }
-      reqObj.getRequest().put(JsonKey.FILE, file);
+      Request reqObj = new Request();
+      reqObj.getRequest().putAll(map);
 
+      // RequestValidator.validateUploadUser(reqObj);
+      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      map.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+      map.put(JsonKey.CREATED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      map.put(JsonKey.FILE, byteArray);
 
       Timeout timeout = new Timeout(300, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-
-  public Result uploadOrg() {
-
-    MultipartFormData body = request().body().asMultipartFormData();
-    FilePart picture = body.getFile("picture");
-    if (picture != null) {
-      String fileName = picture.getFilename();
-      String contentType = picture.getContentType();
-      File file = picture.getFile();
-      return ok("File uploaded");
-    } else {
-      return badRequest("FILE NOT FOUND");
     }
   }
 
