@@ -1,9 +1,7 @@
 package controllers.bulkapimanagement;
 
 import akka.util.Timeout;
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -11,20 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
-import play.mvc.Result;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
+import play.mvc.Result;
 
 /**
  * This controller will handle all the request related to bulk api's for user management.
@@ -58,7 +53,7 @@ public class BulkUploadController extends BaseController {
       Request reqObj = new Request();
       reqObj.getRequest().putAll(map);
       
-     // RequestValidator.validateUploadUser(reqObj);
+      RequestValidator.validateUploadUser(reqObj);
       reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
