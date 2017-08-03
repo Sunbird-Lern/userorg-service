@@ -2,8 +2,10 @@ package controllers.bulkapimanagement;
 
 import akka.util.Timeout;
 import controllers.BaseController;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +38,11 @@ public class BulkUploadController extends BaseController {
   public Promise<Result> uploadUser() {
 
     try {
-      MultipartFormData body = request().body().asMultipartFormData();
+      
+      Request reqObj = new Request();
       Map<String,Object> map = new HashMap<>();
       byte[] byteArray = null;
+      MultipartFormData body = request().body().asMultipartFormData();
       if (body != null) {
           Map<String,String[]> data = body.asFormUrlEncoded();
           for(Entry<String, String[]> entry : data.entrySet()){
@@ -47,11 +51,17 @@ public class BulkUploadController extends BaseController {
           List<FilePart> filePart = body.getFiles();
           InputStream is = new FileInputStream(filePart.get(0).getFile());
           byteArray = IOUtils.toByteArray(is);
-      } else{
+          reqObj.getRequest().putAll(map);
+      } else {
         //read data as string from request
+        Map<String,String[]> data = request().body().asFormUrlEncoded();
+        for(Entry<String, String[]> entry : data.entrySet()){
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        InputStream is = new ByteArrayInputStream(((String)map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
       }
-      Request reqObj = new Request();
-      reqObj.getRequest().putAll(map);
       
       RequestValidator.validateUploadUser(reqObj);
       reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -66,7 +76,7 @@ public class BulkUploadController extends BaseController {
       map.put(JsonKey.FILE, byteArray);
       
       
-      Timeout timeout = new Timeout(300, TimeUnit.SECONDS);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
