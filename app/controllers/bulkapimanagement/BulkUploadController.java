@@ -128,9 +128,16 @@ public class BulkUploadController extends BaseController {
 
   public Result uploadOrg() {
 
-    
-
-    return badRequest("Expecting text/plain request body");
+    MultipartFormData body = request().body().asMultipartFormData();
+    FilePart picture = body.getFile("picture");
+    if (picture != null) {
+      String fileName = picture.getFilename();
+      String contentType = picture.getContentType();
+      File file = picture.getFile();
+      return ok("File uploaded");
+    } else {
+      return badRequest("FILE NOT FOUND");
+    }
   }
 
 }
