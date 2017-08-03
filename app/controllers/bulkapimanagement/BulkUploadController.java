@@ -42,7 +42,6 @@ public class BulkUploadController extends BaseController {
 
     try {
       MultipartFormData body = request().body().asMultipartFormData();
-      File file = null;
       Map<String,Object> map = new HashMap<>();
       byte[] byteArray = null;
       if (body != null) {
@@ -51,10 +50,8 @@ public class BulkUploadController extends BaseController {
             map.put(entry.getKey(), entry.getValue()[0]);
           }
           List<FilePart> filePart = body.getFiles();
-          file = new File("bulkCsv");
           InputStream is = new FileInputStream(filePart.get(0).getFile());
           byteArray = IOUtils.toByteArray(is);
-          FileUtils.writeByteArrayToFile(file, byteArray);
       } else{
         //read data as string from request
       }
