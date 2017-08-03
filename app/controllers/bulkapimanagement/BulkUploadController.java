@@ -43,7 +43,7 @@ public class BulkUploadController extends BaseController {
   public Promise<Result> uploadUser() {
 
     try {
-      
+
       Request reqObj = new Request();
       Map<String,Object> map = new HashMap<>();
       byte[] byteArray = null;
@@ -125,4 +125,45 @@ public class BulkUploadController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
+ /* 
+  *This method will allow to upload bulk organisation.
+  *
+  * @return Promise<Result>
+  */
+ public Promise<Result> uploadOrg() {
+
+   try {
+     MultipartFormData body = request().body().asMultipartFormData();
+     Map<String,Object> map = new HashMap<>();
+     byte[] byteArray = null;
+     if (body != null) {
+       Map<String,String[]> data = body.asFormUrlEncoded();
+       for(Entry<String, String[]> entry : data.entrySet()){
+         map.put(entry.getKey(), entry.getValue()[0]);
+       }
+       List<FilePart> filePart = body.getFiles();
+       InputStream is = new FileInputStream(filePart.get(0).getFile());
+       byteArray = IOUtils.toByteArray(is);
+     } else{
+       //read data as string from request
+     }
+     Request reqObj = new Request();
+     reqObj.getRequest().putAll(map);
+     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+     reqObj.setRequest_id(ExecutionContext.getRequestId());
+     reqObj.setEnv(getEnvironment());
+     HashMap<String, Object> innerMap = new HashMap<>();
+     innerMap.put(JsonKey.DATA, map);
+     map.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+     map.put(JsonKey.CREATED_BY,
+         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.setRequest(innerMap);
+     map.put(JsonKey.FILE, byteArray);
+     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+   } catch (Exception e) {
+     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+   }
+ }
 }
