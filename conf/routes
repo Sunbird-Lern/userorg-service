@@ -82,7 +82,11 @@ GET /v1/org/search							@controllers.LearnerController.getHealth()
 GET /health									@controllers.LearnerController.getHealth()
 
 #bulk upload
+
 POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
+POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
+GET  /v1/bulk/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
+POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
 
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
@@ -90,3 +94,5 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 POST	 /v1/course/batch/users/add				@controllers.coursemanagement.CourseBatchController.addUserToBatch()
 POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
+
+
