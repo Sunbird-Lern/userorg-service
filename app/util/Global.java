@@ -276,5 +276,10 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/user/block", "api.user.inactive");
     apiMap.put("/v1/user/unblock", "api.user.active");
     apiMap.put("/v1/user/assign/role", "api.user.assign.role");
+    apiMap.put("/v1/course/batch/create", "api.course.batch.create");
+    apiMap.put("/v1/course/batch/update", "api.course.batch.update");
+    apiMap.put("/v1/course/batch/users/add", "api.course.batch.user.add");
+    apiMap.put("/v1/course/batch/users/remove", "api.course.batch.user.remove");
+    apiMap.put("/v1/course/batch/read", "api.course.batch.read");
   }
 }

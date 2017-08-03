@@ -74,6 +74,7 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 
 
 #Mock APIs to finish API Gateway onboarding
+
 GET /v1/user/search							@controllers.LearnerController.getHealth()
 GET /v1/user/retire							@controllers.LearnerController.getHealth()
 GET /v1/org/member/suspend					@controllers.LearnerController.getHealth()
@@ -82,3 +83,10 @@ GET /health									@controllers.LearnerController.getHealth()
 
 #bulk upload
 POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
+
+#Course batch
+POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
+PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchController.updateBatch()
+POST	 /v1/course/batch/users/add				@controllers.coursemanagement.CourseBatchController.addUserToBatch()
+POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
+GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
