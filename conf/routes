@@ -95,4 +95,7 @@ POST	 /v1/course/batch/users/add				@controllers.coursemanagement.CourseBatchCon
 POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 
+#metrics APIs for dashboard
+GET /api/dashboard/v1/org/:orgId/creation   @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
+
 
