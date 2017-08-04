@@ -98,7 +98,7 @@ public class CourseBatchController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Delete batch=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddCourse(reqObj);
+      RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.REMOVE_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -122,21 +122,23 @@ public class CourseBatchController extends BaseController {
    * This method will do the user batch enrollment 
    * @return Promise<Result>
    */
-  public Promise<Result> addUserToBatch() {
+  public Promise<Result> addUserToBatch(String batchId) {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Add user to batch=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddCourse(reqObj);
       reqObj.setOperation(ActorOperations.ADD_USER_TO_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
+      reqObj.getRequest().put(JsonKey.BATCH_ID ,batchId);
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
+      RequestValidator.validateAddBatchCourse(reqObj);
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      System.out.println("CALING BBATCH ACTOR FROM CONTROLLER");
       Promise<Result> res =
           actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
       return res;
@@ -155,7 +157,7 @@ public class CourseBatchController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Remove user to batch=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddCourse(reqObj);
+      RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.REMOVE_USER_FROM_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());

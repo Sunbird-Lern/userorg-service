@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
@@ -44,7 +47,7 @@ public class CourseController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add new course data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddCourse(reqObj);
+      RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_COURSE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -113,6 +116,7 @@ public class CourseController extends BaseController {
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       Promise<Result> res =
@@ -231,4 +235,21 @@ public class CourseController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  /**
+   * 
+   * @param request
+   * @return Map<String, String>
+   */
+  private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+    Map<String, String> map = new HashMap<>();
+    Map<String, String[]> headers = request.headers();
+    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
+    while (itr.hasNext()) {
+      Entry<String, String[]> entry = itr.next();
+      map.put(entry.getKey(), entry.getValue()[0]);
+    }
+    return map;
+  }
+
 }

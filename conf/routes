@@ -91,8 +91,11 @@ POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.up
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
 PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchController.updateBatch()
-POST	 /v1/course/batch/users/add				@controllers.coursemanagement.CourseBatchController.addUserToBatch()
+POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToBatch(batchId:String)
 POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
+
+#metrics APIs for dashboard
+GET /api/dashboard/v1/org/:orgId/creation   @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 
 
