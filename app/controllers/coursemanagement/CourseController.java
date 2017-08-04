@@ -44,7 +44,7 @@ public class CourseController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add new course data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddCourse(reqObj);
+      RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_COURSE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
