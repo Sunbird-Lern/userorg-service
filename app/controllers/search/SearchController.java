@@ -8,7 +8,7 @@ import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.BaseController;
-
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
@@ -43,7 +43,7 @@ public class SearchController extends BaseController {
       ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCompositeSearch(reqObj);
-      reqObj.setOperation(ActorOperations.SYNC.getValue());
+      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -65,11 +65,14 @@ public class SearchController extends BaseController {
       ProjectLogger.log("making a call to data synch api = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
-      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+      reqObj.setOperation(ActorOperations.SYNC.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> map = new HashMap<>();
+      map.put(JsonKey.DATA, reqObj.getRequest());
+      reqObj.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
