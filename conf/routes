@@ -96,6 +96,9 @@ POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.Cours
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 
 #metrics APIs for dashboard
-GET /api/dashboard/v1/org/:orgId/creation   @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
-
-
+GET   /v1/dashboard/creation/org/:orgId      @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
+GET   /v1/dashboard/consumption/org/:orgId   @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
+POST  /v1/dashboard/progress/course          @controllers.metrics.CourseMetricsController.courseProgress()
+POST  /v1/dashboard/consumption/course       @controllers.metrics.CourseMetricsController.courseCreation()
+POST  /v1/dashboard/creation/user            @controllers.metrics.UserMetricsController.userCreation()
+POST  /v1/dashboard/consumption/user         @controllers.metrics.UserMetricsController.userConsumption()
