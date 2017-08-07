@@ -98,4 +98,5 @@ GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatch
 #metrics APIs for dashboard
 GET /api/dashboard/v1/org/:orgId/creation   @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 
-
+#Sync
+POST /api/data/sync                          @controllers.search.SearchController.sync()
