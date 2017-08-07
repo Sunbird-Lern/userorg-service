@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.BaseController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -378,6 +379,34 @@ public class OrganisationController extends BaseController {
     }
   }
 
+  
+  /**
+   * This method will do the organisation search for Elastic search.
+   * this will internally call composite search api.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> search() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Organisation search api call =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      reqObj.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.OBJECT_TYPE, new ArrayList<>().add(ProjectUtil.EsType.organisation.getTypeName()));
+      reqObj.getRequest().put(JsonKey.FILTERS, innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
   
   
 }
