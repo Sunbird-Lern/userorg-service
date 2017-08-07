@@ -28,148 +28,82 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller will handle all the API related to course, add course, published course, update
- * course, search course.
+ * This controller will handle all the API related to course batches , add batch,update batch,join member to batch,
+ * remove member from batch, get particular batch details.
  * 
  * @author Manzarul
- * @author Amit Kumar
  */
-public class CourseController extends BaseController {
+public class CourseBatchController extends BaseController {
 
   /**
-   * This method will add a new course entry into cassandra DB.
+   * This method will add a new batch for a particular course.
    * 
    * @return Promise<Result>
    */
-  public Promise<Result> createCourse() {
+  public Promise<Result> createBatch() {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("add new course data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("create new batch request data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddBatchCourse(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_COURSE.getValue());
+      RequestValidator.validateCreateBatchReq(reqObj);
+      reqObj.setOperation(ActorOperations.CREATE_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will update course entry data. course update is allowed only if course is not
-   * published, once course is published we can only update the status to Retired other filed can't
-   * be updated. if course status is not live then update on other fields are valid. if user is
-   * making course status as Retired then we need to updated inside cassandra as well as ES.
-   * 
-   * @return Promise<Result>
-   */
-  public Promise<Result> updateCourse() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("update course request=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateUpdateCourse(reqObj);
-      reqObj.setOperation(ActorOperations.UPDATE_COURSE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-
-  /**
-   * This method will publish the course. when ever course will be published , internally we need to
-   * make EkStep api call to collect all the content related to this course and put into ES.
-   * 
-   * @return Promise<Result>
-   */
-  public Promise<Result> publishCourse() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("published course request =" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validatePublishCourse(reqObj);
-      reqObj.setOperation(ActorOperations.PUBLISH_COURSE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.COURSE, reqObj.getRequest());
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
   /**
-   * This method will do the course search. Based on front end search query we need to make
-   * ElasticSearch search api call to get the data. In ES we will only search for Live course.
-   * 
+   * This method will update existing batch details.
    * @return Promise<Result>
    */
-  public Promise<Result> searchCourse() {
+  public Promise<Result> updateBatch() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("search course request =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("update batch request data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateUpdateCourseBatchReq(reqObj);
+      reqObj.setOperation(ActorOperations.UPDATE_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.setOperation(ActorOperations.SEARCH_COURSE.getValue());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.SEARCH, reqObj.getRequest());
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
+ 
   /**
-   * This method will make the course as retired in Cassandra and ES both
-   * 
+   * This method will do soft delete to the batch.
    * @return Promise<Result>
    */
-  public Promise<Result> deleteCourse() {
+  public Promise<Result> deleteBatch() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("delete course request =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("Delete batch=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.DELETE_COURSE.getValue());
+      RequestValidator.validateAddBatchCourse(reqObj);
+      reqObj.setOperation(ActorOperations.REMOVE_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.COURSE, reqObj.getRequest());
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
@@ -182,22 +116,53 @@ public class CourseController extends BaseController {
     }
   }
 
-
+  
+  
   /**
-   * This method will do the course search based on course id. search will happen under ES.
-   * 
-   * @param courseId Stirng
+   * This method will do the user batch enrollment 
    * @return Promise<Result>
    */
-  public Promise<Result> getCourseById(String courseId) {
+  public Promise<Result> addUserToBatch(String batchId) {
     try {
-      ProjectLogger.log("get course request =" + courseId, LoggerEnum.INFO.name());
-      Request reqObj = new Request();
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Add user to batch=" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.ADD_USER_TO_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.setOperation(ActorOperations.GET_COURSE_BY_ID.getValue());
+      reqObj.getRequest().put(JsonKey.BATCH_ID ,batchId);
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.ID, courseId);
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
+      RequestValidator.validateAddBatchCourse(reqObj);
+      innerMap.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      System.out.println("CALING BBATCH ACTOR FROM CONTROLLER");
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  
+  /**
+   * This method will remove user batch enrollment.
+   * @return Promise<Result>
+   */
+  public Promise<Result> removeUsersFromBatch() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Remove user to batch=" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateAddBatchCourse(reqObj);
+      reqObj.setOperation(ActorOperations.REMOVE_USER_FROM_BATCH.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
@@ -210,31 +175,31 @@ public class CourseController extends BaseController {
     }
   }
 
+  
   /**
-   * This method will provide the recommended courses for particular user. search will happen under
-   * ES.
-   * 
+   * This method will remove user batch enrollment.
    * @return Promise<Result>
    */
-  public Promise<Result> recommendedCourses() {
+  public Promise<Result> getBatch(String batchId) {
     try {
-      ProjectLogger.log("Method Started # RECOMMENDED COURSES");
+      ProjectLogger.log("get batch=" +batchId, LoggerEnum.INFO.name());
       Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.GET_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.setOperation(ActorOperations.GET_RECOMMENDED_COURSES.getValue());
-      HashMap<String, Object> innerMap = new HashMap<String, Object>();
+      HashMap<String, Object> innerMap = new HashMap<>();
+      reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
+      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
   
   /**
    * 
@@ -252,4 +217,5 @@ public class CourseController extends BaseController {
     return map;
   }
 
-}
+  
+  }
