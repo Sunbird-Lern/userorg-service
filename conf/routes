@@ -100,8 +100,8 @@ GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.Organisat
 GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
 GET  /v1/dashboard/progress/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgress(courseId:String)
 GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation(courseId:String)
-GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(usrId:String)
-GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(usrId:String)
+GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
+GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
 
 
 #Sync

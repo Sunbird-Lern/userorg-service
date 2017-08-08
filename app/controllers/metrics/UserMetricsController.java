@@ -15,7 +15,7 @@ import play.mvc.Result;
 
 public class UserMetricsController extends BaseController {
   
-  public Promise<Result> userCreation() {
+  public Promise<Result> userCreation(String userId) {
     try {
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
@@ -33,7 +33,7 @@ public class UserMetricsController extends BaseController {
     }
   }
   
-  public Promise<Result> userConsumption() {
+  public Promise<Result> userConsumption(String userId) {
     try {
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
