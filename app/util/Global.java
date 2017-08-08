@@ -281,5 +281,11 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/course/batch/users/add", "api.course.batch.user.add");
     apiMap.put("/v1/course/batch/users/remove", "api.course.batch.user.remove");
     apiMap.put("/v1/course/batch/read", "api.course.batch.read");
+    apiMap.put("/v1/dashboard/creation/org", "api.sunbird.dashboard.org.creation");
+    apiMap.put("/v1/dashboard/consumption/org", "api.sunbird.dashboard.org.consumption");
+    apiMap.put("/v1/dashboard/progress/course", "api.sunbird.dashboard.course.admin");
+    apiMap.put("/v1/dashboard/consumption/course","api.sunbird.dashboard.course.consumption");
+    apiMap.put("/v1/dashboard/creation/user", "api.sunbird.dashboard.user.creation");
+    apiMap.put("/v1/dashboard/consumption/user", "api.sunbird.dashboard.user.consumption");
   }
 }
