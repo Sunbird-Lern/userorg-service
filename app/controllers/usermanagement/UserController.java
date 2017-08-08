@@ -11,6 +11,8 @@ import controllers.BaseController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
@@ -18,6 +20,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -384,9 +387,11 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       reqObj.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.OBJECT_TYPE, new ArrayList<>().add("user"));
-      reqObj.getRequest().put(JsonKey.FILTERS, innerMap);
+
+      List<String> esObjectType = new ArrayList<>();
+      esObjectType.add(EsType.user.getTypeName());
+      ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
