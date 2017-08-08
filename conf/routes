@@ -106,4 +106,4 @@ POST  /v1/dashboard/consumption/user         @controllers.metrics.UserMetricsCon
 
 
 #Sync
-POST /api/data/sync                          @controllers.search.SearchController.sync()
+POST /v1/data/sync                          @controllers.search.SearchController.sync()
