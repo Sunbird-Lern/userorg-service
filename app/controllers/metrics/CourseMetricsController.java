@@ -20,8 +20,9 @@ import play.mvc.Result;
 public class CourseMetricsController extends BaseController {
   
   @SuppressWarnings("unchecked")
-  public Promise<Result> courseProgress() {
+  public Promise<Result> courseProgress(String courseId) {
     try {
+      String periodStr = request().getQueryString("period");
       Map<String, Object> map = new HashMap<>();
       JsonNode requestData = request().body().asJson();
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
@@ -30,8 +31,8 @@ public class CourseMetricsController extends BaseController {
       Map<String,Object> data = (Map<String,Object>)reqObj.getRequest().get(JsonKey.FILTER);
       List<Map<String,Object>> dataList = (List<Map<String,Object>>) data.get(JsonKey.COURSE);
       data = dataList.get(0);
-      map.put(JsonKey.COURSE_ID, data.get(JsonKey.COURSE_ID));
-      map.put(JsonKey.PERIOD, reqObj.getRequest().get(JsonKey.PERIOD));
+      map.put(JsonKey.COURSE_ID, courseId);
+      map.put(JsonKey.PERIOD, periodStr);
       request.setRequest(map);
       request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS.getValue());
       request.setRequest(map);
@@ -46,8 +47,9 @@ public class CourseMetricsController extends BaseController {
   }
   
   @SuppressWarnings("unchecked")
-  public Promise<Result> courseCreation() {
+  public Promise<Result> courseCreation(String courseId) {
     try {
+      String periodStr = request().getQueryString("period");
       Map<String, Object> map = new HashMap<>();
       JsonNode requestData = request().body().asJson();
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
@@ -57,8 +59,8 @@ public class CourseMetricsController extends BaseController {
       Map<String,Object> data = (Map<String,Object>)reqObj.getRequest().get(JsonKey.FILTER);
       List<Map<String,Object>> dataList = (List<Map<String,Object>>) data.get(JsonKey.COURSE);
       data = dataList.get(0);
-      map.put(JsonKey.COURSE_ID, data.get(JsonKey.COURSE_ID));
-      map.put(JsonKey.PERIOD, reqObj.getRequest().get(JsonKey.PERIOD));
+      map.put(JsonKey.COURSE_ID, courseId);
+      map.put(JsonKey.PERIOD, periodStr);
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());

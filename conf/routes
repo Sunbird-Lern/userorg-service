@@ -98,10 +98,10 @@ GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatch
 #metrics APIs for dashboard
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
-GET  /v1/dashboard/progress/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgress()
-GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation()
-GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation()
-GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption()
+GET  /v1/dashboard/progress/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgress(courseId:String)
+GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation(courseId:String)
+GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(usrId:String)
+GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(usrId:String)
 
 
 #Sync
