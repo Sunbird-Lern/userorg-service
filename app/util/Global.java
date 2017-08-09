@@ -287,5 +287,8 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/dashboard/consumption/course","api.sunbird.dashboard.course.consumption");
     apiMap.put("/v1/dashboard/creation/user", "api.sunbird.dashboard.user.creation");
     apiMap.put("/v1/dashboard/consumption/user", "api.sunbird.dashboard.user.consumption");
+    apiMap.put("/v1/user/search", "api.user.search");
+    apiMap.put("/v1/org/search", "api.org.search");
+    apiMap.put("/v1/user/read", "api.user.read");
   }
 }
