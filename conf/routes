@@ -94,6 +94,7 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToBatch(batchId:String)
 POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
+POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 
 #metrics APIs for dashboard
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
