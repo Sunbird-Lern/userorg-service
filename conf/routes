@@ -87,6 +87,7 @@ POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.u
 POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
 GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
+POST /v1/batch/upload 						@controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
 
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
