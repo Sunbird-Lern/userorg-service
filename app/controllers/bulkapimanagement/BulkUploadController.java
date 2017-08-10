@@ -187,4 +187,69 @@ public class BulkUploadController extends BaseController {
      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
    }
  }
+ 
+ /**
+  * This method will allow to upload bulk user.
+  * 
+  * @return Promise<Result>
+  */
+ public Promise<Result> bulkBatchEnrollment() {
+
+   try {
+
+     Request reqObj = new Request();
+     Map<String,Object> map = new HashMap<>();
+     byte[] byteArray = null;
+     MultipartFormData body = request().body().asMultipartFormData();
+     Map<String,String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+     JsonNode requestData = request().body().asJson();
+     if (body != null) {
+         Map<String,String[]> data = body.asFormUrlEncoded();
+         for(Entry<String, String[]> entry : data.entrySet()){
+           map.put(entry.getKey(), entry.getValue()[0]);
+         }
+         List<FilePart> filePart = body.getFiles();
+         InputStream is = new FileInputStream(filePart.get(0).getFile());
+         byteArray = IOUtils.toByteArray(is);
+         reqObj.getRequest().putAll(map);
+     } else if(null != formUrlEncodeddata){
+       //read data as string from request
+       for(Entry<String, String[]> entry : formUrlEncodeddata.entrySet()){
+         map.put(entry.getKey(), entry.getValue()[0]);
+       }
+       InputStream is = new ByteArrayInputStream(((String)map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+       byteArray = IOUtils.toByteArray(is);
+       reqObj.getRequest().putAll(map);
+     } else if(null != requestData){
+        reqObj = (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+        InputStream is = new ByteArrayInputStream(((String)reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+        map.putAll(reqObj.getRequest());
+     } else{
+       ProjectCommonException e = new ProjectCommonException(
+           ResponseCode.invalidData.getErrorCode(),
+           ResponseCode.invalidData.getErrorMessage(),
+           ResponseCode.CLIENT_ERROR.getResponseCode());
+       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+     }
+     
+     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+     reqObj.setRequest_id(ExecutionContext.getRequestId());
+     reqObj.setEnv(getEnvironment());
+     HashMap<String, Object> innerMap = new HashMap<>();
+     innerMap.put(JsonKey.DATA, map);
+     map.put(JsonKey.OBJECT_TYPE, JsonKey.BATCH);
+     map.put(JsonKey.CREATED_BY,
+        getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.setRequest(innerMap);
+     map.put(JsonKey.FILE, byteArray);
+     
+     
+     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+   } catch (Exception e) {
+     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+   }
+ }
 }
