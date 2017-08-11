@@ -63,9 +63,7 @@ public class OrganisationController extends BaseController {
         innerMap.put(JsonKey.ADDRESS, address);
         orgData.remove(JsonKey.ADDRESS);
       }
-      if(orgData.containsKey(JsonKey.SOURCE)) {
-        orgData.put(JsonKey.SOURCE, ((String) orgData.get(JsonKey.SOURCE)).toLowerCase());
-      } if(orgData.containsKey(JsonKey.PROVIDER)) {
+       if(orgData.containsKey(JsonKey.PROVIDER)) {
         orgData.put(JsonKey.PROVIDER, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
        // orgData.remove(JsonKey.PROVIDER);
       }if(orgData.containsKey(JsonKey.EXTERNAL_ID)) {
