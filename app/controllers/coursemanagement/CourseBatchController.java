@@ -21,6 +21,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
@@ -54,6 +55,10 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
+      if(!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.BATCH_ID))){
+        reqObj.getRequest().put(JsonKey.ID, reqObj.getRequest().get(JsonKey.BATCH_ID));
+        reqObj.getRequest().remove(JsonKey.BATCH_ID);
+      }
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
