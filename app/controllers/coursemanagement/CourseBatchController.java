@@ -185,7 +185,7 @@ public class CourseBatchController extends BaseController {
 
   
   /**
-   * This method will remove user batch enrollment.
+   * This method will fetch batch details from ES.
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
