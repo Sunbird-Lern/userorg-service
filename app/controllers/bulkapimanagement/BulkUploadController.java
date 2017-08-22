@@ -81,6 +81,7 @@ public class BulkUploadController extends BaseController {
             ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
+      RequestValidator.validateUploadUser(reqObj);
       reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
