@@ -332,6 +332,14 @@ public class BaseController extends Controller {
       } else {
         val = Global.apiMap.get(path);
       }
+      if(ProjectUtil.isStringNullOREmpty(val)) {
+        val = Global.apiMap.get(path);
+        if (ProjectUtil.isStringNullOREmpty(val)) {
+          String[] splitedpath = path.split("[/]");
+          path = removeLastValue(splitedpath);
+          val = Global.apiMap.get(path);
+        }
+      } 
     }
     return val;
   }
