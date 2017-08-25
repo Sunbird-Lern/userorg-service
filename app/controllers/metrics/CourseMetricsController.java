@@ -56,6 +56,47 @@ public class CourseMetricsController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
+  public Promise<Result> courseProgressReport(String courseId) {
+    try {
+      String periodStr = request().getQueryString("period");
+      Map<String, Object> map = new HashMap<>();
+      Request request = new Request();
+      request.setEnv(getEnvironment());
+      map.put(JsonKey.COURSE_ID, courseId);
+      map.put(JsonKey.PERIOD, periodStr);
+      request.setRequest(map);
+      request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS_REPORT.getValue());
+      request.setRequest(map);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      request.setRequest_id(ExecutionContext.getRequestId());
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> courseCreationReport(String courseId) {
+    try {
+      String periodStr = request().getQueryString("period");
+      Map<String, Object> map = new HashMap<>();
+      Request request = new Request();
+      request.setEnv(getEnvironment());
+      request.setOperation(ActorOperations.COURSE_CREATION_METRICS_REPORT.getValue());
+      map.put(JsonKey.COURSE_ID, courseId);
+      map.put(JsonKey.PERIOD, periodStr);
+      request.setRequest(map);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      request.setRequest_id(ExecutionContext.getRequestId());
+      Promise<Result> res =
+          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
+      return res;
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   
   
 
