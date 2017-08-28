@@ -114,3 +114,6 @@ POST  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMe
 
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync()
+
+#Email
+POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
