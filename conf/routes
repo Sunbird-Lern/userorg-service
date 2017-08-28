@@ -89,7 +89,7 @@ GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadControll
 POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
 POST /v1/batch/bulk/enrollment 			   @controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
 
-POST /v1/storage/service 						@controllers.storage.FileStorageController.uploadFileService()
+POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
