@@ -77,7 +77,7 @@ public class FileStorageController extends BaseController {
             ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
-      RequestValidator.validateFileUpload(reqObj);
+      //RequestValidator.validateFileUpload(reqObj);
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
