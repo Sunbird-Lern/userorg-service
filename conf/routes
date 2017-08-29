@@ -119,3 +119,8 @@ POST /v1/data/sync                          @controllers.search.SearchController
 
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
+
+#Badges api
+
+GET  /v1/badges/list                        @controllers.badges.BadgesController.getBadges()
+POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
