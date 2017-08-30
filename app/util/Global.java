@@ -51,6 +51,8 @@ public class Global extends GlobalSettings {
 
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
+      long startTime = System.currentTimeMillis();
+      ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()  +" start time " +startTime, LoggerEnum.PERF_LOG);
       Promise<Result> result = null;
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
@@ -61,7 +63,9 @@ public class Global extends GlobalSettings {
        * (!ProjectUtil.isStringNullOREmpty(message)) { result = onDataValidationError(ctx.request(),
        * message); } else { result = delegate.call(ctx); }
        */
-      return delegate.call(ctx);
+        result = delegate.call(ctx);
+        ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()  +" end time " +System.currentTimeMillis() +"  Time taken " + (System.currentTimeMillis()-startTime), LoggerEnum.PERF_LOG);
+       return result;
     }
   }
 
