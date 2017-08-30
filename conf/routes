@@ -107,10 +107,10 @@ GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMet
 GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
 GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
 
-POST  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
-POST  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
-POST  /v1/dashboard/progress/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
-POST  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreationReport(courseId:String)
+GET  /v1/dashboard/creation/report/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
+GET  /v1/dashboard/consumption/report/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
+GET  /v1/dashboard/progress/report/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
+GET  /v1/dashboard/consumption/report/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreationReport(courseId:String)
 
 
 
