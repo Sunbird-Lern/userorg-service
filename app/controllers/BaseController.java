@@ -314,7 +314,7 @@ public class BaseController extends Controller {
   /**
    * Method to get API response Id
    * 
-   * @param requerst play.mvc.Http.Request
+   * @param request play.mvc.Http.Request
    * @return String
    */
   private static String getApiResponseId(play.mvc.Http.Request request) {
