@@ -300,5 +300,9 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/badges/list", "api.badge.list");
     apiMap.put("/v1/health", "all.service.health.api");
     apiMap.put("/v1/learner/health", "learner.service.health.api");
+    apiMap.put("/v1/actor/health", "actor.service.health.api");
+    apiMap.put("/v1/es/health", "es.service.health.api");
+    apiMap.put("/v1/cassandra/health", "cassandra.service.health.api");
+    apiMap.put("/v1/ekstep/health", "ekstep.service.health.api");
   }
 }

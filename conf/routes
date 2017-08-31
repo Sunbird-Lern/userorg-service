@@ -127,4 +127,4 @@ POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges(
 
 #Health check
 GET  /v1/health                              @controllers.healthmanager.HealthController.getHealth()
-GET  /v1/learner/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth()
+GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
