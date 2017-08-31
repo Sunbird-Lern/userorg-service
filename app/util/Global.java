@@ -298,5 +298,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/file/upload", "api.file.upload");
     apiMap.put("/v1/user/badges/add", "api.user.badge.add");
     apiMap.put("/v1/badges/list", "api.badge.list");
+    apiMap.put("/v1/health", "all.service.health.api");
+    apiMap.put("/v1/learner/health", "learner.service.health.api");
   }
 }
