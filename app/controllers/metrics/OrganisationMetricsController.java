@@ -8,6 +8,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 
 import akka.util.Timeout;
@@ -70,9 +71,10 @@ public class OrganisationMetricsController extends BaseController {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       Request request = new Request();
       request.setEnv(getEnvironment());
-      request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CREATION_METRICS_REPORT.getValue());
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
@@ -93,9 +95,10 @@ public class OrganisationMetricsController extends BaseController {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       Request request = new Request();
       request.setEnv(getEnvironment());
-      request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS_REPORT.getValue());
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
