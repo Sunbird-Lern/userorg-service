@@ -55,6 +55,8 @@ public class CourseMetricsController extends BaseController {
       request.setOperation(ActorOperations.COURSE_CREATION_METRICS.getValue());
       map.put(JsonKey.COURSE_ID, courseId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
