@@ -110,7 +110,6 @@ GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetri
 GET  /v1/dashboard/creation/report/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
 GET  /v1/dashboard/consumption/report/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
 GET  /v1/dashboard/progress/report/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
-GET  /v1/dashboard/consumption/report/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreationReport(courseId:String)
 
 
 
