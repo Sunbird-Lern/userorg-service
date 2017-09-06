@@ -406,7 +406,16 @@ public class OrganisationController extends BaseController {
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.organisation.getTypeName());
-      ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      
+      if (reqObj.getRequest().containsKey(JsonKey.FILTERS) && reqObj.getRequest().get(JsonKey.FILTERS)!=null 
+          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map){
+     ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      }else {
+        Map<String,Object> filtermap = new HashMap<>();
+        Map<String,Object> dataMap  = new HashMap<>();
+        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
+        filtermap.put(JsonKey.FILTERS, dataMap);
+      }
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
