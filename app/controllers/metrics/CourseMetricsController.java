@@ -25,6 +25,8 @@ public class CourseMetricsController extends BaseController {
       request.setEnv(getEnvironment());
       map.put(JsonKey.BATCH_ID, batchId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       request.setRequest(map);
       request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS.getValue());
       request.setRequest(map);
