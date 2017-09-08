@@ -68,9 +68,11 @@ public class OrganisationMetricsController extends BaseController {
     ProjectLogger.log("Start Org Metrics Creation Contoller");
     try {
       String periodStr = request().getQueryString("period");
+      String format = request().getQueryString(JsonKey.FORMAT);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.FORMAT, format);
       map.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       Request request = new Request();
@@ -92,9 +94,11 @@ public class OrganisationMetricsController extends BaseController {
     ProjectLogger.log("Start Org Metrics Consumption Contoller");
     try {
       String periodStr = request().getQueryString("period");
+      String format = request().getQueryString(JsonKey.FORMAT);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
+      map.put(JsonKey.FORMAT, format);
       map.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       Request request = new Request();
