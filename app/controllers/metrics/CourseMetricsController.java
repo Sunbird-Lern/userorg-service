@@ -1,19 +1,11 @@
 package controllers.metrics;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -71,13 +63,13 @@ public class CourseMetricsController extends BaseController {
   public Promise<Result> courseProgressReport(String batchId) {
     try {
       String periodStr = request().getQueryString(JsonKey.PERIOD);
-      String reportType = request().getQueryString(JsonKey.TYPE);
+      String reportType = request().getQueryString(JsonKey.FORMAT);
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
       request.setEnv(getEnvironment());
       map.put(JsonKey.BATCH_ID, batchId);
       map.put(JsonKey.PERIOD, periodStr);
-      map.put(JsonKey.TYPE , reportType);
+      map.put(JsonKey.FORMAT , reportType);
       map.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       request.setRequest(map);
