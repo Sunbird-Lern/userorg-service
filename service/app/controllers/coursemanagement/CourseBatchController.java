@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.BaseController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,8 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -51,6 +55,10 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
+      if(!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.BATCH_ID))){
+        reqObj.getRequest().put(JsonKey.ID, reqObj.getRequest().get(JsonKey.BATCH_ID));
+        reqObj.getRequest().remove(JsonKey.BATCH_ID);
+      }
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -177,7 +185,7 @@ public class CourseBatchController extends BaseController {
 
   
   /**
-   * This method will remove user batch enrollment.
+   * This method will fetch batch details from ES.
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
@@ -216,6 +224,41 @@ public class CourseBatchController extends BaseController {
     }
     return map;
   }
-
   
+  
+  /**
+   * This method will do the user search for Elastic search.
+   * this will internally call composite search api.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> search() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Course batch search api call =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      reqObj.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+
+      List<String> esObjectType = new ArrayList<>();
+      esObjectType.add(EsType.course.getTypeName());
+      if (reqObj.getRequest().containsKey(JsonKey.FILTERS) && reqObj.getRequest().get(JsonKey.FILTERS)!=null 
+          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map){
+     ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      }else {
+        Map<String,Object> filtermap = new HashMap<>();
+        Map<String,Object> dataMap  = new HashMap<>();
+        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
+        filtermap.put(JsonKey.FILTERS, dataMap);
+      }
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   }

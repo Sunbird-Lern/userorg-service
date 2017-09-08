@@ -1,14 +1,8 @@
 /**
  * 
  */
-package controllers.search;
+package controllers.badges;
 
-import akka.util.Timeout;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.util.ActorOperations;
@@ -20,30 +14,29 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import akka.util.Timeout;
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller will handle all the request related user and organization search.
- * 
+ * This controller will handle all api related to badges.
  * @author Manzarul
+ *
  */
-public class SearchController extends BaseController {
+public class BadgesController  extends BaseController{
 
   /**
-   * This method will do data search for user and organization. Search type will be decide based on
-   * request object type coming with filter if objectType key is not coming then we need to do the
-   * search for all the types.
-   * 
+   * This method will provide all badges master data.
    * @return Promise<Result>
    */
-  public Promise<Result> compositeSearch() {
+  public Promise<Result> getBadges() {
     try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateCompositeSearch(reqObj);
-      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+      ProjectLogger.log("Call to get badges master data. = " , LoggerEnum.INFO.name());
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.GET_ALL_BADGE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -56,28 +49,24 @@ public class SearchController extends BaseController {
   }
 
   /**
-   * This method will do data Sync form Cassandra db to Elasticsearch.
+   * This method will add badges to user profile.
    * @return Promise<Result>
    */
-  public Promise<Result> sync() {
+  public Promise<Result> addUserBadges() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("making a call to data synch api = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("call to add user badges api." + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateSyncRequest(reqObj);
-      reqObj.setOperation(ActorOperations.SYNC.getValue());
+      RequestValidator.validateAddUserBadge(reqObj);
+      reqObj.setOperation(ActorOperations.ADD_USER_BADGE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> map = new HashMap<>();
-      map.put(JsonKey.DATA, reqObj.getRequest());
-      reqObj.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
 }

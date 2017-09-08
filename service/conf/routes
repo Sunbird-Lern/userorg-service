@@ -85,8 +85,11 @@ GET /health									@controllers.LearnerController.getHealth()
 
 POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
 POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
-GET  /v1/bulk/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
+GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
+POST /v1/batch/bulk/enrollment 			   @controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
+
+POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
@@ -94,16 +97,33 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToBatch(batchId:String)
 POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
+POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 
 #metrics APIs for dashboard
-GET /api/dashboard/v1/org/:orgId/creation   @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
-GET   /v1/dashboard/creation/org/:orgId      @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
-GET   /v1/dashboard/consumption/org/:orgId   @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
-POST  /v1/dashboard/progress/course          @controllers.metrics.CourseMetricsController.courseProgress()
-POST  /v1/dashboard/consumption/course       @controllers.metrics.CourseMetricsController.courseCreation()
-POST  /v1/dashboard/creation/user            @controllers.metrics.UserMetricsController.userCreation()
-POST  /v1/dashboard/consumption/user         @controllers.metrics.UserMetricsController.userConsumption()
+GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
+GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
+GET  /v1/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgress(batchId:String)
+GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation(courseId:String)
+GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
+GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
+
+GET  /v1/dashboard/creation/report/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
+GET  /v1/dashboard/consumption/report/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
+GET  /v1/dashboard/progress/report/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
+
 
 
 #Sync
-POST /api/data/sync                          @controllers.search.SearchController.sync()
+POST /v1/data/sync                          @controllers.search.SearchController.sync()
+
+#Email
+POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
+
+#Badges api
+
+GET  /v1/badges/list                        @controllers.badges.BadgesController.getBadges()
+POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
+
+#Health check
+GET  /v1/health                              @controllers.healthmanager.HealthController.getHealth()
+GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)

@@ -51,6 +51,8 @@ public class Global extends GlobalSettings {
 
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
+      long startTime = System.currentTimeMillis();
+      ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()  +" start time " +startTime, LoggerEnum.PERF_LOG);
       Promise<Result> result = null;
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
@@ -61,7 +63,9 @@ public class Global extends GlobalSettings {
        * (!ProjectUtil.isStringNullOREmpty(message)) { result = onDataValidationError(ctx.request(),
        * message); } else { result = delegate.call(ctx); }
        */
-      return delegate.call(ctx);
+        result = delegate.call(ctx);
+        ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()  +" end time " +System.currentTimeMillis() +"  Time taken " + (System.currentTimeMillis()-startTime), LoggerEnum.PERF_LOG);
+       return result;
     }
   }
 
@@ -281,5 +285,24 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/course/batch/users/add", "api.course.batch.user.add");
     apiMap.put("/v1/course/batch/users/remove", "api.course.batch.user.remove");
     apiMap.put("/v1/course/batch/read", "api.course.batch.read");
+    apiMap.put("/v1/dashboard/creation/org", "api.sunbird.dashboard.org.creation");
+    apiMap.put("/v1/dashboard/consumption/org", "api.sunbird.dashboard.org.consumption");
+    apiMap.put("/v1/dashboard/progress/course", "api.sunbird.dashboard.course.admin");
+    apiMap.put("/v1/dashboard/consumption/course","api.sunbird.dashboard.course.consumption");
+    apiMap.put("/v1/dashboard/creation/user", "api.sunbird.dashboard.user.creation");
+    apiMap.put("/v1/dashboard/consumption/user", "api.sunbird.dashboard.user.consumption");
+    apiMap.put("/v1/user/search", "api.user.search");
+    apiMap.put("/v1/org/search", "api.org.search");
+    apiMap.put("/v1/user/read", "api.user.read");
+    apiMap.put("/v1/notification/email", "api.notification.email");
+    apiMap.put("/v1/file/upload", "api.file.upload");
+    apiMap.put("/v1/user/badges/add", "api.user.badge.add");
+    apiMap.put("/v1/badges/list", "api.badge.list");
+    apiMap.put("/v1/health", "all.service.health.api");
+    apiMap.put("/v1/learner/health", "learner.service.health.api");
+    apiMap.put("/v1/actor/health", "actor.service.health.api");
+    apiMap.put("/v1/es/health", "es.service.health.api");
+    apiMap.put("/v1/cassandra/health", "cassandra.service.health.api");
+    apiMap.put("/v1/ekstep/health", "ekstep.service.health.api");
   }
 }

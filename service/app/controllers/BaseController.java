@@ -314,7 +314,7 @@ public class BaseController extends Controller {
   /**
    * Method to get API response Id
    * 
-   * @param requerst play.mvc.Http.Request
+   * @param request play.mvc.Http.Request
    * @return String
    */
   private static String getApiResponseId(play.mvc.Http.Request request) {
@@ -332,6 +332,14 @@ public class BaseController extends Controller {
       } else {
         val = Global.apiMap.get(path);
       }
+      if(ProjectUtil.isStringNullOREmpty(val)) {
+        val = Global.apiMap.get(path);
+        if (ProjectUtil.isStringNullOREmpty(val)) {
+          String[] splitedpath = path.split("[/]");
+          path = removeLastValue(splitedpath);
+          val = Global.apiMap.get(path);
+        }
+      } 
     }
     return val;
   }

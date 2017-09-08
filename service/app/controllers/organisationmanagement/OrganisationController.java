@@ -11,6 +11,7 @@ import controllers.BaseController;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +20,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -50,6 +52,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Create organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateCreateOrg(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_ORG.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -61,9 +64,7 @@ public class OrganisationController extends BaseController {
         innerMap.put(JsonKey.ADDRESS, address);
         orgData.remove(JsonKey.ADDRESS);
       }
-      if(orgData.containsKey(JsonKey.SOURCE)) {
-        orgData.put(JsonKey.SOURCE, ((String) orgData.get(JsonKey.SOURCE)).toLowerCase());
-      } if(orgData.containsKey(JsonKey.PROVIDER)) {
+       if(orgData.containsKey(JsonKey.PROVIDER)) {
         orgData.put(JsonKey.PROVIDER, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
        // orgData.remove(JsonKey.PROVIDER);
       }if(orgData.containsKey(JsonKey.EXTERNAL_ID)) {
@@ -93,6 +94,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Approve organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateOrg(reqObj);
       reqObj.setOperation(ActorOperations.APPROVE_ORG.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -122,6 +124,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUpdateOrg(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -157,12 +160,12 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUpdateOrgStatus(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG_STATUS.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -186,12 +189,12 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Get Organisation details request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateOrg(reqObj);
       reqObj.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -216,12 +219,12 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" add member to organisation = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateAddMember(reqObj);
       reqObj.setOperation(ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -247,12 +250,12 @@ public class OrganisationController extends BaseController {
       ProjectLogger.log(" remove member from organisation = " + requestData,
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
       reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
@@ -277,6 +280,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" join user organisation = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
       reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -306,6 +310,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" approve user organisation = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
       reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -335,6 +340,7 @@ public class OrganisationController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" approve user organisation = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
       reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -392,14 +398,24 @@ public class OrganisationController extends BaseController {
       ProjectLogger.log("Organisation search api call =" + requestData,
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       reqObj.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.OBJECT_TYPE, new ArrayList<>().add(ProjectUtil.EsType.organisation.getTypeName()));
-      reqObj.getRequest().put(JsonKey.FILTERS, innerMap);
+      List<String> esObjectType = new ArrayList<>();
+      esObjectType.add(EsType.organisation.getTypeName());
+      
+      if (reqObj.getRequest().containsKey(JsonKey.FILTERS) && reqObj.getRequest().get(JsonKey.FILTERS)!=null 
+          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map){
+     ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      }else {
+        Map<String,Object> filtermap = new HashMap<>();
+        Map<String,Object> dataMap  = new HashMap<>();
+        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
+        filtermap.put(JsonKey.FILTERS, dataMap);
+      }
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
