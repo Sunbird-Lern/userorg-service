@@ -25,13 +25,13 @@ import play.mvc.Result;
 
 public class CourseMetricsController extends BaseController {
 
-  public Promise<Result> courseProgress(String courseId) {
+  public Promise<Result> courseProgress(String batchId) {
     try {
       String periodStr = request().getQueryString("period");
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
       request.setEnv(getEnvironment());
-      map.put(JsonKey.COURSE_ID, courseId);
+      map.put(JsonKey.BATCH_ID, batchId);
       map.put(JsonKey.PERIOD, periodStr);
       request.setRequest(map);
       request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS.getValue());
