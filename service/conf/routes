@@ -79,7 +79,7 @@ POST   /v1/user/search							@controllers.usermanagement.UserController.search()
 GET    /v1/user/retire							@controllers.LearnerController.getHealth()
 GET   /v1/org/member/suspend					@controllers.LearnerController.getHealth()
 POST  /v1/org/search							@controllers.organisationmanagement.OrganisationController.search()
-GET /health									@controllers.LearnerController.getHealth()
+GET   /health									@controllers.healthmanager.HealthController.getHealth()
 
 #bulk upload
 
@@ -125,5 +125,5 @@ GET  /v1/badges/list                        @controllers.badges.BadgesController
 POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
 
 #Health check
-GET  /v1/health                              @controllers.healthmanager.HealthController.getHealth()
+GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
 GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)

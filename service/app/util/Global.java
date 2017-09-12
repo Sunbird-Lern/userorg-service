@@ -58,11 +58,21 @@ public class Global extends GlobalSettings {
       response.setHeader("Access-Control-Allow-Origin", "*");
       
       // removing check for headers
-      /*
-       * String message = verifyRequestData(ctx.request(),ctx.request().method()); if
-       * (!ProjectUtil.isStringNullOREmpty(message)) { result = onDataValidationError(ctx.request(),
-       * message); } else { result = delegate.call(ctx); }
-       */
+      
+     /*  String message = verifyRequestData(ctx.request(),ctx.request().method(),ctx); 
+       if (message.contains("{userId}")) {
+          ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
+          ctx.flash().put("isAuthReq", true+"");
+          result = delegate.call(ctx);
+       }
+       else if (!ProjectUtil.isStringNullOREmpty(message)) 
+          { 
+           result = onDataValidationError(ctx.request(),message); 
+         } 
+        else { 
+            result = delegate.call(ctx); 
+           }*/
+       
         result = delegate.call(ctx);
         ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()  +" end time " +System.currentTimeMillis() +"  Time taken " + (System.currentTimeMillis()-startTime), LoggerEnum.PERF_LOG);
        return result;
@@ -125,8 +135,7 @@ public class Global extends GlobalSettings {
    * @return Promise<Result>
    */
   public Promise<Result> onDataValidationError(Request request, String errorMessage) {
-
-    ProjectLogger.log("Data error found--");
+    ProjectLogger.log("Data error found--"+errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
@@ -174,15 +183,8 @@ public class Global extends GlobalSettings {
    * @param method String
    * @return String
    */
-  @SuppressWarnings("deprecation")
-  private String verifyRequestData(Request request, String method) {
-     if(RequestMethod.POST.name().equalsIgnoreCase(method) || RequestMethod.PUT.name().equalsIgnoreCase(method)
-         || RequestMethod.PATCH.name().equalsIgnoreCase(method)) {
-    if(ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.Content_Type.getName())) 
-        ||!request.getHeader(HeaderParam.Content_Type.getName()).equals("application/json") ){
-      return ResponseCode.contentTypeRequiredError.getErrorCode();
-    }
-     }
+  private String verifyRequestData(Request request, String method,Http.Context ctx) {
+    String response = "{userId}";
     if (ProjectUtil.isStringNullOREmpty(
         request.getHeader(HeaderParam.X_Consumer_ID.getName().toLowerCase()))) {
       return ResponseCode.customerIdRequired.getErrorCode();
@@ -191,18 +193,24 @@ public class Global extends GlobalSettings {
       return ResponseCode.deviceIdRequired.getErrorCode();
     } else if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.ts.getName()))) {
       return ResponseCode.timeStampRequired.getErrorCode();
-    } else if (!apiHeaderIgnoreMap.containsKey(request.path())) {
+    } else if (!isRequestInExcludeList(request.path())) {
       if (ProjectUtil
           .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()))) {
         return ResponseCode.authTokenRequired.getErrorCode();
+      }if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.X_User_Token.getName()))) {
+        return ResponseCode.authTokenRequired.getErrorCode();
       }
       String userId = AuthenticationHelper
-          .verifyUserAccesToken(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()));
+          .verifyUserAccesToken(request.getHeader(HeaderParam.X_User_Token.getName()));
       if (ProjectUtil.isStringNullOREmpty(userId)) {
         return ResponseCode.invalidAuthToken.getErrorCode();
       }
+      if (!(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()).equals(userId))) {
+        //TODO check 
+      }
+      response = "{userId}"+userId;
     }
-    return "";
+    return response;
   }
 
   /**
@@ -222,14 +230,29 @@ public class Global extends GlobalSettings {
   }
 
   /**
-   * Method to add API list to Map
+   * add all public api list here , to skip authorization check.
    */
   private void addApiListToMap() {
-
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v1/user/login", var);
-    apiHeaderIgnoreMap.put("/v1/user/getuser", var);
+    apiHeaderIgnoreMap.put("/v1/course/search", var);
+    apiHeaderIgnoreMap.put("/v1/org/read", var);
+    apiHeaderIgnoreMap.put("/v1/page/read/:pageId", var);
+    apiHeaderIgnoreMap.put("/v1/page/all/settings", var);
+    apiHeaderIgnoreMap.put("/v1/page/assemble", var);
+    apiHeaderIgnoreMap.put("/v1/page/section/list", var);
+    apiHeaderIgnoreMap.put("/v1/page/section/read/", var);
+    apiHeaderIgnoreMap.put("/v1/role/read", var);
+    apiHeaderIgnoreMap.put("/v1/user/search", var);
+    apiHeaderIgnoreMap.put("/v1/org/search", var);
+    apiHeaderIgnoreMap.put("/v1/health", var);
+    apiHeaderIgnoreMap.put("/v1/learner/health", var);
+    apiHeaderIgnoreMap.put("/v1/actor/health", var);
+    apiHeaderIgnoreMap.put("/v1/es/health", var);
+    apiHeaderIgnoreMap.put("/v1/cassandra/health", var);
+    apiHeaderIgnoreMap.put("/v1/ekstep/health", var);
+    apiHeaderIgnoreMap.put("/v1/badges/list", var);
   }
 
   /**
@@ -305,4 +328,46 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/cassandra/health", "cassandra.service.health.api");
     apiMap.put("/v1/ekstep/health", "ekstep.service.health.api");
   }
+  
+ 
+  /**
+   * this method will check incoming request required validation or not.
+   * if this method return true it means no need of validation other wise 
+   * validation is required.
+   * @param request Stirng URI
+   * @return boolean
+   */
+  private boolean isRequestInExcludeList(String request) {
+    boolean resp = false;
+    if (!ProjectUtil.isStringNullOREmpty(request)) {
+      if (Global.apiHeaderIgnoreMap.containsKey(request)) {
+        resp = true;
+      } else {
+        String[] splitedpath = request.split("[/]");
+        request = removeLastValue(splitedpath);
+        if (Global.apiHeaderIgnoreMap.containsKey(request)) {
+          resp = true;
+        }
+      }
+    }
+    return resp;
+  }
+  
+/**
+ * Method to remove last value
+ * 
+ * @param splited String []
+ * @return String
+ */
+private static String removeLastValue(String splited[]) {
+
+  StringBuilder builder = new StringBuilder();
+  if (splited != null && splited.length > 0) {
+    for (int i = 1; i < splited.length - 1; i++) {
+      builder.append("/" + splited[i]);
+    }
+  }
+  return builder.toString();
+}
+
 }
