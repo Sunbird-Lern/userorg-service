@@ -194,14 +194,12 @@ public class Global extends GlobalSettings {
     } else if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.ts.getName()))) {
       return ResponseCode.timeStampRequired.getErrorCode();
     } else if (!isRequestInExcludeList(request.path())) {
-      if (ProjectUtil
-          .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()))) {
-        return ResponseCode.authTokenRequired.getErrorCode();
-      }if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.X_User_Token.getName()))) {
+      //Check 
+      if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         return ResponseCode.authTokenRequired.getErrorCode();
       }
       String userId = AuthenticationHelper
-          .verifyUserAccesToken(request.getHeader(HeaderParam.X_User_Token.getName()));
+          .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
       if (ProjectUtil.isStringNullOREmpty(userId)) {
         return ResponseCode.invalidAuthToken.getErrorCode();
       }
