@@ -3,8 +3,8 @@
 
 ## Configuration
 1. Environment Variabls
-    1. sunbird_learnerstate_actor_host
-    2. sunbird_learnerstate_actor_port
+    1. sunbird_learnerstate_actor_host: host of the actor service, e.g.: actor-service
+    2. sunbird_learnerstate_actor_port: port on which the remote actors are running
 
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
