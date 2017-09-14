@@ -1,3 +1,6 @@
 [submodule "sunbird-common"]
 	path = sunbird-common
 	url = https://github.com/project-sunbird/sunbird-common.git
+[submodule "service/libs"]
+	path = service/libs
+	url = https://github.com/project-sunbird/sunbird-utils
