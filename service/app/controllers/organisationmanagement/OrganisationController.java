@@ -480,7 +480,7 @@ public class OrganisationController extends BaseController {
       ProjectLogger.log("Organisation UpdateOrgType method call =" + requestData,
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateCreateOrgType(reqObj);
+      RequestValidator.validateUpdateOrgType(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
