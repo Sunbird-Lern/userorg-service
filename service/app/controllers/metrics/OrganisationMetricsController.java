@@ -21,7 +21,7 @@ public class OrganisationMetricsController extends BaseController {
   public Promise<Result> orgCreation(String orgId) {
     ProjectLogger.log("Start Org Metrics Creation Contoller");
     try {
-      String periodStr = request().getQueryString("period");
+    	String periodStr = request().getQueryString(JsonKey.PERIOD);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
@@ -44,7 +44,7 @@ public class OrganisationMetricsController extends BaseController {
   public Promise<Result> orgConsumption(String orgId) {
     ProjectLogger.log("Start Org Metrics Consumption Contoller");
     try {
-      String periodStr = request().getQueryString("period");
+    	String periodStr = request().getQueryString(JsonKey.PERIOD);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
@@ -67,7 +67,7 @@ public class OrganisationMetricsController extends BaseController {
   public Promise<Result> orgCreationReport(String orgId) {
     ProjectLogger.log("Start Org Metrics Creation Contoller");
     try {
-      String periodStr = request().getQueryString("period");
+      String periodStr = request().getQueryString(JsonKey.PERIOD);
       String format = request().getQueryString(JsonKey.FORMAT);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);
@@ -93,7 +93,7 @@ public class OrganisationMetricsController extends BaseController {
   public Promise<Result> orgConsumptionReport(String orgId) {
     ProjectLogger.log("Start Org Metrics Consumption Contoller");
     try {
-      String periodStr = request().getQueryString("period");
+      String periodStr = request().getQueryString(JsonKey.PERIOD);
       String format = request().getQueryString(JsonKey.FORMAT);
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ORG_ID, orgId);

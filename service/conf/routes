@@ -110,9 +110,9 @@ GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMet
 GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
 GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
 
-GET  /v1/dashboard/creation/report/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
-GET  /v1/dashboard/consumption/report/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
-GET  /v1/dashboard/progress/report/course/:courseId      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
+GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
+GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
+GET  /v1/dashboard/progress/course/:courseId/export      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
 
 
 
@@ -130,3 +130,11 @@ POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges(
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
 GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
+
+
+#Notes API
+POST   /v1/notes/create                         @controllers.notesmanagement.NotesController.createNote()
+GET    /v1/notes/read/:noteId                   @controllers.notesmanagement.NotesController.getNote(noteId:String)
+PATCH  /v1/notes/update/:noteId                 @controllers.notesmanagement.NotesController.updateNote(noteId:String)
+POST   /v1/notes/search                         @controllers.notesmanagement.NotesController.searchNote()
+DELETE /v1/notes/delete/:noteId                 @controllers.notesmanagement.NotesController.deleteNote(noteId:String)
