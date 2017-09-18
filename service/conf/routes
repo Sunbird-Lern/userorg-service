@@ -47,6 +47,9 @@ POST    /v1/org/member/reject         @controllers.organisationmanagement.Organi
 POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
 POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
 POST	/v1/org/download		@controllers.organisationmanagement.OrganisationController.downloadOrgs()
+GET		/v1/org/type/list		@controllers.organisationmanagement.OrganisationController.getOrgTypeList()
+POST	/v1/org/type/create		@controllers.organisationmanagement.OrganisationController.createOrgType()
+PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrganisationController.updateOrgType()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()

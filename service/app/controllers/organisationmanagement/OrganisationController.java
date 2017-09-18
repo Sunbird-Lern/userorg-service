@@ -423,6 +423,74 @@ public class OrganisationController extends BaseController {
     }
   }
   
+  /**
+   * This method will fetch list of OrgType.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> getOrgTypeList() {
+    try {
+      ProjectLogger.log("Organisation getOrgTypeList method call",
+          LoggerEnum.INFO.name());
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.GET_ORG_TYPE_LIST.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      reqObj.put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   
+  /**
+   * This method will create OrgType.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> createOrgType() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Organisation CreateOrgType method call =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateCreateOrgType(reqObj);
+      reqObj.setOperation(ActorOperations.CREATE_ORG_TYPE.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      reqObj.getRequest().put(JsonKey.CREATED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
+  /**
+   * This method will update OrgType.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> updateOrgType() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Organisation UpdateOrgType method call =" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateCreateOrgType(reqObj);
+      reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      reqObj.getRequest().put(JsonKey.UPDATED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   
 }
