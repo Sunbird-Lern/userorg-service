@@ -251,6 +251,7 @@ public class Global extends GlobalSettings {
     apiHeaderIgnoreMap.put("/v1/cassandra/health", var);
     apiHeaderIgnoreMap.put("/v1/ekstep/health", var);
     apiHeaderIgnoreMap.put("/v1/badges/list", var);
+    apiHeaderIgnoreMap.put("/v1/org/type/list", var);
   }
 
   /**
@@ -325,6 +326,14 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/es/health", "es.service.health.api");
     apiMap.put("/v1/cassandra/health", "cassandra.service.health.api");
     apiMap.put("/v1/ekstep/health", "ekstep.service.health.api");
+    apiMap.put("/v1/org/type/create", "api.sunbird.org.type.create");
+    apiMap.put("/v1/org/type/update", "api.sunbird.org.type.update");
+    apiMap.put("/v1/org/type/list", "api.sunbird.org.type.list");
+    apiMap.put("/v1/notes/create", "api.note.create");
+    apiMap.put("/v1/notes/read", "api.note.read");
+    apiMap.put("/v1/notes/update", "api.note.update");
+    apiMap.put("/v1/notes/search", "api.note.search");
+    apiMap.put("/v1/notes/delete", "api.note.delete");
   }
   
  

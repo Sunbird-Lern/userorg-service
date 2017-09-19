@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <name>sunbird_lms_service</name>
   <modules>
-      <module>sunbird-common</module>
+      <module>service/libs</module>
 		  <module>service</module>
   </modules>
 </project>
