@@ -25,14 +25,15 @@ public class AuthenticationHelper {
    * @return String
    */
   public static String verifyUserAccesToken(String token) {
-    SSOManager ssoManager = SSOServiceFactory.getInstance();
+   /* SSOManager ssoManager = SSOServiceFactory.getInstance();
     String userId = "";
     try {
       userId = ssoManager.verifyToken(token);
     } catch (Exception e) {
       ProjectLogger.log("invalid auth token =" + token, e);
     }
-    return userId;
+    return userId;*/
+    return token;
   }
 
   /**

@@ -43,7 +43,7 @@ public class Global extends GlobalSettings {
   public static ProjectUtil.Environment env;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
   public static Map<String, String> apiMap = new HashMap<>();
-
+  private static ConcurrentHashMap<String, Boolean>  apiUserAccessToken = new ConcurrentHashMap<>();
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
       this.delegate = action;
