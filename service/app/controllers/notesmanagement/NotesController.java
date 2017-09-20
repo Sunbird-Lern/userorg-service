@@ -19,8 +19,17 @@ import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
+/**
+ * Controller class to handle Notes related operation such as 
+ * create, read/get, search, update and delete
+ *
+ */
 public class NotesController extends BaseController {
   
+  /**
+   * Method to create Note
+   * @return Promise<Result>
+   */
   public Promise<Result> createNote() {
     try {
       JsonNode requestData = request().body().asJson();
@@ -39,10 +48,16 @@ public class NotesController extends BaseController {
       Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
       return res;
     } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
     }
   }
 
+  /**
+   * Method to update the note
+   * @param noteId
+   * @return Promise<Result>
+   */
   public Promise<Result> updateNote(String noteId) {
     try {
       JsonNode requestData = request().body().asJson();
@@ -62,10 +77,16 @@ public class NotesController extends BaseController {
       Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
       return res;
     } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
     }
   }
   
+  /**
+   * Method to get the note details
+   * @param noteId
+   * @return Promise<Result>
+   */
   public Promise<Result> getNote(String noteId) {
     try {
       ProjectLogger.log("Get Note request: " + noteId, LoggerEnum.INFO.name());
@@ -84,17 +105,20 @@ public class NotesController extends BaseController {
       Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
       return res;
     } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
     }
   }
 
-  
+  /**
+   * Method to search note
+   * @return
+   */
   public Promise<Result> searchNote() {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Search Note request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      //RequestValidator.validateNote(reqObj);
       reqObj.setOperation(ActorOperations.SEARCH_NOTE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -107,10 +131,16 @@ public class NotesController extends BaseController {
       Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
       return res;
     } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
     }
   }
 
+  /**
+   * Method to delete the note
+   * @param noteId
+   * @return Promise<Result>
+   */
   public Promise<Result> deleteNote(String noteId) {
     try {
       ProjectLogger.log("Delete Note request: " + noteId, LoggerEnum.INFO.name());
@@ -128,6 +158,7 @@ public class NotesController extends BaseController {
       Promise<Result> res = actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
       return res;
     } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
     }
   }
