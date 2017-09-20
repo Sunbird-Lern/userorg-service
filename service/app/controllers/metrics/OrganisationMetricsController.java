@@ -65,7 +65,7 @@ public class OrganisationMetricsController extends BaseController {
   }
 
   public Promise<Result> orgCreationReport(String orgId) {
-    ProjectLogger.log("Start Org Metrics Creation Contoller");
+    ProjectLogger.log("Start Org Creation Report Contoller");
     try {
       String periodStr = request().getQueryString(JsonKey.PERIOD);
       String format = request().getQueryString(JsonKey.FORMAT);
@@ -83,7 +83,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest_id(ExecutionContext.getRequestId());
       Promise<Result> res =
           actorResponseHandler(getRemoteActor(), request, timeout, null, request());
-      ProjectLogger.log("Return from Org Metrics Creation Contoller");
+      ProjectLogger.log("Return from Org Creation Report Contoller");
       return res;
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -91,7 +91,7 @@ public class OrganisationMetricsController extends BaseController {
   }
 
   public Promise<Result> orgConsumptionReport(String orgId) {
-    ProjectLogger.log("Start Org Metrics Consumption Contoller");
+    ProjectLogger.log("Start Org Consumption Report Contoller");
     try {
       String periodStr = request().getQueryString(JsonKey.PERIOD);
       String format = request().getQueryString(JsonKey.FORMAT);
@@ -109,7 +109,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest_id(ExecutionContext.getRequestId());
       Promise<Result> res =
           actorResponseHandler(getRemoteActor(), request, timeout, null, request());
-      ProjectLogger.log("Return from Org Metrics Consumption Contoller");
+      ProjectLogger.log("Return from Org Consumption Report Contoller");
       return res;
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

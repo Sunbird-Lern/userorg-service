@@ -27,7 +27,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 
 import play.libs.F.Promise;
-import play.libs.Json;
 import play.mvc.Result;
 
 /**
@@ -376,6 +375,7 @@ public class UserController extends BaseController {
    *
    * @return Promise<Result>
    */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
