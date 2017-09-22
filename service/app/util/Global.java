@@ -298,7 +298,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/assessment/update", "api.assessment.save");
     apiMap.put("/v1/assessment/result/read", "api.assessment.result");
     apiMap.put("/v1/role/read", "api.role.read");
-    apiMap.put("/v1/user/getuser", "api.role.getuser");
+    apiMap.put("/v1/user/getuser", "api.user.getuser");
     apiMap.put("/v1/user/block", "api.user.inactive");
     apiMap.put("/v1/user/unblock", "api.user.active");
     apiMap.put("/v1/user/assign/role", "api.user.assign.role");
