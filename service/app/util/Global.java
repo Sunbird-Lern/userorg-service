@@ -334,6 +334,11 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/note/update", "api.note.update");
     apiMap.put("/v1/note/search", "api.note.search");
     apiMap.put("/v1/note/delete", "api.note.delete");
+    apiMap.put("/v1/upload/status/", "api.upload.status");
+    apiMap.put("/v1/bulk/user/upload", "api.bulk.user.upload");
+    apiMap.put("/v1/user/upload", "api.user.upload");
+    
+    
   }
   
  
