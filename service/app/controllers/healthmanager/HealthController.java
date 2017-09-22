@@ -13,10 +13,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -106,11 +108,28 @@ public class HealthController extends BaseController {
     List<Map<String, Object>> responseList = new ArrayList<>();
     // check EKStep Util.
     try {
-      ProjectUtil.registertag("testtag1233", "{}",
-          getAllRequestHeaders(request));
-      responseList.add(
-          ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, false, null));
-      finalResponseMap.put(JsonKey.Healthy, true);
+    	 String body = "{\"request\":{\"filters\":{\"identifier\":\"test\"}}}";
+    	 Map<String, String> headers = new HashMap<>();
+    	 headers.put(JsonKey.AUTHORIZATION, System.getenv(JsonKey.AUTHORIZATION));
+         if (ProjectUtil.isStringNullOREmpty((String) headers.get(JsonKey.AUTHORIZATION))) {
+           headers.put(JsonKey.AUTHORIZATION, 
+               PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
+         }
+         headers.put("Content-Type", "application/json");
+    	 String response = 
+    	          HttpUtil.sendPostRequest(PropertiesCache.getInstance()
+    	                  .getProperty(JsonKey.EKSTEP_BASE_URL)
+    	                  + PropertiesCache.getInstance()
+    	                      .getProperty(JsonKey.EKSTEP_CONTNET_SEARCH_URL), body, headers);
+      if(response.contains("OK")){ 
+        responseList.add(
+            ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, false, null));
+        finalResponseMap.put(JsonKey.Healthy, true);
+      }else {
+    	responseList.add(
+    	    ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
+    	finalResponseMap.put(JsonKey.Healthy, false);
+      }
     } catch (Exception e) {
       responseList.add(
           ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));

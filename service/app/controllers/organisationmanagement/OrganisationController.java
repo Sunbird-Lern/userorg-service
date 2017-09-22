@@ -392,6 +392,7 @@ public class OrganisationController extends BaseController {
    *
    * @return Promise<Result>
    */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
