@@ -257,6 +257,7 @@ public class UserController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
+      innerMap.put(JsonKey.FIELDS, reqObj.getRequest().get(JsonKey.FIELDS));
       innerMap.put(JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       reqObj.setRequest(innerMap);
