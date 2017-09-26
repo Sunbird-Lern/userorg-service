@@ -251,4 +251,35 @@ public class BulkUploadController extends BaseController {
      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
    }
  }
+ 
+ public Promise<Result> userDataEncryption() {
+   try {
+     Request reqObj = new Request();
+     reqObj.setOperation(ActorOperations.ENCRYPT_USER_DATA.getValue());
+     reqObj.setRequest_id(ExecutionContext.getRequestId());
+     reqObj.getRequest().put(JsonKey.REQUESTED_BY,
+         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.setEnv(getEnvironment());
+     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+   } catch (Exception e) {
+     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+   }
+ }
+ 
+ public Promise<Result> userDataDecryption() {
+   try {
+     Request reqObj = new Request();
+     reqObj.setOperation(ActorOperations.DECRYPT_USER_DATA.getValue());
+     reqObj.setRequest_id(ExecutionContext.getRequestId());
+     reqObj.getRequest().put(JsonKey.REQUESTED_BY,
+         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.setEnv(getEnvironment());
+     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+   } catch (Exception e) {
+     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+   }
+ }
+ 
 }
