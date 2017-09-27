@@ -86,7 +86,7 @@ public class PageController extends BaseController {
       map.put(JsonKey.PAGE, reqObj.getRequest());
       reqObj.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return  actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

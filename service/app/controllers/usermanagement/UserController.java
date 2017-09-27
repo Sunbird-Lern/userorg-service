@@ -50,8 +50,8 @@ public class UserController extends BaseController {
           LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreateUser(reqObj);
-      
-      if(ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))){
+
+      if (ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
         reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
         reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
       }
@@ -88,8 +88,8 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      
-      if(ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))){
+
+      if (ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
         reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
         reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
       }
@@ -267,17 +267,16 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
-   * This method will download user details for particular org or all organizations 
+   * This method will download user details for particular org or all organizations
    *
    * @return Promise<Result>
    */
   public Promise<Result> downloadUsers() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" Downlaod user data request =" + requestData,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log(" Downlaod user data request =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DOWNLOAD_USERS.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -292,7 +291,7 @@ public class UserController extends BaseController {
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
-    }
+  }
 
 
   /**
@@ -304,8 +303,7 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" blockuser =" + requestData,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log(" blockuser =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.BLOCK_USER.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -321,27 +319,25 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
    * This method will assign either user role directly or user org role.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> assignRoles() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" Assign roles api request body =" + requestData,
-          LoggerEnum.INFO.name());
-      Request reqObj =
-          (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      ProjectLogger.log(" Assign roles api request body =" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateAssignRole(reqObj);
       reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, getUserIdByAuthToken(
-          request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY,
+          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null,
-          request());
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -356,8 +352,7 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" unblockuser =" + requestData,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log(" unblockuser =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UNBLOCK_USER.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -375,17 +370,16 @@ public class UserController extends BaseController {
   }
 
   /**
-   * This method will do the user search for Elastic search.
-   * this will internally call composite search api.
+   * This method will do the user search for Elastic search. this will internally call composite
+   * search api.
    *
    * @return Promise<Result>
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("User search api call =" + requestData,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log("User search api call =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -395,15 +389,16 @@ public class UserController extends BaseController {
 
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.user.getTypeName());
-       if (reqObj.getRequest().containsKey(JsonKey.FILTERS) && reqObj.getRequest().get(JsonKey.FILTERS)!=null 
-           && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map){
-      ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
-       }else {
-         Map<String,Object> filtermap = new HashMap<>();
-         Map<String,Object> dataMap  = new HashMap<>();
-         dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
-         filtermap.put(JsonKey.FILTERS, dataMap);
-       }
+      if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
+          && reqObj.getRequest().get(JsonKey.FILTERS) != null
+          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
+        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      } else {
+        Map<String, Object> filtermap = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
+        filtermap.put(JsonKey.FILTERS, dataMap);
+      }
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -437,5 +432,4 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
 }

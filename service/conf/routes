@@ -91,6 +91,8 @@ POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadControl
 GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
 POST /v1/batch/bulk/enrollment 			   @controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
+GET  /v1/user/data/encrypt				@controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
+GET  /v1/user/data/decrypt				@controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 

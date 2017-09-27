@@ -57,6 +57,7 @@ public class SearchController extends BaseController {
 
   /**
    * This method will do data Sync form Cassandra db to Elasticsearch.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> sync() {
@@ -79,5 +80,5 @@ public class SearchController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
 }
