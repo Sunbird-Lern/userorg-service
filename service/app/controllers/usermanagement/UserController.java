@@ -411,5 +411,31 @@ public class UserController extends BaseController {
     }
   }
   
+  /**
+   * This method will update user current login time to keyCloack.
+   * @return promise<Result>
+   */
+  public Promise<Result> updateLoginTime() {
+    ProjectLogger.log("Update user login time api call");
+    try {
+      String userId = ctx().flash().get(JsonKey.USER_ID);
+      JsonNode requestData = request().body().asJson();
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      if(reqObj== null) {
+       reqObj = new Request();
+      }
+      reqObj.setOperation(ActorOperations.USER_CURRENT_LOGIN.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      if(!ProjectUtil.isStringNullOREmpty(userId)){
+       reqObj.getRequest().put(JsonKey.USER_ID, userId);
+      }
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null,
+          request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   
 }
