@@ -4,26 +4,20 @@
 package controllers.coursemanagement;
 
 import akka.util.Timeout;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import controllers.BaseController;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -53,13 +47,10 @@ public class CourseController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -84,13 +75,10 @@ public class CourseController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -114,14 +102,11 @@ public class CourseController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -143,13 +128,10 @@ public class CourseController extends BaseController {
       reqObj.setOperation(ActorOperations.SEARCH_COURSE.getValue());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.SEARCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -170,13 +152,10 @@ public class CourseController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -198,13 +177,10 @@ public class CourseController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_COURSE_BY_ID.getValue());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.ID, courseId);
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -223,14 +199,11 @@ public class CourseController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       reqObj.setOperation(ActorOperations.GET_RECOMMENDED_COURSES.getValue());
-      HashMap<String, Object> innerMap = new HashMap<String, Object>();
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

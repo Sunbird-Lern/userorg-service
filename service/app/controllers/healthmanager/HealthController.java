@@ -52,8 +52,7 @@ public class HealthController extends BaseController {
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -79,8 +78,7 @@ public class HealthController extends BaseController {
         Request reqObj = new Request();
         reqObj.setOperation(val);
         reqObj.setRequest_id(ExecutionContext.getRequestId());
-        reqObj.getRequest().put(JsonKey.CREATED_BY,
-            getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+        reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
         reqObj.setEnv(getEnvironment());
         Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
         return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());

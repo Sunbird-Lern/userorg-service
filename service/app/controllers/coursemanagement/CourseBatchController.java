@@ -4,11 +4,8 @@
 package controllers.coursemanagement;
 
 import akka.util.Timeout;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import controllers.BaseController;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -24,10 +20,8 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -60,8 +54,7 @@ public class CourseBatchController extends BaseController {
         reqObj.getRequest().remove(JsonKey.BATCH_ID);
       }
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
@@ -86,8 +79,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -112,13 +104,10 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -142,14 +131,10 @@ public class CourseBatchController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       RequestValidator.validateAddBatchCourse(reqObj);
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      System.out.println("CALING BBATCH ACTOR FROM CONTROLLER");
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -171,13 +156,10 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -198,8 +180,7 @@ public class CourseBatchController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -242,8 +223,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
 
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.course.getTypeName());

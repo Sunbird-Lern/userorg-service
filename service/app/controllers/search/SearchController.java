@@ -4,22 +4,17 @@
 package controllers.search;
 
 import akka.util.Timeout;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import controllers.BaseController;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -45,8 +40,7 @@ public class SearchController extends BaseController {
       RequestValidator.validateCompositeSearch(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -68,8 +62,7 @@ public class SearchController extends BaseController {
       RequestValidator.validateSyncRequest(reqObj);
       reqObj.setOperation(ActorOperations.SYNC.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.DATA, reqObj.getRequest());

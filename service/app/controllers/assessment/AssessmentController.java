@@ -49,13 +49,10 @@ public class AssessmentController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.ASSESSMENT, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -80,13 +77,10 @@ public class AssessmentController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.ASSESSMENT, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

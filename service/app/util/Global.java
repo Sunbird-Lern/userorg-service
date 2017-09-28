@@ -1,16 +1,15 @@
+
 /**
  * 
  */
 package util;
 
 import controllers.BaseController;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -19,9 +18,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
-
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
@@ -41,9 +38,10 @@ import play.mvc.Results;
 public class Global extends GlobalSettings {
 
   public static ProjectUtil.Environment env;
-  private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
+ 
   public static Map<String, String> apiMap = new HashMap<>();
-  private static ConcurrentHashMap<String, Boolean>  apiUserAccessToken = new ConcurrentHashMap<>();
+  private static ConcurrentHashMap<String, Boolean> apiUserAccessToken = new ConcurrentHashMap<>();
+
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
       this.delegate = action;
@@ -52,30 +50,32 @@ public class Global extends GlobalSettings {
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
       long startTime = System.currentTimeMillis();
-      ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()  +" start time " +startTime, LoggerEnum.PERF_LOG);
+      ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()
+          + " start time " + startTime, LoggerEnum.PERF_LOG);
       Promise<Result> result = null;
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
       
-      // removing check for headers
-      
-     /*  String message = verifyRequestData(ctx.request(),ctx.request().method(),ctx); 
-       if (message.contains("{userId}")) {
-          ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
-          ctx.flash().put("isAuthReq", true+"");
-          result = delegate.call(ctx);
-       }
-       else if (!ProjectUtil.isStringNullOREmpty(message)) 
-          { 
-           result = onDataValidationError(ctx.request(),message); 
-         } 
-        else { 
-            result = delegate.call(ctx); 
-           }*/
-       
+      String message = RequestInterceptor.verifyRequestData(ctx.request());
+      if (message.contains("{userId}")) {
+        ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
+        ctx.flash().put(JsonKey.IS_AUTH_REQ, "false");
+        for(String uri : RequestInterceptor.restrictedUriList){
+          if(ctx.request().path().contains(uri)){
+            ctx.flash().put(JsonKey.IS_AUTH_REQ, "true");
+            break;
+          }
+        }
         result = delegate.call(ctx);
-        ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()  +" end time " +System.currentTimeMillis() +"  Time taken " + (System.currentTimeMillis()-startTime), LoggerEnum.PERF_LOG);
-       return result;
+      } else if (!ProjectUtil.isStringNullOREmpty(message)) {
+        result = onDataValidationError(ctx.request(), message);
+      } else {
+        result = delegate.call(ctx);
+      }
+      ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()
+          + " end time " + System.currentTimeMillis() + "  Time taken "
+          + (System.currentTimeMillis() - startTime), LoggerEnum.PERF_LOG);
+      return result;
     }
   }
 
@@ -86,7 +86,7 @@ public class Global extends GlobalSettings {
    *
    */
   public enum RequestMethod {
-    GET, POST, PUT, DELETE,PATCH;
+    GET, POST, PUT, DELETE, PATCH;
   }
 
   /**
@@ -98,7 +98,6 @@ public class Global extends GlobalSettings {
   public void onStart(Application app) {
 
     setEnvironment();
-    addApiListToMap();
     createApiMap();
     ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
   }
@@ -135,7 +134,7 @@ public class Global extends GlobalSettings {
    * @return Promise<Result>
    */
   public Promise<Result> onDataValidationError(Request request, String errorMessage) {
-    ProjectLogger.log("Data error found--"+errorMessage);
+    ProjectLogger.log("Data error found--" + errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
@@ -175,43 +174,6 @@ public class Global extends GlobalSettings {
 
 
   /**
-   * This method will do the get request header mandatory value check it will check all the
-   * mandatory value under header , if any value is missing then it will send missing key name in
-   * response.
-   * 
-   * @param request Request
-   * @param method String
-   * @return String
-   */
-  private String verifyRequestData(Request request, String method,Http.Context ctx) {
-    String response = "{userId}";
-    if (ProjectUtil.isStringNullOREmpty(
-        request.getHeader(HeaderParam.X_Consumer_ID.getName().toLowerCase()))) {
-      return ResponseCode.customerIdRequired.getErrorCode();
-    } else if (ProjectUtil
-        .isStringNullOREmpty(request.getHeader(HeaderParam.X_Device_ID.getName().toLowerCase()))) {
-      return ResponseCode.deviceIdRequired.getErrorCode();
-    } else if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.ts.getName()))) {
-      return ResponseCode.timeStampRequired.getErrorCode();
-    } else if (!isRequestInExcludeList(request.path())) {
-      //Check 
-      if (ProjectUtil.isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
-        return ResponseCode.authTokenRequired.getErrorCode();
-      }
-      String userId = AuthenticationHelper
-          .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
-      if (ProjectUtil.isStringNullOREmpty(userId)) {
-        return ResponseCode.invalidAuthToken.getErrorCode();
-      }
-      if (!(request.getHeader(HeaderParam.X_Authenticated_Userid.getName()).equals(userId))) {
-        //TODO check 
-      }
-      response = "{userId}"+userId;
-    }
-    return response;
-  }
-
-  /**
    * This method will identify the environment and update with enum.
    * 
    * @return Environment
@@ -225,33 +187,6 @@ public class Global extends GlobalSettings {
     } else {
       return env = Environment.prod;
     }
-  }
-
-  /**
-   * add all public api list here , to skip authorization check.
-   */
-  private void addApiListToMap() {
-    short var = 1;
-    apiHeaderIgnoreMap.put("/v1/user/create", var);
-    apiHeaderIgnoreMap.put("/v1/user/login", var);
-    apiHeaderIgnoreMap.put("/v1/course/search", var);
-    apiHeaderIgnoreMap.put("/v1/org/read", var);
-    apiHeaderIgnoreMap.put("/v1/page/read/:pageId", var);
-    apiHeaderIgnoreMap.put("/v1/page/all/settings", var);
-    apiHeaderIgnoreMap.put("/v1/page/assemble", var);
-    apiHeaderIgnoreMap.put("/v1/page/section/list", var);
-    apiHeaderIgnoreMap.put("/v1/page/section/read/", var);
-    apiHeaderIgnoreMap.put("/v1/role/read", var);
-    apiHeaderIgnoreMap.put("/v1/user/search", var);
-    apiHeaderIgnoreMap.put("/v1/org/search", var);
-    apiHeaderIgnoreMap.put("/v1/health", var);
-    apiHeaderIgnoreMap.put("/v1/learner/health", var);
-    apiHeaderIgnoreMap.put("/v1/actor/health", var);
-    apiHeaderIgnoreMap.put("/v1/es/health", var);
-    apiHeaderIgnoreMap.put("/v1/cassandra/health", var);
-    apiHeaderIgnoreMap.put("/v1/ekstep/health", var);
-    apiHeaderIgnoreMap.put("/v1/badges/list", var);
-    apiHeaderIgnoreMap.put("/v1/org/type/list", var);
   }
 
   /**
@@ -310,7 +245,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/dashboard/creation/org", "api.sunbird.dashboard.org.creation");
     apiMap.put("/v1/dashboard/consumption/org", "api.sunbird.dashboard.org.consumption");
     apiMap.put("/v1/dashboard/progress/course", "api.sunbird.dashboard.course.admin");
-    apiMap.put("/v1/dashboard/consumption/course","api.sunbird.dashboard.course.consumption");
+    apiMap.put("/v1/dashboard/consumption/course", "api.sunbird.dashboard.course.consumption");
     apiMap.put("/v1/dashboard/creation/user", "api.sunbird.dashboard.user.creation");
     apiMap.put("/v1/dashboard/consumption/user", "api.sunbird.dashboard.user.consumption");
     apiMap.put("/v1/user/search", "api.user.search");
@@ -337,49 +272,8 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/upload/status/", "api.upload.status");
     apiMap.put("/v1/bulk/user/upload", "api.bulk.user.upload");
     apiMap.put("/v1/user/upload", "api.user.upload");
-    
-    
-  }
-  
- 
-  /**
-   * this method will check incoming request required validation or not.
-   * if this method return true it means no need of validation other wise 
-   * validation is required.
-   * @param request Stirng URI
-   * @return boolean
-   */
-  private boolean isRequestInExcludeList(String request) {
-    boolean resp = false;
-    if (!ProjectUtil.isStringNullOREmpty(request)) {
-      if (Global.apiHeaderIgnoreMap.containsKey(request)) {
-        resp = true;
-      } else {
-        String[] splitedpath = request.split("[/]");
-        request = removeLastValue(splitedpath);
-        if (Global.apiHeaderIgnoreMap.containsKey(request)) {
-          resp = true;
-        }
-      }
-    }
-    return resp;
-  }
-  
-/**
- * Method to remove last value
- * 
- * @param splited String []
- * @return String
- */
-private static String removeLastValue(String splited[]) {
 
-  StringBuilder builder = new StringBuilder();
-  if (splited != null && splited.length > 0) {
-    for (int i = 1; i < splited.length - 1; i++) {
-      builder.append("/" + splited[i]);
-    }
+
   }
-  return builder.toString();
-}
 
 }

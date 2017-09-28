@@ -19,7 +19,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
@@ -77,14 +76,12 @@ public class FileStorageController extends BaseController {
             ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
-      //RequestValidator.validateFileUpload(reqObj);
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
-      //map.put(JsonKey.CREATED_BY,
-      //   getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
 

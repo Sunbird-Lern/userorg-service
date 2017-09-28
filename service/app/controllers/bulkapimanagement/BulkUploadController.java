@@ -87,8 +87,7 @@ public class BulkUploadController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
       map.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
-      map.put(JsonKey.CREATED_BY,
-         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
       
@@ -115,8 +114,7 @@ public class BulkUploadController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_BULK_OP_STATUS.getValue());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.PROCESS_ID, processId);
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -176,8 +174,7 @@ public class BulkUploadController extends BaseController {
      HashMap<String, Object> innerMap = new HashMap<>();
      innerMap.put(JsonKey.DATA, map);
      map.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-     map.put(JsonKey.CREATED_BY,
-         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
      reqObj.setRequest(innerMap);
      map.put(JsonKey.FILE, byteArray);
      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
@@ -239,8 +236,7 @@ public class BulkUploadController extends BaseController {
      HashMap<String, Object> innerMap = new HashMap<>();
      innerMap.put(JsonKey.DATA, map);
      map.put(JsonKey.OBJECT_TYPE, JsonKey.BATCH);
-     map.put(JsonKey.CREATED_BY,
-        getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
      reqObj.setRequest(innerMap);
      map.put(JsonKey.FILE, byteArray);
      
@@ -257,8 +253,7 @@ public class BulkUploadController extends BaseController {
      Request reqObj = new Request();
      reqObj.setOperation(ActorOperations.ENCRYPT_USER_DATA.getValue());
      reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.getRequest().put(JsonKey.REQUESTED_BY,
-         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.getRequest().put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
      reqObj.setEnv(getEnvironment());
      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -272,8 +267,7 @@ public class BulkUploadController extends BaseController {
      Request reqObj = new Request();
      reqObj.setOperation(ActorOperations.DECRYPT_USER_DATA.getValue());
      reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.getRequest().put(JsonKey.REQUESTED_BY,
-         getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+     reqObj.getRequest().put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
      reqObj.setEnv(getEnvironment());
      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());

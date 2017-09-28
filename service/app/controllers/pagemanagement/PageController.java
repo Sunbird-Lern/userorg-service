@@ -4,26 +4,20 @@
 package controllers.pagemanagement;
 
 import akka.util.Timeout;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import controllers.BaseController;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -50,8 +44,7 @@ public class PageController extends BaseController {
       RequestValidator.validateCreatePage(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_PAGE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.PAGE, reqObj.getRequest());
@@ -79,8 +72,7 @@ public class PageController extends BaseController {
       RequestValidator.validateUpdatepage(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_PAGE.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.UPDATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.UPDATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.PAGE, reqObj.getRequest());
@@ -151,8 +143,7 @@ public class PageController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.PAGE, reqObj.getRequest());
       map.put(JsonKey.HEADER, getAllRequestHeaders(request()));
@@ -198,8 +189,7 @@ public class PageController extends BaseController {
       RequestValidator.validateCreateSection(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_SECTION.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.SECTION, reqObj.getRequest());
@@ -229,8 +219,7 @@ public class PageController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      reqObj.getRequest().put(JsonKey.UPDATED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      reqObj.getRequest().put(JsonKey.UPDATED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.SECTION, reqObj.getRequest());
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);

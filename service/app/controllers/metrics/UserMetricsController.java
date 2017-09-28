@@ -25,9 +25,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -43,9 +41,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

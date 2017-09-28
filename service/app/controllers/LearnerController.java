@@ -4,27 +4,22 @@
 package controllers;
 
 import akka.util.Timeout;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-
 import play.libs.F.Promise;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -44,10 +39,9 @@ public class LearnerController extends BaseController {
    */
   public Promise<Result> getEnrolledCourses(String uid) {
     try {
-      String userId = request().getHeader(HeaderParam.X_Session_ID.getName());
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.USER_ID, uid);
-      map.put(JsonKey.REQUESTED_BY, userId);
+      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       Request request = new Request();
       request.setEnv(getEnvironment());
       request.setRequest(map);
@@ -55,9 +49,7 @@ public class LearnerController extends BaseController {
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, JsonKey.COURSES, request());
-      return res;
+      return   actorResponseHandler(getRemoteActor(), request, timeout, JsonKey.COURSES, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -79,14 +71,11 @@ public class LearnerController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.COURSE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return  actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -126,9 +115,7 @@ public class LearnerController extends BaseController {
       Map<String, Object> innerMap = createRequest(reqObj);
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, JsonKey.CONTENT_LIST, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, JsonKey.CONTENT_LIST, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -139,8 +126,7 @@ public class LearnerController extends BaseController {
   private Map<String, Object> createRequest(Request reqObj) {
 
     HashMap<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.REQUESTED_BY,
-        getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+    innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
     innerMap.put(JsonKey.USER_ID, reqObj.getRequest().get(JsonKey.USER_ID));
 
     if ((null != reqObj.getRequest().get(JsonKey.CONTENT_IDS))
@@ -186,14 +172,11 @@ public class LearnerController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CONTENTS, reqObj.getRequest().get(JsonKey.CONTENTS));
-      innerMap.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.USER_ID, reqObj.getRequest().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-      return res;
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

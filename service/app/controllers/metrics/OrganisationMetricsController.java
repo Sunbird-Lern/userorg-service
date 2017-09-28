@@ -1,18 +1,15 @@
 package controllers.metrics;
 
+import akka.util.Timeout;
+import controllers.BaseController;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -32,10 +29,8 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
       ProjectLogger.log("Return from Org Metrics Creation Contoller");
-      return res;
+      return actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -55,10 +50,8 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
       ProjectLogger.log("Return from Org Metrics Consumption Contoller");
-      return res;
+      return actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -73,18 +66,15 @@ public class OrganisationMetricsController extends BaseController {
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
       map.put(JsonKey.FORMAT, format);
-      map.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      map.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       Request request = new Request();
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CREATION_METRICS_REPORT.getValue());
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
       ProjectLogger.log("Return from Org Creation Report Contoller");
-      return res;
+      return  actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -99,18 +89,15 @@ public class OrganisationMetricsController extends BaseController {
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
       map.put(JsonKey.FORMAT, format);
-      map.put(JsonKey.REQUESTED_BY,
-          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+      map.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       Request request = new Request();
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS_REPORT.getValue());
       request.setRequest(map);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       request.setRequest_id(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getRemoteActor(), request, timeout, null, request());
       ProjectLogger.log("Return from Org Consumption Report Contoller");
-      return res;
+      return actorResponseHandler(getRemoteActor(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
