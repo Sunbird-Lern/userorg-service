@@ -404,6 +404,55 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  /**
+   * This method will update user current login time to keyCloack.
+   * @return promise<Result>
+   */
+  public Promise<Result> updateLoginTime() {
+    ProjectLogger.log("Update user login time api call");
+    try {
+      String userId = ctx().flash().get(JsonKey.USER_ID);
+      JsonNode requestData = request().body().asJson();
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      if(reqObj== null) {
+       reqObj = new Request();
+      }
+      reqObj.setOperation(ActorOperations.USER_CURRENT_LOGIN.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      if(!ProjectUtil.isStringNullOREmpty(userId)){
+       reqObj.getRequest().put(JsonKey.USER_ID, userId);
+      }
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null,
+          request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
+  
+  /**
+   * Get all the social media types supported 
+   * @return
+   */
+  public Promise<Result> getMediaTypes() {
 
-
+	    try {
+	      ProjectLogger.log(" get media Types ", LoggerEnum.INFO.name());
+	      Request reqObj = new Request();
+	      reqObj.setOperation(ActorOperations.GET_MEDIA_TYPES.getValue());
+	      reqObj.setRequest_id(ExecutionContext.getRequestId());
+	      reqObj.setEnv(getEnvironment());
+	      HashMap<String, Object> innerMap = new HashMap<>();
+	      innerMap.put(JsonKey.REQUESTED_BY,
+	          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+	      reqObj.setRequest(innerMap);
+	      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+	      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+	    } catch (Exception e) {
+	      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+	    }
+	  }
 }
