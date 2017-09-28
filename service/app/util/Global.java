@@ -337,6 +337,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/upload/status/", "api.upload.status");
     apiMap.put("/v1/bulk/user/upload", "api.bulk.user.upload");
     apiMap.put("/v1/user/upload", "api.user.upload");
+    apiMap.put("/v1/user/mediatype/list", "api.user.mediatypes.list");
     
     
   }

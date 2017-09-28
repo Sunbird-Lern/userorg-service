@@ -432,4 +432,28 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  
+  /**
+   * Get all the social media types supported 
+   * @return
+   */
+  public Promise<Result> getMediaTypes() {
+
+	    try {
+	      ProjectLogger.log(" get media Types ", LoggerEnum.INFO.name());
+	      Request reqObj = new Request();
+	      reqObj.setOperation(ActorOperations.GET_MEDIA_TYPES.getValue());
+	      reqObj.setRequest_id(ExecutionContext.getRequestId());
+	      reqObj.setEnv(getEnvironment());
+	      HashMap<String, Object> innerMap = new HashMap<>();
+	      innerMap.put(JsonKey.REQUESTED_BY,
+	          getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
+	      reqObj.setRequest(innerMap);
+	      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+	      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+	    } catch (Exception e) {
+	      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+	    }
+	  }
 }

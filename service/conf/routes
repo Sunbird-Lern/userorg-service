@@ -25,6 +25,7 @@ POST  	/v1/user/block			         @controllers.usermanagement.UserController.bloc
 POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
 POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
 PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
+GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
 
 #course management api
 POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
