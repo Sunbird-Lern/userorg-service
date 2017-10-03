@@ -3,10 +3,15 @@ package util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http.Request;
+import scala.reflect.api.Quasiquotes.Quasiquote.api;
 
 /**
  * This class will do the request header validation
@@ -36,6 +41,14 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/health", var);
     apiHeaderIgnoreMap.put("/v1/page/assemble", var);
     apiHeaderIgnoreMap.put("/health", var);
+    apiHeaderIgnoreMap.put("/v1/notification/email", var);
+    apiHeaderIgnoreMap.put("/v1/data/sync", var);
+    apiHeaderIgnoreMap.put("/v1/user/data/encrypt", var);
+    apiHeaderIgnoreMap.put("/v1/user/data/decrypt", var);
+    apiHeaderIgnoreMap.put("/v1/org/upload", var);
+    apiHeaderIgnoreMap.put("/v1/user/upload", var);
+    apiHeaderIgnoreMap.put("/v1/batch/bulk/enrollment", var);
+    apiHeaderIgnoreMap.put("/v1/file/upload", var);
   }
 
   /**
@@ -51,12 +64,17 @@ public class RequestInterceptor {
           .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         return ResponseCode.unAuthorised.getErrorCode();
       }
-    /*  String userId = AuthenticationHelper
+      if(ProjectUtil.isStringNullOREmpty(Global.ssoPublicKey)) {
+        ProjectLogger.log("SSO public key is not set by environment variable==",LoggerEnum.INFO.name());
+        response = "{userId}" + JsonKey.NOT_AVAILABLE;
+      }else{
+      String userId = AuthenticationHelper
           .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
       if (ProjectUtil.isStringNullOREmpty(userId)) {
         return ResponseCode.unAuthorised.getErrorCode();
-      }*/
-      response = "{userId}" + request.getHeader(HeaderParam.X_Access_TokenId.getName());
+      }
+       response = "{userId}" + userId;
+      }
     }
     return response;
   }

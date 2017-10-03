@@ -41,7 +41,7 @@ public class Global extends GlobalSettings {
  
   public static Map<String, String> apiMap = new HashMap<>();
   private static ConcurrentHashMap<String, Boolean> apiUserAccessToken = new ConcurrentHashMap<>();
-
+  public static String ssoPublicKey = "";
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
       this.delegate = action;
@@ -99,6 +99,7 @@ public class Global extends GlobalSettings {
 
     setEnvironment();
     createApiMap();
+    ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
   }
 
