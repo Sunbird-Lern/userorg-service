@@ -51,12 +51,12 @@ public class RequestInterceptor {
           .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         return ResponseCode.unAuthorised.getErrorCode();
       }
-      String userId = AuthenticationHelper
+    /*  String userId = AuthenticationHelper
           .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
       if (ProjectUtil.isStringNullOREmpty(userId)) {
         return ResponseCode.unAuthorised.getErrorCode();
-      }
-      response = "{userId}" + userId;
+      }*/
+      response = "{userId}" + request.getHeader(HeaderParam.X_Access_TokenId.getName());
     }
     return response;
   }
