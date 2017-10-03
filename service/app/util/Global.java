@@ -68,7 +68,7 @@ public class Global extends GlobalSettings {
         }
         result = delegate.call(ctx);
       } else if (!ProjectUtil.isStringNullOREmpty(message)) {
-        result = onDataValidationError(ctx.request(), message);
+        result = onDataValidationError(ctx.request(), message,ResponseCode.UNAUTHORIZED.getResponseCode());
       } else {
         result = delegate.call(ctx);
       }
@@ -133,12 +133,12 @@ public class Global extends GlobalSettings {
    * @param errorMessage String
    * @return Promise<Result>
    */
-  public Promise<Result> onDataValidationError(Request request, String errorMessage) {
+  public Promise<Result> onDataValidationError(Request request, String errorMessage,int responseCode) {
     ProjectLogger.log("Data error found--" + errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
-    return Promise.<Result>pure(Results.status(headerCode.getResponseCode(), Json.toJson(resp)));
+    return Promise.<Result>pure(Results.status(responseCode, Json.toJson(resp)));
   }
 
 
@@ -273,5 +273,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/bulk/user/upload", "api.bulk.user.upload");
     apiMap.put("/v1/user/upload", "api.user.upload");
     apiMap.put("/v1/user/mediatype/list", "api.user.mediatypes.list");
+    apiMap.put("/health", "api.all.health");
   }
 }

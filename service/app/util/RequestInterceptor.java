@@ -49,12 +49,12 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path())) {
       if (ProjectUtil
           .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
-        return ResponseCode.UNAUTHORIZED.getErrorCode();
+        return ResponseCode.unAuthorised.getErrorCode();
       }
       String userId = AuthenticationHelper
           .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
       if (ProjectUtil.isStringNullOREmpty(userId)) {
-        return ResponseCode.UNAUTHORIZED.getErrorCode();
+        return ResponseCode.unAuthorised.getErrorCode();
       }
       response = "{userId}" + userId;
     }
