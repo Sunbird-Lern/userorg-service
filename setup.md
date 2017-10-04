@@ -5,6 +5,13 @@
 1. Environment Variabls
     1. sunbird_learnerstate_actor_host: host of the actor service, e.g.: actor-service
     2. sunbird_learnerstate_actor_port: port on which the remote actors are running
+    3. sunbird_sso_publickey : sso public key
+    4. sunbird_sso_url: url for keycloak server
+    5. sunbird_sso_realm: keycloak realm name
+    6. sunbird_sso_username: keycloak user name
+    7. sunbird_sso_password: keycloak password
+    8. sunbird_sso_client_id: key cloak client id
+    9. sunbird_sso_client_secret : keycloak client secret (not mandatory)
 
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
