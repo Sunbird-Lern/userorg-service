@@ -64,7 +64,7 @@ public class RequestInterceptor {
           .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         return ResponseCode.unAuthorised.getErrorCode();
       }
-      if(ProjectUtil.isStringNullOREmpty(Global.ssoPublicKey)) {
+      if(ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))) {
         ProjectLogger.log("SSO public key is not set by environment variable==",LoggerEnum.INFO.name());
         response = "{userId}" + JsonKey.NOT_AVAILABLE;
       }else{
