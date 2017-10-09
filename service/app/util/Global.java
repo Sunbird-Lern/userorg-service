@@ -275,5 +275,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/user/upload", "api.user.upload");
     apiMap.put("/v1/user/mediatype/list", "api.user.mediatypes.list");
     apiMap.put("/health", "api.all.health");
+    apiMap.put("/v1/audit/history", "api.audit.history");
   }
 }
