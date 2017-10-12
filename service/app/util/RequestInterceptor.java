@@ -11,7 +11,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http.Request;
-import scala.reflect.api.Quasiquotes.Quasiquote.api;
 
 /**
  * This class will do the request header validation

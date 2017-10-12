@@ -33,7 +33,7 @@ import play.mvc.Result;
  * @author Amit Kumar
  */
 public class BulkUploadController extends BaseController {
-  
+
   /**
    * This method will allow to upload bulk user.
    * 
@@ -44,38 +44,40 @@ public class BulkUploadController extends BaseController {
     try {
 
       Request reqObj = new Request();
-      Map<String,Object> map = new HashMap<>();
+      Map<String, Object> map = new HashMap<>();
       byte[] byteArray = null;
       MultipartFormData body = request().body().asMultipartFormData();
-      Map<String,String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+      Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
       JsonNode requestData = request().body().asJson();
       if (body != null) {
-          Map<String,String[]> data = body.asFormUrlEncoded();
-          for(Entry<String, String[]> entry : data.entrySet()){
-            map.put(entry.getKey(), entry.getValue()[0]);
-          }
-          List<FilePart> filePart = body.getFiles();
-          InputStream is = new FileInputStream(filePart.get(0).getFile());
-          byteArray = IOUtils.toByteArray(is);
-          reqObj.getRequest().putAll(map);
-      } else if(null != formUrlEncodeddata){
-        //read data as string from request
-        for(Entry<String, String[]> entry : formUrlEncodeddata.entrySet()){
+        Map<String, String[]> data = body.asFormUrlEncoded();
+        for (Entry<String, String[]> entry : data.entrySet()) {
           map.put(entry.getKey(), entry.getValue()[0]);
         }
-        InputStream is = new ByteArrayInputStream(((String)map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        List<FilePart> filePart = body.getFiles();
+        InputStream is = new FileInputStream(filePart.get(0).getFile());
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
-      } else if(null != requestData){
-         reqObj = (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-         InputStream is = new ByteArrayInputStream(((String)reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
-         byteArray = IOUtils.toByteArray(is);
-         reqObj.getRequest().putAll(map);
-         map.putAll(reqObj.getRequest());
-      } else{
+      } else if (null != formUrlEncodeddata) {
+        // read data as string from request
+        for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        InputStream is = new ByteArrayInputStream(
+            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+      } else if (null != requestData) {
+        reqObj =
+            (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+        InputStream is = new ByteArrayInputStream(
+            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+        map.putAll(reqObj.getRequest());
+      } else {
         ProjectCommonException e = new ProjectCommonException(
-            ResponseCode.invalidData.getErrorCode(),
-            ResponseCode.invalidData.getErrorMessage(),
+            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
@@ -86,11 +88,11 @@ public class BulkUploadController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
       map.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
-      map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
-      
-      
+
+
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -113,7 +115,7 @@ public class BulkUploadController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_BULK_OP_STATUS.getValue());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.PROCESS_ID, processId);
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -122,157 +124,161 @@ public class BulkUploadController extends BaseController {
     }
   }
 
- /* 
-  *This method will allow to upload bulk organisation.
-  *
-  * @return Promise<Result>
-  */
- public Promise<Result> uploadOrg() {
+  /*
+   * This method will allow to upload bulk organisation.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> uploadOrg() {
 
-   try {
-     Request reqObj = new Request();
-     Map<String,Object> map = new HashMap<>();
-     byte[] byteArray = null;
-     MultipartFormData body = request().body().asMultipartFormData();
-     Map<String,String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
-     JsonNode requestData = request().body().asJson();
-     
-     if (body != null) {
-       Map<String,String[]> data = body.asFormUrlEncoded();
-       for(Entry<String, String[]> entry : data.entrySet()){
-         map.put(entry.getKey(), entry.getValue()[0]);
-       }
-       List<FilePart> filePart = body.getFiles();
-       InputStream is = new FileInputStream(filePart.get(0).getFile());
-       byteArray = IOUtils.toByteArray(is);
-     } else if(null != formUrlEncodeddata){
-       //read data as string from request
-       for(Entry<String, String[]> entry : formUrlEncodeddata.entrySet()){
-         map.put(entry.getKey(), entry.getValue()[0]);
-       }
-       InputStream is = new ByteArrayInputStream(((String)map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
-       byteArray = IOUtils.toByteArray(is);
-       reqObj.getRequest().putAll(map);
-     } else if(null != requestData){
-        reqObj = (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-        InputStream is = new ByteArrayInputStream(((String)reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+    try {
+      Request reqObj = new Request();
+      Map<String, Object> map = new HashMap<>();
+      byte[] byteArray = null;
+      MultipartFormData body = request().body().asMultipartFormData();
+      Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+      JsonNode requestData = request().body().asJson();
+
+      if (body != null) {
+        Map<String, String[]> data = body.asFormUrlEncoded();
+        for (Entry<String, String[]> entry : data.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        List<FilePart> filePart = body.getFiles();
+        InputStream is = new FileInputStream(filePart.get(0).getFile());
+        byteArray = IOUtils.toByteArray(is);
+      } else if (null != formUrlEncodeddata) {
+        // read data as string from request
+        for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        InputStream is = new ByteArrayInputStream(
+            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+      } else if (null != requestData) {
+        reqObj =
+            (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+        InputStream is = new ByteArrayInputStream(
+            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
-     } else{
-       ProjectCommonException e = new ProjectCommonException(
-           ResponseCode.invalidData.getErrorCode(),
-           ResponseCode.invalidData.getErrorMessage(),
-           ResponseCode.CLIENT_ERROR.getResponseCode());
-       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-     }
-     reqObj.getRequest().putAll(map);
-     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
-     reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.setEnv(getEnvironment());
-     HashMap<String, Object> innerMap = new HashMap<>();
-     innerMap.put(JsonKey.DATA, map);
-     map.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-     map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
-     reqObj.setRequest(innerMap);
-     map.put(JsonKey.FILE, byteArray);
-     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-   }  catch (Exception e) {
-     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-   }
- }
- 
- /**
-  * This method will allow to upload bulk user.
-  * 
-  * @return Promise<Result>
-  */
- public Promise<Result> bulkBatchEnrollment() {
+      } else {
+        ProjectCommonException e = new ProjectCommonException(
+            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+        return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      }
+      reqObj.getRequest().putAll(map);
+      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      map.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+      map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      map.put(JsonKey.FILE, byteArray);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
 
-   try {
+  /**
+   * This method will allow to upload bulk user.
+   * 
+   * @return Promise<Result>
+   */
+  public Promise<Result> bulkBatchEnrollment() {
 
-     Request reqObj = new Request();
-     Map<String,Object> map = new HashMap<>();
-     byte[] byteArray = null;
-     MultipartFormData body = request().body().asMultipartFormData();
-     Map<String,String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
-     JsonNode requestData = request().body().asJson();
-     if (body != null) {
-         Map<String,String[]> data = body.asFormUrlEncoded();
-         for(Entry<String, String[]> entry : data.entrySet()){
-           map.put(entry.getKey(), entry.getValue()[0]);
-         }
-         List<FilePart> filePart = body.getFiles();
-         InputStream is = new FileInputStream(filePart.get(0).getFile());
-         byteArray = IOUtils.toByteArray(is);
-         reqObj.getRequest().putAll(map);
-     } else if(null != formUrlEncodeddata){
-       //read data as string from request
-       for(Entry<String, String[]> entry : formUrlEncodeddata.entrySet()){
-         map.put(entry.getKey(), entry.getValue()[0]);
-       }
-       InputStream is = new ByteArrayInputStream(((String)map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
-       byteArray = IOUtils.toByteArray(is);
-       reqObj.getRequest().putAll(map);
-     } else if(null != requestData){
-        reqObj = (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-        InputStream is = new ByteArrayInputStream(((String)reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+    try {
+
+      Request reqObj = new Request();
+      Map<String, Object> map = new HashMap<>();
+      byte[] byteArray = null;
+      MultipartFormData body = request().body().asMultipartFormData();
+      Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+      JsonNode requestData = request().body().asJson();
+      if (body != null) {
+        Map<String, String[]> data = body.asFormUrlEncoded();
+        for (Entry<String, String[]> entry : data.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        List<FilePart> filePart = body.getFiles();
+        InputStream is = new FileInputStream(filePart.get(0).getFile());
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+      } else if (null != formUrlEncodeddata) {
+        // read data as string from request
+        for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        InputStream is = new ByteArrayInputStream(
+            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+      } else if (null != requestData) {
+        reqObj =
+            (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+        InputStream is = new ByteArrayInputStream(
+            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
-     } else{
-       ProjectCommonException e = new ProjectCommonException(
-           ResponseCode.invalidData.getErrorCode(),
-           ResponseCode.invalidData.getErrorMessage(),
-           ResponseCode.CLIENT_ERROR.getResponseCode());
-       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-     }
-     
-     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
-     reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.setEnv(getEnvironment());
-     HashMap<String, Object> innerMap = new HashMap<>();
-     innerMap.put(JsonKey.DATA, map);
-     map.put(JsonKey.OBJECT_TYPE, JsonKey.BATCH);
-     map.put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
-     reqObj.setRequest(innerMap);
-     map.put(JsonKey.FILE, byteArray);
-     
-     
-     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-   } catch (Exception e) {
-     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-   }
- }
- 
- public Promise<Result> userDataEncryption() {
-   try {
-     Request reqObj = new Request();
-     reqObj.setOperation(ActorOperations.ENCRYPT_USER_DATA.getValue());
-     reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.getRequest().put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
-     reqObj.setEnv(getEnvironment());
-     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-   } catch (Exception e) {
-     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-   }
- }
- 
- public Promise<Result> userDataDecryption() {
-   try {
-     Request reqObj = new Request();
-     reqObj.setOperation(ActorOperations.DECRYPT_USER_DATA.getValue());
-     reqObj.setRequest_id(ExecutionContext.getRequestId());
-     reqObj.getRequest().put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
-     reqObj.setEnv(getEnvironment());
-     Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-     return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
-   } catch (Exception e) {
-     return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-   }
- }
- 
+      } else {
+        ProjectCommonException e = new ProjectCommonException(
+            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+        return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      }
+
+      reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      map.put(JsonKey.OBJECT_TYPE, JsonKey.BATCH);
+      map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      map.put(JsonKey.FILE, byteArray);
+
+
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> userDataEncryption() {
+    try {
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.ENCRYPT_USER_DATA.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setEnv(getEnvironment());
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> userDataDecryption() {
+    try {
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.DECRYPT_USER_DATA.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setEnv(getEnvironment());
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
 }
