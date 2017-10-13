@@ -57,7 +57,7 @@ public class UserController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -77,17 +77,23 @@ public class UserController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      if(null != ctx().flash().get(JsonKey.IS_AUTH_REQ) && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))){
+      if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
+          && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         String userId = (String) reqObj.getRequest().get(JsonKey.ID);
-        if(!ProjectUtil.isStringNullOREmpty(userId)){
-          if(!userId.equals(ctx().flash().get(JsonKey.USER_ID))){
-            throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(), ResponseCode.unAuthorised.getErrorMessage(), ResponseCode.UNAUTHORIZED.getResponseCode());
+        if (!ProjectUtil.isStringNullOREmpty(userId)) {
+          if (!userId.equals(ctx().flash().get(JsonKey.USER_ID))) {
+            throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+                ResponseCode.unAuthorised.getErrorMessage(),
+                ResponseCode.UNAUTHORIZED.getResponseCode());
           }
-        }else{
-           userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
-           if((!ProjectUtil.isStringNullOREmpty(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))){
-               throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(), ResponseCode.unAuthorised.getErrorMessage(), ResponseCode.UNAUTHORIZED.getResponseCode());
-           }
+        } else {
+          userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+          if ((!ProjectUtil.isStringNullOREmpty(userId))
+              && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
+            throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+                ResponseCode.unAuthorised.getErrorMessage(),
+                ResponseCode.UNAUTHORIZED.getResponseCode());
+          }
         }
       }
       RequestValidator.validateUpdateUser(reqObj);
@@ -101,8 +107,8 @@ public class UserController extends BaseController {
         reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
         reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
       }
-      
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -154,7 +160,7 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.AUTH_TOKEN,
           request().getHeader(HeaderParam.X_Access_TokenId.getName()));
       reqObj.setRequest(innerMap);
@@ -171,7 +177,6 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> changePassword() {
-
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user change password data = " + requestData, LoggerEnum.INFO.name());
@@ -182,9 +187,8 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      System.out.println("User Id is ==" +  ctx().flash().get(JsonKey.USER_ID));
-      reqObj.getRequest().put(JsonKey.USER_ID,ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -212,7 +216,7 @@ public class UserController extends BaseController {
       reqObj.getRequest().put(JsonKey.USER_ID, userId);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.FIELDS, requestedFields);
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -263,7 +267,7 @@ public class UserController extends BaseController {
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.FIELDS, reqObj.getRequest().get(JsonKey.FIELDS));
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -287,7 +291,7 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -313,7 +317,7 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -336,7 +340,7 @@ public class UserController extends BaseController {
       reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -360,7 +364,7 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -384,7 +388,7 @@ public class UserController extends BaseController {
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
 
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.user.getTypeName());
@@ -404,9 +408,10 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
    * This method will update user current login time to keyCloack.
+   * 
    * @return promise<Result>
    */
   public Promise<Result> updateLoginTime() {
@@ -415,30 +420,29 @@ public class UserController extends BaseController {
       String userId = ctx().flash().get(JsonKey.USER_ID);
       JsonNode requestData = request().body().asJson();
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      if(reqObj== null) {
-       reqObj = new Request();
+      if (reqObj == null) {
+        reqObj = new Request();
       }
       reqObj.setOperation(ActorOperations.USER_CURRENT_LOGIN.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      if(!ProjectUtil.isStringNullOREmpty(userId)){
-       reqObj.getRequest().put(JsonKey.USER_ID, userId);
+      if (!ProjectUtil.isStringNullOREmpty(userId)) {
+        reqObj.getRequest().put(JsonKey.USER_ID, userId);
       }
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null,
-          request());
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
-  
+
+
   /**
-   * Get all the social media types supported 
+   * Get all the social media types supported
+   * 
    * @return
    */
   public Promise<Result> getMediaTypes() {
-
 	    try {
 	      ProjectLogger.log(" get media Types ", LoggerEnum.INFO.name());
 	      Request reqObj = new Request();

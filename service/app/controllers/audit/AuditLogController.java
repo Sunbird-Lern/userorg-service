@@ -25,6 +25,7 @@ public class AuditLogController extends BaseController {
 
   /**
    * Method to search audit history logs
+   * 
    * @return
    */
   public Promise<Result> searchAuditHistory() {

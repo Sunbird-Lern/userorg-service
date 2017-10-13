@@ -1,14 +1,10 @@
 package controllers;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-
-import com.typesafe.config.ConfigFactory;
-
-import java.text.MessageFormat;
-
+import controllers.actorutility.ActorSystemFactory;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -18,7 +14,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
-
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -26,7 +21,6 @@ import play.mvc.Controller;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
-
 import util.AuthenticationHelper;
 import util.Global;
 
@@ -38,28 +32,10 @@ import util.Global;
 public class BaseController extends Controller {
 
   public static final int Akka_wait_time = 10;
-  private static ActorSelection selection = null;
+  private static Object actorRef = null;
 
   static {
-
-    ActorSystem system =
-        ActorSystem.create("ActorApplication", ConfigFactory.load().getConfig("ActorConfig"));
-    String path = "akka.tcp://RemoteMiddlewareSystem@127.0.1.1:8088/user/RequestRouterActor";
-    try {
-      path = play.Play.application().configuration().getString("remote.actor.path");
-      if (!ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_IP))
-          && !ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SUNBIRD_ACTOR_PORT))) {
-        ProjectLogger.log("value is taking from system evn");
-        path = MessageFormat.format(
-            play.Play.application().configuration().getString("remote.actor.env.path"),
-            System.getenv(JsonKey.SUNBIRD_ACTOR_IP), System.getenv(JsonKey.SUNBIRD_ACTOR_PORT));
-      }
-      ProjectLogger.log("Actor path is ==" + path, LoggerEnum.INFO.name());
-    } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-
-    selection = system.actorSelection(path);
+    actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
   }
 
   /**
@@ -67,9 +43,9 @@ public class BaseController extends Controller {
    * 
    * @return ActorSelection
    */
-  public ActorSelection getRemoteActor() {
+  public Object getRemoteActor() {
 
-    return selection;
+    return actorRef;
   }
 
   /**
@@ -152,7 +128,8 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(play.mvc.Http.Request request,
       ProjectCommonException exception) {
-   ProjectLogger.log(exception !=null?exception.getMessage():"Message is not coming", exception);
+    ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming",
+        exception);
     Response response = new Response();
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -163,7 +140,7 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
     ResponseCode code = ResponseCode.getResponse(exception.getCode());
-    if(code == null) {
+    if (code == null) {
       code = ResponseCode.SERVER_ERROR;
     }
     response.setParams(createResponseParamObj(code));
@@ -265,25 +242,40 @@ public class BaseController extends Controller {
    * @param httpReq play.mvc.Http.Request
    * @return Promise<Result>
    */
-  public Promise<Result> actorResponseHandler(ActorSelection selection,
+  public Promise<Result> actorResponseHandler(Object actorRef,
       org.sunbird.common.request.Request request, Timeout timeout, String responseKey,
       play.mvc.Http.Request httpReq) {
-
-    Promise<Result> res =
-        Promise.wrap(Patterns.ask(selection, request, timeout)).map(new Function<Object, Result>() {
-          public Result apply(Object result) {
-            if (result instanceof Response) {
-              Response response = (Response) result;
-              return createCommonResponse(response, responseKey, httpReq);
-            } else if (result instanceof ProjectCommonException) {
-              return createCommonExceptionResponse((ProjectCommonException) result, request());
-            } else {
-              ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
-              return createCommonExceptionResponse(new Exception(), httpReq);
+    if (actorRef instanceof ActorRef) {
+      return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
+          .map(new Function<Object, Result>() {
+            public Result apply(Object result) {
+              if (result instanceof Response) {
+                Response response = (Response) result;
+                return createCommonResponse(response, responseKey, httpReq);
+              } else if (result instanceof ProjectCommonException) {
+                return createCommonExceptionResponse((ProjectCommonException) result, request());
+              } else {
+                ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+                return createCommonExceptionResponse(new Exception(), httpReq);
+              }
             }
-          }
-        });
-    return res;
+          });
+    } else {
+      return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout))
+          .map(new Function<Object, Result>() {
+            public Result apply(Object result) {
+              if (result instanceof Response) {
+                Response response = (Response) result;
+                return createCommonResponse(response, responseKey, httpReq);
+              } else if (result instanceof ProjectCommonException) {
+                return createCommonExceptionResponse((ProjectCommonException) result, request());
+              } else {
+                ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+                return createCommonExceptionResponse(new Exception(), httpReq);
+              }
+            }
+          });
+    }
   }
 
   /**
@@ -332,14 +324,14 @@ public class BaseController extends Controller {
       } else {
         val = Global.apiMap.get(path);
       }
-      if(ProjectUtil.isStringNullOREmpty(val)) {
+      if (ProjectUtil.isStringNullOREmpty(val)) {
         val = Global.apiMap.get(path);
         if (ProjectUtil.isStringNullOREmpty(val)) {
           String[] splitedpath = path.split("[/]");
           path = removeLastValue(splitedpath);
           val = Global.apiMap.get(path);
         }
-      } 
+      }
     }
     return val;
   }
