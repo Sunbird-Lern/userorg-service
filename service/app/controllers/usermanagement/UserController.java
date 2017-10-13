@@ -40,7 +40,6 @@ public class UserController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> createUser() {
-
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user registration request data = " + requestData,
@@ -74,7 +73,7 @@ public class UserController extends BaseController {
    */
   public Promise<Result> updateUserProfile() {
 
-    try {
+    try { 
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
@@ -157,7 +156,7 @@ public class UserController extends BaseController {
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.AUTH_TOKEN,
-          request().getHeader(HeaderParam.X_Authenticated_Userid.getName()));
+          request().getHeader(HeaderParam.X_Access_TokenId.getName()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -183,6 +182,7 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
+      System.out.println("User Id is ==" +  ctx().flash().get(JsonKey.USER_ID));
       reqObj.getRequest().put(JsonKey.USER_ID,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
@@ -455,4 +455,31 @@ public class UserController extends BaseController {
 	      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
 	    }
 	  }
+  
+  /**
+   * This method will send user temporary password on his/her 
+   * registered email.in Request it will take either user loginid
+   * or email.
+   * @return Promise<Result>
+   */
+  public Promise<Result> forgotpassword() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" get user forgot password call = " + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateForgotpassword(reqObj);
+      reqObj.setOperation(ActorOperations.FORGOT_PASSWORD.getValue());
+      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER, reqObj.getRequest());
+      reqObj.getRequest().put(JsonKey.USER_ID,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
+      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
 }

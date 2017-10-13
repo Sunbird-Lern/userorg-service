@@ -11,7 +11,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http.Request;
-import scala.reflect.api.Quasiquotes.Quasiquote.api;
 
 /**
  * This class will do the request header validation
@@ -49,6 +48,9 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/upload", var);
     apiHeaderIgnoreMap.put("/v1/batch/bulk/enrollment", var);
     apiHeaderIgnoreMap.put("/v1/file/upload", var);
+    apiHeaderIgnoreMap.put("/v1/user/forgotpassword", var);
+    apiHeaderIgnoreMap.put("/v1/user/login", var);
+    apiHeaderIgnoreMap.put("/v1/user/logout", var);
   }
 
   /**

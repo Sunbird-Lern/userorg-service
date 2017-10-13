@@ -50,12 +50,12 @@ public class IntegrationTest {
 	      //Http.Context.current.set(context);
 	  }
 
-	  //@Test
+	  @Test
 	  public void testgetCourses() {
 		  RequestBuilder req = new RequestBuilder().uri("/v1/user/courses/id").method(GET);
 		    req.headers(headerMap);
 			Result result = route(req);
-			assertEquals(400, result.status());
+			assertEquals(401, result.status());
 	  }
 	  
 	  @AfterClass

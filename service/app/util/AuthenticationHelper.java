@@ -3,7 +3,9 @@
  */
 package util;
 
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 
@@ -16,7 +18,6 @@ import org.sunbird.services.sso.SSOServiceFactory;
  *
  */
 public class AuthenticationHelper {
-
   /**
    * This method will verify the incoming user access token against store data base /cache. If token
    * is valid then it would be associated with some user id. In case of token matched it will
@@ -26,9 +27,14 @@ public class AuthenticationHelper {
    */
   public static String verifyUserAccesToken(String token) {
     SSOManager ssoManager = SSOServiceFactory.getInstance();
-    String userId = "";
-    try {
+    String userId = ""; 
+    try { 
+      boolean response = Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED));
+      if (response) {
       userId = ssoManager.verifyToken(token);
+      } else {
+        userId = token;
+      }
     } catch (Exception e) {
       ProjectLogger.log("invalid auth token =" + token, e);
     }
