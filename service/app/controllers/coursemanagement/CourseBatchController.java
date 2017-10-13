@@ -26,8 +26,8 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller will handle all the API related to course batches , add batch,update batch,join member to batch,
- * remove member from batch, get particular batch details.
+ * This controller will handle all the API related to course batches , add batch,update batch,join
+ * member to batch, remove member from batch, get particular batch details.
  * 
  * @author Manzarul
  */
@@ -49,12 +49,12 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if(!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.BATCH_ID))){
+      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.BATCH_ID))) {
         reqObj.getRequest().put(JsonKey.ID, reqObj.getRequest().get(JsonKey.BATCH_ID));
         reqObj.getRequest().remove(JsonKey.BATCH_ID);
       }
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
@@ -66,6 +66,7 @@ public class CourseBatchController extends BaseController {
 
   /**
    * This method will update existing batch details.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> updateBatch() {
@@ -79,7 +80,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -88,9 +89,10 @@ public class CourseBatchController extends BaseController {
     }
   }
 
- 
+
   /**
    * This method will do soft delete to the batch.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> deleteBatch() {
@@ -104,7 +106,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -113,10 +115,11 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-  
-  
+
+
   /**
-   * This method will do the user batch enrollment 
+   * This method will do the user batch enrollment
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> addUserToBatch(String batchId) {
@@ -127,11 +130,11 @@ public class CourseBatchController extends BaseController {
       reqObj.setOperation(ActorOperations.ADD_USER_TO_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.BATCH_ID ,batchId);
+      reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
       RequestValidator.validateAddBatchCourse(reqObj);
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -140,9 +143,10 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-  
+
   /**
    * This method will remove user batch enrollment.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> removeUsersFromBatch() {
@@ -156,7 +160,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -165,14 +169,15 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-  
+
   /**
    * This method will fetch batch details from ES.
+   * 
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
     try {
-      ProjectLogger.log("get batch=" +batchId, LoggerEnum.INFO.name());
+      ProjectLogger.log("get batch=" + batchId, LoggerEnum.INFO.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_BATCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
@@ -180,7 +185,7 @@ public class CourseBatchController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
       innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
       return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
@@ -189,7 +194,7 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-  
+
   /**
    * 
    * @param request
@@ -205,34 +210,34 @@ public class CourseBatchController extends BaseController {
     }
     return map;
   }
-  
-  
+
+
   /**
-   * This method will do the user search for Elastic search.
-   * this will internally call composite search api.
+   * This method will do the user search for Elastic search. this will internally call composite
+   * search api.
    *
    * @return Promise<Result>
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Course batch search api call =" + requestData,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log("Course batch search api call =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequest_id(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
 
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.course.getTypeName());
-      if (reqObj.getRequest().containsKey(JsonKey.FILTERS) && reqObj.getRequest().get(JsonKey.FILTERS)!=null 
-          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map){
-     ((Map)(reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
-      }else {
-        Map<String,Object> filtermap = new HashMap<>();
-        Map<String,Object> dataMap  = new HashMap<>();
+      if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
+          && reqObj.getRequest().get(JsonKey.FILTERS) != null
+          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
+        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+      } else {
+        Map<String, Object> filtermap = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
         filtermap.put(JsonKey.FILTERS, dataMap);
       }
@@ -242,4 +247,4 @@ public class CourseBatchController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  }
+}
