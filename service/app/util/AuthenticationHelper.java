@@ -3,9 +3,13 @@
  */
 package util;
 
+import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.Util;
+import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 
@@ -18,6 +22,10 @@ import org.sunbird.services.sso.SSOServiceFactory;
  *
  */
 public class AuthenticationHelper {
+  
+  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
+  
   /**
    * This method will verify the incoming user access token against store data base /cache. If token
    * is valid then it would be associated with some user id. In case of token matched it will
