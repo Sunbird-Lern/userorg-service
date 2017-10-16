@@ -3,15 +3,21 @@
  */
 package util;
 
+import java.util.List;
+import java.util.Map;
+
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.Application;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
+
 
 /**
  * 
@@ -22,10 +28,11 @@ import org.sunbird.services.sso.SSOServiceFactory;
  *
  */
 public class AuthenticationHelper {
-  
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
-  
+  static{
+     Application.checkCassandraConnection();
+  }
+  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
   /**
    * This method will verify the incoming user access token against store data base /cache. If token
    * is valid then it would be associated with some user id. In case of token matched it will
@@ -33,6 +40,7 @@ public class AuthenticationHelper {
    * @param token String
    * @return String
    */
+  @SuppressWarnings("unchecked")
   public static String verifyUserAccesToken(String token) {
     SSOManager ssoManager = SSOServiceFactory.getInstance();
     String userId = ""; 
@@ -41,7 +49,15 @@ public class AuthenticationHelper {
       if (response) {
       userId = ssoManager.verifyToken(token);
       } else {
-        userId = token;
+       Response authResponse = cassandraOperation.getRecordById(userAuth.getKeySpace(), userAuth.getTableName(), token);
+       if(authResponse != null && authResponse.get(JsonKey.RESPONSE) != null) {
+        List<Map<String, Object>> authList =
+             (List<Map<String, Object>>) authResponse.get(JsonKey.RESPONSE);
+          if (authList != null && authList.size()>0) {
+            Map<String,Object> authMap = authList.get(0);
+             userId = (String) authMap.get(JsonKey.USER_ID);
+          }
+       }
       }
     } catch (Exception e) {
       ProjectLogger.log("invalid auth token =" + token, e);
