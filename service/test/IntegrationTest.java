@@ -17,6 +17,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
@@ -57,6 +61,17 @@ public class IntegrationTest {
 			Result result = route(req);
 			assertEquals(401, result.status());
 	  }
+	  
+	  
+	 @Test
+      public void testUserFailureLogin() {
+        String data = "{ \"request\":{\"userName\":\"manzarul.haque@tareno.com\",\"source\":\"web\",\"password\":\"password\"}}";    
+         JsonNode json = Json.parse(data);
+          RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/login").method("POST");
+            req.headers(headerMap);
+            Result result = route(req);
+            assertEquals(400, result.status());
+      }
 	  
 	  @AfterClass
 	  public static void stopApp() {
