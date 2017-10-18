@@ -1,6 +1,5 @@
 package controllers.storage;
 
-import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.io.ByteArrayInputStream;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
@@ -77,7 +75,7 @@ public class FileStorageController extends BaseController {
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
@@ -85,8 +83,7 @@ public class FileStorageController extends BaseController {
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
 
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

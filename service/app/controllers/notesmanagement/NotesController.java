@@ -1,10 +1,8 @@
 package controllers.notesmanagement;
 
-import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -42,14 +40,13 @@ public class NotesController extends BaseController {
       }
       RequestValidator.validateNote(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_NOTE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
@@ -68,15 +65,14 @@ public class NotesController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateNoteId(noteId);
       reqObj.setOperation(ActorOperations.UPDATE_NOTE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE_ID, noteId);
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
@@ -94,15 +90,14 @@ public class NotesController extends BaseController {
       RequestValidator.validateNoteId(noteId);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_NOTE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.NOTE_ID, noteId);
       reqObj.setRequest(innerMap);
 
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
@@ -119,14 +114,13 @@ public class NotesController extends BaseController {
       ProjectLogger.log("Search Note request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_NOTE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.putAll(reqObj.getRequest());
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));
@@ -144,14 +138,13 @@ public class NotesController extends BaseController {
       Request reqObj = new Request();
       RequestValidator.validateNoteId(noteId);
       reqObj.setOperation(ActorOperations.DELETE_NOTE.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE_ID, noteId);
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
       return Promise.<Result>pure(createCommonExceptionResponse(e, null));

@@ -3,14 +3,13 @@
  */
 package controllers.healthmanager;
 
+import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.HttpUtil;
@@ -20,11 +19,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
-
-import akka.util.Timeout;
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -51,11 +46,10 @@ public class HealthController extends BaseController {
       ProjectLogger.log("Call to get all server health api = " , LoggerEnum.INFO.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -77,11 +71,10 @@ public class HealthController extends BaseController {
         try{
         Request reqObj = new Request();
         reqObj.setOperation(val);
-        reqObj.setRequest_id(ExecutionContext.getRequestId());
+        reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
         reqObj.setEnv(getEnvironment());
-        Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-        return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+        return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
       } catch (Exception e) {
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
