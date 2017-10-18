@@ -81,9 +81,7 @@ public class CourseMetricsController extends BaseController {
       map.put(JsonKey.PERIOD, periodStr);
       request.setRequest(map);
       request.setRequestId(ExecutionContext.getRequestId());
-      Promise<Result> res =
-          actorResponseHandler(getActorRef(), request, timeout, null, request());
-      return res;
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

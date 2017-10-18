@@ -1,6 +1,5 @@
 package controllers.bulkapimanagement;
 
-import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.io.ByteArrayInputStream;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;

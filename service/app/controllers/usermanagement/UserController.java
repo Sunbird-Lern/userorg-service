@@ -3,14 +3,12 @@
  */
 package controllers.usermanagement;
 
-import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -285,7 +283,6 @@ public class UserController extends BaseController {
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -311,7 +308,6 @@ public class UserController extends BaseController {
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
