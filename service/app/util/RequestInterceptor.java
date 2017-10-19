@@ -8,6 +8,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http.Request;
@@ -62,20 +63,23 @@ public class RequestInterceptor {
   public static String verifyRequestData(Request request) {
     String response = "{userId}";
     if (!isRequestInExcludeList(request.path())) {
-      if (ProjectUtil
-          .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
+      if (ProjectUtil.isStringNullOREmpty(
+          request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         return ResponseCode.unAuthorised.getErrorCode();
       }
-      if(ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))) {
-        ProjectLogger.log("SSO public key is not set by environment variable==",LoggerEnum.INFO.name());
+      if (ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))
+          && Boolean.parseBoolean(PropertiesCache.getInstance()
+              .getProperty(JsonKey.IS_SSO_ENABLED))) {
+        ProjectLogger.log("SSO public key is not set by environment variable==",
+            LoggerEnum.INFO.name());
         response = "{userId}" + JsonKey.NOT_AVAILABLE;
-      }else{
-      String userId = AuthenticationHelper
-          .verifyUserAccesToken(request.getHeader(HeaderParam.X_Access_TokenId.getName()));
-      if (ProjectUtil.isStringNullOREmpty(userId)) {
-        return ResponseCode.unAuthorised.getErrorCode();
-      }
-       response = "{userId}" + userId;
+      } else {
+        String userId = AuthenticationHelper.verifyUserAccesToken(
+            request.getHeader(HeaderParam.X_Access_TokenId.getName()));
+        if (ProjectUtil.isStringNullOREmpty(userId)) {
+          return ResponseCode.unAuthorised.getErrorCode();
+        }
+        response = "{userId}" + userId;
       }
     }
     return response;
