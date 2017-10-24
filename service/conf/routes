@@ -145,3 +145,8 @@ DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.Note
 
 #Audit History API
 POST   /v1/audit/history                       @controllers.audit.AuditLogController.searchAuditHistory()
+
+#skill tag and endoresement
+POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
+POST  /v1/user/skill/get						@controllers.skills.SkillController.getSkill()
+GET   /v1/skills/list						@controllers.skills.SkillController.getSkillsList()
