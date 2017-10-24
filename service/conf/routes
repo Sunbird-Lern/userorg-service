@@ -148,5 +148,5 @@ POST   /v1/audit/history                       @controllers.audit.AuditLogContro
 
 #skill tag and endoresement
 POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
-POST  /v1/user/skill/get						@controllers.skills.SkillController.getSkill()
-GET   /v1/skills/list						@controllers.skills.SkillController.getSkillsList()
+POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
+GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
