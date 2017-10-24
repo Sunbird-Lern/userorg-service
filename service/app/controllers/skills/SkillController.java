@@ -25,16 +25,13 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add/endorse user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      //RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.ADD_SKILL.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
-      //innerMap.put(JsonKey.SKILLS, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -45,16 +42,13 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("get user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      //RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.GET_SKILL.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
-      //innerMap.put(JsonKey.SKILLS, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -62,17 +56,15 @@ public class SkillController extends BaseController {
 
   public Promise<Result> getSkillsList() {
     try {
+      ProjectLogger.log("get list of skills ");
       Request reqObj = new Request();
-      //RequestValidator.validateAddBatchCourse(reqObj);
       reqObj.setOperation(ActorOperations.GET_SKILLS_LIST.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
-      //innerMap.put(JsonKey.SKILLS, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
