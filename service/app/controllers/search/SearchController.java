@@ -3,11 +3,9 @@
  */
 package controllers.search;
 
-import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -39,11 +37,10 @@ public class SearchController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCompositeSearch(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
@@ -61,14 +58,13 @@ public class SearchController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
       reqObj.setOperation(ActorOperations.SYNC.getValue());
-      reqObj.setRequest_id(ExecutionContext.getRequestId());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.DATA, reqObj.getRequest());
       reqObj.setRequest(map);
-      Timeout timeout = new Timeout(Akka_wait_time, TimeUnit.SECONDS);
-      return actorResponseHandler(getRemoteActor(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }

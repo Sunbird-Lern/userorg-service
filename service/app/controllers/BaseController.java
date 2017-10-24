@@ -5,6 +5,7 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import controllers.actorutility.ActorSystemFactory;
+import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -31,9 +32,9 @@ import util.Global;
  */
 public class BaseController extends Controller {
 
-  public static final int Akka_wait_time = 10;
+  public static final int AKKA_WAIT_TIME = 10;
   private static Object actorRef = null;
-
+  protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   static {
     actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
   }
@@ -41,9 +42,9 @@ public class BaseController extends Controller {
   /**
    * This method will provide remote Actor selection
    * 
-   * @return ActorSelection
+   * @return Object 
    */
-  public Object getRemoteActor() {
+  public Object getActorRef() {
 
     return actorRef;
   }
@@ -288,7 +289,7 @@ public class BaseController extends Controller {
     if (Global.env != null) {
       return Global.env.getValue();
     }
-    return ProjectUtil.Environment.prod.getValue();
+    return ProjectUtil.Environment.dev.getValue();
   }
 
   /**

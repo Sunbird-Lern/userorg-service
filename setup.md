@@ -12,6 +12,40 @@
     7. sunbird_sso_password: keycloak password
     8. sunbird_sso_client_id: key cloak client id
     9. sunbird_sso_client_secret : keycloak client secret (not mandatory)
+## Do the below env setup , if you are planing to run actor as local mode.
+    1. sunbird_cassandra_host: host running the cassandra server
+    2. sunbird_cassandra_port: port on which cassandra server is running
+    3. sunbird_cassandra_username (optional): username for cassandra database, if authentication is enabled
+    4. sunbird_cassandra_password (optional): password for cassandra database, if authentication is enabled
+    5. sunbird_es_host: host running the elasticsearch server
+    6. sunbird_es_port: port on which elasticsearch server is running
+    7. sunbird_es_cluster (optional): name of the elasticsearch cluster
+    8. sunbird_learner_actor_host: host running for learner actor
+    9. sunbird_learner_actor_port: port on which learner actor is running.
+    10. ekstep_content_search_base_url : provide base url for EkStep content search
+    11. ekstep_authorization : provide authorization for value for content search
+    12. sunbird_pg_host: postgres host name or ip
+    13. sunbird_pg_port: postgres port number
+    14. sunbird_pg_db: postgres db name
+    15. sunbird_pg_user: postgres db user name
+    16. sunbird_pg_password: postgress db password 
+    17. sunbird_installation
+    18. ekstep_api_base_url
+    19. sunbird_mail_server_host
+    20. sunbird_mail_server_port
+    21. sunbird_mail_server_username
+    22. sunbird_mail_server_password
+    23. sunbird_mail_server_from_email
+    24. sunbird_account_name : account name of azure blob storage.
+    25. sunbird_account_key : azure blob storage account key
+    26. sunbird_quartz_mode: put this value {"embedded" to run quartz without any data base, "any other value" to run with postgres db }
+    27. sunbird_encryption_key
+    28. sunbird_encryption_mode : mode value is either local or remote
+    29. sunbird_sso_publickey : sso public key
+    30. sunbird_env_logo_url : logo url for sending email.(http://www.paramountias.com/media/images/current-affairs/diksha-portal.jpg) 
+    31. sunird_web_url : web page url
+    32. sunbird_app_url : paly store url to downlaod the app    
+    
 
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
