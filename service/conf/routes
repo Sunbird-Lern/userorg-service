@@ -150,3 +150,11 @@ POST   /v1/audit/history                       @controllers.audit.AuditLogContro
 POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
 POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
+
+#DB Operation API
+POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll()
+POST   /v1/object/read                   @controllers.datapersistence.DbOperationController.read()
+POST   /v1/object/create                 @controllers.datapersistence.DbOperationController.create()
+POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update()
+POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete()
+POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
