@@ -49,6 +49,12 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/forgotpassword", var);
     apiHeaderIgnoreMap.put("/v1/user/login", var);
     apiHeaderIgnoreMap.put("/v1/user/logout", var);
+    apiHeaderIgnoreMap.put("/v1/object/read/list", var);
+    apiHeaderIgnoreMap.put("/v1/object/read", var);
+    apiHeaderIgnoreMap.put("/v1/object/create", var);
+    apiHeaderIgnoreMap.put("/v1/object/update", var);
+    apiHeaderIgnoreMap.put("/v1/object/delete", var);
+    apiHeaderIgnoreMap.put("/v1/object/search", var);
   }
 
   /**
