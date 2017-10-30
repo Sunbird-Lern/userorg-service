@@ -150,3 +150,9 @@ POST   /v1/audit/history                       @controllers.audit.AuditLogContro
 POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
 POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
+
+#T&C
+POST  /v1/tenant/tc/createpreference 						@controllers.tenantpreference.TenantPreferenceController.createTanentPreference()
+POST  /v1/tenant/tc/updatepreference 						@controllers.tenantpreference.TenantPreferenceController.updateTanentPreference()
+GET  /v1/tenant/tc/getpreference/:orgId						@controllers.tenantpreference.TenantPreferenceController.getTanentPreference(orgId:String)
+POST  /v1/tenant/tc/updateuserstatus 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
