@@ -22,7 +22,7 @@ import play.mvc.Http.Request;
 public class RequestInterceptor {
 
   private RequestInterceptor() {}
-  public static List<String> restrictedUriList = null;
+  protected static List<String> restrictedUriList = null;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
   static {
     restrictedUriList = new ArrayList<>();
@@ -45,13 +45,16 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
     apiHeaderIgnoreMap.put("/v1/user/data/encrypt", var);
     apiHeaderIgnoreMap.put("/v1/user/data/decrypt", var);
-    apiHeaderIgnoreMap.put("/v1/org/upload", var);
-    apiHeaderIgnoreMap.put("/v1/user/upload", var);
-    apiHeaderIgnoreMap.put("/v1/batch/bulk/enrollment", var);
     apiHeaderIgnoreMap.put("/v1/file/upload", var);
     apiHeaderIgnoreMap.put("/v1/user/forgotpassword", var);
     apiHeaderIgnoreMap.put("/v1/user/login", var);
     apiHeaderIgnoreMap.put("/v1/user/logout", var);
+    apiHeaderIgnoreMap.put("/v1/object/read/list", var);
+    apiHeaderIgnoreMap.put("/v1/object/read", var);
+    apiHeaderIgnoreMap.put("/v1/object/create", var);
+    apiHeaderIgnoreMap.put("/v1/object/update", var);
+    apiHeaderIgnoreMap.put("/v1/object/delete", var);
+    apiHeaderIgnoreMap.put("/v1/object/search", var);
   }
 
   /**

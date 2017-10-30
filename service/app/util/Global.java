@@ -277,5 +277,12 @@ public class Global extends GlobalSettings {
     apiMap.put("/health", "api.all.health");
     apiMap.put("/v1/audit/history", "api.audit.history");
     apiMap.put("/v1/user/forgotpassword", "api.user.forgotpassword");
+    
+    apiMap.put("/v1/object/read", "api.object.read");
+    apiMap.put("/v1/object/create", "api.object.create");
+    apiMap.put("/v1/object/update", "api.object.update");
+    apiMap.put("/v1/object/delete", "api.object.delete");
+    apiMap.put("/v1/object/read/list", "api.object.read.list");
+    apiMap.put("/v1/object/search", "api.object.search");
   }
 }
