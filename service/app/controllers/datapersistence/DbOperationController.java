@@ -207,7 +207,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> readAll() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting read data request = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("getting read all data request = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -249,7 +249,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("getting read data request = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("getting search data request = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
