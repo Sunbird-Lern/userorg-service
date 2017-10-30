@@ -156,3 +156,11 @@ POST  /v1/tenant/tc/createpreference 						@controllers.tenantpreference.TenantP
 POST  /v1/tenant/tc/updatepreference 						@controllers.tenantpreference.TenantPreferenceController.updateTanentPreference()
 GET  /v1/tenant/tc/getpreference/:orgId						@controllers.tenantpreference.TenantPreferenceController.getTanentPreference(orgId:String)
 POST  /v1/tenant/tc/updateuserstatus 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
+
+#DB Operation API
+POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll()
+POST   /v1/object/read                   @controllers.datapersistence.DbOperationController.read()
+POST   /v1/object/create                 @controllers.datapersistence.DbOperationController.create()
+POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update()
+POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete()
+POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
