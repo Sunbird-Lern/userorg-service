@@ -84,6 +84,8 @@ public class RequestInterceptor {
         }
         response = "{userId}" + userId;
       }
+    }else{
+      AuthenticationHelper.invalidateToken("");
     }
     return response;
   }
