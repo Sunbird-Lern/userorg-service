@@ -69,6 +69,7 @@ public class DbOperationController extends BaseController {
                 (String) payload.get(JsonKey.ID));
             response.put(JsonKey.RESPONSE, JsonKey.FAILURE);
           }
+          response.put(JsonKey.DATA, payload);
         }
       }
       return Promise.<Result>pure(createCommonResponse(response, null, request()));
