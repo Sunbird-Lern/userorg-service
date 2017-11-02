@@ -166,3 +166,8 @@ POST   /v1/object/create                 @controllers.datapersistence.DbOperatio
 POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update()
 POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete()
 POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
+
+#Master Key API
+POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient()
+PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey
+GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String)
