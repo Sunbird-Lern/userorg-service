@@ -55,6 +55,8 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/object/update", var);
     apiHeaderIgnoreMap.put("/v1/object/delete", var);
     apiHeaderIgnoreMap.put("/v1/object/search", var);
+    apiHeaderIgnoreMap.put("/v1/client/register",var);
+    apiHeaderIgnoreMap.put("/v1/client/key/read", var);
   }
 
   /**
@@ -66,15 +68,25 @@ public class RequestInterceptor {
   public static String verifyRequestData(Request request) {
     String response = "{userId}";
     if (!isRequestInExcludeList(request.path())) {
-      if (ProjectUtil.isStringNullOREmpty(
-          request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
-        return ResponseCode.unAuthorised.getErrorCode();
+      if (ProjectUtil
+          .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
+        if (ProjectUtil
+            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
+            && ProjectUtil
+                .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
+          return ResponseCode.unAuthorised.getErrorCode();
+        }
       }
       if (ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))
           && Boolean.parseBoolean(PropertiesCache.getInstance()
               .getProperty(JsonKey.IS_SSO_ENABLED))) {
         ProjectLogger.log("SSO public key is not set by environment variable==",
             LoggerEnum.INFO.name());
+        response = "{userId}" + JsonKey.NOT_AVAILABLE;
+      } else if(!ProjectUtil
+            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
+            && !ProjectUtil
+                .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
         response = "{userId}" + JsonKey.NOT_AVAILABLE;
       } else {
         String userId = AuthenticationHelper.verifyUserAccesToken(
