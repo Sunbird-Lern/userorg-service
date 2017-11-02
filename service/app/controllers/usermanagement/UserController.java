@@ -468,4 +468,39 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+  
+  /**
+   * This method will add or update user profile visibility
+   * control. User can make all field as private except name.
+   * any private filed of user is not search-able.
+   * @return Promise<Result>
+   */
+  public Promise<Result> profileVisibility() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log(" Profile visibility control request= " + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateProfileVisibility(reqObj);
+      if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
+          && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
+         String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+          if (!userId.equals(ctx().flash().get(JsonKey.USER_ID))) {
+            throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+                ResponseCode.unAuthorised.getErrorMessage(),
+                ResponseCode.UNAUTHORIZED.getResponseCode());
+        }
+      }
+      reqObj.setOperation(ActorOperations.PROFILE_VISIBILITY.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.USER, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
 }
