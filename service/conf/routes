@@ -27,6 +27,8 @@ POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.un
 PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
 GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
 POST    /v1/user/forgotpassword			@controllers.usermanagement.UserController.forgotpassword()
+POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
+
 
 #course management api
 POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
@@ -151,6 +153,12 @@ POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
 POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
 
+#T&C
+POST  /v1/tenant/tc/createpreference 						@controllers.tenantpreference.TenantPreferenceController.createTanentPreference()
+POST  /v1/tenant/tc/updatepreference 						@controllers.tenantpreference.TenantPreferenceController.updateTanentPreference()
+GET  /v1/tenant/tc/getpreference/:orgId						@controllers.tenantpreference.TenantPreferenceController.getTanentPreference(orgId:String)
+POST  /v1/tenant/tc/updateuserstatus 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
+
 #DB Operation API
 POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll()
 POST   /v1/object/read                   @controllers.datapersistence.DbOperationController.read()
@@ -158,3 +166,8 @@ POST   /v1/object/create                 @controllers.datapersistence.DbOperatio
 POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update()
 POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete()
 POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
+
+#Master Key API
+POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient()
+PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey
+GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String)
