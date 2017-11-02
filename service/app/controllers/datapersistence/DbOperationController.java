@@ -67,7 +67,9 @@ public class DbOperationController extends BaseController {
           if (!esResult) {
             deleteRecord(JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(TABLE_NAME),
                 (String) payload.get(JsonKey.ID));
-            response.put(JsonKey.RESPONSE, JsonKey.FAILURE);
+            throw new ProjectCommonException(ResponseCode.esUpdateFailed.getErrorCode(),
+                ResponseCode.esUpdateFailed.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode());
           }
           response.put(JsonKey.DATA, payload);
         }
@@ -122,7 +124,9 @@ public class DbOperationController extends BaseController {
           if (!((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)) {
             deleteDataFromElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(DOCUMENT_NAME),
                 (String) payload.get(JsonKey.ID));
-            response.put(JsonKey.RESPONSE, JsonKey.FAILURE);
+            throw new ProjectCommonException(ResponseCode.esUpdateFailed.getErrorCode(),
+                ResponseCode.esUpdateFailed.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode());
           }
         }
       }
