@@ -169,3 +169,7 @@ POST   /v1/object/search                 @controllers.datapersistence.DbOperatio
 POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient()
 PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey
 GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String)
+
+#GEO LOCATION API
+POST /v1/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation()
+GET  /v1/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String)
