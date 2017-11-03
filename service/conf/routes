@@ -175,3 +175,5 @@ GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientCont
 #GEO LOCATION API
 POST /v1/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation()
 GET  /v1/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String)
+PATCH  /v1/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
+DELETE   /v1/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String)

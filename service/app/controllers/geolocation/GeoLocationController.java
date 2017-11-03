@@ -2,6 +2,7 @@ package controllers.geolocation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -47,6 +48,41 @@ public class GeoLocationController extends BaseController {
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.TYPE , type);
       innerMap.put(JsonKey.ID , id);
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> updateGeoLocation(String locationId) {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("update geo location" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.UPDATE_GEO_LOCATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.LOCATION_ID , locationId);
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> deleteGeoLocation(String locationId) {
+    try {
+      ProjectLogger.log("delete geo location");
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.DELETE_GEO_LOCATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.LOCATION_ID, locationId);
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
