@@ -22,6 +22,7 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.Application;
 import org.sunbird.learner.util.Util;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -37,8 +38,16 @@ public class DbOperationController extends BaseController {
   private static final String ES_INDEX_NAME = "sunbirdplugin";
   private static List<String> tableList = null;
 
-  static {
-    tableList = manager.getTableList(JsonKey.SUNBIRD_PLUGIN);
+  static{
+    createtableList();
+  }
+  
+  public static void createtableList(){
+    try{
+      tableList = manager.getTableList(JsonKey.SUNBIRD_PLUGIN);
+    }catch (Exception e) {
+      ProjectLogger.log("Error occured" + e.getMessage(), e);
+    }
   }
 
   /**
