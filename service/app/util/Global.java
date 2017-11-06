@@ -288,5 +288,20 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/client/key/update", "api.client.key.update");
     apiMap.put("/v1/client/key/read", "api.client.key.read");
     apiMap.put("/v1/user/profile/visibility", "api.user.profile.visibility");
+
+    apiMap.put("/v1/location/create","api.location.create");
+    apiMap.put("/v1/location/read","api.location.read");
+    apiMap.put("/v1/location/update","api.location.update");
+    apiMap.put("/v1/location/delete","api.location.delete");
+
+    apiMap.put("/v1/org/tc/create","api.org.tc.create");
+    apiMap.put("/v1/org/tc/update","api.org.tc.update");
+    apiMap.put("/v1/org/tc/read","api.org.tc.read");
+    apiMap.put("/v1/user/tc/update","api.user.tc.update");
+
+    apiMap.put("/v1/user/skill/add","api.user.skill.add");
+    apiMap.put("/v1/user/skill/read" , "api.user.skill.read");
+    apiMap.put("/v1/skills" , "api.skills");
+
   }
 }
