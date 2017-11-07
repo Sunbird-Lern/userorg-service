@@ -40,10 +40,10 @@ public class ClientController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_NAME, reqObj.getRequest().get(JsonKey.CLIENT_NAME));
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -66,10 +66,10 @@ public class ClientController extends BaseController {
       innerMap.put(JsonKey.CLIENT_ID, clientId);
       innerMap.put(JsonKey.MASTER_KEY, masterKey);
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -89,10 +89,10 @@ public class ClientController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
