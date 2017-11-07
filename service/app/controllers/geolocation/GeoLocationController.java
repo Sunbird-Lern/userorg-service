@@ -10,6 +10,8 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestValidator;
+
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -90,4 +92,22 @@ public class GeoLocationController extends BaseController {
     }
   }
 
+  public Promise<Result> sendNotification() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Send notification api call" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateSendNotification(reqObj);
+      reqObj.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
 }
