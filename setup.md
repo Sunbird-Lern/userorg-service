@@ -44,7 +44,8 @@
     29. sunbird_sso_publickey : sso public key
     30. sunbird_env_logo_url : logo url for sending email.(http://www.paramountias.com/media/images/current-affairs/diksha-portal.jpg) 
     31. sunird_web_url : web page url
-    32. sunbird_app_url : paly store url to downlaod the app    
+    32. sunbird_app_url : paly store url to downlaod the app
+    33 sunbird_fcm_account_key : account key for FCM     
     
 
 ## Build

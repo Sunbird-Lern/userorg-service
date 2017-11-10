@@ -22,7 +22,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.Application;
 import org.sunbird.learner.util.Util;
 import play.libs.F.Promise;
 import play.mvc.Result;
