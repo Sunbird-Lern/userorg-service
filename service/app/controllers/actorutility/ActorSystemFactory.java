@@ -19,14 +19,14 @@ public class ActorSystemFactory {
   static {
     PropertiesCache cache = PropertiesCache.getInstance();
     if ("local".equalsIgnoreCase(cache.getProperty("api_actor_provider"))) {
-      ProjectLogger.log("Initializing Local Actor System");
+      ProjectLogger.log("Initializing Normal Local Actor System  called from controller");
       if (null == actorSystem) {
-        actorSystem = new LocalActorSystem();
+        actorSystem = LocalActorSystem.getInstance();
       }
     } else {
-      ProjectLogger.log("Initializing Remote Actor System");
+      ProjectLogger.log("Initializing Normal Remote Actor System called from controller");
       if (null == actorSystem) {
-        actorSystem = new RemoteActorSystem();
+        actorSystem = RemoteActorSystem.getInstance();
       }
     }
   }
