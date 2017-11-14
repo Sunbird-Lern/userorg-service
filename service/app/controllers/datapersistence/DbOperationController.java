@@ -28,6 +28,7 @@ import play.mvc.Result;
 
 public class DbOperationController extends BaseController {
 
+  private static final String REQUIRED_FIELDS = "requiredFields";
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static CassandraConnectionManager manager = CassandraConnectionMngrFactory
       .getObject(PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));
@@ -267,19 +268,35 @@ public class DbOperationController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Response response = new Response();
+      List<String> requiredFields = null;
       if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
         String esType = (String) reqObj.getRequest().get(DOCUMENT_NAME);
+        if(reqObj.getRequest().containsKey(REQUIRED_FIELDS)) {
+          requiredFields = (List<String>) reqObj.getRequest().get(REQUIRED_FIELDS);
+          reqObj.getRequest().remove(REQUIRED_FIELDS);
+        }
+
         reqObj.getRequest().remove(DOCUMENT_NAME);
         if(null !=  reqObj.getRequest().get(JsonKey.FILTERS)){
           validateRequestData((Map<String, Object>) reqObj.getRequest().get(JsonKey.FILTERS));
         }
         SearchDTO searchDto = Util.createSearchDto(reqObj.getRequest());
         Map<String, Object> result = ElasticSearchUtil.complexSearch(searchDto, ES_INDEX_NAME, esType);
+        Map<String , Object> finalResult = new HashMap<>();
         if (!result.isEmpty()) {
-          List<Map<String, Object>> mapList =
-              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-          for (Map<String, Object> map : mapList) {
-            map.remove(JsonKey.IDENTIFIER);
+          // filrer the required fields like content or facet etc...
+          if(null != requiredFields && !requiredFields.isEmpty()){
+            for(String attribute : requiredFields){
+              finalResult.put(attribute , result.get(attribute));
+            }
+            result = finalResult;
+          }
+          if(result.containsKey(JsonKey.CONTENT)) {
+            List<Map<String, Object>> mapList =
+                (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+            for (Map<String, Object> map : mapList) {
+              map.remove(JsonKey.IDENTIFIER);
+            }
           }
           response.put(JsonKey.RESPONSE, result);
         } else {
