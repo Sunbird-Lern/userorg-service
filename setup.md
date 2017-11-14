@@ -47,6 +47,13 @@
     32. sunbird_app_url : paly store url to downlaod the app
     33 sunbird_fcm_account_key : account key for FCM     
     
+## Do the below env setup , if you are planing to run background actor in remote mode.
+	1. sunbird_background_actor_host: host running for learner background actor
+    2. sunbird_background_actor_port: port on which learner background actor is running.
+	
+## Do the below env setup , to start a actor system on a machine {"RemoteMiddlewareActorSystem" it will start Normal Actor System on that machine,             ##"BackGroundRemoteMiddlewareActorSystem" , it will start background actor}.
+
+   1.  actor_service_name : actor system name to start{values are "RemoteMiddlewareActorSystem" , "BackGroundRemoteMiddlewareActorSystem"}
 
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
