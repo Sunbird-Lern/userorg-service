@@ -11,7 +11,6 @@ COPY ./service/target/learning-service-1.0-SNAPSHOT-dist.zip /home/sunbird/learn
 RUN unzip /home/sunbird/learner/learning-service-1.0-SNAPSHOT-dist.zip -d /home/sunbird/learner/
 COPY docker-entrypoint.sh /home/sunbird/learner/
 RUN chown -R sunbird:sunbird /home/sunbird
-USER sunbird
 #WORKDIR /home/sunbird/learner/
 #RUN mkdir -p /home/sunbird/learner/logs/
 #RUN touch /home/sunbird/learner/logs/learningServiceProject.log
