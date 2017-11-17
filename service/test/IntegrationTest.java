@@ -70,9 +70,39 @@ public class IntegrationTest {
           RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/login").method("POST");
             req.headers(headerMap);
             Result result = route(req);
-            assertEquals(400, result.status());
+            assertEquals(401, result.status());
       }
 	  
+	 @Test
+     public void testUserFailureLogout() {
+       String data = "{\"request\":{\"authToken\":\"some token value\",\"userId\":\"123344-334444-5566\"}}";    
+        JsonNode json = Json.parse(data);
+         RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/logout").method("POST");
+           req.headers(headerMap);
+           Result result = route(req);
+           assertEquals(401, result.status());
+     }
+	 
+	 
+	 @Test
+     public void testFailureChangePassword() {
+       String data = "{\"request\":{\"authToken\":\"some token value\",\"oldPassword\":\"password1\",\"Password\":\"password\"}}";    
+        JsonNode json = Json.parse(data);
+         RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/changepassword").method("POST");
+           req.headers(headerMap);
+           Result result = route(req);
+           assertEquals(401, result.status());
+     }
+	
+	 
+	 @Test
+     public void testGetUserWithWrongId() {
+         RequestBuilder req = new RequestBuilder().uri("/v1/user/getprofile/1234-5465-1234-455").method("GET");
+           req.headers(headerMap);
+           Result result = route(req);
+           assertEquals(401, result.status());
+     }
+	 
 	  @AfterClass
 	  public static void stopApp() {
 
