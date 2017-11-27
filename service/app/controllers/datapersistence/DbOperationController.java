@@ -33,8 +33,8 @@ public class DbOperationController extends BaseController {
   private static CassandraConnectionManager manager = CassandraConnectionMngrFactory
       .getObject(PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));
   private static final String PAYLOAD = "payload";
-  private static final String TABLE_NAME = "tableName";
-  private static final String DOCUMENT_NAME = "documentName";
+  private static final String ENTITY_NAME = "entityName";
+  private static final String INDEXED = "indexed";
   private static final String ES_INDEX_NAME = "sunbirdplugin";
   private static List<String> tableList = null;
 
@@ -55,6 +55,7 @@ public class DbOperationController extends BaseController {
    * 
    * @return Promise<Result>
    */
+  @SuppressWarnings("unchecked")
   public Promise<Result> create() {
     try {
       JsonNode requestData = request().body().asJson();
@@ -66,15 +67,16 @@ public class DbOperationController extends BaseController {
       Map<String, Object> payload = (Map<String, Object>) reqObj.getRequest().get(PAYLOAD);
       validateRequestData(payload);
       Response response = cassandraOperation.insertRecord(JsonKey.SUNBIRD_PLUGIN,
-          (String) reqObj.getRequest().get(TABLE_NAME), payload);
-      if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)) {
+          (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+      if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS) && 
+          ((boolean)reqObj.getRequest().get(INDEXED))) {
         boolean esResult = false;
-        if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
+        if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(ENTITY_NAME))) {
           esResult =
-              insertDataToElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(DOCUMENT_NAME),
+              insertDataToElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(ENTITY_NAME),
                   (String) payload.get(JsonKey.ID), payload);
           if (!esResult) {
-            deleteRecord(JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(TABLE_NAME),
+            deleteRecord(JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME),
                 (String) payload.get(JsonKey.ID));
             throw new ProjectCommonException(ResponseCode.esUpdateFailed.getErrorCode(),
                 ResponseCode.esUpdateFailed.getErrorMessage(),
@@ -98,7 +100,7 @@ public class DbOperationController extends BaseController {
   }
 
   private void validateTableName(Request reqObj) {
-    if (!tableList.contains((String) reqObj.getRequest().get(TABLE_NAME))) {
+    if (!tableList.contains((String) reqObj.getRequest().get(ENTITY_NAME))) {
       throw new ProjectCommonException(ResponseCode.tableOrDocNameError.getErrorCode(),
           ResponseCode.tableOrDocNameError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -111,6 +113,7 @@ public class DbOperationController extends BaseController {
    * 
    * @return Promise<Result>
    */
+  @SuppressWarnings("unchecked")
   public Promise<Result> update() {
     try {
       JsonNode requestData = request().body().asJson();
@@ -123,20 +126,35 @@ public class DbOperationController extends BaseController {
       validateRequestData(payload);
       Response response = new Response();
       boolean esResult = false;
-      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
-        esResult =
-            updateDataToElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(DOCUMENT_NAME),
-                (String) payload.get(JsonKey.ID), payload);
+      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(ENTITY_NAME))
+          && ((boolean) reqObj.getRequest().get(INDEXED))) {
+        esResult = updateDataToElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(ENTITY_NAME),
+            (String) payload.get(JsonKey.ID), payload);
         if (esResult) {
           response = cassandraOperation.updateRecord(JsonKey.SUNBIRD_PLUGIN,
-              (String) reqObj.getRequest().get(TABLE_NAME), payload);
+              (String) reqObj.getRequest().get(ENTITY_NAME), payload);
           if (!((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)) {
-            deleteDataFromElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(DOCUMENT_NAME),
+            deleteDataFromElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(ENTITY_NAME),
                 (String) payload.get(JsonKey.ID));
             throw new ProjectCommonException(ResponseCode.esUpdateFailed.getErrorCode(),
                 ResponseCode.esUpdateFailed.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode());
           }
+        } else {
+          throw new ProjectCommonException(ResponseCode.updateFailed.getErrorCode(),
+              ResponseCode.updateFailed.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
+      } else {
+        Map<String, Object> data = ElasticSearchUtil.getDataByIdentifier(ES_INDEX_NAME,
+            (String) reqObj.getRequest().get(ENTITY_NAME), (String) payload.get(JsonKey.ID));
+        if (data.isEmpty() || ((boolean) reqObj.getRequest().get(INDEXED))) {
+          response = cassandraOperation.updateRecord(JsonKey.SUNBIRD_PLUGIN,
+              (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+        } else {
+          throw new ProjectCommonException(ResponseCode.updateFailed.getErrorCode(),
+              ResponseCode.updateFailed.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
       return Promise.<Result>pure(createCommonResponse(response, null, request()));
@@ -159,11 +177,11 @@ public class DbOperationController extends BaseController {
       reqObj.setEnv(getEnvironment());
       validateTableName(reqObj);
       Response response = cassandraOperation.deleteRecord(JsonKey.SUNBIRD_PLUGIN,
-          (String) reqObj.getRequest().get(TABLE_NAME),
+          (String) reqObj.getRequest().get(ENTITY_NAME),
           (String) reqObj.getRequest().get(JsonKey.ID));
       if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)
-          && !ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
-        deleteDataFromElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(DOCUMENT_NAME),
+          && ((boolean)reqObj.getRequest().get(INDEXED))) {
+        deleteDataFromElastic(ES_INDEX_NAME, (String) reqObj.getRequest().get(ENTITY_NAME),
             (String) reqObj.getRequest().get(JsonKey.ID));
       }
       return Promise.<Result>pure(createCommonResponse(response, null, request()));
@@ -187,19 +205,9 @@ public class DbOperationController extends BaseController {
       reqObj.setEnv(getEnvironment());
       Response response = new Response();
       validateTableName(reqObj);
-      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
-        Map<String, Object> result = ElasticSearchUtil.getDataByIdentifier(ES_INDEX_NAME,
-            (String) reqObj.getRequest().get(DOCUMENT_NAME),
-            (String) reqObj.getRequest().get(JsonKey.ID));
-        result.remove(JsonKey.IDENTIFIER);
-        if (!result.isEmpty()) {
-          response.put(JsonKey.RESPONSE, result);
-        } else {
-          response.put(JsonKey.RESPONSE, new HashMap<>());
-        }
-      } else if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(TABLE_NAME))) {
+      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(ENTITY_NAME))) {
         response = cassandraOperation.getRecordById(JsonKey.SUNBIRD_PLUGIN,
-            (String) reqObj.getRequest().get(TABLE_NAME),
+            (String) reqObj.getRequest().get(ENTITY_NAME),
             (String) reqObj.getRequest().get(JsonKey.ID));
       } else {
         throw new ProjectCommonException(ResponseCode.tableOrDocNameError.getErrorCode(),
@@ -227,22 +235,9 @@ public class DbOperationController extends BaseController {
       reqObj.setEnv(getEnvironment());
       Response response = new Response();
       validateTableName(reqObj);
-      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
-        Map<String, Object> result = ElasticSearchUtil.complexSearch(new SearchDTO(), ES_INDEX_NAME,
-            (String) reqObj.getRequest().get(DOCUMENT_NAME));
-        if (!result.isEmpty()) {
-          List<Map<String, Object>> mapList =
-              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-          for (Map<String, Object> map : mapList) {
-            map.remove(JsonKey.IDENTIFIER);
-          }
-          response.put(JsonKey.RESPONSE, result);
-        } else {
-          response.put(JsonKey.RESPONSE, new HashMap<>());
-        }
-      } else if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(TABLE_NAME))) {
+      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(ENTITY_NAME))) {
         response = cassandraOperation.getAllRecords(JsonKey.SUNBIRD_PLUGIN,
-            (String) reqObj.getRequest().get(TABLE_NAME));
+            (String) reqObj.getRequest().get(ENTITY_NAME));
       } else {
         throw new ProjectCommonException(ResponseCode.tableOrDocNameError.getErrorCode(),
             ResponseCode.tableOrDocNameError.getErrorMessage(),
@@ -260,6 +255,7 @@ public class DbOperationController extends BaseController {
    * 
    * @return Promise<Result>
    */
+  @SuppressWarnings("unchecked")
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
@@ -269,14 +265,14 @@ public class DbOperationController extends BaseController {
       reqObj.setEnv(getEnvironment());
       Response response = new Response();
       List<String> requiredFields = null;
-      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(DOCUMENT_NAME))) {
-        String esType = (String) reqObj.getRequest().get(DOCUMENT_NAME);
+      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(ENTITY_NAME))) {
+        String esType = (String) reqObj.getRequest().get(ENTITY_NAME);
         if(reqObj.getRequest().containsKey(REQUIRED_FIELDS)) {
           requiredFields = (List<String>) reqObj.getRequest().get(REQUIRED_FIELDS);
           reqObj.getRequest().remove(REQUIRED_FIELDS);
         }
 
-        reqObj.getRequest().remove(DOCUMENT_NAME);
+        reqObj.getRequest().remove(ENTITY_NAME);
         if(null !=  reqObj.getRequest().get(JsonKey.FILTERS)){
           validateRequestData((Map<String, Object>) reqObj.getRequest().get(JsonKey.FILTERS));
         }
@@ -284,7 +280,7 @@ public class DbOperationController extends BaseController {
         Map<String, Object> result = ElasticSearchUtil.complexSearch(searchDto, ES_INDEX_NAME, esType);
         Map<String , Object> finalResult = new HashMap<>();
         if (!result.isEmpty()) {
-          // filrer the required fields like content or facet etc...
+          // filter the required fields like content or facet etc...
           if(null != requiredFields && !requiredFields.isEmpty()){
             for(String attribute : requiredFields){
               finalResult.put(attribute , result.get(attribute));
@@ -353,7 +349,7 @@ public class DbOperationController extends BaseController {
     if (response) {
       return true;
     }
-    ProjectLogger.log("unbale to save the data inside ES with identifier " + identifier,
+    ProjectLogger.log("unable to save the data inside ES with identifier " + identifier,
         LoggerEnum.INFO.name());
     return false;
 
@@ -373,7 +369,7 @@ public class DbOperationController extends BaseController {
     if (response) {
       return true;
     }
-    ProjectLogger.log("unbale to delete the data from ES with identifier " + identifier,
+    ProjectLogger.log("unable to delete the data from ES with identifier " + identifier,
         LoggerEnum.INFO.name());
     return false;
 
