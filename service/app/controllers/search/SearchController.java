@@ -57,7 +57,7 @@ public class SearchController extends BaseController {
       ProjectLogger.log("making a call to data synch api = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
-      String Operation = (String) reqObj.getRequest().get(JsonKey.OBJECT_TYPE);
+      String Operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
       if("ES".equalsIgnoreCase(Operation)){
         reqObj.setOperation(ActorOperations.SYNC.getValue());
         reqObj.setRequestId(ExecutionContext.getRequestId());
