@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 import controllers.BaseController;
@@ -67,4 +68,5 @@ public class ApplicationTest {
 		Result result = new BaseController().createCommonExceptionResponse(new Exception(),null);
 		assertEquals(ResponseCode.OK.getResponseCode(), result.status());
 	}
+
 }
