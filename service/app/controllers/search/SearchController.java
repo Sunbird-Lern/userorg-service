@@ -58,8 +58,8 @@ public class SearchController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
       String Operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
-      if("ES".equalsIgnoreCase(Operation)){
-        reqObj.setOperation(ActorOperations.SYNC.getValue());
+      if("keycloak".equalsIgnoreCase(Operation)){
+        reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
         reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
         reqObj.setEnv(getEnvironment());
@@ -68,7 +68,7 @@ public class SearchController extends BaseController {
         reqObj.setRequest(map);
         return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
       }else{
-        reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
+        reqObj.setOperation(ActorOperations.SYNC.getValue());
         reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
         reqObj.setEnv(getEnvironment());
