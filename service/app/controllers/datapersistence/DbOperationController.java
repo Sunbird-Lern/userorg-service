@@ -1,6 +1,8 @@
 package controllers.datapersistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import controllers.BaseController;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ public class DbOperationController extends BaseController {
   private static final String INDEXED = "indexed";
   private static final String ES_INDEX_NAME = "sunbirdplugin";
   private static List<String> tableList = null;
+  private static final String RAW_QUERY = "rawQuery";
 
   static{
     createtableList();
@@ -377,5 +380,30 @@ public class DbOperationController extends BaseController {
 
   private void deleteRecord(String keyspaceName, String tableName, String identifier) {
     cassandraOperation.deleteRecord(keyspaceName, tableName, identifier);
+  }
+  
+  /**
+   * Method to get data from ElasticSearch based on query 
+   * @return ES Response
+   */
+  @SuppressWarnings("unchecked")
+  public Promise<Result> getMetrics() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("get metrics data request = " + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      validateTableName(reqObj);
+      Map<String,Object> rawQueryMap = (Map<String,Object>) reqObj.getRequest().get(RAW_QUERY);
+      rawQueryMap.put(JsonKey.SIZE, 0);
+      ObjectMapper mapper = new ObjectMapper();
+      String rawQuery = mapper.writeValueAsString(rawQueryMap);
+      Response response = ElasticSearchUtil.searchMetricsData(ES_INDEX_NAME,
+          (String) reqObj.getRequest().get(ENTITY_NAME), rawQuery);
+      return Promise.<Result>pure(createCommonResponse(response, null, request()));
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 }
