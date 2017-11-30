@@ -179,3 +179,7 @@ GET  /v1/location/read/:id               @controllers.geolocation.GeoLocationCon
 PATCH  /v1/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
 DELETE   /v1/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String)
 POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification()
+
+#System Settings
+
+POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()

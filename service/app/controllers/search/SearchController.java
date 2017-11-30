@@ -82,5 +82,5 @@ public class SearchController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
+  
 }

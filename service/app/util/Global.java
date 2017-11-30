@@ -304,6 +304,6 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/user/skill/read" , "api.user.skill.read");
     apiMap.put("/v1/skills" , "api.skills");
     apiMap.put("/v1/notification/send", "api.notification.service");
-
+    apiMap.put("/v1/system/settings", "api.system.settings");
   }
 }
