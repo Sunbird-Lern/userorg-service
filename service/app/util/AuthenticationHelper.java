@@ -3,6 +3,7 @@
  */
 package util;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.Application;
 import org.sunbird.learner.util.Util;
@@ -63,6 +66,26 @@ public class AuthenticationHelper {
       ProjectLogger.log("invalid auth token =" + token, e);
     }
     return userId;
+  }
+  
+  
+  @SuppressWarnings("unchecked")
+  public static String verifyClientAccessToken(String clientId, String clientToken){
+    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.ID, clientId);
+    propertyMap.put(JsonKey.MASTER_KEY, clientToken);
+    String validClientId = "";
+    try {
+      Response clientResponse = cassandraOperation.getRecordsByProperties(clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), propertyMap);
+      if(null != clientResponse && !clientResponse.getResult().isEmpty()){
+        List<Map<String,Object>> dataList = (List<Map<String,Object>>) clientResponse.getResult().get(JsonKey.RESPONSE);
+        validClientId = (String) dataList.get(0).get(JsonKey.ID);
+      } 
+    }catch (Exception e) {
+      ProjectLogger.log("Validating client token failed due to : ", e);
+    }
+    return validClientId;
   }
 
   /**
