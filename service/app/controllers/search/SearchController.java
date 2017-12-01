@@ -57,8 +57,8 @@ public class SearchController extends BaseController {
       ProjectLogger.log("making a call to data synch api = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
-      String Operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
-      if("keycloak".equalsIgnoreCase(Operation)){
+      String operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
+      if("keycloak".equalsIgnoreCase(operation)){
         reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
         reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
