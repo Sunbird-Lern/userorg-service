@@ -89,7 +89,12 @@ public class RequestInterceptor {
             .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
             && !ProjectUtil
                 .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
-        response = "{userId}" + JsonKey.NOT_AVAILABLE;
+        String clientId = AuthenticationHelper.verifyClientAccessToken(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()),
+            request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()));
+        if (ProjectUtil.isStringNullOREmpty(clientId)) {
+          return ResponseCode.unAuthorised.getErrorCode();
+        }
+        response = "{userId}" + clientId;
       } else {
         String userId = AuthenticationHelper.verifyUserAccesToken(
             request.getHeader(HeaderParam.X_Access_TokenId.getName()));
