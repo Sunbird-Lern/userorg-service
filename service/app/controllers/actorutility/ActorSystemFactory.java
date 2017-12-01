@@ -17,6 +17,7 @@ public class ActorSystemFactory {
   private ActorSystemFactory() {}
 
   static {
+    try{
     PropertiesCache cache = PropertiesCache.getInstance();
     if ("local".equalsIgnoreCase(cache.getProperty("api_actor_provider"))) {
       ProjectLogger.log("Initializing Normal Local Actor System  called from controller");
@@ -29,6 +30,9 @@ public class ActorSystemFactory {
         actorSystem = RemoteActorSystem.getInstance();
       }
     }
+    }catch(Exception ex ){
+      ProjectLogger.log("Exception In controllers.actorutility.ActorSystemFactory "+ex);
+      }
   }
 
   public static ActorSystem getActorSystem() {
