@@ -17,8 +17,10 @@ public class ActorSystemFactory {
   private ActorSystemFactory() {}
 
   static {
+    ProjectLogger.log("Inside ActorSystemFactory static block");
     try{
     PropertiesCache cache = PropertiesCache.getInstance();
+    ProjectLogger.log("api_actor_provider value "+cache.getProperty("api_actor_provider"));
     if ("local".equalsIgnoreCase(cache.getProperty("api_actor_provider"))) {
       ProjectLogger.log("Initializing Normal Local Actor System  called from controller");
       if (null == actorSystem) {

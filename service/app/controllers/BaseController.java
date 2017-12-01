@@ -36,7 +36,11 @@ public class BaseController extends Controller {
   private static Object actorRef = null;
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   static {
+    try{
     actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
+    }catch(Exception ex){
+      ProjectLogger.log("Exception occured while getting actor ref in base controller "+ex);
+      }
   }
 
   /**
