@@ -236,7 +236,7 @@ public class BaseController extends Controller {
   /**
    * This method will make a call to Akka actor and return promise.
    * 
-   * @param selection ActorSelection
+   * @param actorRef ActorSelection
    * @param request Request
    * @param timeout Timeout
    * @param responseKey String
@@ -376,6 +376,10 @@ public class BaseController extends Controller {
       }
     }
     return builder.toString();
+  }
+
+  public static void setActorRef(Object obj){
+    actorRef = obj;
   }
 
 }
