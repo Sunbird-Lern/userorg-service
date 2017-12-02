@@ -65,7 +65,7 @@ public class OrganisationControllerTest {
 
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
-    BaseController.setActorRef(subject);
+    //BaseController.setActorRef(subject);
   }
 
   @Test
