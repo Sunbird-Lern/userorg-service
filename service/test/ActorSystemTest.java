@@ -3,7 +3,8 @@ import akka.actor.ActorSelection;
 import controllers.actorutility.ActorSystemFactory;
 import controllers.actorutility.impl.LocalActorSystem;
 import controllers.actorutility.impl.RemoteActorSystem;
-import junit.framework.Assert;
+import static org.junit.Assert.*;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sunbird.common.models.util.PropertiesCache;
@@ -23,9 +24,9 @@ public class ActorSystemTest {
   public void testActorSystem(){
     Object obj = ActorSystemFactory.getActorSystem();
      if(provider.equalsIgnoreCase("local")){
-       Assert.assertTrue(obj instanceof LocalActorSystem);
+       assertTrue(obj instanceof LocalActorSystem);
      } else {
-       Assert.assertTrue(obj instanceof RemoteActorSystem);
+       assertTrue(obj instanceof RemoteActorSystem);
      }
   }
   
@@ -34,9 +35,9 @@ public class ActorSystemTest {
   public void testActorRef(){
     Object obj = ActorSystemFactory.getActorSystem().initializeActorSystem();
      if(provider.equalsIgnoreCase("local")){
-       Assert.assertTrue(obj instanceof ActorRef);
+    	 assertTrue(obj instanceof ActorRef);
      } else {
-       Assert.assertTrue(obj instanceof ActorSelection);
+    	 assertTrue(obj instanceof ActorSelection);
      }
   }
 

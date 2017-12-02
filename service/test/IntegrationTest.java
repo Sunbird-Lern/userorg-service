@@ -70,7 +70,7 @@ public class IntegrationTest {
           RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/login").method("POST");
             req.headers(headerMap);
             Result result = route(req);
-            assertEquals(401, result.status());
+            assertEquals(400, result.status());
       }
 	  
 	 @Test
@@ -80,7 +80,7 @@ public class IntegrationTest {
          RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/logout").method("POST");
            req.headers(headerMap);
            Result result = route(req);
-           assertEquals(401, result.status());
+           assertEquals(500, result.status());
      }
 	 
 	 
