@@ -96,7 +96,7 @@ public class Global extends GlobalSettings {
    * @param app Application
    */
   public void onStart(Application app) {
-
+    ProjectLogger.log("Test***");
     setEnvironment();
     createApiMap();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
