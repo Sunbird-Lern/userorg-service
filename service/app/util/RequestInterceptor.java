@@ -55,6 +55,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/object/update", var);
     apiHeaderIgnoreMap.put("/v1/object/delete", var);
     apiHeaderIgnoreMap.put("/v1/object/search", var);
+    apiHeaderIgnoreMap.put("/v1/object/metrics", var);
     apiHeaderIgnoreMap.put("/v1/client/register",var);
     apiHeaderIgnoreMap.put("/v1/client/key/read", var);
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
