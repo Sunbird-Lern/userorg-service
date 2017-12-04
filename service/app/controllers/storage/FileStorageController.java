@@ -49,9 +49,11 @@ public class FileStorageController extends BaseController {
         }
         List<FilePart> filePart = body.getFiles();
         File f = filePart.get(0).getFile();
-        InputStream is = new FileInputStream(filePart.get(0).getFile());
+
+        InputStream is = new FileInputStream(f);
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
+        map.put(JsonKey.FILE_NAME , filePart.get(0).getFilename());
       } else if(null != formUrlEncodeddata){
         //read data as string from request
         for(Entry<String, String[]> entry : formUrlEncodeddata.entrySet()){
