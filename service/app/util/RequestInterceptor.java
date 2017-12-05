@@ -60,6 +60,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/client/key/read", var);
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
+    apiHeaderIgnoreMap.put("/v1/notification/audience", var);
   }
 
   /**
