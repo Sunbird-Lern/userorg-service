@@ -3,7 +3,7 @@
 node('build-slave') {
 
    currentBuild.result = "SUCCESS"
-
+   cleanWs()
    try {
 
       stage('Checkout'){
