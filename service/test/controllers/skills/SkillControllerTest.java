@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.learner.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
@@ -64,7 +66,7 @@ public class SkillControllerTest {
 
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
-    //BaseController.setActorRef(subject);
+    BaseController.setActorRef(subject);
   }
 
   @Test
@@ -128,6 +130,18 @@ public class SkillControllerTest {
       e.printStackTrace();
     }
     return jsonResp;
+  }
+
+  @AfterClass
+  public static void cleanUp(){
+
+    /*Application.getSystem().terminate();
+    try {
+      Thread.sleep(300);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }*/
+
   }
 
 

@@ -382,8 +382,8 @@ public class BaseController extends Controller {
     return builder.toString();
   }
 
-  /*public static void setActorRef(Object obj){
+  public static void setActorRef(Object obj){
     actorRef = obj;
-  }*/
+  }
 
 }

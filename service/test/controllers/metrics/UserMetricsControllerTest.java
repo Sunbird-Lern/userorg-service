@@ -7,17 +7,10 @@ import static play.test.Helpers.route;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.DummyActor;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -31,8 +24,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.learner.Application;
-import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
@@ -41,13 +32,13 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 /**
- * Created by arvind on 1/12/17.
+ * Created by arvind on 4/12/17.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-public class CourseMetricsControllerTest {
+public class UserMetricsControllerTest {
 
   public static FakeApplication app;
   @Mock
@@ -73,47 +64,23 @@ public class CourseMetricsControllerTest {
   }
 
   @Test
-  public void testcourseProgress() {
+  public void testuserCreation() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/dashboard/progress/course/batchId?period=7d").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/dashboard/creation/user/userId").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testcourseCreation() {
+  public void testuserConsumption() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/dashboard/progress/course/batchId?period=7d").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/dashboard/consumption/user/userId").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
-  }
-
-  private static String mapToJson(Map map){
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return jsonResp;
-  }
-
-  @AfterClass
-  public static void cleanUp(){
-
-    /*Application.getSystem().terminate();
-    try {
-      Thread.sleep(300);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }*/
-
   }
 
 }
