@@ -1,4 +1,4 @@
-package controllers.geolocation;
+package controllers.pagemanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -28,7 +27,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.learner.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
@@ -38,13 +36,13 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 /**
- * Created by arvind on 1/12/17.
+ * Created by arvind on 4/12/17.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-public class GeoLocationControllerTest {
+public class PageControllerTest {
 
   public static FakeApplication app;
   @Mock
@@ -70,84 +68,130 @@ public class GeoLocationControllerTest {
   }
 
   @Test
-  public void testcreateGeoLocation() {
+  public void testcreatePage() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID , "org123");
+    innerMap.put("name" , "page1");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/location/create").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/page/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testgetGeoLocation() {
+  public void testupdatePage() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put("name" , "page1");
+    innerMap.put(JsonKey.ID , "page1");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
 
-    RequestBuilder req = new RequestBuilder().uri("/v1/location/read/123").method("GET");
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/page/update").method("PATCH");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testupdateGeoLocation() {
+  public void testgetPageSetting() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String , Object> requestMap = new HashMap<>();
-    Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID , "org123");
-    requestMap.put(JsonKey.REQUEST , innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/location/update/123").method("PATCH");
+    RequestBuilder req = new RequestBuilder().uri("/v1/page/read/pageId").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testdeleteGeoLocation() {
+  public void testgetPageSettings() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String , Object> requestMap = new HashMap<>();
-    Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID , "org123");
-    requestMap.put(JsonKey.REQUEST , innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/location/delete/123").method("DELETE");
+    RequestBuilder req = new RequestBuilder().uri("/v1/page/all/settings").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testsendNotification() {
+  public void testgetPageData() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID , "org123");
-    innerMap.put(JsonKey.TO,"c93");
-    Map map = new HashMap();
-    map.put(JsonKey.FROM_EMAIL , "fromEmail");
-    innerMap.put(JsonKey.DATA , map);
-    innerMap.put(JsonKey.TYPE , "fcm");
+    innerMap.put("name" , "page1");
+    innerMap.put(JsonKey.SOURCE , "src");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/notification/send").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/page/assemble").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testcreatePageSection() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put("name" , "page1");
+    innerMap.put("sectionDataType" , "section01");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/page/section/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testupdatePageSection() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put("name" , "page1");
+    innerMap.put("sectionDataType" , "section01");
+    innerMap.put(JsonKey.ID , "001");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/page/section/update").method("PATCH");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testgetSection() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    RequestBuilder req = new RequestBuilder().uri("/v1/page/section/read/sectionId").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testgetSections() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    RequestBuilder req = new RequestBuilder().uri("/v1/page/section/list").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
@@ -163,18 +207,6 @@ public class GeoLocationControllerTest {
       e.printStackTrace();
     }
     return jsonResp;
-  }
-
-  @AfterClass
-  public static void cleanUp(){
-
-    /*Application.getSystem().terminate();
-    try {
-      Thread.sleep(300);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }*/
-
   }
 
 }

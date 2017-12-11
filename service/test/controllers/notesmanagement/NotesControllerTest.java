@@ -72,21 +72,42 @@ public class NotesControllerTest {
   @Test
   public void testCreateNote() {
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId}uuiuhcf784508 8y8c79-fhh");
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.USER_ID , "org123");
-    innerMap.put(JsonKey.COURSE_ID , "org123");
-    innerMap.put(JsonKey.NOTE , "org123");
-    innerMap.put(JsonKey.TITLE , "org123");
+    innerMap.put(JsonKey.USER_ID , "uuiuhcf784508 8y8c79-fhh");
+    innerMap.put(JsonKey.COURSE_ID , "crs123");
+    innerMap.put(JsonKey.CONTENT_ID , "content123");
+    innerMap.put(JsonKey.NOTE , "note");
+    innerMap.put(JsonKey.TITLE , "learn");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
-    assertEquals(401, result.status());
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testCreateNoteWithInvalidRequestData() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.USER_ID , "");
+    innerMap.put(JsonKey.COURSE_ID , "org123");
+    innerMap.put(JsonKey.NOTE , "");
+    innerMap.put(JsonKey.TITLE , "org123");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
   }
 
   @Test
@@ -110,7 +131,7 @@ public class NotesControllerTest {
     innerMap.put(JsonKey.TAGS , "123");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/update/123").method("PATCH");
     req.headers(headerMap);
@@ -127,7 +148,7 @@ public class NotesControllerTest {
     innerMap.put(JsonKey.ID , "123");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/delete/123").method("DELETE");
     req.headers(headerMap);
@@ -146,7 +167,7 @@ public class NotesControllerTest {
     innerMap.put(JsonKey.FILTERS, filterMap);
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/search").method("POST");
     req.headers(headerMap);

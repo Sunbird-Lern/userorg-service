@@ -79,7 +79,7 @@ public class SkillControllerTest {
     innerMap.put(JsonKey.ORGANISATION_ID , "7687584");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/skill/add").method("POST");
@@ -98,7 +98,7 @@ public class SkillControllerTest {
     innerMap.put(JsonKey.USER_ID , "7687584");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
-    System.out.println(data);
+
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/skill/read").method("POST");
