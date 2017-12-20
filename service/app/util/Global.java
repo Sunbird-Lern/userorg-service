@@ -56,7 +56,7 @@ public class Global extends GlobalSettings {
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
       
-      String message = RequestInterceptor.verifyRequestData(ctx.request());
+      String message = RequestInterceptor.verifyRequestData(ctx);
       if (message.contains("{userId}")) {
         ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
         ctx.flash().put(JsonKey.IS_AUTH_REQ, "false");

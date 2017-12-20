@@ -37,9 +37,6 @@ public class ClientController extends BaseController {
       reqObj.setOperation(ActorOperations.REGISTER_CLIENT.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.CLIENT_NAME, reqObj.getRequest().get(JsonKey.CLIENT_NAME));
-      reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
@@ -62,7 +59,7 @@ public class ClientController extends BaseController {
       reqObj.setOperation(ActorOperations.UPDATE_CLIENT_KEY.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
+      HashMap<String, Object> innerMap = (HashMap<String, Object>) reqObj.getRequest();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
       innerMap.put(JsonKey.MASTER_KEY, masterKey);
       reqObj.setRequest(innerMap);
@@ -81,13 +78,15 @@ public class ClientController extends BaseController {
   public Promise<Result> getClientKey(String clientId) {
     try {
       ProjectLogger.log("Get client key: " + clientId, LoggerEnum.INFO.name());
-      RequestValidator.validateClientId(clientId);
+      String type = request().getQueryString(JsonKey.TYPE);
+      RequestValidator.validateGetClientKey(clientId , type);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_CLIENT_KEY.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
+      innerMap.put(JsonKey.TYPE,type);
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
