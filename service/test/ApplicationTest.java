@@ -44,7 +44,7 @@ public class ApplicationTest {
 		assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
 	}
 
-	@Test
+	//@Test
 	public void testSuccessResponse() {
 		String apiPath = "/v1/learner/getenrolledcoures";
 		Response response = new Response();

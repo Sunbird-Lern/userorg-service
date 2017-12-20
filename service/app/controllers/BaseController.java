@@ -36,7 +36,11 @@ public class BaseController extends Controller {
   private static Object actorRef = null;
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   static {
+    try{
     actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
+    }catch(Exception ex){
+      ProjectLogger.log("Exception occured while getting actor ref in base controller "+ex);
+      }
   }
 
   /**
@@ -236,7 +240,7 @@ public class BaseController extends Controller {
   /**
    * This method will make a call to Akka actor and return promise.
    * 
-   * @param selection ActorSelection
+   * @param actorRef ActorSelection
    * @param request Request
    * @param timeout Timeout
    * @param responseKey String
@@ -376,6 +380,10 @@ public class BaseController extends Controller {
       }
     }
     return builder.toString();
+  }
+
+  public static void setActorRef(Object obj){
+    actorRef = obj;
   }
 
 }

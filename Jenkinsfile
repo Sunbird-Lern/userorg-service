@@ -3,7 +3,7 @@
 node('build-slave') {
 
    currentBuild.result = "SUCCESS"
-
+   cleanWs()
    try {
 
       stage('Checkout'){
@@ -15,7 +15,7 @@ node('build-slave') {
 
         env.NODE_ENV = "build"
         print "Environment will be : ${env.NODE_ENV}"
-        sh('git submodule foreach git pull origin master')
+        sh('git submodule foreach git pull origin release-1.3')
         sh 'mvn clean install -DskipTests=true '
         dir ('service') {
         sh 'mvn play2:dist'

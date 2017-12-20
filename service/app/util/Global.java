@@ -56,7 +56,7 @@ public class Global extends GlobalSettings {
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
       
-      String message = RequestInterceptor.verifyRequestData(ctx.request());
+      String message = RequestInterceptor.verifyRequestData(ctx);
       if (message.contains("{userId}")) {
         ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
         ctx.flash().put(JsonKey.IS_AUTH_REQ, "false");
@@ -96,7 +96,7 @@ public class Global extends GlobalSettings {
    * @param app Application
    */
   public void onStart(Application app) {
-
+    ProjectLogger.log("Test***");
     setEnvironment();
     createApiMap();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
@@ -284,6 +284,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/object/delete", "api.object.delete");
     apiMap.put("/v1/object/read/list", "api.object.read.list");
     apiMap.put("/v1/object/search", "api.object.search");
+    apiMap.put("/v1/object/metrics", "api.object.metrics");
     apiMap.put("/v1/client/register", "api.client.register");
     apiMap.put("/v1/client/key/update", "api.client.key.update");
     apiMap.put("/v1/client/key/read", "api.client.key.read");
@@ -303,6 +304,7 @@ public class Global extends GlobalSettings {
     apiMap.put("/v1/user/skill/read" , "api.user.skill.read");
     apiMap.put("/v1/skills" , "api.skills");
     apiMap.put("/v1/notification/send", "api.notification.service");
-
+    apiMap.put("/v1/system/settings", "api.system.settings");
+    apiMap.put("/v1/notification/audience", "api.notification.audience");
   }
 }

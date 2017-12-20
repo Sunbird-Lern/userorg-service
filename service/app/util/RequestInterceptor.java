@@ -11,6 +11,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 
 /**
@@ -55,10 +56,12 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/object/update", var);
     apiHeaderIgnoreMap.put("/v1/object/delete", var);
     apiHeaderIgnoreMap.put("/v1/object/search", var);
+    apiHeaderIgnoreMap.put("/v1/object/metrics", var);
     apiHeaderIgnoreMap.put("/v1/client/register",var);
     apiHeaderIgnoreMap.put("/v1/client/key/read", var);
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
+    apiHeaderIgnoreMap.put("/v1/notification/audience", var);
   }
 
   /**
@@ -67,7 +70,8 @@ public class RequestInterceptor {
    * @param request Request
    * @return String
    */
-  public static String verifyRequestData(Request request) {
+  public static String verifyRequestData(Http.Context ctx) {
+    Request request = ctx.request();
     String response = "{userId}";
     if (!isRequestInExcludeList(request.path())) {
       if (ProjectUtil
@@ -89,7 +93,13 @@ public class RequestInterceptor {
             .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
             && !ProjectUtil
                 .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
-        response = "{userId}" + JsonKey.NOT_AVAILABLE;
+        String clientId = AuthenticationHelper.verifyClientAccessToken(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()),
+            request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()));
+        if (ProjectUtil.isStringNullOREmpty(clientId)) {
+          return ResponseCode.unAuthorised.getErrorCode();
+        }
+        response = "{userId}" + clientId;
+        ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY , Boolean.toString(true));
       } else {
         String userId = AuthenticationHelper.verifyUserAccesToken(
             request.getHeader(HeaderParam.X_Access_TokenId.getName()));

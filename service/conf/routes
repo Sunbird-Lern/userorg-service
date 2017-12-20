@@ -166,6 +166,7 @@ POST   /v1/object/create                 @controllers.datapersistence.DbOperatio
 POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update()
 POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete()
 POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
+POST   /v1/object/metrics                @controllers.datapersistence.DbOperationController.getMetrics()
 
 #Master Key API
 POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient()
@@ -178,3 +179,8 @@ GET  /v1/location/read/:id               @controllers.geolocation.GeoLocationCon
 PATCH  /v1/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
 DELETE   /v1/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String)
 POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification()
+POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount()
+
+#System Settings
+
+POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
