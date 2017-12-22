@@ -1,0 +1,596 @@
+{
+  "info": {
+    "name": "Course Batch Management API(s)",
+    "_postman_id": "2c2eea5a-51c7-48c5-917d-d6ab04b95c88",
+    "description": "\nThe Course Batch Management API resources perform operations related to management of batches for courses on the Sunbird Platform. The basic operations include Creation, Updation,joining ,listing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/"
+  },
+  "item": [
+    {
+      "name": "Course Batch APIs",
+      "item": [
+        {
+          "id": "a0f0deb3-2e74-4c37-bcf3-ad589d3cdbf9",
+          "name": "{{host}}/v1/course/batch/create",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/batch/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **create batch** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"create batch \" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"create batch\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with creating a batch on the Sunbird Platform.\n\n  - The Format of the resource URL is '{{host}}/v1/course/batch/create' \n\n  - The **_/batch/create_** endpoint executes \"create batch\" request to create a new batch.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "60428739-e177-4943-b79f-f630afd0d192",
+          "name": "getBatch",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "batch/read/:Batch_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Batch_Id",
+                  "value": "{Batch_Id}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Fetch a batch** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Fetch a batch\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"Fetch a batch\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with fetching a particular batch on the Sunbird Platform.\n\n  - {...}refers to a section of read/{Batch_Id} endpoint URL path that needs to be replaced by appropriate Id.\n\n  - The **_/batch/read/{Batch_Id}_** endpoint executes \"Fetch a batch\" request to fetch a particular batch.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "1c7dafa7-02b1-44ff-9388-861de8ad3c2e",
+          "name": "{{host}}/course/v1/batch/user/add/0123164681508700160",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "batch/user/add/:Batch_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Batch_Id",
+                  "value": "{Batch_Id}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Add user to a batch** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Add user to a batch\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"Add user to a batch\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with addding a user  to a particular batch on the Sunbird Platform.\n\n  - The format of the resource URL is '{{host}}/course/v1/batch/user/add/{Batch_Id}'\n\n  - The **_/batch/user/add/{Batch_Id}_** endpoint executes \"Add user to a batch\" request to add a registered user to a specific batch.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "5d91f11a-6322-4eb6-8675-e8ab9d823dc4",
+          "name": "{{host}}/v1/user/enrollment/list/f741322b-41f9-4392-b4ac-6aa7d878afbb",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "user/enrollment/list/:Batch_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Batch_Id",
+                  "value": "f741322b-41f9-4392-b4ac-6aa7d878afbb",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **List users enrolled in a specific batch** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"List users enrolled in a specific batch\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"List users enrolled in a specific batch\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with fetching a list of enrolled users in a particular batch on the Sunbird Platform.\n\n  - The format of the resource URL is '{{host}}/v1/user/enrollment/list/{Batch_Id}'\n\n  - The **_/user/enrollment/list/{Batch_Id}_** endpoint executes \"List users enrolled in a specific batch\" request to fetch the the list of users enrolled in a particular batch.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "e04f0d2f-8c28-486f-b27a-91159f8f4606",
+          "name": "{{host}}/course/v1/batch/list",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/batch/list",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Lists the existing batches** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Lists the existing batches\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"Lists the existing batches\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with fetching and listing the existing batches on the Sunbird Platform.\n\n  - The format of the resource URL is '{{host}}/course/v1/batch/list'\n\n  - The **_/batch/read_** endpoint executes \"Lists the existing batches\" request to fetch the existing batches.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "73cf3527-cde9-49e4-a5dc-6366c06311b2",
+          "name": "Course Batch Update",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/batch/update",
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Update a batch** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Update a batch\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST,\"Update a batch\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with updating a batch on the Sunbird Platform.\n\n  - The **_/batch/update_** endpoint executes \"Update a batch\" request to update an existing batch.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        }
+      ]
+    }
+  ]
+}

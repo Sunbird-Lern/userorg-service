@@ -1,0 +1,240 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "NotificationService(FCM)",
+    "description": "TODO: Add Description",
+    "license": {
+      "name": "MIT",
+      "url": "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
+    }
+  },
+  "host": "example.com",
+  "basePath": "/data/v1/notification",
+  "securityDefinitions": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "http://example.com/data/v1/notification",
+      "scopes": {},
+      "x-skip-client-authentication": false
+    }
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/send": {
+      "post": {
+        "description": "",
+        "summary": "Sending push notification to android device",
+        "operationId": "SendPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SendingPushNotificationToAndroidDevicerequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/send",
+              "headers": {
+                "Content-Type": "application/json",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "{\n\"request\": {\n    \"to\":\"validtopicname\",\n     \"type\":\"fcm\",\n  \"data\": {\n      \"title\" : \"Announcement!!\",\n      \"notifType\" : \"announcement\",\n      \"summary\" : \"New announcement from rootOrg\",\n      \"body\" : \"www.staging-sunbird.org/new/announcement\"\n  }\n}\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "Sending push notification to android device",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SendingPushNotificationToAndroidDevicerequest": {
+      "title": "Sending push notification to android deviceRequest",
+      "example": {
+        "request": {
+          "to": "validtopicname",
+          "type": "fcm",
+          "data": {
+            "title": "Announcement!!",
+            "notifType": "announcement",
+            "summary": "New announcement from rootOrg",
+            "body": "www.staging-sunbird.org/new/announcement"
+          }
+        }
+      },
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Request",
+          "example": {
+            "to": "validtopicname",
+            "type": "fcm",
+            "data": {
+              "title": "Announcement!!",
+              "notifType": "announcement",
+              "summary": "New announcement from rootOrg",
+              "body": "www.staging-sunbird.org/new/announcement"
+            }
+          }
+        }
+      },
+      "required": [
+        "request"
+      ]
+    },
+    "Request": {
+      "title": "Request",
+      "example": {
+        "to": "validtopicname",
+        "type": "fcm",
+        "data": {
+          "title": "Announcement!!",
+          "notifType": "announcement",
+          "summary": "New announcement from rootOrg",
+          "body": "www.staging-sunbird.org/new/announcement"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "to": {
+          "description": "",
+          "example": "validtopicname",
+          "type": "string"
+        },
+        "type": {
+          "description": "",
+          "example": "fcm",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/Data",
+          "example": {
+            "title": "Announcement!!",
+            "notifType": "announcement",
+            "summary": "New announcement from rootOrg",
+            "body": "www.staging-sunbird.org/new/announcement"
+          }
+        }
+      },
+      "required": [
+        "to",
+        "type",
+        "data"
+      ]
+    },
+    "Data": {
+      "title": "Data",
+      "example": {
+        "title": "Announcement!!",
+        "notifType": "announcement",
+        "summary": "New announcement from rootOrg",
+        "body": "www.staging-sunbird.org/new/announcement"
+      },
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "",
+          "example": "Announcement!!",
+          "type": "string"
+        },
+        "notifType": {
+          "description": "",
+          "example": "announcement",
+          "type": "string"
+        },
+        "summary": {
+          "description": "",
+          "example": "New announcement from rootOrg",
+          "type": "string"
+        },
+        "body": {
+          "description": "",
+          "example": "www.staging-sunbird.org/new/announcement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "notifType",
+        "summary",
+        "body"
+      ]
+    }
+  }
+}
