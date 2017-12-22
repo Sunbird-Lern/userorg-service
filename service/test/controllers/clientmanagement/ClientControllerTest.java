@@ -108,7 +108,7 @@ public class ClientControllerTest {
   public void testgetClientKey() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/client/key/read/clientId").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/client/key/read/clientId?type=channel").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
