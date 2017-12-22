@@ -1,0 +1,2792 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "user management api",
+    "description": "TODO: Add Description",
+    "license": {
+      "name": "MIT",
+      "url": "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
+    }
+  },
+  "host": "example.com",
+  "basePath": "/",
+  "securityDefinitions": {
+    "auth": {
+      "type": "oauth2",
+      "flow": "implicit",
+      "authorizationUrl": "http://example.com",
+      "scopes": {},
+      "x-skip-client-authentication": false
+    }
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/user/logout": {
+      "post": {
+        "description": "Logout api",
+        "summary": "{{host}}/v1/user/logout",
+        "operationId": "V1UserLogoutPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1logoutrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Device-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/logout",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "xyz-123-000-9888",
+                "X-Device-ID": "X-Device-ID",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": "{\r\n\r\n  \"params\": {\r\n           },\r\n    \"request\":{ }\r\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/logout",
+            "x-testDescription": "Logout api"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/user/v1/create": {
+      "post": {
+        "description": "create user",
+        "summary": "create user",
+        "operationId": "UserV1CreatePost2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CreateUserrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Device-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Authenticated-Userid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/user/v1/create",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "{\n\"request\":\n{\n\"firstName\":\"manzarul\",\"lastName\":\"haque\",\n\"password\":\"password\",\"provider\":\"apekx\",\n\"phone\":\"9663890445\",\"phoneVerified\":true,\"userName\":\"manzarul\"\n,\"email\":\"manzarul.haque@tarento.com\"\n}\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "create user",
+            "x-testDescription": "create user"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/update": {
+      "patch": {
+        "description": "update user",
+        "summary": "update user info",
+        "operationId": "V1UserUpdatePatch",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UpdateUserInforequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "PATCH",
+              "uri": "/v1/user/update",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": "{  \"id\": \"5ea900cf-3885-4ab5-b126-77b2074db562\",  \"ts\": \"2017-09-19 12:22:09:874+0530\",  \"params\": {},  \"request\": {\"profileSummary\": \"Test to check for update\",\"userId\": \"fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38\",\"lastname\":\"manzarul\"   }}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "update user info",
+            "x-testDescription": "update user"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/org/v1/role/assign": {
+      "post": {
+        "description": "",
+        "summary": "{{host}}/user/v1/role/assign",
+        "operationId": "OrgV1RoleAssignPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1user~1v1~1role~1assignrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/org/v1/role/assign",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-auth}}"
+              },
+              "body": "{\"request\":{\"userId\":\"3d45fbd8-b911-4cc5-b503-61215902d780\",\"organisationId\":\"0123653943740170242\",\"roles\":[\"CONTENT_CREATION\",\"PUBLIC\",\"CONTENT_CREATOR\",\"ANNOUNCEMENT_SENDER\"]}}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/user/v1/role/assign",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/login": {
+      "post": {
+        "description": "User login api",
+        "summary": "{{host}}/v1/user/login",
+        "operationId": "V1UserLoginPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1logoutrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/login",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "\r\n{\r\n \"params\": { },\r\n    \"request\":{                 \r\n      \"userName\":\"manzarul1.haque@taren.com\",\r\n      \"source\":\"web\",\r\n      \"password\":\"password\"\r\n    }     \r\n}    \r\n"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/login",
+            "x-testDescription": "User login api"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/forgotpassword": {
+      "post": {
+        "description": "Forgot password api.",
+        "summary": "{{host}}/v1/user/forgotpassword",
+        "operationId": "V1UserForgotpasswordPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1forgotpasswordrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/forgotpassword",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "xyz-123-000-9888",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": " {\r\n\"id\":\"unique API ID\",\r\n\"ts\":\"2013/10/15 16:16:39\",\r\n  \"params\": {\r\n      \r\n    },\r\n \"request\":{\r\n           \"userName\":\"m.haque1149348\"       \r\n       }\r\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/forgotpassword",
+            "x-testDescription": "Forgot password api."
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/profile/visibility": {
+      "post": {
+        "description": "",
+        "summary": "{{host}}/v1/user/profile/visibility",
+        "operationId": "V1UserProfileVisibilityPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1profile~1visibilityrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/profile/visibility",
+              "headers": {
+                "Content-Type": "application/json",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": "{\"request\":{\n  \"userId\":\"fa5c49797051b4129985977bcacbba0b451c64df8e73fdac9714378281517077\",\n  \n  \"private\":[\"gender\",\"location\",\"address\"]\n}}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/profile/visibility",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/user/v1/profile/read": {
+      "post": {
+        "description": "",
+        "summary": "get User by Login Id",
+        "operationId": "UserV1ProfileReadPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/GetUserByLoginIdrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/user/v1/profile/read",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "{\r\n \"params\": { },\r\n    \"request\":{   \r\n      \"loginId\":\"username@provider\"\r\n    \r\n     \r\n     \r\n    }\r\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "get User by Login Id",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/badges/add": {
+      "post": {
+        "description": "",
+        "summary": "add badges to user",
+        "operationId": "V1UserBadgesAddPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddBadgesToUserrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/badges/add",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "x-authenticated-user-token": "{{user-token}}",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "{\r\n \"params\": { },\r\n    \"request\":{                 \r\n      \"badgeTypeId\": \"123343444\",\r\n    \"receiverId\" :\"5de6b1af-82c3-4f1b-afef-007db7390841\"\r\n      \r\n    }\r\n } "
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "add badges to user",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/data/v1/role/read": {
+      "get": {
+        "description": "",
+        "summary": "{{host}}/data/v1/role/read",
+        "operationId": "DataV1RoleReadGet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "GET",
+              "uri": "/data/v1/role/read",
+              "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}"
+              }
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/data/v1/role/read",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/user/v1/read/04ee37f9-3f7c-4370-849f-559ce75e8ca2": {
+      "get": {
+        "description": "",
+        "summary": "{{host}}/user/v1/read",
+        "operationId": "UserV1Read04ee37f93f7c4370849f559ce75e8ca2Get",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Fields",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "GET",
+              "uri": "/user/v1/read/userId?Fields=profileCompleteness",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}",
+                "X-authenticated-user-token": "{{user-auth}}"
+              }
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/user/v1/read",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/user/v1/search": {
+      "post": {
+        "description": "",
+        "summary": "search user",
+        "operationId": "UserV1SearchPost2",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SearchUserrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/user/v1/search",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "x-authenticated-user-token": "{{user_token}}",
+                "Authorization": "Bearer {{api-key}}"
+              },
+              "body": "\n{\n\"id\":\"unique API ID\",\n\"ts\":\"2013/10/15 16:16:39\",\n  \"params\": {\n      \n  },\n \"request\": {\n        \"query\":\"a\",\n        \"filters\":{\n           \n        },\n        \"offset\": 0,\n        \"limit\": 5\n    }\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "search user",
+            "x-testDescription": ""
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/changepassword": {
+      "post": {
+        "description": "Change password api.",
+        "summary": "{{host}}/v1/user/changepassword",
+        "operationId": "V1UserChangepasswordPost",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1logoutrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "POST",
+              "uri": "/v1/user/changepassword",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "xyz-123-000-9888",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": "{\r\n\r\n  \"params\": {\r\n       \r\n    },\r\n    \"request\":{ \r\n             \"password\":\"password1\",\r\n             \"newPassword\" :\"password\"\r\n            \r\n         }\r\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/changepassword",
+            "x-testDescription": "Change password api."
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    },
+    "/v1/user/update/logintime": {
+      "patch": {
+        "description": "Add user current login time",
+        "summary": "{{host}}/v1/user/updatelogin",
+        "operationId": "V1UserUpdateLogintimePatch",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/{{host}}~1v1~1user~1logoutrequest"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-Consumer-ID",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "ts",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "X-msgid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "name": "x-authenticated-user-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "auth": []
+          }
+        ],
+        "x-unitTests": [
+          {
+            "request": {
+              "method": "PATCH",
+              "uri": "/v1/user/update/logintime",
+              "headers": {
+                "Content-Type": "application/json",
+                "X-Consumer-ID": "X-Consumer-ID",
+                "ts": "2017-05-25 10:18:56:578+0530",
+                "X-msgid": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "Authorization": "Bearer {{api-key}}",
+                "x-authenticated-user-token": "{{user-token}}"
+              },
+              "body": "{\r\n \"params\": { },\r\n    \"request\":{   \r\n      \"userId\":\"fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38\"\r\n    }\r\n}"
+            },
+            "expectedResponse": {
+              "x-allowExtraHeaders": true,
+              "x-bodyMatchMode": "NONE",
+              "x-arrayOrderedMatching": false,
+              "x-arrayCheckCount": false,
+              "x-matchResponseSchema": true,
+              "headers": {}
+            },
+            "x-testShouldPass": true,
+            "x-testEnabled": true,
+            "x-testName": "{{host}}/v1/user/updatelogin",
+            "x-testDescription": "Add user current login time"
+          }
+        ],
+        "x-operation-settings": {
+          "CollectParameters": false,
+          "AllowDynamicQueryParameters": false,
+          "AllowDynamicFormParameters": false,
+          "IsMultiContentStreaming": false
+        }
+      }
+    }
+  },
+  "definitions": {
+    "{{host}}/v1/user/logoutrequest": {
+      "title": "{{host}}/v1/user/logoutRequest",
+      "example": {
+        "params": {},
+        "request": {}
+      },
+      "type": "object",
+      "properties": {
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        }
+      },
+      "required": [
+        "params",
+        "request"
+      ]
+    },
+    "CreateUserCopyrequest": {
+      "title": "create user copyRequest",
+      "type": "object",
+      "properties": {
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request"
+        }
+      },
+      "required": [
+        "params",
+        "request"
+      ]
+    },
+    "Request": {
+      "title": "Request",
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "description": "",
+          "example": "Amit",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "",
+          "example": "Kumar",
+          "type": "string"
+        },
+        "password": {
+          "description": "",
+          "example": "password",
+          "type": "string"
+        },
+        "provider": {
+          "description": "",
+          "example": "NTP",
+          "type": "string"
+        },
+        "email": {
+          "description": "",
+          "example": "amit127.kumar127@tarento.com",
+          "type": "string"
+        },
+        "userName": {
+          "description": "",
+          "example": "amit127.kumar127",
+          "type": "string"
+        },
+        "phone": {
+          "description": "",
+          "example": "9900032121",
+          "type": "string"
+        },
+        "gender": {
+          "description": "",
+          "example": "male",
+          "type": "string"
+        },
+        "rootOrgId": {
+          "description": "",
+          "example": "32iu0e41972be9280f754e94",
+          "type": "string"
+        },
+        "regOrgId": {
+          "description": "",
+          "example": "32iu0e41972be9280f758999",
+          "type": "string"
+        },
+        "avatar": {
+          "description": "",
+          "type": "string"
+        },
+        "dob": {
+          "description": "",
+          "example": "1992-10-12",
+          "type": "string"
+        },
+        "aadhaarNo": {
+          "description": "",
+          "type": "string"
+        },
+        "language": {
+          "description": "",
+          "example": [
+            "English",
+            "Hindi"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subject": {
+          "description": "",
+          "example": [
+            "Physics",
+            "Math",
+            "English"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "role": {
+          "description": "",
+          "example": [
+            "ADMIN",
+            "MEMBERSHIP_MANAGEMENT"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "address": {
+          "description": "",
+          "example": [
+            {
+              "addType": "permanent",
+              "addressLine1": "212 winding hill dr",
+              "addressLine2": "Frazer town",
+              "city": "Bangalore",
+              "state": "Karnataka",
+              "zipCode": "560103"
+            },
+            {
+              "addType": "permanent1",
+              "addressLine1": "2121 winding hill dr",
+              "addressLine2": "Frazer town1",
+              "city": "Bangalore1",
+              "state": "Karnataka1",
+              "zipCode": "560135"
+            }
+          ],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Address"
+          }
+        },
+        "education": {
+          "description": "",
+          "example": [
+            {
+              "degree": "Bachelor of Science",
+              "yearOfPassing": 2012,
+              "percentage": 72.5,
+              "grade": "B",
+              "name": "MG College",
+              "boardOrUniversity": "Anna University",
+              "address": {
+                "addressLine1": "2121 winding hill dr",
+                "addressLine2": "Frazer town1",
+                "city": "Bangalore1",
+                "state": "Karnataka1",
+                "zipCode": "560135"
+              }
+            },
+            {
+              "degree": "Plus 2",
+              "yearOfPassing": 2009,
+              "name": "Delhi Public School",
+              "boardOrUniversity": "CBSE",
+              "address": {
+                "addressLine1": "2121 winding hill dr",
+                "addressLine2": "Frazer town1",
+                "city": "Bangalore1",
+                "state": "Karnataka1",
+                "zipCode": "560135"
+              }
+            }
+          ],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Education"
+          }
+        },
+        "jobProfile": {
+          "description": "",
+          "example": [
+            {
+              "jobName": "jobName",
+              "role": "teacher",
+              "joiningDate": "1992-10-12",
+              "endDate": "1992-10-12",
+              "orgId": "123",
+              "orgName": "AP ORG",
+              "subject": [
+                "Physics",
+                "Chemistry"
+              ],
+              "address": {
+                "addressLine1": "2121 winding hill dr",
+                "addressLine2": "Frazer town1",
+                "city": "Bangalore1",
+                "state": "Karnataka1",
+                "zipCode": "560135"
+              }
+            },
+            {
+              "jobName": "jobName1",
+              "role": "teacher",
+              "joiningDate": "1992-10-12",
+              "endDate": "1992-10-12",
+              "orgId": "123",
+              "orgName": "AP ORG",
+              "subject": [
+                "Physics",
+                "Chemistry"
+              ],
+              "address": {
+                "addressLine1": "2121 winding hill dr",
+                "addressLine2": "Frazer town1",
+                "city": "Bangalore1",
+                "state": "Karnataka1",
+                "zipCode": "560135"
+              }
+            }
+          ],
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JobProfile"
+          }
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName",
+        "password",
+        "provider",
+        "email",
+        "userName",
+        "phone",
+        "gender",
+        "rootOrgId",
+        "regOrgId",
+        "avatar",
+        "dob",
+        "aadhaarNo",
+        "language",
+        "subject",
+        "role",
+        "address",
+        "education",
+        "jobProfile"
+      ]
+    },
+    "Address": {
+      "title": "Address",
+      "example": {
+        "addType": "permanent",
+        "addressLine1": "212 winding hill dr",
+        "addressLine2": "Frazer town",
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "zipCode": "560103"
+      },
+      "type": "object",
+      "properties": {
+        "addType": {
+          "description": "",
+          "example": "permanent",
+          "type": "string"
+        },
+        "addressLine1": {
+          "description": "",
+          "example": "212 winding hill dr",
+          "type": "string"
+        },
+        "addressLine2": {
+          "description": "",
+          "example": "Frazer town",
+          "type": "string"
+        },
+        "city": {
+          "description": "",
+          "example": "Bangalore",
+          "type": "string"
+        },
+        "state": {
+          "description": "",
+          "example": "Karnataka",
+          "type": "string"
+        },
+        "zipCode": {
+          "description": "",
+          "example": "560103",
+          "type": "string"
+        }
+      },
+      "required": [
+        "addType",
+        "addressLine1",
+        "addressLine2",
+        "city",
+        "state",
+        "zipCode"
+      ]
+    },
+    "Education": {
+      "title": "Education",
+      "example": {
+        "degree": "Bachelor of Science",
+        "yearOfPassing": 2012,
+        "percentage": 72.5,
+        "grade": "B",
+        "name": "MG College",
+        "boardOrUniversity": "Anna University",
+        "address": {
+          "addressLine1": "2121 winding hill dr",
+          "addressLine2": "Frazer town1",
+          "city": "Bangalore1",
+          "state": "Karnataka1",
+          "zipCode": "560135"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "degree": {
+          "description": "",
+          "example": "Bachelor of Science",
+          "type": "string"
+        },
+        "yearOfPassing": {
+          "description": "",
+          "example": 2012,
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "description": "",
+          "example": "MG College",
+          "type": "string"
+        },
+        "boardOrUniversity": {
+          "description": "",
+          "example": "Anna University",
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/Address5",
+          "example": {
+            "addressLine1": "2121 winding hill dr",
+            "addressLine2": "Frazer town1",
+            "city": "Bangalore1",
+            "state": "Karnataka1",
+            "zipCode": "560135"
+          }
+        },
+        "percentage": {
+          "description": "",
+          "example": 72.5,
+          "type": "number",
+          "format": "double"
+        },
+        "grade": {
+          "description": "",
+          "example": "B",
+          "type": "string"
+        }
+      },
+      "required": [
+        "degree",
+        "yearOfPassing",
+        "name",
+        "boardOrUniversity",
+        "address"
+      ]
+    },
+    "Address5": {
+      "title": "Address5",
+      "example": {
+        "addressLine1": "2121 winding hill dr",
+        "addressLine2": "Frazer town1",
+        "city": "Bangalore1",
+        "state": "Karnataka1",
+        "zipCode": "560135"
+      },
+      "type": "object",
+      "properties": {
+        "addressLine1": {
+          "description": "",
+          "example": "2121 winding hill dr",
+          "type": "string"
+        },
+        "addressLine2": {
+          "description": "",
+          "example": "Frazer town1",
+          "type": "string"
+        },
+        "city": {
+          "description": "",
+          "example": "Bangalore1",
+          "type": "string"
+        },
+        "state": {
+          "description": "",
+          "example": "Karnataka1",
+          "type": "string"
+        },
+        "zipCode": {
+          "description": "",
+          "example": "560135",
+          "type": "string"
+        }
+      },
+      "required": [
+        "addressLine1",
+        "addressLine2",
+        "city",
+        "state",
+        "zipCode"
+      ]
+    },
+    "JobProfile": {
+      "title": "JobProfile",
+      "example": {
+        "jobName": "jobName",
+        "role": "teacher",
+        "joiningDate": "1992-10-12",
+        "endDate": "1992-10-12",
+        "orgId": "123",
+        "orgName": "AP ORG",
+        "subject": [
+          "Physics",
+          "Chemistry"
+        ],
+        "address": {
+          "addressLine1": "2121 winding hill dr",
+          "addressLine2": "Frazer town1",
+          "city": "Bangalore1",
+          "state": "Karnataka1",
+          "zipCode": "560135"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "jobName": {
+          "description": "",
+          "example": "jobName",
+          "type": "string"
+        },
+        "role": {
+          "description": "",
+          "example": "teacher",
+          "type": "string"
+        },
+        "joiningDate": {
+          "description": "",
+          "example": "1992-10-12",
+          "type": "string"
+        },
+        "endDate": {
+          "description": "",
+          "example": "1992-10-12",
+          "type": "string"
+        },
+        "orgId": {
+          "description": "",
+          "example": "123",
+          "type": "string"
+        },
+        "orgName": {
+          "description": "",
+          "example": "AP ORG",
+          "type": "string"
+        },
+        "subject": {
+          "description": "",
+          "example": [
+            "Physics",
+            "Chemistry"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "address": {
+          "$ref": "#/definitions/Address5",
+          "example": {
+            "addressLine1": "2121 winding hill dr",
+            "addressLine2": "Frazer town1",
+            "city": "Bangalore1",
+            "state": "Karnataka1",
+            "zipCode": "560135"
+          }
+        }
+      },
+      "required": [
+        "jobName",
+        "role",
+        "joiningDate",
+        "endDate",
+        "orgId",
+        "orgName",
+        "subject",
+        "address"
+      ]
+    },
+    "UpdateUserInforequest": {
+      "title": "update user infoRequest",
+      "example": {
+        "id": "5ea900cf-3885-4ab5-b126-77b2074db562",
+        "ts": "2017-09-19 12:22:09:874+0530",
+        "params": {},
+        "request": {
+          "profileSummary": "Test to check for update",
+          "userId": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38",
+          "lastname": "manzarul"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "example": "5ea900cf-3885-4ab5-b126-77b2074db562",
+          "type": "string"
+        },
+        "ts": {
+          "description": "",
+          "example": "2017-09-19 12:22:09:874+0530",
+          "type": "string"
+        },
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request9",
+          "example": {
+            "profileSummary": "Test to check for update",
+            "userId": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38",
+            "lastname": "manzarul"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ts",
+        "params",
+        "request"
+      ]
+    },
+    "Request9": {
+      "title": "Request9",
+      "example": {
+        "profileSummary": "Test to check for update",
+        "userId": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38",
+        "lastname": "manzarul"
+      },
+      "type": "object",
+      "properties": {
+        "profileSummary": {
+          "description": "",
+          "example": "Test to check for update",
+          "type": "string"
+        },
+        "userId": {
+          "description": "",
+          "example": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38",
+          "type": "string"
+        },
+        "lastname": {
+          "description": "",
+          "example": "manzarul",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profileSummary",
+        "userId",
+        "lastname"
+      ]
+    },
+    "{{host}}/user/v1/role/assignrequest": {
+      "title": "{{host}}/user/v1/role/assignRequest",
+      "example": {
+        "request": {
+          "userId": "3d45fbd8-b911-4cc5-b503-61215902d780",
+          "organisationId": "0123653943740170242",
+          "roles": [
+            "CONTENT_CREATION",
+            "PUBLIC",
+            "CONTENT_CREATOR",
+            "ANNOUNCEMENT_SENDER"
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Request11",
+          "example": {
+            "userId": "3d45fbd8-b911-4cc5-b503-61215902d780",
+            "organisationId": "0123653943740170242",
+            "roles": [
+              "CONTENT_CREATION",
+              "PUBLIC",
+              "CONTENT_CREATOR",
+              "ANNOUNCEMENT_SENDER"
+            ]
+          }
+        }
+      },
+      "required": [
+        "request"
+      ]
+    },
+    "Request11": {
+      "title": "Request11",
+      "example": {
+        "userId": "3d45fbd8-b911-4cc5-b503-61215902d780",
+        "organisationId": "0123653943740170242",
+        "roles": [
+          "CONTENT_CREATION",
+          "PUBLIC",
+          "CONTENT_CREATOR",
+          "ANNOUNCEMENT_SENDER"
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "userId": {
+          "description": "",
+          "example": "3d45fbd8-b911-4cc5-b503-61215902d780",
+          "type": "string"
+        },
+        "organisationId": {
+          "description": "",
+          "example": "0123653943740170242",
+          "type": "string"
+        },
+        "roles": {
+          "description": "",
+          "example": [
+            "CONTENT_CREATION",
+            "PUBLIC",
+            "CONTENT_CREATOR",
+            "ANNOUNCEMENT_SENDER"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "organisationId",
+        "roles"
+      ]
+    },
+    "Request13": {
+      "title": "Request13",
+      "example": {
+        "userName": "manzarul1.haque@taren.com",
+        "source": "web",
+        "password": "password"
+      },
+      "type": "object",
+      "properties": {
+        "userName": {
+          "description": "",
+          "example": "manzarul1.haque@taren.com",
+          "type": "string"
+        },
+        "source": {
+          "description": "",
+          "example": "web",
+          "type": "string"
+        },
+        "password": {
+          "description": "",
+          "example": "password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "userName",
+        "source",
+        "password"
+      ]
+    },
+    "{{host}}/v1/user/forgotpasswordrequest": {
+      "title": "{{host}}/v1/user/forgotpasswordRequest",
+      "example": {
+        "id": "unique API ID",
+        "ts": "2013/10/15 16:16:39",
+        "params": {},
+        "request": {
+          "userName": "m.haque1149348"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "example": "unique API ID",
+          "type": "string"
+        },
+        "ts": {
+          "description": "",
+          "example": "2013/10/15 16:16:39",
+          "type": "string"
+        },
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request15",
+          "example": {
+            "userName": "m.haque1149348"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ts",
+        "params",
+        "request"
+      ]
+    },
+    "Request15": {
+      "title": "Request15",
+      "example": {
+        "userName": "m.haque1149348"
+      },
+      "type": "object",
+      "properties": {
+        "userName": {
+          "description": "",
+          "example": "m.haque1149348",
+          "type": "string"
+        }
+      },
+      "required": [
+        "userName"
+      ]
+    },
+    "{{host}}/v1/user/profile/visibilityrequest": {
+      "title": "{{host}}/v1/user/profile/visibilityRequest",
+      "example": {
+        "request": {
+          "userId": "fa5c49797051b4129985977bcacbba0b451c64df8e73fdac9714378281517077",
+          "private": [
+            "gender",
+            "location",
+            "address"
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Request17",
+          "example": {
+            "userId": "fa5c49797051b4129985977bcacbba0b451c64df8e73fdac9714378281517077",
+            "private": [
+              "gender",
+              "location",
+              "address"
+            ]
+          }
+        }
+      },
+      "required": [
+        "request"
+      ]
+    },
+    "Request17": {
+      "title": "Request17",
+      "example": {
+        "userId": "fa5c49797051b4129985977bcacbba0b451c64df8e73fdac9714378281517077",
+        "private": [
+          "gender",
+          "location",
+          "address"
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "userId": {
+          "description": "",
+          "example": "fa5c49797051b4129985977bcacbba0b451c64df8e73fdac9714378281517077",
+          "type": "string"
+        },
+        "private": {
+          "description": "",
+          "example": [
+            "gender",
+            "location",
+            "address"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "private"
+      ]
+    },
+    "GetUserByLoginIdrequest": {
+      "title": "get User by Login IdRequest",
+      "example": {
+        "params": {},
+        "request": {
+          "loginId": "demopublic@ekstep"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request19",
+          "example": {
+            "loginId": "demopublic@ekstep"
+          }
+        }
+      },
+      "required": [
+        "params",
+        "request"
+      ]
+    },
+    "Request19": {
+      "title": "Request19",
+      "example": {
+        "loginId": "demopublic@ekstep"
+      },
+      "type": "object",
+      "properties": {
+        "loginId": {
+          "description": "",
+          "example": "demopublic@ekstep",
+          "type": "string"
+        }
+      },
+      "required": [
+        "loginId"
+      ]
+    },
+    "AddBadgesToUserrequest": {
+      "title": "add badges to userRequest",
+      "example": {
+        "params": {},
+        "request": {
+          "badgeTypeId": "123343444",
+          "receiverId": "5de6b1af-82c3-4f1b-afef-007db7390841"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request21",
+          "example": {
+            "badgeTypeId": "123343444",
+            "receiverId": "5de6b1af-82c3-4f1b-afef-007db7390841"
+          }
+        }
+      },
+      "required": [
+        "params",
+        "request"
+      ]
+    },
+    "Request21": {
+      "title": "Request21",
+      "example": {
+        "badgeTypeId": "123343444",
+        "receiverId": "5de6b1af-82c3-4f1b-afef-007db7390841"
+      },
+      "type": "object",
+      "properties": {
+        "badgeTypeId": {
+          "description": "",
+          "example": "123343444",
+          "type": "string"
+        },
+        "receiverId": {
+          "description": "",
+          "example": "5de6b1af-82c3-4f1b-afef-007db7390841",
+          "type": "string"
+        }
+      },
+      "required": [
+        "badgeTypeId",
+        "receiverId"
+      ]
+    },
+    "{{host}}/user/v1/searchrequest": {
+      "title": "{{host}}/user/v1/searchRequest",
+      "example": {
+        "id": "unique API ID",
+        "ts": "2013/10/15 16:16:39",
+        "params": {},
+        "request": {
+          "query": "ntp",
+          "filters": {},
+          "offset": 0,
+          "limit": 300,
+          "sort_by": {
+            "createdDate": "desc"
+          }
+        }
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "example": "unique API ID",
+          "type": "string"
+        },
+        "ts": {
+          "description": "",
+          "example": "2013/10/15 16:16:39",
+          "type": "string"
+        },
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request23",
+          "example": {
+            "query": "ntp",
+            "filters": {},
+            "offset": 0,
+            "limit": 300,
+            "sort_by": {
+              "createdDate": "desc"
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ts",
+        "params",
+        "request"
+      ]
+    },
+    "Request23": {
+      "title": "Request23",
+      "example": {
+        "query": "ntp",
+        "filters": {},
+        "offset": 0,
+        "limit": 300,
+        "sort_by": {
+          "createdDate": "desc"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "query": {
+          "description": "",
+          "example": "ntp",
+          "type": "string"
+        },
+        "filters": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "offset": {
+          "description": "",
+          "example": 0,
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "description": "",
+          "example": 300,
+          "type": "integer",
+          "format": "int32"
+        },
+        "sort_by": {
+          "$ref": "#/definitions/SortBy",
+          "example": {
+            "createdDate": "desc"
+          }
+        }
+      },
+      "required": [
+        "query",
+        "filters",
+        "offset",
+        "limit",
+        "sort_by"
+      ]
+    },
+    "SortBy": {
+      "title": "SortBy",
+      "example": {
+        "createdDate": "desc"
+      },
+      "type": "object",
+      "properties": {
+        "createdDate": {
+          "description": "",
+          "example": "desc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdDate"
+      ]
+    },
+    "SearchUserrequest": {
+      "title": "search userRequest",
+      "example": {
+        "id": "unique API ID",
+        "ts": "2013/10/15 16:16:39",
+        "params": {},
+        "request": {
+          "query": "a",
+          "filters": {},
+          "offset": 0,
+          "limit": 5
+        }
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "example": "unique API ID",
+          "type": "string"
+        },
+        "ts": {
+          "description": "",
+          "example": "2013/10/15 16:16:39",
+          "type": "string"
+        },
+        "params": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "request": {
+          "$ref": "#/definitions/Request26",
+          "example": {
+            "query": "a",
+            "filters": {},
+            "offset": 0,
+            "limit": 5
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ts",
+        "params",
+        "request"
+      ]
+    },
+    "Request26": {
+      "title": "Request26",
+      "example": {
+        "query": "a",
+        "filters": {},
+        "offset": 0,
+        "limit": 5
+      },
+      "type": "object",
+      "properties": {
+        "query": {
+          "description": "",
+          "example": "a",
+          "type": "string"
+        },
+        "filters": {
+          "description": "",
+          "example": {},
+          "type": "object"
+        },
+        "offset": {
+          "description": "",
+          "example": 0,
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "description": "",
+          "example": 5,
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": [
+        "query",
+        "filters",
+        "offset",
+        "limit"
+      ]
+    },
+    "Request28": {
+      "title": "Request28",
+      "example": {
+        "password": "password1",
+        "newPassword": "password"
+      },
+      "type": "object",
+      "properties": {
+        "password": {
+          "description": "",
+          "example": "password1",
+          "type": "string"
+        },
+        "newPassword": {
+          "description": "",
+          "example": "password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "newPassword"
+      ]
+    },
+    "Request30": {
+      "title": "Request30",
+      "example": {
+        "userId": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38"
+      },
+      "type": "object",
+      "properties": {
+        "userId": {
+          "description": "",
+          "example": "fe109c81be7e08b5e049e57a51343dfec2fbeaa062f9ecaf7b86852aaa28eb38",
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId"
+      ]
+    },
+    "CreateUserrequest": {
+      "title": "create userRequest",
+      "example": {
+        "request": {
+          "firstName": "manzarul",
+          "lastName": "haque",
+          "emailVerified": true,
+          "password": "password",
+          "provider": "apekx",
+          "phone": "9663890445",
+          "phoneVerified": true,
+          "userName": "manzarul",
+          "email": "manzarul.haque@tarento.com"
+        }
+      },
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/Request32",
+          "example": {
+            "firstName": "manzarul",
+            "lastName": "haque",
+            "emailVerified": true,
+            "password": "password",
+            "provider": "apekx",
+            "phone": "9663890445",
+            "phoneVerified": true,
+            "userName": "manzarul",
+            "email": "manzarul.haque@tarento.com"
+          }
+        }
+      },
+      "required": [
+        "request"
+      ]
+    },
+    "Request32": {
+      "title": "Request32",
+      "example": {
+        "firstName": "manzarul",
+        "lastName": "haque",
+        "emailVerified": true,
+        "password": "password",
+        "provider": "apekx",
+        "phone": "9663890445",
+        "phoneVerified": true,
+        "userName": "manzarul",
+        "email": "manzarul.haque@tarento.com"
+      },
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "description": "",
+          "example": "manzarul",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "",
+          "example": "haque",
+          "type": "string"
+        },
+        "emailVerified": {
+          "description": "",
+          "example": true,
+          "type": "boolean"
+        },
+        "password": {
+          "description": "",
+          "example": "password",
+          "type": "string"
+        },
+        "provider": {
+          "description": "",
+          "example": "apekx",
+          "type": "string"
+        },
+        "phone": {
+          "description": "",
+          "example": "9663890445",
+          "type": "string"
+        },
+        "phoneVerified": {
+          "description": "",
+          "example": true,
+          "type": "boolean"
+        },
+        "userName": {
+          "description": "",
+          "example": "manzarul",
+          "type": "string"
+        },
+        "email": {
+          "description": "",
+          "example": "manzarul.haque@tarento.com",
+          "type": "string"
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName",
+        "emailVerified",
+        "password",
+        "provider",
+        "phone",
+        "phoneVerified",
+        "userName",
+        "email"
+      ]
+    }
+  }
+}

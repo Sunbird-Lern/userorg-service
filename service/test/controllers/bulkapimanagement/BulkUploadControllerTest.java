@@ -1,4 +1,4 @@
-package controllers.clientmanagement;
+package controllers.bulkapimanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.DummyActor;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -36,13 +37,13 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 /**
- * Created by arvind on 6/12/17.
+ * Created by arvind on 4/12/17.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-public class ClientControllerTest {
+public class BulkUploadControllerTest {
 
   public static FakeApplication app;
   @Mock
@@ -68,47 +69,84 @@ public class ClientControllerTest {
   }
 
   @Test
-  public void testregisterClient() {
+  public void testuploadUser() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put("clientName" , "ap");
+    innerMap.put(JsonKey.DATA , "sampleStream".getBytes(Charset.defaultCharset()));
+    innerMap.put(JsonKey.ORGANISATION_ID , "org123");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/client/register").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/upload").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testupdateClientKey() {
+  public void testuploadOrg() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
-    innerMap.put("x-authenticated-client-token" , "ap");
-    innerMap.put("x-authenticated-client-id","123");
+    innerMap.put(JsonKey.DATA , "sampleStream".getBytes(Charset.defaultCharset()));
+    //innerMap.put(JsonKey.ORGANISATION_ID , "org123");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/client/key/update").method("PATCH");
-    headerMap.put("x-authenticated-client-token" , new String[]{"ap"});
-    headerMap.put("x-authenticated-client-id",new String[]{"123"});
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/upload").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testgetClientKey() {
+  public void testgetUploadStatus() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/client/key/read/clientId?type=channel").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/upload/status/pid").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testbulkBatchEnrollment() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.DATA , "sampleStream".getBytes(Charset.defaultCharset()));
+    //innerMap.put(JsonKey.ORGANISATION_ID , "org123");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/batch/bulk/enrollment").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testuserDataEncryption() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    RequestBuilder req = new RequestBuilder().uri("/v1/user/data/encrypt").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testuserDataDecryption() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    RequestBuilder req = new RequestBuilder().uri("/v1/user/data/decrypt").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());

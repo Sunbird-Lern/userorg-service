@@ -106,53 +106,61 @@ public class UserController extends BaseController {
   private void validateAuthenticity(Request reqObj) {
 
     if (ctx().flash().containsKey(JsonKey.AUTH_WITH_MASTER_KEY)) {
-
-      String clientId = ctx().flash().get(JsonKey.USER_ID);
-      String userId ;
-      if (null != reqObj.getRequest().get(JsonKey.USER_ID)) {
-        userId = (String)reqObj.getRequest().get(JsonKey.USER_ID);
-      } else {
-        userId = (String)reqObj.getRequest().get(JsonKey.ID);
-      }
-
-      Map<String, Object> clientDetail = AuthenticationHelper.getClientAccessTokenDetail(clientId);
-      // get user detail from cassandra
-      Map<String, Object> userDetail = AuthenticationHelper.getUserDetail(userId);
-      // check whether both exist or not ...
-      if (clientDetail == null || userDetail == null) {
-        throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
-            ResponseCode.unAuthorised.getErrorMessage(),
-            ResponseCode.UNAUTHORIZED.getResponseCode());
-      }
-
-      String userRootOrgId = (String) userDetail.get(JsonKey.ROOT_ORG_ID);
-      if (ProjectUtil.isStringNullOREmpty(userRootOrgId)) {
-        throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
-            ResponseCode.unAuthorised.getErrorMessage(),
-            ResponseCode.UNAUTHORIZED.getResponseCode());
-      }
-      // get the org info from org table
-      Map<String, Object> orgDetail = AuthenticationHelper.getOrgDetail(userRootOrgId);
-      String userChannel = (String) orgDetail.get(JsonKey.CHANNEL);
-      String clientChannel = (String) clientDetail.get(JsonKey.CHANNEL);
-
-      // check whether both belongs to the same channel or not ...
-      if (!compareStrings(userChannel, clientChannel)) {
-        throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
-            ResponseCode.unAuthorised.getErrorMessage(),
-            ResponseCode.UNAUTHORIZED.getResponseCode());
-      }
+      validateWithClient(reqObj);
     } else {
-      String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
-      if ((!ProjectUtil.isStringNullOREmpty(userId))
-          && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
-        throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
-            ResponseCode.unAuthorised.getErrorMessage(),
-            ResponseCode.UNAUTHORIZED.getResponseCode());
-      }
-
+      validateWithUserId(reqObj);
     }
 
+  }
+
+  private void validateWithClient(Request reqObj) {
+    String clientId = ctx().flash().get(JsonKey.USER_ID);
+    String userId ;
+    if (null != reqObj.getRequest().get(JsonKey.USER_ID)) {
+      userId = (String)reqObj.getRequest().get(JsonKey.USER_ID);
+    } else {
+      userId = (String)reqObj.getRequest().get(JsonKey.ID);
+    }
+
+    Map<String, Object> clientDetail = AuthenticationHelper.getClientAccessTokenDetail(clientId);
+    // get user detail from cassandra
+    Map<String, Object> userDetail = AuthenticationHelper.getUserDetail(userId);
+    // check whether both exist or not ...
+    if (clientDetail == null || userDetail == null) {
+      throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
+
+    String userRootOrgId = (String) userDetail.get(JsonKey.ROOT_ORG_ID);
+    if (ProjectUtil.isStringNullOREmpty(userRootOrgId)) {
+      throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
+    // get the org info from org table
+    Map<String, Object> orgDetail = AuthenticationHelper.getOrgDetail(userRootOrgId);
+    String userChannel = (String) orgDetail.get(JsonKey.CHANNEL);
+    String clientChannel = (String) clientDetail.get(JsonKey.CHANNEL);
+    ProjectLogger.log("User channel : "+userChannel);
+    ProjectLogger.log("Client channel : "+clientChannel);
+
+    // check whether both belongs to the same channel or not ...
+    if (!compareStrings(userChannel, clientChannel)) {
+      throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
+  }
+
+  private void validateWithUserId(Request reqObj) {
+    String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+    if ((!ProjectUtil.isStringNullOREmpty(userId))
+        && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
+      throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
+          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
   }
 
 
