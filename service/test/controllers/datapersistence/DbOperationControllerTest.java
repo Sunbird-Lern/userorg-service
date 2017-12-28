@@ -149,8 +149,7 @@ public class DbOperationControllerTest {
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/object/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
-    assertEquals(400, result.status());
-
+    assertEquals(200, result.status());
   }
 
   //@Test

@@ -208,7 +208,7 @@ public class OrganisationControllerTest {
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
+    innerMap.put(JsonKey.USER_ID, "userId");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
@@ -226,7 +226,7 @@ public class OrganisationControllerTest {
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
+    innerMap.put(JsonKey.USER_ID, "userId");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
@@ -244,7 +244,7 @@ public class OrganisationControllerTest {
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
+    innerMap.put(JsonKey.USER_ID, "userId");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
@@ -262,7 +262,7 @@ public class OrganisationControllerTest {
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
+    innerMap.put(JsonKey.USER_ID, "userId");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
@@ -280,7 +280,7 @@ public class OrganisationControllerTest {
     Map<String , Object> requestMap = new HashMap<>();
     Map<String , Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
+    innerMap.put(JsonKey.USER_ID, "userId");
     requestMap.put(JsonKey.REQUEST , innerMap);
     String data = mapToJson(requestMap);
 
