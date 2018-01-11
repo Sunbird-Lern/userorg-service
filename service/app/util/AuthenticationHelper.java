@@ -6,14 +6,11 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.Application;
 import org.sunbird.learner.util.Util;
@@ -56,7 +53,7 @@ public class AuthenticationHelper {
        if(authResponse != null && authResponse.get(JsonKey.RESPONSE) != null) {
         List<Map<String, Object>> authList =
              (List<Map<String, Object>>) authResponse.get(JsonKey.RESPONSE);
-          if (authList != null && authList.size()>0) {
+          if (authList != null && !authList.isEmpty()) {
             Map<String,Object> authMap = authList.get(0);
              userId = (String) authMap.get(JsonKey.USER_ID);
           }

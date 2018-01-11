@@ -40,13 +40,13 @@ import util.RequestInterceptor;
 @PowerMockIgnore("javax.management.*")
 public class UserMetricsControllerTest {
 
-  public static FakeApplication app;
+  private static FakeApplication app;
   @Mock
   private Http.Request request;
   private static Map<String,String[]> headerMap;
-  static ActorSystem system;
-  final static Props props = Props.create(DummyActor.class);
-  static ActorRef subject ;
+  private static ActorSystem system;
+  private static final Props props = Props.create(DummyActor.class);
+  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {

@@ -249,7 +249,7 @@ public class BaseController extends Controller {
    */
   public Promise<Result> actorResponseHandler(Object actorRef,
       org.sunbird.common.request.Request request, Timeout timeout, String responseKey,
-      play.mvc.Http.Request httpReq) {
+      Request httpReq) {
     if (actorRef instanceof ActorRef) {
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
           .map(new Function<Object, Result>() {

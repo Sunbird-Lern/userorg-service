@@ -8,12 +8,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import controllers.DummyActor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -28,7 +28,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.learner.Application;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
@@ -46,13 +45,13 @@ import util.RequestInterceptor;
 @PowerMockIgnore("javax.management.*")
 public class GeoLocationControllerTest {
 
-  public static FakeApplication app;
+  private static FakeApplication app;
   @Mock
   private Http.Request request;
   private static Map<String,String[]> headerMap;
-  static ActorSystem system;
-  final static Props props = Props.create(DummyActor.class);
-  static ActorRef subject ;
+  private static ActorSystem system;
+  private static final Props props = Props.create(DummyActor.class);
+  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {

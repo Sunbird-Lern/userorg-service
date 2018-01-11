@@ -8,6 +8,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import controllers.DummyActor;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -28,11 +28,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.helper.CassandraConnectionManager;
-import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.learner.util.Util;
 import play.libs.Json;
 import play.mvc.Http;
@@ -51,13 +47,13 @@ import util.RequestInterceptor;
 @PowerMockIgnore("javax.management.*")
 public class DbOperationControllerTest {
 
-  public static FakeApplication app;
+  private static FakeApplication app;
   @Mock
   private Http.Request request;
   private static Map<String,String[]> headerMap;
-  static ActorSystem system;
-  final static Props props = Props.create(DummyActor.class);
-  static ActorRef subject ;
+  private static ActorSystem system;
+  private static final Props props = Props.create(DummyActor.class);
+  private static ActorRef subject ;
  /* private static List<String> tableList = null;
   private static CassandraConnectionManager manager = CassandraConnectionMngrFactory
       .getObject(PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));*/
