@@ -22,9 +22,9 @@ import play.mvc.Http.Request;
  */
 public class RequestInterceptor {
 
-  private RequestInterceptor() {}
   protected static List<String> restrictedUriList = null;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
+  private RequestInterceptor() {}
   static {
     restrictedUriList = new ArrayList<>();
     restrictedUriList.add("/v1/user/update");
@@ -74,15 +74,14 @@ public class RequestInterceptor {
     Request request = ctx.request();
     String response = "{userId}";
     if (!isRequestInExcludeList(request.path())) {
-      if (ProjectUtil
-          .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))) {
         if (ProjectUtil
+            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))
+            && ProjectUtil
             .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
             && ProjectUtil
                 .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
           return ResponseCode.unAuthorised.getErrorCode();
         }
-      }
       if (ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))
           && Boolean.parseBoolean(PropertiesCache.getInstance()
               .getProperty(JsonKey.IS_SSO_ENABLED))) {
@@ -128,8 +127,8 @@ public class RequestInterceptor {
         resp = true;
       } else {
         String[] splitedpath = request.split("[/]");
-        request = removeLastValue(splitedpath);
-        if (apiHeaderIgnoreMap.containsKey(request)) {
+        String tempRequest = removeLastValue(splitedpath);
+        if (apiHeaderIgnoreMap.containsKey(tempRequest)) {
           resp = true;
         }
       }

@@ -218,10 +218,10 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonExceptionResponse(Exception e, Request request) {
-
+    Request req = request;
     ProjectLogger.log(e.getMessage(), e);
-    if (request == null) {
-      request = request();
+    if (req == null) {
+      req = request();
     }
     ProjectCommonException exception = null;
     if (e instanceof ProjectCommonException) {
@@ -232,7 +232,7 @@ public class BaseController extends Controller {
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return Results.status(exception.getResponseCode(),
-        Json.toJson(BaseController.createResponseOnException(request(), exception)));
+        Json.toJson(BaseController.createResponseOnException(req, exception)));
   }
 
 
@@ -350,14 +350,13 @@ public class BaseController extends Controller {
    * @return String
    */
   private static String getApiResponseId(String path, String method) {
-
     String val = "";
     if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
       val = Global.apiMap.get(path);
       if (ProjectUtil.isStringNullOREmpty(val)) {
         String[] splitedpath = path.split("[/]");
-        path = removeLastValue(splitedpath);
-        val = Global.apiMap.get(path);
+        String tempPath = removeLastValue(splitedpath);
+        val = Global.apiMap.get(tempPath);
       }
     } else {
       val = Global.apiMap.get(path);
