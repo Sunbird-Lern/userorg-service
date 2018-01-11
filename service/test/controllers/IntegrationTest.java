@@ -20,8 +20,6 @@ import play.test.Helpers;
 public class IntegrationTest {
 
 	  public static FakeApplication app;
-	  @Mock
-	  private Http.Request request;
       private static Map<String,String[]> headerMap;
 	  
 	  @BeforeClass

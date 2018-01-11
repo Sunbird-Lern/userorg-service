@@ -44,8 +44,6 @@ public class OrganisationMetricsControllerTest {
 
 
   private static FakeApplication app;
-  @Mock
-  private Http.Request request;
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
@@ -106,18 +104,5 @@ public class OrganisationMetricsControllerTest {
     Result result = route(req);
     assertEquals(200, result.status());
   }
-
-  private static String mapToJson(Map map){
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return jsonResp;
-  }
-
 
 }

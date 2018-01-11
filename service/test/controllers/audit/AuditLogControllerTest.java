@@ -45,8 +45,6 @@ import util.RequestInterceptor;
 public class AuditLogControllerTest {
 
   public static FakeApplication app;
-  @Mock
-  private Http.Request request;
   private static Map<String,String[]> headerMap;
   static ActorSystem system;
   final static Props props = Props.create(DummyActor.class);

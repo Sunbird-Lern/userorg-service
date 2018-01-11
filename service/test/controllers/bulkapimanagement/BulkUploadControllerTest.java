@@ -46,8 +46,6 @@ import util.RequestInterceptor;
 public class BulkUploadControllerTest {
 
   private static FakeApplication app;
-  @Mock
-  private Http.Request request;
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
