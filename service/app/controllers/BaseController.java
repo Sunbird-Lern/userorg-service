@@ -97,7 +97,7 @@ public class BaseController extends Controller {
    * @param response Response
    * @return Response
    */
-  public static Response createSuccessResponse(play.mvc.Http.Request request, Response response) {
+  public static Response createSuccessResponse(Request request, Response response) {
 
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -131,7 +131,7 @@ public class BaseController extends Controller {
    * @param exception ProjectCommonException
    * @return Response
    */
-  public static Response createResponseOnException(play.mvc.Http.Request request,
+  public static Response createResponseOnException(Request request,
       ProjectCommonException exception) {
     ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming",
         exception);
@@ -191,7 +191,7 @@ public class BaseController extends Controller {
    * @param request play.mvc.Http.Request
    * @return Result
    */
-  public Result createCommonResponse(Object response, String key, play.mvc.Http.Request request) {
+  public Result createCommonResponse(Object response, String key, Request request) {
 
     if (response instanceof Response) {
       Response courseResponse = (Response) response;
@@ -217,7 +217,7 @@ public class BaseController extends Controller {
    * @param request play.mvc.Http.Request
    * @return Result
    */
-  public Result createCommonExceptionResponse(Exception e, play.mvc.Http.Request request) {
+  public Result createCommonExceptionResponse(Exception e, Request request) {
 
     ProjectLogger.log(e.getMessage(), e);
     if (request == null) {
@@ -314,7 +314,7 @@ public class BaseController extends Controller {
    * @param request play.mvc.Http.Request
    * @return String
    */
-  private static String getApiResponseId(play.mvc.Http.Request request) {
+  private static String getApiResponseId(Request request) {
 
     String val = "";
     if (request != null) {

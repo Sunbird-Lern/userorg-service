@@ -2,7 +2,6 @@ package controllers.tenantpreference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
