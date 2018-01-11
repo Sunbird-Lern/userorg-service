@@ -1,13 +1,12 @@
+package controllers;
+
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-
-import controllers.BaseController;
 import play.mvc.Result;
 
 

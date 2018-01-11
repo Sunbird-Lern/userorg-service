@@ -102,6 +102,27 @@ public class DbOperationControllerTest {
     testreadAll();
     testsearch();
     testdelete();
+    
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String , Object> requestMap = new HashMap<>();
+    Map<String , Object> innerMap = new HashMap<>();
+    innerMap.put(ENTITY_NAME , entityName);
+    List<String> requiredFields = new ArrayList<>();
+    requiredFields.add("userid");
+    innerMap.put(REQUIRED_FIELDS , requiredFields);
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.USER_ID ,"usergt78y4ry85464" );
+    innerMap.put(JsonKey.FILTERS , filters);
+    innerMap.put(JsonKey.ID , "ggudy8d8ydyy8ddy9");
+    requestMap.put(JsonKey.REQUEST , innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/object/search").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
   }
 
   //@Test

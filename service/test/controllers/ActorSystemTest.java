@@ -1,12 +1,13 @@
+package controllers;
+
+import static org.junit.Assert.assertTrue;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import controllers.actorutility.ActorSystemFactory;
 import controllers.actorutility.impl.LocalActorSystem;
 import controllers.actorutility.impl.RemoteActorSystem;
-import static org.junit.Assert.*;
-
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.sunbird.common.models.util.PropertiesCache;
 
 public class ActorSystemTest {
@@ -19,7 +20,6 @@ public class ActorSystemTest {
     provider = PropertiesCache.getInstance().getProperty("api_actor_provider");
   }
   
-  @SuppressWarnings("deprecation")
   //@Test
   public void testActorSystem(){
     Object obj = ActorSystemFactory.getActorSystem();
@@ -30,7 +30,6 @@ public class ActorSystemTest {
      }
   }
   
-  @SuppressWarnings("deprecation")
   //@Test
   public void testActorRef(){
     Object obj = ActorSystemFactory.getActorSystem().initializeActorSystem();

@@ -1,3 +1,5 @@
+package controllers;
+
 import akka.actor.UntypedAbstractActor;
 
 public class MockActor extends UntypedAbstractActor{
