@@ -36,7 +36,6 @@ public class ApplicationTest {
 
 	@Test
 	public void checkExceptionResponse() {
-		String apiPath = "/v1/learner/getenrolledcoures";
 		ProjectCommonException exception = new ProjectCommonException(ResponseCode.courseIdRequiredError.getErrorCode(),
 				ResponseCode.courseIdRequiredError.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
 		Response response = BaseController.createResponseOnException(null, exception);
@@ -45,7 +44,6 @@ public class ApplicationTest {
 
 	//@Test
 	public void testSuccessResponse() {
-		String apiPath = "/v1/learner/getenrolledcoures";
 		Response response = new Response();
 		response = BaseController.createSuccessResponse(null, response);
 		assertEquals(ResponseCode.OK, response.getResponseCode());

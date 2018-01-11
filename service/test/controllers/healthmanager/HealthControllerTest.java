@@ -103,16 +103,4 @@ public class HealthControllerTest {
     assertEquals(200, result.status());
   }
 
-  private static String mapToJson(Map map){
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    return jsonResp;
-  }
-
 }
