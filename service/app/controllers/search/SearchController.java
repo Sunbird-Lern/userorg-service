@@ -35,7 +35,6 @@ public class SearchController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateCompositeSearch(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
