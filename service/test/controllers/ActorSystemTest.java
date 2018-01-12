@@ -12,7 +12,7 @@ import org.sunbird.common.models.util.PropertiesCache;
 
 public class ActorSystemTest {
   
-  static String provider = null;
+  private static String provider = null;
       
   @BeforeClass
   public static void setUp() {

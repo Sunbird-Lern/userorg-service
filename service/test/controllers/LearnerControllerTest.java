@@ -44,11 +44,11 @@ import util.RequestInterceptor;
 @PowerMockIgnore("javax.management.*")
 public class LearnerControllerTest {
 
-  public static FakeApplication app;
+  private static FakeApplication app;
   private static Map<String,String[]> headerMap;
-  static ActorSystem system;
-  final static Props props = Props.create(controllers.DummyActor.class);
-  static ActorRef subject ;
+  private static ActorSystem system;
+  private static final Props props = Props.create(controllers.DummyActor.class);
+  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {
