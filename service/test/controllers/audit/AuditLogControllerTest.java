@@ -46,7 +46,6 @@ public class AuditLogControllerTest {
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
-  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {
