@@ -164,6 +164,7 @@ public class BaseController extends Controller {
     		response.getParams().setErrmsg(exception.getMessage());	
     	}
     }
+    Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
     return response;
   }
 
@@ -226,6 +227,9 @@ public class BaseController extends Controller {
         courseResponse.getResult().remove(JsonKey.RESPONSE);
         courseResponse.getResult().put(key, value);
       }
+
+      // remove request info from map
+    Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
       return Results.ok(
           Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
     //}
@@ -294,6 +298,7 @@ public class BaseController extends Controller {
     params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
     reqForTelemetry.setRequest(generateTelemetryRequestForController("LOG", params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
     lmaxWriter.submitMessage(reqForTelemetry);
+    // cleaning request info ...
     return Results.status(exception.getResponseCode(),
         Json.toJson(BaseController.createResponseOnException(req, exception)));
   }

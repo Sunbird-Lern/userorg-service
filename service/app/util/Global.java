@@ -172,17 +172,14 @@ public class Global extends GlobalSettings {
     if(null != userToken){
       reqContext.put(JsonKey.ACTOR_ID , userId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
-
       ctx.flash().put(JsonKey.ACTOR_ID , userId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
 
     }else{
       // write logic to check consumer id and set trype as consumer ...
       String consumerId = request.getHeader(HeaderParam.X_Consumer_ID.getName());
-
       reqContext.put(JsonKey.ACTOR_ID , consumerId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
-
       ctx.flash().put(JsonKey.ACTOR_ID , consumerId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
 
@@ -212,15 +209,15 @@ public class Global extends GlobalSettings {
     }else if(uri.startsWith("/v1/org")){
       env = JsonKey.ORGANISATION;
     }else if(uri.startsWith("/v1/object")){
-      env = "announcement";//JsonKey.ANNOUNCEMENT;
+      env = JsonKey.ANNOUNCEMENT;
     }else if(uri.startsWith("/v1/page")){
       env = JsonKey.PAGE;
     }else if(uri.startsWith("/v1/course/batch")){
       env = JsonKey.BATCH;
     }else if(uri.startsWith("/v1/notification")){
-      env = "notification";//JsonKey.NOTIFICATION;
+      env = JsonKey.NOTIFICATION;
     }else if(uri.startsWith("/v1/dashboard")){
-      env = "dashboard";//JsonKey.NOTIFICATION;
+      env = JsonKey.DASHBOARD;
     }else{
       env = "miscellaneous";
     }
