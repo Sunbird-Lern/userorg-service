@@ -46,10 +46,10 @@ public class NotesController extends BaseController {
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -72,10 +72,10 @@ public class NotesController extends BaseController {
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
   
@@ -96,11 +96,10 @@ public class NotesController extends BaseController {
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.NOTE_ID, noteId);
       reqObj.setRequest(innerMap);
-
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -120,10 +119,10 @@ public class NotesController extends BaseController {
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       innerMap.putAll(reqObj.getRequest());
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -144,10 +143,10 @@ public class NotesController extends BaseController {
       innerMap.put(JsonKey.NOTE_ID, noteId);
       innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 }

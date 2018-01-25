@@ -5,6 +5,8 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import controllers.actorutility.ActorSystemFactory;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -15,10 +17,13 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.util.TelemetryUtil;
+import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -34,6 +39,7 @@ public class BaseController extends Controller {
 
   public static final int AKKA_WAIT_TIME = 10;
   private static Object actorRef = null;
+  private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   static {
     try{
@@ -134,7 +140,7 @@ public class BaseController extends Controller {
   public static Response createResponseOnException(Request request,
       ProjectCommonException exception) {
     ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming",
-        exception);
+        exception, genarateTelemetryInfoForError());
     Response response = new Response();
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -193,8 +199,28 @@ public class BaseController extends Controller {
    */
   public Result createCommonResponse(Object response, String key, Request request) {
 
-    if (response instanceof Response) {
-      Response courseResponse = (Response) response;
+    // generate info log here...
+    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+    org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
+
+    Map<String, Object> params = (Map<String, Object>) requestInfo.get("ADDITIONAL_INFO");
+
+    params.put(JsonKey.LOG_TYPE, "API_ACCESS");
+    params.put(JsonKey.MESSAGE , request.uri());
+    params.put(JsonKey.METHOD, request.method());
+
+    //if (response instanceof Response) {
+    Response courseResponse = (Response) response;
+
+    long endTime = System.currentTimeMillis();
+    params.put(JsonKey.END_TIME, endTime);
+    params.put(JsonKey.STATUS , String.valueOf(((Response) response).getResponseCode().getResponseCode()));
+    params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
+    req.setRequest(generateTelemetryRequestForController
+          ("LOG", params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
+
+    lmaxWriter.submitMessage(req);
+
       if (!ProjectUtil.isStringNullOREmpty(key)) {
         Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
         courseResponse.getResult().remove(JsonKey.RESPONSE);
@@ -202,11 +228,33 @@ public class BaseController extends Controller {
       }
       return Results.ok(
           Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
-    } else {
+    //}
+    /*else {
+
       ProjectCommonException exception = (ProjectCommonException) response;
       return Results.status(exception.getResponseCode(),
           Json.toJson(BaseController.createResponseOnException(request, exception)));
+    }*/
+  }
+
+  private String generateStackTrace(StackTraceElement[] elements){
+    StringBuilder builder = new StringBuilder("");
+    for(StackTraceElement element : elements){
+
+      builder.append(element.toString());
+      builder.append("\n");
     }
+    return builder.toString();
+  }
+
+  private Map<String,Object> generateTelemetryRequestForController(String eventType, Map<String, Object> params,
+      Map<String, Object> context) {
+
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.TELEMETRY_EVENT_TYPE , eventType);
+    map.put(JsonKey.CONTEXT, context);
+    map.put(JsonKey.PARAMS , params);
+    return map;
   }
 
 
@@ -219,7 +267,7 @@ public class BaseController extends Controller {
    */
   public Result createCommonExceptionResponse(Exception e, Request request) {
     Request req = request;
-    ProjectLogger.log(e.getMessage(), e);
+    ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
     if (req == null) {
       req = request();
     }
@@ -231,6 +279,21 @@ public class BaseController extends Controller {
           ResponseCode.internalError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
+
+    // generate info log here...
+    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+    org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
+    Map<String, Object> params = (Map<String, Object>) requestInfo.get("ADDITIONAL_INFO");
+    params.put(JsonKey.LOG_TYPE, "API_ACCESS");
+    params.put(JsonKey.MESSAGE , request.uri());
+    params.put(JsonKey.METHOD, request.method());
+    long endTime = System.currentTimeMillis();
+    params.put(JsonKey.END_TIME, endTime);
+    params.put(JsonKey.STATUS , String.valueOf(exception.getResponseCode()));
+    params.put(JsonKey.LOG_LEVEL, "error");
+    params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
+    reqForTelemetry.setRequest(generateTelemetryRequestForController("LOG", params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
+    lmaxWriter.submitMessage(reqForTelemetry);
     return Results.status(exception.getResponseCode(),
         Json.toJson(BaseController.createResponseOnException(req, exception)));
   }
@@ -250,6 +313,9 @@ public class BaseController extends Controller {
   public Promise<Result> actorResponseHandler(Object actorRef,
       org.sunbird.common.request.Request request, Timeout timeout, String responseKey,
       Request httpReq) {
+    // set header to request object , setting actor type and channel headers value ...
+    setChannelAndActorInfo(ctx(), request);
+
     if (actorRef instanceof ActorRef) {
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
           .map(new Function<Object, Result>() {
@@ -383,6 +449,27 @@ public class BaseController extends Controller {
 
   public static void setActorRef(Object obj){
     actorRef = obj;
+  }
+
+  private static Map<String, Object> genarateTelemetryInfoForError() {
+
+    Map<String, Object> map = new HashMap<>();
+    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+    Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
+    Map<String, Object> params = new HashMap<>();
+    params.put(JsonKey.ERR_TYPE, "API_ACCESS");
+
+    map.put(JsonKey.CONTEXT, contextInfo);
+    map.put(JsonKey.PARAMS , params);
+    return map;
+  }
+
+  public void setChannelAndActorInfo(Context ctx, org.sunbird.common.request.Request reqObj ){
+
+    reqObj.getContext().put(JsonKey.CHANNEL , ctx().flash().get(JsonKey.CHANNEL));
+    reqObj.getContext().put(JsonKey.ACTOR_ID , ctx().flash().get(JsonKey.ACTOR_ID));
+    reqObj.getContext().put(JsonKey.ACTOR_TYPE , ctx().flash().get(JsonKey.ACTOR_TYPE));
+
   }
 
 }

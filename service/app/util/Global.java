@@ -6,7 +6,9 @@ package util;
 
 import controllers.BaseController;
 import java.lang.reflect.Method;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -18,14 +20,17 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 
+import org.sunbird.learner.util.TelemetryUtil;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Action;
 import play.mvc.Http;
+import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -39,6 +44,8 @@ import play.mvc.Results;
 public class Global extends GlobalSettings {
 
   public static ProjectUtil.Environment env;
+
+  public static Map<String, Map<String, Object>> requestInfo = new HashMap<>();
  
   public static Map<String, String> apiMap = new HashMap<>();
   public static String ssoPublicKey = "";
@@ -49,6 +56,7 @@ public class Global extends GlobalSettings {
 
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
+      ctx.request().headers();
       long startTime = System.currentTimeMillis();
       ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()
           + " start time " + startTime, LoggerEnum.PERF_LOG);
@@ -57,6 +65,8 @@ public class Global extends GlobalSettings {
       response.setHeader("Access-Control-Allow-Origin", "*");
       
       String message = RequestInterceptor.verifyRequestData(ctx);
+      // call method to set all the required params for the telemetry event(log)...
+      intializeRequestInfo(ctx , message.replace("{userId}", ""));
       if (message.contains("{userId}")) {
         ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
         ctx.flash().put(JsonKey.IS_AUTH_REQ, "false");
@@ -77,6 +87,18 @@ public class Global extends GlobalSettings {
           + (System.currentTimeMillis() - startTime), LoggerEnum.PERF_LOG);
       return result;
     }
+  }
+
+  private void initializeRequestChannel(Context ctx) {
+
+    String channel = ctx.request().getHeader(JsonKey.CHANNEL);
+    if(ProjectUtil.isStringNullOREmpty(channel)){
+      // set default channel to context flash
+      ctx.flash().put(JsonKey.CHANNEL, JsonKey.DEFAULT_ROOT_ORG_ID);
+    }else{
+      ctx.flash().put(JsonKey.CHANNEL, channel);
+    }
+
   }
 
 
@@ -125,6 +147,85 @@ public class Global extends GlobalSettings {
     return new ActionWrapper(super.onRequest(request, actionMethod));
   }
 
+  private void intializeRequestInfo(Context ctx, String userId) {
+
+    Request request =ctx.request() ;
+    String actionMethod=ctx.request().method();
+    String messageId = ExecutionContext.getRequestId();//request.getHeader(JsonKey.MESSAGE_ID);
+    String url = request.uri();
+    String methodName = actionMethod;
+    long startTime = System.currentTimeMillis();
+
+    ExecutionContext context = ExecutionContext.getCurrent();
+    Map<String, Object> reqContext = new HashMap<>();
+    // set env and channel to the
+    String channel = request.getHeader(JsonKey.CHANNEL);
+    if(ProjectUtil.isStringNullOREmpty(channel)){
+      channel = JsonKey.DEFAULT_ROOT_ORG_ID;
+    }
+    reqContext.put(JsonKey.CHANNEL , channel);
+    ctx.flash().put(JsonKey.CHANNEL, channel);
+    reqContext.put(JsonKey.ENV, getEnv(request));  // context done we can pass it directly to the LMAX Disruptor ...
+    reqContext.put(JsonKey.REQUEST_ID, ExecutionContext.getRequestId());
+
+    String userToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
+    if(null != userToken){
+      reqContext.put(JsonKey.ACTOR_ID , userId);
+      reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+
+      ctx.flash().put(JsonKey.ACTOR_ID , userId);
+      ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+
+    }else{
+      // write logic to check consumer id and set trype as consumer ...
+      String consumerId = request.getHeader(HeaderParam.X_Consumer_ID.getName());
+
+      reqContext.put(JsonKey.ACTOR_ID , consumerId);
+      reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
+
+      ctx.flash().put(JsonKey.ACTOR_ID , consumerId);
+      ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
+
+    }
+
+    context.setRequestContext(reqContext);
+    Map<String , Object> map = new HashMap<>();
+    map.put(JsonKey.CONTEXT , TelemetryUtil.getTelemetryContext());
+    Map<String, Object> additionalInfo = new HashMap<>();
+    additionalInfo.put(JsonKey.URL , url);
+    additionalInfo.put(JsonKey.METHOD_NAME, methodName);
+    additionalInfo.put(JsonKey.START_TIME, startTime);
+
+    // additional info contains info other than context info ...
+    map.put("ADDITIONAL_INFO", additionalInfo);
+
+    ctx.flash().put(JsonKey.REQUEST_ID, messageId);
+    requestInfo.put(messageId , map);
+  }
+
+  private String getEnv(Request request) {
+
+    String uri = request.uri();
+    String env ;
+    if(uri.startsWith("/v1/user")){
+      env = JsonKey.USER;
+    }else if(uri.startsWith("/v1/org")){
+      env = JsonKey.ORGANISATION;
+    }else if(uri.startsWith("/v1/object")){
+      env = "announcement";//JsonKey.ANNOUNCEMENT;
+    }else if(uri.startsWith("/v1/page")){
+      env = JsonKey.PAGE;
+    }else if(uri.startsWith("/v1/course/batch")){
+      env = JsonKey.BATCH;
+    }else if(uri.startsWith("/v1/notification")){
+      env = "notification";//JsonKey.NOTIFICATION;
+    }else if(uri.startsWith("/v1/dashboard")){
+      env = "dashboard";//JsonKey.NOTIFICATION;
+    }else{
+      env = "miscellaneous";
+    }
+    return env;
+  }
 
   /**
    * This method will do request data validation for GET method only. As a GET request user must
