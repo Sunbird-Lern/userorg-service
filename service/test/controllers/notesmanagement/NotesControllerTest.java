@@ -14,7 +14,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -30,7 +29,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import controllers.DummyActor;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Http.RequestBuilder;
 import play.test.FakeApplication;
@@ -50,7 +48,6 @@ public class NotesControllerTest {
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
-  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {

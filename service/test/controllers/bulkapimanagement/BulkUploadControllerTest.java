@@ -20,7 +20,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -29,7 +28,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.FakeApplication;
@@ -49,7 +47,6 @@ public class BulkUploadControllerTest {
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
-  private static ActorRef subject ;
 
   @BeforeClass
   public static void startApp() {

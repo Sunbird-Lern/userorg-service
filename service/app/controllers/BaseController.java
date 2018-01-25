@@ -142,11 +142,10 @@ public class BaseController extends Controller {
     ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming",
         exception, genarateTelemetryInfoForError());
     Response response = new Response();
+    response.setVer("");
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
-    } else {
-      response.setVer("");
-    }
+    } 
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
@@ -155,14 +154,15 @@ public class BaseController extends Controller {
       code = ResponseCode.SERVER_ERROR;
     }
     response.setParams(createResponseParamObj(code));
-    if (response.getParams() != null && response.getParams().getStatus() != null) {
-      response.getParams().setStatus(
-          exception.getCode() != null ? exception.getCode() : response.getParams().getStatus());
-    }
-    if (response.getParams() != null
-        && !ProjectUtil.isStringNullOREmpty(response.getParams().getErrmsg())
-        && response.getParams().getErrmsg().contains("{0}")) {
-      response.getParams().setErrmsg(exception.getMessage());
+    if (response.getParams() != null) {
+    	response.getParams().setStatus(response.getParams().getStatus());
+    	if (exception.getCode() != null){
+    		response.getParams().setStatus(exception.getCode());	
+    	}
+    	if (!ProjectUtil.isStringNullOREmpty(response.getParams().getErrmsg())
+        && response.getParams().getErrmsg().contains("{0}")){
+    		response.getParams().setErrmsg(exception.getMessage());	
+    	}
     }
     return response;
   }

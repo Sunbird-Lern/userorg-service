@@ -21,7 +21,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -31,7 +30,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.learner.util.Util;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.FakeApplication;
@@ -51,7 +49,6 @@ public class DbOperationControllerTest {
   private static Map<String,String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(DummyActor.class);
-  private static ActorRef subject ;
  /* private static List<String> tableList = null;
   private static CassandraConnectionManager manager = CassandraConnectionMngrFactory
       .getObject(PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));*/
