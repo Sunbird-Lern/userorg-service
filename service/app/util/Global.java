@@ -218,6 +218,8 @@ public class Global extends GlobalSettings {
       env = JsonKey.NOTIFICATION;
     }else if(uri.startsWith("/v1/dashboard")){
       env = JsonKey.DASHBOARD;
+    }else if(uri.startsWith("/v1/badges")){
+      env = JsonKey.BADGES;
     }else{
       env = "miscellaneous";
     }
