@@ -17,7 +17,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.util.TelemetryUtil;
 import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import play.libs.F.Function;
 import play.libs.F.Promise;

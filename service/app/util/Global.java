@@ -8,7 +8,6 @@ import controllers.BaseController;
 import java.lang.reflect.Method;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -87,18 +86,6 @@ public class Global extends GlobalSettings {
           + (System.currentTimeMillis() - startTime), LoggerEnum.PERF_LOG);
       return result;
     }
-  }
-
-  private void initializeRequestChannel(Context ctx) {
-
-    String channel = ctx.request().getHeader(JsonKey.CHANNEL);
-    if(ProjectUtil.isStringNullOREmpty(channel)){
-      // set default channel to context flash
-      ctx.flash().put(JsonKey.CHANNEL, JsonKey.DEFAULT_ROOT_ORG_ID);
-    }else{
-      ctx.flash().put(JsonKey.CHANNEL, channel);
-    }
-
   }
 
 
