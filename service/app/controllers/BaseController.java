@@ -19,6 +19,7 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.TelemetryUtil;
 import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
+import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -204,9 +205,9 @@ public class BaseController extends Controller {
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
 
-    Map<String, Object> params = (Map<String, Object>) requestInfo.get("ADDITIONAL_INFO");
+    Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
 
-    params.put(JsonKey.LOG_TYPE, "API_ACCESS");
+    params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
     params.put(JsonKey.MESSAGE , request.uri());
     params.put(JsonKey.METHOD, request.method());
 
@@ -218,7 +219,7 @@ public class BaseController extends Controller {
     params.put(JsonKey.STATUS , String.valueOf(((Response) response).getResponseCode().getResponseCode()));
     params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
     req.setRequest(generateTelemetryRequestForController
-          ("LOG", params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
+          (TelemetryEvents.LOG.getName(), params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
 
     lmaxWriter.submitMessage(req);
 
@@ -287,8 +288,8 @@ public class BaseController extends Controller {
     // generate info log here...
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
-    Map<String, Object> params = (Map<String, Object>) requestInfo.get("ADDITIONAL_INFO");
-    params.put(JsonKey.LOG_TYPE, "API_ACCESS");
+    Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
+    params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
     params.put(JsonKey.MESSAGE , request.uri());
     params.put(JsonKey.METHOD, request.method());
     long endTime = System.currentTimeMillis();
@@ -296,7 +297,7 @@ public class BaseController extends Controller {
     params.put(JsonKey.STATUS , String.valueOf(exception.getResponseCode()));
     params.put(JsonKey.LOG_LEVEL, "error");
     params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
-    reqForTelemetry.setRequest(generateTelemetryRequestForController("LOG", params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
+    reqForTelemetry.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
     lmaxWriter.submitMessage(reqForTelemetry);
     // cleaning request info ...
     return Results.status(exception.getResponseCode(),
@@ -462,7 +463,7 @@ public class BaseController extends Controller {
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
     Map<String, Object> params = new HashMap<>();
-    params.put(JsonKey.ERR_TYPE, "API_ACCESS");
+    params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
 
     map.put(JsonKey.CONTEXT, contextInfo);
     map.put(JsonKey.PARAMS , params);

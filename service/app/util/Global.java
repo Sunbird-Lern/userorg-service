@@ -194,7 +194,7 @@ public class Global extends GlobalSettings {
     additionalInfo.put(JsonKey.START_TIME, startTime);
 
     // additional info contains info other than context info ...
-    map.put("ADDITIONAL_INFO", additionalInfo);
+    map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
 
     ctx.flash().put(JsonKey.REQUEST_ID, messageId);
     requestInfo.put(messageId , map);
