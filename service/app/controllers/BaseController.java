@@ -207,7 +207,7 @@ public class BaseController extends Controller {
     Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
 
     params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-    params.put(JsonKey.MESSAGE , request.uri());
+    params.put(JsonKey.MESSAGE , "");
     params.put(JsonKey.METHOD, request.method());
 
     //if (response instanceof Response) {
@@ -289,7 +289,7 @@ public class BaseController extends Controller {
     org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
     Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
     params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-    params.put(JsonKey.MESSAGE , request.uri());
+    params.put(JsonKey.MESSAGE , "");
     params.put(JsonKey.METHOD, request.method());
     long endTime = System.currentTimeMillis();
     params.put(JsonKey.END_TIME, endTime);
