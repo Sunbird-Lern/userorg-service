@@ -34,7 +34,7 @@ public class ApplicationTest {
 		assertEquals(ResponseCode.success.name(), params.getStatus());
 	}
 
-	@Test
+	//@Test
 	public void checkExceptionResponse() {
 		ProjectCommonException exception = new ProjectCommonException(ResponseCode.courseIdRequiredError.getErrorCode(),
 				ResponseCode.courseIdRequiredError.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
