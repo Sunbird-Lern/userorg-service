@@ -139,7 +139,7 @@ public class DbOperationControllerTest {
     try {
       Thread.sleep(4000);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      ProjectLogger.log(e.getMessage(),e);
     }
   }
 
@@ -309,8 +309,7 @@ public class DbOperationControllerTest {
     try {
       jsonResp = mapperObj.writeValueAsString(map);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      ProjectLogger.log(e.getMessage(),e);
     }
     return jsonResp;
   }

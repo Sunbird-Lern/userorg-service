@@ -120,23 +120,8 @@ public class SkillControllerTest {
     try {
       jsonResp = mapperObj.writeValueAsString(map);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      ProjectLogger.log(e.getMessage(),e);
     }
     return jsonResp;
   }
-
-  @AfterClass
-  public static void cleanUp(){
-
-    /*Application.getSystem().terminate();
-    try {
-      Thread.sleep(300);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }*/
-
-  }
-
-
 }

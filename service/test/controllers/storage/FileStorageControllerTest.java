@@ -85,8 +85,7 @@ public class FileStorageControllerTest {
     try {
       jsonResp = mapperObj.writeValueAsString(map);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      ProjectLogger.log(e.getMessage(),e);
     }
     return jsonResp;
   }
