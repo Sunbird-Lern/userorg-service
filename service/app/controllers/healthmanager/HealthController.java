@@ -40,17 +40,7 @@ public class HealthController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getHealth() {
-    try {
-      ProjectLogger.log("Call to get all server health api = " , LoggerEnum.INFO.name());
-      Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return getLearnerServiceHealth("learner");
   }
   
   
