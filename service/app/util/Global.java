@@ -165,6 +165,9 @@ public class Global extends GlobalSettings {
     }else{
       // write logic to check consumer id and set trype as consumer ...
       String consumerId = request.getHeader(HeaderParam.X_Consumer_ID.getName());
+      if(ProjectUtil.isStringNullOREmpty(consumerId)){
+        consumerId = JsonKey.DEFAULT_CONSUMER_ID;
+      }
       reqContext.put(JsonKey.ACTOR_ID , consumerId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
       ctx.flash().put(JsonKey.ACTOR_ID , consumerId);
@@ -182,7 +185,9 @@ public class Global extends GlobalSettings {
 
     // additional info contains info other than context info ...
     map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-
+    if(ProjectUtil.isStringNullOREmpty(messageId)){
+      messageId = JsonKey.DEFAULT_CONSUMER_ID;
+    }
     ctx.flash().put(JsonKey.REQUEST_ID, messageId);
     requestInfo.put(messageId , map);
   }
