@@ -283,11 +283,12 @@ public class Global extends GlobalSettings {
 
   /**
    * Method to get the response id on basis of request path.
-   * @param path
+   * @param requestPath
    * @return
    */
-  public static String getResponseId(String path){
+  public static String getResponseId(String requestPath){
 
+    String path = requestPath;
     final String ver = "/"+version;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
