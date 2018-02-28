@@ -11,7 +11,6 @@ import controllers.BaseController;
 import controllers.DummyActor;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -99,17 +98,5 @@ public class CourseMetricsControllerTest {
     assertEquals(200, result.status());
   }
 
-
-  @AfterClass
-  public static void cleanUp(){
-
-    /*Application.getSystem().terminate();
-    try {
-      Thread.sleep(300);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }*/
-
-  }
 
 }

@@ -27,6 +27,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
@@ -227,8 +228,7 @@ public class CourseControllerTest {
     try {
       jsonResp = mapperObj.writeValueAsString(map);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      ProjectLogger.log(e.getMessage(),e);
     }
     return jsonResp;
   }

@@ -45,9 +45,9 @@ public class Global extends GlobalSettings {
   public static ProjectUtil.Environment env;
 
   public static Map<String, Map<String, Object>> requestInfo = new HashMap<>();
- 
-  public static Map<String, String> apiMap = new HashMap<>();
+
   public static String ssoPublicKey = "";
+  private static final String version = "v1";
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
       this.delegate = action;
@@ -107,7 +107,6 @@ public class Global extends GlobalSettings {
   public void onStart(Application app) {
     ProjectLogger.log("Test***");
     setEnvironment();
-    createApiMap();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
   }
@@ -283,120 +282,33 @@ public class Global extends GlobalSettings {
   }
 
   /**
-   * This method will create api url and id for the url. this id we will use while sending api
-   * response to client.
+   * Method to get the response id on basis of request path.
+   * @param requestPath
+   * @return
    */
-  private static void createApiMap() {
+  public static String getResponseId(String requestPath){
 
-    apiMap.put("/v1/user/courses/enroll", "api.course.enroll");
-    apiMap.put("/v1/course/update", "api.course.update");
-    apiMap.put("/v1/course/publish", "api.course.publish");
-    apiMap.put("/v1/course/search", "api.course.search");
-    apiMap.put("/v1/course/delete", "api.course.delete");
-    apiMap.put("/v1/course", "api.course.getbycourseid");
-    apiMap.put("/v1/course/recommended/courses", "api.recomend");
-    apiMap.put("/v1/user/courses", "api.course.getbyuser");
-    apiMap.put("/v1/user/content/state", "api.content.state");
-    apiMap.put("/v1/user/create", "api.user.create");
-    apiMap.put("/v1/user/update", "api.user.update");
-    apiMap.put("/v1/user/login", "api.user.login");
-    apiMap.put("/v1/user/logout", "api.user.logout");
-    apiMap.put("/v1/user/changepassword", "api.user.cp");
-    apiMap.put("/v1/user/getprofile", "api.user.profile");
-    apiMap.put("/v1/course/create", "api.user.create");
-    apiMap.put("/v1/org/create", "api.org.create");
-    apiMap.put("/v1/org/update", "api.org.update");
-    apiMap.put("/v1/org/status/update", "api.org.update.status");
-    apiMap.put("/v1/org/member/join", "api.org.member.join");
-    apiMap.put("/v1/org/member/approve", "api.org.member.approve");
-    apiMap.put("/v1/org/member/reject", "api.org.member.reject");
-    apiMap.put("/v1/org/member/add", "api.org.member.add");
-    apiMap.put("/v1/org/member/remove", "api.org.member.remove");
-    apiMap.put("/v1/org/approve", "api.org.approve");
-    apiMap.put("/v1/org/read", "api.org.read");
-    apiMap.put("/v1/page/create", "api.page.create");
-    apiMap.put("/v1/page/update", "api.page.update");
-    apiMap.put("/v1/page/read", "api.page.get");
-    apiMap.put("/v1/page/all/settings", "api.page.settings");
-    apiMap.put("/v1/page/assemble", "api.page.assemble");
-    apiMap.put("/v1/page/section/create", "api.page.section.create");
-    apiMap.put("/v1/page/section/update", "api.page.section.update");
-    apiMap.put("/v1/page/section/list", "api.page.section.settings");
-    apiMap.put("/v1/page/section/read", "api.page.section.get");
-    apiMap.put("/v1/assessment/update", "api.assessment.save");
-    apiMap.put("/v1/assessment/result/read", "api.assessment.result");
-    apiMap.put("/v1/role/read", "api.role.read");
-    apiMap.put("/v1/user/getuser", "api.user.getuser");
-    apiMap.put("/v1/user/block", "api.user.inactive");
-    apiMap.put("/v1/user/unblock", "api.user.active");
-    apiMap.put("/v1/user/assign/role", "api.user.assign.role");
-    apiMap.put("/v1/course/batch/create", "api.course.batch.create");
-    apiMap.put("/v1/course/batch/update", "api.course.batch.update");
-    apiMap.put("/v1/course/batch/users/add", "api.course.batch.user.add");
-    apiMap.put("/v1/course/batch/users/remove", "api.course.batch.user.remove");
-    apiMap.put("/v1/course/batch/read", "api.course.batch.read");
-    apiMap.put("/v1/dashboard/creation/org", "api.sunbird.dashboard.org.creation");
-    apiMap.put("/v1/dashboard/consumption/org", "api.sunbird.dashboard.org.consumption");
-    apiMap.put("/v1/dashboard/progress/course", "api.sunbird.dashboard.course.admin");
-    apiMap.put("/v1/dashboard/consumption/course", "api.sunbird.dashboard.course.consumption");
-    apiMap.put("/v1/dashboard/creation/user", "api.sunbird.dashboard.user.creation");
-    apiMap.put("/v1/dashboard/consumption/user", "api.sunbird.dashboard.user.consumption");
-    apiMap.put("/v1/user/search", "api.user.search");
-    apiMap.put("/v1/org/search", "api.org.search");
-    apiMap.put("/v1/user/read", "api.user.read");
-    apiMap.put("/v1/notification/email", "api.notification.email");
-    apiMap.put("/v1/file/upload", "api.file.upload");
-    apiMap.put("/v1/user/badges/add", "api.user.badge.add");
-    apiMap.put("/v1/badges/list", "api.badge.list");
-    apiMap.put("/v1/health", "all.service.health.api");
-    apiMap.put("/v1/learner/health", "learner.service.health.api");
-    apiMap.put("/v1/actor/health", "actor.service.health.api");
-    apiMap.put("/v1/es/health", "es.service.health.api");
-    apiMap.put("/v1/cassandra/health", "cassandra.service.health.api");
-    apiMap.put("/v1/ekstep/health", "ekstep.service.health.api");
-    apiMap.put("/v1/org/type/create", "api.sunbird.org.type.create");
-    apiMap.put("/v1/org/type/update", "api.sunbird.org.type.update");
-    apiMap.put("/v1/org/type/list", "api.sunbird.org.type.list");
-    apiMap.put("/v1/note/create", "api.note.create");
-    apiMap.put("/v1/note/read", "api.note.read");
-    apiMap.put("/v1/note/update", "api.note.update");
-    apiMap.put("/v1/note/search", "api.note.search");
-    apiMap.put("/v1/note/delete", "api.note.delete");
-    apiMap.put("/v1/upload/status/", "api.upload.status");
-    apiMap.put("/v1/bulk/user/upload", "api.bulk.user.upload");
-    apiMap.put("/v1/user/upload", "api.user.upload");
-    apiMap.put("/v1/user/mediatype/list", "api.user.mediatypes.list");
-    apiMap.put("/health", "api.all.health");
-    apiMap.put("/v1/audit/history", "api.audit.history");
-    apiMap.put("/v1/user/forgotpassword", "api.user.forgotpassword");
-    
-    apiMap.put("/v1/object/read", "api.object.read");
-    apiMap.put("/v1/object/create", "api.object.create");
-    apiMap.put("/v1/object/update", "api.object.update");
-    apiMap.put("/v1/object/delete", "api.object.delete");
-    apiMap.put("/v1/object/read/list", "api.object.read.list");
-    apiMap.put("/v1/object/search", "api.object.search");
-    apiMap.put("/v1/object/metrics", "api.object.metrics");
-    apiMap.put("/v1/client/register", "api.client.register");
-    apiMap.put("/v1/client/key/update", "api.client.key.update");
-    apiMap.put("/v1/client/key/read", "api.client.key.read");
-    apiMap.put("/v1/user/profile/visibility", "api.user.profile.visibility");
-
-    apiMap.put("/v1/location/create","api.location.create");
-    apiMap.put("/v1/location/read","api.location.read");
-    apiMap.put("/v1/location/update","api.location.update");
-    apiMap.put("/v1/location/delete","api.location.delete");
-
-    apiMap.put("/v1/org/tc/create","api.org.tc.create");
-    apiMap.put("/v1/org/tc/update","api.org.tc.update");
-    apiMap.put("/v1/org/tc/read","api.org.tc.read");
-    apiMap.put("/v1/user/tc/update","api.user.tc.update");
-
-    apiMap.put("/v1/user/skill/add","api.user.skill.add");
-    apiMap.put("/v1/user/skill/read" , "api.user.skill.read");
-    apiMap.put("/v1/skills" , "api.skills");
-    apiMap.put("/v1/notification/send", "api.notification.service");
-    apiMap.put("/v1/system/settings", "api.system.settings");
-    apiMap.put("/v1/notification/audience", "api.notification.audience");
+    String path = requestPath;
+    final String ver = "/"+version;
+    path = path.trim();
+    StringBuilder builder = new StringBuilder("");
+    if(path.startsWith(ver)){
+      String requestUrl = (path.split("\\?"))[0];
+      requestUrl = requestUrl.replaceFirst(ver,"api");
+      String[] list = requestUrl.split("/");
+      for(String str: list){
+        if(str.matches("[A-Za-z]+")){
+          builder.append(str).append(".");
+        }
+      }
+      builder.deleteCharAt(builder.length()-1);
+    }else{
+      if("/health".equalsIgnoreCase(path)){
+        builder.append("api.all.health");
+      }
+    }
+    return builder.toString();
   }
 }
+
+

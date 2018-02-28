@@ -91,9 +91,9 @@ public class OrganisationController extends BaseController {
       innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, null);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 

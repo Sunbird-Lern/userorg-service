@@ -391,21 +391,21 @@ public class BaseController extends Controller {
     if (request != null) {
       String path = request.path();
       if (request.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
-        val = Global.apiMap.get(path);
+        val = Global.getResponseId(path);
         if (ProjectUtil.isStringNullOREmpty(val)) {
           String[] splitedpath = path.split("[/]");
           path = removeLastValue(splitedpath);
-          val = Global.apiMap.get(path);
+          val = Global.getResponseId(path);
         }
       } else {
-        val = Global.apiMap.get(path);
+        val = Global.getResponseId(path);
       }
       if (ProjectUtil.isStringNullOREmpty(val)) {
-        val = Global.apiMap.get(path);
+        val = Global.getResponseId(path);
         if (ProjectUtil.isStringNullOREmpty(val)) {
           String[] splitedpath = path.split("[/]");
           path = removeLastValue(splitedpath);
-          val = Global.apiMap.get(path);
+          val = Global.getResponseId(path);
         }
       }
     }
@@ -423,14 +423,14 @@ public class BaseController extends Controller {
   private static String getApiResponseId(String path, String method) {
     String val = "";
     if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
-      val = Global.apiMap.get(path);
+      val = Global.getResponseId(path);
       if (ProjectUtil.isStringNullOREmpty(val)) {
         String[] splitedpath = path.split("[/]");
         String tempPath = removeLastValue(splitedpath);
-        val = Global.apiMap.get(tempPath);
+        val = Global.getResponseId(tempPath);
       }
     } else {
-      val = Global.apiMap.get(path);
+      val = Global.getResponseId(path);
     }
     return val;
   }
