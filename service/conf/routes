@@ -185,3 +185,9 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 #System Settings
 
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
+#Badging api
+
+POST  /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/create    @controllers.badges.BadgeAssertionController.issueBadge(issuerSlug:String,badgeSlug:String)
+GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/read    @controllers.badges.BadgeAssertionController.getAssertionDetails(issuerSlug:String,badgeSlug:String,assertionSlug:String)
+GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/list                   @controllers.badges.BadgeAssertionController.getAssertionList(issuerSlug:String,badgeSlug:String)
+DELETE /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/revoke @controllers.badges.BadgeAssertionController.revokeAssertion(issuerSlug:String,badgeSlug:String,assertionSlug:String)
