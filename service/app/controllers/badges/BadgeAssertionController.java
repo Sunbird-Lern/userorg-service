@@ -6,6 +6,7 @@ package controllers.badges;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -65,9 +66,9 @@ public class BadgeAssertionController extends BaseController {
 					LoggerEnum.INFO.name());
 			BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug); 
 			Request reqObj = new Request();
-			reqObj.getRequest().put(JsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(JsonKey.BADGE_CLASS_SLUG, badgeSlug);
-			reqObj.getRequest().put(JsonKey.ASSERTION_SLUG, assertionSlug);
+			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
+			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_SLUG, assertionSlug);
 			reqObj.setOperation(ActorOperations.GET_BADGE_ASSERTION.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -84,7 +85,7 @@ public class BadgeAssertionController extends BaseController {
 	 * 
 	 * @param badgeSlug
 	 *            String
-	 * @param assertionSlug String
+	 * @param issuerSlug String
 	 * @return Promise<Result>
 	 */
 	public Promise<Result> getAssertionList(String issuerSlug, String badgeSlug) {
@@ -95,8 +96,8 @@ public class BadgeAssertionController extends BaseController {
 						ResponseCode.invalidData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
 			}
 			Request reqObj = new Request();
-			reqObj.getRequest().put(JsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(JsonKey.BADGE_CLASS_SLUG, badgeSlug);
+			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
 			reqObj.setOperation(ActorOperations.GET_BADGE_ASSERTION_LIST.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -123,9 +124,9 @@ public class BadgeAssertionController extends BaseController {
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-			reqObj.getRequest().put(JsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(JsonKey.BADGE_CLASS_SLUG, badgeSlug);
-			reqObj.getRequest().put(JsonKey.ASSERTION_SLUG, assertionSlug);
+			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
+			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_SLUG, assertionSlug);
 			reqObj.setOperation(ActorOperations.REVOKE_BADGE.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
