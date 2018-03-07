@@ -72,6 +72,8 @@ public class BadgeClassController extends BaseController {
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
+            ProjectLogger.log("createBadgeClass: exception = ", e);
+
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
         }
     }
@@ -89,8 +91,23 @@ public class BadgeClassController extends BaseController {
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
+
+            HashMap<String, Object> map = new HashMap<>();
+
+            if (issuerSlug != null) {
+                map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+            }
+
+            if (issuerSlug != null) {
+                map.put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
+            }
+
+            request.setRequest(map);
+
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
+            ProjectLogger.log("getBadgeClass: exception = ", e);
+
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
         }
     }
@@ -107,6 +124,8 @@ public class BadgeClassController extends BaseController {
             Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue());
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
+            ProjectLogger.log("listBadgeClass: exception = ", e);
+
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
         }
     }
@@ -124,9 +143,23 @@ public class BadgeClassController extends BaseController {
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
+
+            HashMap<String, Object> map = new HashMap<>();
+
+            if (issuerSlug != null) {
+                map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+            }
+
+            if (issuerSlug != null) {
+                map.put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
+            }
+
+            request.setRequest(map);
+
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
-            ProjectLogger.log("Error in controller", e);
+            ProjectLogger.log("deleteBadgeClass: exception = ", e);
+
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
         }
     }
