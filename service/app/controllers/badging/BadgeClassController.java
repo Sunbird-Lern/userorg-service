@@ -3,6 +3,7 @@ package controllers.badging;
 import controllers.BaseController;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -50,12 +51,12 @@ public class BadgeClassController extends BaseController {
                 if (imageFilePart.size() > 0) {
                     InputStream inputStream = new FileInputStream(imageFilePart.get(0).getFile());
                     byte[] imageByteArray = IOUtils.toByteArray(inputStream);
-                    fileParamsMap.put(JsonKey.BADGE_IMAGE, imageByteArray);
+                    fileParamsMap.put(BadgingJsonKey.BADGE_IMAGE, imageByteArray);
                 }
             }
 
             if (issuerSlug != null) {
-                outerMap.put(JsonKey.ISSUER_SLUG, issuerSlug);
+                outerMap.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
             }
 
             if (formParamsMap.size() > 0) {
