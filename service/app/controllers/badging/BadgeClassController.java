@@ -3,6 +3,7 @@ package controllers.badging;
 import controllers.BaseController;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -33,7 +34,7 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("createBadgeClass called with issuerSlug = " + issuerSlug, LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(ActorOperations.CREATE_BADGE_CLASS);
+            Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
 
             HashMap<String, Object> outerMap = new HashMap<>();
             HashMap<String, String> formParamsMap = new HashMap<>();
@@ -87,7 +88,7 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("getBadgeClass called with issuerSlug = " + issuerSlug + " badgeSlug = " + badgeSlug, LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(ActorOperations.GET_BADGE_CLASS);
+            Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
@@ -103,7 +104,7 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("listBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(ActorOperations.LIST_BADGE_CLASS);
+            Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue());
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
@@ -122,7 +123,7 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("deleteBadgeClass called with issuerSlug = " + issuerSlug + " badgeSlug = " + badgeSlug, LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(ActorOperations.DELETE_BADGE_CLASS);
+            Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             ProjectLogger.log("Error in controller", e);

@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -71,7 +72,7 @@ public class BadgeIssuerController extends BaseController {
       map.put(BadgingJsonKey.IMAGE, byteArray);
       reqObj.getRequest().putAll(map);
       BadgeIssuerRequestValidator.validateCreateBadgeIssuer(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_BADGE_ISSUER.getValue());
+      reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ISSUER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
@@ -88,7 +89,7 @@ public class BadgeIssuerController extends BaseController {
   public Promise<Result> getBadgeIssuer(String slug) {
     try {
       Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.CREATE_BADGE_ISSUER.getValue());
+      reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ISSUER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.getRequest().put(JsonKey.SLUG , slug);
