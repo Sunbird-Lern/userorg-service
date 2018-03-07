@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.actorutility.ActorSystemFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
@@ -47,6 +45,41 @@ public class BaseController extends Controller {
     }catch(Exception ex){
       ProjectLogger.log("Exception occured while getting actor ref in base controller "+ex);
       }
+  }
+
+  /**
+   * Helper method for creating and initialising a request for given operation and request body.
+   *
+   * @param operation A defined actor operation
+   * @param requestBodyJson Optional information received in request body (JSON)
+   *
+   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
+   */
+  protected org.sunbird.common.request.Request createAndInitRequest(ActorOperations operation, JsonNode requestBodyJson) {
+    org.sunbird.common.request.Request request;
+
+    if (requestBodyJson != null) {
+      request = (org.sunbird.common.request.Request) mapper.RequestMapper.mapRequest(requestBodyJson, org.sunbird.common.request.Request.class);
+    } else {
+      request = new org.sunbird.common.request.Request();
+    }
+
+    request.setOperation(operation.getValue());
+    request.setRequestId(ExecutionContext.getRequestId());
+    request.setEnv(getEnvironment());
+
+    return request;
+  }
+
+  /**
+   * Helper method for creating and initialising a request for given operation.
+   *
+   * @param operation A defined actor operation
+   *
+   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
+   */
+  protected org.sunbird.common.request.Request createAndInitRequest(ActorOperations operation) {
+    return createAndInitRequest(operation, null);
   }
 
   /**
