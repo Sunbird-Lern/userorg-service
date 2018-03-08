@@ -55,7 +55,7 @@ public class BaseController extends Controller {
    *
    * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
    */
-  protected org.sunbird.common.request.Request createAndInitRequest(ActorOperations operation, JsonNode requestBodyJson) {
+  protected org.sunbird.common.request.Request createAndInitRequest(String operation, JsonNode requestBodyJson) {
     org.sunbird.common.request.Request request;
 
     if (requestBodyJson != null) {
@@ -64,7 +64,7 @@ public class BaseController extends Controller {
       request = new org.sunbird.common.request.Request();
     }
 
-    request.setOperation(operation.getValue());
+    request.setOperation(operation);
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
 
@@ -78,7 +78,7 @@ public class BaseController extends Controller {
    *
    * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
    */
-  protected org.sunbird.common.request.Request createAndInitRequest(ActorOperations operation) {
+  protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
     return createAndInitRequest(operation, null);
   }
 
