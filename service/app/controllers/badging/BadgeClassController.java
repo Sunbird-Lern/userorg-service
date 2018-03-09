@@ -1,5 +1,6 @@
 package controllers.badging;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.models.util.ActorOperations;
@@ -121,7 +122,10 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("listBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue());
+            JsonNode bodyJson = request().body().asJson();
+
+            Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue(), bodyJson);
+
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             ProjectLogger.log("listBadgeClass: exception = ", e);

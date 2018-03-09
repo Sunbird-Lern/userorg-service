@@ -3,8 +3,7 @@
  */
 package controllers.badges;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
@@ -16,7 +15,10 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.badge.BadgeAssertionValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.exception.ProjectCommonException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -41,6 +43,8 @@ public class BadgeAssertionController extends BaseController {
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
 			BadgeAssertionValidator.validateBadgeAssertion(reqObj);
 			reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
