@@ -134,9 +134,9 @@ GET  /v1/badges/list                        @controllers.badges.BadgesController
 POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
 
 # Badging APIs
-POST   /v1/issuer/issuers                             @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 POST /v1/issuer/issuers          @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 GET /v1/issuer/issuers/:slug     @controllers.badging.BadgeIssuerController.getBadgeIssuer(slug:String)
+GET /v1/issuer/issuers     @controllers.badging.BadgeIssuerController.getAllIssuer()
 
 POST   /v1/issuer/:issuerSlug/badge/create            @controllers.badging.BadgeClassController.createBadgeClass(issuerSlug:String)
 GET    /v1/issuer/:issuerSlug/badge/:badgeSlug/read   @controllers.badging.BadgeClassController.getBadgeClass(issuerSlug:String, badgeSlug:String)
