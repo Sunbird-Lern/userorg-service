@@ -196,7 +196,7 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
 #Badging api
 
-POST  /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/create    @controllers.badges.BadgeAssertionController.issueBadge(issuerSlug:String,badgeSlug:String)
-GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/read    @controllers.badges.BadgeAssertionController.getAssertionDetails(issuerSlug:String,badgeSlug:String,assertionSlug:String)
-GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/list                   @controllers.badges.BadgeAssertionController.getAssertionList(issuerSlug:String,badgeSlug:String)
-DELETE /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/revoke @controllers.badges.BadgeAssertionController.revokeAssertion(issuerSlug:String,badgeSlug:String,assertionSlug:String)
+POST  /v1/issuer/badge/assertion/create       @controllers.badges.BadgeAssertionController.issueBadge()
+POST  /v1/issuer/badge/assertion/read         @controllers.badges.BadgeAssertionController.getAssertionDetails()
+POST  /v1/issuer/badge/assertion/list         @controllers.badges.BadgeAssertionController.getAssertionList()
+DELETE /v1issuer/badge/assertion/delete      @controllers.badges.BadgeAssertionController.revokeAssertion()

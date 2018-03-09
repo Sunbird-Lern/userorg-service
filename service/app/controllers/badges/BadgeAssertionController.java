@@ -3,18 +3,13 @@
  */
 package controllers.badges;
 
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingActorOperations;
-import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.badge.BadgeAssertionValidator;
-import org.sunbird.common.responsecode.ResponseCode;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -38,13 +33,11 @@ public class BadgeAssertionController extends BaseController {
 	 * 
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> issueBadge(String issuerSlug, String badgeSlug) {
+	public Promise<Result> issueBadge() {
 		try {
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
 			BadgeAssertionValidator.validateBadgeAssertion(reqObj);
 			reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -65,16 +58,14 @@ public class BadgeAssertionController extends BaseController {
 	 * @param assertionSlug
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> getAssertionDetails(String issuerSlug, String badgeSlug, String assertionSlug) {
+	public Promise<Result> getAssertionDetails() {
 		try {
-			ProjectLogger.log("get badge assertion details = " + issuerSlug + " " + badgeSlug + " " + assertionSlug,
-					LoggerEnum.INFO.name());
-			BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug); 
+			//BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug); 
 			Request reqObj = new Request();
-			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			/*reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
 			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
 			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_SLUG, assertionSlug);
-			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());
+			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());*/
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
 			reqObj.setEnv(getEnvironment());
@@ -85,24 +76,15 @@ public class BadgeAssertionController extends BaseController {
 	}
 
 	/**
-	 * This controller will provide list of assertions based on issuerSlug and
-	 * badgeSlug.
-	 * 
-	 * @param badgeSlug
-	 *            String
-	 * @param issuerSlug String
+	 * This controller will provide list of assertions based on issuerSlug,badgeSlug and 
+	 * assertionSlug
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> getAssertionList(String issuerSlug, String badgeSlug) {
+	public Promise<Result> getAssertionList() {
 		try {
-			ProjectLogger.log("get badge assertion details = " + badgeSlug + " " + issuerSlug, LoggerEnum.INFO.name());
-			if (ProjectUtil.isStringNullOREmpty(badgeSlug) || ProjectUtil.isStringNullOREmpty(issuerSlug)) {
-				throw new ProjectCommonException(ResponseCode.invalidData.getErrorCode(),
-						ResponseCode.invalidData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-			}
-			Request reqObj = new Request();
-			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
+			JsonNode requestData = request().body().asJson();
+			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
+			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION_LIST.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -121,18 +103,16 @@ public class BadgeAssertionController extends BaseController {
 	 * @param assertionSlug
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> revokeAssertion(String issuerSlug, String badgeSlug, String assertionSlug) {
+	public Promise<Result> revokeAssertion() {
 		try {
-			ProjectLogger.log("get badge assertion details = " + badgeSlug + " " + issuerSlug + " " + assertionSlug,
-					LoggerEnum.INFO.name());
-			BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug);
+			//BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug);
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-			reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
+			/*reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
 			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
 			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_SLUG, assertionSlug);
-			reqObj.setOperation(BadgingActorOperations.REVOKE_BADGE.getValue());
+			reqObj.setOperation(BadgingActorOperations.REVOKE_BADGE.getValue());*/
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
 			reqObj.setEnv(getEnvironment());
