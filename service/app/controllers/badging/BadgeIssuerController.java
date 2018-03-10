@@ -69,7 +69,7 @@ public class BadgeIssuerController extends BaseController {
             ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
-      map.put(BadgingJsonKey.IMAGE, byteArray);
+      map.put(JsonKey.IMAGE, byteArray);
       reqObj.getRequest().putAll(map);
       BadgeIssuerRequestValidator.validateCreateBadgeIssuer(reqObj);
       reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ISSUER.getValue());

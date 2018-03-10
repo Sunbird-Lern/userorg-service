@@ -138,10 +138,10 @@ POST   /v1/issuer/issuers                             @controllers.badging.Badge
 POST /v1/issuer/issuers          @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 GET /v1/issuer/issuers/:slug     @controllers.badging.BadgeIssuerController.getBadgeIssuer(slug:String)
 
-POST   /v1/issuer/:issuerSlug/badge/create            @controllers.badging.BadgeClassController.createBadgeClass(issuerSlug:String)
-GET    /v1/issuer/:issuerSlug/badge/:badgeSlug/read   @controllers.badging.BadgeClassController.getBadgeClass(issuerSlug:String, badgeSlug:String)
-POST   /v1/issuer/badge/list                          @controllers.badging.BadgeClassController.listBadgeClass()
-DELETE /v1/issuer/:issuerSlug/badge/:badgeSlug/delete @controllers.badging.BadgeClassController.deleteBadgeClass(issuerSlug:String, badgeSlug:String)
+POST   /v1/issuer/badge/create    @controllers.badging.BadgeClassController.createBadgeClass()
+GET    /v1/issuer/badge/read      @controllers.badging.BadgeClassController.getBadgeClass()
+POST   /v1/issuer/badge/list      @controllers.badging.BadgeClassController.listBadgeClass()
+DELETE /v1/issuer/badge/delete    @controllers.badging.BadgeClassController.deleteBadgeClass()
 
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()

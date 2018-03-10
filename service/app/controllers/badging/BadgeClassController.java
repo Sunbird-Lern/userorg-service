@@ -27,12 +27,10 @@ public class BadgeClassController extends BaseController {
     /**
      * Create a new badge class for a particular issuer.
      *
-     * @param issuerSlug The slug of the issuer to be owner of the new badge class.
-     *
      * @return Return a promise for create badge class API result.
      */
-    public F.Promise<Result> createBadgeClass(String issuerSlug) {
-        ProjectLogger.log("createBadgeClass called with issuerSlug = " + issuerSlug, LoggerEnum.INFO.name());
+    public F.Promise<Result> createBadgeClass() {
+        ProjectLogger.log("createBadgeClass called", LoggerEnum.INFO.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
@@ -53,23 +51,16 @@ public class BadgeClassController extends BaseController {
                 if (imageFilePart.size() > 0) {
                     InputStream inputStream = new FileInputStream(imageFilePart.get(0).getFile());
                     byte[] imageByteArray = IOUtils.toByteArray(inputStream);
-                    fileParamsMap.put(BadgingJsonKey.BADGE_IMAGE, imageByteArray);
+                    fileParamsMap.put(JsonKey.IMAGE, imageByteArray);
                 }
             }
 
-            if (issuerSlug != null) {
-                outerMap.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-            }
-
-            if (formParamsMap.size() > 0) {
-                outerMap.put(JsonKey.FORM_PARAMS, formParamsMap);
-            }
-
-            if (fileParamsMap.size() > 0) {
-                outerMap.put(JsonKey.FILE_PARAMS, fileParamsMap);
-            }
+            outerMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+            outerMap.put(JsonKey.FILE_PARAMS, fileParamsMap);
 
             request.setRequest(outerMap);
+
+            new BadgeClassValidator().validateCreateBadgeClass(request);
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
@@ -82,26 +73,23 @@ public class BadgeClassController extends BaseController {
     /**
      * Get details of badge class for given issuer and badge class.
      *
-     * @param issuerSlug The slug of the issuer who is owner of the badge class.
-     * @param badgeSlug The slug of the badge class whose details to view.
-     *
      * @return Return a promise for get badge class API result.
      */
-    public F.Promise<Result> getBadgeClass(String issuerSlug, String badgeSlug) {
-        ProjectLogger.log("getBadgeClass called with issuerSlug = " + issuerSlug + " badgeSlug = " + badgeSlug, LoggerEnum.INFO.name());
+    public F.Promise<Result> getBadgeClass() {
+        ProjectLogger.log("getBadgeClass called", LoggerEnum.INFO.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
 
             HashMap<String, Object> map = new HashMap<>();
 
-            if (issuerSlug != null) {
+            /*if (issuerSlug != null) {
                 map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
             }
 
             if (issuerSlug != null) {
-                map.put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
-            }
+                map.put(BadgingJsonKey.BADGE_SLUG, badgeSlug);
+            }*/
 
             request.setRequest(map);
 
@@ -137,26 +125,23 @@ public class BadgeClassController extends BaseController {
     /**
      * Delete a badge class that has never been issued.
      *
-     * @param issuerSlug The slug of the issuer who is the owner of the badge class.
-     * @param badgeSlug The slug of the badge class to delete.
-     *
      * @return Return a promise for delete badge class API result.
      */
-    public F.Promise<Result> deleteBadgeClass(String issuerSlug, String badgeSlug) {
-        ProjectLogger.log("deleteBadgeClass called with issuerSlug = " + issuerSlug + " badgeSlug = " + badgeSlug, LoggerEnum.INFO.name());
+    public F.Promise<Result> deleteBadgeClass() {
+        ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
 
             HashMap<String, Object> map = new HashMap<>();
 
-            if (issuerSlug != null) {
+            /*if (issuerSlug != null) {
                 map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
             }
 
-            if (issuerSlug != null) {
-                map.put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
-            }
+            if (badgeClassSlug != null) {
+                map.put(BadgingJsonKey.BADGE_SLUG, badgeSlug);
+            }*/
 
             request.setRequest(map);
 
