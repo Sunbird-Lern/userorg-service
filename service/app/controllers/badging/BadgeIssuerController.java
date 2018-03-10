@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
@@ -89,12 +88,29 @@ public class BadgeIssuerController extends BaseController {
   public Promise<Result> getBadgeIssuer(String slug) {
     try {
       Request reqObj = new Request();
-      reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ISSUER.getValue());
+      reqObj.setOperation(BadgingActorOperations.GET_BADGE_ISSUER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
       reqObj.getRequest().put(JsonKey.SLUG , slug);
       reqObj.setEnv(getEnvironment());
-      BadgeIssuerRequestValidator.validateCreateBadgeIssuer(reqObj);
+      BadgeIssuerRequestValidator.validateGetBadgeIssuerDetail(reqObj);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  /**
+   * This method will add badges to user profile.
+   * @return Promise<Result>
+   */
+  public Promise<Result> getAllIssuer() {
+    try {
+      Request reqObj = new Request();
+      reqObj.setOperation(BadgingActorOperations.GET_ALL_ISSUER.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

@@ -102,6 +102,28 @@ public class BadgeIssuerControllerTest {
     assertEquals(400, result.status());
   }
 
+  @Test
+  public void testGetBadgeIssuer() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+
+    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/issuers").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testGetAllIssuer() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+
+    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/issuers").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
   private static String mapToJson(Map map){
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";

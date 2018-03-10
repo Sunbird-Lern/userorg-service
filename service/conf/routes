@@ -134,9 +134,9 @@ GET  /v1/badges/list                        @controllers.badges.BadgesController
 POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
 
 # Badging APIs
-POST   /v1/issuer/issuers                             @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 POST /v1/issuer/issuers          @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 GET /v1/issuer/issuers/:slug     @controllers.badging.BadgeIssuerController.getBadgeIssuer(slug:String)
+GET /v1/issuer/issuers     @controllers.badging.BadgeIssuerController.getAllIssuer()
 
 POST   /v1/issuer/badge/create    @controllers.badging.BadgeClassController.createBadgeClass()
 GET    /v1/issuer/badge/read      @controllers.badging.BadgeClassController.getBadgeClass()
@@ -196,7 +196,7 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
 #Badging api
 
-POST  /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/create    @controllers.badges.BadgeAssertionController.issueBadge(issuerSlug:String,badgeSlug:String)
-GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/read    @controllers.badges.BadgeAssertionController.getAssertionDetails(issuerSlug:String,badgeSlug:String,assertionSlug:String)
-GET   /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/list                   @controllers.badges.BadgeAssertionController.getAssertionList(issuerSlug:String,badgeSlug:String)
-DELETE /v1/issuer/:issuerSlug/badges/:badgeSlug/assertion/:assertionSlug/revoke @controllers.badges.BadgeAssertionController.revokeAssertion(issuerSlug:String,badgeSlug:String,assertionSlug:String)
+POST  /v1/issuer/badge/assertion/create       @controllers.badges.BadgeAssertionController.issueBadge()
+POST  /v1/issuer/badge/assertion/read         @controllers.badges.BadgeAssertionController.getAssertionDetails()
+POST  /v1/issuer/badge/assertion/list         @controllers.badges.BadgeAssertionController.getAssertionList()
+DELETE /v1issuer/badge/assertion/delete      @controllers.badges.BadgeAssertionController.revokeAssertion()
