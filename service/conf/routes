@@ -139,9 +139,9 @@ GET /v1/issuer/issuers/:slug     @controllers.badging.BadgeIssuerController.getB
 GET /v1/issuer/issuers     @controllers.badging.BadgeIssuerController.getAllIssuer()
 
 POST   /v1/issuer/badge/create    @controllers.badging.BadgeClassController.createBadgeClass()
-GET    /v1/issuer/badge/read      @controllers.badging.BadgeClassController.getBadgeClass()
+POST   /v1/issuer/badge/read      @controllers.badging.BadgeClassController.getBadgeClass()
 POST   /v1/issuer/badge/list      @controllers.badging.BadgeClassController.listBadgeClass()
-DELETE /v1/issuer/badge/delete    @controllers.badging.BadgeClassController.deleteBadgeClass()
+POST   /v1/issuer/badge/delete    @controllers.badging.BadgeClassController.deleteBadgeClass()
 
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()

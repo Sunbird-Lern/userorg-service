@@ -79,19 +79,11 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("getBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
+            JsonNode bodyJson = request().body().asJson();
 
-            HashMap<String, Object> map = new HashMap<>();
+            Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue(), bodyJson);
 
-            /*if (issuerSlug != null) {
-                map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-            }
-
-            if (issuerSlug != null) {
-                map.put(BadgingJsonKey.BADGE_SLUG, badgeSlug);
-            }*/
-
-            request.setRequest(map);
+            new BadgeClassValidator().validateGetBadgeClass(request);
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
@@ -114,6 +106,8 @@ public class BadgeClassController extends BaseController {
 
             Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue(), bodyJson);
 
+            new BadgeClassValidator().validateListBadgeClass(request);
+
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             ProjectLogger.log("listBadgeClass: exception = ", e);
@@ -131,19 +125,11 @@ public class BadgeClassController extends BaseController {
         ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
+            JsonNode bodyJson = request().body().asJson();
 
-            HashMap<String, Object> map = new HashMap<>();
+            Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue(), bodyJson);
 
-            /*if (issuerSlug != null) {
-                map.put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-            }
-
-            if (badgeClassSlug != null) {
-                map.put(BadgingJsonKey.BADGE_SLUG, badgeSlug);
-            }*/
-
-            request.setRequest(map);
+            new BadgeClassValidator().validateDeleteBadgeClass(request);
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {

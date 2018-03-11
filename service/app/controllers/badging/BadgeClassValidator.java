@@ -9,6 +9,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
+import java.util.List;
 import java.util.Map;
 
 public class BadgeClassValidator {
@@ -37,5 +38,29 @@ public class BadgeClassValidator {
             throw new ProjectCommonException(ResponseCode.badgeImageRequired.getErrorCode(),
                     ResponseCode.badgeImageRequired.getErrorMessage(), ERROR_CODE);
         }
+    }
+
+    public void validateGetBadgeClass(Request request) {
+        String issuerId = (String) request.getRequest().get(BadgingJsonKey.ISSUER_ID);
+        validateParam(issuerId, ResponseCode.issuerIdRequired);
+
+        String badgeId = (String) request.getRequest().get(BadgingJsonKey.BADGE_ID);
+        validateParam(badgeId, ResponseCode.badgeIdRequired);
+    }
+
+    public void validateListBadgeClass(Request request) {
+        List<String> issuerList = (List<String>) request.getRequest().get(BadgingJsonKey.ISSUER_LIST);
+
+        if (issuerList == null) {
+            throw new ProjectCommonException(ResponseCode.issuerListRequired.getErrorCode(), ResponseCode.issuerListRequired.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
+    }
+
+    public void validateDeleteBadgeClass(Request request) {
+        String issuerId = (String) request.getRequest().get(BadgingJsonKey.ISSUER_ID);
+        validateParam(issuerId, ResponseCode.issuerIdRequired);
+
+        String badgeId = (String) request.getRequest().get(BadgingJsonKey.BADGE_ID);
+        validateParam(badgeId, ResponseCode.badgeIdRequired);
     }
 }
