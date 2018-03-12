@@ -3,6 +3,7 @@
  */
 package controllers.badges;
 
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
