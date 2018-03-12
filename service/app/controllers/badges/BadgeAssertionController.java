@@ -52,7 +52,6 @@ public class BadgeAssertionController extends BaseController {
 	/**
 	 * This controller will provide assertion details.based on issuerSlug, badgeSlug and
 	 * assertionSlug.
-	 * 
 	 * @param badgeSlug
 	 *            String
 	 * @param assertionSlug
@@ -60,12 +59,11 @@ public class BadgeAssertionController extends BaseController {
 	 */
 	public Promise<Result> getAssertionDetails() {
 		try {
-			//BadgeAssertionValidator.validategetBadgeAssertion(issuerSlug, badgeSlug, assertionSlug); 
-			Request reqObj = new Request();
-			/*reqObj.getRequest().put(BadgingJsonKey.ISSUER_SLUG, issuerSlug);
-			reqObj.getRequest().put(BadgingJsonKey.BADGE_CLASS_SLUG, badgeSlug);
-			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_SLUG, assertionSlug);
-			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());*/
+			JsonNode requestData = request().body().asJson();
+			ProjectLogger.log(" get badge assertion details api called = " + requestData, LoggerEnum.INFO.name());
+			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			BadgeAssertionValidator.validategetBadgeAssertion(reqObj);
+			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
 			reqObj.setEnv(getEnvironment());
