@@ -9,6 +9,8 @@ import controllers.actorutility.ActorSystemFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -41,7 +43,8 @@ public class BaseController extends Controller {
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   static {
     try{
-    actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
+//    actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
+      actorRef = SunbirdMWService.getRequestRouter();
     }catch(Exception ex){
       ProjectLogger.log("Exception occured while getting actor ref in base controller "+ex);
       }

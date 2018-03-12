@@ -22,7 +22,10 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 
+import org.sunbird.actor.service.SunbirdMWService;
+
 import org.sunbird.learner.util.TelemetryUtil;
+import org.sunbird.middleware.ActorRegistry;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
@@ -109,6 +112,8 @@ public class Global extends GlobalSettings {
     setEnvironment();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
+    SunbirdMWService.initClient();
+    new ActorRegistry();
   }
 
   /**
