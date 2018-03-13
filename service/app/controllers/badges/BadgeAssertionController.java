@@ -109,6 +109,7 @@ public class BadgeAssertionController extends BaseController {
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Revoke badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			//BadgeIssuerRequestValidator.validateRevokeAssertion(reqObj);
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.setOperation(BadgingActorOperations.REVOKE_BADGE.getValue());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
