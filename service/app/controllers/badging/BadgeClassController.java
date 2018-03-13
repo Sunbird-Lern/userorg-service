@@ -11,6 +11,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import play.libs.F;
+import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -121,6 +122,7 @@ public class BadgeClassController extends BaseController {
      *
      * @return Return a promise for delete badge class API result.
      */
+    @BodyParser.Of(BodyParser.Json.class)
     public F.Promise<Result> deleteBadgeClass() {
         ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
 
