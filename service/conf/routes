@@ -199,4 +199,4 @@ POST /v1/system/settings			     @controllers.config.ApplicationConfigController.
 POST  /v1/issuer/badge/assertion/create       @controllers.badges.BadgeAssertionController.issueBadge()
 POST  /v1/issuer/badge/assertion/read         @controllers.badges.BadgeAssertionController.getAssertionDetails()
 POST  /v1/issuer/badge/assertion/list         @controllers.badges.BadgeAssertionController.getAssertionList()
-DELETE /v1issuer/badge/assertion/delete      @controllers.badges.BadgeAssertionController.revokeAssertion()
+DELETE /v1/issuer/badge/assertion/revoke      @controllers.badges.BadgeAssertionController.revokeAssertion()
