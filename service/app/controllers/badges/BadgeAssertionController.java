@@ -9,7 +9,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.badge.BadgeAssertionValidator;
+import controllers.badging.validator.BadgeAssertionValidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

@@ -3,13 +3,12 @@ package controllers.badging;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import org.apache.commons.io.IOUtils;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingActorOperations;
-import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import controllers.badging.validator.BadgeClassValidator;
 import play.libs.F;
 import play.mvc.BodyParser;
 import play.mvc.Http;
@@ -23,6 +22,8 @@ import java.util.Map;
 
 /**
  * BadgeClassController handles BadgeClass APIs.
+ *
+ * @author B Vinaya Kumar
  */
 public class BadgeClassController extends BaseController {
     /**
