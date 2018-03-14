@@ -66,6 +66,10 @@ public class BadgeAssertionValidator {
 			throw new ProjectCommonException(ResponseCode.recipientTypeRequired.getErrorCode(),
 					ResponseCode.recipientTypeRequired.getErrorMessage(), ERROR_CODE);
 		}
+		if (!matchRecipientType((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
+			throw new ProjectCommonException(ResponseCode.invalidRecipientType.getErrorCode(),
+					ResponseCode.invalidRecipientType.getErrorMessage(), ERROR_CODE);
+		}
 
 	}
 	
@@ -142,5 +146,23 @@ public class BadgeAssertionValidator {
 			throw new ProjectCommonException(ResponseCode.recipientTypeRequired.getErrorCode(),
 					ResponseCode.recipientTypeRequired.getErrorMessage(), ERROR_CODE);
 		}
+		if (!matchRecipientType((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
+			throw new ProjectCommonException(ResponseCode.invalidRecipientType.getErrorCode(),
+					ResponseCode.invalidRecipientType.getErrorMessage(), ERROR_CODE);
+		}
 	}
+	
+	/**
+	 * This method will check valid recipient type.
+	 * @param recipientType String
+	 * @return boolean
+	 */
+	private static boolean matchRecipientType(String recipientType) {
+		if (BadgingJsonKey.BADGE_TYPE_USER.equalsIgnoreCase(recipientType)
+				|| BadgingJsonKey.BADGE_TYPE_CONTENT.equalsIgnoreCase(recipientType)) {
+			return true;
+		}
+		return false;
+	}
+	
 }
