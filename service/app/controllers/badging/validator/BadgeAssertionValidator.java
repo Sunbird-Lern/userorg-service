@@ -129,10 +129,18 @@ public class BadgeAssertionValidator {
 	 * @param request Request
 	 */
 	public static void validateRevokeAssertion(Request request) {
-		validateBadgeAssertion(request);
+		validategetBadgeAssertion(request);
 		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.REVOCATION_REASON))) {
 			throw new ProjectCommonException(ResponseCode.revocationReasonRequired.getErrorCode(),
 					ResponseCode.revocationReasonRequired.getErrorMessage(), ERROR_CODE);
+		}
+		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_ID))) {
+			throw new ProjectCommonException(ResponseCode.recipientIdRequired.getErrorCode(),
+					ResponseCode.recipientIdRequired.getErrorMessage(), ERROR_CODE);
+		}
+		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
+			throw new ProjectCommonException(ResponseCode.recipientTypeRequired.getErrorCode(),
+					ResponseCode.recipientTypeRequired.getErrorMessage(), ERROR_CODE);
 		}
 	}
 }
