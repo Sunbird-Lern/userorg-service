@@ -79,7 +79,7 @@ public class BadgeAssertionValidator {
 			throw new ProjectCommonException(ResponseCode.issuerIdRequired.getErrorCode(),
 					ResponseCode.issuerIdRequired.getErrorMessage(), ERROR_CODE);
 		}
-		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.BADGE_CLASS_ID))) {
+		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.BADGE_ID))) {
 			throw new ProjectCommonException(ResponseCode.badgeIdRequired.getErrorCode(),
 					ResponseCode.badgeIdRequired.getErrorMessage(), ERROR_CODE);
 
