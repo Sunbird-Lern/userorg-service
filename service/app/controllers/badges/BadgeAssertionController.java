@@ -9,7 +9,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.badge.BadgeAssertionValidator;
+import controllers.badging.validator.BadgeAssertionValidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -109,7 +109,7 @@ public class BadgeAssertionController extends BaseController {
 			JsonNode requestData = request().body().asJson();
 			ProjectLogger.log(" Revoke badge method called = " + requestData, LoggerEnum.INFO.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-			//BadgeIssuerRequestValidator.validateRevokeAssertion(reqObj);
+			BadgeAssertionValidator.validateRevokeAssertion(reqObj);
 			reqObj.setRequestId(ExecutionContext.getRequestId());
 			reqObj.setOperation(BadgingActorOperations.REVOKE_BADGE.getValue());
 			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
