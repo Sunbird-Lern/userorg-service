@@ -300,7 +300,7 @@ public class BadgeClassValidatorTest {
         formParamsMap.put(JsonKey.ROLES, "[ \"roleId1\" ]");
 
         Map<String, Object> fileParamsMap = new HashMap<>();
-        fileParamsMap.put("image", "something");
+        fileParamsMap.put(JsonKey.IMAGE, "something");
 
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
