@@ -165,4 +165,5 @@ public class BadgeAssertionValidator {
 		return false;
 	}
 	
+	
 }
