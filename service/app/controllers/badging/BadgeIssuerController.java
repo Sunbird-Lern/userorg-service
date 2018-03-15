@@ -85,13 +85,13 @@ public class BadgeIssuerController extends BaseController {
    * This method will add badges to user profile.
    * @return Promise<Result>
    */
-  public Promise<Result> getBadgeIssuer(String slug) {
+  public Promise<Result> getBadgeIssuer(String issuerId) {
     try {
       Request reqObj = new Request();
       reqObj.setOperation(BadgeOperations.getBadgeIssuer.name());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
-      reqObj.getRequest().put(JsonKey.SLUG , slug);
+      reqObj.getRequest().put(JsonKey.SLUG , issuerId);
       reqObj.setEnv(getEnvironment());
       BadgeIssuerRequestValidator.validateGetBadgeIssuerDetail(reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -121,13 +121,13 @@ public class BadgeIssuerController extends BaseController {
    * This method will add badges to user profile.
    * @return Promise<Result>
    */
-  public Promise<Result> deleteBadgeIssuer(String slug) {
+  public Promise<Result> deleteBadgeIssuer(String issuerId) {
     try {
       Request reqObj = new Request();
       reqObj.setOperation(BadgeOperations.deleteIssuer.name());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
-      reqObj.getRequest().put(JsonKey.SLUG , slug);
+      reqObj.getRequest().put(JsonKey.SLUG , issuerId);
       reqObj.setEnv(getEnvironment());
       BadgeIssuerRequestValidator.validateGetBadgeIssuerDetail(reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
