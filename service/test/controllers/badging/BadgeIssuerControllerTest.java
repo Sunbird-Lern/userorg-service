@@ -77,7 +77,7 @@ public class BadgeIssuerControllerTest {
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/issuer/issuers").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/issuer/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
@@ -96,7 +96,7 @@ public class BadgeIssuerControllerTest {
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/issuer/issuers").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/issuer/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(400, result.status());
@@ -107,7 +107,7 @@ public class BadgeIssuerControllerTest {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
 
-    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/issuers/123").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/read/123").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
@@ -118,7 +118,7 @@ public class BadgeIssuerControllerTest {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
 
-    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/issuers").method("GET");
+    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/list").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
@@ -129,7 +129,7 @@ public class BadgeIssuerControllerTest {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when( RequestInterceptor.verifyRequestData(Mockito.anyObject()) ).thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
 
-    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/issuers/123").method("DELETE");
+    RequestBuilder req = new RequestBuilder().uri("/v1/issuer/delete/123").method("DELETE");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
