@@ -112,7 +112,7 @@ public class Global extends GlobalSettings {
     setEnvironment();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with Environment --" + env.name(), LoggerEnum.INFO.name());
-    SunbirdMWService.initClient();
+    SunbirdMWService.init();
     new ActorRegistry();
   }
 
