@@ -134,20 +134,24 @@ GET  /v1/badges/list                        @controllers.badges.BadgesController
 POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
 
 # Badging APIs
-POST /v1/issuer/create          @controllers.badging.BadgeIssuerController.createBadgeIssuer()
-GET /v1/issuer/read/:issuerId     @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String)
-GET /v1/issuer/list     @controllers.badging.BadgeIssuerController.getAllIssuer()
-DELETE /v1/issuer/delete/:issuerId     @controllers.badging.BadgeIssuerController.deleteBadgeIssuer(issuerId:String)
+POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer()
+GET /v1/issuer/read/:issuerId                 @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String)
+GET /v1/issuer/list                           @controllers.badging.BadgeIssuerController.getAllIssuer()
+DELETE /v1/issuer/delete/:issuerId            @controllers.badging.BadgeIssuerController.deleteBadgeIssuer(issuerId:String)
 
-POST   /v1/issuer/badge/create    @controllers.badging.BadgeClassController.createBadgeClass()
-POST   /v1/issuer/badge/read      @controllers.badging.BadgeClassController.getBadgeClass()
-POST   /v1/issuer/badge/list      @controllers.badging.BadgeClassController.listBadgeClass()
-DELETE /v1/issuer/badge/delete    @controllers.badging.BadgeClassController.deleteBadgeClass()
+POST   /v1/issuer/badge/create                @controllers.badging.BadgeClassController.createBadgeClass()
+POST   /v1/issuer/badge/read                  @controllers.badging.BadgeClassController.getBadgeClass()
+POST   /v1/issuer/badge/list                  @controllers.badging.BadgeClassController.listBadgeClass()
+DELETE /v1/issuer/badge/delete                @controllers.badging.BadgeClassController.deleteBadgeClass()
+
+POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge()
+POST  /v1/issuer/badge/assertion/read         @controllers.badging.BadgeAssertionController.getAssertionDetails()
+POST  /v1/issuer/badge/assertion/list         @controllers.badging.BadgeAssertionController.getAssertionList()
+DELETE /v1/issuer/badge/assertion/revoke      @controllers.badging.BadgeAssertionController.revokeAssertion()
 
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
 GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
-
 
 #Notes API
 POST   /v1/note/create                         @controllers.notesmanagement.NotesController.createNote()
@@ -195,9 +199,4 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 #System Settings
 
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
-#Badging api
 
-POST  /v1/issuer/badge/assertion/create       @controllers.badges.BadgeAssertionController.issueBadge()
-POST  /v1/issuer/badge/assertion/read         @controllers.badges.BadgeAssertionController.getAssertionDetails()
-POST  /v1/issuer/badge/assertion/list         @controllers.badges.BadgeAssertionController.getAssertionList()
-DELETE /v1/issuer/badge/assertion/revoke      @controllers.badges.BadgeAssertionController.revokeAssertion()

@@ -54,7 +54,7 @@ public class BadgeClassValidator {
         }
 
         error = ResponseCode.invalidBadgeType;
-        if (! (type.equals(BadgingJsonKey.BADGE_TYPE_USER) || type.equals(BadgingJsonKey.BADGE_TYPE_CONTENT))) {
+        if (! (type.equalsIgnoreCase(BadgingJsonKey.BADGE_TYPE_USER) || type.equalsIgnoreCase(BadgingJsonKey.BADGE_TYPE_CONTENT))) {
             throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
     }
@@ -68,7 +68,7 @@ public class BadgeClassValidator {
 
             String[] validSubtypesList = validSubtypes.split("\\,");
             for (String validSubtype : validSubtypesList) {
-                if (validSubtype.equals(subtype)) return;
+                if (validSubtype.equalsIgnoreCase(subtype)) return;
             }
 
             ResponseCode error = ResponseCode.invalidBadgeSubtype;

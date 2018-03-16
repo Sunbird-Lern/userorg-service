@@ -1,7 +1,7 @@
 /**
  * 
  */
-package controllers.badges;
+package controllers.badging;
 
 import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.JsonKey;
