@@ -169,9 +169,9 @@ POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
 
 #T&C
-POST  /v1/org/tc/create 						@controllers.tenantpreference.TenantPreferenceController.createTanentPreference()
-POST  /v1/org/tc/update 						@controllers.tenantpreference.TenantPreferenceController.updateTanentPreference()
-GET  /v1/org/tc/read/:orgId						@controllers.tenantpreference.TenantPreferenceController.getTanentPreference(orgId:String)
+POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
+POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference()
+POST  /v1/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference()
 POST  /v1/user/tc/update 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
 
 #DB Operation API

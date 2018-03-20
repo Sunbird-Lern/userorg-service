@@ -17,10 +17,10 @@ import play.mvc.Result;
  */
 public class TenantPreferenceController extends BaseController {
 
-  public Promise<Result> createTanentPreference() {
+  public Promise<Result> createTenantPreference() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("add/endorse user skills=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("Create tenant preferences: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -34,10 +34,10 @@ public class TenantPreferenceController extends BaseController {
     }
   }
 
-  public Promise<Result> updateTanentPreference() {
+  public Promise<Result> updateTenantPreference() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("get user skills=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("Update tenant preferences: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -51,15 +51,15 @@ public class TenantPreferenceController extends BaseController {
     }
   }
 
-  public Promise<Result> getTanentPreference(String orgId) {
+  public Promise<Result> getTenantPreference() {
     try {
-      ProjectLogger.log("get list of skills ");
-      Request reqObj = new Request();
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Get tenant preferences: " + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.ORG_ID, orgId);
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
