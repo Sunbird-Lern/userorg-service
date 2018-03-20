@@ -42,15 +42,6 @@ public class BadgeAssertionValidator {
 					ResponseCode.badgeIdRequired.getErrorMessage(), ERROR_CODE);
 
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_EMAIL))) {
-			throw new ProjectCommonException(ResponseCode.recipientEmailRequired.getErrorCode(),
-					ResponseCode.recipientEmailRequired.getErrorMessage(), ERROR_CODE);
-		}
-		if (!ProjectUtil.isEmailvalid((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_EMAIL))) {
-			throw new ProjectCommonException(ResponseCode.emailFormatError.getErrorCode(),
-					ResponseCode.emailFormatError.getErrorMessage(), ERROR_CODE);
-
-		}
 		if (!ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.EVIDENCE))) {
 			boolean response = ProjectUtil.isUrlvalid((String) request.getRequest().get(BadgingJsonKey.EVIDENCE));
 			if (!response) {
