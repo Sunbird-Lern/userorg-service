@@ -20,7 +20,7 @@ public class BadgeIssuerRequestValidator {
    * @param request
    */
   public static void validateCreateBadgeIssuer(Request request) {
-    StringBuilder builder = new StringBuilder("Required fields are - ");
+    StringBuilder builder = new StringBuilder("");
     Boolean flag = false;
     if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(JsonKey.NAME))) {
       builder = builder.append(JsonKey.NAME+COMMA_SEPERATOR);
@@ -34,14 +34,14 @@ public class BadgeIssuerRequestValidator {
       builder = builder.append(JsonKey.URL + COMMA_SEPERATOR);
       flag = true;
     }
-    if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(JsonKey.EMAIL))) {
+    if (!ProjectUtil.isEmailvalid((String)request.getRequest().get(JsonKey.EMAIL))) {
       builder = builder.append(JsonKey.EMAIL + COMMA_SEPERATOR);
       flag = true;
     }
 
     if(flag){
       builder.deleteCharAt(builder.length()-1);
-      throw createExceptionInstance(ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),builder.toString() );
+      throw createExceptionInstance(ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),builder.toString());
     }
   }
 
@@ -55,7 +55,7 @@ public class BadgeIssuerRequestValidator {
   private static ProjectCommonException createExceptionInstance(String errorCode,
       String errMsg) {
     return new ProjectCommonException(ResponseCode.getResponse(errorCode).getErrorCode(),
-        errMsg, ERROR_CODE);
+        ResponseCode.getResponse(errorCode).getErrorMessage(), ERROR_CODE, errMsg);
   }
 
 }
