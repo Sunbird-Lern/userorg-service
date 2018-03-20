@@ -147,7 +147,7 @@ DELETE /v1/issuer/badge/delete                @controllers.badging.BadgeClassCon
 POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge()
 GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String)
 POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList()
-DELETE /v1/issuer/badge/assertion/revoke      @controllers.badging.BadgeAssertionController.revokeAssertion()
+DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
 
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
