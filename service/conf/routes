@@ -145,8 +145,8 @@ POST   /v1/issuer/badge/list                  @controllers.badging.BadgeClassCon
 DELETE /v1/issuer/badge/delete                @controllers.badging.BadgeClassController.deleteBadgeClass()
 
 POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge()
-POST  /v1/issuer/badge/assertion/read         @controllers.badging.BadgeAssertionController.getAssertionDetails()
-POST  /v1/issuer/badge/assertion/list         @controllers.badging.BadgeAssertionController.getAssertionList()
+GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String)
+POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList()
 DELETE /v1/issuer/badge/assertion/revoke      @controllers.badging.BadgeAssertionController.revokeAssertion()
 
 #Health check

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BadgingJsonKey;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
@@ -70,15 +71,6 @@ public class BadgeAssertionValidator {
 	 * @param request Request
 	 */
 	public static void validategetBadgeAssertion(Request request) {
-		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.ISSUER_ID))) {
-			throw new ProjectCommonException(ResponseCode.issuerIdRequired.getErrorCode(),
-					ResponseCode.issuerIdRequired.getErrorMessage(), ERROR_CODE);
-		}
-		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.BADGE_ID))) {
-			throw new ProjectCommonException(ResponseCode.badgeIdRequired.getErrorCode(),
-					ResponseCode.badgeIdRequired.getErrorMessage(), ERROR_CODE);
-
-		}
 		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.ASSERTION_ID))) {
 			throw new ProjectCommonException(ResponseCode.assertionIdRequired.getErrorCode(),
 					ResponseCode.assertionIdRequired.getErrorMessage(), ERROR_CODE);
@@ -97,13 +89,17 @@ public class BadgeAssertionValidator {
 	 * @param request
 	 */
 	public static void validateGetAssertionList(Request request) {
-		Object obj = request.getRequest().get(BadgingJsonKey.ASSERTIONS);
+		Map<String, Object> filtesMap = (Map) request.getRequest().get(JsonKey.FILTERS);
+		if (filtesMap == null) {
+			throw new ProjectCommonException(ResponseCode.invalidRequestData.getErrorCode(),
+					ResponseCode.invalidRequestData.getErrorMessage(), ERROR_CODE);
+		}
+		Object obj = filtesMap.get(BadgingJsonKey.ASSERTIONS);
 		if (obj == null || !(obj instanceof List)) {
 			throw new ProjectCommonException(ResponseCode.invalidRequestData.getErrorCode(),
 					ResponseCode.invalidRequestData.getErrorMessage(), ERROR_CODE);
 		}
-
-		List<Map<String, Object>> assertionData = (List<Map<String, Object>>) obj;
+		List<String> assertionData = (List<String>) obj;
 		int size = Integer
 				.parseInt(PropertiesCache.getInstance().getProperty(BadgingJsonKey.BADGING_ASSERTION_LIST_SIZE));
 		if (assertionData.size() > size) {
@@ -111,9 +107,9 @@ public class BadgeAssertionValidator {
 					MessageFormat.format(ResponseCode.sizeLimitExceed.getErrorMessage(), size), ERROR_CODE);
 		}
 
-		for (Map<String, Object> map : assertionData) {
+		for (String assertionId : assertionData) {
 			Request temp = new Request();
-			temp.getRequest().putAll(map);
+			temp.getRequest().put(BadgingJsonKey.ASSERTION_ID, assertionId);
 			validategetBadgeAssertion(temp);
 		}
 	}

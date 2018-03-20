@@ -4,16 +4,17 @@
 package controllers.badging;
 
 import org.sunbird.common.models.util.BadgingActorOperations;
+import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import controllers.badging.validator.BadgeAssertionValidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import controllers.BaseController;
+import controllers.badging.validator.BadgeAssertionValidator;
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -51,18 +52,18 @@ public class BadgeAssertionController extends BaseController {
 	}
 
 	/**
-	 * This controller will provide assertion details.based on issuerSlug, badgeSlug and
+	 * This controller will provide assertion details.based on 
 	 * assertionSlug.
 	 * @param badgeSlug
 	 *            String
 	 * @param assertionSlug
 	 * @return Promise<Result>
 	 */
-	public Promise<Result> getAssertionDetails() {
+	public Promise<Result> getAssertionDetails(String assertionId) {
 		try {
-			JsonNode requestData = request().body().asJson();
-			ProjectLogger.log(" get badge assertion details api called = " + requestData, LoggerEnum.INFO.name());
-			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+			ProjectLogger.log(" get badge assertion details api called = " + assertionId, LoggerEnum.INFO.name());
+			Request reqObj =  new Request();
+			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_ID, assertionId);
 			BadgeAssertionValidator.validategetBadgeAssertion(reqObj);
 			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());
 			reqObj.setRequestId(ExecutionContext.getRequestId());
