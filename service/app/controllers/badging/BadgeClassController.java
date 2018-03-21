@@ -3,10 +3,7 @@ package controllers.badging;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import org.apache.commons.io.IOUtils;
-import org.sunbird.common.models.util.BadgingActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import controllers.badging.validator.BadgeClassValidator;
 import play.libs.F;
@@ -37,30 +34,25 @@ public class BadgeClassController extends BaseController {
         try {
             Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
 
-            HashMap<String, Object> outerMap = new HashMap<>();
-            HashMap<String, String> formParamsMap = new HashMap<>();
-            HashMap<String, Object> fileParamsMap = new HashMap<>();
+            HashMap<String, Object> map = new HashMap<>();
 
             Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
 
             if (multipartBody != null) {
                 Map<String, String[]> data = multipartBody.asFormUrlEncoded();
                 for (Map.Entry<String, String[]> entry : data.entrySet()) {
-                    formParamsMap.put(entry.getKey(), entry.getValue()[0]);
+                    map.put(entry.getKey(), entry.getValue()[0]);
                 }
 
                 List<Http.MultipartFormData.FilePart> imageFilePart = multipartBody.getFiles();
                 if (imageFilePart.size() > 0) {
                     InputStream inputStream = new FileInputStream(imageFilePart.get(0).getFile());
                     byte[] imageByteArray = IOUtils.toByteArray(inputStream);
-                    fileParamsMap.put(JsonKey.IMAGE, imageByteArray);
+                    map.put(JsonKey.IMAGE, imageByteArray);
                 }
             }
 
-            outerMap.put(JsonKey.FORM_PARAMS, formParamsMap);
-            outerMap.put(JsonKey.FILE_PARAMS, fileParamsMap);
-
-            request.setRequest(outerMap);
+            request.setRequest(map);
 
             new BadgeClassValidator().validateCreateBadgeClass(request);
 
@@ -75,15 +67,15 @@ public class BadgeClassController extends BaseController {
     /**
      * Get details of badge class for given issuer and badge class.
      *
+     * @param badgeId The ID of the Badge Class whose details to view
      * @return Return a promise for get badge class API result.
      */
-    public F.Promise<Result> getBadgeClass() {
+    public F.Promise<Result> getBadgeClass(String badgeId) {
         ProjectLogger.log("getBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            JsonNode bodyJson = request().body().asJson();
-
-            Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue(), bodyJson);
+            Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
+            request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
             new BadgeClassValidator().validateGetBadgeClass(request);
 
@@ -98,21 +90,21 @@ public class BadgeClassController extends BaseController {
     /**
      * Get list of badge classes for given issuer(s) and matching given context.
      *
-     * @return Return a promise for list badge class API result.
+     * @return Return a promise for search badge class API result.
      */
-    public F.Promise<Result> listBadgeClass() {
-        ProjectLogger.log("listBadgeClass called", LoggerEnum.INFO.name());
+    public F.Promise<Result> searchBadgeClass() {
+        ProjectLogger.log("searchBadgeClass called", LoggerEnum.INFO.name());
 
         try {
             JsonNode bodyJson = request().body().asJson();
 
-            Request request = createAndInitRequest(BadgingActorOperations.LIST_BADGE_CLASS.getValue(), bodyJson);
+            Request request = createAndInitRequest(BadgingActorOperations.SEARCH_BADGE_CLASS.getValue(), bodyJson);
 
-            new BadgeClassValidator().validateListBadgeClass(request);
+            new BadgeClassValidator().validateSearchBadgeClass(request);
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
-            ProjectLogger.log("listBadgeClass: exception = ", e);
+            ProjectLogger.log("searchBadgeClass: exception = ", e);
 
             return F.Promise.pure(createCommonExceptionResponse(e, request()));
         }
@@ -121,16 +113,15 @@ public class BadgeClassController extends BaseController {
     /**
      * Delete a badge class that has never been issued.
      *
+     * @param badgeId The ID of the Badge Class to delete
      * @return Return a promise for delete badge class API result.
      */
-    @BodyParser.Of(BodyParser.Json.class)
-    public F.Promise<Result> deleteBadgeClass() {
+    public F.Promise<Result> deleteBadgeClass(String badgeId) {
         ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
 
         try {
-            JsonNode bodyJson = request().body().asJson();
-
-            Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue(), bodyJson);
+            Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
+            request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
             new BadgeClassValidator().validateDeleteBadgeClass(request);
 

@@ -7,6 +7,9 @@ tmp
 dist
 /.idea
 /*.iml
+*.iml
+*.log
+RUNNING_PID
 /out
 /.idea_modules
 /.classpath
