@@ -14,6 +14,7 @@
     9. sunbird_sso_client_secret : keycloak client secret (not mandatory)
    10. sunbird_valid_badge_subtypes: list of valid badge subtypes (comma separated)
    11. sunbird_valid_badge_roles: list of valid badge roles (comma separated)
+   12. sunbird_learner_service_url: url for learner service
 ## Do the below env setup , if you are planing to run actor as local mode.
     1. sunbird_cassandra_host: host running the cassandra server
     2. sunbird_cassandra_port: port on which cassandra server is running
