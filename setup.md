@@ -47,7 +47,8 @@
     32. sunbird_app_url : paly store url to downlaod the app
     33 sunbird_fcm_account_key : account key for FCM 
     34 sunbird_msg_91_auth : msg 91 auth 
-    35. sunbird_msg_sender  : message sender name   
+    35. sunbird_msg_sender  : message sender name
+    36. sunbird_installation_email  : email of admin per installation 
     
 ## Do the below env setup , if you are planing to run background actor in remote mode.
 	1. sunbird_background_actor_host: host running for learner background actor
