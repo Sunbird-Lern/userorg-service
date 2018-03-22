@@ -62,6 +62,9 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
     apiHeaderIgnoreMap.put("/v1/notification/audience", var);
+    apiHeaderIgnoreMap.put("/v1/org/preferences/read", var);
+    apiHeaderIgnoreMap.put("/v1/org/preferences/create", var);
+    apiHeaderIgnoreMap.put("/v1/org/preferences/update", var);
   }
 
   /**

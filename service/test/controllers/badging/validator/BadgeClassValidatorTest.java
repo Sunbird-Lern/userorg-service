@@ -23,11 +23,7 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassIssuerIdRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
-
         request.setRequest(requestMap);
 
         try {
@@ -40,11 +36,9 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassCriteriaRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
 
         request.setRequest(requestMap);
 
@@ -58,12 +52,10 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassNameRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
 
         request.setRequest(requestMap);
 
@@ -77,13 +69,11 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassDescriptionRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
 
         request.setRequest(requestMap);
 
@@ -97,14 +87,12 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassRootOrgIdRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
 
         request.setRequest(requestMap);
 
@@ -118,15 +106,13 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassTypeRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
 
         request.setRequest(requestMap);
 
@@ -140,16 +126,14 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassInvalidType() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "invalid");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "invalid");
 
         request.setRequest(requestMap);
 
@@ -163,17 +147,15 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassInvalidSubtype() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "invalid");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "invalid");
 
         request.setRequest(requestMap);
 
@@ -187,17 +169,15 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassRolesRequiredNull() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "award");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "award");
 
         request.setRequest(requestMap);
 
@@ -211,18 +191,16 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassRolesRequiredEmpty() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "award");
-        formParamsMap.put(JsonKey.ROLES, "[]");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "award");
+        requestMap.put(JsonKey.ROLES, "[]");
 
         request.setRequest(requestMap);
 
@@ -234,20 +212,18 @@ public class BadgeClassValidatorTest {
     }
 
     @Test
-    public void testValidateCreateBadgeClassImageRequiredNull() {
+    public void testValidateCreateBadgeClassSingleRoleImageRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "award");
-        formParamsMap.put(JsonKey.ROLES, "[ \"roleId1\" ]");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "award");
+        requestMap.put(JsonKey.ROLES, "OFFICIAL_BADGE_ISSUER");
 
         request.setRequest(requestMap);
 
@@ -259,23 +235,18 @@ public class BadgeClassValidatorTest {
     }
 
     @Test
-    public void testValidateCreateBadgeClassImageRequiredEmpty() {
+    public void testValidateCreateBadgeClassMultipleRolesImageRequired() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "award");
-        formParamsMap.put(JsonKey.ROLES, "[ \"roleId1\" ]");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
-
-        Map<String, Object> fileParamsMap = new HashMap<>();
-        requestMap.put(JsonKey.FILE_PARAMS, fileParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "award");
+        requestMap.put(JsonKey.ROLES, "[ \"OFFICIAL_BADGE_ISSUER\", \"TEACHER_BADGE_ISSUER\" ]");
 
         request.setRequest(requestMap);
 
@@ -289,22 +260,17 @@ public class BadgeClassValidatorTest {
     @Test
     public void testValidateCreateBadgeClassSuccess() {
         Request request = new Request();
-        Map<String, Object> formParamsMap = new HashMap<>();
-        formParamsMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
-        formParamsMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
-        formParamsMap.put(JsonKey.NAME, "Java SE 8 Programmer");
-        formParamsMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
-        formParamsMap.put(JsonKey.ROOT_ORG_ID, "AP");
-        formParamsMap.put(JsonKey.TYPE, "user");
-        formParamsMap.put(JsonKey.SUBTYPE, "award");
-        formParamsMap.put(JsonKey.ROLES, "[ \"roleId1\" ]");
-
-        Map<String, Object> fileParamsMap = new HashMap<>();
-        fileParamsMap.put(JsonKey.IMAGE, "something");
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(JsonKey.FORM_PARAMS, formParamsMap);
-        requestMap.put(JsonKey.FILE_PARAMS, fileParamsMap);
+        requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+        requestMap.put(BadgingJsonKey.BADGE_CRITERIA, "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+        requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+        requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+        requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+        requestMap.put(JsonKey.TYPE, "user");
+        requestMap.put(JsonKey.SUBTYPE, "award");
+        requestMap.put(JsonKey.ROLES, "[ \"OFFICIAL_BADGE_ISSUER\" ]");
+        requestMap.put(JsonKey.IMAGE, "something");
 
         request.setRequest(requestMap);
 
@@ -364,7 +330,7 @@ public class BadgeClassValidatorTest {
     }
 
     @Test
-    public void testValidateListBadgeIssuerListRequired() {
+    public void testValidateSearchBadgeInvalidRequest() {
         Request request = new Request();
 
         Map<String, Object> requestMap = new HashMap<>();
@@ -372,23 +338,44 @@ public class BadgeClassValidatorTest {
         request.setRequest(requestMap);
 
         try {
-            new BadgeClassValidator().validateListBadgeClass(request);
+            new BadgeClassValidator().validateSearchBadgeClass(request);
+        } catch (ProjectCommonException e) {
+            assertEquals(e.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+        }
+    }
+
+    @Test
+    public void testValidateSearchBadgeIssuerListRequired() {
+        Request request = new Request();
+
+        Map<String, Object> requestMap = new HashMap<>();
+        Map<String, Object> filtersMap = new HashMap<>();
+
+        requestMap.put(JsonKey.FILTERS, filtersMap);
+
+        request.setRequest(requestMap);
+
+        try {
+            new BadgeClassValidator().validateSearchBadgeClass(request);
         } catch (ProjectCommonException e) {
             assertEquals(e.getCode(), ResponseCode.issuerListRequired.getErrorCode());
         }
     }
 
     @Test
-    public void testValidateListBadgeIssuerListSuccess() {
+    public void testValidateSearchBadgeIssuerListSuccess() {
         Request request = new Request();
 
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put(BadgingJsonKey.ISSUER_LIST, new ArrayList<>());
+        Map<String, Object> filtersMap = new HashMap<>();
+
+        filtersMap.put(BadgingJsonKey.ISSUER_LIST, new ArrayList<>());
+        requestMap.put(JsonKey.FILTERS, filtersMap);
 
         request.setRequest(requestMap);
 
         try {
-            new BadgeClassValidator().validateListBadgeClass(request);
+            new BadgeClassValidator().validateSearchBadgeClass(request);
         } catch (ProjectCommonException e) {
             assertEquals(e.getCode(), ResponseCode.issuerListRequired.getErrorCode());
         }
