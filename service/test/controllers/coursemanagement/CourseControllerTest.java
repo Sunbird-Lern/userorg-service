@@ -1,4 +1,4 @@
-package coursemanagement;
+package controllers.coursemanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
