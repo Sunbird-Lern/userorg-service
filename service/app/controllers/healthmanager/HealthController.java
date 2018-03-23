@@ -42,7 +42,6 @@ public class HealthController extends BaseController {
    */
   public Promise<Result> getHealth() {
     try {
-      ProjectLogger.log("Call to get all server health api = " , LoggerEnum.INFO.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
