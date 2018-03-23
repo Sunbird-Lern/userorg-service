@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -214,6 +215,8 @@ public class Global extends GlobalSettings {
       env = JsonKey.DASHBOARD;
     }else if(uri.startsWith("/v1/badges")){
       env = JsonKey.BADGES;
+    }else if(uri.startsWith("/v1/issuer")){
+      env = BadgingJsonKey.BADGES;
     }else{
       env = "miscellaneous";
     }
