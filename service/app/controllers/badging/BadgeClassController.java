@@ -7,7 +7,6 @@ import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import controllers.badging.validator.BadgeClassValidator;
 import play.libs.F;
-import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -54,7 +53,7 @@ public class BadgeClassController extends BaseController {
 
             request.setRequest(map);
 
-            new BadgeClassValidator().validateCreateBadgeClass(request);
+            new BadgeClassValidator().validateCreateBadgeClass(request, request().headers());
 
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {

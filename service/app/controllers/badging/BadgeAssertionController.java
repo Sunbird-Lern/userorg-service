@@ -38,13 +38,12 @@ public class BadgeAssertionController extends BaseController {
 	public Promise<Result> issueBadge() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.INFO.name());
+			ProjectLogger.log(" Issue badge method called = " + requestData, LoggerEnum.DEBUG.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			BadgeAssertionValidator.validateBadgeAssertion(reqObj);
-			reqObj.setOperation(BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue());
-			reqObj.setRequestId(ExecutionContext.getRequestId());
-			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-			reqObj.setEnv(getEnvironment());
+			reqObj = setExtraParam(reqObj, ExecutionContext.getRequestId(),
+					BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue(), ctx().flash().get(JsonKey.USER_ID),
+					getEnvironment());
 			return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
 		} catch (Exception e) {
 			return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -61,14 +60,13 @@ public class BadgeAssertionController extends BaseController {
 	 */
 	public Promise<Result> getAssertionDetails(String assertionId) {
 		try {
-			ProjectLogger.log(" get badge assertion details api called = " + assertionId, LoggerEnum.INFO.name());
-			Request reqObj =  new Request();
+			ProjectLogger.log(" get badge assertion details api called = " + assertionId, LoggerEnum.DEBUG.name());
+			Request reqObj = new Request();
 			reqObj.getRequest().put(BadgingJsonKey.ASSERTION_ID, assertionId);
 			BadgeAssertionValidator.validategetBadgeAssertion(reqObj);
-			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION.getValue());
-			reqObj.setRequestId(ExecutionContext.getRequestId());
-			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-			reqObj.setEnv(getEnvironment());
+			reqObj = setExtraParam(reqObj, ExecutionContext.getRequestId(),
+					BadgingActorOperations.GET_BADGE_ASSERTION.getValue(), ctx().flash().get(JsonKey.USER_ID),
+					getEnvironment());
 			return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
 		} catch (Exception e) {
 			return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -83,13 +81,12 @@ public class BadgeAssertionController extends BaseController {
 	public Promise<Result> getAssertionList() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			ProjectLogger.log(" get assertion list api called = " + requestData, LoggerEnum.INFO.name());
+			ProjectLogger.log(" get assertion list api called = " + requestData, LoggerEnum.DEBUG.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			BadgeAssertionValidator.validateGetAssertionList(reqObj);
-			reqObj.setOperation(BadgingActorOperations.GET_BADGE_ASSERTION_LIST.getValue());
-			reqObj.setRequestId(ExecutionContext.getRequestId());
-			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-			reqObj.setEnv(getEnvironment());
+			reqObj = setExtraParam(reqObj, ExecutionContext.getRequestId(),
+					BadgingActorOperations.GET_BADGE_ASSERTION_LIST.getValue(), ctx().flash().get(JsonKey.USER_ID),
+					getEnvironment());
 			return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
 		} catch (Exception e) {
 			return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -108,17 +105,15 @@ public class BadgeAssertionController extends BaseController {
 	public Promise<Result> revokeAssertion() {
 		try {
 			JsonNode requestData = request().body().asJson();
-			ProjectLogger.log(" Revoke badge method called = " + requestData, LoggerEnum.INFO.name());
+			ProjectLogger.log(" Revoke badge method called = " + requestData, LoggerEnum.DEBUG.name());
 			Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
 			BadgeAssertionValidator.validateRevokeAssertion(reqObj);
-			reqObj.setRequestId(ExecutionContext.getRequestId());
-			reqObj.setOperation(BadgingActorOperations.REVOKE_BADGE.getValue());
-			reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-			reqObj.setEnv(getEnvironment());
+			reqObj = setExtraParam(reqObj, ExecutionContext.getRequestId(),
+					BadgingActorOperations.REVOKE_BADGE.getValue(), ctx().flash().get(JsonKey.USER_ID),
+					getEnvironment());
 			return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
 		} catch (Exception e) {
 			return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
 		}
 	}
-
 }

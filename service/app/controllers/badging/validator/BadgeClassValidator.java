@@ -3,15 +3,14 @@ package controllers.badging.validator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.BadgingJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.response.HttpUtilResponse;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +70,46 @@ public class BadgeClassValidator {
         }
     }
 
-    private static void validateType(String type) {
+    private void validateRootOrgId(String rootOrgId, Map<String, String[]> httpRequestHeaders) {
+        validateParam(rootOrgId, ResponseCode.rootOrgIdRequired);
+
+        try {
+            String baseUrl = ProjectUtil.getConfigValue(LearnerServiceUrls.BASE_URL);
+            String prefix = LearnerServiceUrls.PREFIX_ORG_SERVICE;
+            LearnerServiceUrls.Path path = LearnerServiceUrls.Path.API_GW_PATH_READ_ORG;
+            String requestUrl = LearnerServiceUrls.getRequestUrl(baseUrl, prefix, path);
+
+            Map<String, String> headersMap = LearnerServiceUrls.getRequestHeaders(httpRequestHeaders);
+
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put(JsonKey.ORGANISATION_ID, rootOrgId);
+
+            Map<String, Object> bodyMap = new HashMap<>();
+            bodyMap.put(JsonKey.REQUEST, requestMap);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String bodyJson = objectMapper.writeValueAsString(bodyMap);
+
+            HttpUtilResponse response = HttpUtil.doPostRequest(requestUrl, bodyJson, headersMap);
+            if (response.getStatusCode() == ResponseCode.OK.getResponseCode()) {
+                String responseStr = response.getBody();
+                if (responseStr != null) {
+                    Map<String, Object> responseMap = objectMapper.readValue(responseStr, HashMap.class);
+                    Map<String, Object> resultMap = (Map<String, Object>) responseMap.get(JsonKey.RESULT);
+                    Map<String, Object> resultResponseMap = (Map<String, Object>) resultMap.get(JsonKey.RESPONSE);
+                    boolean isRootOrg = resultResponseMap.get(JsonKey.IS_ROOT_ORG) != null ? (boolean) resultResponseMap.get(JsonKey.IS_ROOT_ORG) : false;
+                    if (isRootOrg) return;
+                }
+            }
+        } catch (IOException | NullPointerException e) {
+            ProjectLogger.log("validateRootOrgId: exception = ",  e);
+        }
+
+        ResponseCode error = ResponseCode.invalidRootOrganisationId;
+        throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
+    private void validateType(String type) {
         ResponseCode error = ResponseCode.badgeTypeRequired;
 
         if (StringUtils.isBlank(type)) {
@@ -84,7 +122,7 @@ public class BadgeClassValidator {
         }
     }
 
-    private static void validateSubtype(String subtype) {
+    private void validateSubtype(String subtype) {
         if (subtype != null) {
             String validSubtypes = System.getenv(BadgingJsonKey.VALID_BADGE_SUBTYPES);
             if (StringUtils.isBlank(validSubtypes)) {
@@ -115,8 +153,9 @@ public class BadgeClassValidator {
      *                    type: Badge class type (user / content)
      *                    subtype: Badge class subtype (e.g. award)
      *                    roles: JSON array of roles (e.g. [ "COURSE_MENTOR" ])
+     * @param httpRequestHeaders Map of headers in the received HTTP request
      */
-    public void validateCreateBadgeClass(Request request) {
+    public void validateCreateBadgeClass(Request request, Map<String, String[]> httpRequestHeaders) {
         Map<String, Object> requestMap = request.getRequest();
 
         if (requestMap == null) {
@@ -128,8 +167,8 @@ public class BadgeClassValidator {
         validateParam((String) requestMap.get(BadgingJsonKey.BADGE_CRITERIA), ResponseCode.badgeCriteriaRequired);
         validateParam((String) requestMap.get(JsonKey.NAME), ResponseCode.badgeNameRequired);
         validateParam((String) requestMap.get(JsonKey.DESCRIPTION), ResponseCode.badgeDescriptionRequired);
-        validateParam((String) requestMap.get(JsonKey.ROOT_ORG_ID), ResponseCode.rootOrgIdRequired);
 
+        validateRootOrgId((String) requestMap.get(JsonKey.ROOT_ORG_ID), httpRequestHeaders);
         validateType((String) requestMap.get(JsonKey.TYPE));
         validateSubtype((String) requestMap.get(JsonKey.SUBTYPE));
         validateRoles((String) requestMap.get(JsonKey.ROLES), ResponseCode.badgeRolesRequired);

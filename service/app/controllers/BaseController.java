@@ -1,10 +1,5 @@
 package controllers;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -13,11 +8,21 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -511,5 +516,23 @@ public class BaseController extends Controller {
     reqObj.getContext().put(JsonKey.ACTOR_TYPE , ctx().flash().get(JsonKey.ACTOR_TYPE));
 
   }
-
+   
+  /**
+    * This method will set extra param to request body which is required for
+    * actor layer.
+    * @param request Request
+    * @param requestId String
+    * @param actorOpName String
+    * @param requestedUserId String
+    * @param env int
+    * @return Request
+    */
+	public org.sunbird.common.request.Request setExtraParam(org.sunbird.common.request.Request request,
+			String requestId, String actorOpName, String requestedUserId, int env) {
+		request.setRequestId(requestId);
+		request.setOperation(actorOpName);
+		request.getRequest().put(JsonKey.CREATED_BY, requestedUserId);
+		request.setEnv(env);
+		return request;
+	}
 }
