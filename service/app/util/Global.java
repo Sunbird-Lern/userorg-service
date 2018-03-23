@@ -122,12 +122,9 @@ public class Global extends GlobalSettings {
   public Action onRequest(Request request, Method actionMethod) {
 
     String messageId = request.getHeader(JsonKey.MESSAGE_ID);
-    ProjectLogger.log("method call start.." + request.path() + " " + actionMethod + " " + messageId,
-        LoggerEnum.INFO.name());
     if (ProjectUtil.isStringNullOREmpty(messageId)) {
       UUID uuid = UUID.randomUUID();
       messageId = uuid.toString();
-      ProjectLogger.log("message id is not provided by client.." + messageId);
     }
     ExecutionContext.setRequestId(messageId);
     return new ActionWrapper(super.onRequest(request, actionMethod));
