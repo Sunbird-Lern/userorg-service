@@ -28,7 +28,7 @@ public class BadgesController  extends BaseController{
    */
   public Promise<Result> getBadges() {
     try {
-      ProjectLogger.log("Call to get badges master data. = " , LoggerEnum.INFO.name());
+      ProjectLogger.log("Call to get badges master data." , LoggerEnum.DEBUG.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_ALL_BADGE.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -47,7 +47,7 @@ public class BadgesController  extends BaseController{
   public Promise<Result> addUserBadges() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("call to add user badges api." + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("call to add user badges api.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateAddUserBadge(reqObj);
       reqObj.setOperation(ActorOperations.ADD_USER_BADGE.getValue());

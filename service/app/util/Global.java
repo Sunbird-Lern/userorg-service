@@ -60,12 +60,9 @@ public class Global extends GlobalSettings {
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
       ctx.request().headers();
       long startTime = System.currentTimeMillis();
-      ProjectLogger.log("Learning Service Call start  for  api ==" + ctx.request().path()
-          + " start time " + startTime, LoggerEnum.PERF_LOG);
       Promise<Result> result = null;
       Http.Response response = ctx.response();
       response.setHeader("Access-Control-Allow-Origin", "*");
-      
       String message = RequestInterceptor.verifyRequestData(ctx);
       // call method to set all the required params for the telemetry event(log)...
       intializeRequestInfo(ctx , message.replace("{userId}", ""));
@@ -84,8 +81,7 @@ public class Global extends GlobalSettings {
       } else {
         result = delegate.call(ctx);
       }
-      ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path()
-          + " end time " + System.currentTimeMillis() + "  Time taken "
+      ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path() + "  Time taken "
           + (System.currentTimeMillis() - startTime), LoggerEnum.PERF_LOG);
       return result;
     }

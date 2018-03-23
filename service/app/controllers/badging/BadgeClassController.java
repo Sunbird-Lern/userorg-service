@@ -28,7 +28,7 @@ public class BadgeClassController extends BaseController {
      * @return Return a promise for create badge class API result.
      */
     public F.Promise<Result> createBadgeClass() {
-        ProjectLogger.log("createBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("createBadgeClass called", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
@@ -70,7 +70,7 @@ public class BadgeClassController extends BaseController {
      * @return Return a promise for get badge class API result.
      */
     public F.Promise<Result> getBadgeClass(String badgeId) {
-        ProjectLogger.log("getBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("getBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
@@ -92,7 +92,7 @@ public class BadgeClassController extends BaseController {
      * @return Return a promise for search badge class API result.
      */
     public F.Promise<Result> searchBadgeClass() {
-        ProjectLogger.log("searchBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("searchBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             JsonNode bodyJson = request().body().asJson();
@@ -116,7 +116,7 @@ public class BadgeClassController extends BaseController {
      * @return Return a promise for delete badge class API result.
      */
     public F.Promise<Result> deleteBadgeClass(String badgeId) {
-        ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("deleteBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());

@@ -33,7 +33,7 @@ public class AssessmentController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("add new assessment data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("add new assessment data.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSaveAssessment(reqObj);
       reqObj.setOperation(ActorOperations.SAVE_ASSESSMENT.getValue());
@@ -60,7 +60,7 @@ public class AssessmentController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("get assessment request=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("get assessment request.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetAssessment(reqObj);
       reqObj.setOperation(ActorOperations.GET_ASSESSMENT.getValue());
