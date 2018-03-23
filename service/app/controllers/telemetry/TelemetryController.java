@@ -29,7 +29,7 @@ public class TelemetryController extends BaseController {
    * 
    * @return Promise<Result>
    */
-	public Promise<Result> saveTelemetryData() {
+	public Promise<Result> save() {
 
 		try {
 			JsonNode requestData = request().body().asJson();
