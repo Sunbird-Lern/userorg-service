@@ -149,7 +149,7 @@ public class Global extends GlobalSettings {
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
-    String channel = request.getHeader(JsonKey.CHANNEL);
+    String channel = request.getHeader(JsonKey.CHANNEL_ID);
     if(ProjectUtil.isStringNullOREmpty(channel)){
       channel = JsonKey.DEFAULT_ROOT_ORG_ID;
     }
