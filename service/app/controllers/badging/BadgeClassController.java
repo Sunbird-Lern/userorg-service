@@ -25,6 +25,17 @@ public class BadgeClassController extends BaseController {
     /**
      * Create a new badge class for a particular issuer.
      *
+     * Request body contains following parameters:
+     *     issuerId: The ID of the Issuer to be owner of the new Badge Class
+     *     name: The name of the Badge Class
+     *     description: A short description of the new Badge Class.
+     *     image: An image to represent the Badge Class.
+     *     criteria: Either a text string or a URL of a remotely hosted page describing the criteria
+     *     rootOrgId: Root organisation ID
+     *     type: Badge class type (user / content)
+     *     subtype: Badge class subtype (e.g. award)
+     *     roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ])
+     *
      * @return Return a promise for create badge class API result.
      */
     public F.Promise<Result> createBadgeClass() {
@@ -64,7 +75,7 @@ public class BadgeClassController extends BaseController {
     }
 
     /**
-     * Get details of badge class for given issuer and badge class.
+     * Get details of requsted badge class.
      *
      * @param badgeId The ID of the Badge Class whose details to view
      * @return Return a promise for get badge class API result.
@@ -88,6 +99,14 @@ public class BadgeClassController extends BaseController {
 
     /**
      * Get list of badge classes for given issuer(s) and matching given context.
+     *
+     * Request containing following filters:
+     *     issuerList: List of Issuer IDs whose badge classes are to be listed
+     *     badgeList: List of badge IDs whose badge classes are to be listed
+     *     rootOrgId: Root organisation ID
+     *     type: Badge class type (user / content)
+     *     subtype: Badge class subtype (e.g. award)
+     *     roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ])
      *
      * @return Return a promise for search badge class API result.
      */

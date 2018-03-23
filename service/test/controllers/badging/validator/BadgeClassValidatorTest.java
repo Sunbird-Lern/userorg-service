@@ -391,43 +391,6 @@ public class BadgeClassValidatorTest {
     }
 
     @Test
-    public void testValidateSearchBadgeIssuerListRequired() {
-        Request request = new Request();
-
-        Map<String, Object> requestMap = new HashMap<>();
-        Map<String, Object> filtersMap = new HashMap<>();
-
-        requestMap.put(JsonKey.FILTERS, filtersMap);
-
-        request.setRequest(requestMap);
-
-        try {
-            new BadgeClassValidator().validateSearchBadgeClass(request);
-        } catch (ProjectCommonException e) {
-            assertEquals(e.getCode(), ResponseCode.issuerListRequired.getErrorCode());
-        }
-    }
-
-    @Test
-    public void testValidateSearchBadgeIssuerListSuccess() {
-        Request request = new Request();
-
-        Map<String, Object> requestMap = new HashMap<>();
-        Map<String, Object> filtersMap = new HashMap<>();
-
-        filtersMap.put(BadgingJsonKey.ISSUER_LIST, new ArrayList<>());
-        requestMap.put(JsonKey.FILTERS, filtersMap);
-
-        request.setRequest(requestMap);
-
-        try {
-            new BadgeClassValidator().validateSearchBadgeClass(request);
-        } catch (ProjectCommonException e) {
-            assertEquals(e.getCode(), ResponseCode.issuerListRequired.getErrorCode());
-        }
-    }
-
-    @Test
     public void testValidateDeleteBadgeBadgeIdRequired() {
         Request request = new Request();
 
