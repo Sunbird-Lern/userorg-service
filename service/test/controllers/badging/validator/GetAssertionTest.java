@@ -10,8 +10,12 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BadgingJsonKey;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -20,6 +24,8 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Manzarul
  *
  */
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
 public class GetAssertionTest {
 
 	@Test
@@ -45,34 +51,32 @@ public class GetAssertionTest {
 		Request request = new Request();
 		boolean response = false;
 		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
 		requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
 		request.setRequest(requestObj);
 		try {
 			BadgeAssertionValidator.validategetBadgeAssertion(request);
 			response = true;
 		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.issuerIdRequired.getErrorCode(), e.getCode());
+			Assert.assertNull(e);
 		}
-		assertEquals(false, response);
+		assertEquals(true, response);
 	}
 
 	@Test
 	public void getAssertionWithEmptyIssuerId() {
 		Request request = new Request();
 		boolean response = false;
-		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.ISSUER_ID, "");
-		requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
-		requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-		request.setRequest(requestObj);
+		List<String> list = new ArrayList<>();
+		Map<String,List<String>> filterMap = new HashMap<>();
+		filterMap.put(BadgingJsonKey.ASSERTIONS, list);
+		
+		request.getRequest().put(JsonKey.FILTERS, filterMap);
 		try {
 			BadgeAssertionValidator.validategetBadgeAssertion(request);
 			response = true;
 		} catch (ProjectCommonException e) {
 			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.issuerIdRequired.getErrorCode(), e.getCode());
+			assertEquals(ResponseCode.assertionIdRequired.getErrorCode(), e.getCode());
 		}
 		assertEquals(false, response);
 	}
@@ -90,28 +94,9 @@ public class GetAssertionTest {
 			BadgeAssertionValidator.validategetBadgeAssertion(request);
 			response = true;
 		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.badgeIdRequired.getErrorCode(), e.getCode());
+			Assert.assertNull(e);
 		}
-		assertEquals(false, response);
-	}
-
-	@Test
-	public void getAssertionWithOutBadgeId() {
-		Request request = new Request();
-		boolean response = false;
-		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.ISSUER_ID, "issuerId");
-		requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-		request.setRequest(requestObj);
-		try {
-			BadgeAssertionValidator.validategetBadgeAssertion(request);
-			response = true;
-		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.badgeIdRequired.getErrorCode(), e.getCode());
-		}
-		assertEquals(false, response);
+		assertEquals(true, response);
 	}
 
 	@Test
@@ -133,37 +118,19 @@ public class GetAssertionTest {
 		assertEquals(false, response);
 	}
 
-	@Test
-	public void getAssertionWithEmptyAll() {
-		Request request = new Request();
-		boolean response = false;
-		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.ISSUER_ID, "");
-		requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "null");
-		requestObj.put(BadgingJsonKey.ASSERTION_ID, " ");
-		request.setRequest(requestObj);
-		try {
-			BadgeAssertionValidator.validategetBadgeAssertion(request);
-			response = true;
-		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.issuerIdRequired.getErrorCode(), e.getCode());
-		}
-		assertEquals(false, response);
-	}
-	
 	
 	@Test
 	public void getAssertionList() {
 		Request request = new Request();
 		boolean response = false;
-		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.ISSUER_ID, "issuerSlug");
-		requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
-		requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-		List<Map<String,Object>> list = new ArrayList<>();
-		 list.add(requestObj);
-		request.getRequest().put(BadgingJsonKey.ASSERTIONS, list);
+		List<String> list = new ArrayList<>();
+		for (int i = 0 ; i< 2 ;i++) {
+		 list.add("assertionId-"+i);
+		}
+		Map<String,List<String>> filterMap = new HashMap<>();
+		filterMap.put(BadgingJsonKey.ASSERTIONS, list);
+		
+		request.getRequest().put(JsonKey.FILTERS, filterMap);
 		try {
 			BadgeAssertionValidator.validateGetAssertionList(request);
 			response = true;
@@ -199,15 +166,14 @@ public class GetAssertionTest {
 	public void getAssertionListWithExceedSize() {
 		Request request = new Request();
 		boolean response = false;
-		List<Map<String,Object>> list = new ArrayList<>();
+		List<String> list = new ArrayList<>();
 		for (int i = 0 ; i< 50 ;i++) {
-		Map<String, Object> requestObj = new HashMap<>();
-		requestObj.put(BadgingJsonKey.ISSUER_ID, "issuerSlug");
-		requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
-		requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-		 list.add(requestObj);
+		 list.add("assertionId-"+i);
 		}
-		request.getRequest().put(BadgingJsonKey.ASSERTIONS, list);
+		Map<String,List<String>> filterMap = new HashMap<>();
+		filterMap.put(BadgingJsonKey.ASSERTIONS, list);
+		
+		request.getRequest().put(JsonKey.FILTERS, filterMap);
 		try {
 			BadgeAssertionValidator.validateGetAssertionList(request);
 			response = true;
@@ -222,15 +188,14 @@ public class GetAssertionTest {
 	public void getAssertionListWithMaxSize() {
 		Request request = new Request();
 		boolean response = false;
-		List<Map<String, Object>> list = new ArrayList<>();
-		for (int i = 0; i < 5; i++) {
-			Map<String, Object> requestObj = new HashMap<>();
-			requestObj.put(BadgingJsonKey.ISSUER_ID, "issuerSlug");
-			requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
-			requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-			list.add(requestObj);
+		List<String> list = new ArrayList<>();
+		for (int i = 0 ; i< 5 ;i++) {
+		 list.add("assertionId-"+i);
 		}
-		request.getRequest().put(BadgingJsonKey.ASSERTIONS, list);
+		Map<String,List<String>> filterMap = new HashMap<>();
+		filterMap.put(BadgingJsonKey.ASSERTIONS, list);
+		
+		request.getRequest().put(JsonKey.FILTERS, filterMap);
 		try {
 			BadgeAssertionValidator.validateGetAssertionList(request);
 			response = true;
@@ -238,28 +203,5 @@ public class GetAssertionTest {
 			assertNotNull(e);
 		}
 		assertEquals(true, response);
-	}
-	
-	@Test
-	public void getAssertionListWithEmptyIssuer() {
-		Request request = new Request();
-		boolean response = false;
-		List<Map<String, Object>> list = new ArrayList<>();
-		for (int i = 0; i < 5; i++) {
-			Map<String, Object> requestObj = new HashMap<>();
-			requestObj.put(BadgingJsonKey.ISSUER_ID, "");
-			requestObj.put(BadgingJsonKey.BADGE_CLASS_ID, "classslug");
-			requestObj.put(BadgingJsonKey.ASSERTION_ID, "someAssertionId");
-			list.add(requestObj);
-		}
-		request.getRequest().put(BadgingJsonKey.ASSERTIONS, list);
-		try {
-			BadgeAssertionValidator.validateGetAssertionList(request);
-			response = true;
-		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.issuerIdRequired.getErrorCode(), e.getCode());
-		}
-		assertEquals(false, response);
 	}
 }
