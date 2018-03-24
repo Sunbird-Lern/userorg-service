@@ -77,47 +77,39 @@ public class RequestInterceptor {
    * @return String
    */
   public static String verifyRequestData(Http.Context ctx) {
-    Request request = ctx.request();
-    String response = "{userId}";
-    if (!isRequestInExcludeList(request.path())) {
-        if (ProjectUtil
-            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Access_TokenId.getName()))
-            && ProjectUtil
-            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
-            && ProjectUtil
-                .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
-          return ResponseCode.unAuthorised.getErrorCode();
-        }
-      if (StringUtils.isBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
-          && Boolean.parseBoolean(PropertiesCache.getInstance()
-              .getProperty(JsonKey.IS_SSO_ENABLED))) {
-        ProjectLogger.log("SSO public key is not set by environment variable==",
-            LoggerEnum.INFO.name());
-        response = "{userId}" + JsonKey.NOT_AVAILABLE;
-      } else if(!ProjectUtil
-            .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()))
-            && !ProjectUtil
-                .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
-        String clientId = AuthenticationHelper.verifyClientAccessToken(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()),
-            request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()));
-        if (StringUtils.isBlank(clientId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
-        }
-        response = "{userId}" + clientId;
-        ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY , Boolean.toString(true));
-      } else {
-        String userId = AuthenticationHelper.verifyUserAccesToken(
-            request.getHeader(HeaderParam.X_Access_TokenId.getName()));
-        if (StringUtils.isBlank(userId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
-        }
-        response = "{userId}" + userId;
-      }
-    }else{
-      AuthenticationHelper.invalidateToken("");
-    }
-    return response;
-  }
+		Request request = ctx.request();
+		String response = "{userId}";
+		if (!isRequestInExcludeList(request.path())) {
+			String accessToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
+			String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
+			String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
+			if (StringUtils.isBlank(accessToken) && StringUtils.isBlank(authClientToken)
+					&& StringUtils.isBlank(authClientId)) {
+				return ResponseCode.unAuthorised.getErrorCode();
+			}
+			if (StringUtils.isBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
+					&& Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
+				ProjectLogger.log("SSO public key is not set by environment variable==", LoggerEnum.INFO.name());
+				response = "{userId}" + JsonKey.NOT_AVAILABLE;
+			} else if (!StringUtils.isBlank(authClientToken) && !StringUtils.isBlank(authClientId)) {
+				String clientId = AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
+				if (StringUtils.isBlank(clientId)) {
+					return ResponseCode.unAuthorised.getErrorCode();
+				}
+				response = "{userId}" + clientId;
+				ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
+			} else {
+				String userId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+				if (StringUtils.isBlank(userId)) {
+					return ResponseCode.unAuthorised.getErrorCode();
+				}
+				response = "{userId}" + userId;
+			}
+		} else {
+			AuthenticationHelper.invalidateToken("");
+		}
+		return response;
+	}
   
   /**
    * this method will check incoming request required validation or not. if this method return true
