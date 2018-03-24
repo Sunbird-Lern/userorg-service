@@ -1,5 +1,6 @@
 package controllers.badging.validator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -21,7 +22,7 @@ public class BadgeIssuerRequestValidator {
      * @param request
      */
     public static void validateCreateBadgeIssuer(Request request) {
-        if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(JsonKey.NAME))) {
+        if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.NAME))) {
             throw createExceptionInstance(
                     ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),
                     "name is required.");
@@ -32,12 +33,12 @@ public class BadgeIssuerRequestValidator {
                     ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),
                     "Description is required.");
         }
-        if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(JsonKey.URL))) {
+        if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.URL))) {
             throw createExceptionInstance(
                     ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),
                     "url is required.");
         }
-        if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(JsonKey.EMAIL))) {
+        if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.EMAIL))) {
             throw createExceptionInstance(
                     ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(),
                     "email is required.");
@@ -51,7 +52,7 @@ public class BadgeIssuerRequestValidator {
     }
 
     public static void validateGetBadgeIssuerDetail(Request request) {
-        if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(JsonKey.SLUG))) {
+        if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.SLUG))) {
             throw new ProjectCommonException(ResponseCode.slugRequired.getErrorCode(),
                     ResponseCode.slugRequired.getErrorMessage(), ERROR_CODE);
         }

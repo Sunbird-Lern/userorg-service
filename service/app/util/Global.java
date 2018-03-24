@@ -4,13 +4,13 @@
  */
 package util;
 
-import controllers.BaseController;
 import java.lang.reflect.Method;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BadgingJsonKey;
@@ -22,10 +22,9 @@ import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.service.SunbirdMWService;
-
 import org.sunbird.learner.util.TelemetryUtil;
+
+import controllers.BaseController;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
@@ -77,7 +76,7 @@ public class Global extends GlobalSettings {
 					}
 				}
 				result = delegate.call(ctx);
-			} else if (!ProjectUtil.isStringNullOREmpty(message)) {
+			} else if (!StringUtils.isBlank(message)) {
 				result = onDataValidationError(ctx.request(), message, ResponseCode.UNAUTHORIZED.getResponseCode());
 			} else {
 				result = delegate.call(ctx);
@@ -124,7 +123,7 @@ public class Global extends GlobalSettings {
 	public Action onRequest(Request request, Method actionMethod) {
 
 		String messageId = request.getHeader(JsonKey.MESSAGE_ID);
-		if (ProjectUtil.isStringNullOREmpty(messageId)) {
+		if (StringUtils.isBlank(messageId)) {
 			UUID uuid = UUID.randomUUID();
 			messageId = uuid.toString();
 		}
@@ -148,7 +147,7 @@ public class Global extends GlobalSettings {
 		Map<String, Object> reqContext = new HashMap<>();
 		// set env and channel to the
 		String channel = request.getHeader(JsonKey.CHANNEL_ID);
-		if (ProjectUtil.isStringNullOREmpty(channel)) {
+		if (StringUtils.isBlank(channel)) {
 			channel = JsonKey.DEFAULT_ROOT_ORG_ID;
 		}
 		reqContext.put(JsonKey.CHANNEL, channel);
@@ -166,7 +165,7 @@ public class Global extends GlobalSettings {
 		} else {
 			// write logic to check consumer id and set trype as consumer ...
 			String consumerId = request.getHeader(HeaderParam.X_Consumer_ID.getName());
-			if (ProjectUtil.isStringNullOREmpty(consumerId)) {
+			if (StringUtils.isBlank(consumerId)) {
 				consumerId = JsonKey.DEFAULT_CONSUMER_ID;
 			}
 			reqContext.put(JsonKey.ACTOR_ID, consumerId);
@@ -186,7 +185,7 @@ public class Global extends GlobalSettings {
 
 		// additional info contains info other than context info ...
 		map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-		if (ProjectUtil.isStringNullOREmpty(messageId)) {
+		if (StringUtils.isBlank(messageId)) {
 			messageId = JsonKey.DEFAULT_CONSUMER_ID;
 		}
 		ctx.flash().put(JsonKey.REQUEST_ID, messageId);

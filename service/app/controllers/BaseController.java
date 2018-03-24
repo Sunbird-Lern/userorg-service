@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -214,7 +215,7 @@ public class BaseController extends Controller {
 			if (exception.getCode() != null) {
 				response.getParams().setStatus(exception.getCode());
 			}
-			if (!ProjectUtil.isStringNullOREmpty(response.getParams().getErrmsg())
+			if (!StringUtils.isBlank(response.getParams().getErrmsg())
 					&& response.getParams().getErrmsg().contains("{0}")) {
 				response.getParams().setErrmsg(exception.getMessage());
 			}
@@ -275,7 +276,7 @@ public class BaseController extends Controller {
 
 		lmaxWriter.submitMessage(req);
 		Response courseResponse = (Response) response;
-		if (!ProjectUtil.isStringNullOREmpty(key)) {
+		if (!StringUtils.isBlank(key)) {
 			Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
 			courseResponse.getResult().remove(JsonKey.RESPONSE);
 			courseResponse.getResult().put(key, value);
@@ -449,7 +450,7 @@ public class BaseController extends Controller {
 			String path = request.path();
 			if (request.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
 				val = Global.getResponseId(path);
-				if (ProjectUtil.isStringNullOREmpty(val)) {
+				if (StringUtils.isBlank(val)) {
 					String[] splitedpath = path.split("[/]");
 					path = removeLastValue(splitedpath);
 					val = Global.getResponseId(path);
@@ -457,9 +458,9 @@ public class BaseController extends Controller {
 			} else {
 				val = Global.getResponseId(path);
 			}
-			if (ProjectUtil.isStringNullOREmpty(val)) {
+			if (StringUtils.isBlank(val)) {
 				val = Global.getResponseId(path);
-				if (ProjectUtil.isStringNullOREmpty(val)) {
+				if (StringUtils.isBlank(val)) {
 					String[] splitedpath = path.split("[/]");
 					path = removeLastValue(splitedpath);
 					val = Global.getResponseId(path);
@@ -482,7 +483,7 @@ public class BaseController extends Controller {
 		String val = "";
 		if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
 			val = Global.getResponseId(path);
-			if (ProjectUtil.isStringNullOREmpty(val)) {
+			if (StringUtils.isBlank(val)) {
 				String[] splitedpath = path.split("[/]");
 				String tempPath = removeLastValue(splitedpath);
 				val = Global.getResponseId(tempPath);

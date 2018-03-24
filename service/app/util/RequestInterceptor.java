@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -11,6 +12,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
+
 import play.mvc.Http;
 import play.mvc.Http.Request;
 
@@ -86,7 +88,7 @@ public class RequestInterceptor {
                 .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
           return ResponseCode.unAuthorised.getErrorCode();
         }
-      if (ProjectUtil.isStringNullOREmpty(System.getenv(JsonKey.SSO_PUBLIC_KEY))
+      if (StringUtils.isBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
           && Boolean.parseBoolean(PropertiesCache.getInstance()
               .getProperty(JsonKey.IS_SSO_ENABLED))) {
         ProjectLogger.log("SSO public key is not set by environment variable==",
@@ -98,7 +100,7 @@ public class RequestInterceptor {
                 .isStringNullOREmpty(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()))) {
         String clientId = AuthenticationHelper.verifyClientAccessToken(request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName()),
             request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName()));
-        if (ProjectUtil.isStringNullOREmpty(clientId)) {
+        if (StringUtils.isBlank(clientId)) {
           return ResponseCode.unAuthorised.getErrorCode();
         }
         response = "{userId}" + clientId;
@@ -106,7 +108,7 @@ public class RequestInterceptor {
       } else {
         String userId = AuthenticationHelper.verifyUserAccesToken(
             request.getHeader(HeaderParam.X_Access_TokenId.getName()));
-        if (ProjectUtil.isStringNullOREmpty(userId)) {
+        if (StringUtils.isBlank(userId)) {
           return ResponseCode.unAuthorised.getErrorCode();
         }
         response = "{userId}" + userId;
@@ -126,7 +128,7 @@ public class RequestInterceptor {
    */
   public static boolean isRequestInExcludeList(String request) {
     boolean resp = false;
-    if (!ProjectUtil.isStringNullOREmpty(request)) {
+    if (!StringUtils.isBlank(request)) {
       if (apiHeaderIgnoreMap.containsKey(request)) {
         resp = true;
       } else {

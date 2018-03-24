@@ -1,19 +1,26 @@
 package controllers.badging.validator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.HttpUtilResponse;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.HttpUtilResponse;
+import org.sunbird.common.models.util.BadgingJsonKey;
+import org.sunbird.common.models.util.HttpUtil;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LearnerServiceUrls;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Validates BadgeClass API requests.

@@ -7,15 +7,11 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * Test class for Badge assertion request data.

@@ -1,18 +1,21 @@
 package controllers.notesmanagement;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
 import java.util.HashMap;
+
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -34,7 +37,7 @@ public class NotesController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       if(null != ctx().flash().get(JsonKey.IS_AUTH_REQ) && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))){
         String userId = (String) reqObj.get(JsonKey.USER_ID);
-        if((!ProjectUtil.isStringNullOREmpty(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))){
+        if((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))){
             throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(), ResponseCode.unAuthorised.getErrorMessage(), ResponseCode.UNAUTHORIZED.getResponseCode());
         }
       }
