@@ -22,7 +22,7 @@ import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
-
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 
 import org.sunbird.learner.util.TelemetryUtil;
@@ -133,7 +133,10 @@ public class Global extends GlobalSettings {
 	}
 
 	private void intializeRequestInfo(Context ctx, String userId) {
-
+		// TODO: need to re-factor entire code.
+		if (StringUtils.isBlank(userId)) {
+			userId = "anonymous";
+		}
 		Request request = ctx.request();
 		String actionMethod = ctx.request().method();
 		String messageId = ExecutionContext.getRequestId();// request.getHeader(JsonKey.MESSAGE_ID);
