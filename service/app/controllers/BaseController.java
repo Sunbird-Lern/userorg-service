@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -18,6 +19,7 @@ import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -41,492 +43,516 @@ import util.Global;
  */
 public class BaseController extends Controller {
 
-  public static final int AKKA_WAIT_TIME = 10;
-  private static Object actorRef = null;
-  private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
-  protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
-  static {
-    try{
-//    actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
-      actorRef = SunbirdMWService.getRequestRouter();
-    }catch(Exception ex){
-      ProjectLogger.log("Exception occured while getting actor ref in base controller "+ex);
-      }
-  }
+	public static final int AKKA_WAIT_TIME = 10;
+	private static Object actorRef = null;
+	private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
+	protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
+	private ObjectMapper objMapper = new ObjectMapper();
+	static {
+		try {
+			// actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
+			actorRef = SunbirdMWService.getRequestRouter();
+		} catch (Exception ex) {
+			ProjectLogger.log("Exception occured while getting actor ref in base controller " + ex);
+		}
+	}
 
-  /**
-   * Helper method for creating and initialising a request for given operation and request body.
-   *
-   * @param operation A defined actor operation
-   * @param requestBodyJson Optional information received in request body (JSON)
-   *
-   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
-   */
-  protected org.sunbird.common.request.Request createAndInitRequest(String operation, JsonNode requestBodyJson) {
-    org.sunbird.common.request.Request request;
+	/**
+	 * Helper method for creating and initialising a request for given operation and
+	 * request body.
+	 *
+	 * @param operation
+	 *            A defined actor operation
+	 * @param requestBodyJson
+	 *            Optional information received in request body (JSON)
+	 *
+	 * @return Created and initialised Request (@see
+	 *         {@link org.sunbird.common.request.Request}) instance.
+	 */
+	protected org.sunbird.common.request.Request createAndInitRequest(String operation, JsonNode requestBodyJson) {
+		org.sunbird.common.request.Request request;
 
-    if (requestBodyJson != null) {
-      request = (org.sunbird.common.request.Request) mapper.RequestMapper.mapRequest(requestBodyJson, org.sunbird.common.request.Request.class);
-    } else {
-      request = new org.sunbird.common.request.Request();
-    }
+		if (requestBodyJson != null) {
+			request = (org.sunbird.common.request.Request) mapper.RequestMapper.mapRequest(requestBodyJson,
+					org.sunbird.common.request.Request.class);
+		} else {
+			request = new org.sunbird.common.request.Request();
+		}
 
-    request.setOperation(operation);
-    request.setRequestId(ExecutionContext.getRequestId());
-    request.setEnv(getEnvironment());
+		request.setOperation(operation);
+		request.setRequestId(ExecutionContext.getRequestId());
+		request.setEnv(getEnvironment());
 
-    return request;
-  }
+		return request;
+	}
 
-  /**
-   * Helper method for creating and initialising a request for given operation.
-   *
-   * @param operation A defined actor operation
-   *
-   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request}) instance.
-   */
-  protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
-    return createAndInitRequest(operation, null);
-  }
+	/**
+	 * Helper method for creating and initialising a request for given operation.
+	 *
+	 * @param operation
+	 *            A defined actor operation
+	 *
+	 * @return Created and initialised Request (@see
+	 *         {@link org.sunbird.common.request.Request}) instance.
+	 */
+	protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
+		return createAndInitRequest(operation, null);
+	}
 
-  /**
-   * This method will provide remote Actor selection
-   * 
-   * @return Object 
-   */
-  public Object getActorRef() {
+	/**
+	 * This method will provide remote Actor selection
+	 * 
+	 * @return Object
+	 */
+	public Object getActorRef() {
 
-    return actorRef;
-  }
+		return actorRef;
+	}
 
-  /**
-   * This method will create failure response
-   * 
-   * @param request Request
-   * @param code ResponseCode
-   * @param headerCode ResponseCode
-   * @return Response
-   */
-  public static Response createFailureResponse(Request request, ResponseCode code,
-      ResponseCode headerCode) {
+	/**
+	 * This method will create failure response
+	 * 
+	 * @param request
+	 *            Request
+	 * @param code
+	 *            ResponseCode
+	 * @param headerCode
+	 *            ResponseCode
+	 * @return Response
+	 */
+	public static Response createFailureResponse(Request request, ResponseCode code, ResponseCode headerCode) {
 
-    Response response = new Response();
-    response.setVer(getApiVersion(request.path()));
-    response.setId(getApiResponseId(request));
-    response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(headerCode);
-    response.setParams(createResponseParamObj(code));
-    return response;
-  }
+		Response response = new Response();
+		response.setVer(getApiVersion(request.path()));
+		response.setId(getApiResponseId(request));
+		response.setTs(ProjectUtil.getFormattedDate());
+		response.setResponseCode(headerCode);
+		response.setParams(createResponseParamObj(code));
+		return response;
+	}
 
-  /**
-   * This method will create response parameter
-   * 
-   * @param code ResponseCode
-   * @return ResponseParams
-   */
-  public static ResponseParams createResponseParamObj(ResponseCode code) {
-    ResponseParams params = new ResponseParams();
-    if (code.getResponseCode() != 200) {
-      params.setErr(code.getErrorCode());
-      params.setErrmsg(code.getErrorMessage());
-    }
-    params.setMsgid(ExecutionContext.getRequestId());
-    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
-    return params;
-  }
+	/**
+	 * This method will create response parameter
+	 * 
+	 * @param code
+	 *            ResponseCode
+	 * @return ResponseParams
+	 */
+	public static ResponseParams createResponseParamObj(ResponseCode code) {
+		ResponseParams params = new ResponseParams();
+		if (code.getResponseCode() != 200) {
+			params.setErr(code.getErrorCode());
+			params.setErrmsg(code.getErrorMessage());
+		}
+		params.setMsgid(ExecutionContext.getRequestId());
+		params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
+		return params;
+	}
 
-  /**
-   * This method will create data for success response.
-   * 
-   * @param request play.mvc.Http.Request
-   * @param response Response
-   * @return Response
-   */
-  public static Response createSuccessResponse(Request request, Response response) {
+	/**
+	 * This method will create data for success response.
+	 * 
+	 * @param request
+	 *            play.mvc.Http.Request
+	 * @param response
+	 *            Response
+	 * @return Response
+	 */
+	public static Response createSuccessResponse(Request request, Response response) {
 
-    if (request != null) {
-      response.setVer(getApiVersion(request.path()));
-    } else {
-      response.setVer("");
-    }
-    response.setId(getApiResponseId(request));
-    response.setTs(ProjectUtil.getFormattedDate());
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
-    code.setResponseCode(ResponseCode.OK.getResponseCode());
-    response.setParams(createResponseParamObj(code));
-    return response;
-  }
+		if (request != null) {
+			response.setVer(getApiVersion(request.path()));
+		} else {
+			response.setVer("");
+		}
+		response.setId(getApiResponseId(request));
+		response.setTs(ProjectUtil.getFormattedDate());
+		ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
+		code.setResponseCode(ResponseCode.OK.getResponseCode());
+		response.setParams(createResponseParamObj(code));
+		return response;
+	}
 
-  /**
-   * This method will provide api version.
-   * 
-   * @param request String
-   * @return String
-   */
-  public static String getApiVersion(String request) {
+	/**
+	 * This method will provide api version.
+	 * 
+	 * @param request
+	 *            String
+	 * @return String
+	 */
+	public static String getApiVersion(String request) {
 
-    return request.split("[/]")[1];
-  }
+		return request.split("[/]")[1];
+	}
 
+	/**
+	 * This method will handle response in case of exception
+	 * 
+	 * @param request
+	 *            play.mvc.Http.Request
+	 * @param exception
+	 *            ProjectCommonException
+	 * @return Response
+	 */
+	public static Response createResponseOnException(Request request, ProjectCommonException exception) {
+		ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming", exception,
+				genarateTelemetryInfoForError());
+		Response response = new Response();
+		response.setVer("");
+		if (request != null) {
+			response.setVer(getApiVersion(request.path()));
+		}
+		response.setId(getApiResponseId(request));
+		response.setTs(ProjectUtil.getFormattedDate());
+		response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
+		ResponseCode code = ResponseCode.getResponse(exception.getCode());
+		if (code == null) {
+			code = ResponseCode.SERVER_ERROR;
+		}
+		response.setParams(createResponseParamObj(code));
+		if (response.getParams() != null) {
+			response.getParams().setStatus(response.getParams().getStatus());
+			if (exception.getCode() != null) {
+				response.getParams().setStatus(exception.getCode());
+			}
+			if (!StringUtils.isBlank(response.getParams().getErrmsg())
+					&& response.getParams().getErrmsg().contains("{0}")) {
+				response.getParams().setErrmsg(exception.getMessage());
+			}
+		}
+		Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
+		return response;
+	}
 
-  /**
-   * This method will handle response in case of exception
-   * 
-   * @param request play.mvc.Http.Request
-   * @param exception ProjectCommonException
-   * @return Response
-   */
-  public static Response createResponseOnException(Request request,
-      ProjectCommonException exception) {
-    ProjectLogger.log(exception != null ? exception.getMessage() : "Message is not coming",
-        exception, genarateTelemetryInfoForError());
-    Response response = new Response();
-    response.setVer("");
-    if (request != null) {
-      response.setVer(getApiVersion(request.path()));
-    } 
-    response.setId(getApiResponseId(request));
-    response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
-    ResponseCode code = ResponseCode.getResponse(exception.getCode());
-    if (code == null) {
-      code = ResponseCode.SERVER_ERROR;
-    }
-    response.setParams(createResponseParamObj(code));
-    if (response.getParams() != null) {
-    	response.getParams().setStatus(response.getParams().getStatus());
-    	if (exception.getCode() != null){
-    		response.getParams().setStatus(exception.getCode());	
-    	}
-    	if (!ProjectUtil.isStringNullOREmpty(response.getParams().getErrmsg())
-        && response.getParams().getErrmsg().contains("{0}")){
-    		response.getParams().setErrmsg(exception.getMessage());	
-    	}
-    }
-    Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
-    return response;
-  }
+	/**
+	 * 
+	 * @param path
+	 *            String
+	 * @param method
+	 *            String
+	 * @param exception
+	 *            ProjectCommonException
+	 * @return Response
+	 */
+	public static Response createResponseOnException(String path, String method, ProjectCommonException exception) {
 
+		Response response = new Response();
+		response.setVer(getApiVersion(path));
+		response.setId(getApiResponseId(path, method));
+		response.setTs(ProjectUtil.getFormattedDate());
+		response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
+		ResponseCode code = ResponseCode.getResponse(exception.getCode());
+		response.setParams(createResponseParamObj(code));
+		return response;
+	}
 
-  /**
-   * 
-   * @param path String
-   * @param method String
-   * @param exception ProjectCommonException
-   * @return Response
-   */
-  public static Response createResponseOnException(String path, String method,
-      ProjectCommonException exception) {
+	/**
+	 * This method will create common response for all controller method
+	 * 
+	 * @param response
+	 *            Object
+	 * @param key
+	 *            String
+	 * @param request
+	 *            play.mvc.Http.Request
+	 * @return Result
+	 */
+	public Result createCommonResponse(Object response, String key, Request request) {
 
-    Response response = new Response();
-    response.setVer(getApiVersion(path));
-    response.setId(getApiResponseId(path, method));
-    response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
-    ResponseCode code = ResponseCode.getResponse(exception.getCode());
-    response.setParams(createResponseParamObj(code));
-    return response;
-  }
+		// generate info log here...
+		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+		org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
 
+		Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
 
-  /**
-   * This method will create common response for all controller method
-   * 
-   * @param response Object
-   * @param key String
-   * @param request play.mvc.Http.Request
-   * @return Result
-   */
-  public Result createCommonResponse(Object response, String key, Request request) {
+		params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
+		params.put(JsonKey.MESSAGE, "");
+		params.put(JsonKey.METHOD, request.method());
+		params.put(JsonKey.END_TIME, System.currentTimeMillis());
+		params.put(JsonKey.STATUS, String.valueOf(((Response) response).getResponseCode().getResponseCode()));
+		params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
+		req.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
+				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
 
-    // generate info log here...
-    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
-    org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
+		lmaxWriter.submitMessage(req);
+		Response courseResponse = (Response) response;
+		if (!StringUtils.isBlank(key)) {
+			Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
+			courseResponse.getResult().remove(JsonKey.RESPONSE);
+			courseResponse.getResult().put(key, value);
+		}
 
-    Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
+		// remove request info from map
+		Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
+		return Results.ok(Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
+		// }
+		/*
+		 * else {
+		 * 
+		 * ProjectCommonException exception = (ProjectCommonException) response; return
+		 * Results.status(exception.getResponseCode(),
+		 * Json.toJson(BaseController.createResponseOnException(request, exception))); }
+		 */
+	}
 
-    params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-    params.put(JsonKey.MESSAGE , "");
-    params.put(JsonKey.METHOD, request.method());
+	private String generateStackTrace(StackTraceElement[] elements) {
+		StringBuilder builder = new StringBuilder("");
+		for (StackTraceElement element : elements) {
 
-    //if (response instanceof Response) {
-    Response courseResponse = (Response) response;
+			builder.append(element.toString());
+			builder.append("\n");
+		}
+		return builder.toString();
+	}
 
-    long endTime = System.currentTimeMillis();
-    params.put(JsonKey.END_TIME, endTime);
-    params.put(JsonKey.STATUS , String.valueOf(((Response) response).getResponseCode().getResponseCode()));
-    params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
-    req.setRequest(generateTelemetryRequestForController
-          (TelemetryEvents.LOG.getName(), params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
+	private Map<String, Object> generateTelemetryRequestForController(String eventType, Map<String, Object> params,
+			Map<String, Object> context) {
 
-    lmaxWriter.submitMessage(req);
+		Map<String, Object> map = new HashMap<>();
+		map.put(JsonKey.TELEMETRY_EVENT_TYPE, eventType);
+		map.put(JsonKey.CONTEXT, context);
+		map.put(JsonKey.PARAMS, params);
+		return map;
+	}
 
-      if (!ProjectUtil.isStringNullOREmpty(key)) {
-        Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
-        courseResponse.getResult().remove(JsonKey.RESPONSE);
-        courseResponse.getResult().put(key, value);
-      }
+	/**
+	 * Common exception response handler method.
+	 * 
+	 * @param e
+	 *            Exception
+	 * @param request
+	 *            play.mvc.Http.Request
+	 * @return Result
+	 */
+	public Result createCommonExceptionResponse(Exception e, Request request) {
+		Request req = request;
+		ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
+		if (req == null) {
+			req = request();
+		}
+		ProjectCommonException exception = null;
+		if (e instanceof ProjectCommonException) {
+			exception = (ProjectCommonException) e;
+		} else {
+			exception = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
+					ResponseCode.internalError.getErrorMessage(), ResponseCode.SERVER_ERROR.getResponseCode());
+		}
 
-      // remove request info from map
-    Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
-      return Results.ok(
-          Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
-    //}
-    /*else {
+		// generate info log here...
+		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+		org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
+		Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
+		params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
+		params.put(JsonKey.MESSAGE, "");
+		params.put(JsonKey.METHOD, request.method());
+		long endTime = System.currentTimeMillis();
+		params.put(JsonKey.END_TIME, endTime);
+		params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
+		params.put(JsonKey.LOG_LEVEL, "error");
+		params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
+		reqForTelemetry.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
+				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
+		lmaxWriter.submitMessage(reqForTelemetry);
+		// cleaning request info ...
+		return Results.status(exception.getResponseCode(),
+				Json.toJson(BaseController.createResponseOnException(req, exception)));
+	}
 
-      ProjectCommonException exception = (ProjectCommonException) response;
-      return Results.status(exception.getResponseCode(),
-          Json.toJson(BaseController.createResponseOnException(request, exception)));
-    }*/
-  }
+	/**
+	 * This method will make a call to Akka actor and return promise.
+	 * 
+	 * @param actorRef
+	 *            ActorSelection
+	 * @param request
+	 *            Request
+	 * @param timeout
+	 *            Timeout
+	 * @param responseKey
+	 *            String
+	 * @param httpReq
+	 *            play.mvc.Http.Request
+	 * @return Promise<Result>
+	 */
+	public Promise<Result> actorResponseHandler(Object actorRef, org.sunbird.common.request.Request request,
+			Timeout timeout, String responseKey, Request httpReq) {
+		// set header to request object , setting actor type and channel headers value
+		// ...
+		setChannelAndActorInfo(ctx(), request);
 
-  private String generateStackTrace(StackTraceElement[] elements){
-    StringBuilder builder = new StringBuilder("");
-    for(StackTraceElement element : elements){
+		if (actorRef instanceof ActorRef) {
+			return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
+					.map(new Function<Object, Result>() {
+						public Result apply(Object result) {
+							if (result instanceof Response) {
+								Response response = (Response) result;
+								return createCommonResponse(response, responseKey, httpReq);
+							} else if (result instanceof ProjectCommonException) {
+								return createCommonExceptionResponse((ProjectCommonException) result, request());
+							} else {
+								ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+								return createCommonExceptionResponse(new Exception(), httpReq);
+							}
+						}
+					});
+		} else {
+			return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout))
+					.map(new Function<Object, Result>() {
+						public Result apply(Object result) {
+							if (result instanceof Response) {
+								Response response = (Response) result;
+								return createCommonResponse(response, responseKey, httpReq);
+							} else if (result instanceof ProjectCommonException) {
+								return createCommonExceptionResponse((ProjectCommonException) result, request());
+							} else {
+								ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+								return createCommonExceptionResponse(new Exception(), httpReq);
+							}
+						}
+					});
+		}
+	}
 
-      builder.append(element.toString());
-      builder.append("\n");
-    }
-    return builder.toString();
-  }
+	/**
+	 * This method will provide environment id.
+	 * 
+	 * @return int
+	 */
+	public int getEnvironment() {
 
-  private Map<String,Object> generateTelemetryRequestForController(String eventType, Map<String, Object> params,
-      Map<String, Object> context) {
+		if (Global.env != null) {
+			return Global.env.getValue();
+		}
+		return ProjectUtil.Environment.dev.getValue();
+	}
 
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.TELEMETRY_EVENT_TYPE , eventType);
-    map.put(JsonKey.CONTEXT, context);
-    map.put(JsonKey.PARAMS , params);
-    return map;
-  }
+	/**
+	 * Method to get UserId by AuthToken
+	 * 
+	 * @param token
+	 * @return String
+	 */
+	public String getUserIdByAuthToken(String token) {
 
+		return AuthenticationHelper.verifyUserAccesToken(token);
+	}
 
-  /**
-   * Common exception response handler method.
-   * 
-   * @param e Exception
-   * @param request play.mvc.Http.Request
-   * @return Result
-   */
-  public Result createCommonExceptionResponse(Exception e, Request request) {
-    Request req = request;
-    ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
-    if (req == null) {
-      req = request();
-    }
-    ProjectCommonException exception = null;
-    if (e instanceof ProjectCommonException) {
-      exception = (ProjectCommonException) e;
-    } else {
-      exception = new ProjectCommonException(ResponseCode.internalError.getErrorCode(),
-          ResponseCode.internalError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+	/**
+	 * Method to get API response Id
+	 * 
+	 * @param request
+	 *            play.mvc.Http.Request
+	 * @return String
+	 */
+	private static String getApiResponseId(Request request) {
 
-    // generate info log here...
-    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
-    org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
-    Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
-    params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-    params.put(JsonKey.MESSAGE , "");
-    params.put(JsonKey.METHOD, request.method());
-    long endTime = System.currentTimeMillis();
-    params.put(JsonKey.END_TIME, endTime);
-    params.put(JsonKey.STATUS , String.valueOf(exception.getResponseCode()));
-    params.put(JsonKey.LOG_LEVEL, "error");
-    params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
-    reqForTelemetry.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params ,(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT) ));
-    lmaxWriter.submitMessage(reqForTelemetry);
-    // cleaning request info ...
-    return Results.status(exception.getResponseCode(),
-        Json.toJson(BaseController.createResponseOnException(req, exception)));
-  }
+		String val = "";
+		if (request != null) {
+			String path = request.path();
+			if (request.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
+				val = Global.getResponseId(path);
+				if (StringUtils.isBlank(val)) {
+					String[] splitedpath = path.split("[/]");
+					path = removeLastValue(splitedpath);
+					val = Global.getResponseId(path);
+				}
+			} else {
+				val = Global.getResponseId(path);
+			}
+			if (StringUtils.isBlank(val)) {
+				val = Global.getResponseId(path);
+				if (StringUtils.isBlank(val)) {
+					String[] splitedpath = path.split("[/]");
+					path = removeLastValue(splitedpath);
+					val = Global.getResponseId(path);
+				}
+			}
+		}
+		return val;
+	}
 
+	/**
+	 * Method to get API response Id
+	 * 
+	 * @param path
+	 *            String
+	 * @param method
+	 *            String
+	 * @return String
+	 */
+	private static String getApiResponseId(String path, String method) {
+		String val = "";
+		if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
+			val = Global.getResponseId(path);
+			if (StringUtils.isBlank(val)) {
+				String[] splitedpath = path.split("[/]");
+				String tempPath = removeLastValue(splitedpath);
+				val = Global.getResponseId(tempPath);
+			}
+		} else {
+			val = Global.getResponseId(path);
+		}
+		return val;
+	}
 
+	/**
+	 * Method to remove last value
+	 * 
+	 * @param splited
+	 *            String []
+	 * @return String
+	 */
+	private static String removeLastValue(String splited[]) {
 
-  /**
-   * This method will make a call to Akka actor and return promise.
-   * 
-   * @param actorRef ActorSelection
-   * @param request Request
-   * @param timeout Timeout
-   * @param responseKey String
-   * @param httpReq play.mvc.Http.Request
-   * @return Promise<Result>
-   */
-  public Promise<Result> actorResponseHandler(Object actorRef,
-      org.sunbird.common.request.Request request, Timeout timeout, String responseKey,
-      Request httpReq) {
-    // set header to request object , setting actor type and channel headers value ...
-    setChannelAndActorInfo(ctx(), request);
+		StringBuilder builder = new StringBuilder();
+		if (splited != null && splited.length > 0) {
+			for (int i = 1; i < splited.length - 1; i++) {
+				builder.append("/" + splited[i]);
+			}
+		}
+		return builder.toString();
+	}
 
-    if (actorRef instanceof ActorRef) {
-      return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
-          .map(new Function<Object, Result>() {
-            public Result apply(Object result) {
-              if (result instanceof Response) {
-                Response response = (Response) result;
-                return createCommonResponse(response, responseKey, httpReq);
-              } else if (result instanceof ProjectCommonException) {
-                return createCommonExceptionResponse((ProjectCommonException) result, request());
-              } else {
-                ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
-                return createCommonExceptionResponse(new Exception(), httpReq);
-              }
-            }
-          });
-    } else {
-      return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout))
-          .map(new Function<Object, Result>() {
-            public Result apply(Object result) {
-              if (result instanceof Response) {
-                Response response = (Response) result;
-                return createCommonResponse(response, responseKey, httpReq);
-              } else if (result instanceof ProjectCommonException) {
-                return createCommonExceptionResponse((ProjectCommonException) result, request());
-              } else {
-                ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
-                return createCommonExceptionResponse(new Exception(), httpReq);
-              }
-            }
-          });
-    }
-  }
+	public static void setActorRef(Object obj) {
+		actorRef = obj;
+	}
 
-  /**
-   * This method will provide environment id.
-   * 
-   * @return int
-   */
-  public int getEnvironment() {
+	private static Map<String, Object> genarateTelemetryInfoForError() {
 
-    if (Global.env != null) {
-      return Global.env.getValue();
-    }
-    return ProjectUtil.Environment.dev.getValue();
-  }
+		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
+		Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
+		Map<String, Object> params = new HashMap<>();
+		params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
 
-  /**
-   * Method to get UserId by AuthToken
-   * 
-   * @param token
-   * @return String
-   */
-  public String getUserIdByAuthToken(String token) {
+		map.put(JsonKey.CONTEXT, contextInfo);
+		map.put(JsonKey.PARAMS, params);
+		return map;
+	}
 
-    return AuthenticationHelper.verifyUserAccesToken(token);
-  }
+	public void setChannelAndActorInfo(Context ctx, org.sunbird.common.request.Request reqObj) {
 
+		reqObj.getContext().put(JsonKey.CHANNEL, ctx().flash().get(JsonKey.CHANNEL));
+		reqObj.getContext().put(JsonKey.ACTOR_ID, ctx().flash().get(JsonKey.ACTOR_ID));
+		reqObj.getContext().put(JsonKey.ACTOR_TYPE, ctx().flash().get(JsonKey.ACTOR_TYPE));
 
-  /**
-   * Method to get API response Id
-   * 
-   * @param request play.mvc.Http.Request
-   * @return String
-   */
-  private static String getApiResponseId(Request request) {
+	}
 
-    String val = "";
-    if (request != null) {
-      String path = request.path();
-      if (request.method().equalsIgnoreCase(ProjectUtil.Method.GET.name())) {
-        val = Global.getResponseId(path);
-        if (ProjectUtil.isStringNullOREmpty(val)) {
-          String[] splitedpath = path.split("[/]");
-          path = removeLastValue(splitedpath);
-          val = Global.getResponseId(path);
-        }
-      } else {
-        val = Global.getResponseId(path);
-      }
-      if (ProjectUtil.isStringNullOREmpty(val)) {
-        val = Global.getResponseId(path);
-        if (ProjectUtil.isStringNullOREmpty(val)) {
-          String[] splitedpath = path.split("[/]");
-          path = removeLastValue(splitedpath);
-          val = Global.getResponseId(path);
-        }
-      }
-    }
-    return val;
-  }
-
-
-  /**
-   * Method to get API response Id
-   * 
-   * @param path String
-   * @param method String
-   * @return String
-   */
-  private static String getApiResponseId(String path, String method) {
-    String val = "";
-    if (ProjectUtil.Method.GET.name().equalsIgnoreCase(method)) {
-      val = Global.getResponseId(path);
-      if (ProjectUtil.isStringNullOREmpty(val)) {
-        String[] splitedpath = path.split("[/]");
-        String tempPath = removeLastValue(splitedpath);
-        val = Global.getResponseId(tempPath);
-      }
-    } else {
-      val = Global.getResponseId(path);
-    }
-    return val;
-  }
-
-  /**
-   * Method to remove last value
-   * 
-   * @param splited String []
-   * @return String
-   */
-  private static String removeLastValue(String splited[]) {
-
-    StringBuilder builder = new StringBuilder();
-    if (splited != null && splited.length > 0) {
-      for (int i = 1; i < splited.length - 1; i++) {
-        builder.append("/" + splited[i]);
-      }
-    }
-    return builder.toString();
-  }
-
-  public static void setActorRef(Object obj){
-    actorRef = obj;
-  }
-
-  private static Map<String, Object> genarateTelemetryInfoForError() {
-
-    Map<String, Object> map = new HashMap<>();
-    Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
-    Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
-    Map<String, Object> params = new HashMap<>();
-    params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
-
-    map.put(JsonKey.CONTEXT, contextInfo);
-    map.put(JsonKey.PARAMS , params);
-    return map;
-  }
-
-  public void setChannelAndActorInfo(Context ctx, org.sunbird.common.request.Request reqObj ){
-
-    reqObj.getContext().put(JsonKey.CHANNEL , ctx().flash().get(JsonKey.CHANNEL));
-    reqObj.getContext().put(JsonKey.ACTOR_ID , ctx().flash().get(JsonKey.ACTOR_ID));
-    reqObj.getContext().put(JsonKey.ACTOR_TYPE , ctx().flash().get(JsonKey.ACTOR_TYPE));
-
-  }
-   
-  /**
-    * This method will set extra param to request body which is required for
-    * actor layer.
-    * @param request Request
-    * @param requestId String
-    * @param actorOpName String
-    * @param requestedUserId String
-    * @param env int
-    * @return Request
-    */
+	/**
+	 * This method will set extra param to request body which is required for actor
+	 * layer.
+	 * 
+	 * @param request
+	 *            Request
+	 * @param requestId
+	 *            String
+	 * @param actorOpName
+	 *            String
+	 * @param requestedUserId
+	 *            String
+	 * @param env
+	 *            int
+	 * @return Request
+	 */
 	public org.sunbird.common.request.Request setExtraParam(org.sunbird.common.request.Request request,
 			String requestId, String actorOpName, String requestedUserId, int env) {
 		request.setRequestId(requestId);

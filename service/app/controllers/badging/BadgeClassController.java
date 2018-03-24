@@ -1,20 +1,26 @@
 package controllers.badging;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
-import org.apache.commons.io.IOUtils;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.Request;
-import controllers.badging.validator.BadgeClassValidator;
-import play.libs.F;
-import play.mvc.Http;
-import play.mvc.Result;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.sunbird.common.models.util.BadgingActorOperations;
+import org.sunbird.common.models.util.BadgingJsonKey;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.Request;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
+import controllers.badging.validator.BadgeClassValidator;
+import play.libs.F;
+import play.mvc.Http;
+import play.mvc.Result;
 
 /**
  * BadgeClassController handles BadgeClass APIs.
@@ -25,10 +31,21 @@ public class BadgeClassController extends BaseController {
     /**
      * Create a new badge class for a particular issuer.
      *
+     * Request body contains following parameters:
+     *     issuerId: The ID of the Issuer to be owner of the new Badge Class
+     *     name: The name of the Badge Class
+     *     description: A short description of the new Badge Class.
+     *     image: An image to represent the Badge Class.
+     *     criteria: Either a text string or a URL of a remotely hosted page describing the criteria
+     *     rootOrgId: Root organisation ID
+     *     type: Badge class type (user / content)
+     *     subtype: Badge class subtype (e.g. award)
+     *     roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ])
+     *
      * @return Return a promise for create badge class API result.
      */
     public F.Promise<Result> createBadgeClass() {
-        ProjectLogger.log("createBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("createBadgeClass called", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
@@ -64,13 +81,13 @@ public class BadgeClassController extends BaseController {
     }
 
     /**
-     * Get details of badge class for given issuer and badge class.
+     * Get details of requsted badge class.
      *
      * @param badgeId The ID of the Badge Class whose details to view
      * @return Return a promise for get badge class API result.
      */
     public F.Promise<Result> getBadgeClass(String badgeId) {
-        ProjectLogger.log("getBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("getBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
@@ -89,10 +106,18 @@ public class BadgeClassController extends BaseController {
     /**
      * Get list of badge classes for given issuer(s) and matching given context.
      *
+     * Request containing following filters:
+     *     issuerList: List of Issuer IDs whose badge classes are to be listed
+     *     badgeList: List of badge IDs whose badge classes are to be listed
+     *     rootOrgId: Root organisation ID
+     *     type: Badge class type (user / content)
+     *     subtype: Badge class subtype (e.g. award)
+     *     roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ])
+     *
      * @return Return a promise for search badge class API result.
      */
     public F.Promise<Result> searchBadgeClass() {
-        ProjectLogger.log("searchBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("searchBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             JsonNode bodyJson = request().body().asJson();
@@ -116,7 +141,7 @@ public class BadgeClassController extends BaseController {
      * @return Return a promise for delete badge class API result.
      */
     public F.Promise<Result> deleteBadgeClass(String badgeId) {
-        ProjectLogger.log("deleteBadgeClass called", LoggerEnum.INFO.name());
+        ProjectLogger.log("deleteBadgeClass called.", LoggerEnum.DEBUG.name());
 
         try {
             Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());

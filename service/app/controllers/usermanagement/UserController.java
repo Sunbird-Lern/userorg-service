@@ -6,12 +6,12 @@ package controllers.usermanagement;
 import static org.sunbird.learner.util.Util.isNotNull;
 import static org.sunbird.learner.util.Util.isNull;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -24,6 +24,10 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import util.AuthenticationHelper;
@@ -49,7 +53,7 @@ public class UserController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateCreateUser(reqObj);
 
-      if (ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
+      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
         reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
         reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
       }
@@ -90,7 +94,7 @@ public class UserController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
 
-      if (ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
+      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
         reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
         reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
       }
@@ -133,7 +137,7 @@ public class UserController extends BaseController {
     }
 
     String userRootOrgId = (String) userDetail.get(JsonKey.ROOT_ORG_ID);
-    if (ProjectUtil.isStringNullOREmpty(userRootOrgId)) {
+    if (StringUtils.isBlank(userRootOrgId)) {
       throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
           ResponseCode.unAuthorised.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
@@ -155,7 +159,7 @@ public class UserController extends BaseController {
 
   private void validateWithUserId(Request reqObj) {
     String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
-    if ((!ProjectUtil.isStringNullOREmpty(userId))
+    if ((!StringUtils.isBlank(userId))
         && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
       throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(),
           ResponseCode.unAuthorised.getErrorMessage(),
@@ -461,7 +465,7 @@ public class UserController extends BaseController {
       reqObj.setOperation(ActorOperations.USER_CURRENT_LOGIN.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      if (!ProjectUtil.isStringNullOREmpty(userId)) {
+      if (!StringUtils.isBlank(userId)) {
         reqObj.getRequest().put(JsonKey.USER_ID, userId);
       }
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());

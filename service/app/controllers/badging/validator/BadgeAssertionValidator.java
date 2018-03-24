@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
@@ -34,27 +35,27 @@ public class BadgeAssertionValidator {
 	 */
 	public static void validateBadgeAssertion(Request request) {
 
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.ISSUER_ID))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.ISSUER_ID))) {
 			throw new ProjectCommonException(ResponseCode.issuerIdRequired.getErrorCode(),
 					ResponseCode.issuerIdRequired.getErrorMessage(), ERROR_CODE);
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.BADGE_ID))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.BADGE_ID))) {
 			throw new ProjectCommonException(ResponseCode.badgeIdRequired.getErrorCode(),
 					ResponseCode.badgeIdRequired.getErrorMessage(), ERROR_CODE);
 
 		}
-		if (!ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.EVIDENCE))) {
+		if (!StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.EVIDENCE))) {
 			boolean response = ProjectUtil.isUrlvalid((String) request.getRequest().get(BadgingJsonKey.EVIDENCE));
 			if (!response) {
 				throw new ProjectCommonException(ResponseCode.evidenceRequired.getErrorCode(),
 						ResponseCode.evidenceRequired.getErrorMessage(), ERROR_CODE);
 			}
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_ID))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_ID))) {
 			throw new ProjectCommonException(ResponseCode.recipientIdRequired.getErrorCode(),
 					ResponseCode.recipientIdRequired.getErrorMessage(), ERROR_CODE);
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
 			throw new ProjectCommonException(ResponseCode.recipientTypeRequired.getErrorCode(),
 					ResponseCode.recipientTypeRequired.getErrorMessage(), ERROR_CODE);
 		}
@@ -71,7 +72,7 @@ public class BadgeAssertionValidator {
 	 * @param request Request
 	 */
 	public static void validategetBadgeAssertion(Request request) {
-		if (ProjectUtil.isStringNullOREmpty((String)request.getRequest().get(BadgingJsonKey.ASSERTION_ID))) {
+		if (StringUtils.isBlank((String)request.getRequest().get(BadgingJsonKey.ASSERTION_ID))) {
 			throw new ProjectCommonException(ResponseCode.assertionIdRequired.getErrorCode(),
 					ResponseCode.assertionIdRequired.getErrorMessage(), ERROR_CODE);
 
@@ -121,15 +122,15 @@ public class BadgeAssertionValidator {
 	 */
 	public static void validateRevokeAssertion(Request request) {
 		validategetBadgeAssertion(request);
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.REVOCATION_REASON))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.REVOCATION_REASON))) {
 			throw new ProjectCommonException(ResponseCode.revocationReasonRequired.getErrorCode(),
 					ResponseCode.revocationReasonRequired.getErrorMessage(), ERROR_CODE);
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_ID))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_ID))) {
 			throw new ProjectCommonException(ResponseCode.recipientIdRequired.getErrorCode(),
 					ResponseCode.recipientIdRequired.getErrorMessage(), ERROR_CODE);
 		}
-		if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
+		if (StringUtils.isBlank((String) request.getRequest().get(BadgingJsonKey.RECIPIENT_TYPE))) {
 			throw new ProjectCommonException(ResponseCode.recipientTypeRequired.getErrorCode(),
 					ResponseCode.recipientTypeRequired.getErrorMessage(), ERROR_CODE);
 		}

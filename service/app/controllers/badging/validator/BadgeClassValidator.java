@@ -1,34 +1,42 @@
 package controllers.badging.validator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.HttpUtilResponse;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.HttpUtilResponse;
+import org.sunbird.common.models.util.BadgingJsonKey;
+import org.sunbird.common.models.util.HttpUtil;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LearnerServiceUrls;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Validates BadgeClass API requests.
  *
  * @author B Vinaya Kumar
  */
-public class BadgeClassValidator {
+public class BadgeClassValidator extends BaseRequestValidator {
     private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
     private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
 
-    private void validateParam(String value, ResponseCode error) {
-        if (StringUtils.isBlank(value)) {
-            throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-    }
-
+    /**
+     * Helper method for validating given role ID against list of predefined valid badge issuer roles.
+     *
+     * @param role Role ID.
+     * @param error Error to be thrown in case of validation error.
+     */
     private void validateRole(String role, ResponseCode error) {
         String validRoles = System.getenv(BadgingJsonKey.VALID_BADGE_ROLES);
         if (StringUtils.isBlank(validRoles)) {
@@ -43,26 +51,32 @@ public class BadgeClassValidator {
         throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    private void validateRoles(String value, ResponseCode error) {
-        if (value == null) {
+    /**
+     * Helper method for validating given list of role IDs.
+     *
+     * @param roles Single (string) or multiple (JSON array) role IDs.
+     * @param error Error to be thrown in case of validation error.
+     */
+    private void validateRoles(String roles, ResponseCode error) {
+        if (roles == null) {
             throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
 
         try {
-            String trimmedValue = value.trim();
-            if (trimmedValue.startsWith("[") && trimmedValue.endsWith("]")) {
+            String trimmedRole = roles.trim();
+            if (trimmedRole.startsWith("[") && trimmedRole.endsWith("]")) {
                 ObjectMapper mapper = new ObjectMapper();
-                List<String> list = mapper.readValue(value, ArrayList.class);
+                List<String> roleList = mapper.readValue(roles, ArrayList.class);
 
-                if (list.size() <= 0) {
+                if (roleList.size() <= 0) {
                     throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
                 }
 
-                for (String role: list) {
+                for (String role: roleList) {
                     validateRole(role, ResponseCode.invalidBadgeRole);
                 }
             } else {
-                validateRole(trimmedValue, ResponseCode.invalidBadgeRole);
+                validateRole(trimmedRole, ResponseCode.invalidBadgeRole);
             }
 
         } catch (IOException e) {
@@ -70,6 +84,12 @@ public class BadgeClassValidator {
         }
     }
 
+    /**
+     * Helper method for validating if given org ID is a valid root org ID.
+     *
+     * @param rootOrgId Organisation ID.
+     * @param httpRequestHeaders Map containing headers received in incoming request.
+     */
     private void validateRootOrgId(String rootOrgId, Map<String, String[]> httpRequestHeaders) {
         validateParam(rootOrgId, ResponseCode.rootOrgIdRequired);
 
@@ -109,6 +129,11 @@ public class BadgeClassValidator {
         throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
+    /**
+     * Helper method to validate given type against supported badge types (user / content).
+     *
+     * @param type Badge type.
+     */
     private void validateType(String type) {
         ResponseCode error = ResponseCode.badgeTypeRequired;
 
@@ -122,6 +147,11 @@ public class BadgeClassValidator {
         }
     }
 
+    /**
+     * Helper method to validate given subtype against configured badge subtypes (e.g. award).
+     *
+     * @param subtype Badge subtype.
+     */
     private void validateSubtype(String subtype) {
         if (subtype != null) {
             String validSubtypes = System.getenv(BadgingJsonKey.VALID_BADGE_SUBTYPES);
@@ -144,16 +174,16 @@ public class BadgeClassValidator {
      * Validates request of create badge class API.
      *
      * @param request Request containing following parameters:
-     *                    issuerId: The ID of the Issuer to be owner of the new Badge Class
-     *                    name: The name of the Badge Class
+     *                    issuerId: The ID of the Issuer to be owner of the new Badge Class.
+     *                    name: The name of the Badge Class.
      *                    description: A short description of the new Badge Class.
      *                    image: An image to represent the Badge Class.
-     *                    criteria: Either a text string or a URL of a remotely hosted page describing the criteria
-     *                    rootOrgId: Root organisation ID
-     *                    type: Badge class type (user / content)
-     *                    subtype: Badge class subtype (e.g. award)
-     *                    roles: JSON array of roles (e.g. [ "COURSE_MENTOR" ])
-     * @param httpRequestHeaders Map of headers in the received HTTP request
+     *                    criteria: Either a text string or a URL of a remotely hosted page describing the criteria.
+     *                    rootOrgId: Root organisation ID.
+     *                    type: Badge class type (user / content).
+     *                    subtype: Badge class subtype (e.g. award).
+     *                    roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ]).
+     * @param httpRequestHeaders Map of headers in the received HTTP request.
      */
     public void validateCreateBadgeClass(Request request, Map<String, String[]> httpRequestHeaders) {
         Map<String, Object> requestMap = request.getRequest();
@@ -185,7 +215,7 @@ public class BadgeClassValidator {
      * Validates request of get badge class API.
      *
      * @param request Request containing following parameters:
-     *                    badgeId: The ID of the Badge Class whose details to view
+     *                    badgeId: The ID of the Badge Class whose details to view.
      */
     public void validateGetBadgeClass(Request request) {
         String badgeId = (String) request.getRequest().get(BadgingJsonKey.BADGE_ID);
@@ -196,11 +226,12 @@ public class BadgeClassValidator {
      * Validates request of search badge class API.
      *
      * @param request Request containing following filters:
-     *                    issuerList: List of Issuer IDs whose badge classes are to be listed
-     *                    rootOrgId: Root organisation ID
-     *                    type: Badge class type (user / content)
-     *                    subtype: Badge class subtype (e.g. award)
-     *                    roles: JSON array of roles (e.g. [ "COURSE_MENTOR" ])
+     *                    issuerList: List of Issuer IDs whose badge classes are to be listed.
+     *                    badgeList: List of badge IDs whose badge classes are to be listed
+     *                    rootOrgId: Root organisation ID.
+     *                    type: Badge class type (user / content).
+     *                    subtype: Badge class subtype (e.g. award).
+     *                    roles: JSON array of roles (e.g. [ "OFFICIAL_TEXTBOOK_BADGE_ISSUER" ]).
      */
     public void validateSearchBadgeClass(Request request) {
         Map<String, Object> filtersMap = (Map<String, Object>) request.getRequest().get(JsonKey.FILTERS);
@@ -208,19 +239,13 @@ public class BadgeClassValidator {
         if (filtersMap == null) {
             throw new ProjectCommonException(ResponseCode.invalidRequestData.getErrorCode(), ResponseCode.invalidRequestData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
-
-        List<String> issuerList = (List<String>) filtersMap.get(BadgingJsonKey.ISSUER_LIST);
-
-        if (issuerList == null) {
-            throw new ProjectCommonException(ResponseCode.issuerListRequired.getErrorCode(), ResponseCode.issuerListRequired.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
     }
 
     /**
      * Validates request of delete badge class API.
      *
      * @param request Request containing following parameters:
-     *                    badgeId: The ID of the Badge Class to delete
+     *                    badgeId: The ID of the Badge Class to delete.
      */
     public void validateDeleteBadgeClass(Request request) {
         String badgeId = (String) request.getRequest().get(BadgingJsonKey.BADGE_ID);
