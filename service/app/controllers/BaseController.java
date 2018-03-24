@@ -19,7 +19,6 @@ import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -47,7 +46,7 @@ public class BaseController extends Controller {
 	private static Object actorRef = null;
 	private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
 	protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
-	private ObjectMapper objMapper = new ObjectMapper();
+	
 	static {
 		try {
 			// actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
