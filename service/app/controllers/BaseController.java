@@ -19,7 +19,6 @@ import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -47,7 +46,7 @@ public class BaseController extends Controller {
 	private static Object actorRef = null;
 	private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
 	protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
-	private ObjectMapper objMapper = new ObjectMapper();
+	private static  String TELEMETRY_URI = "/v1/telemetry";
 	static {
 		try {
 			// actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
@@ -258,7 +257,7 @@ public class BaseController extends Controller {
 	 * @return Result
 	 */
 	public Result createCommonResponse(Object response, String key, Request request) {
-
+		if (!(TELEMETRY_URI.equals(request.path()))) {
 		// generate info log here...
 		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
 		org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
@@ -273,8 +272,10 @@ public class BaseController extends Controller {
 		params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
 		req.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
 				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
-
-		lmaxWriter.submitMessage(req);
+		 //if any request is coming form /v1/telemetry/save then don't generate the telemetry log 
+		//for it.
+			lmaxWriter.submitMessage(req);
+		 }
 		Response courseResponse = (Response) response;
 		if (!StringUtils.isBlank(key)) {
 			Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
@@ -339,6 +340,7 @@ public class BaseController extends Controller {
 		}
 
 		// generate info log here...
+		if(!(TELEMETRY_URI.equals(req.uri()))) {
 		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
 		org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
 		Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
@@ -353,6 +355,7 @@ public class BaseController extends Controller {
 		reqForTelemetry.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
 				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
 		lmaxWriter.submitMessage(reqForTelemetry);
+		}
 		// cleaning request info ...
 		return Results.status(exception.getResponseCode(),
 				Json.toJson(BaseController.createResponseOnException(req, exception)));

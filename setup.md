@@ -51,7 +51,22 @@
     33 sunbird_fcm_account_key : account key for FCM 
     34 sunbird_msg_91_auth : msg 91 auth 
     35. sunbird_msg_sender  : message sender name
-    36. sunbird_installation_email  : email of admin per installation 
+    36. sunbird_installation_email  : email of admin per installation
+    37. sunbird_lms_base_url : sunbird lms service based url
+    38. sunbird_lms_authorization : api gateway auth key 
+    39 sunbird_mw_system_host=actor-service
+    40. sunbird_mw_system_port=
+    41.background_actor_provider=remote
+    42.api_actor_provider=off
+    43.badging_authorization_key=
+    44.sunbird_badger_baseurl=http://badger-service:8000
+    45.sunbird_remote_req_router_path=
+    46.sunbird_remote_bg_req_router_path=
+    47.sunbird_api_base_url=http://content-service:
+    48.sunbird_authorization={}
+    49.telemetry_pdata_id={{env}}.sunbird.learning.service
+    50.telemetry_pdata_pid=actor-service
+    51.telemetry_pdata_ver=1.5
     
 ## Do the below env setup , if you are planing to run background actor in remote mode.
 	1. sunbird_background_actor_host: host running for learner background actor

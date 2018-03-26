@@ -82,10 +82,9 @@ public class RevokeAssertionTest {
 			BadgeAssertionValidator.validateRevokeAssertion(request);
 			response = true;
 		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.badgeIdRequired.getErrorCode(), e.getCode());
+			Assert.assertNull(e);
 		}
-		assertEquals(false, response);
+		assertEquals(true, response);
 	}
 	
 	@Test
@@ -103,10 +102,9 @@ public class RevokeAssertionTest {
 			BadgeAssertionValidator.validateRevokeAssertion(request);
 			response = true;
 		} catch (ProjectCommonException e) {
-			assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-			assertEquals(ResponseCode.issuerIdRequired.getErrorCode(), e.getCode());
+			Assert.assertNull(e);
 		}
-		assertEquals(false, response);
+		assertEquals(true, response);
 	}	
  
 	@Test

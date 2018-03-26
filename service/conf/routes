@@ -201,4 +201,4 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
 
 #telemetry
-POST /v1/telemetry	                 @controllers.telemetry.TelemetryController.save()
+POST /v1/telemetry                      @controllers.telemetry.TelemetryController.save()
