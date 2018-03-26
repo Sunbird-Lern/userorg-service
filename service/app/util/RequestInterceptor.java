@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -68,6 +67,18 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/org/preferences/create", var);
     apiHeaderIgnoreMap.put("/v1/org/preferences/update", var);
 	apiHeaderIgnoreMap.put("/v1/telemetry", var);
+	//making badging api's as public access
+	apiHeaderIgnoreMap.put("/v1/issuer/create", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/read", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/list", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/create", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/read", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/search", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/delete", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delet", var);
   }
 
   /**
