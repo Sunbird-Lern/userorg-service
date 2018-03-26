@@ -71,6 +71,7 @@ public class RequestInterceptor {
 	apiHeaderIgnoreMap.put("/v1/issuer/create", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/read", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/list", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/delete", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/create", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/read", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/search", var);
@@ -78,7 +79,7 @@ public class RequestInterceptor {
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
-	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delet", var);
+	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
   }
 
   /**
