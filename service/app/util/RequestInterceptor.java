@@ -80,6 +80,8 @@ public class RequestInterceptor {
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
 	apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
+	//making org read as public access
+	apiHeaderIgnoreMap.put("/v1/org/read", var);
   }
 
   /**
