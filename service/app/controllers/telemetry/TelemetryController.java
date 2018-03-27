@@ -51,7 +51,6 @@ public class TelemetryController extends BaseController {
                     byteArray = IOUtils.toByteArray(stream);
                     Map<String, Object> map = new HashMap<>();
                     map.put(JsonKey.FILE, byteArray);
-                    map.put(JsonKey.CONTENT_ENCODING, "gzip");
                     reqObj.getRequest().putAll(map);
                 } finally {
                     if (null != stream) {
