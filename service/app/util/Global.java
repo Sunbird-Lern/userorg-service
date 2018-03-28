@@ -22,7 +22,8 @@ import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.util.TelemetryUtil;
+import org.sunbird.telemetry.util.TelemetryUtil;
+
 
 import controllers.BaseController;
 import play.Application;

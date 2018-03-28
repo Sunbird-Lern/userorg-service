@@ -15,7 +15,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
+import org.sunbird.telemetry.util.TelemetryLmaxWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,12 +44,11 @@ public class BaseController extends Controller {
 
 	public static final int AKKA_WAIT_TIME = 10;
 	private static Object actorRef = null;
-	private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
+	private TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
 	protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
-	private static  String TELEMETRY_URI = "/v1/telemetry";
+	
 	static {
 		try {
-			// actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
 			actorRef = SunbirdMWService.getRequestRouter();
 		} catch (Exception ex) {
 			ProjectLogger.log("Exception occured while getting actor ref in base controller " + ex);
@@ -257,8 +256,7 @@ public class BaseController extends Controller {
 	 * @return Result
 	 */
 	public Result createCommonResponse(Object response, String key, Request request) {
-		if (!(TELEMETRY_URI.equals(request.path()))) {
-		// generate info log here...
+		
 		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
 		org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
 
@@ -274,8 +272,8 @@ public class BaseController extends Controller {
 				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
 		 //if any request is coming form /v1/telemetry/save then don't generate the telemetry log 
 		//for it.
-			lmaxWriter.submitMessage(req);
-		 }
+		lmaxWriter.submitMessage(req);
+		 
 		Response courseResponse = (Response) response;
 		if (!StringUtils.isBlank(key)) {
 			Object value = courseResponse.getResult().get(JsonKey.RESPONSE);
