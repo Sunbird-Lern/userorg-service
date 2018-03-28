@@ -337,8 +337,7 @@ public class BaseController extends Controller {
 					ResponseCode.internalError.getErrorMessage(), ResponseCode.SERVER_ERROR.getResponseCode());
 		}
 
-		// generate info log here...
-		if(!(TELEMETRY_URI.equals(req.uri()))) {
+		
 		Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
 		org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
 		Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
@@ -353,7 +352,7 @@ public class BaseController extends Controller {
 		reqForTelemetry.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
 				(Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
 		lmaxWriter.submitMessage(reqForTelemetry);
-		}
+
 		// cleaning request info ...
 		return Results.status(exception.getResponseCode(),
 				Json.toJson(BaseController.createResponseOnException(req, exception)));
