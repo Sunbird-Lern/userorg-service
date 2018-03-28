@@ -15,8 +15,8 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.telemetry.util.lmaxdisruptor.LMAXWriter;
 import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryEvents;
+import org.sunbird.telemetry.util.lmaxdisruptor.TelemetryLmaxWriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -44,12 +44,11 @@ public class BaseController extends Controller {
 
 	public static final int AKKA_WAIT_TIME = 10;
 	private static Object actorRef = null;
-	private LMAXWriter lmaxWriter = LMAXWriter.getInstance();
+	private TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
 	protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
 	private static  String TELEMETRY_URI = "/v1/telemetry";
 	static {
 		try {
-			// actorRef = ActorSystemFactory.getActorSystem().initializeActorSystem();
 			actorRef = SunbirdMWService.getRequestRouter();
 		} catch (Exception ex) {
 			ProjectLogger.log("Exception occured while getting actor ref in base controller " + ex);
