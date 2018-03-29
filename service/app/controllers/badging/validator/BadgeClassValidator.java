@@ -1,9 +1,7 @@
 package controllers.badging.validator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -58,28 +56,7 @@ public class BadgeClassValidator extends BaseRequestValidator {
      * @param error Error to be thrown in case of validation error.
      */
     private void validateRoles(String roles, ResponseCode error) {
-        if (roles == null) {
-            throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-
-        try {
-            String trimmedRole = roles.trim();
-            if (trimmedRole.startsWith("[") && trimmedRole.endsWith("]")) {
-                ObjectMapper mapper = new ObjectMapper();
-                List<String> roleList = mapper.readValue(roles, ArrayList.class);
-
-                if (roleList.size() <= 0) {
-                    throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-                }
-
-                for (String role: roleList) {
-                    validateRole(role, ResponseCode.invalidBadgeRole);
-                }
-            } else {
-                validateRole(trimmedRole, ResponseCode.invalidBadgeRole);
-            }
-
-        } catch (IOException e) {
+        if (StringUtils.isEmpty(roles)) {
             throw new ProjectCommonException(error.getErrorCode(), error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
     }
