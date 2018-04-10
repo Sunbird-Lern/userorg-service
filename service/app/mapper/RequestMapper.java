@@ -3,12 +3,12 @@
  */
 package mapper;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import play.libs.Json;
 

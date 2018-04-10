@@ -3,9 +3,8 @@
  */
 package controllers.assessment;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
 import java.util.HashMap;
+
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -13,6 +12,10 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -33,7 +36,7 @@ public class AssessmentController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("add new assessment data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("add new assessment data.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSaveAssessment(reqObj);
       reqObj.setOperation(ActorOperations.SAVE_ASSESSMENT.getValue());
@@ -60,7 +63,7 @@ public class AssessmentController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("get assessment request=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("get assessment request.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetAssessment(reqObj);
       reqObj.setOperation(ActorOperations.GET_ASSESSMENT.getValue());

@@ -133,10 +133,25 @@ POST /v1/notification/email					@controllers.notificationservice.EmailServiceCon
 GET  /v1/badges/list                        @controllers.badges.BadgesController.getBadges()
 POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
 
+# Badging APIs
+POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer()
+GET /v1/issuer/read/:issuerId                 @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String)
+GET /v1/issuer/list                           @controllers.badging.BadgeIssuerController.getAllIssuer()
+DELETE /v1/issuer/delete/:issuerId            @controllers.badging.BadgeIssuerController.deleteBadgeIssuer(issuerId:String)
+
+POST   /v1/issuer/badge/create                @controllers.badging.BadgeClassController.createBadgeClass()
+GET    /v1/issuer/badge/read/:badgeId         @controllers.badging.BadgeClassController.getBadgeClass(badgeId:String)
+POST   /v1/issuer/badge/search                @controllers.badging.BadgeClassController.searchBadgeClass()
+DELETE /v1/issuer/badge/delete/:badgeId       @controllers.badging.BadgeClassController.deleteBadgeClass(badgeId:String)
+
+POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge()
+GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String)
+POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList()
+DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
+
 #Health check
 GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
 GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
-
 
 #Notes API
 POST   /v1/note/create                         @controllers.notesmanagement.NotesController.createNote()
@@ -154,9 +169,9 @@ POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
 
 #T&C
-POST  /v1/org/tc/create 						@controllers.tenantpreference.TenantPreferenceController.createTanentPreference()
-POST  /v1/org/tc/update 						@controllers.tenantpreference.TenantPreferenceController.updateTanentPreference()
-GET  /v1/org/tc/read/:orgId						@controllers.tenantpreference.TenantPreferenceController.getTanentPreference(orgId:String)
+POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
+POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference()
+POST  /v1/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference()
 POST  /v1/user/tc/update 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
 
 #DB Operation API
@@ -184,3 +199,6 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 #System Settings
 
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
+
+#telemetry
+POST /v1/telemetry                      @controllers.telemetry.TelemetryController.save()
