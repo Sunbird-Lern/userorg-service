@@ -1,14 +1,17 @@
 package controllers.audit;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
 import java.util.HashMap;
+
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -26,7 +29,7 @@ public class AuditLogController extends BaseController {
   public Promise<Result> searchAuditHistory() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Request for Search Audit History: " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("Request for search audith-istory.", requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_AUDIT_LOG.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());

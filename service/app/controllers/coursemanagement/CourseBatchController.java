@@ -3,23 +3,26 @@
  */
 package controllers.coursemanagement;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -47,7 +50,7 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      if (!ProjectUtil.isStringNullOREmpty((String) reqObj.getRequest().get(JsonKey.BATCH_ID))) {
+      if (!StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.BATCH_ID))) {
         reqObj.getRequest().put(JsonKey.ID, reqObj.getRequest().get(JsonKey.BATCH_ID));
         reqObj.getRequest().remove(JsonKey.BATCH_ID);
       }

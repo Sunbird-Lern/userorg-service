@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
 
-import controllers.BaseController;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,13 +24,15 @@ import org.sunbird.common.request.HeaderParam;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import controllers.BaseController;
 import controllers.DummyActor;
 import play.libs.Json;
-import play.mvc.Result;
 import play.mvc.Http.RequestBuilder;
+import play.mvc.Result;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
