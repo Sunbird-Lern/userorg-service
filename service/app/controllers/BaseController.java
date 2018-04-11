@@ -265,11 +265,10 @@ public class BaseController extends Controller {
 		params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
 		params.put(JsonKey.MESSAGE, "");
 		params.put(JsonKey.METHOD, request.method());
-		long endTime = System.currentTimeMillis();
-		params.put(JsonKey.END_TIME, endTime);
 		// calculate  the total time consume
 		long startTime = (Long) params.get(JsonKey.START_TIME);
-		params.put(JsonKey.TIME_TAKEN , calculateApiTimeTaken(startTime, endTime));
+		params.put(JsonKey.DURATION , calculateApiTimeTaken(startTime));
+		removeFields(params , JsonKey.START_TIME);
 		params.put(JsonKey.STATUS, String.valueOf(((Response) response).getResponseCode().getResponseCode()));
 		params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
 		req.setRequest(generateTelemetryRequestForController(TelemetryEvents.LOG.getName(), params,
@@ -296,6 +295,12 @@ public class BaseController extends Controller {
 		 * Results.status(exception.getResponseCode(),
 		 * Json.toJson(BaseController.createResponseOnException(request, exception))); }
 		 */
+	}
+
+	private void removeFields(Map<String, Object> params, String... properties) {
+		for(String property: properties){
+			params.remove(property);
+		}
 	}
 
 	private String generateStackTrace(StackTraceElement[] elements) {
@@ -348,11 +353,10 @@ public class BaseController extends Controller {
 		params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
 		params.put(JsonKey.MESSAGE, "");
 		params.put(JsonKey.METHOD, request.method());
-		long endTime = System.currentTimeMillis();
-		params.put(JsonKey.END_TIME, endTime);
 		// calculate  the total time consume
 		long startTime = (Long) params.get(JsonKey.START_TIME);
-		params.put(JsonKey.TIME_TAKEN , calculateApiTimeTaken(startTime, endTime));
+		params.put(JsonKey.DURATION , calculateApiTimeTaken(startTime));
+		removeFields(params , JsonKey.START_TIME);
 		params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
 		params.put(JsonKey.LOG_LEVEL, "error");
 		params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
@@ -365,11 +369,11 @@ public class BaseController extends Controller {
 				Json.toJson(BaseController.createResponseOnException(req, exception)));
 	}
 
-	private long calculateApiTimeTaken(Long startTime, Long endTime) {
+	private long calculateApiTimeTaken(Long startTime) {
 
 		Long timeConsumed=null;
-		if(null != startTime && null != endTime){
-			timeConsumed= endTime - startTime;
+		if(null != startTime ){
+			timeConsumed= System.currentTimeMillis() - startTime;
 		}
 		return timeConsumed;
 	}
