@@ -1,18 +1,16 @@
 package controllers.metrics;
 
+import controllers.BaseController;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 public class UserMetricsController extends BaseController {
-  
+
   public Promise<Result> userCreation(String userId) {
     try {
       Map<String, Object> map = new HashMap<>();
@@ -27,7 +25,7 @@ public class UserMetricsController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   public Promise<Result> userConsumption(String userId) {
     try {
       Map<String, Object> map = new HashMap<>();
@@ -42,5 +40,4 @@ public class UserMetricsController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }

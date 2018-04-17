@@ -1,15 +1,13 @@
 package controllers.datapersistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -17,7 +15,7 @@ public class DbOperationController extends BaseController {
 
   /**
    * This method will allow create Data in DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> create() {
@@ -37,7 +35,7 @@ public class DbOperationController extends BaseController {
 
   /**
    * This method will allow update Data in DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> update() {
@@ -57,7 +55,7 @@ public class DbOperationController extends BaseController {
 
   /**
    * This method will allow to delete Data in DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> delete() {
@@ -75,10 +73,9 @@ public class DbOperationController extends BaseController {
     }
   }
 
-
   /**
    * This method will allow to read Data from DB/ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> read() {
@@ -96,10 +93,9 @@ public class DbOperationController extends BaseController {
     }
   }
 
-
   /**
    * This method will allow to read all Data from DB/ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> readAll() {
@@ -117,10 +113,9 @@ public class DbOperationController extends BaseController {
     }
   }
 
-
   /**
    * This method will allow to search Data from ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> search() {
@@ -140,7 +135,7 @@ public class DbOperationController extends BaseController {
 
   /**
    * Method to get data from ElasticSearch based on query
-   * 
+   *
    * @return ES Response
    */
   public Promise<Result> getMetrics() {

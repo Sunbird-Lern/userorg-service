@@ -1,7 +1,8 @@
 package controllers.notificationservice;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.HashMap;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -9,10 +10,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -20,7 +17,7 @@ public class EmailServiceController extends BaseController {
 
   /**
    * This method will add a new course entry into cassandra DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> sendMail() {
@@ -35,13 +32,12 @@ public class EmailServiceController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-     
-      return  actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }

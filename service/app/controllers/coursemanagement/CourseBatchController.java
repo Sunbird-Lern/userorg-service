@@ -1,15 +1,14 @@
-/**
- * 
- */
+/** */
 package controllers.coursemanagement;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -19,24 +18,20 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
  * This controller will handle all the API related to course batches , add batch,update batch,join
  * member to batch, remove member from batch, get particular batch details.
- * 
+ *
  * @author Manzarul
  */
 public class CourseBatchController extends BaseController {
 
   /**
    * This method will add a new batch for a particular course.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> createBatch() {
@@ -66,7 +61,7 @@ public class CourseBatchController extends BaseController {
 
   /**
    * This method will update existing batch details.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> updateBatch() {
@@ -88,10 +83,9 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-
   /**
    * This method will do soft delete to the batch.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> deleteBatch() {
@@ -113,11 +107,9 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-
-
   /**
    * This method will do the user batch enrollment
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> addUserToBatch(String batchId) {
@@ -140,10 +132,9 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-
   /**
    * This method will remove user batch enrollment.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> removeUsersFromBatch() {
@@ -165,10 +156,9 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-
   /**
    * This method will fetch batch details from ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
@@ -189,9 +179,7 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-
   /**
-   * 
    * @param request
    * @return Map<String, String>
    */
@@ -205,7 +193,6 @@ public class CourseBatchController extends BaseController {
     }
     return map;
   }
-
 
   /**
    * This method will do the user search for Elastic search. this will internally call composite

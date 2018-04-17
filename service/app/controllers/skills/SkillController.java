@@ -1,23 +1,18 @@
 package controllers.skills;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.Map;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * Created by arvind on 23/10/17.
- */
+/** Created by arvind on 23/10/17. */
 public class SkillController extends BaseController {
 
   public Promise<Result> addSkill() {
@@ -69,5 +64,4 @@ public class SkillController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }

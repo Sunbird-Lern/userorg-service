@@ -1,7 +1,8 @@
 package controllers.notesmanagement;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.HashMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
@@ -12,22 +13,18 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * Controller class to handle Notes related operation such as 
- * create, read/get, search, update and delete
- *
+ * Controller class to handle Notes related operation such as create, read/get, search, update and
+ * delete
  */
 public class NotesController extends BaseController {
-  
+
   /**
    * Method to create Note
+   *
    * @return Promise<Result>
    */
   public Promise<Result> createNote() {
@@ -35,10 +32,15 @@ public class NotesController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Create note request: " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      if(null != ctx().flash().get(JsonKey.IS_AUTH_REQ) && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))){
+      if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
+          && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         String userId = (String) reqObj.get(JsonKey.USER_ID);
-        if((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))){
-            throw new ProjectCommonException(ResponseCode.unAuthorised.getErrorCode(), ResponseCode.unAuthorised.getErrorMessage(), ResponseCode.UNAUTHORIZED.getResponseCode());
+        if ((!StringUtils.isBlank(userId))
+            && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
+          throw new ProjectCommonException(
+              ResponseCode.unAuthorised.getErrorCode(),
+              ResponseCode.unAuthorised.getErrorMessage(),
+              ResponseCode.UNAUTHORIZED.getResponseCode());
         }
       }
       RequestValidator.validateNote(reqObj);
@@ -47,7 +49,7 @@ public class NotesController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -58,6 +60,7 @@ public class NotesController extends BaseController {
 
   /**
    * Method to update the note
+   *
    * @param noteId
    * @return Promise<Result>
    */
@@ -73,7 +76,7 @@ public class NotesController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE_ID, noteId);
       innerMap.put(JsonKey.NOTE, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -81,9 +84,10 @@ public class NotesController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
    * Method to get the note details
+   *
    * @param noteId
    * @return Promise<Result>
    */
@@ -96,7 +100,7 @@ public class NotesController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       innerMap.put(JsonKey.NOTE_ID, noteId);
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -108,6 +112,7 @@ public class NotesController extends BaseController {
 
   /**
    * Method to search note
+   *
    * @return
    */
   public Promise<Result> searchNote() {
@@ -119,7 +124,7 @@ public class NotesController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       innerMap.putAll(reqObj.getRequest());
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -131,6 +136,7 @@ public class NotesController extends BaseController {
 
   /**
    * Method to delete the note
+   *
    * @param noteId
    * @return Promise<Result>
    */
@@ -144,7 +150,7 @@ public class NotesController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.NOTE_ID, noteId);
-      innerMap.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {

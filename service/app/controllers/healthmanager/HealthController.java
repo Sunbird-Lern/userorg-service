@@ -1,13 +1,11 @@
-/**
- * 
- */
+/** */
 package controllers.healthmanager;
 
+import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
@@ -19,14 +17,10 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * @author Manzarul
- */
+/** @author Manzarul */
 public class HealthController extends BaseController {
   private static List<String> list = new ArrayList<>();
 
@@ -40,7 +34,7 @@ public class HealthController extends BaseController {
 
   /**
    * This method will do the complete health check
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getHealth() {
@@ -48,7 +42,7 @@ public class HealthController extends BaseController {
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY,ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -56,10 +50,9 @@ public class HealthController extends BaseController {
     }
   }
 
-
   /**
    * This method will do the health check for play service.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> getLearnerServiceHealth(String val) {
@@ -95,7 +88,6 @@ public class HealthController extends BaseController {
     }
   }
 
-
   public Promise<Result> getEkStepHealtCheck(play.mvc.Http.Request request) {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
@@ -105,7 +97,8 @@ public class HealthController extends BaseController {
       Map<String, String> headers = new HashMap<>();
       headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.AUTHORIZATION));
       if (StringUtils.isBlank((String) headers.get(JsonKey.AUTHORIZATION))) {
-        headers.put(JsonKey.AUTHORIZATION,
+        headers.put(
+            JsonKey.AUTHORIZATION,
             PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
       }
       headers.put("Content-Type", "application/json");
@@ -113,10 +106,12 @@ public class HealthController extends BaseController {
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
       }
-      String response = HttpUtil.sendPostRequest(
-          ekStepBaseUrl
-              + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
-          body, headers);
+      String response =
+          HttpUtil.sendPostRequest(
+              ekStepBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
+              body,
+              headers);
       if (response.contains("OK")) {
         responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, false, null));
         finalResponseMap.put(JsonKey.Healthy, true);
@@ -137,5 +132,4 @@ public class HealthController extends BaseController {
     response.setTs(ExecutionContext.getRequestId());
     return Promise.<Result>pure(ok(play.libs.Json.toJson(response)));
   }
-
 }

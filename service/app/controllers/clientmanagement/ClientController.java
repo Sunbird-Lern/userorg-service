@@ -1,7 +1,8 @@
 package controllers.clientmanagement;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.HashMap;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -10,10 +11,6 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -25,7 +22,7 @@ public class ClientController extends BaseController {
 
   /**
    * Method to register the client and generate master key for the client
-   * 
+   *
    * @return Response object on success else Error object
    */
   public Promise<Result> registerClient() {
@@ -46,6 +43,7 @@ public class ClientController extends BaseController {
 
   /**
    * Method to update the client key for the given clientId in the header
+   *
    * @return Response object on success else Error object
    */
   public Promise<Result> updateClientKey() {
@@ -53,7 +51,7 @@ public class ClientController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Update client key: " + requestData, LoggerEnum.INFO.name());
       String masterKey = request().getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
-      String clientId = request().getHeader(HeaderParam.X_Authenticated_Client_Id.getName());    
+      String clientId = request().getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateClientKey(clientId, masterKey);
       reqObj.setOperation(ActorOperations.UPDATE_CLIENT_KEY.getValue());
@@ -71,7 +69,8 @@ public class ClientController extends BaseController {
   }
 
   /**
-   * Method to get client data such as Master Key based on given clientId 
+   * Method to get client data such as Master Key based on given clientId
+   *
    * @param clientId
    * @return Response object on success else Error object
    */
@@ -79,14 +78,14 @@ public class ClientController extends BaseController {
     try {
       ProjectLogger.log("Get client key: " + clientId, LoggerEnum.INFO.name());
       String type = request().getQueryString(JsonKey.TYPE);
-      RequestValidator.validateGetClientKey(clientId , type);
+      RequestValidator.validateGetClientKey(clientId, type);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_CLIENT_KEY.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
-      innerMap.put(JsonKey.TYPE,type);
+      innerMap.put(JsonKey.TYPE, type);
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -94,5 +93,4 @@ public class ClientController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }

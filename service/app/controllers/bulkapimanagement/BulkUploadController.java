@@ -1,5 +1,7 @@
 package controllers.bulkapimanagement;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -8,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
@@ -19,10 +20,6 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -30,14 +27,14 @@ import play.mvc.Result;
 
 /**
  * This controller will handle all the request related to bulk api's for user management.
- * 
+ *
  * @author Amit Kumar
  */
 public class BulkUploadController extends BaseController {
 
   /**
    * This method will allow to upload bulk user.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> uploadUser() {
@@ -64,22 +61,26 @@ public class BulkUploadController extends BaseController {
         for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
           map.put(entry.getKey(), entry.getValue()[0]);
         }
-        InputStream is = new ByteArrayInputStream(
-            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
       } else if (null != requestData) {
         reqObj =
             (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-        InputStream is = new ByteArrayInputStream(
-            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
       } else {
-        ProjectCommonException e = new ProjectCommonException(
-            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ProjectCommonException e =
+            new ProjectCommonException(
+                ResponseCode.invalidData.getErrorCode(),
+                ResponseCode.invalidData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
       RequestValidator.validateUploadUser(reqObj);
@@ -93,7 +94,6 @@ public class BulkUploadController extends BaseController {
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
 
-
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -102,7 +102,7 @@ public class BulkUploadController extends BaseController {
 
   /**
    * This method will provide the status of bulk operation by their processId.
-   * 
+   *
    * @param processId Stirng
    * @return Promise<Result>
    */
@@ -151,22 +151,26 @@ public class BulkUploadController extends BaseController {
         for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
           map.put(entry.getKey(), entry.getValue()[0]);
         }
-        InputStream is = new ByteArrayInputStream(
-            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
       } else if (null != requestData) {
         reqObj =
             (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-        InputStream is = new ByteArrayInputStream(
-            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
       } else {
-        ProjectCommonException e = new ProjectCommonException(
-            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ProjectCommonException e =
+            new ProjectCommonException(
+                ResponseCode.invalidData.getErrorCode(),
+                ResponseCode.invalidData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
       reqObj.getRequest().putAll(map);
@@ -187,7 +191,7 @@ public class BulkUploadController extends BaseController {
 
   /**
    * This method will allow to upload bulk user.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> bulkBatchEnrollment() {
@@ -214,22 +218,26 @@ public class BulkUploadController extends BaseController {
         for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
           map.put(entry.getKey(), entry.getValue()[0]);
         }
-        InputStream is = new ByteArrayInputStream(
-            ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
       } else if (null != requestData) {
         reqObj =
             (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
-        InputStream is = new ByteArrayInputStream(
-            ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
       } else {
-        ProjectCommonException e = new ProjectCommonException(
-            ResponseCode.invalidData.getErrorCode(), ResponseCode.invalidData.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ProjectCommonException e =
+            new ProjectCommonException(
+                ResponseCode.invalidData.getErrorCode(),
+                ResponseCode.invalidData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
 
@@ -274,5 +282,4 @@ public class BulkUploadController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }

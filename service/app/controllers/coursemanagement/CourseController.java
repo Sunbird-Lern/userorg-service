@@ -1,13 +1,12 @@
-/**
- * 
- */
+/** */
 package controllers.coursemanagement;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -15,17 +14,13 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
  * This controller will handle all the API related to course, add course, published course, update
  * course, search course.
- * 
+ *
  * @author Manzarul
  * @author Amit Kumar
  */
@@ -33,7 +28,7 @@ public class CourseController extends BaseController {
 
   /**
    * This method will add a new course entry into cassandra DB.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> createCourse() {
@@ -61,7 +56,7 @@ public class CourseController extends BaseController {
    * published, once course is published we can only update the status to Retired other filed can't
    * be updated. if course status is not live then update on other fields are valid. if user is
    * making course status as Retired then we need to updated inside cassandra as well as ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> updateCourse() {
@@ -83,11 +78,10 @@ public class CourseController extends BaseController {
     }
   }
 
-
   /**
    * This method will publish the course. when ever course will be published , internally we need to
    * make EkStep api call to collect all the content related to this course and put into ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> publishCourse() {
@@ -113,7 +107,7 @@ public class CourseController extends BaseController {
   /**
    * This method will do the course search. Based on front end search query we need to make
    * ElasticSearch search api call to get the data. In ES we will only search for Live course.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> searchCourse() {
@@ -136,7 +130,7 @@ public class CourseController extends BaseController {
 
   /**
    * This method will make the course as retired in Cassandra and ES both
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> deleteCourse() {
@@ -157,10 +151,9 @@ public class CourseController extends BaseController {
     }
   }
 
-
   /**
    * This method will do the course search based on course id. search will happen under ES.
-   * 
+   *
    * @param courseId Stirng
    * @return Promise<Result>
    */
@@ -184,7 +177,7 @@ public class CourseController extends BaseController {
   /**
    * This method will provide the recommended courses for particular user. search will happen under
    * ES.
-   * 
+   *
    * @return Promise<Result>
    */
   public Promise<Result> recommendedCourses() {
@@ -204,7 +197,6 @@ public class CourseController extends BaseController {
   }
 
   /**
-   * 
    * @param request
    * @return Map<String, String>
    */
@@ -218,5 +210,4 @@ public class CourseController extends BaseController {
     }
     return map;
   }
-
 }

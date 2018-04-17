@@ -1,14 +1,12 @@
 package controllers.metrics;
 
+import controllers.BaseController;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -22,7 +20,7 @@ public class CourseMetricsController extends BaseController {
       request.setEnv(getEnvironment());
       map.put(JsonKey.BATCH_ID, batchId);
       map.put(JsonKey.PERIOD, periodStr);
-      map.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(map);
       request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS.getValue());
       request.setRequest(map);
@@ -42,7 +40,7 @@ public class CourseMetricsController extends BaseController {
       request.setOperation(ActorOperations.COURSE_CREATION_METRICS.getValue());
       map.put(JsonKey.COURSE_ID, courseId);
       map.put(JsonKey.PERIOD, periodStr);
-      map.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(map);
       request.setRequestId(ExecutionContext.getRequestId());
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
@@ -60,8 +58,8 @@ public class CourseMetricsController extends BaseController {
       request.setEnv(getEnvironment());
       map.put(JsonKey.BATCH_ID, batchId);
       map.put(JsonKey.PERIOD, periodStr);
-      map.put(JsonKey.FORMAT , reportType);
-      map.put(JsonKey.REQUESTED_BY,ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.FORMAT, reportType);
+      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(map);
       request.setOperation(ActorOperations.COURSE_PROGRESS_METRICS_REPORT.getValue());
       request.setRequest(map);
@@ -88,7 +86,4 @@ public class CourseMetricsController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
-
-
 }

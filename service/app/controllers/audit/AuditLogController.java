@@ -1,29 +1,23 @@
 package controllers.audit;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import controllers.BaseController;
 import java.util.HashMap;
-
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.BaseController;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * Controller class to provide APIs for searching Audit Logs
- *
- */
+/** Controller class to provide APIs for searching Audit Logs */
 public class AuditLogController extends BaseController {
 
   /**
    * Method to search audit history logs
-   * 
+   *
    * @return
    */
   public Promise<Result> searchAuditHistory() {
@@ -43,5 +37,4 @@ public class AuditLogController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }
