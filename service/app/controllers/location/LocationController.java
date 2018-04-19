@@ -1,8 +1,8 @@
-package controllers.locationservice;
+package controllers.location;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.locationservice.validator.LocationRequestValidator;
+import controllers.location.validator.LocationRequestValidator;
 import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
@@ -69,18 +69,6 @@ public class LocationController extends BaseController {
       Request reqObj = getRequestOject();
       LocationRequestValidator.validateSearchLocationRequest(reqObj);
       prepareRequestObject(reqObj, LocationActorOperation.DELETE_LOCATION.getValue());
-      Map<String, Object> requestMap = reqObj.getRequest();
-      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  public Promise<Result> getLocationType() {
-    try {
-      Request reqObj = new Request();
-      prepareRequestObject(reqObj, LocationActorOperation.READ_LOCATION_TYPE.getValue());
       Map<String, Object> requestMap = reqObj.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
