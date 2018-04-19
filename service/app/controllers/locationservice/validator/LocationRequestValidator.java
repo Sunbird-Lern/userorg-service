@@ -12,7 +12,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** Created by arvind on 18/4/18. */
-public class LocationServiceRequestValidator {
+public class LocationRequestValidator {
 
   public static void validateCreateLocationRequest(Request req) {
 
@@ -40,12 +40,24 @@ public class LocationServiceRequestValidator {
     data.stream()
         .forEach(
             x -> {
-              if (StringUtils.isEmpty((String) x.get(JsonKey.NAME))
-                  || StringUtils.isEmpty((String) x.get(JsonKey.CODE))
-                  || StringUtils.isEmpty((String) x.get(GeoLocationJsonKey.PARENT_CODE))) {
+              if (StringUtils.isEmpty((String) x.get(JsonKey.NAME))) {
+                throw new ProjectCommonException(
+                    ResponseCode.invalidRequestDataCreateLocation.getErrorCode(),
+                    JsonKey.NAME,
+                    ResponseCode.CLIENT_ERROR.getResponseCode());
+              }
+
+              if (StringUtils.isEmpty((String) x.get(JsonKey.CODE))) {
                 throw new ProjectCommonException(
                     ResponseCode.invalidRequestData.getErrorCode(),
-                    ResponseCode.invalidRequestData.getErrorMessage(),
+                    JsonKey.CODE,
+                    ResponseCode.CLIENT_ERROR.getResponseCode());
+              }
+
+              if (StringUtils.isEmpty((String) x.get(GeoLocationJsonKey.PARENT_CODE))) {
+                throw new ProjectCommonException(
+                    ResponseCode.invalidRequestData.getErrorCode(),
+                    GeoLocationJsonKey.PARENT_CODE,
                     ResponseCode.CLIENT_ERROR.getResponseCode());
               }
             });

@@ -2,17 +2,17 @@ package controllers.locationservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.locationservice.validator.LocationServiceRequestValidator;
+import controllers.locationservice.validator.LocationRequestValidator;
 import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationServiceOperation;
+import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /** Created by arvind on 18/4/18. */
-public class LocationServiceController extends BaseController {
+public class LocationController extends BaseController {
 
   /**
    * Method to create the location of the given type .
@@ -23,8 +23,8 @@ public class LocationServiceController extends BaseController {
 
     try {
       Request reqObj = getRequestOject();
-      LocationServiceRequestValidator.validateCreateLocationRequest(reqObj);
-      prepareRequestObject(reqObj, LocationServiceOperation.CREATE_LOCATION.getValue());
+      LocationRequestValidator.validateCreateLocationRequest(reqObj);
+      prepareRequestObject(reqObj, LocationActorOperation.CREATE_LOCATION.getValue());
       Map<String, Object> requestMap = reqObj.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -38,8 +38,8 @@ public class LocationServiceController extends BaseController {
 
     try {
       Request reqObj = getRequestOject();
-      LocationServiceRequestValidator.validateUpdateLocationRequest(reqObj);
-      prepareRequestObject(reqObj, LocationServiceOperation.UPDATE_LOCATION.getValue());
+      LocationRequestValidator.validateUpdateLocationRequest(reqObj);
+      prepareRequestObject(reqObj, LocationActorOperation.UPDATE_LOCATION.getValue());
       Map<String, Object> requestMap = reqObj.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -52,8 +52,8 @@ public class LocationServiceController extends BaseController {
   public Promise<Result> deleteLocation(String locationId) {
     try {
       Request reqObj = new Request();
-      LocationServiceRequestValidator.validateDeleteLocationRequest(locationId);
-      prepareRequestObject(reqObj, LocationServiceOperation.DELETE_LOCATION.getValue());
+      LocationRequestValidator.validateDeleteLocationRequest(locationId);
+      prepareRequestObject(reqObj, LocationActorOperation.DELETE_LOCATION.getValue());
       Map<String, Object> requestMap = reqObj.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       requestMap.put(JsonKey.ID, locationId);
@@ -67,8 +67,20 @@ public class LocationServiceController extends BaseController {
   public Promise<Result> searchLocation() {
     try {
       Request reqObj = getRequestOject();
-      LocationServiceRequestValidator.validateSearchLocationRequest(reqObj);
-      prepareRequestObject(reqObj, LocationServiceOperation.DELETE_LOCATION.getValue());
+      LocationRequestValidator.validateSearchLocationRequest(reqObj);
+      prepareRequestObject(reqObj, LocationActorOperation.DELETE_LOCATION.getValue());
+      Map<String, Object> requestMap = reqObj.getRequest();
+      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> getLocationType() {
+    try {
+      Request reqObj = new Request();
+      prepareRequestObject(reqObj, LocationActorOperation.READ_LOCATION_TYPE.getValue());
       Map<String, Object> requestMap = reqObj.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
