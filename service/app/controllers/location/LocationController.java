@@ -1,5 +1,6 @@
 package controllers.location;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.location.validator.LocationRequestValidator;
 import java.util.Map;
@@ -14,14 +15,22 @@ public class LocationController extends BaseController {
 
   LocationRequestValidator validator = new LocationRequestValidator();
   /**
-   * Method to create the location of the given type .
+   * Method to create new location.
    *
-   * @return Result
+   * <p>Request body contains following parameters - name: A name given to location . code: Unique
+   * code for the location. type: Each location has specific type for example location type can be
+   * STATE, DISTRICT, BLOCK, CLUSTER. parentid: The location has hierarchy , so the parentid defines
+   * the immediate id of parent location ,for root level location parentid not required and other
+   * than root location parentid required .
+   *
+   * @return Return a promise for create location API result
    */
   public Promise<Result> createLocation() {
 
     try {
-      Request request = createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue());
+      JsonNode jsonNode = request().body().asJson();
+      Request request =
+          createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode);
       validator.validateCreateLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -34,12 +43,17 @@ public class LocationController extends BaseController {
   /**
    * Method to update the location .
    *
-   * @return Result
+   * <p>Request body contains following parameters - id: Id of the location to uniquely identify the
+   * location , Every location assigned with unique identifier while location creation.
+   *
+   * @return Return a promise for update location API result
    */
   public Promise<Result> updateLocation() {
 
     try {
-      Request request = createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue());
+      JsonNode jsonNode = request().body().asJson();
+      Request request =
+          createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode);
       validator.validateUpdateLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -52,7 +66,9 @@ public class LocationController extends BaseController {
   /**
    * Method to delete the location on basis of location id .
    *
-   * @return Result
+   * <p>Path param contains locationId .
+   *
+   * @return Return a promise for update location API result.
    */
   public Promise<Result> deleteLocation(String locationId) {
     try {
@@ -70,11 +86,17 @@ public class LocationController extends BaseController {
   /**
    * Method to search the location on basis of search query in request body
    *
-   * @return Result
+   * <p>Request body contains the varoius parameters on which basis location search execute and
+   * result size varies . For example parameter filter contain the fields and thier values ,
+   * parameter size represents the max search result size.
+   *
+   * @return Return a promise for update location API result.
    */
   public Promise<Result> searchLocation() {
     try {
-      Request request = createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue());
+      JsonNode jsonNode = request().body().asJson();
+      Request request =
+          createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), jsonNode);
       validator.validateSearchLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));

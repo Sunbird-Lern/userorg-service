@@ -39,7 +39,7 @@ public class LocationRequestValidator extends BaseRequestValidator {
    * @param req Request.
    */
   public void validateUpdateLocationRequest(Request req) {
-    checkMandatoryFieldsPresent(req.getRequest(), JsonKey.ID, JsonKey.TYPE);
+    checkMandatoryFieldsPresent(req.getRequest(), JsonKey.ID);
   }
 
   /**
