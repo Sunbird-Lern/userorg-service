@@ -18,19 +18,7 @@ public class LocationRequestValidator extends BaseRequestValidator {
    * @param req Request .
    */
   public void validateCreateLocationRequest(Request req) {
-
-    Map<String, Object> requestBody = req.getRequest();
-    if (MapUtils.isEmpty(requestBody)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
-          ResponseCode.invalidRequestData.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    checkMandatoryFieldsPresent(
-        (Map<String, Object>) requestBody.get(JsonKey.DATA),
-        JsonKey.NAME,
-        JsonKey.CODE,
-        JsonKey.TYPE);
+    checkMandatoryFieldsPresent(req.getRequest(), JsonKey.NAME, JsonKey.CODE, JsonKey.TYPE);
   }
 
   /**

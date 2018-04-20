@@ -76,7 +76,7 @@ public class LocationController extends BaseController {
       validator.validateDeleteLocationRequest(locationId);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      requestMap.put(JsonKey.ID, locationId);
+      requestMap.put(JsonKey.LOCATION_ID, locationId);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -96,7 +96,7 @@ public class LocationController extends BaseController {
     try {
       JsonNode jsonNode = request().body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), jsonNode);
+          createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode);
       validator.validateSearchLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
