@@ -21,6 +21,8 @@ import org.sunbird.common.request.Request;
 @RunWith(PowerMockRunner.class)
 public class LocationRequestValidatorTest {
 
+  LocationRequestValidator validator = new LocationRequestValidator();
+
   @Test
   public void validateCreateLocationRequestTest() {
     Request request = new Request();
@@ -33,7 +35,7 @@ public class LocationRequestValidatorTest {
     requestBody.put(JsonKey.DATA, locationData);
     request.setRequest(requestBody);
     try {
-      LocationRequestValidator.validateCreateLocationRequest(request);
+      validator.validateCreateLocationRequest(request);
       response = true;
     } catch (ProjectCommonException e) {
       Assert.assertNull(e);
@@ -50,13 +52,13 @@ public class LocationRequestValidatorTest {
     locationData.put(JsonKey.CODE, "CA");
     requestBody.put(JsonKey.DATA, locationData);
     request.setRequest(requestBody);
-    LocationRequestValidator.validateCreateLocationRequest(request);
+    validator.validateCreateLocationRequest(request);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void validateCreateLocationRequestTestWithEmptyData() {
     Request request = new Request();
-    LocationRequestValidator.validateCreateLocationRequest(request);
+    validator.validateCreateLocationRequest(request);
   }
 
   @Test
@@ -69,7 +71,7 @@ public class LocationRequestValidatorTest {
     requestBody.put(JsonKey.TYPE, "STATE");
     request.setRequest(requestBody);
     try {
-      LocationRequestValidator.validateUpdateLocationRequest(request);
+      validator.validateUpdateLocationRequest(request);
       response = true;
     } catch (ProjectCommonException e) {
       Assert.assertNull(e);
@@ -83,20 +85,20 @@ public class LocationRequestValidatorTest {
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put(JsonKey.TYPE, "STATE");
     request.setRequest(requestBody);
-    LocationRequestValidator.validateUpdateLocationRequest(request);
+    validator.validateUpdateLocationRequest(request);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void validateUpdateLocationRequestTestWithEmptyData() {
     Request request = new Request();
-    LocationRequestValidator.validateUpdateLocationRequest(request);
+    validator.validateUpdateLocationRequest(request);
   }
 
   @Test
   public void validateDeleteLocationRequestTest() {
     boolean response = false;
     try {
-      LocationRequestValidator.validateDeleteLocationRequest("123");
+      validator.validateDeleteLocationRequest("123");
       response = true;
     } catch (ProjectCommonException e) {
       Assert.assertNull(e);
@@ -106,7 +108,7 @@ public class LocationRequestValidatorTest {
 
   @Test(expected = ProjectCommonException.class)
   public void validateDeleteLocationRequestTestWithInvalidRequestData() {
-    LocationRequestValidator.validateDeleteLocationRequest("");
+    validator.validateDeleteLocationRequest("");
   }
 
   @Test
@@ -121,7 +123,7 @@ public class LocationRequestValidatorTest {
     requestBody.put(JsonKey.FILTERS, filters);
     request.setRequest(requestBody);
     try {
-      LocationRequestValidator.validateSearchLocationRequest(request);
+      validator.validateSearchLocationRequest(request);
       response = true;
     } catch (ProjectCommonException e) {
       Assert.assertNull(e);
@@ -137,12 +139,12 @@ public class LocationRequestValidatorTest {
     filters.add("CAL");
     requestBody.put(JsonKey.FILTERS, filters);
     request.setRequest(requestBody);
-    LocationRequestValidator.validateSearchLocationRequest(request);
+    validator.validateSearchLocationRequest(request);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void validateSearchLocationRequestTestWithEmptyBody() {
     Request request = new Request();
-    LocationRequestValidator.validateSearchLocationRequest(request);
+    validator.validateSearchLocationRequest(request);
   }
 }
