@@ -33,7 +33,6 @@ public class LocationController extends BaseController {
           createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode);
       validator.validateCreateLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
-      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -56,7 +55,6 @@ public class LocationController extends BaseController {
           createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode);
       validator.validateUpdateLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
-      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -75,7 +73,6 @@ public class LocationController extends BaseController {
       Request request = createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue());
       validator.validateDeleteLocationRequest(locationId);
       Map<String, Object> requestMap = request.getRequest();
-      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       requestMap.put(JsonKey.LOCATION_ID, locationId);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
@@ -99,7 +96,6 @@ public class LocationController extends BaseController {
           createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode);
       validator.validateSearchLocationRequest(request);
       Map<String, Object> requestMap = request.getRequest();
-      requestMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

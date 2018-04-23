@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 
@@ -27,13 +28,11 @@ public class LocationRequestValidatorTest {
   public void validateCreateLocationRequestTest() {
     Request request = new Request();
     boolean response = false;
-    Map<String, Object> requestBody = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, "CAL");
     locationData.put(JsonKey.CODE, "CA");
-    locationData.put(JsonKey.TYPE, "STATE");
-    requestBody.put(JsonKey.DATA, locationData);
-    request.setRequest(requestBody);
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
+    request.setRequest(locationData);
     try {
       validator.validateCreateLocationRequest(request);
       response = true;
@@ -50,8 +49,7 @@ public class LocationRequestValidatorTest {
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, "CAL");
     locationData.put(JsonKey.CODE, "CA");
-    requestBody.put(JsonKey.DATA, locationData);
-    request.setRequest(requestBody);
+    request.setRequest(locationData);
     validator.validateCreateLocationRequest(request);
   }
 
@@ -68,7 +66,6 @@ public class LocationRequestValidatorTest {
     Map<String, Object> requestBody = new HashMap<>();
     requestBody.put(JsonKey.ID, "123");
     requestBody.put(JsonKey.CODE, "CA");
-    requestBody.put(JsonKey.TYPE, "STATE");
     request.setRequest(requestBody);
     try {
       validator.validateUpdateLocationRequest(request);
@@ -83,7 +80,7 @@ public class LocationRequestValidatorTest {
   public void validateUpdateLocationRequestTestWithInvalidData() {
     Request request = new Request();
     Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put(JsonKey.TYPE, "STATE");
+    requestBody.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
     request.setRequest(requestBody);
     validator.validateUpdateLocationRequest(request);
   }

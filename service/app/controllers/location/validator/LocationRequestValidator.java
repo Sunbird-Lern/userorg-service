@@ -4,6 +4,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -18,7 +19,8 @@ public class LocationRequestValidator extends BaseRequestValidator {
    * @param req Request .
    */
   public void validateCreateLocationRequest(Request req) {
-    checkMandatoryFieldsPresent(req.getRequest(), JsonKey.NAME, JsonKey.CODE, JsonKey.TYPE);
+    checkMandatoryFieldsPresent(
+        req.getRequest(), JsonKey.NAME, JsonKey.CODE, GeoLocationJsonKey.LOCATION_TYPE);
   }
 
   /**
@@ -28,6 +30,7 @@ public class LocationRequestValidator extends BaseRequestValidator {
    */
   public void validateUpdateLocationRequest(Request req) {
     checkMandatoryFieldsPresent(req.getRequest(), JsonKey.ID);
+    checkForMustNotAttribute(req.getRequest(), GeoLocationJsonKey.LOCATION_TYPE);
   }
 
   /**
