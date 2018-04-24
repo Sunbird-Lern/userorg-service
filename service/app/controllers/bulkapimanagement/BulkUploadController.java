@@ -13,10 +13,14 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BulkUploadActorOperation;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -31,6 +35,8 @@ import play.mvc.Result;
  * @author Amit Kumar
  */
 public class BulkUploadController extends BaseController {
+
+  BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
 
   /**
    * This method will allow to upload bulk user.
@@ -277,6 +283,75 @@ public class BulkUploadController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  /*
+   * This method will allow to upload bulk location.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> uploadLocation() {
+
+    try {
+      Request reqObj = new Request();
+      baseRequestValidator.checkMandatoryHeaderssPresent(
+          request().headers(), HeaderParam.X_Location_Type);
+      Map<String, Object> map = new HashMap<>();
+      byte[] byteArray = null;
+      MultipartFormData body = request().body().asMultipartFormData();
+      Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+      JsonNode requestData = request().body().asJson();
+
+      if (body != null) {
+        Map<String, String[]> data = body.asFormUrlEncoded();
+        for (Entry<String, String[]> entry : data.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        List<FilePart> filePart = body.getFiles();
+        InputStream is = new FileInputStream(filePart.get(0).getFile());
+        byteArray = IOUtils.toByteArray(is);
+      } else if (null != formUrlEncodeddata) {
+        // read data as string from request
+        for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+      } else if (null != requestData) {
+        reqObj =
+            (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+        InputStream is =
+            new ByteArrayInputStream(
+                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        byteArray = IOUtils.toByteArray(is);
+        reqObj.getRequest().putAll(map);
+        map.putAll(reqObj.getRequest());
+      } else {
+        ProjectCommonException e =
+            new ProjectCommonException(
+                ResponseCode.invalidData.getErrorCode(),
+                ResponseCode.invalidData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+        return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      }
+      reqObj.getRequest().putAll(map);
+      reqObj.setOperation(BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      map.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
+      map.put(GeoLocationJsonKey.LOCATION_TYPE, getValueFromHeader(HeaderParam.X_Location_Type)[0]);
+      map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      map.put(JsonKey.FILE, byteArray);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
