@@ -299,7 +299,7 @@ public class BulkUploadController extends BaseController {
     try {
       Request reqObj = new Request();
       baseRequestValidator.checkMandatoryHeaderssPresent(
-          request().headers(), HeaderParam.X_Location_Type);
+          request().headers(), HeaderParam.X_Location_Type.getName());
       Map<String, Object> map = new HashMap<>();
       byte[] byteArray = null;
       MultipartFormData body = request().body().asMultipartFormData();
@@ -348,7 +348,9 @@ public class BulkUploadController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
       map.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
-      map.put(GeoLocationJsonKey.LOCATION_TYPE, getValueFromHeader(HeaderParam.X_Location_Type)[0]);
+      map.put(
+          GeoLocationJsonKey.LOCATION_TYPE,
+          getValueFromHeader(HeaderParam.X_Location_Type.getName())[0]);
       map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);

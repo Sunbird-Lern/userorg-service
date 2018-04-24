@@ -569,4 +569,8 @@ public class BaseController extends Controller {
     request.setEnv(env);
     return request;
   }
+
+  public String[] getValueFromHeader(String key) {
+    return request().headers().get(key);
+  }
 }
