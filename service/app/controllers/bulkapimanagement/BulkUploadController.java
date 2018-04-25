@@ -20,7 +20,6 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -298,8 +297,6 @@ public class BulkUploadController extends BaseController {
 
     try {
       Request reqObj = new Request();
-      baseRequestValidator.checkMandatoryHeaderssPresent(
-          request().headers(), HeaderParam.X_Location_Type.getName());
       Map<String, Object> map = new HashMap<>();
       byte[] byteArray = null;
       MultipartFormData body = request().body().asMultipartFormData();
@@ -341,15 +338,13 @@ public class BulkUploadController extends BaseController {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
+      baseRequestValidator.checkMandatoryFieldsPresent(map, GeoLocationJsonKey.LOCATION_TYPE);
       reqObj.getRequest().putAll(map);
       reqObj.setOperation(BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       map.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
-      map.put(
-          GeoLocationJsonKey.LOCATION_TYPE,
-          getValueFromHeader(HeaderParam.X_Location_Type.getName())[0]);
       map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       map.put(JsonKey.FILE, byteArray);
       innerMap.put(JsonKey.DATA, map);

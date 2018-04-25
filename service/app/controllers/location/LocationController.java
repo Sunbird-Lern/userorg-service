@@ -2,18 +2,18 @@ package controllers.location;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.location.validator.LocationRequestValidator;
 import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.validator.location.BaseLocationRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
 /** Created by arvind on 18/4/18. */
 public class LocationController extends BaseController {
 
-  LocationRequestValidator validator = new LocationRequestValidator();
+  BaseLocationRequestValidator validator = new BaseLocationRequestValidator();
   /**
    * Method to create new location.
    *
@@ -32,7 +32,6 @@ public class LocationController extends BaseController {
       Request request =
           createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode);
       validator.validateCreateLocationRequest(request);
-      Map<String, Object> requestMap = request.getRequest();
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -54,7 +53,6 @@ public class LocationController extends BaseController {
       Request request =
           createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode);
       validator.validateUpdateLocationRequest(request);
-      Map<String, Object> requestMap = request.getRequest();
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -66,6 +64,7 @@ public class LocationController extends BaseController {
    *
    * <p>Path param contains locationId .
    *
+   * @param locationId
    * @return Return a promise for update location API result.
    */
   public Promise<Result> deleteLocation(String locationId) {
@@ -83,8 +82,8 @@ public class LocationController extends BaseController {
   /**
    * Method to search the location on basis of search query in request body
    *
-   * <p>Request body contains the varoius parameters on which basis location search execute and
-   * result size varies . For example parameter filter contain the fields and thier values ,
+   * <p>Request body contains the various parameters on which basis location search execute and
+   * result size varies . For example parameter filter contain the fields and their values ,
    * parameter size represents the max search result size.
    *
    * @return Return a promise for update location API result.
@@ -95,7 +94,6 @@ public class LocationController extends BaseController {
       Request request =
           createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode);
       validator.validateSearchLocationRequest(request);
-      Map<String, Object> requestMap = request.getRequest();
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
