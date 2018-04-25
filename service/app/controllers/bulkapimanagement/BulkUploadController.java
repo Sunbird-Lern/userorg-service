@@ -346,14 +346,14 @@ public class BulkUploadController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.DATA, map);
       map.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
       map.put(
           GeoLocationJsonKey.LOCATION_TYPE,
           getValueFromHeader(HeaderParam.X_Location_Type.getName())[0]);
       map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
+      innerMap.put(JsonKey.DATA, map);
+      reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
