@@ -204,7 +204,7 @@ POST /v1/system/settings			     @controllers.config.ApplicationConfigController.
 POST /v1/telemetry                      @controllers.telemetry.TelemetryController.save()
 
 #Bulk Upload Location API
-POST   /v1/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
+POST   /v1/bulk/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
 
 #Location API
 POST   /v1/location/create                      @controllers.location.LocationController.createLocation()
