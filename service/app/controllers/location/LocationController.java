@@ -10,7 +10,11 @@ import org.sunbird.common.validator.location.BaseLocationRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/** Created by arvind on 18/4/18. */
+/**
+ * LocationController handles location APIs.
+ *
+ * @author arvind on 18/4/18.
+ */
 public class LocationController extends BaseController {
 
   BaseLocationRequestValidator validator = new BaseLocationRequestValidator();
@@ -19,9 +23,9 @@ public class LocationController extends BaseController {
    *
    * <p>Request body contains following parameters - name: A name given to location . code: Unique
    * code for the location. type: Each location has specific type for example location type can be
-   * STATE, DISTRICT, BLOCK, CLUSTER. parentid: The location has hierarchy , so the parentid defines
-   * the immediate id of parent location ,for root level location parentid not required and other
-   * than root location parentid required .
+   * STATE, DISTRICT, BLOCK, CLUSTER. parentId: The location has hierarchy , so the parentId defines
+   * the one level up parentId of location ,for root level location parentId not required and other
+   * than root location parentId required.
    *
    * @return Return a promise for create location API result
    */
@@ -39,10 +43,13 @@ public class LocationController extends BaseController {
   }
 
   /**
-   * Method to update the location .
+   * Method to update the location.
    *
    * <p>Request body contains following parameters - id: Id of the location to uniquely identify the
-   * location , Every location assigned with unique identifier while location creation.
+   * location , Every location assigned with unique identifier while location creation.The fields
+   * that can not be updated are code, type. The allowed fields that can be updated are -
+   * parentCode, parentId, name. The parentId or parentCode should be of the immediate one level up
+   * location id. For root level location can not update parentId or parentCode.
    *
    * @return Return a promise for update location API result
    */
@@ -64,7 +71,7 @@ public class LocationController extends BaseController {
    *
    * <p>Path param contains locationId .
    *
-   * @param locationId
+   * @param locationId Id of location to
    * @return Return a promise for update location API result.
    */
   public Promise<Result> deleteLocation(String locationId) {
@@ -80,11 +87,11 @@ public class LocationController extends BaseController {
   }
 
   /**
-   * Method to search the location on basis of search query in request body
+   * Method to search the location on basis of search query in request body.
    *
-   * <p>Request body contains the various parameters on which basis location search execute and
-   * result size varies . For example parameter filter contain the fields and their values ,
-   * parameter size represents the max search result size.
+   * <p>Request body contains the various filters on which basis location search execute and also
+   * parameters like offset and size. For example parameter filter contain the fields and their
+   * values , parameter size represents the max search result size.
    *
    * @return Return a promise for update location API result.
    */
