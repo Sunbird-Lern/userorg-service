@@ -118,7 +118,7 @@ public class BaseBulkUploadController extends BaseController {
             ResponseCode.fileAttachmentSizeNotConfigured.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
-      Double filesize = Double.parseDouble(allowedMaxSize);
+      Double filesize = Double.parseDouble(allowedMaxSize.trim());
       filesize = filesize * MB_to_byte;
       // converting MB to bytes
       Long allowedSize = filesize.longValue();
