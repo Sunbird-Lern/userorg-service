@@ -5,9 +5,17 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -26,6 +34,8 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http.Context;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -570,7 +580,67 @@ public class BaseController extends Controller {
     return request;
   }
 
-  public String[] getValueFromHeader(String key) {
-    return request().headers().get(key);
+  /**
+   * Helper method for creating and initialising a request for given operation for content type
+   * Multiform data.
+   *
+   * @param operation A defined actor operation
+   * @param objectType A defined type of object to set in he request body
+   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
+   *     instance.
+   */
+  protected org.sunbird.common.request.Request createAndInitRequestForMultiFormData(
+      String operation, String objectType) throws IOException {
+    ProjectLogger.log("API call for operation : " + operation);
+    org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
+    Map<String, Object> map = new HashMap<>();
+    byte[] byteArray = null;
+    MultipartFormData body = request().body().asMultipartFormData();
+    Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+    JsonNode requestData = request().body().asJson();
+    if (body != null) {
+      Map<String, String[]> data = body.asFormUrlEncoded();
+      for (Entry<String, String[]> entry : data.entrySet()) {
+        map.put(entry.getKey(), entry.getValue()[0]);
+      }
+      List<FilePart> filePart = body.getFiles();
+      InputStream is = new FileInputStream(filePart.get(0).getFile());
+      byteArray = IOUtils.toByteArray(is);
+    } else if (null != formUrlEncodeddata) {
+      // read data as string from request
+      for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+        map.put(entry.getKey(), entry.getValue()[0]);
+      }
+      InputStream is =
+          new ByteArrayInputStream(
+              ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+      byteArray = IOUtils.toByteArray(is);
+    } else if (null != requestData) {
+      reqObj =
+          (org.sunbird.common.request.Request)
+              mapper.RequestMapper.mapRequest(
+                  request().body().asJson(), org.sunbird.common.request.Request.class);
+      InputStream is =
+          new ByteArrayInputStream(
+              ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+      byteArray = IOUtils.toByteArray(is);
+      reqObj.getRequest().remove(JsonKey.DATA);
+      map.putAll(reqObj.getRequest());
+    } else {
+      throw new ProjectCommonException(
+          ResponseCode.invalidData.getErrorCode(),
+          ResponseCode.invalidData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    reqObj.setOperation(operation);
+    reqObj.setRequestId(ExecutionContext.getRequestId());
+    reqObj.setEnv(getEnvironment());
+    map.put(JsonKey.OBJECT_TYPE, objectType);
+    map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+    map.put(JsonKey.FILE, byteArray);
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.DATA, map);
+    reqObj.setRequest(innerMap);
+    return reqObj;
   }
 }
