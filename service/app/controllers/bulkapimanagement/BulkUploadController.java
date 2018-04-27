@@ -1,6 +1,5 @@
 package controllers.bulkapimanagement;
 
-import controllers.BaseController;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
@@ -19,7 +18,7 @@ import play.mvc.Result;
  *
  * @author Amit Kumar
  */
-public class BulkUploadController extends BaseController {
+public class BulkUploadController extends BaseBulkUploadController {
 
   BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
 
@@ -32,8 +31,7 @@ public class BulkUploadController extends BaseController {
 
     try {
       Request request =
-          createAndInitRequestForMultiFormData(
-              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.USER);
+          createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.USER, false);
       RequestValidator.validateUploadUser(
           (Map<String, Object>) request.getRequest().get(JsonKey.DATA));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
@@ -68,8 +66,8 @@ public class BulkUploadController extends BaseController {
 
     try {
       Request request =
-          createAndInitRequestForMultiFormData(
-              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.ORGANISATION);
+          createAndInitBulkRequest(
+              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, false);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -85,8 +83,7 @@ public class BulkUploadController extends BaseController {
 
     try {
       Request request =
-          createAndInitRequestForMultiFormData(
-              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH);
+          createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH, false);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -120,8 +117,8 @@ public class BulkUploadController extends BaseController {
 
     try {
       Request request =
-          createAndInitRequestForMultiFormData(
-              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION);
+          createAndInitBulkRequest(
+              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION, true);
       baseRequestValidator.checkMandatoryFieldsPresent(
           (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
           GeoLocationJsonKey.LOCATION_TYPE);
