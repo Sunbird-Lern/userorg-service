@@ -11,6 +11,7 @@ import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LearnerServiceUrls;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
@@ -144,7 +145,7 @@ public class BadgeClassValidator extends BaseRequestValidator {
    * @param subtype Badge subtype.
    */
   private void validateSubtype(String subtype) {
-    if (subtype != null) {
+    if (subtype != null && !("".equals(subtype.trim()))) {
       String validSubtypes = System.getenv(BadgingJsonKey.VALID_BADGE_SUBTYPES);
       if (StringUtils.isBlank(validSubtypes)) {
         validSubtypes = propertiesCache.getProperty(BadgingJsonKey.VALID_BADGE_SUBTYPES);
@@ -154,13 +155,31 @@ public class BadgeClassValidator extends BaseRequestValidator {
       for (String validSubtype : validSubtypesList) {
         if (validSubtype.equalsIgnoreCase(subtype)) return;
       }
-
       ResponseCode error = ResponseCode.invalidBadgeSubtype;
-      throw new ProjectCommonException(
-          error.getErrorCode(),
-          error.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+      throw createExceptionByResponseCode(error, ResponseCode.CLIENT_ERROR.getResponseCode());
+    } else {
+      throw createExceptionByResponseCode(
+          ResponseCode.badgeSubTypeRequired, ResponseCode.CLIENT_ERROR.getResponseCode());
     }
+  }
+
+  /**
+   * This method will create the ProjectCommonException by reading ResponseCode and errorCode.
+   * incase ResponseCode is null then it will throw invalidData error.
+   *
+   * @param code ResponseCode
+   * @param erroCode ResponseCode.CLIENT_ERROR
+   * @return ProjectCommonException
+   */
+  private ProjectCommonException createExceptionByResponseCode(ResponseCode code, int erroCode) {
+    if (code == null) {
+      ProjectLogger.log("ResponseCode object is coming as null", LoggerEnum.INFO.name());
+      return new ProjectCommonException(
+          ResponseCode.invalidData.getErrorCode(),
+          ResponseCode.invalidData.getErrorMessage(),
+          erroCode);
+    }
+    return new ProjectCommonException(code.getErrorCode(), code.getErrorMessage(), erroCode);
   }
 
   /**

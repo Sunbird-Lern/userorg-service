@@ -455,4 +455,50 @@ public class BadgeClassValidatorTest {
       fail();
     }
   }
+
+  @Test
+  public void testValidateCreateBadgeClassSubTypeRequired() {
+    Request request = new Request();
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+    requestMap.put(
+        BadgingJsonKey.BADGE_CRITERIA,
+        "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+    requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+    requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+    requestMap.put(JsonKey.TYPE, "user");
+
+    request.setRequest(requestMap);
+
+    try {
+      new BadgeClassValidator().validateCreateBadgeClass(request, new HashMap<>());
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getCode(), ResponseCode.badgeSubTypeRequired.getErrorCode());
+    }
+  }
+
+  @Test
+  public void testValidateCreateBadgeClassSubTypeWithEmpty() {
+    Request request = new Request();
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(BadgingJsonKey.ISSUER_ID, "oracle-university");
+    requestMap.put(
+        BadgingJsonKey.BADGE_CRITERIA,
+        "https://education.oracle.com/pls/web_prod-plq-dad/db_pages.getpage?page_id=5001&get_params=p_exam_id:1Z0-808");
+    requestMap.put(JsonKey.NAME, "Java SE 8 Programmer");
+    requestMap.put(JsonKey.DESCRIPTION, "A basic Java SE 8 certification.");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "AP");
+    requestMap.put(JsonKey.TYPE, "user");
+    requestMap.put(JsonKey.SUBTYPE, "   ");
+    request.setRequest(requestMap);
+
+    try {
+      new BadgeClassValidator().validateCreateBadgeClass(request, new HashMap<>());
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getCode(), ResponseCode.badgeSubTypeRequired.getErrorCode());
+    }
+  }
 }
