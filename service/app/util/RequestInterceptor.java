@@ -81,6 +81,12 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
     // making org read as public access
     apiHeaderIgnoreMap.put("/v1/org/read", var);
+    // making location APIs public access
+    apiHeaderIgnoreMap.put("/v1/location/create", var);
+    apiHeaderIgnoreMap.put("/v1/location/update", var);
+    apiHeaderIgnoreMap.put("/v1/location/search", var);
+    apiHeaderIgnoreMap.put("/v1/location/delete", var);
+    apiHeaderIgnoreMap.put("/v1/bulk/location/upload", var);
   }
 
   /**

@@ -189,10 +189,10 @@ PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientCont
 GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String)
 
 #GEO LOCATION API
-POST /v1/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation()
-GET  /v1/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String)
-PATCH  /v1/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
-DELETE   /v1/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String)
+POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation()
+GET  /v1/notification/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String)
+PATCH  /v1/notification/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
+DELETE   /v1/notification/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String)
 POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification()
 POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount()
 
@@ -202,3 +202,12 @@ POST /v1/system/settings			     @controllers.config.ApplicationConfigController.
 
 #telemetry
 POST /v1/telemetry                      @controllers.telemetry.TelemetryController.save()
+
+#Bulk Upload Location API
+POST   /v1/bulk/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
+
+#Location API
+POST   /v1/location/create                      @controllers.location.LocationController.createLocation()
+PATCH  /v1/location/update                      @controllers.location.LocationController.updateLocation()
+POST   /v1/location/search                      @controllers.location.LocationController.searchLocation()
+DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
