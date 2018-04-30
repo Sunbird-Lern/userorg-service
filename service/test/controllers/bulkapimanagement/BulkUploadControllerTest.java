@@ -25,6 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
@@ -64,7 +65,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testuploadUser() {
+  public void testUploadUser() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -83,7 +84,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testuploadOrg() {
+  public void testUploadOrg() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -102,7 +103,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testgetUploadStatus() {
+  public void testGetUploadStatus() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -113,7 +114,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testbulkBatchEnrollment() {
+  public void testBulkBatchEnrollment() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -133,7 +134,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testuserDataEncryption() {
+  public void testUserDataEncryption() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -144,7 +145,7 @@ public class BulkUploadControllerTest {
   }
 
   @Test
-  public void testuserDataDecryption() {
+  public void testUserDataDecryption() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -163,5 +164,42 @@ public class BulkUploadControllerTest {
       ProjectLogger.log(e.getMessage(), e);
     }
     return jsonResp;
+  }
+
+  @Test
+  public void testUploadLocationWithProperData() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
+    innerMap.put(GeoLocationJsonKey.LOCATION_TYPE, "State");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/bulk/location/upload").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testUploadLocationWithoutMandatoryParamtype() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/bulk/location/upload").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
   }
 }
