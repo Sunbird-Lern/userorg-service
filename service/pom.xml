@@ -104,7 +104,12 @@
             <groupId>org.sunbird</groupId>
   			<artifactId>common-util</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-        </dependency>	
+        </dependency>
+        <dependency>
+			<groupId>org.sunbird</groupId>
+			<artifactId>request-validator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>	
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-testkit_2.11</artifactId>
