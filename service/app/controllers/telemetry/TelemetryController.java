@@ -49,7 +49,7 @@ public class TelemetryController extends BaseController {
           setExtraParam(
               request,
               ExecutionContext.getRequestId(),
-              ActorOperations.SAVE_TELEMETRY.getValue(),
+              "saveTelemetry",
               ctx().flash().get(JsonKey.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
