@@ -197,11 +197,7 @@ POST    /v1/notification/send             @controllers.geolocation.GeoLocationCo
 POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount()
 
 #System Settings
-
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
-
-#telemetry
-POST /v1/telemetry                      @controllers.telemetry.TelemetryController.save()
 
 #Bulk Upload Location API
 POST   /v1/bulk/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
