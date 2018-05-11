@@ -390,7 +390,7 @@ public class BaseController extends Controller {
     // ...
     setChannelAndActorInfo(ctx(), request);
 
-    Function function = new Function() {
+    Function<Object, Result> function = new Function<Object, Result>() {
         public Result apply(Object result) {
             if (result instanceof Response) {
               Response response = (Response) result;
@@ -403,7 +403,7 @@ public class BaseController extends Controller {
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
           }
-        }
+        };
     
     if (actorRef instanceof ActorRef) {
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
