@@ -6,7 +6,7 @@ import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.validator.location.BaseLocationRequestValidator;
+import org.sunbird.validator.location.BaseLocationRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
