@@ -62,8 +62,6 @@ public class Global extends GlobalSettings {
       ctx.request().headers();
       Promise<Result> result = null;
       ctx.response().setHeader("Access-Control-Allow-Origin", "*");
-      ctx.flash().put("startTime", Long.toString(System.currentTimeMillis()));
-
       // Unauthorized, Anonymous, UserID
       String message = RequestInterceptor.verifyRequestData(ctx);
       // call method to set all the required params for the telemetry event(log)...
@@ -83,8 +81,6 @@ public class Global extends GlobalSettings {
       } else {
         result = delegate.call(ctx);
       }
-      long duration = System.currentTimeMillis() - Long.parseLong(ctx.flash().get("startTime"));
-      System.out.println("Time taken to process request:" + duration);
       return result;
     }
   }
