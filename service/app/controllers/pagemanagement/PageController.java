@@ -126,7 +126,6 @@ public class PageController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("requested data for get page  = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetPageData(reqObj);
       reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
