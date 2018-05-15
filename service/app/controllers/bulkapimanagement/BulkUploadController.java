@@ -32,8 +32,10 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.USER, false);
-      RequestValidator.validateUploadUser(
-          (Map<String, Object>) request.getRequest().get(JsonKey.DATA));
+      Map<String, Object> reqObj = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
+      reqObj.put(JsonKey.EXTERNAL_ID, reqObj.get(JsonKey.ORG_EXTERNAL_ID));
+      reqObj.put(JsonKey.PROVIDER, reqObj.get(JsonKey.ORG_PROVIDER));
+      RequestValidator.validateUploadUser(reqObj);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
