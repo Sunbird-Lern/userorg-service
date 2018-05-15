@@ -38,8 +38,8 @@ public class NotesController extends BaseController {
         if ((!StringUtils.isBlank(userId))
             && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
           throw new ProjectCommonException(
-              ResponseCode.unAuthorised.getErrorCode(),
-              ResponseCode.unAuthorised.getErrorMessage(),
+              ResponseCode.unAuthorized.getErrorCode(),
+              ResponseCode.unAuthorized.getErrorMessage(),
               ResponseCode.UNAUTHORIZED.getResponseCode());
         }
       }

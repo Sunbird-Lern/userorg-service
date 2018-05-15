@@ -106,7 +106,7 @@ public class RequestInterceptor {
       if (StringUtils.isBlank(accessToken)
           && StringUtils.isBlank(authClientToken)
           && StringUtils.isBlank(authClientId)) {
-        return ResponseCode.unAuthorised.getErrorCode();
+        return ResponseCode.unAuthorized.getErrorCode();
       }
       if (StringUtils.isBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
           && Boolean.parseBoolean(
@@ -118,14 +118,14 @@ public class RequestInterceptor {
         String clientId =
             AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
         if (StringUtils.isBlank(clientId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
+          return ResponseCode.unAuthorized.getErrorCode();
         }
         response = "{userId}" + clientId;
         ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
       } else {
         String userId = AuthenticationHelper.verifyUserAccesToken(accessToken);
         if (StringUtils.isBlank(userId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
+          return ResponseCode.unAuthorized.getErrorCode();
         }
         response = "{userId}" + userId;
       }

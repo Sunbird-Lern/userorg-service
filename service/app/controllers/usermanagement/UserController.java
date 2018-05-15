@@ -106,7 +106,9 @@ public class UserController extends BaseController {
     if (ctx().flash().containsKey(JsonKey.AUTH_WITH_MASTER_KEY)) {
       validateWithClient(reqObj);
     } else {
-      validateWithUserId(reqObj);
+      ProjectLogger.log("Auth token is not master token.");
+      // Moving this check to Actor side.
+      // validateWithUserId(reqObj);
     }
   }
 
@@ -125,16 +127,16 @@ public class UserController extends BaseController {
     // check whether both exist or not ...
     if (clientDetail == null || userDetail == null) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
 
     String userRootOrgId = (String) userDetail.get(JsonKey.ROOT_ORG_ID);
     if (StringUtils.isBlank(userRootOrgId)) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
     // get the org info from org table
@@ -147,18 +149,8 @@ public class UserController extends BaseController {
     // check whether both belongs to the same channel or not ...
     if (!compareStrings(userChannel, clientChannel)) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
-    }
-  }
-
-  private void validateWithUserId(Request reqObj) {
-    String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
-    if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
-      throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
   }
@@ -533,8 +525,8 @@ public class UserController extends BaseController {
         String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
         if (!userId.equals(ctx().flash().get(JsonKey.USER_ID))) {
           throw new ProjectCommonException(
-              ResponseCode.unAuthorised.getErrorCode(),
-              ResponseCode.unAuthorised.getErrorMessage(),
+              ResponseCode.unAuthorized.getErrorCode(),
+              ResponseCode.unAuthorized.getErrorMessage(),
               ResponseCode.UNAUTHORIZED.getResponseCode());
         }
       }
