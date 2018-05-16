@@ -156,6 +156,16 @@ public class UserController extends BaseController {
     }
   }
 
+  private void validateWithUserId(Request reqObj) {
+    String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+    if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
+      throw new ProjectCommonException(
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
+  }
+
   /**
    * This method will do the user authentication based on login type key. login can be done with
    * following ways (simple login , Google plus login , Facebook login , Aadhaar login)

@@ -3,7 +3,9 @@ package util;
 
 import controllers.BaseController;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +21,8 @@ import org.sunbird.common.models.util.ProjectUtil.Environment;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.util.SchedulerManager;
+import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import play.Application;
 import play.GlobalSettings;
@@ -44,6 +48,8 @@ public class Global extends GlobalSettings {
 
   public static String ssoPublicKey = "";
   private static final String version = "v1";
+  private static final List<String> USER_UNAUTH_STATES =
+      Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
 
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
@@ -53,15 +59,14 @@ public class Global extends GlobalSettings {
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
       ctx.request().headers();
-      long startTime = System.currentTimeMillis();
       Promise<Result> result = null;
-      Http.Response response = ctx.response();
-      response.setHeader("Access-Control-Allow-Origin", "*");
+      ctx.response().setHeader("Access-Control-Allow-Origin", "*");
+      // Unauthorized, Anonymous, UserID
       String message = RequestInterceptor.verifyRequestData(ctx);
       // call method to set all the required params for the telemetry event(log)...
-      intializeRequestInfo(ctx, message.replace("{userId}", ""));
-      if (message.contains("{userId}")) {
-        ctx.flash().put(JsonKey.USER_ID, message.replace("{userId}", ""));
+      intializeRequestInfo(ctx, message);
+      if (!USER_UNAUTH_STATES.contains(message)) {
+        ctx.flash().put(JsonKey.USER_ID, message);
         ctx.flash().put(JsonKey.IS_AUTH_REQ, "false");
         for (String uri : RequestInterceptor.restrictedUriList) {
           if (ctx.request().path().contains(uri)) {
@@ -70,27 +75,15 @@ public class Global extends GlobalSettings {
           }
         }
         result = delegate.call(ctx);
-      } else if (!StringUtils.isBlank(message)) {
+      } else if (JsonKey.UNAUTHORIZED.equals(message)) {
         result =
             onDataValidationError(
                 ctx.request(), message, ResponseCode.UNAUTHORIZED.getResponseCode());
       } else {
         result = delegate.call(ctx);
       }
-      //			ProjectLogger.log("Learning Service Call Ended  for  api ==" + ctx.request().path() + "
-      // Time taken "
-      //					+ (System.currentTimeMillis() - startTime), LoggerEnum.PERF_LOG);
       return result;
     }
-  }
-
-  /** @author Manzarul */
-  public enum RequestMethod {
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    PATCH;
   }
 
   /**
@@ -104,6 +97,19 @@ public class Global extends GlobalSettings {
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
     SunbirdMWService.init();
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
+    SchedulerManager.schedule();
+    // scheduler should start after few minutes so internally it is sleeping for 4 minute , so
+    // it is in separate thread.
+    new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance();
+              }
+            })
+        .start();
   }
 
   /**
@@ -126,10 +132,6 @@ public class Global extends GlobalSettings {
   }
 
   private void intializeRequestInfo(Context ctx, String userId) {
-    // TODO: need to re-factor entire code.
-    if (StringUtils.isBlank(userId)) {
-      userId = "anonymous";
-    }
     Request request = ctx.request();
     String actionMethod = ctx.request().method();
     String messageId = ExecutionContext.getRequestId(); // request.getHeader(JsonKey.MESSAGE_ID);
@@ -146,20 +148,15 @@ public class Global extends GlobalSettings {
     }
     reqContext.put(JsonKey.CHANNEL, channel);
     ctx.flash().put(JsonKey.CHANNEL, channel);
-    reqContext.put(
-        JsonKey.ENV,
-        getEnv(request)); // context done we can pass it directly to the LMAX Disruptor ...
+    reqContext.put(JsonKey.ENV, getEnv(request));
     reqContext.put(JsonKey.REQUEST_ID, ExecutionContext.getRequestId());
 
-    String userToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
-    if (null != userToken) {
+    if (!USER_UNAUTH_STATES.contains(userId)) {
       reqContext.put(JsonKey.ACTOR_ID, userId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
       ctx.flash().put(JsonKey.ACTOR_ID, userId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
-
     } else {
-      // write logic to check consumer id and set trype as consumer ...
       String consumerId = request.getHeader(HeaderParam.X_Consumer_ID.getName());
       if (StringUtils.isBlank(consumerId)) {
         consumerId = JsonKey.DEFAULT_CONSUMER_ID;
