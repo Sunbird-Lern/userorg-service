@@ -82,6 +82,7 @@ public class UserController extends BaseController {
         validateAuthenticity(reqObj);
       }
       UserRequestValidator.validateUpdateUser(reqObj);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
