@@ -4,6 +4,7 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -168,5 +169,32 @@ public class AuthenticationHelper {
   public static boolean invalidateToken(String token) {
 
     return false;
+  }
+
+  public static Map<String, Object> getUserFromExternalIdAndProvider(
+      String externalId, String provider) {
+    String keyspace = "sunbird";
+    String userExtTable = "user_external_identity";
+    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
+    Map<String, Object> user = null;
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.PROVIDER, (provider).toLowerCase());
+    map.put(JsonKey.EXTERNAL_ID, (externalId).toLowerCase());
+    Response response = cassandraOperation.getRecordsByProperties(keyspace, userExtTable, map);
+    List<Map<String, Object>> userRecordList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(userRecordList)) {
+      Map<String, Object> userExtIdRecord = userRecordList.get(0);
+      Response res =
+          cassandraOperation.getRecordById(
+              usrDbInfo.getKeySpace(),
+              usrDbInfo.getTableName(),
+              (String) userExtIdRecord.get(JsonKey.USER_ID));
+      if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) res.get(JsonKey.RESPONSE))) {
+        // user exist
+        user = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE)).get(0);
+      }
+    }
+    return user;
   }
 }

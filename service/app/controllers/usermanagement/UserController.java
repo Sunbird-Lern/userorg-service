@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
@@ -77,11 +78,11 @@ public class UserController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      UserRequestValidator.validateUpdateUser(reqObj);
       if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         validateAuthenticity(reqObj);
       }
-      UserRequestValidator.validateUpdateUser(reqObj);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -108,19 +109,40 @@ public class UserController extends BaseController {
       validateWithClient(reqObj);
     } else {
       ProjectLogger.log("Auth token is not master token.");
-      // Moving this check to Actor side.
-      // validateWithUserId(reqObj);
+      // TODO: Moving this check to Actor side.
+      validateWithUserId(reqObj);
     }
   }
 
-  private void validateWithClient(Request reqObj) {
-    String clientId = ctx().flash().get(JsonKey.USER_ID);
-    String userId;
+  private String getUserIdFromExtIdAndProvider(Request reqObj) {
+    String userId = "";
     if (null != reqObj.getRequest().get(JsonKey.USER_ID)) {
       userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
     } else {
       userId = (String) reqObj.getRequest().get(JsonKey.ID);
     }
+    if (StringUtils.isBlank(userId)) {
+      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
+      String provider = (String) reqObj.getRequest().get(JsonKey.PROVIDER);
+      Map<String, Object> user =
+          AuthenticationHelper.getUserFromExternalIdAndProvider(extId, provider);
+      if (MapUtils.isNotEmpty(user)) {
+        userId = (String) user.get(JsonKey.ID);
+      } else {
+        throw new ProjectCommonException(
+            ResponseCode.invalidParameter.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.invalidParameter.getErrorMessage(),
+                JsonKey.EXTERNAL_ID + " and " + JsonKey.PROVIDER),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+    }
+    return userId;
+  }
+
+  private void validateWithClient(Request reqObj) {
+    String clientId = ctx().flash().get(JsonKey.USER_ID);
+    String userId = getUserIdFromExtIdAndProvider(reqObj);
 
     Map<String, Object> clientDetail = AuthenticationHelper.getClientAccessTokenDetail(clientId);
     // get user detail from cassandra
@@ -157,7 +179,7 @@ public class UserController extends BaseController {
   }
 
   private void validateWithUserId(Request reqObj) {
-    String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+    String userId = getUserIdFromExtIdAndProvider(reqObj);
     if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
