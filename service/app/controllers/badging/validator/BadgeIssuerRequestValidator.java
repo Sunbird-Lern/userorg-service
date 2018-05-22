@@ -1,62 +1,65 @@
 package controllers.badging.validator;
 
-import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-/** Created by arvind on 2/3/18. */
-public class BadgeIssuerRequestValidator {
+/**
+ * Validates Badge Issuer API requests.
+ *
+ * @author Arvind, B Vinaya Kumar
+ */
+public class BadgeIssuerRequestValidator extends BaseRequestValidator {
 
-  private BadgeIssuerRequestValidator() {}
-
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  private final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   /**
-   * Method to validate noteId
+   * Validates request of create issuer API.
    *
-   * @param request
+   * @param request Request containing following parameters: name: The unique name of the badge
+   *     issuing entity or organisation. description: A short description of the issuer. url: The
+   *     valid homepage URL of the issuer. email: The valid contact e-mail address of the issuer.
+   *     image: An image to represent the issuer.
    */
-  public static void validateCreateBadgeIssuer(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.NAME))) {
-      throw createExceptionInstance(
-          ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(), "name is required.");
-    }
-    if (ProjectUtil.isStringNullOREmpty((String) request.getRequest().get(JsonKey.DESCRIPTION))) {
-      throw createExceptionInstance(
-          ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(), "Description is required.");
-    }
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.URL))) {
-      throw createExceptionInstance(
-          ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(), "url is required.");
-    }
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.EMAIL))) {
-      throw createExceptionInstance(
-          ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(), "email is required.");
-    }
+  public void validateCreateBadgeIssuer(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.NAME),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.NAME);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.DESCRIPTION),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.DESCRIPTION);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.URL),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.URL);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.EMAIL),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.EMAIL);
 
     if (!ProjectUtil.isEmailvalid((String) request.getRequest().get(JsonKey.EMAIL))) {
-      throw createExceptionInstance(
-          ResponseCode.invalidDataForCreateBadgeIssuer.getErrorCode(), "email is invalid.");
+      throw createExceptionByResponseCode(ResponseCode.emailFormatError, ERROR_CODE);
+    }
+
+    if (!ProjectUtil.isUrlvalid((String) request.getRequest().get(JsonKey.URL))) {
+      throw createExceptionByResponseCode(ResponseCode.urlFormatError, ERROR_CODE);
     }
   }
 
-  public static void validateGetBadgeIssuerDetail(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.SLUG))) {
-      throw new ProjectCommonException(
-          ResponseCode.slugRequired.getErrorCode(),
-          ResponseCode.slugRequired.getErrorMessage(),
-          ERROR_CODE);
-    }
-  }
-
-  private static ProjectCommonException createExceptionInstance(String errorCode, String errMsg) {
-    return new ProjectCommonException(
-        ResponseCode.getResponse(errorCode).getErrorCode(),
-        ResponseCode.getResponse(errorCode).getErrorMessage(),
-        ERROR_CODE,
-        errMsg);
+  /**
+   * Validates request of get issuer API.
+   *
+   * @param request Request containing following parameters: slug: The ID of the Issuer whose
+   *     details need to be returned.
+   */
+  public void validateGetBadgeIssuerDetail(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.SLUG),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.SLUG);
   }
 }
