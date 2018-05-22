@@ -109,7 +109,6 @@ public class UserController extends BaseController {
       validateWithClient(reqObj);
     } else {
       ProjectLogger.log("Auth token is not master token.");
-      // TODO: Moving this check to Actor side.
       validateWithUserId(reqObj);
     }
   }
