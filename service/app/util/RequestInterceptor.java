@@ -94,11 +94,12 @@ public class RequestInterceptor {
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
     if (!isRequestInExcludeList(request.path())) {
-    	  String clientId = JsonKey.UNAUTHORIZED;
+      String clientId = JsonKey.UNAUTHORIZED;
       String accessToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
-      String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
+      String authClientToken =
+          request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
       String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-      
+
       if (StringUtils.isNotBlank(accessToken)) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
       } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
@@ -109,7 +110,7 @@ public class RequestInterceptor {
       }
       return clientId;
     } else {
-    		return JsonKey.ANONYMOUS;
+      return JsonKey.ANONYMOUS;
     }
   }
 
