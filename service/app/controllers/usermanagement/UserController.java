@@ -48,11 +48,6 @@ public class UserController extends BaseController {
           " get user registration request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateCreateUser(reqObj);
-
-      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
-        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
-        reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
-      }
       reqObj.setOperation(ActorOperations.CREATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -89,11 +84,6 @@ public class UserController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-
-      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
-        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
-        reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
-      }
 
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
