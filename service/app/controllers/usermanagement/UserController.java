@@ -113,8 +113,9 @@ public class UserController extends BaseController {
     if (StringUtils.isBlank(userId)) {
       String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
       String provider = (String) reqObj.getRequest().get(JsonKey.PROVIDER);
+      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
       Map<String, Object> user =
-          AuthenticationHelper.getUserFromExternalIdAndProvider(extId, provider);
+          AuthenticationHelper.getUserFromExternalId(extId, provider,idType);
       if (MapUtils.isNotEmpty(user)) {
         userId = (String) user.get(JsonKey.ID);
       } else {
