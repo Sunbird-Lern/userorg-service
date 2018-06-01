@@ -24,6 +24,7 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.responsecode.ResponseMessage;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import util.AuthenticationHelper;
@@ -123,7 +124,7 @@ public class UserController extends BaseController {
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
                 ResponseCode.invalidParameter.getErrorMessage(),
-                JsonKey.EXTERNAL_ID + " and " + JsonKey.PROVIDER),
+                ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT,(JsonKey.EXTERNAL_ID+", "+JsonKey.EXTERNAL_ID_TYPE),JsonKey.PROVIDER)),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
