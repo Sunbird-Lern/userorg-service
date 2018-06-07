@@ -23,7 +23,8 @@ public class AuditLogController extends BaseController {
   public Promise<Result> searchAuditHistory() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Request for search audith-istory.", requestData, LoggerEnum.DEBUG.name());
+      ProjectLogger.log(
+          "AuditLogController:searchAuditHistory call start", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_AUDIT_LOG.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
