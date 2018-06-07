@@ -4,6 +4,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 
+import org.sunbird.actor.router.BackgroundRequestRouter;
+import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.common.request.Request;
+
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -36,6 +40,12 @@ public class ThreadDumpController extends BaseController {
         System.out.println("=== thread-dump start ===");
         System.out.println(dump.toString());
         System.out.println("=== thread-dump end ===");
+        Request request = new Request();
+        request.setOperation("takeThreadDump");
+        request.setEnv(getEnvironment());
+        if ("off".equalsIgnoreCase(BackgroundRequestRouter.getMode())) {
+        		actorResponseHandler(SunbirdMWService.getBackgroundRequestRouter(), request, timeout, null, request());
+        }
         return Promise.promise(() -> ok("successful"));
 	}
 }
