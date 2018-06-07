@@ -39,7 +39,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:createOrg call start" + requestData, LoggerEnum.DEBUG.name());
+          "OrganisationController: createOrg called" + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateCreateOrg(reqObj);
@@ -78,7 +78,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:approveOrg call start with org id = " + requestData,
+          "OrganisationController: approveOrg called with data = " + requestData,
           LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
@@ -107,8 +107,8 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:updateOrg call start with requested data = " + requestData,
-          LoggerEnum.INFO.name());
+          "OrganisationController: updateOrg called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUpdateOrg(reqObj);
@@ -140,7 +140,7 @@ public class OrganisationController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUpdateOrgStatus(reqObj);
@@ -167,8 +167,8 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:getOrgDetails call start with requested data =  " + requestData,
-          LoggerEnum.INFO.name());
+          "OrganisationController: getOrgDetails called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateOrg(reqObj);
@@ -195,9 +195,8 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:addMemberToOrganisation call start with requested data =  "
-              + requestData,
-          LoggerEnum.INFO.name());
+          "OrganisationController: addMemberToOrganisation called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateAddMember(reqObj);
@@ -224,7 +223,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:removeMemberFromOrganisation call start", LoggerEnum.INFO.name());
+          "OrganisationController: removeMemberFromOrganisation called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
@@ -251,7 +250,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:joinUserOrganisation call start", LoggerEnum.DEBUG.name());
+          "OrganisationController: joinUserOrganisation called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
@@ -278,7 +277,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:approveUserOrganisation call start", LoggerEnum.INFO.name());
+          "OrganisationController: approveUserOrganisation called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
@@ -305,7 +304,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:rejectUserOrganisation call start" + requestData,
+          "OrganisationController: rejectUserOrganisation called with data = " + requestData,
           LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
@@ -332,7 +331,8 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "OrganisationController:downloadOrgs call start" + requestData, LoggerEnum.INFO.name());
+          "OrganisationController: downloadOrgs called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DOWNLOAD_ORGS.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -357,7 +357,7 @@ public class OrganisationController extends BaseController {
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("OrganisationController:search call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("OrganisationController: search called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
@@ -390,7 +390,7 @@ public class OrganisationController extends BaseController {
    */
   public Promise<Result> getOrgTypeList() {
     try {
-      ProjectLogger.log("OrganisationController:getOrgTypeList call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("OrganisationController: getOrgTypeList called", LoggerEnum.DEBUG.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_ORG_TYPE_LIST.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -410,7 +410,7 @@ public class OrganisationController extends BaseController {
   public Promise<Result> createOrgType() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("OrganisationController:createOrgType call start", LoggerEnum.DEBUG.name());
+      ProjectLogger.log("OrganisationController: createOrgType called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreateOrgType(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_ORG_TYPE.getValue());
@@ -432,7 +432,7 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "Organisation UpdateOrgType method call =" + requestData, LoggerEnum.INFO.name());
+          "Organisation UpdateOrgType called with data = " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrgType(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());

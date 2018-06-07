@@ -21,7 +21,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> create() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:create call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: create called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -41,7 +41,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> update() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:update call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: update called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -61,7 +61,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> delete() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:delete call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: delete called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DELETE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -81,7 +81,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> read() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:read call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: read called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -101,7 +101,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> readAll() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:readAll call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: readAll called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_ALL_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -121,7 +121,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:search call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: search called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -141,7 +141,7 @@ public class DbOperationController extends BaseController {
   public Promise<Result> getMetrics() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("DbOperationController:getMetrics call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("DbOperationController: getMetrics called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.GET_METRICS.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());

@@ -20,7 +20,7 @@ public class GeoLocationController extends BaseController {
   public Promise<Result> createGeoLocation() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("create geo location" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("create geo location" + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_GEO_LOCATION.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());

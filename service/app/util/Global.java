@@ -211,7 +211,7 @@ public class Global extends GlobalSettings {
     } else if (uri.startsWith("/v1/role")) {
       env = JsonKey.ROLE;
     } else if (uri.startsWith("/v1/note")) {
-      env = JsonKey.USER;
+      env = JsonKey.NOTE;
     } else if (uri.startsWith("/v1/location")) {
       env = JsonKey.LOCATION;
     } else {
