@@ -23,7 +23,6 @@ import play.mvc.Result;
 
 /**
  * This controller will handle all the API related to course batches , add batch,update batch,join
- * member to batch, remove member from batch, get particular batch details.
  *
  * @author Manzarul
  */
@@ -206,7 +205,7 @@ public class CourseBatchController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "CourseBatchController: search called with data =" + requestData,
+          "CourseBatchController: search called with data = " + requestData,
           LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());

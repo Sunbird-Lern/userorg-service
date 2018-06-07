@@ -140,7 +140,9 @@ public class OrganisationController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Update organisation request: " + requestData, LoggerEnum.DEBUG.name());
+      ProjectLogger.log(
+          "OrganisationController: updateOrgStatus called with data =  " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUpdateOrgStatus(reqObj);
@@ -432,7 +434,8 @@ public class OrganisationController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "Organisation UpdateOrgType called with data = " + requestData, LoggerEnum.DEBUG.name());
+          "OrganisationController: updateOrgType called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateOrgType(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());

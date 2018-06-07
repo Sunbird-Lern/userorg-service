@@ -91,7 +91,7 @@ public class GeoLocationController extends BaseController {
   public Promise<Result> sendNotification() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("createGeoLocation:sendNotification call start", LoggerEnum.INFO.name());
+      ProjectLogger.log("createGeoLocation:sendNotification called", LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendNotification(reqObj);
       reqObj.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());

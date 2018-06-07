@@ -407,7 +407,7 @@ public class UserController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "UserController:unBlockUser called with data = " + requestData, LoggerEnum.DEBUG.name());
+          "UserController: unBlockUser called with data = " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UNBLOCK_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -432,7 +432,7 @@ public class UserController extends BaseController {
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController:search call start");
+      ProjectLogger.log("UserController: search call start");
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
