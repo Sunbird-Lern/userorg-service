@@ -61,7 +61,8 @@ public class LocationControllerTest {
     headerMap = new HashMap<String, String[]>();
 
     headerMap.put(
-        HeaderParam.X_Access_TokenId.getName(), new String[] {"Authenticated user token"});
+        HeaderParam.X_Authenticated_User_Token.getName(),
+        new String[] {"Authenticated user token"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
 
     system = ActorSystem.create("system");
