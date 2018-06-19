@@ -4,6 +4,8 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -27,8 +29,13 @@ public class AuthenticationHelper {
     Application.checkCassandraConnection();
   }
 
+  private static boolean ssoEnabled =
+      (StringUtils.isNotBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
+          && Boolean.parseBoolean(
+              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED)));
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
+
   /**
    * This method will verify the incoming user access token against store data base /cache. If token
    * is valid then it would be associated with some user id. In case of token matched it will
@@ -40,11 +47,9 @@ public class AuthenticationHelper {
   @SuppressWarnings("unchecked")
   public static String verifyUserAccesToken(String token) {
     SSOManager ssoManager = SSOServiceFactory.getInstance();
-    String userId = "";
+    String userId = JsonKey.UNAUTHORIZED;
     try {
-      boolean response =
-          Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED));
-      if (response) {
+      if (ssoEnabled) {
         userId = ssoManager.verifyToken(token);
       } else {
         Response authResponse =
@@ -71,7 +76,7 @@ public class AuthenticationHelper {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.ID, clientId);
     propertyMap.put(JsonKey.MASTER_KEY, clientToken);
-    String validClientId = "";
+    String validClientId = JsonKey.UNAUTHORIZED;
     try {
       Response clientResponse =
           cassandraOperation.getRecordsByProperties(
@@ -164,5 +169,32 @@ public class AuthenticationHelper {
   public static boolean invalidateToken(String token) {
 
     return false;
+  }
+
+  public static Map<String, Object> getUserFromExternalIdAndProvider(
+      String externalId, String provider) {
+    String keyspace = "sunbird";
+    String userExtTable = "user_external_identity";
+    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
+    Map<String, Object> user = null;
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.PROVIDER, (provider).toLowerCase());
+    map.put(JsonKey.EXTERNAL_ID, (externalId).toLowerCase());
+    Response response = cassandraOperation.getRecordsByProperties(keyspace, userExtTable, map);
+    List<Map<String, Object>> userRecordList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(userRecordList)) {
+      Map<String, Object> userExtIdRecord = userRecordList.get(0);
+      Response res =
+          cassandraOperation.getRecordById(
+              usrDbInfo.getKeySpace(),
+              usrDbInfo.getTableName(),
+              (String) userExtIdRecord.get(JsonKey.USER_ID));
+      if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) res.get(JsonKey.RESPONSE))) {
+        // user exist
+        user = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE)).get(0);
+      }
+    }
+    return user;
   }
 }

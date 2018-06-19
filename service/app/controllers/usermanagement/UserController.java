@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
@@ -43,15 +44,9 @@ public class UserController extends BaseController {
   public Promise<Result> createUser() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          " get user registration request data = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: createUser called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateCreateUser(reqObj);
-
-      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
-        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
-        reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
-      }
       reqObj.setOperation(ActorOperations.CREATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -75,23 +70,19 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user update profile data = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: updateUserProfile called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      UserRequestValidator.validateUpdateUser(reqObj);
       if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         validateAuthenticity(reqObj);
       }
-      UserRequestValidator.validateUpdateUser(reqObj);
+      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
-
-      if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.PROVIDER))) {
-        reqObj.getRequest().put(JsonKey.EMAIL_VERIFIED, false);
-        reqObj.getRequest().put(JsonKey.PHONE_VERIFIED, false);
-      }
 
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
@@ -106,18 +97,40 @@ public class UserController extends BaseController {
     if (ctx().flash().containsKey(JsonKey.AUTH_WITH_MASTER_KEY)) {
       validateWithClient(reqObj);
     } else {
+      ProjectLogger.log("Auth token is not master token.");
       validateWithUserId(reqObj);
     }
   }
 
-  private void validateWithClient(Request reqObj) {
-    String clientId = ctx().flash().get(JsonKey.USER_ID);
-    String userId;
+  private String getUserIdFromExtIdAndProvider(Request reqObj) {
+    String userId = "";
     if (null != reqObj.getRequest().get(JsonKey.USER_ID)) {
       userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
     } else {
       userId = (String) reqObj.getRequest().get(JsonKey.ID);
     }
+    if (StringUtils.isBlank(userId)) {
+      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
+      String provider = (String) reqObj.getRequest().get(JsonKey.PROVIDER);
+      Map<String, Object> user =
+          AuthenticationHelper.getUserFromExternalIdAndProvider(extId, provider);
+      if (MapUtils.isNotEmpty(user)) {
+        userId = (String) user.get(JsonKey.ID);
+      } else {
+        throw new ProjectCommonException(
+            ResponseCode.invalidParameter.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.invalidParameter.getErrorMessage(),
+                JsonKey.EXTERNAL_ID + " and " + JsonKey.PROVIDER),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+    }
+    return userId;
+  }
+
+  private void validateWithClient(Request reqObj) {
+    String clientId = ctx().flash().get(JsonKey.USER_ID);
+    String userId = getUserIdFromExtIdAndProvider(reqObj);
 
     Map<String, Object> clientDetail = AuthenticationHelper.getClientAccessTokenDetail(clientId);
     // get user detail from cassandra
@@ -125,16 +138,16 @@ public class UserController extends BaseController {
     // check whether both exist or not ...
     if (clientDetail == null || userDetail == null) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
 
     String userRootOrgId = (String) userDetail.get(JsonKey.ROOT_ORG_ID);
     if (StringUtils.isBlank(userRootOrgId)) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
     // get the org info from org table
@@ -147,18 +160,18 @@ public class UserController extends BaseController {
     // check whether both belongs to the same channel or not ...
     if (!compareStrings(userChannel, clientChannel)) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
   }
 
   private void validateWithUserId(Request reqObj) {
-    String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
+    String userId = getUserIdFromExtIdAndProvider(reqObj);
     if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctx().flash().get(JsonKey.USER_ID)))) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorised.getErrorCode(),
-          ResponseCode.unAuthorised.getErrorMessage(),
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }
   }
@@ -173,7 +186,7 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user login data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: login called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateUserLogin(reqObj);
       reqObj.setOperation(ActorOperations.LOGIN.getValue());
@@ -197,7 +210,7 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user logout data = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: logout called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.LOGOUT.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -221,7 +234,7 @@ public class UserController extends BaseController {
   public Promise<Result> changePassword() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user change password data = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: changePassword called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateChangePassword(reqObj);
       reqObj.setOperation(ActorOperations.CHANGE_PASSWORD.getValue());
@@ -246,9 +259,9 @@ public class UserController extends BaseController {
   public Promise<Result> getUserProfile(String userId) {
 
     try {
-      JsonNode requestData = request().body().asJson();
       String requestedFields = request().getQueryString(JsonKey.FIELDS);
-      ProjectLogger.log(" get user profile data by id =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "UserController: getUserProfile called with data = " + userId, LoggerEnum.DEBUG.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_PROFILE.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -295,7 +308,8 @@ public class UserController extends BaseController {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          " verify user details by loginId data =" + requestData, LoggerEnum.INFO.name());
+          "UserController: getUserDetailsByLoginId called with data = " + requestData,
+          LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateVerifyUser(reqObj);
       reqObj.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
@@ -321,7 +335,7 @@ public class UserController extends BaseController {
   public Promise<Result> downloadUsers() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" Downlaod user data request =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: downloadUsers called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DOWNLOAD_USERS.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -345,7 +359,8 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" blockuser =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "UserController: blockUser called with data = " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.BLOCK_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -368,7 +383,8 @@ public class UserController extends BaseController {
   public Promise<Result> assignRoles() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" Assign roles api request body =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "UserController: assignRoles called with data = " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateAssignRole(reqObj);
       reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
@@ -390,7 +406,8 @@ public class UserController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" unblockuser =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "UserController: unBlockUser called with data = " + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UNBLOCK_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -415,7 +432,7 @@ public class UserController extends BaseController {
   public Promise<Result> search() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("User search api call =" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: search call start");
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -446,7 +463,7 @@ public class UserController extends BaseController {
    * @return promise<Result>
    */
   public Promise<Result> updateLoginTime() {
-    ProjectLogger.log("Update user login time api call");
+    ProjectLogger.log("UserController: updateLoginTime called", LoggerEnum.DEBUG.name());
     try {
       String userId = ctx().flash().get(JsonKey.USER_ID);
       JsonNode requestData = request().body().asJson();
@@ -473,7 +490,7 @@ public class UserController extends BaseController {
    */
   public Promise<Result> getMediaTypes() {
     try {
-      ProjectLogger.log(" get media Types ", LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: getMediaTypes called", LoggerEnum.DEBUG.name());
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_MEDIA_TYPES.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -498,7 +515,7 @@ public class UserController extends BaseController {
   public Promise<Result> forgotpassword() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get user forgot password call = " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: forgotpassword called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateForgotpassword(reqObj);
       reqObj.setOperation(ActorOperations.FORGOT_PASSWORD.getValue());
@@ -524,8 +541,7 @@ public class UserController extends BaseController {
   public Promise<Result> profileVisibility() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          " Profile visibility control request= " + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: profileVisibility called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       UserRequestValidator.validateProfileVisibility(reqObj);
       if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
@@ -533,8 +549,8 @@ public class UserController extends BaseController {
         String userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
         if (!userId.equals(ctx().flash().get(JsonKey.USER_ID))) {
           throw new ProjectCommonException(
-              ResponseCode.unAuthorised.getErrorCode(),
-              ResponseCode.unAuthorised.getErrorMessage(),
+              ResponseCode.unAuthorized.getErrorCode(),
+              ResponseCode.unAuthorized.getErrorMessage(),
               ResponseCode.UNAUTHORIZED.getResponseCode());
         }
       }

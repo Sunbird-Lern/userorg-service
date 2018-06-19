@@ -5,11 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 
@@ -97,42 +93,25 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
-    String response = "{userId}";
     if (!isRequestInExcludeList(request.path())) {
+      String clientId = JsonKey.UNAUTHORIZED;
       String accessToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
       String authClientToken =
           request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
       String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-      if (StringUtils.isBlank(accessToken)
-          && StringUtils.isBlank(authClientToken)
-          && StringUtils.isBlank(authClientId)) {
-        return ResponseCode.unAuthorised.getErrorCode();
-      }
-      if (StringUtils.isBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
-          && Boolean.parseBoolean(
-              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
-        ProjectLogger.log(
-            "SSO public key is not set by environment variable==", LoggerEnum.INFO.name());
-        response = "{userId}" + JsonKey.NOT_AVAILABLE;
-      } else if (!StringUtils.isBlank(authClientToken) && !StringUtils.isBlank(authClientId)) {
-        String clientId =
-            AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
-        if (StringUtils.isBlank(clientId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
+
+      if (StringUtils.isNotBlank(accessToken)) {
+        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+      } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
+        clientId = AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
+        if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
+          ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
         }
-        response = "{userId}" + clientId;
-        ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
-      } else {
-        String userId = AuthenticationHelper.verifyUserAccesToken(accessToken);
-        if (StringUtils.isBlank(userId)) {
-          return ResponseCode.unAuthorised.getErrorCode();
-        }
-        response = "{userId}" + userId;
       }
+      return clientId;
     } else {
-      AuthenticationHelper.invalidateToken("");
+      return JsonKey.ANONYMOUS;
     }
-    return response;
   }
 
   /**

@@ -390,40 +390,25 @@ public class BaseController extends Controller {
     // ...
     setChannelAndActorInfo(ctx(), request);
 
+    Function<Object, Result> function =
+        new Function<Object, Result>() {
+          public Result apply(Object result) {
+            if (result instanceof Response) {
+              Response response = (Response) result;
+              return createCommonResponse(response, responseKey, httpReq);
+            } else if (result instanceof ProjectCommonException) {
+              return createCommonExceptionResponse((ProjectCommonException) result, request());
+            } else {
+              ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+              return createCommonExceptionResponse(new Exception(), httpReq);
+            }
+          }
+        };
+
     if (actorRef instanceof ActorRef) {
-      return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout))
-          .map(
-              new Function<Object, Result>() {
-                public Result apply(Object result) {
-                  if (result instanceof Response) {
-                    Response response = (Response) result;
-                    return createCommonResponse(response, responseKey, httpReq);
-                  } else if (result instanceof ProjectCommonException) {
-                    return createCommonExceptionResponse(
-                        (ProjectCommonException) result, request());
-                  } else {
-                    ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
-                    return createCommonExceptionResponse(new Exception(), httpReq);
-                  }
-                }
-              });
+      return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
-      return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout))
-          .map(
-              new Function<Object, Result>() {
-                public Result apply(Object result) {
-                  if (result instanceof Response) {
-                    Response response = (Response) result;
-                    return createCommonResponse(response, responseKey, httpReq);
-                  } else if (result instanceof ProjectCommonException) {
-                    return createCommonExceptionResponse(
-                        (ProjectCommonException) result, request());
-                  } else {
-                    ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
-                    return createCommonExceptionResponse(new Exception(), httpReq);
-                  }
-                }
-              });
+      return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout)).map(function);
     }
   }
 

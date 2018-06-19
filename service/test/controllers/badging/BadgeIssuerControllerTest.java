@@ -27,6 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.learner.util.Util;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
@@ -34,10 +35,14 @@ import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-/** Created by arvind on 5/3/18. */
+/**
+ * Test class for BadgeIssuerController.
+ *
+ * @author Arvind, B Vinaya Kumar
+ */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
+@PrepareForTest({RequestInterceptor.class, Util.class})
 @PowerMockIgnore("javax.management.*")
 public class BadgeIssuerControllerTest {
 
@@ -47,10 +52,12 @@ public class BadgeIssuerControllerTest {
   private static final Props props = Props.create(DummyActor.class);
 
   @BeforeClass
-  public static void startApp() {
+  public static void startApp() throws Exception {
     app = Helpers.fakeApplication();
+    PowerMockito.mockStatic(Util.class);
+    PowerMockito.doNothing().when(Util.class, "checkCassandraDbConnections", Mockito.any());
     Helpers.start(app);
-    headerMap = new HashMap<String, String[]>();
+    headerMap = new HashMap<>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
     headerMap.put(
@@ -60,6 +67,7 @@ public class BadgeIssuerControllerTest {
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
     BaseController.setActorRef(subject);
+    PowerMockito.mockStatic(RequestInterceptor.class);
   }
 
   @Test
@@ -72,7 +80,7 @@ public class BadgeIssuerControllerTest {
     innerMap.put(JsonKey.NAME, "goldBadge");
     innerMap.put(JsonKey.DESCRIPTION, "golden award");
     innerMap.put(JsonKey.EMAIL, "abc@gmail.com");
-    innerMap.put(JsonKey.URL, "dummy/url");
+    innerMap.put(JsonKey.URL, "http://example.com");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
@@ -85,7 +93,7 @@ public class BadgeIssuerControllerTest {
   }
 
   @Test
-  public void testCreateBadgeIssuerInvalidRequestData() {
+  public void testCreateBadgeIssuerMissingUrl() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -94,6 +102,28 @@ public class BadgeIssuerControllerTest {
     innerMap.put(JsonKey.NAME, "goldBadge");
     innerMap.put(JsonKey.DESCRIPTION, "golden award");
     innerMap.put(JsonKey.EMAIL, "abc@gmail.com");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/issuer/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
+  }
+
+  @Test
+  public void testCreateBadgeIssuerInvalidUrl() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.NAME, "goldBadge");
+    innerMap.put(JsonKey.DESCRIPTION, "golden award");
+    innerMap.put(JsonKey.EMAIL, "abc@gmail.com");
+    innerMap.put(JsonKey.URL, "https://mail.");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 

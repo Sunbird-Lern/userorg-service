@@ -55,7 +55,7 @@ public class BadgeIssuerController extends BaseController {
         return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
       }
       reqObj.getRequest().putAll(map);
-      BadgeIssuerRequestValidator.validateCreateBadgeIssuer(reqObj);
+      new BadgeIssuerRequestValidator().validateCreateBadgeIssuer(reqObj);
       reqObj =
           setExtraParam(
               reqObj,
@@ -85,7 +85,7 @@ public class BadgeIssuerController extends BaseController {
               ctx().flash().get(JsonKey.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
-      BadgeIssuerRequestValidator.validateGetBadgeIssuerDetail(reqObj);
+      new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -129,7 +129,7 @@ public class BadgeIssuerController extends BaseController {
               ctx().flash().get(JsonKey.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
-      BadgeIssuerRequestValidator.validateGetBadgeIssuerDetail(reqObj);
+      new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
