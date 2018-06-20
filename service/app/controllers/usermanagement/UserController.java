@@ -218,7 +218,9 @@ public class UserController extends BaseController {
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(JsonKey.AUTH_TOKEN, request().getHeader(HeaderParam.X_Access_TokenId.getName()));
+      innerMap.put(
+          JsonKey.AUTH_TOKEN,
+          request().getHeader(HeaderParam.X_Authenticated_User_Token.getName()));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
