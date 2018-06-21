@@ -25,11 +25,17 @@ public class RequestMapper {
    */
   public static <T> Object mapRequest(JsonNode requestData, Class<T> obj) throws RuntimeException {
 
+    if(requestData==null)
+		throw new ProjectCommonException(
+		          ResponseCode.contentTypeRequiredError.getErrorCode(),
+		          ResponseCode.contentTypeRequiredError.getErrorMessage(),
+		          ResponseCode.CLIENT_ERROR.getResponseCode());
+	
     try {
       return Json.fromJson(requestData, obj);
     } catch (Exception e) {
       ProjectLogger.log("ControllerRequestMapper error : " + e.getMessage(), e);
-      ProjectLogger.log("Request Data" + requestData.toString(), LoggerEnum.INFO.name());
+      ProjectLogger.log("Request Data" + requestData, LoggerEnum.INFO.name());
       throw new ProjectCommonException(
           ResponseCode.invalidData.getErrorCode(),
           ResponseCode.invalidData.getErrorMessage(),
