@@ -34,7 +34,7 @@ public class RequestMapper {
       return Json.fromJson(requestData, obj);
     } catch (Exception e) {
       ProjectLogger.log("ControllerRequestMapper error : " + e.getMessage(), e);
-      ProjectLogger.log("Request Data" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log("RequestMapper:mapRequest Requested data : " + requestData, LoggerEnum.INFO.name());
 	  throw ProjectUtil.createClientException(ResponseCode.invalidData);
     }
   }
