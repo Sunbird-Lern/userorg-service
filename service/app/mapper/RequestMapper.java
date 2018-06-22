@@ -1,11 +1,13 @@
 /** */
 package mapper;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import play.libs.Json;
 
 /**
@@ -26,20 +28,14 @@ public class RequestMapper {
   public static <T> Object mapRequest(JsonNode requestData, Class<T> obj) throws RuntimeException {
 
     if(requestData==null)
-		throw new ProjectCommonException(
-		          ResponseCode.contentTypeRequiredError.getErrorCode(),
-		          ResponseCode.contentTypeRequiredError.getErrorMessage(),
-		          ResponseCode.CLIENT_ERROR.getResponseCode());
+    	throw ProjectUtil.createClientException(ResponseCode.contentTypeRequiredError);
 	
     try {
       return Json.fromJson(requestData, obj);
     } catch (Exception e) {
       ProjectLogger.log("ControllerRequestMapper error : " + e.getMessage(), e);
       ProjectLogger.log("Request Data" + requestData, LoggerEnum.INFO.name());
-      throw new ProjectCommonException(
-          ResponseCode.invalidData.getErrorCode(),
-          ResponseCode.invalidData.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+	  throw ProjectUtil.createClientException(ResponseCode.invalidData);
     }
   }
 }
