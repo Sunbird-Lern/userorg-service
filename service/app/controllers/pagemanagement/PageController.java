@@ -4,9 +4,9 @@ package controllers.pagemanagement;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -149,15 +149,14 @@ public class PageController extends BaseController {
    * @return Map<String, String>
    */
   private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
-
-    Map<String, String> map = new HashMap<>();
     Map<String, String[]> headers = request.headers();
-    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
-    while (itr.hasNext()) {
-      Entry<String, String[]> entry = itr.next();
-      map.put(entry.getKey(), entry.getValue()[0]);
-    }
-    return map;
+    Map<String, String> filtered =
+        headers
+            .entrySet()
+            .stream()
+            .filter(e -> StringUtils.startsWithAny(e.getKey(), "X-", "x-"))
+            .collect(Collectors.toMap(e -> e.getKey(), e -> StringUtils.join(e.getValue(), ",")));
+    return filtered;
   }
 
   /**

@@ -65,12 +65,44 @@ public class UserControllerTest {
   }
 
   @Test
+  public void testCreateUserWithoutContentType() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.PHONE_VERIFIED, true);
+    innerMap.put(JsonKey.PHONE, "8800088000");
+    innerMap.put(JsonKey.COUNTRY_CODE, "+91");
+    innerMap.put(JsonKey.EMAIL, "abbc@gmail.com");
+    innerMap.put(JsonKey.USERNAME, "userName");
+    innerMap.put(JsonKey.FIRST_NAME, "john");
+    innerMap.put(JsonKey.LAST_NAME, "rambo");
+    List<String> roles = new ArrayList<>();
+    roles.add("user");
+    List languages = new ArrayList<>();
+    languages.add("hindi");
+
+    innerMap.put(JsonKey.ROLES, roles);
+    innerMap.put(JsonKey.LANGUAGE, languages);
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    // stringified json data(raw) request instead of json content-type request
+    String data = mapToJson(requestMap);
+    RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
+  }
+
+  @Test
   public void testcreateUser() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.PHONE_VERIFIED, true);
     innerMap.put(JsonKey.PHONE, "8800088000");
     innerMap.put(JsonKey.COUNTRY_CODE, "+91");
     innerMap.put(JsonKey.EMAIL, "abbc@gmail.com");

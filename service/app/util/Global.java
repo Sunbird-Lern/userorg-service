@@ -206,6 +206,14 @@ public class Global extends GlobalSettings {
       env = JsonKey.BADGES;
     } else if (uri.startsWith("/v1/issuer")) {
       env = BadgingJsonKey.BADGES;
+    } else if (uri.startsWith("/v1/content")) {
+      env = JsonKey.BATCH;
+    } else if (uri.startsWith("/v1/role")) {
+      env = JsonKey.ROLE;
+    } else if (uri.startsWith("/v1/note")) {
+      env = JsonKey.NOTE;
+    } else if (uri.startsWith("/v1/location")) {
+      env = JsonKey.LOCATION;
     } else {
       env = "miscellaneous";
     }

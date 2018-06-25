@@ -87,6 +87,7 @@ GET    /v1/user/retire							@controllers.LearnerController.getHealth()
 GET   /v1/org/member/suspend					@controllers.LearnerController.getHealth()
 POST  /v1/org/search							@controllers.organisationmanagement.OrganisationController.search()
 GET   /health									@controllers.healthmanager.HealthController.getHealth()
+GET /threaddump									@controllers.ThreadDumpController.threaddump()
 
 #bulk upload
 
