@@ -197,7 +197,7 @@ public class AuthenticationHelper {
     Map<String, Object> externalIdReq = new HashMap<>();
     externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
     externalIdReq.put(
-        JsonKey.EXTERNAL_ID_TYPE, idType.toLowerCase());
+        JsonKey.ID_TYPE, idType.toLowerCase());
     externalIdReq.put(
         JsonKey.EXTERNAL_ID,getEncryptedData(extId.toLowerCase()));
     Response response =
