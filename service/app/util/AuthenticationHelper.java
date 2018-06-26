@@ -190,20 +190,20 @@ public class AuthenticationHelper {
     }
   }
 
+  @SuppressWarnings({"unchecked"})
   public static Map<String, Object> getUserFromExternalId(String extId, String provider,String idType) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> user = null;
-    StringBuilder sb = new StringBuilder();
-    sb.append(provider.toLowerCase());
-    sb.append(":");
-    sb.append(idType.toLowerCase());
-    sb.append(":");
-    sb.append(getEncryptedData(extId.toLowerCase()));
-    
-
+    Map<String, Object> externalIdReq = new HashMap<>();
+    externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
+    externalIdReq.put(
+        JsonKey.EXTERNAL_ID_TYPE, idType.toLowerCase());
+    externalIdReq.put(
+        JsonKey.EXTERNAL_ID,getEncryptedData(extId.toLowerCase()));
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            KEY_SPACE_NAME, USER_EXT_IDNT_TABLE, JsonKey.SLUG, sb.toString());
+        cassandraOperation.getRecordsByCompositeKey(
+            KEY_SPACE_NAME, USER_EXT_IDNT_TABLE, externalIdReq);
+
     List<Map<String, Object>> userRecordList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
