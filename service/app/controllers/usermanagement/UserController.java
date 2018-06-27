@@ -19,12 +19,12 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
+import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import util.AuthenticationHelper;
@@ -112,7 +112,7 @@ public class UserController extends BaseController {
     }
     if (StringUtils.isBlank(userId)) {
       String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.PROVIDER);
+      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
       Map<String, Object> user =
           AuthenticationHelper.getUserFromExternalId(extId, provider,idType);
@@ -122,8 +122,8 @@ public class UserController extends BaseController {
         throw new ProjectCommonException(
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
-                ResponseCode.invalidParameter.getErrorMessage(),
-                ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT,(JsonKey.EXTERNAL_ID+", "+JsonKey.EXTERNAL_ID_TYPE),JsonKey.PROVIDER)),
+                ResponseCode.invalidParameter.getErrorMessage(), 
+                StringFormatter.joinByAnd(StringFormatter.joinByComma(JsonKey.EXTERNAL_ID,JsonKey.EXTERNAL_ID_TYPE),JsonKey.PROVIDER)),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
