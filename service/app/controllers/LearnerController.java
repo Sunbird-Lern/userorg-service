@@ -4,10 +4,8 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -15,7 +13,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import play.mvc.Results;
@@ -99,52 +96,12 @@ public class LearnerController extends BaseController {
   public Promise<Result> getContentState() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get course request data=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setOperation(ActorOperations.GET_CONTENT.getValue());
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = createRequest(reqObj);
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, JsonKey.CONTENT_LIST, request());
+      JsonNode jsonNode = request().body().asJson();
+      Request request = createAndInitRequest(ActorOperations.GET_CONTENT.getValue(), jsonNode);
+      return actorResponseHandler(getActorRef(), request, timeout, JsonKey.CONTENT_LIST, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, Object> createRequest(Request reqObj) {
-
-    HashMap<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    innerMap.put(JsonKey.USER_ID, reqObj.getRequest().get(JsonKey.USER_ID));
-
-    if ((null != reqObj.getRequest().get(JsonKey.CONTENT_IDS))
-        && (null == reqObj.getRequest().get(JsonKey.COURSE_IDS))) {
-      innerMap.put(JsonKey.CONTENT_IDS, reqObj.getRequest().get(JsonKey.CONTENT_IDS));
-      return innerMap;
-    } else if ((null == reqObj.getRequest().get(JsonKey.CONTENT_IDS))
-        && (null != reqObj.getRequest().get(JsonKey.COURSE_IDS))) {
-      innerMap.put(JsonKey.COURSE_IDS, reqObj.getRequest().get(JsonKey.COURSE_IDS));
-      return innerMap;
-    } else if ((null != reqObj.getRequest().get(JsonKey.CONTENT_IDS))
-        && (null != reqObj.getRequest().get(JsonKey.COURSE_IDS))) {
-      if ((((List<String>) reqObj.getRequest().get(JsonKey.COURSE_IDS)).size() == 1)
-          && ((List<String>) reqObj.getRequest().get(JsonKey.CONTENT_IDS)).size() >= 0) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(
-            JsonKey.COURSE_ID, ((List<String>) reqObj.getRequest().get(JsonKey.COURSE_IDS)).get(0));
-        map.put(JsonKey.CONTENT_IDS, (reqObj.getRequest().get(JsonKey.CONTENT_IDS)));
-        innerMap.put(JsonKey.COURSE, map);
-        return innerMap;
-      } else {
-        throw new ProjectCommonException(
-            ResponseCode.invalidRequestData.getErrorCode(),
-            ResponseCode.invalidRequestData.getErrorMessage(),
-            ResponseCode.invalidRequestData.getResponseCode());
-      }
-    }
-    return null;
   }
 
   /**
