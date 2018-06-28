@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -94,13 +95,12 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
+    String clientId = JsonKey.UNAUTHORIZED;
+    String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
+    String authClientToken =
+        request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
+    String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path())) {
-      String clientId = JsonKey.UNAUTHORIZED;
-      String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
-      String authClientToken =
-          request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
-      String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-
       if (StringUtils.isNotBlank(accessToken)) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
       } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
@@ -111,6 +111,16 @@ public class RequestInterceptor {
       }
       return clientId;
     } else {
+      if (StringUtils.isNotBlank(accessToken)) {
+        String clientAccessTokenId = null;
+        try{
+          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+        }catch(Exception ex){
+          ProjectLogger.log(ex.getMessage(),ex);
+          clientAccessTokenId = null;
+        }
+        return StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId:JsonKey.ANONYMOUS;
+      }
       return JsonKey.ANONYMOUS;
     }
   }
