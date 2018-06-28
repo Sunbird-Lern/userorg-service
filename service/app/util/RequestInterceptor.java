@@ -115,6 +115,9 @@ public class RequestInterceptor {
         String clientAccessTokenId = null;
         try{
           clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+          if(JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)){
+            clientAccessTokenId = null;
+          }
         }catch(Exception ex){
           ProjectLogger.log(ex.getMessage(),ex);
           clientAccessTokenId = null;
