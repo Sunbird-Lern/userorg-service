@@ -27,6 +27,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
@@ -34,7 +35,7 @@ import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-/** Created by arvind on 6/12/17. */
+/** @author arvind */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
@@ -45,6 +46,10 @@ public class LearnerControllerTest {
   private static Map<String, String[]> headerMap;
   private static ActorSystem system;
   private static final Props props = Props.create(controllers.DummyActor.class);
+  private static final String COURSE_ID = "course-123";
+  private static final String USER_ID = "user-123";
+  private static final String CONTENT_ID = "content-123";
+  private static final String BATCH_ID = "batch-123";
 
   @BeforeClass
   public static void startApp() {
@@ -63,13 +68,13 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testenrollCourse() {
+  public void tesEenrollCourse() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put("courseId", "course-123");
+    innerMap.put("courseId", COURSE_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
     System.out.println(data);
@@ -82,7 +87,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testenrollCourseWithInvalidData() {
+  public void testEnrollCourseWithInvalidData() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -101,7 +106,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testgetEnrolledCourses() {
+  public void testGetEnrolledCourses() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -112,7 +117,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testupdateContentState() {
+  public void testUpdateContentState() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -120,12 +125,12 @@ public class LearnerControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     List list = new ArrayList();
     Map map = new HashMap();
-    map.put(JsonKey.CONTENT_ID, "6778");
+    map.put(JsonKey.CONTENT_ID, CONTENT_ID);
     map.put(JsonKey.STATUS, "Active");
     map.put(JsonKey.LAST_UPDATED_TIME, "2017-12-18 10:47:30:707+0530");
     list.add(map);
     innerMap.put("contents", list);
-    innerMap.put("courseId", "course-123");
+    innerMap.put("courseId", COURSE_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
@@ -138,13 +143,14 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testgetContentState() {
+  public void testGetContentState() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put("courseId", "course-123");
+    innerMap.put(JsonKey.BATCH_ID, BATCH_ID);
+    innerMap.put(JsonKey.USER_ID, USER_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
@@ -155,6 +161,47 @@ public class LearnerControllerTest {
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testGetContentStateWithoutUserId() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put("courseId", COURSE_ID);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/content/state/read").method("POST");
+
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), result.status());
+  }
+
+  @Test
+  public void testGetContentStateWithInvalidFieldType() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put("courseId", COURSE_ID);
+    innerMap.put(JsonKey.COURSE_IDS, new HashMap<>());
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/content/state/read").method("POST");
+
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), result.status());
   }
 
   private static String mapToJson(Map map) {

@@ -11,6 +11,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.LearnerStateRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
@@ -23,6 +24,9 @@ import play.mvc.Results;
  * @author Manzarul
  */
 public class LearnerController extends BaseController {
+
+  private LearnerStateRequestValidator validator = new LearnerStateRequestValidator();
+
   /**
    * This method will provide list of enrolled courses for a user. User courses are stored in
    * Cassandra db.
@@ -95,9 +99,9 @@ public class LearnerController extends BaseController {
    */
   public Promise<Result> getContentState() {
     try {
-      JsonNode requestData = request().body().asJson();
-      JsonNode jsonNode = request().body().asJson();
-      Request request = createAndInitRequest(ActorOperations.GET_CONTENT.getValue(), jsonNode);
+      JsonNode requestJson = request().body().asJson();
+      Request request = createAndInitRequest(ActorOperations.GET_CONTENT.getValue(), requestJson);
+      validator.validateGetContentState(request);
       return actorResponseHandler(getActorRef(), request, timeout, JsonKey.CONTENT_LIST, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
