@@ -123,7 +123,7 @@ public class UserController extends BaseController {
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
                 ResponseCode.invalidParameter.getErrorMessage(), 
-                StringFormatter.joinByAnd(StringFormatter.joinByComma(JsonKey.EXTERNAL_ID,JsonKey.EXTERNAL_ID_TYPE),JsonKey.PROVIDER)),
+                StringFormatter.joinByAnd(StringFormatter.joinByComma(JsonKey.EXTERNAL_ID,JsonKey.EXTERNAL_ID_TYPE),JsonKey.EXTERNAL_ID_PROVIDER)),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
