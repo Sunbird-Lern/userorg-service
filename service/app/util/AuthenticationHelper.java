@@ -39,7 +39,6 @@ public class AuthenticationHelper {
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
   public static final String KEY_SPACE_NAME = "sunbird";
-  public static final String USER_EXT_IDNT_TABLE = JsonKey.USR_EXT_IDNT_TABLE;
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
@@ -202,7 +201,7 @@ public class AuthenticationHelper {
         JsonKey.EXTERNAL_ID,getEncryptedData(extId.toLowerCase()));
     Response response =
         cassandraOperation.getRecordsByCompositeKey(
-            KEY_SPACE_NAME, USER_EXT_IDNT_TABLE, externalIdReq);
+            KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
 
     List<Map<String, Object>> userRecordList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
