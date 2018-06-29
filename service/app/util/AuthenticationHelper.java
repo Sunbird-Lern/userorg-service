@@ -7,10 +7,13 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
@@ -35,6 +38,11 @@ public class AuthenticationHelper {
               PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED)));
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
+  public static final String KEY_SPACE_NAME = "sunbird";
+  public static final String USER_EXT_IDNT_TABLE = "user_external_identity";
+  private static EncryptionService encryptionService =
+      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+          null);
 
   /**
    * This method will verify the incoming user access token against store data base /cache. If token
@@ -170,19 +178,35 @@ public class AuthenticationHelper {
 
     return false;
   }
+  
+  public static String getEncryptedData(String value) {
+    try {
+      return encryptionService.encryptData(value);
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
 
-  public static Map<String, Object> getUserFromExternalIdAndProvider(
-      String externalId, String provider) {
-    String keyspace = "sunbird";
-    String userExtTable = "user_external_identity";
+  @SuppressWarnings({"unchecked"})
+  public static Map<String, Object> getUserFromExternalId(String extId, String provider,String idType) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> user = null;
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.PROVIDER, (provider).toLowerCase());
-    map.put(JsonKey.EXTERNAL_ID, (externalId).toLowerCase());
-    Response response = cassandraOperation.getRecordsByProperties(keyspace, userExtTable, map);
+    Map<String, Object> externalIdReq = new HashMap<>();
+    externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
+    externalIdReq.put(
+        JsonKey.ID_TYPE, idType.toLowerCase());
+    externalIdReq.put(
+        JsonKey.EXTERNAL_ID,getEncryptedData(extId.toLowerCase()));
+    Response response =
+        cassandraOperation.getRecordsByCompositeKey(
+            KEY_SPACE_NAME, USER_EXT_IDNT_TABLE, externalIdReq);
+
     List<Map<String, Object>> userRecordList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+
     if (CollectionUtils.isNotEmpty(userRecordList)) {
       Map<String, Object> userExtIdRecord = userRecordList.get(0);
       Response res =

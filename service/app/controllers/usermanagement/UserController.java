@@ -19,6 +19,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
+import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -111,17 +112,18 @@ public class UserController extends BaseController {
     }
     if (StringUtils.isBlank(userId)) {
       String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.PROVIDER);
+      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
+      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
       Map<String, Object> user =
-          AuthenticationHelper.getUserFromExternalIdAndProvider(extId, provider);
+          AuthenticationHelper.getUserFromExternalId(extId, provider,idType);
       if (MapUtils.isNotEmpty(user)) {
         userId = (String) user.get(JsonKey.ID);
       } else {
         throw new ProjectCommonException(
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
-                ResponseCode.invalidParameter.getErrorMessage(),
-                JsonKey.EXTERNAL_ID + " and " + JsonKey.PROVIDER),
+                ResponseCode.invalidParameter.getErrorMessage(), 
+                StringFormatter.joinByAnd(StringFormatter.joinByComma(JsonKey.EXTERNAL_ID,JsonKey.EXTERNAL_ID_TYPE),JsonKey.EXTERNAL_ID_PROVIDER)),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
