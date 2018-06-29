@@ -68,7 +68,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void tesEenrollCourse() {
+  public void testEnrolCourse() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -87,7 +87,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testEnrollCourseWithInvalidData() {
+  public void testEnrolCourseWithInvalidData() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -106,7 +106,7 @@ public class LearnerControllerTest {
   }
 
   @Test
-  public void testGetEnrolledCourses() {
+  public void testGetEnroledCourses() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
