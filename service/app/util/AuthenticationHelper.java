@@ -39,7 +39,7 @@ public class AuthenticationHelper {
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
   public static final String KEY_SPACE_NAME = "sunbird";
-  public static final String USER_EXT_IDNT_TABLE = "user_external_identity2";
+  public static final String USER_EXT_IDNT_TABLE = "usr_external_identity";
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
