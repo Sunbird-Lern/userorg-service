@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 
 /**
- * This class will do the request header validation
+ * Request interceptor responsible to authenticated HTTP requests
  *
  * @author Amit Kumar
  */
@@ -86,20 +87,20 @@ public class RequestInterceptor {
   }
 
   /**
-   * This Method will do the request header validation.
+   * Authenticates given HTTP request context
    *
-   * @param request Request
-   * @return String
+   * @param ctx HTTP play request context
+   * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
+   *     is returned
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
+    String clientId = JsonKey.UNAUTHORIZED;
+    String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
+    String authClientToken =
+        request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
+    String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path())) {
-      String clientId = JsonKey.UNAUTHORIZED;
-      String accessToken = request.getHeader(HeaderParam.X_Access_TokenId.getName());
-      String authClientToken =
-          request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
-      String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-
       if (StringUtils.isNotBlank(accessToken)) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
       } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
@@ -110,26 +111,38 @@ public class RequestInterceptor {
       }
       return clientId;
     } else {
+      if (StringUtils.isNotBlank(accessToken)) {
+        String clientAccessTokenId = null;
+        try{
+          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+          if(JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)){
+            clientAccessTokenId = null;
+          }
+        }catch(Exception ex){
+          ProjectLogger.log(ex.getMessage(),ex);
+          clientAccessTokenId = null;
+        }
+        return StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId:JsonKey.ANONYMOUS;
+      }
       return JsonKey.ANONYMOUS;
     }
   }
 
   /**
-   * this method will check incoming request required validation or not. if this method return true
-   * it means no need of validation other wise validation is required.
+   * Checks if request URL is in excluded (i.e. public) URL list or not
    *
-   * @param request Stirng URI
-   * @return boolean
+   * @param requestUrl Request URL
+   * @return True if URL is in excluded (public) URLs. Otherwise, returns false
    */
-  public static boolean isRequestInExcludeList(String request) {
+  public static boolean isRequestInExcludeList(String requestUrl) {
     boolean resp = false;
-    if (!StringUtils.isBlank(request)) {
-      if (apiHeaderIgnoreMap.containsKey(request)) {
+    if (!StringUtils.isBlank(requestUrl)) {
+      if (apiHeaderIgnoreMap.containsKey(requestUrl)) {
         resp = true;
       } else {
-        String[] splitedpath = request.split("[/]");
-        String tempRequest = removeLastValue(splitedpath);
-        if (apiHeaderIgnoreMap.containsKey(tempRequest)) {
+        String[] splitPath = requestUrl.split("[/]");
+        String urlWithoutPathParam = removeLastValue(splitPath);
+        if (apiHeaderIgnoreMap.containsKey(urlWithoutPathParam)) {
           resp = true;
         }
       }
@@ -138,17 +151,17 @@ public class RequestInterceptor {
   }
 
   /**
-   * Method to remove last value
+   * Returns URL without path and query parameters.
    *
-   * @param splited String []
-   * @return String
+   * @param splitPath URL path split on slash (i.e. /)
+   * @return URL without path and query parameters
    */
-  private static String removeLastValue(String splited[]) {
+  private static String removeLastValue(String splitPath[]) {
 
     StringBuilder builder = new StringBuilder();
-    if (splited != null && splited.length > 0) {
-      for (int i = 1; i < splited.length - 1; i++) {
-        builder.append("/" + splited[i]);
+    if (splitPath != null && splitPath.length > 0) {
+      for (int i = 1; i < splitPath.length - 1; i++) {
+        builder.append("/" + splitPath[i]);
       }
     }
     return builder.toString();
