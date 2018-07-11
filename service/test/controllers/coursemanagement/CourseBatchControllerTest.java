@@ -177,6 +177,7 @@ public class CourseBatchControllerTest {
     assertEquals(400, result.status());
   }
 
+
   @Test
   public void testaddUserToBatch() {
     PowerMockito.mockStatic(RequestInterceptor.class);
