@@ -73,6 +73,8 @@ public class UserController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("UserController: updateUserProfile called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      String accessToken = request().getHeader(HeaderParam.X_Authenticated_User_Token.getName());
+      reqObj.getRequest().put(HeaderParam.X_Authenticated_User_Token.getName(), accessToken);
       UserRequestValidator.validateUpdateUser(reqObj);
       if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
