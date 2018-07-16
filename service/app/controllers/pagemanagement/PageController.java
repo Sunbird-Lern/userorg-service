@@ -2,16 +2,10 @@
 package controllers.pagemanagement;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import controllers.BaseController;
-
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -156,9 +150,12 @@ public class PageController extends BaseController {
    */
   private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
     Map<String, String[]> headers = request.headers();
-    Map<String, String> filtered =headers.entrySet().stream()
-    		.filter(e -> StringUtils.startsWithAny(e.getKey(), "X-", "x-"))
-    		.collect(Collectors.toMap(e -> e.getKey(), e -> StringUtils.join(e.getValue(), ",")));
+    Map<String, String> filtered =
+        headers
+            .entrySet()
+            .stream()
+            .filter(e -> StringUtils.startsWithAny(e.getKey(), "X-", "x-"))
+            .collect(Collectors.toMap(e -> e.getKey(), e -> StringUtils.join(e.getValue(), ",")));
     return filtered;
   }
 
