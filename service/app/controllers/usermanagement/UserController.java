@@ -73,6 +73,8 @@ public class UserController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("UserController: updateUserProfile called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      String accessToken = request().getHeader(HeaderParam.X_Authenticated_User_Token.getName());
+      reqObj.getRequest().put(HeaderParam.X_Authenticated_User_Token.getName(), accessToken);
       UserRequestValidator.validateUpdateUser(reqObj);
       if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
@@ -115,15 +117,17 @@ public class UserController extends BaseController {
       String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
       Map<String, Object> user =
-          AuthenticationHelper.getUserFromExternalId(extId, provider,idType);
+          AuthenticationHelper.getUserFromExternalId(extId, provider, idType);
       if (MapUtils.isNotEmpty(user)) {
         userId = (String) user.get(JsonKey.ID);
       } else {
         throw new ProjectCommonException(
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
-                ResponseCode.invalidParameter.getErrorMessage(), 
-                StringFormatter.joinByAnd(StringFormatter.joinByComma(JsonKey.EXTERNAL_ID,JsonKey.EXTERNAL_ID_TYPE),JsonKey.EXTERNAL_ID_PROVIDER)),
+                ResponseCode.invalidParameter.getErrorMessage(),
+                StringFormatter.joinByAnd(
+                    StringFormatter.joinByComma(JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE),
+                    JsonKey.EXTERNAL_ID_PROVIDER)),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }

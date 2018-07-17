@@ -87,14 +87,14 @@ public class UserControllerTest {
     innerMap.put(JsonKey.LANGUAGE, languages);
 
     requestMap.put(JsonKey.REQUEST, innerMap);
-    //stringified json data(raw) request instead of json content-type request
+    // stringified json data(raw) request instead of json content-type request
     String data = mapToJson(requestMap);
     RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(400, result.status());
   }
-  
+
   @Test
   public void testcreateUser() {
     PowerMockito.mockStatic(RequestInterceptor.class);

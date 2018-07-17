@@ -97,8 +97,7 @@ public class RequestInterceptor {
     Request request = ctx.request();
     String clientId = JsonKey.UNAUTHORIZED;
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
-    String authClientToken =
-        request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
+    String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
     String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path())) {
       if (StringUtils.isNotBlank(accessToken)) {
@@ -113,16 +112,18 @@ public class RequestInterceptor {
     } else {
       if (StringUtils.isNotBlank(accessToken)) {
         String clientAccessTokenId = null;
-        try{
+        try {
           clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
-          if(JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)){
+          if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }
-        }catch(Exception ex){
-          ProjectLogger.log(ex.getMessage(),ex);
+        } catch (Exception ex) {
+          ProjectLogger.log(ex.getMessage(), ex);
           clientAccessTokenId = null;
         }
-        return StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId:JsonKey.ANONYMOUS;
+        return StringUtils.isNotBlank(clientAccessTokenId)
+            ? clientAccessTokenId
+            : JsonKey.ANONYMOUS;
       }
       return JsonKey.ANONYMOUS;
     }

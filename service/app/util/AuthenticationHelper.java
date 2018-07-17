@@ -177,7 +177,7 @@ public class AuthenticationHelper {
 
     return false;
   }
-  
+
   public static String getEncryptedData(String value) {
     try {
       return encryptionService.encryptData(value);
@@ -190,15 +190,14 @@ public class AuthenticationHelper {
   }
 
   @SuppressWarnings({"unchecked"})
-  public static Map<String, Object> getUserFromExternalId(String extId, String provider,String idType) {
+  public static Map<String, Object> getUserFromExternalId(
+      String extId, String provider, String idType) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> user = null;
     Map<String, Object> externalIdReq = new HashMap<>();
     externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
-    externalIdReq.put(
-        JsonKey.ID_TYPE, idType.toLowerCase());
-    externalIdReq.put(
-        JsonKey.EXTERNAL_ID,getEncryptedData(extId.toLowerCase()));
+    externalIdReq.put(JsonKey.ID_TYPE, idType.toLowerCase());
+    externalIdReq.put(JsonKey.EXTERNAL_ID, getEncryptedData(extId.toLowerCase()));
     Response response =
         cassandraOperation.getRecordsByCompositeKey(
             KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
