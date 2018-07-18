@@ -30,6 +30,11 @@ import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
+/**
+ * This class has test case specs for Initialisation Controller
+ *
+ * @author Loganathan
+ */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
