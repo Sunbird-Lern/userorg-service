@@ -1,4 +1,3 @@
-/** */
 package controllers.initialization;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,33 +8,36 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
+import org.sunbird.validator.initialisation.InitialisationRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/** @author Loganathan Shanmugam */
+/**
+ * InitializationController This class contains controller methods for System Initialisation
+ *
+ * @author Loganathan Shanmugam
+ */
 public class InitializationController extends BaseController {
+  private static final InitialisationRequestValidator initialisationRequestValidator =
+      new InitialisationRequestValidator();
   /**
    * This method will do the initialisation process to create the first rootOrg in the system.
    *
-   * @return Promise<Result>
+   * @return returns the response result contains the id of the first rootOrg created or gives error
+   *     response if already initalised
    */
   @SuppressWarnings("unchecked")
-  public Promise<Result> initalizeSystem() {
+  public Promise<Result> initaliseRootOrg() {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log(
-          "InitializationController: initalizeSystem called" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      reqObj.put("remoteAddress", request().remoteAddress());
-      RequestValidator.validateCreateFirstRootOrg(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_FIRST_ROOTORG.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
+          "InitializationController: initaliseRootOrg called" + requestData,
+          LoggerEnum.INFO.name());
+      Request reqObj =
+          createAndInitRequest(ActorOperations.SYSTEM_INIT_ROOT_ORG.getValue(), requestData);
+      reqObj.put(JsonKey.REMOTE_ADDRESS, request().remoteAddress());
+      initialisationRequestValidator.validateCreateFirstRootOrg(reqObj);
       HashMap<String, Object> innerMap = new HashMap<>();
       Map<String, Object> orgData = reqObj.getRequest();
       innerMap.put(JsonKey.ORGANISATION, orgData);

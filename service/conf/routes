@@ -210,4 +210,4 @@ POST   /v1/location/search                      @controllers.location.LocationCo
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
 
 #Initalization API
-POST   /v1/system/init                          @controllers.initialization.InitializationController.initalizeSystem
+POST   /v1/system/init/rootOrg                          @controllers.initialization.InitializationController.initaliseRootOrg()
