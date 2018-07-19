@@ -65,21 +65,4 @@ public class TenantPreferenceController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
-  public Promise<Result> updateTCStatusOfUser() {
-    try {
-      ProjectLogger.log("get list of skills ");
-      JsonNode requestData = request().body().asJson();
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.UPDATE_TC_STATUS_OF_USER.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
 }
