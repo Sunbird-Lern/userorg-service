@@ -69,8 +69,16 @@
 			<version>${play2.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-		            <artifactId>logback-classic</artifactId>
+				  <groupId>ch.qos.logback</groupId>
+		                  <artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+				  <groupId>com.fasterxml.jackson.core</groupId>
+		                  <artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+				  <groupId>com.fasterxml.jackson.datatype</groupId>
+		                  <artifactId>jackson-datatype-jdk8</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
