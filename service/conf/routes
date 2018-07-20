@@ -2,11 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
 # ~~~~
-GET      /v1/user/courses/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
 GET      /v1/user/courses/list/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
 POST     /v1/user/courses/enroll	    @controllers.LearnerController.enrollCourse()
 POST     /v1/course/enrol	    		@controllers.LearnerController.enrollCourse()
-POST     /v1/user/content/state	        @controllers.LearnerController.getContentState()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
@@ -17,7 +15,6 @@ PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserP
 POST	/v1/user/login					@controllers.usermanagement.UserController.login()
 POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
 POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
-GET  	/v1/user/getprofile/:uid			@controllers.usermanagement.UserController.getUserProfile(uid:String)
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
 POST    /v1/user/download				@controllers.usermanagement.UserController.downloadUsers()
@@ -28,16 +25,6 @@ PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.
 GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
 POST    /v1/user/forgotpassword			@controllers.usermanagement.UserController.forgotpassword()
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
-
-
-#course management api
-POST	/v1/course/create		@controllers.coursemanagement.CourseController.createCourse()
-PATCH	/v1/course/update		@controllers.coursemanagement.CourseController.updateCourse()
-POST	/v1/course/publish      @controllers.coursemanagement.CourseController.publishCourse()
-POST	/v1/course/search       @controllers.coursemanagement.CourseController.searchCourse()
-POST	/v1/course/delete       @controllers.coursemanagement.CourseController.deleteCourse()
-GET	    /v1/course/:courseId     @controllers.coursemanagement.CourseController.getCourseById(courseId:String)
-GET 	/v1/recommended/courses     @controllers.coursemanagement.CourseController.recommendedCourses()
 
 #organisation management api
 POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
@@ -50,7 +37,6 @@ POST    /v1/org/member/approve         @controllers.organisationmanagement.Organ
 POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
 POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
 POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
-POST	/v1/org/download		@controllers.organisationmanagement.OrganisationController.downloadOrgs()
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrganisationController.getOrgTypeList()
 POST	/v1/org/type/create		@controllers.organisationmanagement.OrganisationController.createOrgType()
 PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrganisationController.updateOrgType()
@@ -68,10 +54,6 @@ PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.up
 GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
 GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
-#Assessment management
-POST   /v1/assessment/update					 @controllers.assessment.AssessmentController.saveAssessment()
-POST   /v1/assessment/result/read					 @controllers.assessment.AssessmentController.getAssessment()
-
 #permission
 
 GET   /v1/role/read						@controllers.usermanagement.UserController.getRoles()
@@ -83,8 +65,6 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 #Mock APIs to finish API Gateway onboarding
 
 POST   /v1/user/search							@controllers.usermanagement.UserController.search()
-GET    /v1/user/retire							@controllers.LearnerController.getHealth()
-GET   /v1/org/member/suspend					@controllers.LearnerController.getHealth()
 POST  /v1/org/search							@controllers.organisationmanagement.OrganisationController.search()
 GET   /health									@controllers.healthmanager.HealthController.getHealth()
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
@@ -129,11 +109,6 @@ POST /v1/data/sync                          @controllers.search.SearchController
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
 
-#Badges api
-
-GET  /v1/badges/list                        @controllers.badges.BadgesController.getBadges()
-POST /v1/user/badges/add					@controllers.badges.BadgesController.addUserBadges()
-
 # Badging APIs
 POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer()
 GET /v1/issuer/read/:issuerId                 @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String)
@@ -173,7 +148,6 @@ GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
 POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
 POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference()
 POST  /v1/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference()
-POST  /v1/user/tc/update 						@controllers.tenantpreference.TenantPreferenceController.updateTCStatusOfUser()
 
 #DB Operation API
 POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll()
