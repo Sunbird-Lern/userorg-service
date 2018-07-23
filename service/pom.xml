@@ -85,6 +85,10 @@
 		                  <artifactId>joda-convert</artifactId>
 				</exclusion>
                                 <exclusion>
+                                  <groupId>joda-time</groupId>
+                                  <artifactId>joda-time</artifactId>
+                                </exclusion>
+                                <exclusion>
                                   <groupId>com.fasterxml.jackson.datatype</groupId>
                                   <artifactId>jackson-datatype-jsr310</artifactId>
                                 </exclusion>
