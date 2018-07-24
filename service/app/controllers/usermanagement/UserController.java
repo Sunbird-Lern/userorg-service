@@ -183,83 +183,6 @@ public class UserController extends BaseController {
   }
 
   /**
-   * This method will do the user authentication based on login type key. login can be done with
-   * following ways (simple login , Google plus login , Facebook login , Aadhaar login)
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> login() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: login called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      UserRequestValidator.validateUserLogin(reqObj);
-      reqObj.setOperation(ActorOperations.LOGIN.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER, reqObj.getRequest());
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will invalidate user auth token .
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> logout() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: logout called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.LOGOUT.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(
-          JsonKey.AUTH_TOKEN,
-          request().getHeader(HeaderParam.X_Authenticated_User_Token.getName()));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will allow user to change their password.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> changePassword() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: changePassword called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      UserRequestValidator.validateChangePassword(reqObj);
-      reqObj.setOperation(ActorOperations.CHANGE_PASSWORD.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER, reqObj.getRequest());
-      reqObj.getRequest().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
    * This method will provide user profile details based on requested userId.
    *
    * @return Promise<Result>
@@ -327,29 +250,6 @@ public class UserController extends BaseController {
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.FIELDS, reqObj.getRequest().get(JsonKey.FIELDS));
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will download user details for particular org or all organizations
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> downloadUsers() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: downloadUsers called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.DOWNLOAD_USERS.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
@@ -507,32 +407,6 @@ public class UserController extends BaseController {
       innerMap.put(
           JsonKey.REQUESTED_BY,
           getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_Userid.getName())));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will send user temporary password on his/her registered email.in Request it will
-   * take either user loginid or email.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> forgotpassword() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: forgotpassword called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      UserRequestValidator.validateForgotpassword(reqObj);
-      reqObj.setOperation(ActorOperations.FORGOT_PASSWORD.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER, reqObj.getRequest());
-      reqObj.getRequest().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {

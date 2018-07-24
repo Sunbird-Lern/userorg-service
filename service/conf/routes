@@ -12,35 +12,27 @@ PATCH    /v1/content/state/update     	@controllers.LearnerController.updateCont
 #user management api 
 POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
 PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
-POST	/v1/user/login					@controllers.usermanagement.UserController.login()
-POST	/v1/user/logout					@controllers.usermanagement.UserController.logout()
-POST	/v1/user/changepassword			@controllers.usermanagement.UserController.changePassword()
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST    /v1/user/download				@controllers.usermanagement.UserController.downloadUsers()
 POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
 POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
 POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
 PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
 GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
-POST    /v1/user/forgotpassword			@controllers.usermanagement.UserController.forgotpassword()
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
+POST   /v1/user/search							@controllers.usermanagement.UserController.search()
 
 #organisation management api
-POST	 /v1/org/create		@controllers.organisationmanagement.OrganisationController.createOrg()
-PATCH	 /v1/org/update		@controllers.organisationmanagement.OrganisationController.updateOrg()
-POST	 /v1/org/read     @controllers.organisationmanagement.OrganisationController.getOrgDetails()
-PATCH	/v1/org/status/update		@controllers.organisationmanagement.OrganisationController.updateOrgStatus()
-POST    /v1/org/approve             @controllers.organisationmanagement.OrganisationController.approveOrg()
-POST    /v1/org/member/join            @controllers.organisationmanagement.OrganisationController.joinUserOrganisation()
-POST    /v1/org/member/approve         @controllers.organisationmanagement.OrganisationController.approveUserOrganisation()
-POST    /v1/org/member/reject         @controllers.organisationmanagement.OrganisationController.rejectUserOrganisation()
-POST     /v1/org/member/add			@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
+POST	 /v1/org/create		    @controllers.organisationmanagement.OrganisationController.createOrg()
+PATCH	 /v1/org/update		    @controllers.organisationmanagement.OrganisationController.updateOrg()
+POST	 /v1/org/read           @controllers.organisationmanagement.OrganisationController.getOrgDetails()
+PATCH	/v1/org/status/update   @controllers.organisationmanagement.OrganisationController.updateOrgStatus()
+POST     /v1/org/member/add		@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
 POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrganisationController.getOrgTypeList()
 POST	/v1/org/type/create		@controllers.organisationmanagement.OrganisationController.createOrgType()
 PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrganisationController.updateOrgType()
-
+POST    /v1/org/search		    @controllers.organisationmanagement.OrganisationController.search()
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
@@ -63,10 +55,6 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 
 
 #Mock APIs to finish API Gateway onboarding
-
-POST   /v1/user/search							@controllers.usermanagement.UserController.search()
-POST  /v1/org/search							@controllers.organisationmanagement.OrganisationController.search()
-GET   /health									@controllers.healthmanager.HealthController.getHealth()
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
 
 #bulk upload
@@ -126,7 +114,7 @@ POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertion
 DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
 
 #Health check
-GET  /v1/health                               @controllers.healthmanager.HealthController.getHealth()
+GET  /health                                  @controllers.healthmanager.HealthController.getHealth()
 GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
 
 #Notes API
