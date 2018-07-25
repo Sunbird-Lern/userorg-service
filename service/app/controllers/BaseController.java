@@ -121,6 +121,16 @@ public class BaseController extends Controller {
     return response;
   }
 
+  public static ResponseParams createResponseParamObj(ResponseCode code, String customMessage) {
+    ResponseParams params = new ResponseParams();
+    if (code.getResponseCode() != 200) {
+      params.setErr(code.getErrorCode());
+      params.setErrmsg(customMessage != null ? customMessage : code.getErrorMessage());
+    }
+    params.setMsgid(ExecutionContext.getRequestId());
+    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
+    return params;
+  }
   /**
    * This method will create response parameter
    *
@@ -128,14 +138,7 @@ public class BaseController extends Controller {
    * @return ResponseParams
    */
   public static ResponseParams createResponseParamObj(ResponseCode code) {
-    ResponseParams params = new ResponseParams();
-    if (code.getResponseCode() != 200) {
-      params.setErr(code.getErrorCode());
-      params.setErrmsg(code.getErrorMessage());
-    }
-    params.setMsgid(ExecutionContext.getRequestId());
-    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
-    return params;
+    return createResponseParamObj(code, null);
   }
 
   /**
@@ -196,7 +199,7 @@ public class BaseController extends Controller {
     if (code == null) {
       code = ResponseCode.SERVER_ERROR;
     }
-    response.setParams(createResponseParamObj(code));
+    response.setParams(createResponseParamObj(code, exception.getMessage()));
     if (response.getParams() != null) {
       response.getParams().setStatus(response.getParams().getStatus());
       if (exception.getCode() != null) {
@@ -226,7 +229,7 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
     ResponseCode code = ResponseCode.getResponse(exception.getCode());
-    response.setParams(createResponseParamObj(code));
+    response.setParams(createResponseParamObj(code, exception.getMessage()));
     return response;
   }
 

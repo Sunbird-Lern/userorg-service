@@ -14,9 +14,11 @@ import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.badge.BadgeOperations;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -76,6 +78,7 @@ public class BadgeIssuerController extends BaseController {
    */
   public Promise<Result> getBadgeIssuer(String issuerId) {
     try {
+      BaseRequestValidator.validateIdentifierValue(issuerId, BadgingJsonKey.ISSUER);
       Request reqObj = new Request();
       reqObj =
           setExtraParam(
@@ -120,6 +123,7 @@ public class BadgeIssuerController extends BaseController {
    */
   public Promise<Result> deleteBadgeIssuer(String issuerId) {
     try {
+      BaseRequestValidator.validateIdentifierValue(issuerId, BadgingJsonKey.ISSUER);
       Request reqObj = new Request();
       reqObj =
           setExtraParam(
