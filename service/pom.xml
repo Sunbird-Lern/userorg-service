@@ -67,10 +67,6 @@
 		                  <artifactId>jackson-core</artifactId>
 				</exclusion>
 				<exclusion>
-				  <groupId>com.fasterxml.jackson.datatype</groupId>
-		                  <artifactId>jackson-datatype-jdk8</artifactId>
-				</exclusion>
-				<exclusion>
 				  <groupId>org.joda</groupId>
 		                  <artifactId>joda-convert</artifactId>
 				</exclusion>
