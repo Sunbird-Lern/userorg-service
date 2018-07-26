@@ -55,7 +55,7 @@ public class InitializationControllerTest {
   }
 
   @Test
-  public void TestInitalizeRootOrg() {
+  public void testInitalizeRootOrg() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORG_NAME, "org123");
@@ -70,7 +70,7 @@ public class InitializationControllerTest {
   }
 
   @Test
-  public void TestInitalizeRootOrgWithoutChannel() {
+  public void testInitalizeRootOrgWithoutChannel() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORG_NAME, "org123");
@@ -84,7 +84,7 @@ public class InitializationControllerTest {
   }
 
   @Test
-  public void TestInitalizeRootOrgWithoutOrgName() {
+  public void testInitalizeRootOrgWithoutOrgName() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.CHANNEL, "123456");

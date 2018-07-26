@@ -36,7 +36,6 @@ public class InitializationController extends BaseController {
           LoggerEnum.INFO.name());
       Request reqObj =
           createAndInitRequest(ActorOperations.SYSTEM_INIT_ROOT_ORG.getValue(), requestData);
-      reqObj.put(JsonKey.REMOTE_ADDRESS, request().remoteAddress());
       initialisationRequestValidator.validateCreateFirstRootOrg(reqObj);
       HashMap<String, Object> innerMap = new HashMap<>();
       Map<String, Object> orgData = reqObj.getRequest();

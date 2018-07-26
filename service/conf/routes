@@ -173,3 +173,7 @@ DELETE /v1/location/delete/:locationId                      @controllers.locatio
 
 #Initalization API
 POST   /v1/system/init/rootOrg                          @controllers.initialization.InitializationController.initaliseRootOrg()
+
+#System Settings API
+GET   /v1/system/setting/:settingId                    @controllers.systemsettings.SystemSettingsController.getSystemSettingById(settingId:String)
+GET   /v1/system/settings/list                              @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
