@@ -9,7 +9,6 @@ import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
@@ -62,7 +61,6 @@ public class BadgeAssertionController extends BaseController {
     try {
       ProjectLogger.log(
           " get badge assertion details api called = " + assertionId, LoggerEnum.DEBUG.name());
-      BaseRequestValidator.validateIdentifierValue(assertionId, BadgingJsonKey.ASSERTION_ID);
       Request reqObj = new Request();
       reqObj.getRequest().put(BadgingJsonKey.ASSERTION_ID, assertionId);
       BadgeAssertionValidator.validategetBadgeAssertion(reqObj);

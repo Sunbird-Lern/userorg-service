@@ -125,7 +125,8 @@ public class BaseController extends Controller {
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
-      params.setErrmsg(customMessage != null ? customMessage : code.getErrorMessage());
+      params.setErrmsg(
+          StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
     }
     params.setMsgid(ExecutionContext.getRequestId());
     params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());

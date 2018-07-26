@@ -14,7 +14,6 @@ import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import play.libs.F;
 import play.mvc.Http;
@@ -84,7 +83,6 @@ public class BadgeClassController extends BaseController {
     ProjectLogger.log("getBadgeClass called.", LoggerEnum.DEBUG.name());
 
     try {
-      BaseRequestValidator.validateIdentifierValue(badgeId, BadgingJsonKey.BADGE_ID);
       Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
       request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
@@ -137,7 +135,6 @@ public class BadgeClassController extends BaseController {
     ProjectLogger.log("deleteBadgeClass called.", LoggerEnum.DEBUG.name());
 
     try {
-      BaseRequestValidator.validateIdentifierValue(badgeId, BadgingJsonKey.BADGE_ID);
       Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
       request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
