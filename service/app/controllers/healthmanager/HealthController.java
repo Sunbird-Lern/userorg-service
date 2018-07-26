@@ -44,8 +44,7 @@ public class HealthController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      // return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-      return Promise.<Result>pure(ok());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
