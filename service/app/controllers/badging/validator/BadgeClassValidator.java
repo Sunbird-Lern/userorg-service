@@ -190,7 +190,6 @@ public class BadgeClassValidator extends BaseRequestValidator {
     validateParam(
         (String) requestMap.get(JsonKey.DESCRIPTION), ResponseCode.badgeDescriptionRequired);
 
-    validateRootOrgId((String) requestMap.get(JsonKey.ROOT_ORG_ID), httpRequestHeaders);
     validateType((String) requestMap.get(JsonKey.TYPE));
     validateSubtype((String) requestMap.get(JsonKey.SUBTYPE));
     validateRoles((String) requestMap.get(JsonKey.ROLES), ResponseCode.badgeRolesRequired);
@@ -203,6 +202,8 @@ public class BadgeClassValidator extends BaseRequestValidator {
           ResponseCode.badgeImageRequired.getErrorMessage(),
           ERROR_CODE);
     }
+
+    validateRootOrgId((String) requestMap.get(JsonKey.ROOT_ORG_ID), httpRequestHeaders);
   }
 
   /**
