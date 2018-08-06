@@ -69,34 +69,6 @@ public class OrganisationController extends BaseController {
   }
 
   /**
-   * Method to approve an organization
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> approveOrg() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: approveOrg called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateOrg(reqObj);
-      reqObj.setOperation(ActorOperations.APPROVE_ORG.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
    * This method will update organization data.
    *
    * @return Promise<Result>
@@ -230,88 +202,6 @@ public class OrganisationController extends BaseController {
       ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       RequestValidator.validateUserOrg(reqObj);
       reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * Method to perform the user join organization operation .
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> joinUserOrganisation() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: joinUserOrganisation called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUserOrg(reqObj);
-      reqObj.setOperation(ActorOperations.JOIN_USER_ORGANISATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * Method to approve the user joined organization .
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> approveUserOrganisation() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: approveUserOrganisation called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUserOrg(reqObj);
-      reqObj.setOperation(ActorOperations.APPROVE_USER_ORGANISATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * Method to reject the user organization .
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> rejectUserOrganisation() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: rejectUserOrganisation called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUserOrg(reqObj);
-      reqObj.setOperation(ActorOperations.REJECT_USER_ORGANISATION.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
