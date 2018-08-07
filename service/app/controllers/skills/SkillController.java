@@ -2,6 +2,8 @@ package controllers.skills;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+
+import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -20,12 +22,13 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add/endorse user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.ADD_SKILL.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
+      reqObj = setExtraParam(
+              reqObj,
+              ExecutionContext.getRequestId(),
+              ActorOperations.UPDATE_SKILL.getValue(),
+              ctx().flash().get(JsonKey.USER_ID),
+              getEnvironment());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -37,12 +40,13 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("get user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.GET_SKILL.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
+      reqObj = setExtraParam(
+              reqObj,
+              ExecutionContext.getRequestId(),
+              ActorOperations.UPDATE_SKILL.getValue(),
+              ctx().flash().get(JsonKey.USER_ID),
+              getEnvironment());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -53,12 +57,31 @@ public class SkillController extends BaseController {
     try {
       ProjectLogger.log("get list of skills ");
       Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.GET_SKILLS_LIST.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
+      reqObj = setExtraParam(
+              reqObj,
+              ExecutionContext.getRequestId(),
+              ActorOperations.UPDATE_SKILL.getValue(),
+              ctx().flash().get(JsonKey.USER_ID),
+              getEnvironment());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> updateSkill(){
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("Update skill request: ");
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj = setExtraParam(
+                      reqObj,
+                      ExecutionContext.getRequestId(),
+                      ActorOperations.UPDATE_SKILL.getValue(),
+                      ctx().flash().get(JsonKey.USER_ID),
+                      getEnvironment());
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
