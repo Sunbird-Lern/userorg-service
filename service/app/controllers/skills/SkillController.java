@@ -2,9 +2,6 @@ package controllers.skills;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-
-import java.util.HashMap;
-import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -22,7 +19,8 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("add/endorse user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj = setExtraParam(
+      reqObj =
+          setExtraParam(
               reqObj,
               ExecutionContext.getRequestId(),
               ActorOperations.UPDATE_SKILL.getValue(),
@@ -40,7 +38,8 @@ public class SkillController extends BaseController {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("get user skills=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj = setExtraParam(
+      reqObj =
+          setExtraParam(
               reqObj,
               ExecutionContext.getRequestId(),
               ActorOperations.UPDATE_SKILL.getValue(),
@@ -57,7 +56,8 @@ public class SkillController extends BaseController {
     try {
       ProjectLogger.log("get list of skills ");
       Request reqObj = new Request();
-      reqObj = setExtraParam(
+      reqObj =
+          setExtraParam(
               reqObj,
               ExecutionContext.getRequestId(),
               ActorOperations.UPDATE_SKILL.getValue(),
@@ -70,17 +70,18 @@ public class SkillController extends BaseController {
     }
   }
 
-  public Promise<Result> updateSkill(){
+  public Promise<Result> updateSkill() {
     try {
       JsonNode requestData = request().body().asJson();
       ProjectLogger.log("Update skill request: ");
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj = setExtraParam(
-                      reqObj,
-                      ExecutionContext.getRequestId(),
-                      ActorOperations.UPDATE_SKILL.getValue(),
-                      ctx().flash().get(JsonKey.USER_ID),
-                      getEnvironment());
+      reqObj =
+          setExtraParam(
+              reqObj,
+              ExecutionContext.getRequestId(),
+              ActorOperations.UPDATE_SKILL.getValue(),
+              ctx().flash().get(JsonKey.USER_ID),
+              getEnvironment());
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
