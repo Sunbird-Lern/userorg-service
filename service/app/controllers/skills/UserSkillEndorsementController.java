@@ -10,7 +10,7 @@ public class UserSkillEndorsementController extends BaseController {
 
   public Promise<Result> addEndorsement() {
     try {
-      Request reqObj = createAndInitRequest(ActorOperations.ENDORSE_USER_SKILL.getValue());
+      Request reqObj = createAndInitRequest(ActorOperations.ADD_USER_SKILL_ENDORSEMENT.getValue());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
