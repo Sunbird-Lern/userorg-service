@@ -13,10 +13,10 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
         (String) request.getRequest().get(JsonKey.USER_ID),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USER_ID);
-    isUserIdValid(request);
+    validateUserId(request);
   }
 
-  private static void isUserIdValid(Request request) {
+  private static void validateUserId(Request request) {
     if (request
         .getRequest()
         .get(JsonKey.USER_ID)
