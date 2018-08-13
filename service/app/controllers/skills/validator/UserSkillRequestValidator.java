@@ -30,4 +30,20 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
           JsonKey.USER_ID);
     }
   }
+
+  public void validateSkillEndorsementRequest(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.USER_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.USER_ID);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.ENDORSED_USER_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ENDORSED_USER_ID);
+    validateParam(
+        (String) request.getRequest().get("skillId"),
+        ResponseCode.mandatoryParamsMissing,
+        "skillId");
+    isUserIdValid(request);
+  }
 }

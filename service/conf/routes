@@ -132,7 +132,7 @@ POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
 POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
 GET   /v1/skills						        @controllers.skills.SkillController.getSkillsList()
 POST /v1/user/skill/update						@controllers.skills.UserSkillController.updateSkill()
-POST /v1/user/skill/endorse/add					@controllers.skills.UserSkillEndorsementController.addEndorsement()
+POST /v1/user/skill/endorse/add					@controllers.skills.UserSkillEndorsementController.addEndorseroment()
 POST  /v1/user/skill/temp/read						@controllers.skills.UserSkillController.getSkill()
 GET   /v1/temp/skills						        @controllers.skills.UserSkillController.getSkillsList()
 #T&C
