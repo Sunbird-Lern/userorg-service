@@ -44,6 +44,6 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
         (String) request.getRequest().get("skillId"),
         ResponseCode.mandatoryParamsMissing,
         "skillId");
-    isUserIdValid(request);
+    validateUserId(request);
   }
 }
