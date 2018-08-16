@@ -19,6 +19,9 @@ node('build-slave') {
         sh('git status')
         sh('grep -r UPDATE_SKILL service/libs/')
         sh('git submodule update --init')
+        sh('git branch')
+        sh('git status')
+        sh('grep -r UPDATE_SKILL service/libs/')
         sh 'mvn clean install -DskipTests=true '
         dir ('service') {
         sh 'mvn play2:dist'
