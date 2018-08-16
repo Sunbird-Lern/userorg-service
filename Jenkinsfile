@@ -15,6 +15,9 @@ node('build-slave') {
 
         env.NODE_ENV = "build"
         print "Environment will be : ${env.NODE_ENV}"
+        sh('git branch')
+        sh('git status')
+        sh('grep -r UPDATE_SKILL service/libs/')
         sh('git submodule update --init')
         sh 'mvn clean install -DskipTests=true '
         dir ('service') {
