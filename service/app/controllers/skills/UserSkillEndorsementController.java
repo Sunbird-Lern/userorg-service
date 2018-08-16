@@ -10,7 +10,7 @@ import play.mvc.Result;
 
 public class UserSkillEndorsementController extends BaseController {
 
-  public Promise<Result> addEndorseroment() {
+  public Promise<Result> addEndorsement() {
     try {
       JsonNode bodyJson = request().body().asJson();
       Request reqObj =

@@ -21,7 +21,7 @@ public class UserSkillEndorsementRequestValidator extends BaseRequestValidator {
         (String) request.getRequest().get("skillId"),
         ResponseCode.mandatoryParamsMissing,
         "skillId");
-    validateUserId(request);
+    validateUserId(request,JsonKey.USER_ID);
   }
 
 
