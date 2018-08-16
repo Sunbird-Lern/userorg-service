@@ -1,3 +1,4 @@
 [submodule "service/libs"]
 	path = service/libs
 	url = https://github.com/project-sunbird/sunbird-utils
+	branch = release-1.10
