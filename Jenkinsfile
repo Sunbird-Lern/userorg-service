@@ -22,6 +22,7 @@ node('build-slave') {
         sh('git branch')
         sh('git status')
         sh('grep -r UPDATE_SKILL service/libs/')
+        sh('git checkout release-1.10')
         sh 'sudo mvn clean install -DskipTests=true '
         dir ('service') {
         sh 'mvn play2:dist'
