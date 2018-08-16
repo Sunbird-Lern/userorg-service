@@ -1,6 +1,5 @@
 package controllers.skills.validator;
 
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -21,8 +20,7 @@ public class UserSkillEndorsementRequestValidator extends BaseRequestValidator {
         (String) request.getRequest().get("skillId"),
         ResponseCode.mandatoryParamsMissing,
         "skillId");
-    validateUserId(request,JsonKey.USER_ID);
+
+    validateUserId(request, JsonKey.USER_ID);
   }
-
-
 }
