@@ -84,6 +84,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/location/search", var);
     apiHeaderIgnoreMap.put("/v1/location/delete", var);
     apiHeaderIgnoreMap.put("/v1/bulk/location/upload", var);
+    apiHeaderIgnoreMap.put("/v1/system/init/rootOrg", var);
   }
 
   /**
