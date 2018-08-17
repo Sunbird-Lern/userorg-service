@@ -127,14 +127,13 @@ DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.Note
 #Audit History API
 POST   /v1/audit/history                       @controllers.audit.AuditLogController.searchAuditHistory()
 
-#skill tag and endoresement
-POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
-POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
-GET   /v1/skills						        @controllers.skills.SkillController.getSkillsList()
-POST /v1/user/skill/update						@controllers.skills.UserSkillController.updateSkill()
-POST /v1/user/skill/endorse/add					@controllers.skills.UserSkillEndorsementController.addEndorsement()
-POST  /v1/user/skill/temp/read						@controllers.skills.UserSkillController.getSkill()
-GET   /v1/temp/skills						        @controllers.skills.UserSkillController.getSkillsList()
+# Skill tag and endorsement
+POST /v1/user/skill/add                        @controllers.skills.UserSkillController.addSkill()
+POST /v1/user/skill/read                       @controllers.skills.UserSkillController.getSkill()
+GET  /v1/skills                                @controllers.skills.UserSkillController.getSkillsList()
+POST /v1/user/skill/update                     @controllers.skills.UserSkillController.updateSkill()
+POST /v1/user/skill/endorse/add                @controllers.skills.UserSkillEndorsementController.addEndorsement()
+
 #T&C
 POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
 POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference()

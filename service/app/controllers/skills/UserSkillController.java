@@ -10,6 +10,16 @@ import play.mvc.Result;
 
 public class UserSkillController extends BaseController {
 
+  public Promise<Result> addSkill() {
+    try {
+      JsonNode bodyJson = request().body().asJson();
+      Request reqObj = createAndInitRequest(ActorOperations.ADD_SKILL.getValue(), bodyJson);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
   public Promise<Result> updateSkill() {
     try {
       JsonNode bodyJson = request().body().asJson();
@@ -17,7 +27,7 @@ public class UserSkillController extends BaseController {
       new UserSkillRequestValidator().validateUpdateSkillRequest(reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -27,7 +37,7 @@ public class UserSkillController extends BaseController {
       Request reqObj = createAndInitRequest(ActorOperations.GET_SKILL.getValue());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -36,7 +46,7 @@ public class UserSkillController extends BaseController {
       Request reqObj = createAndInitRequest(ActorOperations.GET_SKILLS_LIST.getValue());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 }
