@@ -13,6 +13,7 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USER_ID);
 
+
     validateUserId(request, JsonKey.USER_ID);
   }
 }
