@@ -15,14 +15,8 @@ node('build-slave') {
 
         env.NODE_ENV = "build"
         print "Environment will be : ${env.NODE_ENV}"
-        sh('git checkout release-1.10')
-        sh('git branch')
-        sh('git status')
-        sh('grep -r UPDATE_SKILL service/libs/')
         sh('git submodule update --init')
-        sh('git branch')
-        sh('git status')
-        sh('grep -r UPDATE_SKILL service/libs/')
+        sh('git submodule update --init --recursive --remote')
         sh 'sudo mvn clean install -DskipTests=true '
         dir ('service') {
         sh 'mvn play2:dist'
