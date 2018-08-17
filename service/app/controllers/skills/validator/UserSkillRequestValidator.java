@@ -13,11 +13,6 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USER_ID);
 
-    validateParam(
-        (String) request.getRequest().get(JsonKey.SKILLS),
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.SKILLS);
-
     validateUserId(request, JsonKey.USER_ID);
   }
 }
