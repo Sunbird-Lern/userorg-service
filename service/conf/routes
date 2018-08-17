@@ -172,3 +172,8 @@ POST   /v1/location/create                      @controllers.location.LocationCo
 PATCH  /v1/location/update                      @controllers.location.LocationController.updateLocation()
 POST   /v1/location/search                      @controllers.location.LocationController.searchLocation()
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
+
+#System Settings API
+GET   /v1/system/setting/:settingId                    @controllers.systemsettings.SystemSettingsController.getSystemSettingById(settingId:String)
+GET   /v1/system/settings/list                              @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
+PUT   /v1/system/setting/upsert                              @controllers.systemsettings.SystemSettingsController.updateSystemSettingById()
