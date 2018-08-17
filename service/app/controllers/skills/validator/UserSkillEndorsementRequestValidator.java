@@ -1,5 +1,6 @@
 package controllers.skills.validator;
 
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -17,10 +18,24 @@ public class UserSkillEndorsementRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.ENDORSED_USER_ID);
     validateParam(
-        (String) request.getRequest().get("skillId"),
+        (String) request.getRequest().get(JsonKey.SKILL_NAME),
         ResponseCode.mandatoryParamsMissing,
-        "skillId");
+        JsonKey.SKILL_NAME);
 
     validateUserId(request, JsonKey.USER_ID);
+    validateSelfEndorsement(request);
+  }
+
+  private void validateSelfEndorsement(Request request) {
+    String endorsedUserId = (String) request.getRequest().get(JsonKey.ENDORSED_USER_ID);
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+    if (userId.equalsIgnoreCase(endorsedUserId)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidDuplicateValue.getErrorCode(),
+          ResponseCode.invalidDuplicateValue.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
+          JsonKey.USER_ID,
+          JsonKey.ENDORSED_USER_ID);
+    }
   }
 }

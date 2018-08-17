@@ -33,8 +33,8 @@ public class UserSkillController extends BaseController {
 
   public Promise<Result> getSkill() {
     try {
-
-      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILL.getValue());
+      JsonNode bodyJson = request().body().asJson();
+      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILL.getValue(), bodyJson);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.pure(createCommonExceptionResponse(e, request()));
