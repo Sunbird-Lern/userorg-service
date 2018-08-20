@@ -1,7 +1,6 @@
 package controllers.skills.validator;
 
 import java.util.List;
-import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
@@ -16,13 +15,20 @@ public class UserSkillRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USER_ID);
 
-    if (CollectionUtils.isEmpty((List<String>) request.getRequest().get(JsonKey.SKILLS))) {
+    if (request.getRequest().get(JsonKey.SKILLS) == null) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
-          ResponseCode.invalidParameterValue.getErrorMessage(),
-          ResponseCode.invalidParameterValue.getResponseCode(),
-          "[]",
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
           JsonKey.SKILLS);
+    }
+    if (!(request.getRequest().get(JsonKey.SKILLS) instanceof List)) {
+      throw new ProjectCommonException(
+          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
+          JsonKey.SKILLS,
+          "List");
     }
 
     validateUserId(request, JsonKey.USER_ID);
