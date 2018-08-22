@@ -408,6 +408,29 @@ public class CourseBatchControllerTest {
     assertEquals(200, result.status());
   }
 
+  @Test
+  public void testUpdateBatchStartDateToTodayDate() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.COURSE_ID, "org123");
+    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
+    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    Date currentdate = new Date();
+    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
   private static String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
