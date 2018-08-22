@@ -12,7 +12,7 @@
   </properties>
 
   <modules>
-      <!--<module>service/sunbird-utils</module>-->
+      <module>service/sunbird-utils</module>
       <module>service</module>
   </modules>
 </project>
