@@ -1,5 +1,6 @@
 package controllers.skills;
 
+import static controllers.TestUtil.mapToJson;
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
@@ -8,13 +9,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import controllers.DummyActor;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -26,7 +26,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http;
@@ -35,7 +34,6 @@ import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-/** Created by rajatgupta on 21/08/18. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
@@ -64,6 +62,7 @@ public class UserSkillControllerTest {
     BaseController.setActorRef(subject);
   }
 
+  @Before
   public void setup() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -72,7 +71,6 @@ public class UserSkillControllerTest {
 
   @Test
   public void testAddSkill() {
-    setup();
     Map<String, Object> requestMap = new HashMap();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
@@ -90,48 +88,28 @@ public class UserSkillControllerTest {
   }
 
   @Test
-  public void testDeleteSkill() {
+  public void testGetSkills() {
     setup();
-    Map<String, Object> requestMap = new HashMap();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
-    innerMap.put(JsonKey.SKILLS, Arrays.asList("C"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    Http.RequestBuilder req =
-        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/update").method("POST");
+    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/skills").method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testUpdateSkill() {
-    setup();
-    Map<String, Object> requestMap = new HashMap();
+  public void testGetUserSkill() {
+
+    Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
-    innerMap.put(JsonKey.SKILLS, Arrays.asList("C-1", "JAVA"));
+    innerMap.put(JsonKey.USER_ID, "7687584");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
     Http.RequestBuilder req =
-        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/update").method("POST");
+        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/read").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
-  }
-
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 }

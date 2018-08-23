@@ -1,96 +1,67 @@
 package controllers.skills.validator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.junit.Assert;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 
-/** Created by rajatgupta on 21/08/18. */
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
 public class UserSkillEndorsementRequestValidatorTest {
   @Test
-  public void validateSkillEndorsementAddSuccess() {
-    Request request = new Request();
+  public void testValidateSkillAddEndorsementSuccess() {
     boolean response = false;
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.USER_ID, "111");
-    requestObj.put(JsonKey.ENDORSED_USER_ID, "112");
-    requestObj.put(JsonKey.SKILL_NAME, "C");
-    request.getContext().put(JsonKey.REQUESTED_BY, "111");
-    request.setRequest(requestObj);
     try {
-      new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+      new UserSkillEndorsementRequestValidator()
+          .validateSkillEndorsementRequest(createRequest("111", "112", "C", "111"));
       response = true;
     } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
+      fail();
     }
     assertEquals(true, response);
   }
 
   @Test(expected = ProjectCommonException.class)
-  public void validateSkillEndorsementAddWithUserIdMissingFailure() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.ENDORSED_USER_ID, "112");
-    requestObj.put(JsonKey.SKILL_NAME, "C");
-    request.getContext().put(JsonKey.REQUESTED_BY, "111");
-    request.setRequest(requestObj);
-    new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+  public void testValidateSkillAddEndorsementFailureWithUserIdMissing() {
+
+    new UserSkillEndorsementRequestValidator()
+        .validateSkillEndorsementRequest(createRequest(null, "112", "C", "111"));
   }
 
   @Test(expected = ProjectCommonException.class)
-  public void validateSkillEndorsementAddToSelfFailure() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.USER_ID, "111");
-    requestObj.put(JsonKey.ENDORSED_USER_ID, "111");
-    requestObj.put(JsonKey.SKILL_NAME, "C");
-    request.getContext().put(JsonKey.REQUESTED_BY, "111");
-    request.setRequest(requestObj);
-    new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+  public void testValidateSkillAddEndorsementFailureForSelf() {
+    new UserSkillEndorsementRequestValidator()
+        .validateSkillEndorsementRequest(createRequest("111", "111", "C", "111"));
   }
 
   @Test(expected = ProjectCommonException.class)
-  public void validateSkillEndorsementAddWithoutEndordrsedIdFailure() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.USER_ID, "111");
-    requestObj.put(JsonKey.SKILL_NAME, "C");
-    request.getContext().put(JsonKey.REQUESTED_BY, "111");
-    request.setRequest(requestObj);
-    new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+  public void testValidateSkillAddEndorsementFailureWithoutEndorsedUserId() {
+    new UserSkillEndorsementRequestValidator()
+        .validateSkillEndorsementRequest(createRequest("111", null, "C", "111"));
   }
 
   @Test(expected = ProjectCommonException.class)
-  public void validateSkillUpdateWithoutSkillsFailure() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.USER_ID, "111");
-    requestObj.put(JsonKey.ENDORSED_USER_ID, "112");
-    request.getContext().put(JsonKey.REQUESTED_BY, "111");
-    request.setRequest(requestObj);
-    new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+  public void testValidateSkillAddEndorsementFailureWithoutSkillName() {
+    new UserSkillEndorsementRequestValidator()
+        .validateSkillEndorsementRequest(createRequest("111", "112", null, "111"));
   }
 
-  @Test(expected = ProjectCommonException.class)
-  public void validateSkillUpdateWithDifferentUserFailure() {
+  private Request createRequest(
+      String userId, String endorseUserId, String skillName, String requestedByUserId) {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.USER_ID, "111");
-    List<String> skills = Arrays.asList("C", "C++");
-    requestObj.put(JsonKey.ENDORSED_USER_ID, "113");
-    requestObj.put(JsonKey.SKILLS, skills);
-    request.getContext().put(JsonKey.REQUESTED_BY, "112");
+    if (userId != null) requestObj.put(JsonKey.USER_ID, userId);
+    if (endorseUserId != null) requestObj.put(JsonKey.ENDORSED_USER_ID, endorseUserId);
+    if (skillName != null) requestObj.put(JsonKey.SKILL_NAME, skillName);
+    if (requestedByUserId != null)
+      request.getContext().put(JsonKey.REQUESTED_BY, requestedByUserId);
     request.setRequest(requestObj);
 
-    new UserSkillEndorsementRequestValidator().validateSkillEndorsementRequest(request);
+    return request;
   }
 }
