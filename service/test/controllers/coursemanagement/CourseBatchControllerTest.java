@@ -203,6 +203,7 @@ public class CourseBatchControllerTest {
     assertEquals(400, result.status());
   }
 
+  // kirti interchange startdate enddate
   @Test
   public void testUpdateBatchWithEndDateBeforeStartDate() {
     PowerMockito.mockStatic(RequestInterceptor.class);
@@ -220,8 +221,8 @@ public class CourseBatchControllerTest {
     calendar.add(Calendar.DAY_OF_MONTH, -2);
     Date previousDate = calendar.getTime();
 
-    innerMap.put(JsonKey.START_DATE, format.format(previousDate));
-    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
+    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
+    innerMap.put(JsonKey.END_DATE, format.format(previousDate));
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
@@ -406,6 +407,84 @@ public class CourseBatchControllerTest {
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
+  }
+
+  // kirti test cases
+  @Test
+  public void testUpdateBatchWithoutStartDate() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.COURSE_ID, "org123");
+    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
+    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    Date currentdate = new Date();
+
+    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testUpdateBatchWithStartDateBeforeEndDate() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.COURSE_ID, "org123");
+    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
+    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    Date currentdate = new Date();
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.DAY_OF_MONTH, 2);
+    Date futureDate = calendar.getTime();
+    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
+    innerMap.put(JsonKey.END_DATE, format.format(futureDate));
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testUpdateBatchWithoutStartDateAndEndDate() {
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.COURSE_ID, "org123");
+    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
+    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
   }
 
   private static String mapToJson(Map map) {
