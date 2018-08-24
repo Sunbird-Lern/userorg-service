@@ -71,6 +71,25 @@ public class UserSkillControllerTest {
 
   @Test
   public void testAddSkill() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
+    innerMap.put(JsonKey.SKILL_NAME, Arrays.asList("C", "C++"));
+    innerMap.put(JsonKey.ENDORSED_USER_ID, "uuiuhcf784508");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/add").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testUpdateSkill() {
     Map<String, Object> requestMap = new HashMap();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
@@ -88,7 +107,7 @@ public class UserSkillControllerTest {
   }
 
   @Test
-  public void testGetSkills() {
+  public void testGetAllSkills() {
     setup();
     Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/skills").method("GET");
     req.headers(headerMap);
@@ -97,7 +116,7 @@ public class UserSkillControllerTest {
   }
 
   @Test
-  public void testGetUserSkill() {
+  public void testGetSkill() {
 
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();

@@ -61,15 +61,11 @@ public class UserSkillEndorsementControllerTest {
     BaseController.setActorRef(subject);
   }
 
-  public void setup() {
+  @Test
+  public void testAddSkillEndorsement() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-  }
-
-  @Test
-  public void testAddSkillEndorsement() {
-    setup();
     Map<String, Object> requestMap = new HashMap();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
