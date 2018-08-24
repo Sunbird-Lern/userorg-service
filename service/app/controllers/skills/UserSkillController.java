@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.skills.validator.UserSkillRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -14,6 +15,7 @@ public class UserSkillController extends BaseController {
     try {
       JsonNode bodyJson = request().body().asJson();
       Request reqObj = createAndInitRequest(ActorOperations.ADD_SKILL.getValue(), bodyJson);
+      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.pure(createCommonExceptionResponse(e, request()));

@@ -1,5 +1,6 @@
 package controllers.skills;
 
+import static controllers.TestUtil.mapToJson;
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
@@ -8,12 +9,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import controllers.DummyActor;
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -25,22 +26,19 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
-import play.mvc.Http.RequestBuilder;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-/** Created by arvind on 30/11/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
-@PowerMockIgnore("javax.management.*")
-public class SkillControllerTest {
-
+@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+public class UserSkillControllerTest {
   private static FakeApplication app;
   private static Map<String, String[]> headerMap;
   private static ActorSystem system;
@@ -56,37 +54,69 @@ public class SkillControllerTest {
     headerMap.put(
         HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
-
+    headerMap.put(
+        HeaderParam.X_Authenticated_User_Token.getName(),
+        new String[] {"{userId} uuiuhcf784508 8y8c79-fhh"});
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
     BaseController.setActorRef(subject);
   }
 
-  @Test
-  public void testAddSkill() {
+  @Before
+  public void setup() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+  }
+
+  @Test
+  public void testAddSkill() {
 
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "7687584");
+    innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
+    innerMap.put(JsonKey.SKILL_NAME, Arrays.asList("C", "C++"));
+    innerMap.put(JsonKey.ENDORSED_USER_ID, "uuiuhcf784508");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/user/skill/add").method("POST");
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/add").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testGetUserSkill() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+  public void testUpdateSkill() {
+    Map<String, Object> requestMap = new HashMap();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
+    innerMap.put(JsonKey.SKILLS, Arrays.asList("C", "C++"));
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/update").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testGetAllSkills() {
+    setup();
+    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/skills").method("GET");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testGetSkill() {
 
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
@@ -95,33 +125,10 @@ public class SkillControllerTest {
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/user/skill/read").method("POST");
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/read").method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testGetSkills() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    RequestBuilder req = new RequestBuilder().uri("/v1/skills").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 }
