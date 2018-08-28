@@ -13,11 +13,6 @@ import org.sunbird.validator.systemsettings.SystemSettingsRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * SystemSettingsController This class contains controller methods for System Settings requests
- *
- * @author Loganathan Shanmugam
- */
 public class SystemSettingsController extends BaseController {
 
   private static final SystemSettingsRequestValidator systemSettingsRequestValidator =
