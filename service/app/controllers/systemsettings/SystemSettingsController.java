@@ -17,12 +17,8 @@ public class SystemSettingsController extends BaseController {
   private static final SystemSettingsRequestValidator systemSettingsRequestValidator =
       new SystemSettingsRequestValidator();
 
-  /**
-   * @param settingId id of the setting to be read
-   * @return returns the response result contains the SystemSetting
-   */
   @SuppressWarnings("unchecked")
-  public Promise<Result> getSystemSettingById(String settingId) {
+  public Promise<Result> getSystemSetting(String settingId) {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSettingById called", LoggerEnum.DEBUG.name());
@@ -36,7 +32,6 @@ public class SystemSettingsController extends BaseController {
     }
   }
 
-  /** @return returns the response result contains the SystemSetting */
   @SuppressWarnings("unchecked")
   public Promise<Result> setSystemSetting() {
     try {
@@ -53,7 +48,6 @@ public class SystemSettingsController extends BaseController {
     }
   }
 
-  /** @return returns the response result contains the list of SystemSettings */
   @SuppressWarnings("unchecked")
   public Promise<Result> getAllSystemSettings() {
     try {
