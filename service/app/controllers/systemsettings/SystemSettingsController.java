@@ -2,7 +2,6 @@ package controllers.systemsettings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -19,8 +18,6 @@ public class SystemSettingsController extends BaseController {
       new SystemSettingsRequestValidator();
 
   /**
-   * This method will get SystemSettings by id
-   *
    * @param settingId id of the setting to be read
    * @return returns the response result contains the SystemSetting
    */
@@ -30,10 +27,8 @@ public class SystemSettingsController extends BaseController {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSettingById called", LoggerEnum.DEBUG.name());
       Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), null);
-      HashMap<String, Object> innerMap = new HashMap<>();
-      Map<String, Object> settingsData = reqObj.getRequest();
-      settingsData.put(JsonKey.ID, settingId);
-      innerMap.put(JsonKey.SYSTEM_SETTINGS, settingsData);
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.ID, settingId);
       reqObj.setRequest(innerMap);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
@@ -41,35 +36,24 @@ public class SystemSettingsController extends BaseController {
     }
   }
 
-  /**
-   * This method will update the SystemSettings by id
-   *
-   * @return returns the response result contains the SystemSetting
-   */
+  /** @return returns the response result contains the SystemSetting */
   @SuppressWarnings("unchecked")
-  public Promise<Result> updateSystemSettingById() {
+  public Promise<Result> setSystemSetting() {
     try {
       ProjectLogger.log(
           "SystemSettingsController: updateSystemSetting called", LoggerEnum.DEBUG.name());
       JsonNode requestJson = request().body().asJson();
       Request reqObj =
           createAndInitRequest(ActorOperations.SET_SYSTEM_SETTING.getValue(), requestJson);
-      systemSettingsRequestValidator.validateUpdateSystemSetting(reqObj);
-      HashMap<String, Object> innerMap = new HashMap<>();
-      Map<String, Object> settingsData = reqObj.getRequest();
-      innerMap.put(JsonKey.SYSTEM_SETTINGS, settingsData);
-      reqObj.setRequest(innerMap);
+      systemSettingsRequestValidator.validateSetSystemSetting(reqObj);
+      reqObj.setRequest(reqObj.getRequest());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
-  /**
-   * This method will get all the SystemSettings
-   *
-   * @return returns the response result contains the list of SystemSettings
-   */
+  /** @return returns the response result contains the list of SystemSettings */
   @SuppressWarnings("unchecked")
   public Promise<Result> getAllSystemSettings() {
     try {

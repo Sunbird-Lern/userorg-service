@@ -174,6 +174,6 @@ POST   /v1/location/search                      @controllers.location.LocationCo
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
 
 #System Settings API
-GET   /v1/system/setting/:settingId             @controllers.systemsettings.SystemSettingsController.getSystemSettingById(settingId:String)
+GET   /v1/system/setting/get/:settingId             @controllers.systemsettings.SystemSettingsController.getSystemSettingById(settingId:String)
 GET   /v1/system/settings/list                  @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
-PUT   /v1/system/setting/upsert                 @controllers.systemsettings.SystemSettingsController.updateSystemSettingById()
+POST  /v1/system/setting/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
