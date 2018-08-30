@@ -2,8 +2,8 @@ package controllers.systemsettings;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.collections.map.HashedMap;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -24,7 +24,7 @@ public class SystemSettingsController extends BaseController {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSetting called", LoggerEnum.INFO.name());
       Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), null);
-      Map<String, Object> map = new HashedMap();
+      Map<String, Object> map = new HashMap();
       map.put(JsonKey.ID, settingId);
       reqObj.setRequest(map);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());

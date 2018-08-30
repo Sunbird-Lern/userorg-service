@@ -2,20 +2,16 @@ package controllers.systemsettings;
 
 import static controllers.TestUtil.mapToJson;
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -30,13 +26,6 @@ import util.RequestInterceptor;
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
 public class SystemSettingsControllerTest extends BaseControllerTest {
-
-  @Before
-  public void beforeTest() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-  }
 
   @Test
   public void testGetSystemSettingSuccess() {
@@ -57,7 +46,7 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
 
   @Test
   public void testSetSystemSettingSuccess() {
-    JsonNode json = createSetSystemRequest("defaultRootOrgId", "defaultRootOrgId", "org123");
+    JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", "org123");
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
     req.headers(headerMap);
@@ -67,7 +56,7 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
 
   @Test
   public void testSetSystemSettingFailureWithoutId() {
-    JsonNode json = createSetSystemRequest(null, "defaultRootOrgId", "org123");
+    JsonNode json = createSetSystemSettingRequest(null, "defaultRootOrgId", "org123");
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
     req.headers(headerMap);
@@ -77,7 +66,7 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
 
   @Test
   public void testSetSystemSettingFailureWithoutField() {
-    JsonNode json = createSetSystemRequest("defaultRootOrgId", null, "org123");
+    JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", null, "org123");
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
     req.headers(headerMap);
@@ -87,7 +76,7 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
 
   @Test
   public void testSetSystemSettingFailureWithoutValue() {
-    JsonNode json = createSetSystemRequest("defaultRootOrgId", "defaultRootOrgId", null);
+    JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", null);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
     req.headers(headerMap);
@@ -95,7 +84,7 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
     assertEquals(400, result.status());
   }
 
-  public JsonNode createSetSystemRequest(String id, String field, String value) {
+  private JsonNode createSetSystemSettingRequest(String id, String field, String value) {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     if (id != null) innerMap.put(JsonKey.ID, id);
