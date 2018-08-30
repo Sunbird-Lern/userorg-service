@@ -212,7 +212,8 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-
+      // in course batch search mentor also need to view batch.
+      reqObj.put(JsonKey.MENTOR_COURSE_VIEW, "true");
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.course.getTypeName());
       if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
