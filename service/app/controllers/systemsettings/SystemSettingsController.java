@@ -19,13 +19,13 @@ public class SystemSettingsController extends BaseController {
       new SystemSettingsRequestValidator();
 
   @SuppressWarnings("unchecked")
-  public Promise<Result> getSystemSetting(String settingId) {
+  public Promise<Result> getSystemSetting(String field) {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSetting called", LoggerEnum.INFO.name());
       Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), null);
       Map<String, Object> map = new HashMap();
-      map.put(JsonKey.ID, settingId);
+      map.put(JsonKey.FIELD, field);
       reqObj.setRequest(map);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
