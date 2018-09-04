@@ -92,6 +92,7 @@ public class Global extends GlobalSettings {
    *
    * @param app Application
    */
+  @Override
   public void onStart(Application app) {
     setEnvironment();
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
@@ -119,6 +120,7 @@ public class Global extends GlobalSettings {
    * @param actionMethod Method
    * @return Action
    */
+  @Override
   @SuppressWarnings("rawtypes")
   public Action onRequest(Request request, Method actionMethod) {
 
@@ -188,7 +190,7 @@ public class Global extends GlobalSettings {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;
