@@ -78,7 +78,7 @@ public class UserController extends BaseController {
       innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(innerMap);
-      request.getRequest().put(JsonKey.VERSION,"V2");
+      request.getRequest().put(JsonKey.VERSION,JsonKey.VERSION_2);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
