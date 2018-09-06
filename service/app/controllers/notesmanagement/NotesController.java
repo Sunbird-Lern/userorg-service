@@ -31,7 +31,7 @@ public class NotesController extends BaseController {
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -54,7 +54,7 @@ public class NotesController extends BaseController {
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -73,7 +73,7 @@ public class NotesController extends BaseController {
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -90,7 +90,7 @@ public class NotesController extends BaseController {
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 
@@ -110,7 +110,7 @@ public class NotesController extends BaseController {
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
 }
