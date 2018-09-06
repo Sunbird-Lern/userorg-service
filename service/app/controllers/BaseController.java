@@ -81,6 +81,21 @@ public class BaseController extends Controller {
   }
 
   /**
+   * Helper method for creating and initialising a request for given operation and request body.
+   *
+   * @param operation A defined actor operation
+   * @param requestBodyJson Optional information received in request body (JSON)
+   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
+   *     instance.
+   */
+  protected org.sunbird.common.request.Request createAndInitRequest(
+      String operation, JsonNode requestBodyJson, String pathId, String pathVariable) {
+    org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+    request.getContext().put(pathVariable, pathId);
+    return request;
+  }
+
+  /**
    * Helper method for creating and initialising a request for given operation.
    *
    * @param operation A defined actor operation
