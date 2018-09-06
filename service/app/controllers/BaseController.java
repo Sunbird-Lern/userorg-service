@@ -85,6 +85,8 @@ public class BaseController extends Controller {
    *
    * @param operation A defined actor operation
    * @param requestBodyJson Optional information received in request body (JSON)
+   * @param pathId information received in path
+   * @param pathVariable variable in which path information is stored
    * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
    *     instance.
    */
