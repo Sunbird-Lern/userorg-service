@@ -70,7 +70,7 @@ public class UserController extends BaseController {
    */
   public Promise<Result> createUserV2() {
     try {
-      ProjectLogger.log("UserController: createUserV1 called", LoggerEnum.INFO.name());
+      ProjectLogger.log("UserController: createUserV2 called", LoggerEnum.INFO.name());
       JsonNode requestData = request().body().asJson();
       Request request =
           createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
