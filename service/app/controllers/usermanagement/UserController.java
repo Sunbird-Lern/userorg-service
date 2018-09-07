@@ -7,6 +7,7 @@ import static org.sunbird.learner.util.Util.isNull;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,19 +45,43 @@ public class UserController extends BaseController {
    */
   public Promise<Result> createUser() {
     try {
+      ProjectLogger.log("UserController: createUserV1 called", LoggerEnum.INFO.name());
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: createUser called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      UserRequestValidator.validateCreateUser(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_USER.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
+      Request request =
+          createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
+      UserRequestValidator.validateCreateUser(request);
+      UserRequestValidator.fieldsNotAllowed(Arrays.asList(JsonKey.ORGANISATION_ID), request);
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      innerMap.put(JsonKey.USER, reqObj.getRequest());
+      ProjectUtil.updateMapSomeValueTOLowerCase(request);
+      innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      request.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+  
+  /**
+   * This method will do the registration process. registered user data will be store inside
+   * cassandra db.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> createUserV2() {
+    try {
+      ProjectLogger.log("UserController: createUserV2 called", LoggerEnum.INFO.name());
+      JsonNode requestData = request().body().asJson();
+      Request request =
+          createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
+      UserRequestValidator.validateCreateUserV2(request);
+      HashMap<String, Object> innerMap = new HashMap<>();
+      ProjectUtil.updateMapSomeValueTOLowerCase(request);
+      innerMap.put(JsonKey.USER, request.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      request.setRequest(innerMap);
+      request.getRequest().put(JsonKey.VERSION,JsonKey.VERSION_2);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
