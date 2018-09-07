@@ -38,7 +38,7 @@ public class NotesControllerTest extends BaseControllerTest {
   private static List<String> TAGS = Arrays.asList("SOME TAG");
 
   @Test
-  public void testCreateNote() {
+  public void testCreateNoteSuccess() {
 
     Map<String, Object> requestMap = new HashMap<>();
 
@@ -53,7 +53,7 @@ public class NotesControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testCreateNoteWithInvalidRequestData() {
+  public void testCreateNoteFailureWithInvalidRequestData() {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.REQUEST, getCreateNoteRequest(USER_ID, "", "", "", TITLE));
     String data = mapToJson(requestMap);
@@ -66,7 +66,7 @@ public class NotesControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGetNote() {
+  public void testGetNoteSuccess() {
     RequestBuilder req = new RequestBuilder().uri("/v1/note/read/" + NOTE_ID).method("GET");
     req.headers(headerMap);
     Result result = route(req);
@@ -74,7 +74,7 @@ public class NotesControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testUpdateNote() {
+  public void testUpdateNoteSuccess() {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(
         JsonKey.REQUEST, getCreateNoteRequest(USER_ID, COURSE_ID, CONTENT_ID, NOTE, TITLE));
@@ -89,7 +89,7 @@ public class NotesControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testDeleteNote() {
+  public void testDeleteNoteSuccess() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ID, "123");
@@ -105,7 +105,7 @@ public class NotesControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testsearchNote() {
+  public void testSearchNoteSuccess() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> filterMap = new HashMap<>();
