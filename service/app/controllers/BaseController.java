@@ -84,7 +84,7 @@ public class BaseController extends Controller {
       String operation, JsonNode requestBodyJson, java.util.function.Function function) {
     try {
       org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-      function.apply(request);
+      if (function != null) function.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
