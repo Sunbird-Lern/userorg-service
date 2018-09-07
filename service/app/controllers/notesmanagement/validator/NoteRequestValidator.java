@@ -11,33 +11,37 @@ import org.sunbird.common.responsecode.ResponseCode;
 public class NoteRequestValidator extends BaseRequestValidator {
 
   public void validateNote(Request request) {
-    validateUserId(request, JsonKey.USER_ID);
+
     validateParam(
-        (String) request.get("userId"), ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
+        (String) request.get(JsonKey.USER_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.USER_ID);
     validateParam(
-        (String) request.get("title"), ResponseCode.mandatoryParamsMissing, JsonKey.TITLE);
-    validateParam((String) request.get("note"), ResponseCode.mandatoryParamsMissing, JsonKey.NOTE);
-    if (StringUtils.isBlank((String) request.get("contentId"))
-        && StringUtils.isBlank((String) request.get("courseId"))) {
+        (String) request.get(JsonKey.TITLE), ResponseCode.mandatoryParamsMissing, JsonKey.TITLE);
+    validateParam(
+        (String) request.get(JsonKey.NOTE), ResponseCode.mandatoryParamsMissing, JsonKey.NOTE);
+    if (StringUtils.isBlank((String) request.get(JsonKey.CONTENT_ID))
+        && StringUtils.isBlank((String) request.get(JsonKey.COURSE_ID))) {
       throw new ProjectCommonException(
           ResponseCode.contentIdError.getErrorCode(),
           ResponseCode.contentIdError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (request.getRequest().containsKey("tags")
-        && request.getRequest().get("tags") instanceof List
-        && ((List) request.getRequest().get("tags")).isEmpty()) {
+    if (request.getRequest().containsKey(JsonKey.TAGS)
+        && request.getRequest().get(JsonKey.TAGS) instanceof List
+        && ((List) request.getRequest().get(JsonKey.TAGS)).isEmpty()) {
       throw new ProjectCommonException(
           ResponseCode.invalidTags.getErrorCode(),
           ResponseCode.invalidTags.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (request.getRequest().get("tags") instanceof String) {
+    if (request.getRequest().get(JsonKey.TAGS) instanceof String) {
       throw new ProjectCommonException(
           ResponseCode.invalidTags.getErrorCode(),
           ResponseCode.invalidTags.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
+    validateUserId(request, JsonKey.USER_ID);
   }
 
   public void validateNoteId(String noteId) {

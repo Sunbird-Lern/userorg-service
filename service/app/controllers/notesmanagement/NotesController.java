@@ -56,7 +56,6 @@ public class NotesController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getNote(String noteId) {
-    //    try {
     return handleRequest(
         ActorOperations.GET_NOTE.getValue(),
         (request) -> {
