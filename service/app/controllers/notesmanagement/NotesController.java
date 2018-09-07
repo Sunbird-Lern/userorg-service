@@ -2,7 +2,7 @@ package controllers.notesmanagement;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.notesmanagement.validator.NoteValidator;
+import controllers.notesmanagement.validator.NoteRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -21,11 +21,11 @@ public class NotesController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> createNote() {
-    return handlePostRequest(
+    return handleRequest(
         ActorOperations.CREATE_NOTE.getValue(),
         request().body().asJson(),
         (request) -> {
-          new NoteValidator().validateNote((Request) request);
+          new NoteRequestValidator().validateNote((Request) request);
           return null;
         });
   }
@@ -42,7 +42,7 @@ public class NotesController extends BaseController {
         ActorOperations.UPDATE_NOTE.getValue(),
         requestData,
         (request) -> {
-          new NoteValidator().validateNoteId(noteId);
+          new NoteRequestValidator().validateNoteId(noteId);
           return null;
         },
         noteId,
@@ -59,9 +59,8 @@ public class NotesController extends BaseController {
     //    try {
     return handleRequest(
         ActorOperations.GET_NOTE.getValue(),
-        null,
         (request) -> {
-          new NoteValidator().validateNoteId(noteId);
+          new NoteRequestValidator().validateNoteId(noteId);
           return null;
         },
         noteId,
@@ -74,8 +73,7 @@ public class NotesController extends BaseController {
    * @return
    */
   public Promise<Result> searchNote() {
-    return handlePostRequest(
-        ActorOperations.SEARCH_NOTE.getValue(), request().body().asJson(), null);
+    return handleRequest(ActorOperations.SEARCH_NOTE.getValue(), request().body().asJson());
   }
 
   /**
@@ -87,9 +85,8 @@ public class NotesController extends BaseController {
   public Promise<Result> deleteNote(String noteId) {
     return handleRequest(
         ActorOperations.DELETE_NOTE.getValue(),
-        null,
         (request) -> {
-          new NoteValidator().validateNoteId(noteId);
+          new NoteRequestValidator().validateNoteId(noteId);
           return null;
         },
         noteId,

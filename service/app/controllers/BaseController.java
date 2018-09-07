@@ -80,10 +80,52 @@ public class BaseController extends Controller {
     return request;
   }
 
-  protected Promise<Result> handlePostRequest(
+  /**
+   * Helper method for creating and initialising a request for given operation.
+   *
+   * @param operation A defined actor operation
+   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
+   *     instance.
+   */
+  protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
+    return createAndInitRequest(operation, null);
+  }
+
+  protected Promise<Result> handleRequest(
       String operation, JsonNode requestBodyJson, java.util.function.Function function) {
     try {
       org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      if (function != null) function.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleRequest(String operation) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleRequest(String operation, JsonNode requestBodyJson) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleRequest(String operation, java.util.function.Function function) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation);
       if (function != null) function.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
@@ -109,32 +151,20 @@ public class BaseController extends Controller {
     }
   }
 
-  /**
-   * Helper method for creating and initialising a request for given operation and request body.
-   *
-   * @param operation A defined actor operation
-   * @param requestBodyJson Optional information received in request body (JSON)
-   * @param pathId information received in path
-   * @param pathVariable variable in which path information is stored
-   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
-   *     instance.
-   */
-  protected org.sunbird.common.request.Request createAndInitRequest(
-      String operation, JsonNode requestBodyJson, String pathId, String pathVariable) {
-    org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-    request.getContext().put(pathVariable, pathId);
-    return request;
-  }
-
-  /**
-   * Helper method for creating and initialising a request for given operation.
-   *
-   * @param operation A defined actor operation
-   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
-   *     instance.
-   */
-  protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
-    return createAndInitRequest(operation, null);
+  protected Promise<Result> handleRequest(
+      String operation,
+      java.util.function.Function validatorFunction,
+      String pathId,
+      String pathVariable) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation);
+      request.getContext().put(pathVariable, pathId);
+      validatorFunction.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   /**

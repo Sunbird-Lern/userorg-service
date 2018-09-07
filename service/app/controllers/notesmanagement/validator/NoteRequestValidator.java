@@ -9,7 +9,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** Created by rajatgupta on 04/09/18. */
-public class NoteValidator extends BaseRequestValidator {
+public class NoteRequestValidator extends BaseRequestValidator {
 
   public void validateNote(Request request) {
     validateUserId(request, JsonKey.USER_ID);
