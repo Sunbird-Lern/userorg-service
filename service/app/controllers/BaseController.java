@@ -92,45 +92,28 @@ public class BaseController extends Controller {
   }
 
   protected Promise<Result> handleRequest(String operation) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log("Error in controller", e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(operation, null, null, null, null);
   }
 
   protected Promise<Result> handleRequest(String operation, JsonNode requestBodyJson) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log("Error in controller", e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(operation, requestBodyJson, null, null, null);
   }
 
   protected Promise<Result> handleRequest(String operation, java.util.function.Function function) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation);
-      if (function != null) function.apply(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log("Error in controller", e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(operation, null, function, null, null);
   }
+
   protected Promise<Result> handleRequest(
       String operation, JsonNode requestBodyJson, java.util.function.Function function) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-      if (function != null) function.apply(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log("Error in controller", e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(operation, requestBodyJson, function, null, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      java.util.function.Function validatorFunction,
+      String pathId,
+      String pathVariable) {
+    return handleRequest(operation, null, validatorFunction, pathId, pathVariable);
   }
 
   protected Promise<Result> handleRequest(
@@ -141,24 +124,8 @@ public class BaseController extends Controller {
       String pathVariable) {
     try {
       org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-      request.getContext().put(pathVariable, pathId);
-      validatorFunction.apply(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log("Error in controller", e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  protected Promise<Result> handleRequest(
-      String operation,
-      java.util.function.Function validatorFunction,
-      String pathId,
-      String pathVariable) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation);
-      request.getContext().put(pathVariable, pathId);
-      validatorFunction.apply(request);
+      if (pathId != null) request.getContext().put(pathVariable, pathId);
+      if (validatorFunction != null) validatorFunction.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log("Error in controller", e);
