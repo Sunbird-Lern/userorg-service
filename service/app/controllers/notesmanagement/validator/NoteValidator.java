@@ -1,6 +1,7 @@
 package controllers.notesmanagement.validator;
 
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
@@ -17,8 +18,13 @@ public class NoteValidator extends BaseRequestValidator {
     validateParam(
         (String) request.get("title"), ResponseCode.mandatoryParamsMissing, JsonKey.TITLE);
     validateParam((String) request.get("note"), ResponseCode.mandatoryParamsMissing, JsonKey.NOTE);
-    validateParam(
-        (String) request.get("contentId"), ResponseCode.mandatoryParamsMissing, JsonKey.CONTENT_ID);
+    if (StringUtils.isBlank((String) request.get("contentId"))
+        && StringUtils.isBlank((String) request.get("courseId"))) {
+      throw new ProjectCommonException(
+          ResponseCode.contentIdError.getErrorCode(),
+          ResponseCode.contentIdError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
     if (request.getRequest().containsKey("tags")
         && request.getRequest().get("tags") instanceof List
         && ((List) request.getRequest().get("tags")).isEmpty()) {

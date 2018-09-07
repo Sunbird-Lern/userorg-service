@@ -80,6 +80,35 @@ public class BaseController extends Controller {
     return request;
   }
 
+  protected Promise<Result> handlePostRequest(
+      String operation, JsonNode requestBodyJson, java.util.function.Function function) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      function.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function validatorFunction,
+      String pathId,
+      String pathVariable) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      request.getContext().put(pathVariable, pathId);
+      validatorFunction.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("Error in controller", e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
   /**
    * Helper method for creating and initialising a request for given operation and request body.
    *
@@ -149,6 +178,7 @@ public class BaseController extends Controller {
     params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     return params;
   }
+
   /**
    * This method will create response parameter
    *
