@@ -23,7 +23,6 @@ import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import util.RequestInterceptor;
 
-/** Created by arvind on 4/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
