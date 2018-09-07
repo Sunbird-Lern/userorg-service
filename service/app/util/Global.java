@@ -300,11 +300,17 @@ public class Global extends GlobalSettings {
 
     String path = requestPath;
     final String ver = "/" + version;
+    final String ver2 = "/" + JsonKey.VERSION_2;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver)) {
+    if (path.startsWith(ver) || path.startsWith(ver2)) {
       String requestUrl = (path.split("\\?"))[0];
-      requestUrl = requestUrl.replaceFirst(ver, "api");
+      if(requestUrl.contains(ver)){
+        requestUrl = requestUrl.replaceFirst(ver, "api");
+      } else {
+        requestUrl = requestUrl.replaceFirst(ver2, "api");
+      }
+      
       String[] list = requestUrl.split("/");
       for (String str : list) {
         if (str.matches("[A-Za-z]+")) {
