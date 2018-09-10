@@ -11,6 +11,7 @@ PATCH    /v1/content/state/update     	@controllers.LearnerController.updateCont
 
 #user management api 
 POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
+POST	/v2/user/create				    @controllers.usermanagement.UserController.createUserV2()
 PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
@@ -127,10 +128,12 @@ DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.Note
 #Audit History API
 POST   /v1/audit/history                       @controllers.audit.AuditLogController.searchAuditHistory()
 
-#skill tag and endoresement
-POST  /v1/user/skill/add 						@controllers.skills.SkillController.addSkill()
-POST  /v1/user/skill/read						@controllers.skills.SkillController.getSkill()
-GET   /v1/skills						@controllers.skills.SkillController.getSkillsList()
+# Skill tag and endorsement
+POST /v1/user/skill/add                        @controllers.skills.UserSkillController.addSkill()
+POST /v1/user/skill/read                       @controllers.skills.UserSkillController.getSkill()
+GET  /v1/skills                                @controllers.skills.UserSkillController.getSkillsList()
+POST /v1/user/skill/update                     @controllers.skills.UserSkillController.updateSkill()
+POST /v1/user/skill/endorse/add                @controllers.skills.UserSkillEndorsementController.addEndorsement()
 
 #T&C
 POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
@@ -170,3 +173,8 @@ POST   /v1/location/create                      @controllers.location.LocationCo
 PATCH  /v1/location/update                      @controllers.location.LocationController.updateLocation()
 POST   /v1/location/search                      @controllers.location.LocationController.searchLocation()
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
+
+# System Settings APIs
+GET   /v1/system/setting/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
+GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
+POST  /v1/system/setting/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
