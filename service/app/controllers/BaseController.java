@@ -52,6 +52,14 @@ public class BaseController extends Controller {
     }
   }
 
+  private org.sunbird.common.request.Request initRequest(org.sunbird.common.request.Request request, String operation) {
+    request.setOperation(operation);
+    request.setRequestId(ExecutionContext.getRequestId());
+    request.setEnv(getEnvironment());
+    request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+    return request;    
+  }
+  
   /**
    * Helper method for creating and initialising a request for given operation and request body.
    *
@@ -62,22 +70,11 @@ public class BaseController extends Controller {
    */
   protected org.sunbird.common.request.Request createAndInitRequest(
       String operation, JsonNode requestBodyJson) {
-    org.sunbird.common.request.Request request;
-
-    if (requestBodyJson != null) {
-      request =
+    org.sunbird.common.request.Request request =
           (org.sunbird.common.request.Request)
               mapper.RequestMapper.mapRequest(
                   requestBodyJson, org.sunbird.common.request.Request.class);
-    } else {
-      request = new org.sunbird.common.request.Request();
-    }
-
-    request.setOperation(operation);
-    request.setRequestId(ExecutionContext.getRequestId());
-    request.setEnv(getEnvironment());
-    request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    return request;
+    return initRequest(request, operation);
   }
 
   /**
@@ -88,7 +85,9 @@ public class BaseController extends Controller {
    *     instance.
    */
   protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
-    return createAndInitRequest(operation, null);
+    org.sunbird.common.request.Request request = new org.sunbird.common.request.Request();
+
+    return initRequest(request, operation);
   }
 
   /**
@@ -278,7 +277,7 @@ public class BaseController extends Controller {
     // remove request info from map
     Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
     return Results.ok(
-        Json.toJson(BaseController.createSuccessResponse(request, (Response) courseResponse)));
+        Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
     // }
     /*
      * else {
@@ -396,6 +395,7 @@ public class BaseController extends Controller {
 
     Function<Object, Result> function =
         new Function<Object, Result>() {
+          @Override
           public Result apply(Object result) {
             if (result instanceof Response) {
               Response response = (Response) result;
