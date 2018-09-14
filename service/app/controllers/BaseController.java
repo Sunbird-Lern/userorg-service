@@ -99,7 +99,8 @@ public class BaseController extends Controller {
     return handleRequest(operation, requestBodyJson, null, null, null);
   }
 
-  protected Promise<Result> handleRequest(String operation, java.util.function.Function requestValidatorFn) {
+  protected Promise<Result> handleRequest(
+      String operation, java.util.function.Function requestValidatorFn) {
     return handleRequest(operation, null, requestValidatorFn, null, null);
   }
 
@@ -128,7 +129,9 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
-      ProjectLogger.log("BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(), e);
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
