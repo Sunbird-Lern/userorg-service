@@ -152,7 +152,12 @@ public class Global extends GlobalSettings {
     ctx.flash().put(JsonKey.CHANNEL, channel);
     reqContext.put(JsonKey.ENV, getEnv(request));
     reqContext.put(JsonKey.REQUEST_ID, ExecutionContext.getRequestId());
-
+    String appId = request.getHeader(HeaderParam.X_APP_ID.getName());
+    // check if in request header X-app-id is coming then that need to
+    // be pass in search telemetry.
+    if (StringUtils.isNotBlank(appId)) {
+      ctx.flash().put(JsonKey.APP_ID, appId);
+    }
     if (!USER_UNAUTH_STATES.contains(userId)) {
       reqContext.put(JsonKey.ACTOR_ID, userId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
@@ -305,12 +310,12 @@ public class Global extends GlobalSettings {
     StringBuilder builder = new StringBuilder("");
     if (path.startsWith(ver) || path.startsWith(ver2)) {
       String requestUrl = (path.split("\\?"))[0];
-      if(requestUrl.contains(ver)){
+      if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
       } else {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
       }
-      
+
       String[] list = requestUrl.split("/");
       for (String str : list) {
         if (str.matches("[A-Za-z]+")) {
