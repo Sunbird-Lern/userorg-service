@@ -52,14 +52,15 @@ public class BaseController extends Controller {
     }
   }
 
-  private org.sunbird.common.request.Request initRequest(org.sunbird.common.request.Request request, String operation) {
+  private org.sunbird.common.request.Request initRequest(
+      org.sunbird.common.request.Request request, String operation) {
     request.setOperation(operation);
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    return request;    
+    return request;
   }
-  
+
   /**
    * Helper method for creating and initialising a request for given operation and request body.
    *
@@ -71,9 +72,9 @@ public class BaseController extends Controller {
   protected org.sunbird.common.request.Request createAndInitRequest(
       String operation, JsonNode requestBodyJson) {
     org.sunbird.common.request.Request request =
-          (org.sunbird.common.request.Request)
-              mapper.RequestMapper.mapRequest(
-                  requestBodyJson, org.sunbird.common.request.Request.class);
+        (org.sunbird.common.request.Request)
+            mapper.RequestMapper.mapRequest(
+                requestBodyJson, org.sunbird.common.request.Request.class);
     return initRequest(request, operation);
   }
 
@@ -276,8 +277,7 @@ public class BaseController extends Controller {
 
     // remove request info from map
     Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
-    return Results.ok(
-        Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
+    return Results.ok(Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
     // }
     /*
      * else {
@@ -534,6 +534,8 @@ public class BaseController extends Controller {
     reqObj.getContext().put(JsonKey.CHANNEL, ctx().flash().get(JsonKey.CHANNEL));
     reqObj.getContext().put(JsonKey.ACTOR_ID, ctx().flash().get(JsonKey.ACTOR_ID));
     reqObj.getContext().put(JsonKey.ACTOR_TYPE, ctx().flash().get(JsonKey.ACTOR_TYPE));
+    reqObj.getContext().put(JsonKey.APP_ID, ctx().flash().get(JsonKey.APP_ID));
+    ctx().current().flash().remove(JsonKey.APP_ID);
   }
 
   /**
