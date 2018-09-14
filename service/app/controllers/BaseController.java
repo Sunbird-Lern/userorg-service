@@ -91,6 +91,48 @@ public class BaseController extends Controller {
     return initRequest(request, operation);
   }
 
+  protected Promise<Result> handleRequest(String operation) {
+    return handleRequest(operation, null, null, null, null);
+  }
+
+  protected Promise<Result> handleRequest(String operation, JsonNode requestBodyJson) {
+    return handleRequest(operation, requestBodyJson, null, null, null);
+  }
+
+  protected Promise<Result> handleRequest(String operation, java.util.function.Function requestValidatorFn) {
+    return handleRequest(operation, null, requestValidatorFn, null, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, JsonNode requestBodyJson, java.util.function.Function requestValidatorFn) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable) {
+    return handleRequest(operation, null, requestValidatorFn, pathId, pathVariable);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable) {
+    try {
+      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      if (pathId != null) request.getContext().put(pathVariable, pathId);
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log("BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(), e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
   /**
    * This method will provide remote Actor selection
    *
@@ -132,6 +174,7 @@ public class BaseController extends Controller {
     params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     return params;
   }
+
   /**
    * This method will create response parameter
    *
