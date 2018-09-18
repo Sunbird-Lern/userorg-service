@@ -70,22 +70,6 @@ public class CourseBatchController extends BaseController {
           new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
           return null;
         });
-    //    try {
-    //      JsonNode requestData = request().body().asJson();
-    //      ProjectLogger.log("Delete batch=" + requestData, LoggerEnum.INFO.name());
-    //      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-    //      RequestValidator.validateAddBatchCourse(reqObj);
-    //      reqObj.setOperation(ActorOperations.REMOVE_BATCH.getValue());
-    //      reqObj.setRequestId(ExecutionContext.getRequestId());
-    //      reqObj.setEnv(getEnvironment());
-    //      HashMap<String, Object> innerMap = new HashMap<>();
-    //      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-    //      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    //      reqObj.setRequest(innerMap);
-    //      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    //    } catch (Exception e) {
-    //      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    //    }
   }
 
   /**
@@ -101,23 +85,6 @@ public class CourseBatchController extends BaseController {
           new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
           return null;
         });
-    //    try {
-    //      JsonNode requestData = request().body().asJson();
-    //      ProjectLogger.log("Add user to batch=" + requestData, LoggerEnum.INFO.name());
-    //      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-    //      reqObj.setOperation(ActorOperations.ADD_USER_TO_BATCH.getValue());
-    //      reqObj.setRequestId(ExecutionContext.getRequestId());
-    //      reqObj.setEnv(getEnvironment());
-    //      reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
-    //      HashMap<String, Object> innerMap = new HashMap<>();
-    //      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-    //      RequestValidator.validateAddBatchCourse(reqObj);
-    //      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    //      reqObj.setRequest(innerMap);
-    //      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    //    } catch (Exception e) {
-    //      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    //    }
   }
 
   /**
