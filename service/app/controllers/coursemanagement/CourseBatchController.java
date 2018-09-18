@@ -84,7 +84,7 @@ public class CourseBatchController extends BaseController {
         (request) -> {
           new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
           return null;
-        });
+        },batchId,JsonKey.BATCH_ID);
   }
 
   /**
@@ -109,7 +109,7 @@ public class CourseBatchController extends BaseController {
    */
   public Promise<Result> getBatch(String batchId) {
     return handleRequest(
-        ActorOperations.GET_BATCH.getValue(), request().body().asJson(), JsonKey.BATCH_ID, batchId);
+        ActorOperations.GET_BATCH.getValue(), batchId,JsonKey.BATCH_ID);
   }
 
   /**
