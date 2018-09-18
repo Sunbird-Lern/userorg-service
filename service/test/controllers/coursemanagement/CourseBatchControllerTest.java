@@ -1,40 +1,27 @@
 package controllers.coursemanagement;
 
+import static controllers.TestUtil.mapToJson;
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.BaseController;
-import controllers.DummyActor;
-import java.io.IOException;
+import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import play.test.FakeApplication;
-import play.test.Helpers;
 import util.RequestInterceptor;
 
 /** Created by arvind on 1/12/17. */
@@ -42,48 +29,34 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-public class CourseBatchControllerTest {
+public class CourseBatchControllerTest extends BaseControllerTest {
+  public static String COURSE_ID = "courseId";
+  public static String COURSE_NAME = "courseName";
+  public static int DAY_OF_MONTH = 2;
+  public static String INVALID_ENROLLMENT_TYPE = "invalid";
+  public static String BATCH_ID = "batchID";
+  public static String USER_IDS = "userIds";
 
-  private static FakeApplication app;
-  private static Map<String, String[]> headerMap;
-  private static ActorSystem system;
-  private static final Props props = Props.create(DummyActor.class);
-
-  @BeforeClass
-  public static void startApp() {
-    app = Helpers.fakeApplication();
-    Helpers.start(app);
-    headerMap = new HashMap<String, String[]>();
-    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
-    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
-    headerMap.put(
-        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
-    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
-
-    system = ActorSystem.create("system");
-    ActorRef subject = system.actorOf(props);
-    BaseController.setActorRef(subject);
+  @Test
+  public void testCreateBatchSuccess() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true)));
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
   }
 
   @Test
-  public void testcreateBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, 2);
-    Date futureDate = calendar.getTime();
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-    innerMap.put(JsonKey.END_DATE, format.format(futureDate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
+  public void testCreateBatchSuccessWithoutEndDate() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null));
 
     JsonNode json = Json.parse(data);
     RequestBuilder req =
@@ -94,48 +67,55 @@ public class CourseBatchControllerTest {
   }
 
   @Test
-  public void testCreateBatchWithoutEndDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+  public void testCreateBatchFailureWithInvalidEnrollmentType() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, new Date(), getEndDate(true)));
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
+  }
+
+  @Test
+  public void testCreateBatchFailureWithEndDateBeforeStartDate() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, new Date(), getEndDate(false)));
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
+  }
+
+  @Test
+  public void testCreateBatchFailureWithSameStartAndEndDate() {
     Date currentdate = new Date();
-
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentdate, currentdate));
 
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
-    assertEquals(200, result.status());
+    assertEquals(400, result.status());
   }
 
   @Test
-  public void testUpdateBatchWithoutEndDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
+  public void testUpdateBatchSuccessWithoutEndDate() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null));
 
     JsonNode json = Json.parse(data);
     RequestBuilder req =
@@ -146,85 +126,11 @@ public class CourseBatchControllerTest {
   }
 
   @Test
-  public void testcreateBatchWithInvalidEnrollmentType() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, "inlaid_invite_type");
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, 2);
-    Date futureDate = calendar.getTime();
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-    innerMap.put(JsonKey.END_DATE, format.format(futureDate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testCreateBatchWithEndDateBeforeStartDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, "inlaid_invite_type");
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
-    Date currentdate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, -2);
-    Date previousDate = calendar.getTime();
-
-    innerMap.put(JsonKey.START_DATE, format.format(previousDate));
-    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testUpdateBatchWithEndDateBeforeStartDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, "inlaid_invite_type");
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
-    Date currentdate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, -2);
-    Date previousDate = calendar.getTime();
-
-    innerMap.put(JsonKey.START_DATE, format.format(previousDate));
-    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
+  public void testUpdateBatchFailureWithEndDateBeforeStartDate() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, new Date(), getEndDate(false)));
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
@@ -234,51 +140,11 @@ public class CourseBatchControllerTest {
   }
 
   @Test
-  public void testCreateBatchWithSameStartAndEndDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, "inlaid_invite_type");
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testupdateBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.DAY_OF_MONTH, 2);
-    Date futureDate = calendar.getTime();
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-    innerMap.put(JsonKey.END_DATE, format.format(futureDate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
+  public void testUpdateBatchSuccess() {
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true)));
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
@@ -288,22 +154,12 @@ public class CourseBatchControllerTest {
   }
 
   @Test
-  public void testUpdateBatchWithSameStartAndEndDate() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.COURSE_ID, "org123");
-    innerMap.put(JsonKey.NAME, "IT BATCH UPDATED");
-    innerMap.put(JsonKey.ENROLLMENT_TYPE, JsonKey.INVITE_ONLY);
-    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentdate = new Date();
-    innerMap.put(JsonKey.START_DATE, format.format(currentdate));
-    innerMap.put(JsonKey.END_DATE, format.format(currentdate));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
+  public void testUpdateBatchFailureWithSameStartAndEndDate() {
+    Date currentDate = new Date();
+    String data =
+        mapToJson(
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentDate, currentDate));
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
@@ -313,93 +169,21 @@ public class CourseBatchControllerTest {
   }
 
   @Test
-  public void testaddUserToBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.BATCH_ID, "batch123");
-    innerMap.put(JsonKey.USER_IDs, "LIST OF USER IDs");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
+  public void testGetBatchSuccess() {
     RequestBuilder req =
-        new RequestBuilder()
-            .bodyJson(json)
-            .uri("/v1/course/batch/users/add/batchid")
-            .method("POST");
+        new RequestBuilder().uri("/v1/course/batch/read/" + BATCH_ID).method("GET");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testaddUserToBatchWithUserIdsNull() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+  public void testSearchBatchSuccess() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.BATCH_ID, "batch123");
-    innerMap.put(JsonKey.USER_IDs, null);
+    innerMap.put(JsonKey.FILTERS, BATCH_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder()
-            .bodyJson(json)
-            .uri("/v1/course/batch/users/add/batchid")
-            .method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testremoveUsersFromBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.BATCH_ID, "batch123");
-    innerMap.put(JsonKey.USER_IDs, "LIST OF USER IDs");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/users/remove").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/course/batch/read/batchId").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testsearchBatch() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.FILTERS, "batch123");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/course/batch/search").method("POST");
@@ -408,14 +192,69 @@ public class CourseBatchControllerTest {
     assertEquals(200, result.status());
   }
 
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
+  @Test
+  public void testAddUserToBatchSuccess() {
+    String data = mapToJson(getAddUserToBatchRequest(BATCH_ID, USER_IDS));
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder()
+            .bodyJson(json)
+            .uri("/v1/course/batch/users/add/batchid")
+            .method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddUserToBatchFailureWithUserIdsNull() {
+    String data = mapToJson(getAddUserToBatchRequest(BATCH_ID, null));
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder()
+            .bodyJson(json)
+            .uri("/v1/course/batch/users/add/" + BATCH_ID)
+            .method("POST");
+    req.headers(headerMap);
+    Result result = route(req);
+    assertEquals(400, result.status());
+  }
+
+  private Map<String, Object> createAndUpdateCourseBatchRequest(
+      String courseId, String name, String enrollmentType, Date startDate, Date endDate) {
+    Map<String, Object> innerMap = new HashMap<>();
+    if (courseId != null) innerMap.put(JsonKey.COURSE_ID, courseId);
+    if (name != null) innerMap.put(JsonKey.NAME, name);
+    if (enrollmentType != null) innerMap.put(JsonKey.ENROLLMENT_TYPE, enrollmentType);
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+    if (startDate != null) innerMap.put(JsonKey.START_DATE, format.format(startDate));
+    if (endDate != null) {
+      innerMap.put(JsonKey.END_DATE, format.format(endDate));
     }
-    return jsonResp;
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
+  }
+
+  private Date getEndDate(boolean isFuture) {
+    Calendar calendar = Calendar.getInstance();
+    if (isFuture) {
+
+      calendar.add(Calendar.DAY_OF_MONTH, DAY_OF_MONTH);
+
+    } else {
+      calendar.add(Calendar.DAY_OF_MONTH, -DAY_OF_MONTH);
+    }
+    return calendar.getTime();
+  }
+
+  private Map<String, Object> getAddUserToBatchRequest(String batchID, String userIds) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.BATCH_ID, batchID);
+    innerMap.put(JsonKey.USER_IDs, userIds);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
   }
 }
