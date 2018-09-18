@@ -6,6 +6,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -52,14 +53,15 @@ public class BaseController extends Controller {
     }
   }
 
-  private org.sunbird.common.request.Request initRequest(org.sunbird.common.request.Request request, String operation) {
+  private org.sunbird.common.request.Request initRequest(
+      org.sunbird.common.request.Request request, String operation) {
     request.setOperation(operation);
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    return request;    
+    return request;
   }
-  
+
   /**
    * Helper method for creating and initialising a request for given operation and request body.
    *
@@ -71,9 +73,9 @@ public class BaseController extends Controller {
   protected org.sunbird.common.request.Request createAndInitRequest(
       String operation, JsonNode requestBodyJson) {
     org.sunbird.common.request.Request request =
-          (org.sunbird.common.request.Request)
-              mapper.RequestMapper.mapRequest(
-                  requestBodyJson, org.sunbird.common.request.Request.class);
+        (org.sunbird.common.request.Request)
+            mapper.RequestMapper.mapRequest(
+                requestBodyJson, org.sunbird.common.request.Request.class);
     return initRequest(request, operation);
   }
 
@@ -98,13 +100,22 @@ public class BaseController extends Controller {
     return handleRequest(operation, requestBodyJson, null, null, null);
   }
 
-  protected Promise<Result> handleRequest(String operation, java.util.function.Function requestValidatorFn) {
+  protected Promise<Result> handleRequest(
+      String operation, java.util.function.Function requestValidatorFn) {
     return handleRequest(operation, null, requestValidatorFn, null, null);
   }
 
   protected Promise<Result> handleRequest(
       String operation, JsonNode requestBodyJson, java.util.function.Function requestValidatorFn) {
     return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      Map<String, String> header) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, header);
   }
 
   protected Promise<Result> handleRequest(
@@ -121,13 +132,32 @@ public class BaseController extends Controller {
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable) {
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, JsonNode requestBodyJson, String pathId, String pathVariable) {
+    return handleRequest(operation, requestBodyJson, null, pathId, pathVariable, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers) {
     try {
       org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
-      ProjectLogger.log("BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(), e);
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
@@ -319,8 +349,7 @@ public class BaseController extends Controller {
 
     // remove request info from map
     Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
-    return Results.ok(
-        Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
+    return Results.ok(Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
     // }
     /*
      * else {
@@ -600,5 +629,20 @@ public class BaseController extends Controller {
     request.getRequest().put(JsonKey.CREATED_BY, requestedUserId);
     request.setEnv(env);
     return request;
+  }
+
+  /**
+   * @param request
+   * @return Map<String, String>
+   */
+  public Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+    Map<String, String> map = new HashMap<>();
+    Map<String, String[]> headers = request.headers();
+    Iterator<Map.Entry<String, String[]>> itr = headers.entrySet().iterator();
+    while (itr.hasNext()) {
+      Map.Entry<String, String[]> entry = itr.next();
+      map.put(entry.getKey(), entry.getValue()[0]);
+    }
+    return map;
   }
 }
