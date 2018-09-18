@@ -67,7 +67,8 @@ public class CourseBatchController extends BaseController {
         ActorOperations.REMOVE_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
+          new CourseBatchRequestValidator()
+              .validateAddOrDeleteCourseBatchRequest((Request) request);
           return null;
         });
   }
@@ -82,24 +83,12 @@ public class CourseBatchController extends BaseController {
         ActorOperations.ADD_USER_TO_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
+          new CourseBatchRequestValidator()
+              .validateAddOrDeleteCourseBatchRequest((Request) request);
           return null;
-        },batchId,JsonKey.BATCH_ID);
-  }
-
-  /**
-   * This method will remove user batch enrollment.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> removeUsersFromBatch() {
-    return handleRequest(
-        ActorOperations.REMOVE_USER_FROM_BATCH.getValue(),
-        request().body().asJson(),
-        (request) -> {
-          new CourseBatchRequestValidator().validateAddBatchCourse((Request) request);
-          return null;
-        });
+        },
+        batchId,
+        JsonKey.BATCH_ID);
   }
 
   /**
@@ -108,8 +97,7 @@ public class CourseBatchController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
-    return handleRequest(
-        ActorOperations.GET_BATCH.getValue(), batchId,JsonKey.BATCH_ID);
+    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
   }
 
   /**

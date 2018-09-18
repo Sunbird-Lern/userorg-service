@@ -118,8 +118,8 @@ public class BaseController extends Controller {
       String operation,
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
-      Map<String, String> header) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, header);
+      Map<String, String> headers) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers);
   }
 
   protected Promise<Result> handleRequest(

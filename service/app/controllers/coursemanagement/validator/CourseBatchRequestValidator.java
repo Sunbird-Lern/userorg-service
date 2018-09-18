@@ -232,7 +232,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     return false;
   }
 
-  public void validateAddBatchCourse(Request courseRequest) {
+  public void validateAddOrDeleteCourseBatchRequest(Request courseRequest) {
     if (courseRequest.getRequest().get("batchId") == null) {
       throw new ProjectCommonException(
           ResponseCode.courseBatchIdRequired.getErrorCode(),
