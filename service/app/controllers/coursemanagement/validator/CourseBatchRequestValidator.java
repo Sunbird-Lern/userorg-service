@@ -19,8 +19,9 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   public void validateCreateBatchRequest(Request request) {
 
     validateParam(
-        (String) request.getRequest().get(JsonKey.COURSE_ID), ResponseCode.invalidCourseId);
-    validateParam((String) request.getRequest().get(JsonKey.NAME), ResponseCode.courseNameRequired);
+        (String) request.getRequest().get(JsonKey.COURSE_ID), ResponseCode.mandatoryParamsMissing);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.NAME), ResponseCode.mandatoryParamsMissing);
     validateEnrolmentType(request);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
@@ -32,13 +33,13 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   public void validateEnrolmentType(Request request) {
     validateParam(
         (String) request.getRequest().get(JsonKey.ENROLLMENT_TYPE),
-        ResponseCode.enrolmentTypeRequired);
+        ResponseCode.mandatoryParamsMissing);
     String enrolmentType = (String) request.getRequest().get(JsonKey.ENROLLMENT_TYPE);
     if (!ProjectUtil.EnrolmentType.open.getVal().equalsIgnoreCase(enrolmentType)
         && !ProjectUtil.EnrolmentType.inviteOnly.getVal().equalsIgnoreCase(enrolmentType)) {
       throw new ProjectCommonException(
-          ResponseCode.enrolmentIncorrectValue.getErrorCode(),
-          ResponseCode.enrolmentIncorrectValue.getErrorMessage(),
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
@@ -46,7 +47,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   private void validateStartDate(String startDate) {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     format.setLenient(false);
-    validateParam(startDate, ResponseCode.courseBatchStartDateRequired);
+    validateParam(startDate, ResponseCode.mandatoryParamsMissing);
     try {
       Date batchStartDate = format.parse(startDate);
       Date todayDate = format.parse(format.format(new Date()));

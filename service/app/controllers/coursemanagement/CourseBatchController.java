@@ -74,24 +74,6 @@ public class CourseBatchController extends BaseController {
   }
 
   /**
-   * This method will do the user batch enrollment
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> addUserToBatch(String batchId) {
-    return handleRequest(
-        ActorOperations.ADD_USER_TO_BATCH.getValue(),
-        request().body().asJson(),
-        (request) -> {
-          new CourseBatchRequestValidator()
-              .validateAddOrDeleteCourseBatchRequest((Request) request);
-          return null;
-        },
-        batchId,
-        JsonKey.BATCH_ID);
-  }
-
-  /**
    * This method will fetch batch details from ES.
    *
    * @return Promise<Result>
