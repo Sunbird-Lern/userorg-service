@@ -635,7 +635,7 @@ public class BaseController extends Controller {
    * @param request
    * @return Map<String, String>
    */
-  public Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+  public Map<String, String> getAllRequestHeaders(Request request) {
     Map<String, String> map = new HashMap<>();
     Map<String, String[]> headers = request.headers();
     Iterator<Map.Entry<String, String[]>> itr = headers.entrySet().iterator();
