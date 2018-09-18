@@ -111,6 +111,7 @@ public class BaseController extends Controller {
   }
   protected Promise<Result> handleRequest(
           String operation, String pathId,String pathVariable) {
+    System.out.println("PathId " + pathId +  "   pathVariable   " +  pathVariable);
     return handleRequest(operation, null, null, pathId, pathVariable);
   }
   protected Promise<Result> handleRequest(
@@ -152,10 +153,16 @@ public class BaseController extends Controller {
       String pathVariable,
       Map<String, String> headers) {
     try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      org.sunbird.common.request.Request request;
+      if(requestBodyJson != null)
+       request  = createAndInitRequest(operation, requestBodyJson);
+      else
+        request = createAndInitRequest(operation);
+
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log(
