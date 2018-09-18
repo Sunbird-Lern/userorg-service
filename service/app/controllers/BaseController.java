@@ -109,11 +109,11 @@ public class BaseController extends Controller {
       String operation, JsonNode requestBodyJson, java.util.function.Function requestValidatorFn) {
     return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null);
   }
-  protected Promise<Result> handleRequest(
-          String operation, String pathId,String pathVariable) {
-    System.out.println("PathId " + pathId +  "   pathVariable   " +  pathVariable);
+
+  protected Promise<Result> handleRequest(String operation, String pathId, String pathVariable) {
     return handleRequest(operation, null, null, pathId, pathVariable);
   }
+
   protected Promise<Result> handleRequest(
       String operation,
       JsonNode requestBodyJson,
@@ -154,10 +154,8 @@ public class BaseController extends Controller {
       Map<String, String> headers) {
     try {
       org.sunbird.common.request.Request request;
-      if(requestBodyJson != null)
-       request  = createAndInitRequest(operation, requestBodyJson);
-      else
-        request = createAndInitRequest(operation);
+      if (requestBodyJson != null) request = createAndInitRequest(operation, requestBodyJson);
+      else request = createAndInitRequest(operation);
 
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
