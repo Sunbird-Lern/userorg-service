@@ -27,7 +27,18 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
     validateStartDate(startDate);
     validateEndDate(startDate, endDate);
-    validateParticipantsAndMentors(request);
+    validateCreatedForAndMentors(request);
+    validateParticipants(request);
+  }
+
+  private void validateParticipants(Request request) {
+    if (request.getRequest().containsKey(JsonKey.PARTICIPANTS)
+        && !(request.getRequest().get(JsonKey.PARTICIPANTS) instanceof List)) {
+      throw new ProjectCommonException(
+          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError.getErrorMessage(),
+          ERROR_CODE);
+    }
   }
 
   public void validateEnrolmentType(Request request) {
@@ -105,7 +116,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    validateParam(JsonKey.NAME, ResponseCode.courseNameRequired);
+    validateParam(JsonKey.NAME, ResponseCode.mandatoryParamsMissing);
     if (request.getRequest().containsKey(JsonKey.ENROLLMENT_TYPE)) {
       validateEnrolmentType(request);
     }
@@ -124,10 +135,11 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     }
 
     validateUpdateBatchEndDate(request);
-    validateParticipantsAndMentors(request);
+    validateCreatedForAndMentors(request);
+    validateParticipants(request);
   }
 
-  private void validateParticipantsAndMentors(Request request) {
+  private void validateCreatedForAndMentors(Request request) {
     if (request.getRequest().containsKey(JsonKey.COURSE_CREATED_FOR)
         && !(request.getRequest().get(JsonKey.COURSE_CREATED_FOR) instanceof List)) {
       throw new ProjectCommonException(

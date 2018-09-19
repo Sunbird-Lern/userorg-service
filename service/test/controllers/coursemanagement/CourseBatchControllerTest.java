@@ -311,7 +311,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     if (endDate != null) {
       innerMap.put(JsonKey.END_DATE, format.format(endDate));
     }
-    if (participants != null) innerMap.put(JsonKey.COURSE_CREATED_FOR, participants);
+    if (participants != null) innerMap.put(JsonKey.PARTICIPANTS, participants);
     if (mentors != null) innerMap.put(JsonKey.MENTORS, mentors);
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.REQUEST, innerMap);
