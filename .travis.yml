@@ -16,3 +16,7 @@ notifications:
       - vinayab@ilimi.in
      on_success: never
      on_failure: always
+git:
+  submodules: false
+before_install:
+  - git submodule update --init --recursive	 
