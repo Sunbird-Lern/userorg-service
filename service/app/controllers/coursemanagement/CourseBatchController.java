@@ -3,13 +3,11 @@ package controllers.coursemanagement;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import controllers.coursemanagement.validator.CourseBatchRequestValidator;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -17,7 +15,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -35,28 +32,14 @@ public class CourseBatchController extends BaseController {
    */
   public Promise<Result> createBatch() {
 
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "CourseBatchController: createBatch called" + requestData, LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateCreateBatchReq(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      if (!StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.BATCH_ID))) {
-        reqObj.getRequest().put(JsonKey.ID, reqObj.getRequest().get(JsonKey.BATCH_ID));
-        reqObj.getRequest().remove(JsonKey.BATCH_ID);
-      }
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      innerMap.put(JsonKey.HEADER, getAllRequestHeaders(request()));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.CREATE_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateCreateCourseBatchRequest((Request) request);
+          return null;
+        },
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -65,22 +48,13 @@ public class CourseBatchController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> updateBatch() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("update batch request data=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateUpdateCourseBatchReq(reqObj);
-      reqObj.setOperation(ActorOperations.UPDATE_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.UPDATE_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateUpdateCourseBatchRequest((Request) request);
+          return null;
+        });
   }
 
   /**
@@ -89,71 +63,14 @@ public class CourseBatchController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> deleteBatch() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Delete batch=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddBatchCourse(reqObj);
-      reqObj.setOperation(ActorOperations.REMOVE_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will do the user batch enrollment
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> addUserToBatch(String batchId) {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Add user to batch=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.ADD_USER_TO_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      RequestValidator.validateAddBatchCourse(reqObj);
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will remove user batch enrollment.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> removeUsersFromBatch() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("Remove user to batch=" + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateAddBatchCourse(reqObj);
-      reqObj.setOperation(ActorOperations.REMOVE_USER_FROM_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.REMOVE_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator()
+              .validateAddOrDeleteCourseBatchRequest((Request) request);
+          return null;
+        });
   }
 
   /**
@@ -162,36 +79,7 @@ public class CourseBatchController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getBatch(String batchId) {
-    try {
-      ProjectLogger.log("get batch=" + batchId, LoggerEnum.INFO.name());
-      Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.GET_BATCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      reqObj.getRequest().put(JsonKey.BATCH_ID, batchId);
-      innerMap.put(JsonKey.BATCH, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * @param request
-   * @return Map<String, String>
-   */
-  private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
-    Map<String, String> map = new HashMap<>();
-    Map<String, String[]> headers = request.headers();
-    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
-    while (itr.hasNext()) {
-      Entry<String, String[]> entry = itr.next();
-      map.put(entry.getKey(), entry.getValue()[0]);
-    }
-    return map;
+    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
   }
 
   /**

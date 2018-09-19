@@ -73,8 +73,6 @@ POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFil
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
 PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchController.updateBatch()
-POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToBatch(batchId:String)
-POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 
