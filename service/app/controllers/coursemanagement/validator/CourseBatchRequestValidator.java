@@ -16,7 +16,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 public class CourseBatchRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
-  public void validateCreateBatchRequest(Request request) {
+  public void validateCreateCourseBatchRequest(Request request) {
 
     validateParam(
         (String) request.getRequest().get(JsonKey.COURSE_ID), ResponseCode.mandatoryParamsMissing);
@@ -146,7 +146,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   private void validateUpdateBatchStartDate(String startDate) {
-    validateParam(startDate, ResponseCode.courseBatchStartDateRequired);
+    validateParam(startDate, ResponseCode.mandatoryParamsMissing);
     try {
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
       format.parse(startDate);

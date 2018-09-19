@@ -36,7 +36,7 @@ public class CourseBatchController extends BaseController {
         ActorOperations.CREATE_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator().validateCreateBatchRequest((Request) request);
+          new CourseBatchRequestValidator().validateCreateCourseBatchRequest((Request) request);
           return null;
         },
         getAllRequestHeaders(request()));
