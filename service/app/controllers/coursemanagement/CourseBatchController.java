@@ -67,8 +67,7 @@ public class CourseBatchController extends BaseController {
         ActorOperations.REMOVE_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator()
-              .validateAddOrDeleteCourseBatchRequest((Request) request);
+          new CourseBatchRequestValidator().validateDeleteCourseBatchRequest((Request) request);
           return null;
         });
   }

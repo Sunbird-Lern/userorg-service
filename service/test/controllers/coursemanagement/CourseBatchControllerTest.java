@@ -1,7 +1,5 @@
 package controllers.coursemanagement;
 
-import static controllers.TestUtil.mapToJson;
-
 import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -33,173 +31,161 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateBatchSuccess() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                JsonKey.INVITE_ONLY,
-                new Date(),
-                getEndDate(true),
-                null,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 200);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true), null, null),
+        200);
   }
 
   @Test
   public void testCreateBatchSuccessWithValidMentors() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                JsonKey.INVITE_ONLY,
-                new Date(),
-                getEndDate(true),
-                MENTORS,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 200);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            JsonKey.INVITE_ONLY,
+            new Date(),
+            getEndDate(true),
+            MENTORS,
+            null),
+        200);
   }
 
   @Test
   public void testCreateBatchSuccessWithValidMentorsAndParticipants() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                JsonKey.INVITE_ONLY,
-                new Date(),
-                getEndDate(true),
-                MENTORS,
-                PARTICIPANTS));
-    performTest("/v1/course/batch/create", "POST", data, 200);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            JsonKey.INVITE_ONLY,
+            new Date(),
+            getEndDate(true),
+            MENTORS,
+            PARTICIPANTS),
+        200);
   }
 
   @Test
   public void testCreateBatchSuccessWithoutEndDate() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
-    performTest("/v1/course/batch/create", "POST", data, 200);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null),
+        200);
   }
 
   @Test
   public void testCreateBatchFailureWithInvalidEnrollmentType() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                new Date(),
-                getEndDate(true),
-                null,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 400);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            INVALID_ENROLLMENT_TYPE,
+            new Date(),
+            getEndDate(true),
+            null,
+            null),
+        400);
   }
 
   @Test
   public void testCreateBatchFailureWithInvalidMentorType() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                new Date(),
-                getEndDate(true),
-                INVALID_MENTORS_TYPE,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 400);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            INVALID_ENROLLMENT_TYPE,
+            new Date(),
+            getEndDate(true),
+            INVALID_MENTORS_TYPE,
+            null),
+        400);
   }
 
   @Test
   public void testCreateBatchFailureWithEndDateBeforeStartDate() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                new Date(),
-                getEndDate(false),
-                null,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 400);
+
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            INVALID_ENROLLMENT_TYPE,
+            new Date(),
+            getEndDate(false),
+            null,
+            null),
+        400);
   }
 
   @Test
   public void testCreateBatchFailureWithSameStartAndEndDate() {
     Date currentdate = new Date();
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                currentdate,
-                currentdate,
-                null,
-                null));
-    performTest("/v1/course/batch/create", "POST", data, 400);
+    performTest(
+        "/v1/course/batch/create",
+        "POST",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentdate, currentdate, null, null),
+        400);
   }
 
   @Test
   public void testUpdateBatchSuccessWithoutEndDate() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
-
-    performTest("/v1/course/batch/update", "PATCH", data, 200);
+    performTest(
+        "/v1/course/batch/update",
+        "PATCH",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null),
+        200);
   }
 
   @Test
   public void testUpdateBatchFailureWithEndDateBeforeStartDate() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                new Date(),
-                getEndDate(false),
-                null,
-                null));
-    performTest("/v1/course/batch/update", "PATCH", data, 400);
+    performTest(
+        "/v1/course/batch/update",
+        "PATCH",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID,
+            COURSE_NAME,
+            INVALID_ENROLLMENT_TYPE,
+            new Date(),
+            getEndDate(false),
+            null,
+            null),
+        400);
   }
 
   @Test
   public void testUpdateBatchSuccess() {
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                JsonKey.INVITE_ONLY,
-                new Date(),
-                getEndDate(true),
-                null,
-                null));
-    performTest("/v1/course/batch/update", "PATCH", data, 200);
+    performTest(
+        "/v1/course/batch/update",
+        "PATCH",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true), null, null),
+        200);
   }
 
   @Test
   public void testUpdateBatchFailureWithSameStartAndEndDate() {
     Date currentDate = new Date();
-    String data =
-        mapToJson(
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                INVALID_ENROLLMENT_TYPE,
-                currentDate,
-                currentDate,
-                null,
-                null));
-    performTest("/v1/course/batch/update", "PATCH", data, 400);
+    performTest(
+        "/v1/course/batch/update",
+        "PATCH",
+        createAndUpdateCourseBatchRequest(
+            COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentDate, currentDate, null, null),
+        400);
   }
 
   @Test
@@ -213,8 +199,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.FILTERS, BATCH_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    performTest("/v1/course/batch/search", "POST", data, 200);
+    performTest("/v1/course/batch/search", "POST", requestMap, 200);
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(

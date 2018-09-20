@@ -38,8 +38,12 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   private void validateParticipants(Request request) {
     if (request.getRequest().containsKey(JsonKey.PARTICIPANTS)
         && !(request.getRequest().get(JsonKey.PARTICIPANTS) instanceof List)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.dataTypeError, ResponseCode.dataTypeError.getErrorMessage());
+      throw new ProjectCommonException(
+          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
+          JsonKey.PARTICIPANTS,
+          "Array");
     }
   }
 
@@ -151,7 +155,9 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
           ResponseCode.dataTypeError.getErrorMessage(),
-          ERROR_CODE);
+          ERROR_CODE,
+          JsonKey.COURSE_CREATED_FOR,
+          "Arrays");
     }
 
     if (request.getRequest().containsKey(JsonKey.MENTORS)
@@ -159,7 +165,9 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
           ResponseCode.dataTypeError.getErrorMessage(),
-          ERROR_CODE);
+          ERROR_CODE,
+          JsonKey.MENTORS,
+          "Arrays");
     }
   }
 
@@ -251,7 +259,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     return false;
   }
 
-  public void validateAddOrDeleteCourseBatchRequest(Request courseRequest) {
+  public void validateDeleteCourseBatchRequest(Request courseRequest) {
     if (courseRequest.getRequest().get("batchId") == null) {
       throw new ProjectCommonException(
           ResponseCode.courseBatchIdRequired.getErrorCode(),
