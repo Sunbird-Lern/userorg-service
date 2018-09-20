@@ -1,7 +1,6 @@
 package controllers;
 
 import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static play.test.Helpers.route;
 
@@ -48,7 +47,7 @@ public class BaseControllerTest {
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
   }
 
-  public void performTest(String url, String method, Map map, int expectedStatusCode) {
+  public Result performTest(String url, String method, Map map) {
     String data = mapToJson(map);
     Http.RequestBuilder req;
     if (data != null) {
@@ -59,6 +58,7 @@ public class BaseControllerTest {
     }
     req.headers(headerMap);
     Result result = route(req);
-    assertEquals(expectedStatusCode, result.status());
+    return result;
+    //    assertEquals(expectedStatusCode, result.status());
   }
 }

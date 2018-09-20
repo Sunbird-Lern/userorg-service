@@ -1,5 +1,7 @@
 package controllers.coursemanagement;
 
+import static org.junit.Assert.assertEquals;
+
 import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -11,6 +13,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
+import play.mvc.Result;
 import util.RequestInterceptor;
 
 /** Created by arvind on 1/12/17. */
@@ -31,166 +34,203 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateBatchSuccess() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true), null, null),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                JsonKey.INVITE_ONLY,
+                new Date(),
+                getEndDate(true),
+                null,
+                null));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testCreateBatchSuccessWithValidMentors() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            JsonKey.INVITE_ONLY,
-            new Date(),
-            getEndDate(true),
-            MENTORS,
-            null),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                JsonKey.INVITE_ONLY,
+                new Date(),
+                getEndDate(true),
+                MENTORS,
+                null));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testCreateBatchSuccessWithValidMentorsAndParticipants() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            JsonKey.INVITE_ONLY,
-            new Date(),
-            getEndDate(true),
-            MENTORS,
-            PARTICIPANTS),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                JsonKey.INVITE_ONLY,
+                new Date(),
+                getEndDate(true),
+                MENTORS,
+                PARTICIPANTS));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testCreateBatchSuccessWithoutEndDate() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testCreateBatchFailureWithInvalidEnrollmentType() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            INVALID_ENROLLMENT_TYPE,
-            new Date(),
-            getEndDate(true),
-            null,
-            null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                new Date(),
+                getEndDate(true),
+                null,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testCreateBatchFailureWithInvalidMentorType() {
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            INVALID_ENROLLMENT_TYPE,
-            new Date(),
-            getEndDate(true),
-            INVALID_MENTORS_TYPE,
-            null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                new Date(),
+                getEndDate(true),
+                INVALID_MENTORS_TYPE,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testCreateBatchFailureWithEndDateBeforeStartDate() {
 
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            INVALID_ENROLLMENT_TYPE,
-            new Date(),
-            getEndDate(false),
-            null,
-            null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                new Date(),
+                getEndDate(false),
+                null,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testCreateBatchFailureWithSameStartAndEndDate() {
     Date currentdate = new Date();
-    performTest(
-        "/v1/course/batch/create",
-        "POST",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentdate, currentdate, null, null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/create",
+            "POST",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                currentdate,
+                currentdate,
+                null,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testUpdateBatchSuccessWithoutEndDate() {
-    performTest(
-        "/v1/course/batch/update",
-        "PATCH",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/update",
+            "PATCH",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testUpdateBatchFailureWithEndDateBeforeStartDate() {
-    performTest(
-        "/v1/course/batch/update",
-        "PATCH",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID,
-            COURSE_NAME,
-            INVALID_ENROLLMENT_TYPE,
-            new Date(),
-            getEndDate(false),
-            null,
-            null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/update",
+            "PATCH",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                new Date(),
+                getEndDate(false),
+                null,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testUpdateBatchSuccess() {
-    performTest(
-        "/v1/course/batch/update",
-        "PATCH",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), getEndDate(true), null, null),
-        200);
+    Result result =
+        performTest(
+            "/v1/course/batch/update",
+            "PATCH",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                JsonKey.INVITE_ONLY,
+                new Date(),
+                getEndDate(true),
+                null,
+                null));
+    assertEquals(200, result.status());
   }
 
   @Test
   public void testUpdateBatchFailureWithSameStartAndEndDate() {
     Date currentDate = new Date();
-    performTest(
-        "/v1/course/batch/update",
-        "PATCH",
-        createAndUpdateCourseBatchRequest(
-            COURSE_ID, COURSE_NAME, INVALID_ENROLLMENT_TYPE, currentDate, currentDate, null, null),
-        400);
+    Result result =
+        performTest(
+            "/v1/course/batch/update",
+            "PATCH",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                INVALID_ENROLLMENT_TYPE,
+                currentDate,
+                currentDate,
+                null,
+                null));
+    assertEquals(400, result.status());
   }
 
   @Test
   public void testGetBatchSuccess() {
-    performTest("/v1/course/batch/read/" + BATCH_ID, "GET", null, 200);
+    Result result = performTest("/v1/course/batch/read/" + BATCH_ID, "GET", null);
+    assertEquals(200, result.status());
   }
 
   @Test
@@ -199,7 +239,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.FILTERS, BATCH_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
-    performTest("/v1/course/batch/search", "POST", requestMap, 200);
+    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    assertEquals(200, result.status());
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(
