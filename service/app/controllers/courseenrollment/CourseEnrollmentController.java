@@ -2,6 +2,7 @@ package controllers.courseenrollment;
 
 import controllers.BaseController;
 import controllers.courseenrollment.validator.CourseEnrollmentRequestValidator;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
@@ -19,7 +20,10 @@ public class CourseEnrollmentController extends BaseController {
     return handleRequest(
         ActorOperations.GET_COURSE.getValue(),
         request().body().asJson(),
-        getAllRequestHeaders((Request) request));
+        null,
+        JsonKey.USER_ID,
+        uid,
+        getAllRequestHeaders((request())));
   }
 
   /**
@@ -34,7 +38,8 @@ public class CourseEnrollmentController extends BaseController {
         (request) -> {
           new CourseEnrollmentRequestValidator().validateEnrollCourse((Request) request);
           return null;
-        });
+        },
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -50,6 +55,7 @@ public class CourseEnrollmentController extends BaseController {
         (request) -> {
           new CourseEnrollmentRequestValidator().validateUnenrollCourse((Request) request);
           return null;
-        });
+        },
+        getAllRequestHeaders(request()));
   }
 }
