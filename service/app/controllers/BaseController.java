@@ -6,7 +6,9 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
@@ -605,5 +607,20 @@ public class BaseController extends Controller {
     request.getRequest().put(JsonKey.CREATED_BY, requestedUserId);
     request.setEnv(env);
     return request;
+  }
+
+  /**
+   * @param request
+   * @return Map<String, String>
+   */
+  public static Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+    Map<String, String> map = new HashMap<>();
+    Map<String, String[]> headers = request.headers();
+    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
+    while (itr.hasNext()) {
+      Entry<String, String[]> entry = itr.next();
+      map.put(entry.getKey(), entry.getValue()[0]);
+    }
+    return map;
   }
 }

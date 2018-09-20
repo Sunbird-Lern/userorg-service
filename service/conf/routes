@@ -2,9 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
 # ~~~~
-GET      /v1/user/courses/list/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
-POST     /v1/user/courses/enroll	    @controllers.LearnerController.enrollCourse()
-POST     /v1/course/enrol	    		@controllers.LearnerController.enrollCourse()
+GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnrollmentController.getEnrolledCourses(uid:String)
+POST     /v1/user/courses/enroll	    @controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
+POST     /v1/course/enrol	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
 POST     /V1/course/unenroll            @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
