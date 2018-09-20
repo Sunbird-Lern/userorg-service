@@ -1,10 +1,7 @@
 package controllers.coursemanagement;
 
 import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
-import static play.test.Helpers.route;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,9 +13,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import play.libs.Json;
-import play.mvc.Http.RequestBuilder;
-import play.mvc.Result;
 import util.RequestInterceptor;
 
 /** Created by arvind on 1/12/17. */
@@ -49,12 +43,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 200);
   }
 
   @Test
@@ -69,12 +58,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 200);
   }
 
   @Test
@@ -89,12 +73,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 PARTICIPANTS));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 200);
   }
 
   @Test
@@ -103,13 +82,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
         mapToJson(
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 200);
   }
 
   @Test
@@ -124,12 +97,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 400);
   }
 
   @Test
@@ -144,12 +112,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 INVALID_MENTORS_TYPE,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 400);
   }
 
   @Test
@@ -164,12 +127,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 400);
   }
 
   @Test
@@ -185,13 +143,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentdate,
                 null,
                 null));
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/create", "POST", data, 400);
   }
 
   @Test
@@ -201,12 +153,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
 
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/update", "PATCH", data, 200);
   }
 
   @Test
@@ -221,12 +168,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/update", "PATCH", data, 400);
   }
 
   @Test
@@ -241,12 +183,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/update", "PATCH", data, 200);
   }
 
   @Test
@@ -262,21 +199,12 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentDate,
                 null,
                 null));
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
+    performTest("/v1/course/batch/update", "PATCH", data, 400);
   }
 
   @Test
   public void testGetBatchSuccess() {
-    RequestBuilder req =
-        new RequestBuilder().uri("/v1/course/batch/read/" + BATCH_ID).method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/read/" + BATCH_ID, "GET", null, 200);
   }
 
   @Test
@@ -286,12 +214,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.FILTERS, BATCH_ID);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/course/batch/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    performTest("/v1/course/batch/search", "POST", data, 200);
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(

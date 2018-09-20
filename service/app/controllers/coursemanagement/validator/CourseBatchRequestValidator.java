@@ -19,9 +19,13 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   public void validateCreateCourseBatchRequest(Request request) {
 
     validateParam(
-        (String) request.getRequest().get(JsonKey.COURSE_ID), ResponseCode.mandatoryParamsMissing);
+        (String) request.getRequest().get(JsonKey.COURSE_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.COURSE_ID);
     validateParam(
-        (String) request.getRequest().get(JsonKey.NAME), ResponseCode.mandatoryParamsMissing);
+        (String) request.getRequest().get(JsonKey.NAME),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.NAME);
     validateEnrolmentType(request);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
@@ -34,31 +38,32 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   private void validateParticipants(Request request) {
     if (request.getRequest().containsKey(JsonKey.PARTICIPANTS)
         && !(request.getRequest().get(JsonKey.PARTICIPANTS) instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ResponseCode.dataTypeError.getErrorMessage(),
-          ERROR_CODE);
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.dataTypeError, ResponseCode.dataTypeError.getErrorMessage());
     }
   }
 
   public void validateEnrolmentType(Request request) {
     validateParam(
         (String) request.getRequest().get(JsonKey.ENROLLMENT_TYPE),
-        ResponseCode.mandatoryParamsMissing);
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ENROLLMENT_TYPE);
     String enrolmentType = (String) request.getRequest().get(JsonKey.ENROLLMENT_TYPE);
     if (!ProjectUtil.EnrolmentType.open.getVal().equalsIgnoreCase(enrolmentType)
         && !ProjectUtil.EnrolmentType.inviteOnly.getVal().equalsIgnoreCase(enrolmentType)) {
       throw new ProjectCommonException(
           ResponseCode.invalidParameterValue.getErrorCode(),
           ResponseCode.invalidParameterValue.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
+          enrolmentType,
+          JsonKey.ENROLLMENT_TYPE);
     }
   }
 
   private void validateStartDate(String startDate) {
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     format.setLenient(false);
-    validateParam(startDate, ResponseCode.mandatoryParamsMissing);
+    validateParam(startDate, ResponseCode.mandatoryParamsMissing, JsonKey.START_DATE);
     try {
       Date batchStartDate = format.parse(startDate);
       Date todayDate = format.parse(format.format(new Date()));
@@ -73,7 +78,8 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } catch (ProjectCommonException e) {
-      throw e;
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.dateFormatError.getErrorCode(),
@@ -116,7 +122,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    validateParam(JsonKey.NAME, ResponseCode.mandatoryParamsMissing);
+    validateParam(JsonKey.NAME, ResponseCode.mandatoryParamsMissing, JsonKey.NAME);
     if (request.getRequest().containsKey(JsonKey.ENROLLMENT_TYPE)) {
       validateEnrolmentType(request);
     }
@@ -158,7 +164,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   private void validateUpdateBatchStartDate(String startDate) {
-    validateParam(startDate, ResponseCode.mandatoryParamsMissing);
+    validateParam(startDate, ResponseCode.mandatoryParamsMissing, JsonKey.START_DATE);
     try {
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
       format.parse(startDate);
