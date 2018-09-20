@@ -641,10 +641,6 @@ public class BaseController extends Controller {
     return request;
   }
 
-  /**
-   * @param request
-   * @return Map<String, String>
-   */
   public Map<String, String> getAllRequestHeaders(Request request) {
     Map<String, String> map = new HashMap<>();
     Map<String, String[]> headers = request.headers();
