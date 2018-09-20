@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
@@ -111,6 +110,18 @@ public class BaseController extends Controller {
     return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null);
   }
 
+  protected Promise<Result> handleRequest(String operation, String pathId, String pathVariable) {
+    return handleRequest(operation, null, null, pathId, pathVariable);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      Map<String, String> headers) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers);
+  }
+
   protected Promise<Result> handleRequest(
       String operation,
       java.util.function.Function requestValidatorFn,
@@ -125,10 +136,31 @@ public class BaseController extends Controller {
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable) {
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, JsonNode requestBodyJson, String pathId, String pathVariable) {
+    return handleRequest(operation, requestBodyJson, null, pathId, pathVariable, null);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers) {
     try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      org.sunbird.common.request.Request request;
+      if (requestBodyJson != null) request = createAndInitRequest(operation, requestBodyJson);
+      else request = createAndInitRequest(operation);
+
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log(
@@ -609,16 +641,12 @@ public class BaseController extends Controller {
     return request;
   }
 
-  /**
-   * @param request
-   * @return Map<String, String>
-   */
-  public Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+  public Map<String, String> getAllRequestHeaders(Request request) {
     Map<String, String> map = new HashMap<>();
     Map<String, String[]> headers = request.headers();
-    Iterator<Entry<String, String[]>> itr = headers.entrySet().iterator();
+    Iterator<Map.Entry<String, String[]>> itr = headers.entrySet().iterator();
     while (itr.hasNext()) {
-      Entry<String, String[]> entry = itr.next();
+      Map.Entry<String, String[]> entry = itr.next();
       map.put(entry.getKey(), entry.getValue()[0]);
     }
     return map;

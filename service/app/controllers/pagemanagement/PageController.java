@@ -148,7 +148,7 @@ public class PageController extends BaseController {
    * @param request play.mvc.Http.Request
    * @return Map<String, String>
    */
-  private Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
+  public Map<String, String> getAllRequestHeaders(play.mvc.Http.Request request) {
     Map<String, String[]> headers = request.headers();
     Map<String, String> filtered =
         headers
