@@ -35,6 +35,53 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateParticipants(request);
   }
 
+  public void validateUpdateCourseBatchRequest(Request request) {
+    if (null != request.getRequest().get(JsonKey.STATUS)) {
+      boolean status = validateBatchStatus(request);
+      if (!status) {
+        throw new ProjectCommonException(
+            ResponseCode.progressStatusError.getErrorCode(),
+            ResponseCode.progressStatusError.getErrorMessage(),
+            ERROR_CODE);
+      }
+    }
+    validateParam(JsonKey.NAME, ResponseCode.mandatoryParamsMissing, JsonKey.NAME);
+    if (request.getRequest().containsKey(JsonKey.ENROLLMENT_TYPE)) {
+      validateEnrolmentType(request);
+    }
+    String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
+    String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
+
+    validateUpdateBatchStartDate(startDate);
+    validateEndDate(startDate, endDate);
+
+    boolean bool = validateDateWithTodayDate(endDate);
+    if (!bool) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidBatchEndDateError.getErrorCode(),
+          ResponseCode.invalidBatchEndDateError.getErrorMessage(),
+          ERROR_CODE);
+    }
+
+    validateUpdateBatchEndDate(request);
+    validateCreatedForAndMentors(request);
+    validateParticipants(request);
+  }
+
+  public void validateDeleteCourseBatchRequest(Request courseRequest) {
+    if (courseRequest.getRequest().get("batchId") == null) {
+      throw new ProjectCommonException(
+          ResponseCode.courseBatchIdRequired.getErrorCode(),
+          ResponseCode.courseBatchIdRequired.getErrorMessage(),
+          ERROR_CODE);
+    } else if (courseRequest.getRequest().get("userIds") == null) {
+      throw new ProjectCommonException(
+          ResponseCode.userIdRequired.getErrorCode(),
+          ResponseCode.userIdRequired.getErrorMessage(),
+          ERROR_CODE);
+    }
+  }
+
   private void validateParticipants(Request request) {
     if (request.getRequest().containsKey(JsonKey.PARTICIPANTS)
         && !(request.getRequest().get(JsonKey.PARTICIPANTS) instanceof List)) {
@@ -47,7 +94,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public void validateEnrolmentType(Request request) {
+  private void validateEnrolmentType(Request request) {
     validateParam(
         (String) request.getRequest().get(JsonKey.ENROLLMENT_TYPE),
         ResponseCode.mandatoryParamsMissing,
@@ -114,39 +161,6 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
           ResponseCode.endDateError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-  }
-
-  public void validateUpdateCourseBatchRequest(Request request) {
-    if (null != request.getRequest().get(JsonKey.STATUS)) {
-      boolean status = validateBatchStatus(request);
-      if (!status) {
-        throw new ProjectCommonException(
-            ResponseCode.progressStatusError.getErrorCode(),
-            ResponseCode.progressStatusError.getErrorMessage(),
-            ERROR_CODE);
-      }
-    }
-    validateParam(JsonKey.NAME, ResponseCode.mandatoryParamsMissing, JsonKey.NAME);
-    if (request.getRequest().containsKey(JsonKey.ENROLLMENT_TYPE)) {
-      validateEnrolmentType(request);
-    }
-    String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
-    String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
-
-    validateUpdateBatchStartDate(startDate);
-    validateEndDate(startDate, endDate);
-
-    boolean bool = validateDateWithTodayDate(endDate);
-    if (!bool) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidBatchEndDateError.getErrorCode(),
-          ResponseCode.invalidBatchEndDateError.getErrorMessage(),
-          ERROR_CODE);
-    }
-
-    validateUpdateBatchEndDate(request);
-    validateCreatedForAndMentors(request);
-    validateParticipants(request);
   }
 
   private void validateCreatedForAndMentors(Request request) {
@@ -259,17 +273,4 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     return false;
   }
 
-  public void validateDeleteCourseBatchRequest(Request courseRequest) {
-    if (courseRequest.getRequest().get("batchId") == null) {
-      throw new ProjectCommonException(
-          ResponseCode.courseBatchIdRequired.getErrorCode(),
-          ResponseCode.courseBatchIdRequired.getErrorMessage(),
-          ERROR_CODE);
-    } else if (courseRequest.getRequest().get("userIds") == null) {
-      throw new ProjectCommonException(
-          ResponseCode.userIdRequired.getErrorCode(),
-          ResponseCode.userIdRequired.getErrorMessage(),
-          ERROR_CODE);
-    }
-  }
 }
