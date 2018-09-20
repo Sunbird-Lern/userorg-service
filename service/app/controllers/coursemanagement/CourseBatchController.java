@@ -18,18 +18,8 @@ import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * This controller will handle all the API related to course batches , add batch,update batch,join
- *
- * @author Manzarul
- */
 public class CourseBatchController extends BaseController {
 
-  /**
-   * This method will add a new batch for a particular course.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> createBatch() {
 
     return handleRequest(
@@ -42,11 +32,6 @@ public class CourseBatchController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  /**
-   * This method will update existing batch details.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> updateBatch() {
     return handleRequest(
         ActorOperations.UPDATE_BATCH.getValue(),
@@ -57,11 +42,6 @@ public class CourseBatchController extends BaseController {
         });
   }
 
-  /**
-   * This method will do soft delete to the batch.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> deleteBatch() {
     return handleRequest(
         ActorOperations.REMOVE_BATCH.getValue(),
@@ -72,21 +52,10 @@ public class CourseBatchController extends BaseController {
         });
   }
 
-  /**
-   * This method will fetch batch details from ES.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> getBatch(String batchId) {
     return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
   }
 
-  /**
-   * This method will do the user search for Elastic search. this will internally call composite
-   * search api.
-   *
-   * @return Promise<Result>
-   */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
     try {
