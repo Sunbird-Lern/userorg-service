@@ -16,7 +16,10 @@ public class CourseEnrollmentController extends BaseController {
    * @return Result
    */
   public Promise<Result> getEnrolledCourses(String uid) {
-    return handleRequest(ActorOperations.GET_COURSE.getValue(), request().body().asJson());
+    return handleRequest(
+        ActorOperations.GET_COURSE.getValue(),
+        request().body().asJson(),
+        getAllRequestHeaders((Request) request));
   }
 
   /**
