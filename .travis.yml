@@ -19,4 +19,5 @@ notifications:
 git:
   submodules: false
 before_install:
+  - git submodule -b release-1.11 add https://github.com/project-sunbird/sunbird-lms-mw.git actors/sunbird-lms-mw
   - git submodule update --init --recursive	 
