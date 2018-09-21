@@ -119,12 +119,47 @@ public class BaseController extends Controller {
 
   protected Promise<Result> handleRequest(
       String operation,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      boolean isJsonBodyRequired) {
+    return handleRequest(
+        operation, null, requestValidatorFn, pathId, pathVariable, isJsonBodyRequired);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable) {
     try {
       org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
+      if (pathId != null) request.getContext().put(pathVariable, pathId);
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      boolean isJsonBodyRequired) {
+    try {
+      org.sunbird.common.request.Request request = null;
+      if (!isJsonBodyRequired) {
+        request = new org.sunbird.common.request.Request();
+      } else {
+        request = createAndInitRequest(operation, requestBodyJson);
+      }
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
