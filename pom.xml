@@ -12,8 +12,8 @@
   </properties>
 
   <modules>
-      <module>service/sunbird-utils</module>
-	  <module>util/sunbird-lms-mw</module>
+      <!-- <module>service/sunbird-utils</module> -->
+	  <module>actors/sunbird-lms-mw</module>
       <module>service</module>
   </modules>
 </project>
