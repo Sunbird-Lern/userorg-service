@@ -1,4 +1,4 @@
 [submodule "actors/sunbird-lms-mw"]
 	path = actors/sunbird-lms-mw
-	url = https://github.com/project-sunbird/sunbird-lms-mw.git
+	url = https://github.com/project-sunbird/sunbird-lms-mw
 	branch = release-1.11
