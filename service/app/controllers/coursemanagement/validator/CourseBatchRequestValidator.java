@@ -68,20 +68,34 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateParticipants(request);
   }
 
-  public void validateAddOrDeleteCourseBatchRequest(Request courseRequest) {
-    if (courseRequest.getRequest().get("batchId") == null) {
+  public void validateAddUserToCourseBatchRequest(Request courseRequest) {
+    validateBatchId(request);
+    validateUserId(request);
+  }
+  
+  public void validateDeleteCourseBatchRequest(Request courseRequest) {
+    validateBatchId(request);
+    validateUserId(request);
+  }
+  
+  private void validateBatchId(Request request) {
+    if (courseRequest.getRequest().get(JsonKey.BATCH_ID) == null) {
       throw new ProjectCommonException(
           ResponseCode.courseBatchIdRequired.getErrorCode(),
           ResponseCode.courseBatchIdRequired.getErrorMessage(),
           ERROR_CODE);
-    } else if (courseRequest.getRequest().get("userIds") == null) {
+    }
+  }
+
+  public void validateUserId(Request request) {
+    if (courseRequest.getRequest().get(JsonKey.USER_IDs) == null) {
       throw new ProjectCommonException(
           ResponseCode.userIdRequired.getErrorCode(),
           ResponseCode.userIdRequired.getErrorMessage(),
           ERROR_CODE);
     }
   }
-
+  
   private void validateParticipants(Request request) {
     if (request.getRequest().containsKey(JsonKey.PARTICIPANTS)
         && !(request.getRequest().get(JsonKey.PARTICIPANTS) instanceof List)) {
