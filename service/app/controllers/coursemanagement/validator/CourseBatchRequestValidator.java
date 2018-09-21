@@ -272,5 +272,4 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     }
     return false;
   }
-
 }
