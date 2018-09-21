@@ -46,8 +46,7 @@ public class NotesController extends BaseController {
           return null;
         },
         noteId,
-        JsonKey.NOTE_ID,
-        true);
+        JsonKey.NOTE_ID);
   }
 
   /**
@@ -64,8 +63,7 @@ public class NotesController extends BaseController {
           return null;
         },
         noteId,
-        JsonKey.NOTE_ID,
-        false);
+        JsonKey.NOTE_ID);
   }
 
   /**
