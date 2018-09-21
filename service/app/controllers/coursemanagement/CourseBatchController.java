@@ -21,7 +21,6 @@ import play.mvc.Result;
 public class CourseBatchController extends BaseController {
 
   public Promise<Result> createBatch() {
-
     return handleRequest(
         ActorOperations.CREATE_BATCH.getValue(),
         request().body().asJson(),
@@ -30,6 +29,10 @@ public class CourseBatchController extends BaseController {
           return null;
         },
         getAllRequestHeaders(request()));
+  }
+
+  public Promise<Result> getBatch(String batchId) {
+    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
   }
 
   public Promise<Result> updateBatch() {
@@ -41,19 +44,29 @@ public class CourseBatchController extends BaseController {
           return null;
         });
   }
+  
+  public Promise<Result> addUserToCourseBatch(String batchId) {
+    return handleRequest(
+        ActorOperations.ADD_USER_TO_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator()
+              .validateAddUserToCourseBatchRequest((Request) request);
+          return null;
+        },
+        batchId,
+        JsonKey.BATCH_ID);
+  }
 
   public Promise<Result> deleteBatch() {
     return handleRequest(
         ActorOperations.REMOVE_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator().validateDeleteCourseBatchRequest((Request) request);
+          new CourseBatchRequestValidator()
+              .validateDeleteCourseBatchRequest((Request) request);
           return null;
         });
-  }
-
-  public Promise<Result> getBatch(String batchId) {
-    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
