@@ -89,6 +89,7 @@ public class NotesController extends BaseController {
           return null;
         },
         noteId,
-        JsonKey.NOTE_ID);
+        JsonKey.NOTE_ID,
+        false);
   }
 }
