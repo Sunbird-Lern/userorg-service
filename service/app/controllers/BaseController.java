@@ -92,21 +92,21 @@ public class BaseController extends Controller {
   }
 
   protected Promise<Result> handleRequest(String operation) {
-    return handleRequest(operation, null, null, null, null);
+    return handleRequest(operation, null, null, null, null, false);
   }
 
   protected Promise<Result> handleRequest(String operation, JsonNode requestBodyJson) {
-    return handleRequest(operation, requestBodyJson, null, null, null);
+    return handleRequest(operation, requestBodyJson, null, null, null, true);
   }
 
   protected Promise<Result> handleRequest(
       String operation, java.util.function.Function requestValidatorFn) {
-    return handleRequest(operation, null, requestValidatorFn, null, null);
+    return handleRequest(operation, null, requestValidatorFn, null, null, false);
   }
 
   protected Promise<Result> handleRequest(
       String operation, JsonNode requestBodyJson, java.util.function.Function requestValidatorFn) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null);
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, true);
   }
 
   protected Promise<Result> handleRequest(
@@ -114,17 +114,7 @@ public class BaseController extends Controller {
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable) {
-    return handleRequest(operation, null, requestValidatorFn, pathId, pathVariable);
-  }
-
-  protected Promise<Result> handleRequest(
-      String operation,
-      java.util.function.Function requestValidatorFn,
-      String pathId,
-      String pathVariable,
-      boolean isJsonBodyRequired) {
-    return handleRequest(
-        operation, null, requestValidatorFn, pathId, pathVariable, isJsonBodyRequired);
+    return handleRequest(operation, null, requestValidatorFn, pathId, pathVariable, false);
   }
 
   protected Promise<Result> handleRequest(
@@ -133,17 +123,8 @@ public class BaseController extends Controller {
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable) {
-    try {
-      org.sunbird.common.request.Request request = createAndInitRequest(operation, requestBodyJson);
-      if (pathId != null) request.getContext().put(pathVariable, pathId);
-      if (requestValidatorFn != null) requestValidatorFn.apply(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
-          e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, true);
   }
 
   protected Promise<Result> handleRequest(
