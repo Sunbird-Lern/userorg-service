@@ -117,4 +117,16 @@ public class CourseBatchController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
+  public Promise<Result> addUserToBatch(String batchId) {
+    return handleRequest(
+        ActorOperations.ADD_USER_TO_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateDeleteCourseBatchRequest((Request) request);
+          return null;
+        },
+        batchId,
+        JsonKey.BATCH_ID);
+  }
 }
