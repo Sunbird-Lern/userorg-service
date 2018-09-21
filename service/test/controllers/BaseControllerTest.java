@@ -59,6 +59,5 @@ public class BaseControllerTest {
     req.headers(headerMap);
     Result result = route(req);
     return result;
-    //    assertEquals(expectedStatusCode, result.status());
   }
 }
