@@ -156,7 +156,7 @@ public class BaseController extends Controller {
     try {
       org.sunbird.common.request.Request request = null;
       if (!isJsonBodyRequired) {
-        request = new org.sunbird.common.request.Request();
+        request = createAndInitRequest(operation);
       } else {
         request = createAndInitRequest(operation, requestBodyJson);
       }
