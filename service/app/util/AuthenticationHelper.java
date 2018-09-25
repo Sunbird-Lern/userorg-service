@@ -32,10 +32,10 @@ public class AuthenticationHelper {
     Application.checkCassandraConnection();
   }
 
-  private static boolean ssoEnabled =
-      (StringUtils.isNotBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
-          && Boolean.parseBoolean(
-              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED)));
+  private static boolean ssoEnabled = 
+		  ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY)!=null) &&( Boolean.parseBoolean(
+	              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))));
+  
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
   public static final String KEY_SPACE_NAME = "sunbird";
