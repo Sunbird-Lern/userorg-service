@@ -33,7 +33,7 @@ public class AuthenticationHelper {
   }
 
   private static boolean ssoEnabled = 
-		  ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY)!=null) &&( Boolean.parseBoolean(
+    		  ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY)!=null) &&( Boolean.parseBoolean(
 	              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))));
   
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
