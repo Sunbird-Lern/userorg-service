@@ -14,6 +14,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
@@ -219,6 +220,8 @@ public class CourseBatchController extends BaseController {
           && reqObj.getRequest().get(JsonKey.FILTERS) != null
           && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
         ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
+        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS)))
+            .put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
       } else {
         Map<String, Object> filtermap = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
