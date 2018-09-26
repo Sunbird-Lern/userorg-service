@@ -119,7 +119,7 @@ public class BaseController extends Controller {
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
       Map<String, String> headers) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers);
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers,true);
   }
 
   protected Promise<Result> handleRequest(
@@ -156,7 +156,6 @@ public class BaseController extends Controller {
       }
       if (pathId != null) request.getContext().put(pathVariable, pathId);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
-      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
@@ -167,6 +166,32 @@ public class BaseController extends Controller {
     }
   }
 
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String,String> headers,boolean isJsonBodyRequired) {
+    try {
+      org.sunbird.common.request.Request request = null;
+      if (!isJsonBodyRequired) {
+        request = createAndInitRequest(operation);
+      } else {
+        request = createAndInitRequest(operation, requestBodyJson);
+      }
+      if (pathId != null) request.getContext().put(pathVariable, pathId);
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   /**
    * This method will provide remote Actor selection
    *
