@@ -2,8 +2,8 @@ package controllers.courseenrollment;
 
 import controllers.BaseController;
 import controllers.courseenrollment.validator.CourseEnrollmentRequestValidator;
-import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -17,7 +17,7 @@ public class CourseEnrollmentController extends BaseController {
         null,
         JsonKey.USER_ID,
         uid,
-        getAllRequestHeaders((request())));
+        getAllRequestHeaders((request())),true);
   }
 
   public Promise<Result> enrollCourse() {

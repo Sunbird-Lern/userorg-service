@@ -119,7 +119,7 @@ public class BaseController extends Controller {
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
       Map<String, String> headers) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers);
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers,true);
   }
 
   protected Promise<Result> handleRequest(
@@ -147,6 +147,16 @@ public class BaseController extends Controller {
       String pathId,
       String pathVariable,
       boolean isJsonBodyRequired) {
+    return handleRequest(operation,requestBodyJson,requestValidatorFn,pathId,pathVariable,null,isJsonBodyRequired);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String,String> headers,boolean isJsonBodyRequired) {
     try {
       org.sunbird.common.request.Request request = null;
       if (!isJsonBodyRequired) {
@@ -166,7 +176,6 @@ public class BaseController extends Controller {
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
-
   /**
    * This method will provide remote Actor selection
    *
