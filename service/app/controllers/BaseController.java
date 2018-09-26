@@ -111,7 +111,7 @@ public class BaseController extends Controller {
   }
 
   protected Promise<Result> handleRequest(String operation, String pathId, String pathVariable) {
-    return handleRequest(operation, null, null, pathId, pathVariable);
+    return handleRequest(operation, null, null, pathId, pathVariable, false);
   }
 
   protected Promise<Result> handleRequest(
