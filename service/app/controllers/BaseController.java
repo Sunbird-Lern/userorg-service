@@ -147,23 +147,7 @@ public class BaseController extends Controller {
       String pathId,
       String pathVariable,
       boolean isJsonBodyRequired) {
-    try {
-      org.sunbird.common.request.Request request = null;
-      if (!isJsonBodyRequired) {
-        request = createAndInitRequest(operation);
-      } else {
-        request = createAndInitRequest(operation, requestBodyJson);
-      }
-      if (pathId != null) request.getContext().put(pathVariable, pathId);
-      if (requestValidatorFn != null) requestValidatorFn.apply(request);
-
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
-          e);
-      return Promise.pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(operation,requestBodyJson,requestValidatorFn,pathId,pathVariable,null,isJsonBodyRequired);
   }
 
   protected Promise<Result> handleRequest(
