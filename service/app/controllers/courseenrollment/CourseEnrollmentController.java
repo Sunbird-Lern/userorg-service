@@ -1,7 +1,7 @@
 package controllers.courseenrollment;
 
+import app.controllers.courseenrollment.validator.CourseEnrollmentRequestValidator;
 import controllers.BaseController;
-import controllers.courseenrollment.validator.CourseEnrollmentRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -17,7 +17,8 @@ public class CourseEnrollmentController extends BaseController {
         null,
         JsonKey.USER_ID,
         uid,
-        getAllRequestHeaders((request())),true);
+        getAllRequestHeaders((request())),
+        false);
   }
 
   public Promise<Result> enrollCourse() {
@@ -41,5 +42,4 @@ public class CourseEnrollmentController extends BaseController {
         },
         getAllRequestHeaders(request()));
   }
-  
 }
