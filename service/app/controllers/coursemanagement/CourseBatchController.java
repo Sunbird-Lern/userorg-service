@@ -33,7 +33,7 @@ public class CourseBatchController extends BaseController {
   }
 
   public Promise<Result> getBatch(String batchId) {
-    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID);
+    return handleRequest(ActorOperations.GET_BATCH.getValue(), batchId, JsonKey.BATCH_ID, false);
   }
 
   public Promise<Result> updateBatch() {
@@ -45,14 +45,13 @@ public class CourseBatchController extends BaseController {
           return null;
         });
   }
-  
+
   public Promise<Result> addUserToCourseBatch(String batchId) {
     return handleRequest(
         ActorOperations.ADD_USER_TO_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator()
-              .validateAddUserToCourseBatchRequest((Request) request);
+          new CourseBatchRequestValidator().validateAddUserToCourseBatchRequest((Request) request);
           return null;
         },
         batchId,
@@ -64,8 +63,7 @@ public class CourseBatchController extends BaseController {
         ActorOperations.REMOVE_BATCH.getValue(),
         request().body().asJson(),
         (request) -> {
-          new CourseBatchRequestValidator()
-              .validateDeleteCourseBatchRequest((Request) request);
+          new CourseBatchRequestValidator().validateDeleteCourseBatchRequest((Request) request);
           return null;
         });
   }

@@ -115,6 +115,11 @@ public class BaseController extends Controller {
   }
 
   protected Promise<Result> handleRequest(
+      String operation, String pathId, String pathVariable, boolean isJsonBodyRequired) {
+    return handleRequest(operation, null, null, pathId, pathVariable, isJsonBodyRequired);
+  }
+
+  protected Promise<Result> handleRequest(
       String operation,
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
