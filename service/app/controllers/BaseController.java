@@ -119,7 +119,7 @@ public class BaseController extends Controller {
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
       Map<String, String> headers) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers,true);
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers, true);
   }
 
   protected Promise<Result> handleRequest(
@@ -147,7 +147,14 @@ public class BaseController extends Controller {
       String pathId,
       String pathVariable,
       boolean isJsonBodyRequired) {
-    return handleRequest(operation,requestBodyJson,requestValidatorFn,pathId,pathVariable,null,isJsonBodyRequired);
+    return handleRequest(
+        operation,
+        requestBodyJson,
+        requestValidatorFn,
+        pathId,
+        pathVariable,
+        null,
+        isJsonBodyRequired);
   }
 
   protected Promise<Result> handleRequest(
@@ -156,7 +163,8 @@ public class BaseController extends Controller {
       java.util.function.Function requestValidatorFn,
       String pathId,
       String pathVariable,
-      Map<String,String> headers,boolean isJsonBodyRequired) {
+      Map<String, String> headers,
+      boolean isJsonBodyRequired) {
     try {
       org.sunbird.common.request.Request request = null;
       if (!isJsonBodyRequired) {
@@ -164,7 +172,10 @@ public class BaseController extends Controller {
       } else {
         request = createAndInitRequest(operation, requestBodyJson);
       }
-      if (pathId != null) request.getContext().put(pathVariable, pathId);
+      if (pathId != null) {
+        request.getRequest().put(pathVariable, pathId);
+        request.getContext().put(pathVariable, pathId);
+      }
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
