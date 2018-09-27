@@ -37,7 +37,7 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testEnrollCourseBatchSuccess() {
-    JsonNode json = createCourseEnrollmentRequest(COURSE_ID, BATCH_ID, USER_ID);
+    JsonNode json = createRequest(COURSE_ID, BATCH_ID, USER_ID);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(ENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -46,7 +46,7 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testUnenrollCourseBatchSuccess() {
-    JsonNode json = createCourseEnrollmentRequest(COURSE_ID, BATCH_ID, USER_ID);
+    JsonNode json = createRequest(COURSE_ID, BATCH_ID, USER_ID);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(UNENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -55,7 +55,7 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testEnrollCourseBatchFailureWithoutCourseId() {
-    JsonNode json = createCourseEnrollmentRequest(null, BATCH_ID, USER_ID);
+    JsonNode json = createRequest(null, BATCH_ID, USER_ID);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(ENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -64,7 +64,7 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testUnenrollCourseBatchFailureWithoutCourseId() {
-    JsonNode json = createCourseEnrollmentRequest(null, BATCH_ID, USER_ID);
+    JsonNode json = createRequest(null, BATCH_ID, USER_ID);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(UNENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -73,7 +73,7 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testUnenrollCourseBatchFailureWithoutBatchId() {
-    JsonNode json = createCourseEnrollmentRequest(COURSE_ID, null, USER_ID);
+    JsonNode json = createRequest(COURSE_ID, null, USER_ID);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(UNENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -82,14 +82,14 @@ public class CourseEnrollmentControllerTest extends BaseControllerTest {
 
   @Test
   public void testUnenrollCourseBatchFailureWithoutUserId() {
-    JsonNode json = createCourseEnrollmentRequest(COURSE_ID, BATCH_ID, null);
+    JsonNode json = createRequest(COURSE_ID, BATCH_ID, null);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri(UNENROLL_URI).method("POST");
     req.headers(headerMap);
     Result result = route(req);
     assertEquals(400, result.status());
   }
 
-  private JsonNode createCourseEnrollmentRequest(
+  private JsonNode createRequest(
       String courseId, String batchId, String userId) {
     Map<String, Object> innerMap = new HashMap<>();
     if (courseId != null) innerMap.put(JsonKey.COURSE_ID, courseId);
