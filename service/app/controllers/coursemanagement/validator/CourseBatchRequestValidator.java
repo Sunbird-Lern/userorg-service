@@ -200,7 +200,6 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   private void validateUpdateBatchStartDate(String startDate) {
-    validateParam(startDate, ResponseCode.mandatoryParamsMissing, JsonKey.START_DATE);
     try {
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
       format.parse(startDate);
