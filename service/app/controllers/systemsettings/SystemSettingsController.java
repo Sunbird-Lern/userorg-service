@@ -23,7 +23,7 @@ public class SystemSettingsController extends BaseController {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSetting called", LoggerEnum.INFO.name());
-      Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), null);
+      Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue());
       Map<String, Object> map = new HashMap();
       map.put(JsonKey.FIELD, field);
       reqObj.setRequest(map);
