@@ -10,22 +10,21 @@ public class CourseEnrollmentRequestValidator extends BaseRequestValidator {
   public CourseEnrollmentRequestValidator() {}
 
   public void validateEnrollCourse(Request courseRequestDto) {
-    validateParam(
-        (String) courseRequestDto.getRequest().get(JsonKey.COURSE_ID),
-        ResponseCode.courseIdRequiredError);
+    validateUnenrollCourse(courseRequestDto);
   }
 
   public void validateUnenrollCourse(Request courseRequestDto) {
     validateParam(
         (String) courseRequestDto.getRequest().get(JsonKey.COURSE_ID),
-        ResponseCode.courseIdRequiredError);
-
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.COURSE_ID);
     validateParam(
         (String) courseRequestDto.getRequest().get(JsonKey.BATCH_ID),
-        ResponseCode.courseBatchIdRequired);
-
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.BATCH_ID);
     validateParam(
-        (String) courseRequestDto.getRequest().get(JsonKey.USER_ID), ResponseCode.userIdRequired);
+        (String) courseRequestDto.getRequest().get(JsonKey.USER_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.USER_ID);
   }
-  
 }
