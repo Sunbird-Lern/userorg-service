@@ -143,8 +143,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } catch (ProjectCommonException e) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
+      throw e;
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.dateFormatError.getErrorCode(),
