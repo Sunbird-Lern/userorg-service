@@ -10,10 +10,14 @@ public class CourseEnrollmentRequestValidator extends BaseRequestValidator {
   public CourseEnrollmentRequestValidator() {}
 
   public void validateEnrollCourse(Request courseRequestDto) {
-    validateUnenrollCourse(courseRequestDto);
+    commonValidations(courseRequestDto);
   }
 
   public void validateUnenrollCourse(Request courseRequestDto) {
+    commonValidations(courseRequestDto);
+  }
+  
+  private void commonValidations(Request courseRequestDto) {
     validateParam(
         (String) courseRequestDto.getRequest().get(JsonKey.COURSE_ID),
         ResponseCode.mandatoryParamsMissing,
