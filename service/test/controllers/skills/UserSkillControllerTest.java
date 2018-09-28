@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -38,6 +39,7 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@Ignore
 public class UserSkillControllerTest {
   private static FakeApplication app;
   private static Map<String, String[]> headerMap;
