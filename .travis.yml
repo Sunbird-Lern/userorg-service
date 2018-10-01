@@ -19,4 +19,4 @@ notifications:
 git:
   submodules: false
 before_install:
-  - git submodule update --init --recursive	 
+  - git submodule foreach git pull origin release-1.11	 
