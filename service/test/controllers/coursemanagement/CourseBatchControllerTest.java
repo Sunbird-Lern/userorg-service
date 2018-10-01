@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -21,6 +22,7 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
+@Ignore
 public class CourseBatchControllerTest extends BaseControllerTest {
   public static String COURSE_ID = "courseId";
   public static String COURSE_NAME = "courseName";
