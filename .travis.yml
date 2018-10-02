@@ -19,4 +19,6 @@ notifications:
 git:
   submodules: false
 before_install:
-  - git submodule update --init --recursive	 
+  - git submodule update --init --recursive
+  - git add actors/sunbird-lms-mw/
+  - git commit -m "Update submodule tracking to the latest commit"
