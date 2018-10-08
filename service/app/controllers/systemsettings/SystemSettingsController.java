@@ -53,8 +53,7 @@ public class SystemSettingsController extends BaseController {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getAllSystemSettings called", LoggerEnum.INFO.name());
-      Request reqObj =
-          createAndInitRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue(), null);
+      Request reqObj = createAndInitRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
