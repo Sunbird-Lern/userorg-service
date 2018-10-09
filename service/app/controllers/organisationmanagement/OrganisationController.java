@@ -3,9 +3,7 @@ package controllers.organisationmanagement;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -14,6 +12,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.OrgRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
@@ -27,108 +26,40 @@ import play.mvc.Result;
  */
 public class OrganisationController extends BaseController {
 
-  /**
-   * This method will do the registration process. Registered organization data will be store inside
-   * cassandra DB.
-   *
-   * @return Promise<Result>
-   */
-  @SuppressWarnings("unchecked")
   public Promise<Result> createOrg() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: createOrg called" + requestData, LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateCreateOrg(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_ORG.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      Map<String, Object> address = (Map<String, Object>) reqObj.getRequest().get(JsonKey.ADDRESS);
-      Map<String, Object> orgData = reqObj.getRequest();
-      if (null != address && address.size() > 0 && orgData.containsKey(JsonKey.ADDRESS)) {
-        innerMap.put(JsonKey.ADDRESS, address);
-        orgData.remove(JsonKey.ADDRESS);
-      }
-      if (orgData.containsKey(JsonKey.PROVIDER)) {
-        orgData.put(JsonKey.PROVIDER, ((String) orgData.get(JsonKey.PROVIDER)).toLowerCase());
-      }
-      if (orgData.containsKey(JsonKey.EXTERNAL_ID)) {
-        orgData.put(JsonKey.EXTERNAL_ID, ((String) orgData.get(JsonKey.EXTERNAL_ID)).toLowerCase());
-      }
-      innerMap.put(JsonKey.ORGANISATION, orgData);
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    Request request = createAndInitRequest(ActorOperations.CREATE_ORG.getValue(),request().body().asJson());
+    ProjectUtil.updateMapSomeValueTOLowerCase(request);
+    return handleRequest(
+        request,
+        (orgRequest) -> {
+          new OrgRequestValidator().validateCreateOrgRequest((Request) orgRequest);
+          return null;
+        },null,null,
+        getAllRequestHeaders(request()));
   }
 
-  /**
-   * This method will update organization data.
-   *
-   * @return Promise<Result>
-   */
-  @SuppressWarnings("unchecked")
   public Promise<Result> updateOrg() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: updateOrg called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUpdateOrg(reqObj);
-      reqObj.setOperation(ActorOperations.UPDATE_ORG.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      Map<String, Object> address = (Map<String, Object>) reqObj.getRequest().get(JsonKey.ADDRESS);
-      Map<String, Object> orgData = reqObj.getRequest();
-      if (null != address && address.size() > 0 && orgData.containsKey(JsonKey.ADDRESS)) {
-        innerMap.put(JsonKey.ADDRESS, address);
-        orgData.remove(JsonKey.ADDRESS);
-      }
-      innerMap.put(JsonKey.ORGANISATION, orgData);
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    Request request = createAndInitRequest(ActorOperations.UPDATE_ORG.getValue(),request().body().asJson());
+    ProjectUtil.updateMapSomeValueTOLowerCase(request);
+    return handleRequest(
+        request,
+        (orgRequest) -> {
+          new OrgRequestValidator().validateUpdateOrgRequest((Request) orgRequest);
+          return null;
+        },null,null,
+        getAllRequestHeaders(request()));
   }
 
-  /**
-   * Method to update the status of the organization
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> updateOrgStatus() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: updateOrgStatus called with data =  " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUpdateOrgStatus(reqObj);
-      reqObj.setOperation(ActorOperations.UPDATE_ORG_STATUS.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, null));
-    }
+    Request request = createAndInitRequest(ActorOperations.UPDATE_ORG_STATUS.getValue(),request().body().asJson());
+    ProjectUtil.updateMapSomeValueTOLowerCase(request);
+    return handleRequest(
+        request,
+        (orgRequest) -> {
+          new OrgRequestValidator().validateUpdateOrgStatusRequest((Request) orgRequest);
+          return null;
+        },null,null,
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -137,26 +68,15 @@ public class OrganisationController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getOrgDetails() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: getOrgDetails called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateOrg(reqObj);
-      reqObj.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.ORGANISATION, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    Request request = createAndInitRequest(ActorOperations.GET_ORG_DETAILS.getValue(),request().body().asJson());
+    ProjectUtil.updateMapSomeValueTOLowerCase(request);
+    return handleRequest(
+        request,
+        (orgRequest) -> {
+          new OrgRequestValidator().validateOrgReqForIdOrExternalIdAndProvider((Request) orgRequest);
+          return null;
+        },null,null,
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -245,34 +165,24 @@ public class OrganisationController extends BaseController {
    *
    * @return Promise<Result>
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("OrganisationController: search called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      List<String> esObjectType = new ArrayList<>();
-      esObjectType.add(EsType.organisation.getTypeName());
-
-      if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
-          && reqObj.getRequest().get(JsonKey.FILTERS) != null
-          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
-        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
-      } else {
-        Map<String, Object> filtermap = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
-        filtermap.put(JsonKey.FILTERS, dataMap);
-      }
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    Request request = createAndInitRequest(ActorOperations.COMPOSITE_SEARCH.getValue(),request().body().asJson());
+    ProjectUtil.updateMapSomeValueTOLowerCase(request);
+    if (request.getRequest().containsKey(JsonKey.FILTERS)
+        && request.getRequest().get(JsonKey.FILTERS) != null
+        && request.getRequest().get(JsonKey.FILTERS) instanceof Map) {
+      ((Map) (request.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, EsType.organisation.getTypeName());
+    } else {
+      Map<String, Object> filtermap = new HashMap<>();
+      Map<String, Object> dataMap = new HashMap<>();
+      dataMap.put(JsonKey.OBJECT_TYPE, EsType.organisation.getTypeName());
+      filtermap.put(JsonKey.FILTERS, dataMap);
+      (request.getRequest()).putAll(filtermap);
     }
+    return handleRequest(
+        request,
+        null,null,null,
+        getAllRequestHeaders(request()));
   }
 
   /**
