@@ -59,11 +59,6 @@ public class OrganisationController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  /**
-   * This method will provide user profile details based on requested userId.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> getOrgDetails() {
     Request request = createAndInitRequest(ActorOperations.GET_ORG_DETAILS.getValue(),request().body().asJson());
     ProjectUtil.updateMapSomeValueTOLowerCase(request);
@@ -76,13 +71,6 @@ public class OrganisationController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-
-  /**
-   * This method will do the organisation search for Elastic search. this will internally call
-   * composite search api.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> search() {
     Request request = createAndInitRequest(ActorOperations.COMPOSITE_SEARCH.getValue(),request().body().asJson());
     List<String> esObjectType = new ArrayList<>();
