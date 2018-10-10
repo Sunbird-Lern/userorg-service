@@ -14,7 +14,6 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.OrgRequestValidator;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -80,61 +79,6 @@ public class OrganisationController extends BaseController {
   }
 
   /**
-   * Method to add an user to the organization
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> addMemberToOrganisation() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: addMemberToOrganisation called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateAddMember(reqObj);
-      reqObj.setOperation(ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * Method to remove an user to the organization
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> removeMemberFromOrganisation() {
-
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: removeMemberFromOrganisation called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
-      RequestValidator.validateUserOrg(reqObj);
-      reqObj.setOperation(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      HashMap<String, Object> innerMap = new HashMap<>();
-      innerMap.put(JsonKey.USER_ORG, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
    * This method will download organization details.
    *
    * @return Promise<Result>
@@ -185,66 +129,5 @@ public class OrganisationController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  /**
-   * This method will fetch list of OrgType.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> getOrgTypeList() {
-    try {
-      ProjectLogger.log("OrganisationController: getOrgTypeList called", LoggerEnum.DEBUG.name());
-      Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.GET_ORG_TYPE_LIST.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will create OrgType.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> createOrgType() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("OrganisationController: createOrgType called", LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateCreateOrgType(reqObj);
-      reqObj.setOperation(ActorOperations.CREATE_ORG_TYPE.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  /**
-   * This method will update OrgType.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> updateOrgType() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "OrganisationController: updateOrgType called with data = " + requestData,
-          LoggerEnum.DEBUG.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      RequestValidator.validateUpdateOrgType(reqObj);
-      reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.getRequest().put(JsonKey.UPDATED_BY, ctx().flash().get(JsonKey.USER_ID));
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
+  
 }

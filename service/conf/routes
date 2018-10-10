@@ -28,12 +28,15 @@ POST	 /v1/org/create		    @controllers.organisationmanagement.OrganisationContro
 PATCH	 /v1/org/update		    @controllers.organisationmanagement.OrganisationController.updateOrg()
 POST	 /v1/org/read           @controllers.organisationmanagement.OrganisationController.getOrgDetails()
 PATCH	/v1/org/status/update   @controllers.organisationmanagement.OrganisationController.updateOrgStatus()
-POST     /v1/org/member/add		@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
-POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
-GET		/v1/org/type/list		@controllers.organisationmanagement.OrganisationController.getOrgTypeList()
-POST	/v1/org/type/create		@controllers.organisationmanagement.OrganisationController.createOrgType()
-PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrganisationController.updateOrgType()
 POST    /v1/org/search		    @controllers.organisationmanagement.OrganisationController.search()
+
+POST     /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
+POST    /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberController.removeMemberFromOrganisation()
+
+GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.getOrgTypeList()
+POST	/v1/org/type/create		@controllers.organisationmanagement.OrgTypeController.createOrgType()
+PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrgTypeController.updateOrgType()
+
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
