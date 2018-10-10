@@ -7,6 +7,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.responsecode.ResponseCode;
+
 import play.mvc.Result;
 
 /**
@@ -30,18 +31,18 @@ public class ApplicationTest {
     assertEquals(ResponseCode.success.name(), params.getStatus());
   }
 
-  // @Test
+ @Test
   public void checkExceptionResponse() {
     ProjectCommonException exception =
         new ProjectCommonException(
             ResponseCode.courseIdRequiredError.getErrorCode(),
             ResponseCode.courseIdRequiredError.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
-    Response response = BaseController.createResponseOnException(null, exception);
+    Response response = BaseController.createResponseOnException("v1/user/create","POST", exception);
     assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
   }
 
-  // @Test
+  @Test
   public void testSuccessResponse() {
     Response response = new Response();
     response = BaseController.createSuccessResponse(null, response);
