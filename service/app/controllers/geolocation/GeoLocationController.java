@@ -2,7 +2,7 @@ package controllers.geolocation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.geolocation.validator.GeolocationRequestValidator;
+import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -18,19 +18,23 @@ import play.mvc.Result;
 public class GeoLocationController extends BaseController {
 
   public Promise<Result> createGeoLocation() {
-
-    return handleRequest(
-        ActorOperations.CREATE_GEO_LOCATION.getValue(),
-        request().body().asJson(),
-        request -> {
-          new GeolocationRequestValidator().validateCreateGeolocationRequest((Request) request);
-          return null;
-        },
-        getAllRequestHeaders(request()));
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("create geo location" + requestData, LoggerEnum.DEBUG.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.CREATE_GEO_LOCATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   public Promise<Result> getGeoLocation(String id) {
-
     try {
       ProjectLogger.log("get geo location by id ");
       String type = request().getQueryString(JsonKey.TYPE);
@@ -50,32 +54,56 @@ public class GeoLocationController extends BaseController {
   }
 
   public Promise<Result> updateGeoLocation(String locationId) {
-
-    return handleRequest(
-        ActorOperations.UPDATE_GEO_LOCATION.getValue(),
-        request().body().asJson(),
-        request -> {
-          new GeolocationRequestValidator().valdiateUpdateGeolocationRequest((Request) request);
-          return null;
-        },
-        locationId,
-        JsonKey.LOCATION_ID);
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("update geo location" + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.UPDATE_GEO_LOCATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.LOCATION_ID, locationId);
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   public Promise<Result> deleteGeoLocation(String locationId) {
-    return handleRequest(
-        ActorOperations.DELETE_GEO_LOCATION.getValue(), locationId, JsonKey.LOCATION_ID, false);
+    try {
+      ProjectLogger.log("delete geo location");
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.DELETE_GEO_LOCATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.LOCATION_ID, locationId);
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   public Promise<Result> sendNotification() {
-    return handleRequest(
-        ActorOperations.SEND_NOTIFICATION.getValue(),
-        request().body().asJson(),
-        request -> {
-          RequestValidator.validateSendNotification((Request) request);
-          return null;
-        },
-        getAllRequestHeaders(request()));
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("createGeoLocation:sendNotification called", LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateSendNotification(reqObj);
+      reqObj.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      Map<String, Object> innerMap = reqObj.getRequest();
+      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
   }
 
   public Promise<Result> getUserCount() {
