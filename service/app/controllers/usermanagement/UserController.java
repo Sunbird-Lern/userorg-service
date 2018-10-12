@@ -52,7 +52,7 @@ public class UserController extends BaseController {
       UserRequestValidator.validateCreateUser(request);
       UserRequestValidator.fieldsNotAllowed(Arrays.asList(JsonKey.ORGANISATION_ID), request);
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(request);
+      ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
       innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(innerMap);
@@ -76,7 +76,7 @@ public class UserController extends BaseController {
           createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
       UserRequestValidator.validateCreateUserV2(request);
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(request);
+      ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
       innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(innerMap);
@@ -105,7 +105,7 @@ public class UserController extends BaseController {
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         validateAuthenticity(reqObj);
       }
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
+      ProjectUtil.toLower(reqObj,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -272,7 +272,7 @@ public class UserController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
+      ProjectUtil.toLower(reqObj,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.FIELDS, reqObj.getRequest().get(JsonKey.FIELDS));
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));

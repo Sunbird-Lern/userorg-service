@@ -2,8 +2,8 @@ package controllers.organisationmanagement;
 
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.OrgTypeRequestValidator;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.orgvalidator.OrgTypeRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -26,8 +26,8 @@ public class OrgTypeController extends BaseController {
    */
   public Promise<Result> createOrgType() {
     return handleRequest(ActorOperations.CREATE_ORG_TYPE.getValue(), request().body().asJson(),
-        (request) -> {
-          new OrgTypeRequestValidator().validateCreateOrgType((Request) request);
+        request -> { 
+          new OrgTypeRequestValidator().validateCreateOrgTypeRequest((Request) request);
           return null;
         }, getAllRequestHeaders(request()));
   }
@@ -39,8 +39,8 @@ public class OrgTypeController extends BaseController {
    */
   public Promise<Result> updateOrgType() {
     return handleRequest(ActorOperations.UPDATE_ORG_TYPE.getValue(), request().body().asJson(),
-        (request) -> {
-          new OrgTypeRequestValidator().validateUpdateOrgType((Request) request);
+        request -> {
+          new OrgTypeRequestValidator().validateUpdateOrgTypeRequest((Request) request);
           return null;
         }, getAllRequestHeaders(request()));
   }
