@@ -1,4 +1,3 @@
-/** */
 package controllers.organisationmanagement;
 
 import controllers.BaseController;
@@ -10,12 +9,6 @@ import org.sunbird.common.request.orgvalidator.OrgRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/**
- * This controller will handle all the API related to course, add course , published course, update
- * course, search course.
- *
- * @author Amit Kumar
- */
 public class OrgController extends BaseController {
 
   public Promise<Result> createOrg() {
