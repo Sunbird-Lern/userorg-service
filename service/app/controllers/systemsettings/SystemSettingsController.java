@@ -23,7 +23,7 @@ public class SystemSettingsController extends BaseController {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getSystemSetting called", LoggerEnum.INFO.name());
-      Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), null);
+      Request reqObj = createAndInitRequest(ActorOperations.GET_SYSTEM_SETTING.getValue());
       Map<String, Object> map = new HashMap();
       map.put(JsonKey.FIELD, field);
       reqObj.setRequest(map);
@@ -53,8 +53,7 @@ public class SystemSettingsController extends BaseController {
     try {
       ProjectLogger.log(
           "SystemSettingsController: getAllSystemSettings called", LoggerEnum.INFO.name());
-      Request reqObj =
-          createAndInitRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue(), null);
+      Request reqObj = createAndInitRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

@@ -6,6 +6,7 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -52,14 +53,15 @@ public class BaseController extends Controller {
     }
   }
 
-  private org.sunbird.common.request.Request initRequest(org.sunbird.common.request.Request request, String operation) {
+  private org.sunbird.common.request.Request initRequest(
+      org.sunbird.common.request.Request request, String operation) {
     request.setOperation(operation);
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-    return request;    
+    return request;
   }
-  
+
   /**
    * Helper method for creating and initialising a request for given operation and request body.
    *
@@ -71,9 +73,9 @@ public class BaseController extends Controller {
   protected org.sunbird.common.request.Request createAndInitRequest(
       String operation, JsonNode requestBodyJson) {
     org.sunbird.common.request.Request request =
-          (org.sunbird.common.request.Request)
-              mapper.RequestMapper.mapRequest(
-                  requestBodyJson, org.sunbird.common.request.Request.class);
+        (org.sunbird.common.request.Request)
+            mapper.RequestMapper.mapRequest(
+                requestBodyJson, org.sunbird.common.request.Request.class);
     return initRequest(request, operation);
   }
 
@@ -90,6 +92,106 @@ public class BaseController extends Controller {
     return initRequest(request, operation);
   }
 
+  protected Promise<Result> handleRequest(String operation) {
+    return handleRequest(operation, null, null, null, null, false);
+  }
+
+  protected Promise<Result> handleRequest(String operation, JsonNode requestBodyJson) {
+    return handleRequest(operation, requestBodyJson, null, null, null, true);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, java.util.function.Function requestValidatorFn) {
+    return handleRequest(operation, null, requestValidatorFn, null, null, false);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, JsonNode requestBodyJson, java.util.function.Function requestValidatorFn) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, true);
+  }
+
+  protected Promise<Result> handleRequest(String operation, String pathId, String pathVariable) {
+    return handleRequest(operation, null, null, pathId, pathVariable, false);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation, String pathId, String pathVariable, boolean isJsonBodyRequired) {
+    return handleRequest(operation, null, null, pathId, pathVariable, isJsonBodyRequired);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      Map<String, String> headers) {
+    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers, true);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable) {
+    return handleRequest(operation, null, requestValidatorFn, pathId, pathVariable, false);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable) {
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, true);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      boolean isJsonBodyRequired) {
+    return handleRequest(
+        operation,
+        requestBodyJson,
+        requestValidatorFn,
+        pathId,
+        pathVariable,
+        null,
+        isJsonBodyRequired);
+  }
+
+  protected Promise<Result> handleRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers,
+      boolean isJsonBodyRequired) {
+    try {
+      org.sunbird.common.request.Request request = null;
+      if (!isJsonBodyRequired) {
+        request = createAndInitRequest(operation);
+      } else {
+        request = createAndInitRequest(operation, requestBodyJson);
+      }
+      if (pathId != null) {
+        request.getRequest().put(pathVariable, pathId);
+        request.getContext().put(pathVariable, pathId);
+      }
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
   /**
    * This method will provide remote Actor selection
    *
@@ -131,6 +233,7 @@ public class BaseController extends Controller {
     params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     return params;
   }
+
   /**
    * This method will create response parameter
    *
@@ -276,8 +379,7 @@ public class BaseController extends Controller {
 
     // remove request info from map
     Global.requestInfo.remove(ctx().flash().get(JsonKey.REQUEST_ID));
-    return Results.ok(
-        Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
+    return Results.ok(Json.toJson(BaseController.createSuccessResponse(request, courseResponse)));
     // }
     /*
      * else {
@@ -534,6 +636,8 @@ public class BaseController extends Controller {
     reqObj.getContext().put(JsonKey.CHANNEL, ctx().flash().get(JsonKey.CHANNEL));
     reqObj.getContext().put(JsonKey.ACTOR_ID, ctx().flash().get(JsonKey.ACTOR_ID));
     reqObj.getContext().put(JsonKey.ACTOR_TYPE, ctx().flash().get(JsonKey.ACTOR_TYPE));
+    reqObj.getContext().put(JsonKey.APP_ID, ctx().flash().get(JsonKey.APP_ID));
+    ctx().current().flash().remove(JsonKey.APP_ID);
   }
 
   /**
@@ -557,5 +661,16 @@ public class BaseController extends Controller {
     request.getRequest().put(JsonKey.CREATED_BY, requestedUserId);
     request.setEnv(env);
     return request;
+  }
+
+  public Map<String, String> getAllRequestHeaders(Request request) {
+    Map<String, String> map = new HashMap<>();
+    Map<String, String[]> headers = request.headers();
+    Iterator<Map.Entry<String, String[]>> itr = headers.entrySet().iterator();
+    while (itr.hasNext()) {
+      Map.Entry<String, String[]> entry = itr.next();
+      map.put(entry.getKey(), entry.getValue()[0]);
+    }
+    return map;
   }
 }
