@@ -194,7 +194,7 @@ public class BaseController extends Controller {
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   protected Promise<Result> handleSearchRequest(
       String operation,
       JsonNode requestBodyJson,
@@ -205,21 +205,22 @@ public class BaseController extends Controller {
       String esObjectType) {
     try {
       org.sunbird.common.request.Request request = null;
-      if(null != requestBodyJson){
+      if (null != requestBodyJson) {
         request = createAndInitRequest(operation, requestBodyJson);
       } else {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData, null);
-        }
+      }
       if (pathId != null) {
         request.getRequest().put(pathVariable, pathId);
         request.getContext().put(pathVariable, pathId);
       }
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
-      if(StringUtils.isNotBlank(esObjectType)){
+      if (StringUtils.isNotBlank(esObjectType)) {
         List<String> esObjectTypeList = new ArrayList<>();
         esObjectTypeList.add(esObjectType);
-        ((Map) (request.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectTypeList);
+        ((Map) (request.getRequest().get(JsonKey.FILTERS)))
+            .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
       }
       request.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
