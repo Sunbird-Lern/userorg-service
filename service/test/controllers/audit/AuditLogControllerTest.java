@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static play.test.Helpers.route;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseTestHelper;
+import controllers.BaseControllerTest;
 import controllers.LearnerControllerTest;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 
 /** Created by arvind on 6/12/17. */
-public class AuditLogControllerTest extends BaseTestHelper {
+public class AuditLogControllerTest extends BaseControllerTest {
 
   @Test
   public void testSearchAuditHistorySuccess() {

@@ -19,7 +19,7 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 /** @author arvind */
-public class LearnerControllerTest extends BaseTestHelper {
+public class LearnerControllerTest extends BaseControllerTest {
 
   private static final String COURSE_ID = "course-123";
   private static final String USER_ID = "user-123";
