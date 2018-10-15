@@ -29,7 +29,7 @@ public class OrgController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  public Promise<Result> updateOrg() {
+  public Promise<Result> updateOrg() { 
     return handleRequest(
         ActorOperations.UPDATE_ORG.getValue(),
         request().body().asJson(),

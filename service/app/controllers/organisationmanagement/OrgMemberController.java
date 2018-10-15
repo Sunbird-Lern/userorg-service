@@ -30,7 +30,7 @@ public class OrgMemberController extends BaseController {
   public Promise<Result> removeMemberFromOrganisation() {
     return handleRequest(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
         request().body().asJson(), orgRequest -> {
-          new OrgMemberRequestValidator().validateOrgMemberRequest((Request) orgRequest);
+          new OrgMemberRequestValidator().validateCommon((Request) orgRequest);
           return null;
         }, getAllRequestHeaders(request()));
   }
