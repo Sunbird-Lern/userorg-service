@@ -9,11 +9,6 @@ import play.mvc.Result;
 
 public class OrgMemberController extends BaseController {
 
-  /**
-   * Method to add an user to the organization
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> addMemberToOrganisation() {
     return handleRequest(
         ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
@@ -25,11 +20,6 @@ public class OrgMemberController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  /**
-   * Method to remove an user to the organization
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> removeMemberFromOrganisation() {
     return handleRequest(
         ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
