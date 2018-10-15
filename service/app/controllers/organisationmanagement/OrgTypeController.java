@@ -15,8 +15,14 @@ public class OrgTypeController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> getOrgTypeList() {
-    return handleRequest(ActorOperations.GET_ORG_TYPE_LIST.getValue(), request().body().asJson(),
-        null, null, null, getAllRequestHeaders((request())), false);
+    return handleRequest(
+        ActorOperations.GET_ORG_TYPE_LIST.getValue(),
+        request().body().asJson(),
+        null,
+        null,
+        null,
+        getAllRequestHeaders((request())),
+        false);
   }
 
   /**
@@ -25,11 +31,14 @@ public class OrgTypeController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> createOrgType() {
-    return handleRequest(ActorOperations.CREATE_ORG_TYPE.getValue(), request().body().asJson(),
-        request -> { 
+    return handleRequest(
+        ActorOperations.CREATE_ORG_TYPE.getValue(),
+        request().body().asJson(),
+        request -> {
           new OrgTypeRequestValidator().validateCreateOrgTypeRequest((Request) request);
           return null;
-        }, getAllRequestHeaders(request()));
+        },
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -38,10 +47,13 @@ public class OrgTypeController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> updateOrgType() {
-    return handleRequest(ActorOperations.UPDATE_ORG_TYPE.getValue(), request().body().asJson(),
+    return handleRequest(
+        ActorOperations.UPDATE_ORG_TYPE.getValue(),
+        request().body().asJson(),
         request -> {
           new OrgTypeRequestValidator().validateUpdateOrgTypeRequest((Request) request);
           return null;
-        }, getAllRequestHeaders(request()));
+        },
+        getAllRequestHeaders(request()));
   }
 }

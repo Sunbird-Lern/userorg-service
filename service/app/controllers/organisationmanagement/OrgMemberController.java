@@ -15,11 +15,14 @@ public class OrgMemberController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> addMemberToOrganisation() {
-    return handleRequest(ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson(), orgRequest -> {
+    return handleRequest(
+        ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
+        request().body().asJson(),
+        orgRequest -> {
           new OrgMemberRequestValidator().validateAddMemberRequest((Request) orgRequest);
           return null;
-        }, getAllRequestHeaders(request()));
+        },
+        getAllRequestHeaders(request()));
   }
 
   /**
@@ -28,10 +31,13 @@ public class OrgMemberController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> removeMemberFromOrganisation() {
-    return handleRequest(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson(), orgRequest -> {
+    return handleRequest(
+        ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
+        request().body().asJson(),
+        orgRequest -> {
           new OrgMemberRequestValidator().validateCommon((Request) orgRequest);
           return null;
-        }, getAllRequestHeaders(request()));
+        },
+        getAllRequestHeaders(request()));
   }
 }

@@ -29,7 +29,7 @@ public class OrgController extends BaseController {
         getAllRequestHeaders(request()));
   }
 
-  public Promise<Result> updateOrg() { 
+  public Promise<Result> updateOrg() {
     return handleRequest(
         ActorOperations.UPDATE_ORG.getValue(),
         request().body().asJson(),
@@ -69,10 +69,10 @@ public class OrgController extends BaseController {
         orgRequest -> {
           new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
           return null;
-        },null,null,
+        },
+        null,
+        null,
         getAllRequestHeaders(request()),
         EsType.organisation.getTypeName());
   }
-
-  
 }
