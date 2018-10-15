@@ -23,19 +23,19 @@ GET     /v1/user/mediatype/list               @controllers.usermanagement.UserCo
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
 POST   /v1/user/search							@controllers.usermanagement.UserController.search()
 
-#organisation management api
-POST	 /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
-PATCH	 /v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
-POST	 /v1/org/read           @controllers.organisationmanagement.OrgController.getOrgDetails()
-PATCH	/v1/org/status/update   @controllers.organisationmanagement.OrgController.updateOrgStatus()
-POST    /v1/org/search		    @controllers.organisationmanagement.OrgController.search()
+# Organisation management APIs
+POST	/v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
+PATCH	/v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
+PATCH	/v1/org/status/update @controllers.organisationmanagement.OrgController.updateOrgStatus()
+POST	/v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
+POST  /v1/org/search		    @controllers.organisationmanagement.OrgController.search()
 
-POST     /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
-POST    /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberController.removeMemberFromOrganisation()
+POST  /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
+POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberController.removeMemberFromOrganisation()
 
+POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType()
+PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType()
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.getOrgTypeList()
-POST	/v1/org/type/create		@controllers.organisationmanagement.OrgTypeController.createOrgType()
-PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrgTypeController.updateOrgType()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
