@@ -363,7 +363,7 @@ public class UserController extends BaseController {
           orgRequest -> {
             new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
             return null;
-          },null,null,
+          }, null, null,
           getAllRequestHeaders(request()),
           EsType.user.getTypeName());
    }
