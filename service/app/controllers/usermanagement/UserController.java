@@ -6,10 +6,8 @@ import static org.sunbird.learner.util.Util.isNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -363,32 +362,16 @@ public class UserController extends BaseController {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: search call start");
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-
-      List<String> esObjectType = new ArrayList<>();
-      esObjectType.add(EsType.user.getTypeName());
-      if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
-          && reqObj.getRequest().get(JsonKey.FILTERS) != null
-          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
-        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
-      } else {
-        Map<String, Object> filtermap = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
-        filtermap.put(JsonKey.FILTERS, dataMap);
-      }
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
+      return handleSearchRequest(
+          ActorOperations.COMPOSITE_SEARCH.getValue(),
+          request().body().asJson(),
+          orgRequest -> {
+            new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
+            return null;
+          },null,null,
+          getAllRequestHeaders(request()),
+          EsType.user.getTypeName());
+   }
 
   /**
    * This method will update user current login time to keyCloack.
