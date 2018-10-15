@@ -21,50 +21,46 @@ import play.mvc.Result;
 public class OrgController extends BaseController {
 
   public Promise<Result> createOrg() {
-    Request request = createAndInitRequest(ActorOperations.CREATE_ORG.getValue(),request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
     return handleRequest(
-        request,
+        ActorOperations.CREATE_BATCH.getValue(),
+        request().body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateCreateOrgRequest((Request) orgRequest);
           return null;
-        },null,null,
+        },
         getAllRequestHeaders(request()));
   }
 
   public Promise<Result> updateOrg() {
-    Request request = createAndInitRequest(ActorOperations.UPDATE_ORG.getValue(),request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
     return handleRequest(
-        request,
+        ActorOperations.UPDATE_ORG.getValue(),
+        request().body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgRequest((Request) orgRequest);
           return null;
-        },null,null,
+        },
         getAllRequestHeaders(request()));
   }
 
   public Promise<Result> updateOrgStatus() {
-    Request request = createAndInitRequest(ActorOperations.UPDATE_ORG_STATUS.getValue(),request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
     return handleRequest(
-        request,
+        ActorOperations.UPDATE_ORG_STATUS.getValue(),
+        request().body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgStatusRequest((Request) orgRequest);
           return null;
-        },null,null,
+        },
         getAllRequestHeaders(request()));
   }
 
   public Promise<Result> getOrgDetails() {
-    Request request = createAndInitRequest(ActorOperations.GET_ORG_DETAILS.getValue(),request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
     return handleRequest(
-        request,
+        ActorOperations.GET_ORG_DETAILS.getValue(),
+        request().body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateOrgReference((Request) orgRequest);
           return null;
-        },null,null,
+        },
         getAllRequestHeaders(request()));
   }
 

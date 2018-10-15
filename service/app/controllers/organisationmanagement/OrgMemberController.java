@@ -1,10 +1,7 @@
 package controllers.organisationmanagement;
 
 import controllers.BaseController;
-import java.util.Arrays;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.orgvalidator.OrgMemberRequestValidator;
 import play.libs.F.Promise;
@@ -18,13 +15,11 @@ public class OrgMemberController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> addMemberToOrganisation() {
-    Request request = createAndInitRequest(ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
-    return handleRequest(request, orgRequest -> {
-      new OrgMemberRequestValidator().validateAddMemberRequest((Request) orgRequest);
-      return null;
-    }, null, null, getAllRequestHeaders(request()));
+    return handleRequest(ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
+        request().body().asJson(), orgRequest -> {
+          new OrgMemberRequestValidator().validateAddMemberRequest((Request) orgRequest);
+          return null;
+        }, getAllRequestHeaders(request()));
   }
 
   /**
@@ -33,12 +28,10 @@ public class OrgMemberController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> removeMemberFromOrganisation() {
-    Request request = createAndInitRequest(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson());
-    ProjectUtil.toLower(request,Arrays.asList(ProjectUtil.getConfigValue(JsonKey.LOWER_CASE_FIELDS).split(",")));
-    return handleRequest(request, orgRequest -> {
-      new OrgMemberRequestValidator().validateOrgMemberRequest((Request) orgRequest);
-      return null;
-    }, null, null, getAllRequestHeaders(request()));
+    return handleRequest(ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
+        request().body().asJson(), orgRequest -> {
+          new OrgMemberRequestValidator().validateOrgMemberRequest((Request) orgRequest);
+          return null;
+        }, getAllRequestHeaders(request()));
   }
 }
