@@ -31,7 +31,7 @@ public class UserStatusController extends BaseController {
         ActorOperations.UNBLOCK_USER.getValue(),
         request().body().asJson(),
         request -> {
-          new UserStatusRequestValidator().validateunBlockUser((Request) request);
+          new UserStatusRequestValidator().validateUnBlockUser((Request) request);
           return null;
         },
         getAllRequestHeaders(request()));
