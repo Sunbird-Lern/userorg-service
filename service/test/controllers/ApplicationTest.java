@@ -23,7 +23,7 @@ public class ApplicationTest {
   }
 
   @Test
-  public void testCreateRequestParamObjSuccess() {
+  public void testCreateResponseParamObjSuccess() {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     ResponseParams params = BaseController.createResponseParamObj(code);
