@@ -12,7 +12,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 public class UserRoleRequestValidator extends BaseRequestValidator {
 
-  public void validateAssignRoles(Request request) {
+  public void validateAssignRolesRequest(Request request) {
     validateParam(
         (String) request.getRequest().get(JsonKey.USER_ID),
         ResponseCode.mandatoryParamsMissing,
