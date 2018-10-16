@@ -7,15 +7,16 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 public class UserStatusRequestValidator extends BaseRequestValidator {
 
-  public void validateBlockUser(Request request) {
+  public void validateBlockUserRequest(Request request) {
     validateUserId((String) request.getRequest().get(JsonKey.USER_ID));
   }
 
-  public void validateUnblockUser(Request request) {
+  public void validateUnblockUserRequest(Request request) {
     validateUserId((String) request.getRequest().get(JsonKey.USER_ID));
   }
 
   public void validateUserId(String userId) {
     validateParam(userId, ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
   }
+  
 }

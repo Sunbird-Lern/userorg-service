@@ -8,11 +8,10 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 public class UserLoginController extends BaseController {
-
   /**
-   * This method will update user current login time to keyCloack.
+   * Updates current login time for given user in Keycloak.
    *
-   * @return promise<Result>
+   * @return Return a promise for update login time API result.
    */
   public Promise<Result> updateLoginTime() {
 
@@ -20,7 +19,7 @@ public class UserLoginController extends BaseController {
         ActorOperations.USER_CURRENT_LOGIN.getValue(),
         request().body().asJson(),
         request -> {
-          new UserLoginRequestValidator().validateUpdateLoginTime((Request) request);
+          new UserLoginRequestValidator().validateUpdateLoginTimeRequest((Request) request);
           return null;
         });
   }
