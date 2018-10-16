@@ -17,7 +17,7 @@ public class RequestMapperTest {
   public void testMapRequestSuccess() {
     Request request;
     JsonNode node =
-        new ObjectMapper().convertValue(testRequestData(JsonKey.REQUEST), JsonNode.class);
+        new ObjectMapper().convertValue(createRequestMap(JsonKey.REQUEST), JsonNode.class);
     request = (Request) RequestMapper.mapRequest(node, Request.class);
     Assert.assertNotNull(request);
     Assert.assertEquals("xyz", request.getRequest().get(JsonKey.FIRST_NAME));
@@ -36,13 +36,13 @@ public class RequestMapperTest {
   @Test
   public void testMapRequestFailureWithInvalidKey() {
     Request request;
-    JsonNode node = new ObjectMapper().convertValue(testRequestData("invalidKey"), JsonNode.class);
+    JsonNode node = new ObjectMapper().convertValue(createRequestMap("invalidKey"), JsonNode.class);
     request = (Request) RequestMapper.mapRequest(node, Request.class);
     Assert.assertNotNull(request);
     Assert.assertEquals(null, request.getRequest().get(JsonKey.FIRST_NAME));
   }
 
-  private Map<String, Object> testRequestData(String requestKey) {
+  private Map<String, Object> createRequestMap(String requestKey) {
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.FIRST_NAME, "xyz");
