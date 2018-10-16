@@ -9,18 +9,12 @@ import play.mvc.Result;
 
 public class UserStatusController extends BaseController {
 
-  /**
-   * This method will facilitate the block user based on requested userId.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> blockUser() {
-
     return handleRequest(
         ActorOperations.BLOCK_USER.getValue(),
         request().body().asJson(),
         request -> {
-          new UserStatusRequestValidator().validateBlockUser((Request) request);
+          new UserStatusRequestValidator().validateBlockUserRequest((Request) request);
           return null;
         });
   }
@@ -30,8 +24,9 @@ public class UserStatusController extends BaseController {
         ActorOperations.UNBLOCK_USER.getValue(),
         request().body().asJson(),
         request -> {
-          new UserStatusRequestValidator().validateUnblockUser((Request) request);
+          new UserStatusRequestValidator().validateUnblockUserRequest((Request) request);
           return null;
         });
   }
+  
 }
