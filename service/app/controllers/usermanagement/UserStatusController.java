@@ -22,18 +22,16 @@ public class UserStatusController extends BaseController {
         request -> {
           new UserStatusRequestValidator().validateBlockUser((Request) request);
           return null;
-        },
-        getAllRequestHeaders(request()));
+        });
   }
 
-  public Promise<Result> unBlockUser() {
+  public Promise<Result> unblockUser() {
     return handleRequest(
         ActorOperations.UNBLOCK_USER.getValue(),
         request().body().asJson(),
         request -> {
-          new UserStatusRequestValidator().validateUnBlockUser((Request) request);
+          new UserStatusRequestValidator().validateUnblockUser((Request) request);
           return null;
-        },
-        getAllRequestHeaders(request()));
+        });
   }
 }
