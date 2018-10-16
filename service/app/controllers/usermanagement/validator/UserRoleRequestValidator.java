@@ -23,14 +23,13 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
     String provider = (String) request.getRequest().get(JsonKey.PROVIDER);
     if (StringUtils.isBlank(organisationId)
         && (StringUtils.isBlank(externalId) || StringUtils.isBlank(provider))) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.mandatoryParamsMissing,
           ProjectUtil.formatMessage(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-              (StringFormatter.joinByOr(
+              StringFormatter.joinByOr(
                   JsonKey.ORGANISATION_ID,
-                  StringFormatter.joinByAnd(JsonKey.EXTERNAL_ID, JsonKey.PROVIDER)))),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+                  StringFormatter.joinByAnd(JsonKey.EXTERNAL_ID, JsonKey.PROVIDER))));
     }
 
     validateParam(
@@ -44,8 +43,8 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
           ResponseCode.dataTypeError.getErrorCode(),
           ResponseCode.dataTypeError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
-          JsonKey.COURSE_CREATED_FOR,
-          "Arrays");
+          JsonKey.ROLES,
+          JsonKey.LIST);
     }
   }
 }

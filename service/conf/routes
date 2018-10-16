@@ -15,10 +15,10 @@ POST	/v2/user/create				    @controllers.usermanagement.UserController.createUse
 PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
-POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
-POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
-PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
+POST  	/v1/user/block			         @controllers.usermanagement.UserStatusController.blockUser()
+POST    /v1/user/assign/role			 @controllers.usermanagement.UserRoleController.assignRoles()
+POST  	/v1/user/unblock			         @controllers.usermanagement.UserStatusController.unblockUser()
+PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserLoginController.updateLoginTime()
 GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
 POST   /v1/user/search							@controllers.usermanagement.UserController.search()
@@ -52,7 +52,7 @@ GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.Page
 
 #permission
 
-GET   /v1/role/read						@controllers.usermanagement.UserController.getRoles()
+GET   /v1/role/read						@controllers.usermanagement.UserRoleController.getRoles()
 
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
