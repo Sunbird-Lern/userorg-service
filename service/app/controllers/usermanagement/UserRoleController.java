@@ -18,7 +18,7 @@ public class UserRoleController extends BaseController {
         ActorOperations.ASSIGN_ROLES.getValue(),
         request().body().asJson(),
         request -> {
-          new UserRoleRequestValidator().validateAssignRoles((Request) request);
+          new UserRoleRequestValidator().validateAssignRolesRequest((Request) request);
           return null;
         });
   }
