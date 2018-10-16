@@ -328,16 +328,11 @@ public class Global extends GlobalSettings {
     Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
     Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
     SchedulerManager.schedule();
-    // scheduler should start after few minutes so internally it is sleeping for 4
-    // minute , so
-    // it is in separate thread.
+    
+    // Run quartz scheduler in a separate thread as it waits for 4 minutes 
+    // before scheduling various jobs.
     new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance();
-              }
-            })
-        .start();
+            () -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance())
+      .start();
   }
 }
