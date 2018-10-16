@@ -7,10 +7,11 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 public class UserLoginRequestValidator extends BaseRequestValidator {
 
-  public void validateUpdateLoginTime(Request request) {
+  public void validateUpdateLoginTimeRequest(Request request) {
     validateParam(
         (String) request.getRequest().get(JsonKey.USER_ID),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USER_ID);
   }
+  
 }
