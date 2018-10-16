@@ -57,15 +57,14 @@ public class BaseControllerTest {
 
   @BeforeClass
   public static void startApp() {
-
     app = Helpers.fakeApplication();
     Helpers.start(app);
-    headerMap = new HashMap<String, String[]>();
-    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
-    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap = new HashMap<>();
+    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Some consumer ID"});
+    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some device ID"});
     headerMap.put(
-        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
-    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
+        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Some authenticated user ID"});
+    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Some message ID"});
 
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
@@ -73,7 +72,7 @@ public class BaseControllerTest {
   }
 
   @Before
-  public void doResourceMock() {
+  public void mockKeycloakAndCassandra() {
     SSOManager impl = Mockito.mock(KeyCloakServiceImpl.class);
     Keycloak keycloak = Mockito.mock(Keycloak.class);
     PowerMockito.mockStatic(SSOServiceFactory.class);
@@ -90,26 +89,15 @@ public class BaseControllerTest {
     PowerMockito.mockStatic(RequestInterceptor.class);
     Mockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(Application.class);
     try {
       PowerMockito.doNothing().when(Util.class, "checkCassandraDbConnections");
       PowerMockito.doNothing().when(Application.class, "checkCassandraConnection");
     } catch (Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
-  }
-
-  public static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 
   public Result performTest(String url, String method, Map map) {
@@ -124,5 +112,16 @@ public class BaseControllerTest {
     req.headers(headerMap);
     Result result = route(req);
     return result;
+  }
+
+  public static String mapToJson(Map map) {
+    ObjectMapper mapperObj = new ObjectMapper();
+    String jsonResp = "";
+    try {
+      jsonResp = mapperObj.writeValueAsString(map);
+    } catch (IOException e) {
+      ProjectLogger.log(e.getMessage(), e);
+    }
+    return jsonResp;
   }
 }

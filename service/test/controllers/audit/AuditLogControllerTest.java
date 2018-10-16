@@ -1,33 +1,26 @@
 package controllers.audit;
 
 import static org.junit.Assert.assertEquals;
-import static play.test.Helpers.route;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
-import controllers.LearnerControllerTest;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
-import play.libs.Json;
-import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 
-/** Created by arvind on 6/12/17. */
 public class AuditLogControllerTest extends BaseControllerTest {
 
   @Test
   public void testSearchAuditHistorySuccess() {
+    Result result = performTest("/v1/audit/history", "POST", createRequest());
+    assertEquals(200, result.status());
+  }
+
+  private Map<String, Object> createRequest() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = LearnerControllerTest.mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/audit/history").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
+    return requestMap;
   }
 }
