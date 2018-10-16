@@ -14,19 +14,19 @@ POST	/v1/user/create				    @controllers.usermanagement.UserCrudController.creat
 POST	/v2/user/create				    @controllers.usermanagement.UserCrudController.createUserV2()
 PATCH	/v1/user/update					@controllers.usermanagement.UserCrudController.updateUserProfile()
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserCrudController.getUserProfile(uid:String)
-POST    /v1/user/getuser                 @controllers.usermanagement.UserCrudController.getUserDetailsByLoginId()
-POST   /v1/user/search							@controllers.usermanagement.UserController.search()
+POST    /v1/user/getuser                @controllers.usermanagement.UserCrudController.getUserDetailsByLoginId()
+POST   /v1/user/search					@controllers.usermanagement.UserCrudController.search()
 
-GET     /v1/user/mediatype/list               @controllers.usermanagement.UserProfileController.getMediaTypes()
+GET     /v1/user/mediatype/list         @controllers.usermanagement.UserProfileController.getMediaTypes()
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
 
-POST  	/v1/user/block			         @controllers.usermanagement.UserStatusController.blockUser()
-POST  	/v1/user/unblock			         @controllers.usermanagement.UserStatusController.unBlockUser()
+POST  	/v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
+POST  	/v1/user/unblock			    @controllers.usermanagement.UserStatusController.unBlockUser()
 
-GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
-POST    /v1/user/assign/role			 @controllers.usermanagement.UserRoleController.assignRoles()
+GET   /v1/role/read						@controllers.usermanagement.UserRoleController.getRoles()
+POST    /v1/user/assign/role			@controllers.usermanagement.UserRoleController.assignRoles()
 
-PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
+PATCH /v1/user/update/logintime	  		@controllers.usermanagement.UserLoginController.updateLoginTime()
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()

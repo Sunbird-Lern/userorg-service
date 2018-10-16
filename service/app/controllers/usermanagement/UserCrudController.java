@@ -14,7 +14,9 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
@@ -151,6 +153,26 @@ public class UserCrudController extends BaseController {
         null,
         null,
         true);
+  }
+
+  /**
+   * This method will do the user search for Elastic search. this will internally call composite
+   * search api.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> search() {
+    return handleSearchRequest(
+        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        request().body().asJson(),
+        orgRequest -> {
+          new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(request()),
+        EsType.user.getTypeName());
   }
 
   private void validateAuthenticity(Request reqObj) {
