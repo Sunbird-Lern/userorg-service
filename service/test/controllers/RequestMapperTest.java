@@ -14,6 +14,16 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 public class RequestMapperTest {
   @Test
+  public void testMapRequestSuccess() {
+    Request request;
+    JsonNode node =
+        new ObjectMapper().convertValue(testRequestData(JsonKey.REQUEST), JsonNode.class);
+    request = (Request) RequestMapper.mapRequest(node, Request.class);
+    Assert.assertNotNull(request);
+    Assert.assertEquals("xyz", request.getRequest().get(JsonKey.FIRST_NAME));
+  }
+
+  @Test
   public void testMapRequestFailure() {
     try {
       RequestMapper.mapRequest(null, Request.class);
@@ -24,18 +34,8 @@ public class RequestMapperTest {
   }
 
   @Test
-  public void testMapRequestSuccess() {
-    Request request = null;
-    JsonNode node =
-        new ObjectMapper().convertValue(testRequestData(JsonKey.REQUEST), JsonNode.class);
-    request = (Request) RequestMapper.mapRequest(node, Request.class);
-    Assert.assertNotNull(request);
-    Assert.assertEquals("xyz", request.getRequest().get(JsonKey.FIRST_NAME));
-  }
-
-  @Test
   public void testMapRequestFailureWithInvalidKey() {
-    Request request = null;
+    Request request;
     JsonNode node = new ObjectMapper().convertValue(testRequestData("invalidKey"), JsonNode.class);
     request = (Request) RequestMapper.mapRequest(node, Request.class);
     Assert.assertNotNull(request);
