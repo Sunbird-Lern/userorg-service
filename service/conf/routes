@@ -10,17 +10,17 @@ PATCH    /v1/user/content/state     	@controllers.LearnerController.updateConten
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
 #user management api 
-POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
-POST	/v2/user/create				    @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
-GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
+POST	/v1/user/create				    @controllers.usermanagement.UserCrudController.createUser()
+POST	/v2/user/create				    @controllers.usermanagement.UserCrudController.createUserV2()
+PATCH	/v1/user/update					@controllers.usermanagement.UserCrudController.updateUserProfile()
+GET  	/v1/user/read/:uid				@controllers.usermanagement.UserCrudController.getUserProfile(uid:String)
+POST    /v1/user/getuser                 @controllers.usermanagement.UserCrudController.getUserDetailsByLoginId()
 POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
 POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
 POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
 PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
-GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
-POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
+GET     /v1/user/mediatype/list               @controllers.usermanagement.UserProfileController.getMediaTypes()
+POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
 POST   /v1/user/search							@controllers.usermanagement.UserController.search()
 
 # Organisation management APIs
