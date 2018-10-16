@@ -9,25 +9,29 @@ POST     /v1/content/state/read	        @controllers.LearnerController.getConten
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
-#user management api 
-POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
-POST	/v2/user/create				    @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
-GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST  	/v1/user/block			         @controllers.usermanagement.UserStatusController.blockUser()
-POST    /v1/user/assign/role			 @controllers.usermanagement.UserRoleController.assignRoles()
-POST  	/v1/user/unblock			         @controllers.usermanagement.UserStatusController.unblockUser()
-PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserLoginController.updateLoginTime()
-GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
-POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
-POST   /v1/user/search							@controllers.usermanagement.UserController.search()
+# User management APIs 
+POST	/v1/user/create				      @controllers.usermanagement.UserController.createUser()
+POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
+PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUserProfile()
+GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserProfile(uid:String)
+POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserDetailsByLoginId()
+GET   /v1/user/mediatype/list     @controllers.usermanagement.UserController.getMediaTypes()
+POST  /v1/user/profile/visibility @controllers.usermanagement.UserController.profileVisibility()
+POST  /v1/user/search							@controllers.usermanagement.UserController.search()
+
+POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
+POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.unblockUser()
+
+GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
+POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.assignRoles()
+
+PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
 # Organisation management APIs
-POST	/v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
+POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
 PATCH	/v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
 PATCH	/v1/org/status/update @controllers.organisationmanagement.OrgController.updateOrgStatus()
-POST	/v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
+POST  /v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
 POST  /v1/org/search		    @controllers.organisationmanagement.OrgController.search()
 
 POST  /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
@@ -50,13 +54,8 @@ PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.up
 GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
 GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
-#permission
-
-GET   /v1/role/read						@controllers.usermanagement.UserRoleController.getRoles()
-
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
-
 
 #Mock APIs to finish API Gateway onboarding
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
@@ -91,8 +90,6 @@ GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetri
 GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
 GET  /v1/dashboard/progress/course/:courseId/export      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
-
-
 
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync()
