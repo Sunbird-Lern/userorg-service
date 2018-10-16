@@ -19,7 +19,7 @@ public class UserLoginController extends BaseController {
         ActorOperations.USER_CURRENT_LOGIN.getValue(),
         request().body().asJson(),
         request -> {
-          new UserLoginRequestValidator().validateUpdateLoginTime((Request) request);
+          new UserLoginRequestValidator().validateUpdateLoginTimeRequest((Request) request);
           return null;
         });
   }
