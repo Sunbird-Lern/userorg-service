@@ -9,6 +9,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 public class TestUtil {
 
   public static String mapToJson(Map map) {
+
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
     try {

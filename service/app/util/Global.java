@@ -1,13 +1,13 @@
 /** */
 package util;
 
+import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -24,8 +24,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.SchedulerManager;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
-
-import controllers.BaseController;
 import play.Application;
 import play.GlobalSettings;
 import play.libs.F.Promise;
@@ -36,6 +34,7 @@ import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
+
 /**
  * This class will work as a filter.
  *
@@ -43,17 +42,18 @@ import play.mvc.Results;
  */
 public class Global extends GlobalSettings {
   public static ProjectUtil.Environment env;
-  
+
   public static Map<String, Map<String, Object>> requestInfo = new HashMap<>();
 
   public static String ssoPublicKey = "";
   private static final String version = "v1";
   private final List<String> USER_UNAUTH_STATES =
       Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
-  static{
-	  init();
-	}
-  
+
+  static {
+    init();
+  }
+
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
       this.delegate = action;
@@ -96,12 +96,12 @@ public class Global extends GlobalSettings {
    * @param app Application
    */
   @Override
-	public void onStart(Application app) {
-		setEnvironment();
-		ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
-		ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
-		SunbirdMWService.init();
-	}
+  public void onStart(Application app) {
+    setEnvironment();
+    ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
+    ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
+    SunbirdMWService.init();
+  }
 
   /**
    * This method will be called on each request.
@@ -177,8 +177,8 @@ public class Global extends GlobalSettings {
       messageId = JsonKey.DEFAULT_CONSUMER_ID;
     }
     ctx.flash().put(JsonKey.REQUEST_ID, messageId);
-    if(requestInfo == null) {
-    	requestInfo = new HashMap<>();
+    if (requestInfo == null) {
+      requestInfo = new HashMap<>();
     }
     requestInfo.put(messageId, map);
   }
@@ -322,19 +322,17 @@ public class Global extends GlobalSettings {
     }
     return builder.toString();
   }
-  
-	private static void init() {
-		Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
-		Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
-		SchedulerManager.schedule();
-		// scheduler should start after few minutes so internally it is sleeping for 4
-		// minute , so
-		// it is in separate thread.
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance();
-			}
-		}).start();
-	}
+
+  private static void init() {
+
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
+    SchedulerManager.schedule();
+    
+    // Run quartz scheduler in a separate thread as it waits for 4 minutes 
+    // before scheduling various jobs.
+    new Thread(
+            () -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance())
+      .start();
+  }
 }
