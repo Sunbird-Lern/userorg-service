@@ -21,7 +21,7 @@ GET     /v1/user/mediatype/list         @controllers.usermanagement.UserProfileC
 POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
 
 POST  	/v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
-POST  	/v1/user/unblock			    @controllers.usermanagement.UserStatusController.unBlockUser()
+POST  	/v1/user/unblock			    @controllers.usermanagement.UserStatusController.unblockUser()
 
 GET   /v1/role/read						@controllers.usermanagement.UserRoleController.getRoles()
 POST    /v1/user/assign/role			@controllers.usermanagement.UserRoleController.assignRoles()
