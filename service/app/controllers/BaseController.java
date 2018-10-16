@@ -5,8 +5,10 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -184,6 +186,43 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleSearchRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers,
+      String esObjectType) {
+    try {
+      org.sunbird.common.request.Request request = null;
+      if (null != requestBodyJson) {
+        request = createAndInitRequest(operation, requestBodyJson);
+      } else {
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData, null);
+      }
+      if (pathId != null) {
+        request.getRequest().put(pathVariable, pathId);
+        request.getContext().put(pathVariable, pathId);
+      }
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+      if (StringUtils.isNotBlank(esObjectType)) {
+        List<String> esObjectTypeList = new ArrayList<>();
+        esObjectTypeList.add(esObjectType);
+        ((Map) (request.getRequest().get(JsonKey.FILTERS)))
+            .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
+      }
+      request.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log(
