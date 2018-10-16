@@ -31,7 +31,7 @@ public class ApplicationTest {
   }
 
   @Test
-  public void testCreateExceptionOnResponseSuccess() {
+  public void testCreateResponseOnExceptionSuccess() {
     ProjectCommonException exception =
         new ProjectCommonException(
             ResponseCode.courseIdRequiredError.getErrorCode(),
