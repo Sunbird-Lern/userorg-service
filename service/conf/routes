@@ -15,19 +15,24 @@ POST	/v2/user/create				    @controllers.usermanagement.UserCrudController.creat
 PATCH	/v1/user/update					@controllers.usermanagement.UserCrudController.updateUserProfile()
 GET  	/v1/user/read/:uid				@controllers.usermanagement.UserCrudController.getUserProfile(uid:String)
 POST    /v1/user/getuser                 @controllers.usermanagement.UserCrudController.getUserDetailsByLoginId()
-POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
-POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
-POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
-PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
-GET     /v1/user/mediatype/list               @controllers.usermanagement.UserProfileController.getMediaTypes()
-POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
 POST   /v1/user/search							@controllers.usermanagement.UserController.search()
 
+GET     /v1/user/mediatype/list               @controllers.usermanagement.UserProfileController.getMediaTypes()
+POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
+
+POST  	/v1/user/block			         @controllers.usermanagement.UserStatusController.blockUser()
+POST  	/v1/user/unblock			         @controllers.usermanagement.UserStatusController.unBlockUser()
+
+GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
+POST    /v1/user/assign/role			 @controllers.usermanagement.UserRoleController.assignRoles()
+
+PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
+
 # Organisation management APIs
-POST	/v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
+POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
 PATCH	/v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
 PATCH	/v1/org/status/update @controllers.organisationmanagement.OrgController.updateOrgStatus()
-POST	/v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
+POST  /v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
 POST  /v1/org/search		    @controllers.organisationmanagement.OrgController.search()
 
 POST  /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
@@ -50,13 +55,8 @@ PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.up
 GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
 GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
-#permission
-
-GET   /v1/role/read						@controllers.usermanagement.UserController.getRoles()
-
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
-
 
 #Mock APIs to finish API Gateway onboarding
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
@@ -91,8 +91,6 @@ GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetri
 GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
 GET  /v1/dashboard/progress/course/:courseId/export      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
-
-
 
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync()
