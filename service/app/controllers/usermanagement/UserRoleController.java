@@ -9,6 +9,10 @@ import play.mvc.Result;
 
 public class UserRoleController extends BaseController {
 
+  public Promise<Result> getRoles() {
+    return handleRequest(ActorOperations.GET_ROLES.getValue());
+  }
+
   public Promise<Result> assignRoles() {
     return handleRequest(
         ActorOperations.ASSIGN_ROLES.getValue(),
@@ -18,13 +22,5 @@ public class UserRoleController extends BaseController {
           return null;
         });
   }
-
-  /**
-   * This method will provide complete role details list.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> getRoles() {
-    return handleRequest(ActorOperations.GET_ROLES.getValue());
-  }
+  
 }
