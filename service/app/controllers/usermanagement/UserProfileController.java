@@ -1,11 +1,9 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
-import java.util.HashMap;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -20,15 +18,8 @@ public class UserProfileController extends BaseController {
    * @return
    */
   public Promise<Result> getMediaTypes() {
-    String userId =
-        getUserIdByAuthToken(request().getHeader(HeaderParam.X_Authenticated_User_Token.getName()));
-    return handleRequest(
-        ActorOperations.GET_MEDIA_TYPES.getValue(),
-        null,
-        null,
-        userId,
-        JsonKey.REQUESTED_BY,
-        false);
+
+    return handleRequest(ActorOperations.GET_MEDIA_TYPES.getValue(), null, null, null, null, false);
   }
 
   /**
@@ -55,9 +46,6 @@ public class UserProfileController extends BaseController {
         (req) -> {
           Request request = (Request) req;
           UserRequestValidator.validateProfileVisibility(request);
-          HashMap<String, Object> innerMap = new HashMap<>();
-          innerMap.put(JsonKey.USER, request.getRequest());
-          request.setRequest(innerMap);
           return null;
         },
         null,
