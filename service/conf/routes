@@ -12,12 +12,13 @@ PATCH    /v1/content/state/update     	@controllers.LearnerController.updateCont
 # User management APIs 
 POST	/v1/user/create				      @controllers.usermanagement.UserController.createUser()
 POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUserProfile()
-GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-GET   /v1/user/mediatype/list     @controllers.usermanagement.UserController.getMediaTypes()
-POST  /v1/user/profile/visibility @controllers.usermanagement.UserController.profileVisibility()
-POST  /v1/user/search							@controllers.usermanagement.UserController.search()
+PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
+GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
+POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
+POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
+
+GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
+POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
 
 POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
 POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.unblockUser()
