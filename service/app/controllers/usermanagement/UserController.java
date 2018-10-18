@@ -24,7 +24,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          UserRequestValidator.validateCreateUserV1Request(request);
+          new UserRequestValidator().validateCreateUserV1Request(request);
           return null;
         },
         null,
@@ -45,7 +45,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          UserRequestValidator.validateCreateUserV2Request(request);
+          new UserRequestValidator().validateCreateUserV2Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
@@ -67,7 +67,7 @@ public class UserController extends BaseController {
         (req) -> {
           Request request = (Request) req;
           request.getContext().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
-          UserRequestValidator.validateUpdateUserRequest(request);
+          new UserRequestValidator().validateUpdateUserRequest(request);
           request.getContext().put(JsonKey.IS_AUTH_REQ, ctx().flash().get(JsonKey.IS_AUTH_REQ));
           return null;
         },
@@ -110,7 +110,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          UserRequestValidator.validateVerifyUser(request);
+          new UserRequestValidator().validateVerifyUser(request);
           request.getContext().put(JsonKey.FIELDS, requestedFields);
 
           return null;
@@ -139,8 +139,4 @@ public class UserController extends BaseController {
         getAllRequestHeaders(request()),
         EsType.user.getTypeName());
   }
-
-  // ctx().flash().containsKey(JsonKey.AUTH_WITH_MASTER_KEY)
-  // ctx().flash().get(JsonKey.USER_ID)
-
 }
