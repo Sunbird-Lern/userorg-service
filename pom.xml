@@ -7,12 +7,12 @@
   <name>sunbird_lms_service</name>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+	  <maven.compiler.source>1.8</maven.compiler.source>
+	  <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
   <modules>
-      <module>service/sunbird-utils</module>
-      <module>service</module>
+	  <module>actors/sunbird-lms-mw</module>
+	  <module>service</module>
   </modules>
 </project>

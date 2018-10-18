@@ -2,9 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
 # ~~~~
-GET      /v1/user/courses/list/:uid	        @controllers.LearnerController.getEnrolledCourses(uid:String)
-POST     /v1/user/courses/enroll	    @controllers.LearnerController.enrollCourse()
-POST     /v1/course/enrol	    		@controllers.LearnerController.enrollCourse()
+GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnrollmentController.getEnrolledCourses(uid:String)
+POST     /v1/course/enroll	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
+POST     /v1/course/unenroll             @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
@@ -73,10 +73,9 @@ POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFil
 #Course batch
 POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
 PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchController.updateBatch()
-POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToBatch(batchId:String)
-POST	 /v1/course/batch/users/remove          @controllers.coursemanagement.CourseBatchController.removeUsersFromBatch()
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
+POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToCourseBatch(batchId:String)
 
 #metrics APIs for dashboard
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)

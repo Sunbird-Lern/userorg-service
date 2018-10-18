@@ -1,11 +1,9 @@
-/** */
 package util;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -33,9 +31,9 @@ public class AuthenticationHelper {
   }
 
   private static boolean ssoEnabled =
-      (StringUtils.isNotBlank(System.getenv(JsonKey.SSO_PUBLIC_KEY))
-          && Boolean.parseBoolean(
-              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED)));
+      ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY) != null)
+          && (Boolean.parseBoolean(
+              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))));
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
   public static final String KEY_SPACE_NAME = "sunbird";

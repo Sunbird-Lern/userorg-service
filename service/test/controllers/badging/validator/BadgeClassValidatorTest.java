@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -116,6 +117,7 @@ public class BadgeClassValidatorTest {
   }
 
   @Test
+  @Ignore
   public void testValidateCreateBadgeClassRootOrgIdRequired() {
     Request request = new Request();
 
@@ -145,6 +147,7 @@ public class BadgeClassValidatorTest {
   }
 
   @Test
+  @Ignore
   public void testValidateCreateBadgeClassInvalidRootOrgId() throws IOException {
     PowerMockito.when(
             HttpUtil.doPostRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
@@ -274,6 +277,7 @@ public class BadgeClassValidatorTest {
   }
 
   @Test
+  @Ignore
   public void testValidateCreateBadgeClassRolesRequiredEmpty() {
     Request request = new Request();
 

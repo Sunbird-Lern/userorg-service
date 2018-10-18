@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -40,6 +41,7 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
+@Ignore
 public class OrganisationControllerTest {
 
   private static FakeApplication app;
