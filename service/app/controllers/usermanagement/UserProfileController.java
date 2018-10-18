@@ -9,7 +9,7 @@ import play.mvc.Result;
 
 public class UserProfileController extends BaseController {
 
-  public Promise<Result> getMediaTypes() {
+  public Promise<Result> getProfileSupportedSocialMediaTypes() {
     return handleRequest(ActorOperations.GET_MEDIA_TYPES.getValue(), null, null, null, null, false);
   }
 
