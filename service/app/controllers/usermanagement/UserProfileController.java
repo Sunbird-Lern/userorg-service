@@ -1,12 +1,11 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -29,22 +28,17 @@ public class UserProfileController extends BaseController {
    * @return Promise<Result>
    */
   public Promise<Result> profileVisibility() {
-    if (null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
-        && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
-      String userId = (String) request().body().asJson().get(JsonKey.USER_ID).asText();
-      if (!userId.equals(ctx().flash().get(JsonKey.USER_ID))) {
-        throw new ProjectCommonException(
-            ResponseCode.unAuthorized.getErrorCode(),
-            ResponseCode.unAuthorized.getErrorMessage(),
-            ResponseCode.UNAUTHORIZED.getResponseCode());
-      }
-    }
-
+    final boolean isAuthRequired =
+        null != ctx().flash().get(JsonKey.IS_AUTH_REQ)
+            && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ));
     return handleRequest(
         ActorOperations.PROFILE_VISIBILITY.getValue(),
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
+          if (isAuthRequired) {
+            BaseRequestValidator.validateUserId(request, JsonKey.USER_ID);
+          }
           UserRequestValidator.validateProfileVisibility(request);
           return null;
         },
