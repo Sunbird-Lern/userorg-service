@@ -17,7 +17,7 @@ GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUser
 POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
 POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
-GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getMediaTypes()
+GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
 POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
 
 POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
