@@ -9,24 +9,24 @@ POST     /v1/content/state/read	        @controllers.LearnerController.getConten
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
-#user management api 
-POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
-POST	/v2/user/create				    @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
-GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/getuser                @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST   /v1/user/search					@controllers.usermanagement.UserController.search()
+# User management APIs 
+POST	/v1/user/create				      @controllers.usermanagement.UserController.createUser()
+POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
+PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
+GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
+POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
+POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
-GET     /v1/user/mediatype/list         @controllers.usermanagement.UserProfileController.getMediaTypes()
-POST    /v1/user/profile/visibility     @controllers.usermanagement.UserProfileController.profileVisibility()
+GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getMediaTypes()
+POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
 
-POST  	/v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
-POST  	/v1/user/unblock			    @controllers.usermanagement.UserStatusController.unblockUser()
+POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
+POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.unblockUser()
 
-GET   /v1/role/read						@controllers.usermanagement.UserRoleController.getRoles()
-POST    /v1/user/assign/role			@controllers.usermanagement.UserRoleController.assignRoles()
+GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
+POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.assignRoles()
 
-PATCH /v1/user/update/logintime	  		@controllers.usermanagement.UserLoginController.updateLoginTime()
+PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
