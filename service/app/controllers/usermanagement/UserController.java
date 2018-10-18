@@ -12,12 +12,6 @@ import play.mvc.Result;
 
 public class UserController extends BaseController {
 
-  /**
-   * This method will do the registration process. registered user data will be store inside
-   * cassandra db.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> createUser() {
     return handleRequest(
         ActorOperations.CREATE_USER.getValue(),
@@ -32,12 +26,6 @@ public class UserController extends BaseController {
         true);
   }
 
-  /**
-   * This method will do the registration process. registered user data will be store inside
-   * cassandra db.
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> createUserV2() {
 
     return handleRequest(
@@ -54,13 +42,7 @@ public class UserController extends BaseController {
         true);
   }
 
-  /**
-   * This method will update user profile data. user can update all the data except email.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> updateUserProfile() {
-
+  public Promise<Result> updateUser() {
     return handleRequest(
         ActorOperations.UPDATE_USER.getValue(),
         request().body().asJson(),
@@ -76,12 +58,7 @@ public class UserController extends BaseController {
         true);
   }
 
-  /**
-   * This method will provide user profile details based on requested userId.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> getUserProfile(String userId) {
+  public Promise<Result> getUserById(String userId) {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
 
     return handleRequest(
@@ -97,14 +74,9 @@ public class UserController extends BaseController {
         false);
   }
 
-  /**
-   * Method to verify user existence in our DB.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> getUserDetailsByLoginId() {
-
+  public Promise<Result> getUserByLoginId() {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
+    
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
         request().body().asJson(),
@@ -120,13 +92,7 @@ public class UserController extends BaseController {
         true);
   }
 
-  /**
-   * This method will do the user search for Elastic search. this will internally call composite
-   * search api.
-   *
-   * @return Promise<Result>
-   */
-  public Promise<Result> search() {
+  public Promise<Result> searchUser() {
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
