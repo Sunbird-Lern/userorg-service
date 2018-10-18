@@ -6,10 +6,8 @@ import static org.sunbird.learner.util.Util.isNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
@@ -47,12 +46,10 @@ public class UserController extends BaseController {
     try {
       ProjectLogger.log("UserController: createUserV1 called", LoggerEnum.INFO.name());
       JsonNode requestData = request().body().asJson();
-      Request request =
-          createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
+      Request request = createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
       UserRequestValidator.validateCreateUser(request);
       UserRequestValidator.fieldsNotAllowed(Arrays.asList(JsonKey.ORGANISATION_ID), request);
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(request);
       innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(innerMap);
@@ -61,7 +58,7 @@ public class UserController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   /**
    * This method will do the registration process. registered user data will be store inside
    * cassandra db.
@@ -72,15 +69,13 @@ public class UserController extends BaseController {
     try {
       ProjectLogger.log("UserController: createUserV2 called", LoggerEnum.INFO.name());
       JsonNode requestData = request().body().asJson();
-      Request request =
-          createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
+      Request request = createAndInitRequest(ActorOperations.CREATE_USER.getValue(), requestData);
       UserRequestValidator.validateCreateUserV2(request);
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(request);
       innerMap.put(JsonKey.USER, request.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       request.setRequest(innerMap);
-      request.getRequest().put(JsonKey.VERSION,JsonKey.VERSION_2);
+      request.getRequest().put(JsonKey.VERSION, JsonKey.VERSION_2);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -105,7 +100,6 @@ public class UserController extends BaseController {
           && Boolean.parseBoolean(ctx().flash().get(JsonKey.IS_AUTH_REQ))) {
         validateAuthenticity(reqObj);
       }
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_USER.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
@@ -272,7 +266,6 @@ public class UserController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
-      ProjectUtil.updateMapSomeValueTOLowerCase(reqObj);
       innerMap.put(JsonKey.USER, reqObj.getRequest());
       innerMap.put(JsonKey.FIELDS, reqObj.getRequest().get(JsonKey.FIELDS));
       innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
@@ -361,33 +354,18 @@ public class UserController extends BaseController {
    *
    * @return Promise<Result>
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public Promise<Result> search() {
-    try {
-      JsonNode requestData = request().body().asJson();
-      ProjectLogger.log("UserController: search call start");
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.setEnv(getEnvironment());
-      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-
-      List<String> esObjectType = new ArrayList<>();
-      esObjectType.add(EsType.user.getTypeName());
-      if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
-          && reqObj.getRequest().get(JsonKey.FILTERS) != null
-          && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
-        ((Map) (reqObj.getRequest().get(JsonKey.FILTERS))).put(JsonKey.OBJECT_TYPE, esObjectType);
-      } else {
-        Map<String, Object> filtermap = new HashMap<>();
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put(JsonKey.OBJECT_TYPE, esObjectType);
-        filtermap.put(JsonKey.FILTERS, dataMap);
-      }
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleSearchRequest(
+        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        request().body().asJson(),
+        orgRequest -> {
+          new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(request()),
+        EsType.user.getTypeName());
   }
 
   /**
