@@ -32,10 +32,9 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                   StringFormatter.joinByAnd(JsonKey.EXTERNAL_ID, JsonKey.PROVIDER))));
     }
 
-    validateParam(
-        (String) request.getRequest().get(JsonKey.ROLES),
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.ROLES);
+    if (request.getRequest().get(JsonKey.ROLES) == null) {
+      validateParam(null, ResponseCode.mandatoryParamsMissing, JsonKey.ROLES);
+    }
 
     if (request.getRequest().containsKey(JsonKey.ROLES)
         && !(request.getRequest().get(JsonKey.ROLES) instanceof List)) {

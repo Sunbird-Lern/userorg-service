@@ -3,7 +3,6 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -97,62 +96,6 @@ public class AuthenticationHelper {
     return validClientId;
   }
 
-  public static Map<String, Object> getClientAccessTokenDetail(String clientId) {
-    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
-    Map<String, Object> response = null;
-    Map<String, Object> propertyMap = new HashMap<>();
-    propertyMap.put(JsonKey.ID, clientId);
-    try {
-      Response clientResponse =
-          cassandraOperation.getRecordById(
-              clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), clientId);
-      if (null != clientResponse && !clientResponse.getResult().isEmpty()) {
-        List<Map<String, Object>> dataList =
-            (List<Map<String, Object>>) clientResponse.getResult().get(JsonKey.RESPONSE);
-        response = dataList.get(0);
-      }
-    } catch (Exception e) {
-      ProjectLogger.log("Validating client token failed due to : ", e);
-    }
-    return response;
-  }
-
-  public static Map<String, Object> getUserDetail(String userId) {
-    Util.DbInfo userDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Map<String, Object> response = null;
-    try {
-      Response userResponse =
-          cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId);
-      if (null != userResponse && !userResponse.getResult().isEmpty()) {
-        List<Map<String, Object>> dataList =
-            (List<Map<String, Object>>) userResponse.getResult().get(JsonKey.RESPONSE);
-        response = dataList.get(0);
-      }
-    } catch (Exception e) {
-      ProjectLogger.log("fetching user for id " + userId + " failed due to : ", e);
-    }
-    return response;
-  }
-
-  public static Map<String, Object> getOrgDetail(String orgId) {
-    Util.DbInfo userDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Map<String, Object> response = null;
-    try {
-      Response userResponse =
-          cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), orgId);
-      if (null != userResponse && !userResponse.getResult().isEmpty()) {
-        List<Map<String, Object>> dataList =
-            (List<Map<String, Object>>) userResponse.getResult().get(JsonKey.RESPONSE);
-        response = dataList.get(0);
-      }
-    } catch (Exception e) {
-      ProjectLogger.log("fetching user for id " + orgId + " failed due to : ", e);
-    }
-    return response;
-  }
-
   /**
    * This method will save the user access token in side data base.
    *
@@ -185,36 +128,5 @@ public class AuthenticationHelper {
           ResponseCode.userDataEncryptionError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
-  }
-
-  @SuppressWarnings({"unchecked"})
-  public static Map<String, Object> getUserFromExternalId(
-      String extId, String provider, String idType) {
-    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Map<String, Object> user = null;
-    Map<String, Object> externalIdReq = new HashMap<>();
-    externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
-    externalIdReq.put(JsonKey.ID_TYPE, idType.toLowerCase());
-    externalIdReq.put(JsonKey.EXTERNAL_ID, getEncryptedData(extId.toLowerCase()));
-    Response response =
-        cassandraOperation.getRecordsByCompositeKey(
-            KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
-
-    List<Map<String, Object>> userRecordList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-
-    if (CollectionUtils.isNotEmpty(userRecordList)) {
-      Map<String, Object> userExtIdRecord = userRecordList.get(0);
-      Response res =
-          cassandraOperation.getRecordById(
-              usrDbInfo.getKeySpace(),
-              usrDbInfo.getTableName(),
-              (String) userExtIdRecord.get(JsonKey.USER_ID));
-      if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) res.get(JsonKey.RESPONSE))) {
-        // user exist
-        user = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE)).get(0);
-      }
-    }
-    return user;
   }
 }
