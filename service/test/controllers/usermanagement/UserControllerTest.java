@@ -261,6 +261,7 @@ public class UserControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.USER_ID, userId);
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     List<String> roles = new ArrayList<>();
+    roles.add(role);
     innerMap.put(JsonKey.ROLES, roles);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
