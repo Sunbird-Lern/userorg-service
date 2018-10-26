@@ -109,7 +109,7 @@ public class BaseBulkUploadController extends BaseController {
           ResponseCode.missingFileAttachment.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (objectType == JsonKey.LOCATION) {
+    if (objectType == JsonKey.LOCATION || objectType == JsonKey.ORGANISATION) {
       // allowed max size in MB
       String allowedMaxSize = ProjectUtil.getConfigValue(JsonKey.UPLOAD_FILE_MAX_SIZE);
       if (StringUtils.isEmpty(allowedMaxSize)) {
