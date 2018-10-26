@@ -1,29 +1,19 @@
 package controllers.coursemanagement;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
-import util.RequestInterceptor;
+import play.test.Helpers;
 
-/** Created by arvind on 1/12/17. */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
-@PowerMockIgnore("javax.management.*")
-@Ignore
 public class CourseBatchControllerTest extends BaseControllerTest {
+
   public static String COURSE_ID = "courseId";
   public static String COURSE_NAME = "courseName";
   public static int DAY_OF_MONTH = 2;
@@ -31,7 +21,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   public static String BATCH_ID = "batchID";
   public static List<String> MENTORS = Arrays.asList("mentors");
   public static String INVALID_MENTORS_TYPE = "invalidMentorType";
-  public static String INVALID_PARTICIPANTS_TYPE = "invalidParticipantsType";
   public static List<String> PARTICIPANTS = Arrays.asList("participants");
 
   @Test
@@ -48,6 +37,9 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
+
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -65,6 +57,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -82,6 +76,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 PARTICIPANTS));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -93,6 +89,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
             "POST",
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -110,11 +108,14 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
   @Test
   public void testCreateBatchFailureWithInvalidMentorType() {
+
     Result result =
         performTest(
             "/v1/course/batch/create",
@@ -127,6 +128,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 INVALID_MENTORS_TYPE,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
@@ -145,6 +148,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
@@ -163,6 +168,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentdate,
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
@@ -174,6 +181,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
             "PATCH",
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -191,6 +200,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
@@ -208,6 +219,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -226,12 +239,16 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentDate,
                 null,
                 null));
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
   }
 
   @Test
   public void testGetBatchSuccess() {
     Result result = performTest("/v1/course/batch/read/" + BATCH_ID, "GET", null);
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
@@ -239,10 +256,66 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   public void testSearchBatchSuccess() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.FILTERS, BATCH_ID);
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.BATCH_ID, BATCH_ID);
+    innerMap.put(JsonKey.FILTERS, filters);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
     assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testSearchBatchSuccessWithoutFilters() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testSearchBatchSuccessWithEmptyFilters() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.FILTERS, null);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddUserToBatchSuccess() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    List<String> users = new ArrayList();
+    users.add("123");
+    innerMap.put(JsonKey.USER_IDs, users);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+
+    Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
+
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains("success"));
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddUserToBatchFailureWithoutUserIds() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
+    String response = Helpers.contentAsString(result);
+    assertTrue(response.contains(ResponseCode.userIdRequired.getErrorCode()));
+    assertEquals(400, result.status());
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(
@@ -272,9 +345,7 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   private Date getEndDate(boolean isFuture) {
     Calendar calendar = Calendar.getInstance();
     if (isFuture) {
-
       calendar.add(Calendar.DAY_OF_MONTH, DAY_OF_MONTH);
-
     } else {
       calendar.add(Calendar.DAY_OF_MONTH, -DAY_OF_MONTH);
     }
