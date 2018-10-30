@@ -2,21 +2,14 @@ package controllers.organisationmanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static play.test.Helpers.route;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseControllerTest;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
-import play.libs.Json;
-import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
@@ -30,10 +23,11 @@ public class OrganisationControllerTest extends BaseControllerTest {
   @Test
   public void testCreateOrgSuccess() {
 
-    JsonNode json = getRequestedJsonData(true, false, false, false, false, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(true, false, false, false, false, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
@@ -42,10 +36,11 @@ public class OrganisationControllerTest extends BaseControllerTest {
   @Test
   public void testCreateOrgFailureWithoutOrgName() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, false, false, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(false, false, false, false, false, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
@@ -54,10 +49,11 @@ public class OrganisationControllerTest extends BaseControllerTest {
   @Test
   public void testCreateOrgFailureWithRootOrgWithoutChannel() {
 
-    JsonNode json = getRequestedJsonData(true, true, false, false, false, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(true, true, false, false, false, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.dependentParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
@@ -66,10 +62,11 @@ public class OrganisationControllerTest extends BaseControllerTest {
   @Test
   public void testUpdateOrgSuccess() {
 
-    JsonNode json = getRequestedJsonData(false, false, true, true, false, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/update",
+            "PATCH",
+            createOrganisationRequest(false, false, true, true, false, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
@@ -78,108 +75,102 @@ public class OrganisationControllerTest extends BaseControllerTest {
   @Test
   public void testUpdateOrgFailureWithoutOrgId() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, true, false, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/update",
+            "PATCH",
+            createOrganisationRequest(false, false, false, true, false, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
   }
 
   @Test
-  public void testupdateOrgStatusSuccess() {
+  public void testUpdateOrgStatusSuccess() {
 
-    JsonNode json = getRequestedJsonData(false, false, true, false, true, false, null);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/status/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/status/update",
+            "PATCH",
+            createOrganisationRequest(false, false, true, false, true, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testupdateOrgStatusFailureWithoutOrgId() {
+  public void testUpdateOrgStatusFailureWithoutOrgId() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, false, true, false, null);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/status/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/status/update",
+            "PATCH",
+            createOrganisationRequest(false, false, false, false, true, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
   }
 
   @Test
-  public void testgetOrgDetailsSuccess() {
+  public void testGetOrgDetailsSuccess() {
 
-    JsonNode json = getRequestedJsonData(false, false, true, false, true, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/read").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/read",
+            "POST",
+            createOrganisationRequest(false, false, true, false, true, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testgetOrgDetailsFailureWithoutOrgId() {
+  public void testGetOrgDetailsFailureWithoutOrgId() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, false, true, false, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/read").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/read",
+            "POST",
+            createOrganisationRequest(false, false, false, false, true, false, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
   }
 
   @Test
-  public void testsearchOrgsSuccess() {
+  public void testSearchOrgsSuccess() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, false, true, true, "filter");
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/search",
+            "POST",
+            createOrganisationRequest(false, false, false, false, true, true, "filter"));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testsearchOrgsFailureWithoutFilters() {
+  public void testSearchOrgsFailureWithoutFilters() {
 
-    JsonNode json = getRequestedJsonData(false, false, false, false, true, true, null);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result =
+        performTest(
+            "/v1/org/search",
+            "POST",
+            createOrganisationRequest(false, false, false, false, true, true, null));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
     assertEquals(400, result.status());
   }
 
-  public static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
-  }
-
-  private JsonNode getRequestedJsonData(
+  private Map createOrganisationRequest(
       boolean isOrgName,
       boolean isRootOrg,
       boolean isOrgId,
       boolean isRootOrgId,
       boolean isStatus,
       boolean isFilter,
-      String isFilterNull) {
+      String isFilterNUll) {
 
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
@@ -190,12 +181,11 @@ public class OrganisationControllerTest extends BaseControllerTest {
     if (isStatus) innerMap.put(JsonKey.STATUS, new BigInteger(status));
     if (isFilter) {
       Map<String, Object> filterMap = new HashMap<>();
-      if (isFilterNull != null) {
+      if (isFilterNUll != null) {
         innerMap.put(JsonKey.FILTERS, filterMap);
       } else innerMap.put(JsonKey.FILTERS, null);
     }
     requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    return Json.parse(data);
+    return requestMap;
   }
 }
