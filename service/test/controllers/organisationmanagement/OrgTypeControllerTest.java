@@ -77,6 +77,7 @@ public class OrgTypeControllerTest extends BaseControllerTest {
         performTest("/v1/org/type/update", "PATCH", createOrgTypeRequest(false, null, true, id));
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
+
     assertEquals(400, result.status());
   }
 
