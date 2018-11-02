@@ -47,9 +47,26 @@ public class BulkUploadController extends BaseBulkUploadController {
    * @return Promise<Result>
    */
   public Promise<Result> getUploadStatus(String processId) {
+    return handleRequest(
+        ActorOperations.GET_BULK_OP_STATUS.getValue(),
+        request().body().asJson(),
+        null,
+        processId,
+        JsonKey.PROCESS_ID,
+        false);
+  }
+
+  /**
+   * This method will provide the status of bulk operation by their processId.
+   *
+   * @param processId Stirng
+   * @return Promise<Result>
+   */
+  public Promise<Result> getStatusDownloadLink(String processId) {
     try {
       ProjectLogger.log("get bulk operation status =" + processId, LoggerEnum.INFO.name());
-      Request request = createAndInitRequest(ActorOperations.GET_BULK_OP_STATUS.getValue());
+      Request request =
+          createAndInitRequest(ActorOperations.GET_BULK_STATUS_DOWNLOAD_LINK.getValue());
       request.getRequest().put(JsonKey.PROCESS_ID, processId);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
