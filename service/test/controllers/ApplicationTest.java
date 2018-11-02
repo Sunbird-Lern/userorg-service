@@ -16,40 +16,41 @@ import play.mvc.Result;
 public class ApplicationTest {
 
   @Test
-  public void checkGetApiVersion() {
+  public void testGetApiVersionSuccess() {
     String apiPath = "/v1/learner/getenrolledcoures";
     String version = BaseController.getApiVersion(apiPath);
     assertEquals("v1", version);
   }
 
   @Test
-  public void checkCreateRequestParam() {
+  public void testCreateResponseParamObjSuccess() {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     ResponseParams params = BaseController.createResponseParamObj(code);
     assertEquals(ResponseCode.success.name(), params.getStatus());
   }
 
-  // @Test
-  public void checkExceptionResponse() {
+  @Test
+  public void testCreateResponseOnExceptionSuccess() {
     ProjectCommonException exception =
         new ProjectCommonException(
             ResponseCode.courseIdRequiredError.getErrorCode(),
             ResponseCode.courseIdRequiredError.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
-    Response response = BaseController.createResponseOnException(null, exception);
+    Response response =
+        BaseController.createResponseOnException("v1/user/create", "POST", exception);
     assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
   }
 
-  // @Test
-  public void testSuccessResponse() {
+  @Test
+  public void testCreateSuccessResponseSuccess() {
     Response response = new Response();
     response = BaseController.createSuccessResponse(null, response);
     assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
   @Test
-  public void checkFailureResponse() {
+  public void testCreateResponseParamObjFailure() {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
     code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
     ResponseParams params = BaseController.createResponseParamObj(code);
@@ -57,7 +58,7 @@ public class ApplicationTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testcreateCommonExceptionResponse() {
+  public void testCreateCommonExceptionResponseSuccess() {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
     code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
     Result result = new BaseController().createCommonExceptionResponse(new Exception(), null);
