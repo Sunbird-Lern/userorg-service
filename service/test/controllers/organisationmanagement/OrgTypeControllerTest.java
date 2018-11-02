@@ -17,16 +17,7 @@ public class OrgTypeControllerTest extends BaseControllerTest {
   private static String id = "id";
 
   @Test
-  public void testListOrgTypeListSuccess() {
-
-    Result result = performTest("/v1/org/type/list", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(getResponseStatus(result) == 200);
-  }
-
-  @Test
   public void testCreateOrgTypeSuccess() {
-
     Result result =
         performTest(
             "/v1/org/type/create", "POST", createOrgTypeRequest(true, orgTypeName, false, null));
@@ -53,8 +44,14 @@ public class OrgTypeControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testUpdateOrgTypeSuccess() {
+  public void testListOrgTypeListSuccess() {
+    Result result = performTest("/v1/org/type/list", "GET", null);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
 
+  @Test
+  public void testUpdateOrgTypeSuccess() {
     Result result =
         performTest(
             "/v1/org/type/update", "PATCH", createOrgTypeRequest(true, orgTypeName, true, id));
@@ -64,7 +61,6 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgTypeFailureWithoutName() {
-
     Result result =
         performTest("/v1/org/type/update", "PATCH", createOrgTypeRequest(false, null, true, id));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
@@ -73,7 +69,6 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgTypeFailureWithEmptyName() {
-
     Result result =
         performTest("/v1/org/type/update", "PATCH", createOrgTypeRequest(true, null, true, id));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
@@ -82,7 +77,6 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgTypeFailureWithoutId() {
-
     Result result =
         performTest(
             "/v1/org/type/update", "PATCH", createOrgTypeRequest(true, orgTypeName, false, null));
@@ -91,7 +85,6 @@ public class OrgTypeControllerTest extends BaseControllerTest {
   }
 
   private Map createOrgTypeRequest(boolean isName, String name, boolean isId, String id) {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     if (isName) innerMap.put(JsonKey.NAME, name);
@@ -99,4 +92,5 @@ public class OrgTypeControllerTest extends BaseControllerTest {
     requestMap.put(JsonKey.REQUEST, innerMap);
     return requestMap;
   }
+
 }
