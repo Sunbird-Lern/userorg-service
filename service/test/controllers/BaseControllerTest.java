@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -20,8 +21,11 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.learner.util.Util;
@@ -103,7 +107,7 @@ public class BaseControllerTest {
   public Result performTest(String url, String method, Map map) {
     String data = mapToJson(map);
     Http.RequestBuilder req;
-    if (data != null) {
+    if (StringUtils.isNotBlank(data)) {
       JsonNode json = Json.parse(data);
       req = new Http.RequestBuilder().bodyJson(json).uri(url).method(method);
     } else {
@@ -114,14 +118,42 @@ public class BaseControllerTest {
     return result;
   }
 
-  public static String mapToJson(Map map) {
+  public String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
+
+    if (map != null) {
+      try {
+        jsonResp = mapperObj.writeValueAsString(map);
+      } catch (IOException e) {
+        ProjectLogger.log(e.getMessage(), e);
+      }
     }
     return jsonResp;
   }
+
+  public String getResponseCode(Result result) {
+    String responseStr = Helpers.contentAsString(result);
+    ObjectMapper mapper = new ObjectMapper();
+
+    try {
+      Response response = mapper.readValue(responseStr, Response.class);
+
+      if (response != null) {
+        ResponseParams params = response.getParams();
+        return params.getStatus();
+      }
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
+    }
+    return "";
+  }
+
+  public int getResponseStatus(Result result) {
+    return result.status();
+  }
+
 }
