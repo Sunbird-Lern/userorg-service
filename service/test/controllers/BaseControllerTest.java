@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -20,6 +21,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -103,7 +106,7 @@ public class BaseControllerTest {
   public Result performTest(String url, String method, Map map) {
     String data = mapToJson(map);
     Http.RequestBuilder req;
-    if (data != null) {
+    if (StringUtils.isNotBlank(data)) {
       JsonNode json = Json.parse(data);
       req = new Http.RequestBuilder().bodyJson(json).uri(url).method(method);
     } else {
@@ -117,11 +120,38 @@ public class BaseControllerTest {
   public static String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
+
+    if (map != null) {
+      try {
+        jsonResp = mapperObj.writeValueAsString(map);
+      } catch (IOException e) {
+        ProjectLogger.log(e.getMessage(), e);
+      }
     }
     return jsonResp;
+  }
+
+  public static String getResponseCode(Result result) {
+
+    String response = Helpers.contentAsString(result);
+    ObjectMapper mapper = new ObjectMapper();
+
+    try {
+      Response res = mapper.readValue(response, Response.class);
+      if (res != null) {
+
+        ResponseParams params = res.getParams();
+        String status = params.getStatus();
+        return status;
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return "";
+  }
+
+  public static int getResponseStatus(Result result) {
+    return result.status();
   }
 }
