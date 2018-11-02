@@ -117,7 +117,7 @@ public class BaseControllerTest {
     return result;
   }
 
-  public static String mapToJson(Map map) {
+  public String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
 
@@ -131,27 +131,30 @@ public class BaseControllerTest {
     return jsonResp;
   }
 
-  public static String getResponseCode(Result result) {
+  public String getResponseCode(Result result) {
 
-    String response = Helpers.contentAsString(result);
+    String responseStr = Helpers.contentAsString(result);
     ObjectMapper mapper = new ObjectMapper();
 
     try {
-      Response res = mapper.readValue(response, Response.class);
-      if (res != null) {
+      Response response = mapper.readValue(responseStr, Response.class);
 
-        ResponseParams params = res.getParams();
+      if (response != null) {
+        ResponseParams params = response.getParams();
         String status = params.getStatus();
         return status;
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      ProjectLogger.log(
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          "ERROR");
     }
     return "";
   }
 
-  public static int getResponseStatus(Result result) {
+  public int getResponseStatus(Result result) {
     return result.status();
   }
 }

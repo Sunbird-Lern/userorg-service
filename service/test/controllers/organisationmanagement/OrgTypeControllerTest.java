@@ -20,10 +20,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
   public void testListOrgTypeListSuccess() {
 
     Result result = performTest("/v1/org/type/list", "GET", null);
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 200);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -32,10 +30,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/type/create", "POST", createOrgTypeRequest(true, orgTypeName, false, null));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 200);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -43,10 +39,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
     Result result =
         performTest("/v1/org/type/create", "POST", createOrgTypeRequest(true, null, false, null));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.mandatoryParamsMissing.getErrorCode());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 400);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -54,10 +48,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
     Result result =
         performTest("/v1/org/type/create", "POST", createOrgTypeRequest(false, null, false, null));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.mandatoryParamsMissing.getErrorCode());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 400);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -66,10 +58,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/type/update", "PATCH", createOrgTypeRequest(true, orgTypeName, true, id));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 200);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -77,10 +67,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
     Result result =
         performTest("/v1/org/type/update", "PATCH", createOrgTypeRequest(false, null, true, id));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.mandatoryParamsMissing.getErrorCode());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 400);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -88,10 +76,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
 
     Result result =
         performTest("/v1/org/type/update", "PATCH", createOrgTypeRequest(true, null, true, id));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.mandatoryParamsMissing.getErrorCode());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 400);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -100,10 +86,8 @@ public class OrgTypeControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/type/update", "PATCH", createOrgTypeRequest(true, orgTypeName, false, null));
-    assertEquals(
-        BaseControllerTest.getResponseCode(result),
-        ResponseCode.mandatoryParamsMissing.getErrorCode());
-    assertTrue(BaseControllerTest.getResponseStatus(result) == 400);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   private Map createOrgTypeRequest(boolean isName, String name, boolean isId, String id) {
