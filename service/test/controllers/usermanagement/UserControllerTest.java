@@ -5,16 +5,13 @@ import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.route;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseControllerTest;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
@@ -201,16 +198,5 @@ public class UserControllerTest extends BaseControllerTest {
 
     requestMap.put(JsonKey.REQUEST, innerMap);
     return mapToJson(requestMap);
-  }
-
-  public static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 }
