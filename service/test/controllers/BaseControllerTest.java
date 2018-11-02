@@ -25,6 +25,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.learner.util.Util;
@@ -132,7 +133,6 @@ public class BaseControllerTest {
   }
 
   public String getResponseCode(Result result) {
-
     String responseStr = Helpers.contentAsString(result);
     ObjectMapper mapper = new ObjectMapper();
 
@@ -141,15 +141,13 @@ public class BaseControllerTest {
 
       if (response != null) {
         ResponseParams params = response.getParams();
-        String status = params.getStatus();
-        return status;
+        return params.getStatus();
       }
-
     } catch (Exception e) {
       ProjectLogger.log(
           "BaseControllerTest:getResponseCode: Exception occurred with error message = "
               + e.getMessage(),
-          "ERROR");
+          LoggerEnum.ERROR.name());
     }
     return "";
   }
@@ -157,4 +155,5 @@ public class BaseControllerTest {
   public int getResponseStatus(Result result) {
     return result.status();
   }
+
 }
