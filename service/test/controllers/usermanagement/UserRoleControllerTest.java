@@ -15,13 +15,12 @@ import play.mvc.Result;
 
 public class UserRoleControllerTest extends BaseControllerTest {
 
-  private static String role = "user";
-  private static String userId = "user-id";
-  private static String orgId = "org-id";
+  private static String role = "someRole";
+  private static String userId = "someUserId";
+  private static String orgId = "someOrgId";
 
   @Test
   public void testAssignRolesSuccess() {
-
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
@@ -30,7 +29,6 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
   @Test
   public void testAssignRolesFailueWithoutOrgId() {
-
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
@@ -39,7 +37,6 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
   @Test
   public void testAssignRolesFailueWithoutUserId() {
-
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(false, true, true, role));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
@@ -47,8 +44,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testAssignRolesFailueWithoutRoles() {
-
+  public void testAssignRolesFailureWithoutRoles() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, false, null));
 
@@ -58,7 +54,6 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateAssignedRolesFailureWithEmptyRole() {
-
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, null));
     assertEquals(getResponseCode(result), ResponseCode.emptyRolesProvided.getErrorCode());
@@ -67,7 +62,6 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
   @Test
   public void testGetAllRolesSuccess() {
-
     Result result = performTest("/v1/role/read", "GET", null);
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
@@ -75,10 +69,10 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
   private Map createUserRoleRequest(
       boolean isUserIdReq, boolean isOrgReq, boolean isRoleReq, String role) {
-
     Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
 
+    Map<String, Object> innerMap = new HashMap<>();
+    
     if (isUserIdReq) innerMap.put(JsonKey.USER_ID, userId);
     if (isOrgReq) innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     if (isRoleReq) {
@@ -87,6 +81,8 @@ public class UserRoleControllerTest extends BaseControllerTest {
       innerMap.put(JsonKey.ROLES, roles);
     }
     requestMap.put(JsonKey.REQUEST, innerMap);
+
     return requestMap;
   }
+
 }
