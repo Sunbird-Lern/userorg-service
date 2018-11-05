@@ -13,12 +13,11 @@ import play.mvc.Result;
 
 public class OrgMemberControllerTest extends BaseControllerTest {
 
-  private static String orgId = "org-id";
-  private static String userId = "user-id";
+  private static String orgId = "someOrgId";
+  private static String userId = "someUserId";
 
   @Test
-  public void testAddMemberToOrganisation() {
-
+  public void testAddMemberToOrganisationSuccess() {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, userId, false));
@@ -28,7 +27,6 @@ public class OrgMemberControllerTest extends BaseControllerTest {
 
   @Test
   public void testAddMemberToOrganisationFailureWithoutOrgId() {
-
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(false, null, true, userId, false));
@@ -38,7 +36,6 @@ public class OrgMemberControllerTest extends BaseControllerTest {
 
   @Test
   public void testAddMemberToOrganisationFailureWithEmptyOrgId() {
-
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, null, true, userId, false));
@@ -47,8 +44,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testAddMemberToOrganisationFailureWithOutUserId() {
-
+  public void testAddMemberToOrganisationFailureWithoutUserId() {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, false, null, false));
@@ -58,7 +54,6 @@ public class OrgMemberControllerTest extends BaseControllerTest {
 
   @Test
   public void testAddMemberToOrganisationFailureWithEmptyUserId() {
-
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, null, false));
@@ -67,8 +62,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testAddMemberToOrganisationFailureWithRolesOfWrongFormat() {
-
+  public void testAddMemberToOrganisationFailureWithNullRoles() {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, userId, true));
@@ -77,8 +71,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testRemoveMemberFromOrganisation() {
-
+  public void testRemoveMemberFromOrganisationSuccess() {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, true, userId, false));
@@ -87,8 +80,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testRemoveMemberFromOrganisationWithoutOrgId() {
-
+  public void testRemoveMemberFromOrganisationFailureWithoutOrgId() {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(false, null, true, userId, false));
@@ -97,8 +89,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testRemoveMemberFromOrganisationWithEmptyOrgId() {
-
+  public void testRemoveMemberFromOrganisationFailureWithEmptyOrgId() {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, null, true, userId, false));
@@ -107,8 +98,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testRemoveMemberFromOrganisationWithoutUserId() {
-
+  public void testRemoveMemberFromOrganisationFailureWithoutUserId() {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, false, null, false));
@@ -117,8 +107,7 @@ public class OrgMemberControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testRemoveMemberFromOrganisationWithEmptyUserId() {
-
+  public void testRemoveMemberFromOrganisationFailureWithEmptyUserId() {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, true, null, false));
@@ -128,7 +117,6 @@ public class OrgMemberControllerTest extends BaseControllerTest {
 
   private Map createMemberRequest(
       boolean isOrgId, String orgId, boolean isUserId, String userId, boolean isRoleNull) {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     if (isOrgId) innerMap.put(JsonKey.ORGANISATION_ID, orgId);
@@ -137,4 +125,5 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     requestMap.put(JsonKey.REQUEST, innerMap);
     return requestMap;
   }
+
 }
