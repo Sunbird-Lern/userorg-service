@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
-import play.test.Helpers;
 
 public class OrgMemberControllerTest extends BaseControllerTest {
 
@@ -23,9 +22,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, userId, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -34,9 +32,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(false, null, true, userId, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -45,9 +42,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, null, true, userId, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -56,9 +52,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, false, null, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -67,9 +62,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, null, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -78,9 +72,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/add", "POST", createMemberRequest(true, orgId, true, userId, true));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.dataTypeError.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.dataTypeError.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -89,9 +82,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, true, userId, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -100,10 +92,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(false, null, true, userId, false));
-
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -112,9 +102,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, null, true, userId, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -123,9 +112,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, false, null, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -134,9 +122,8 @@ public class OrgMemberControllerTest extends BaseControllerTest {
     Result result =
         performTest(
             "/v1/org/member/remove", "POST", createMemberRequest(true, orgId, true, null, false));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   private Map createMemberRequest(
