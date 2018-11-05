@@ -13,46 +13,44 @@ import play.mvc.Result;
 
 public class UserStatusControllerTest extends BaseControllerTest {
 
-  private static String userId = "user-id";
+  private static String userId = "someUserId";
 
   @Test
   public void testBlockUserSuccess() {
-
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(userId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testBlockUserFailureWithouUserId() {
-
+  public void testBlockUserFailureWithoutUserId() {
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
-  public void testUnBlockUserSuccess() {
-
+  public void testUnblockUserSuccess() {
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(userId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testUnBlockUserFailureWithoutUserId() {
-
+  public void testUnblockUserFailureWithoutUserId() {
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   private Map userStatusRequest(String userId) {
-
     Map<String, Object> requestMap = new HashMap<>();
+    
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.USER_ID, userId);
     requestMap.put(JsonKey.REQUEST, innerMap);
+    
     return requestMap;
   }
+
 }
