@@ -239,49 +239,32 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testSearchBatchSuccess() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.BATCH_ID, BATCH_ID);
-    innerMap.put(JsonKey.FILTERS, filters);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    Result result =
+        performTest("/v1/course/batch/search", "POST", searchCourseBatchRequest(true, false));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testSearchBatchSuccessWithoutFilters() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    Result result =
+        performTest("/v1/course/batch/search", "POST", searchCourseBatchRequest(false, true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testSearchBatchSuccessWithEmptyFilters() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.FILTERS, null);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/course/batch/search", "POST", requestMap);
+    Result result =
+        performTest("/v1/course/batch/search", "POST", searchCourseBatchRequest(false, true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testAddUserToBatchSuccess() {
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    List<String> users = new ArrayList();
-    users.add("123");
-    innerMap.put(JsonKey.USER_IDs, users);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-
-    Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
+    Result result =
+        performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", addUserToBatchRequest(true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -289,12 +272,42 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   @Test
   public void testAddUserToBatchFailureWithoutUserIds() {
 
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
+    Result result =
+        performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", addUserToBatchRequest(false));
     assertEquals(getResponseCode(result), ResponseCode.userIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
+  }
+
+  private Map<String, Object> searchCourseBatchRequest(boolean isFilter, boolean isEmpty) {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+
+    if (isFilter) {
+      Map<String, Object> filters = new HashMap<>();
+
+      if (isEmpty) innerMap.put(JsonKey.FILTERS, null);
+      else {
+        filters.put(JsonKey.BATCH_ID, BATCH_ID);
+        innerMap.put(JsonKey.FILTERS, filters);
+      }
+    }
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
+  }
+
+  private Map<String, Object> addUserToBatchRequest(boolean isUserIds) {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+
+    if (isUserIds) {
+      List<String> users = new ArrayList();
+      users.add("123");
+      innerMap.put(JsonKey.USER_IDs, users);
+    }
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(
