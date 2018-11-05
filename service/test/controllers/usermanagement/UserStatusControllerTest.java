@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
-import play.test.Helpers;
 
 public class UserStatusControllerTest extends BaseControllerTest {
 
@@ -20,36 +19,32 @@ public class UserStatusControllerTest extends BaseControllerTest {
   public void testBlockUserSuccess() {
 
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(userId));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testBlockUserFailureWithouUserId() {
 
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testUnBlockUserSuccess() {
 
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(userId));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testUnBlockUserFailureWithoutUserId() {
 
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   private Map userStatusRequest(String userId) {
