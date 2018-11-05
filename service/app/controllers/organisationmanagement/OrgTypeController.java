@@ -30,8 +30,8 @@ public class OrgTypeController extends BaseController {
         },
         getAllRequestHeaders(request()));
   }
-  
-  public Promise<Result> getOrgTypeList() {
+
+  public Promise<Result> listOrgType() {
     return handleRequest(
         ActorOperations.GET_ORG_TYPE_LIST.getValue(),
         request().body().asJson(),
@@ -41,5 +41,4 @@ public class OrgTypeController extends BaseController {
         getAllRequestHeaders((request())),
         false);
   }
-
 }
