@@ -74,9 +74,25 @@ public class UserController extends BaseController {
         false);
   }
 
+  public Promise<Result> getUserByIdV2(String userId) {
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
+
+    return handleRequest(
+        ActorOperations.GET_PROFILEV2.getValue(),
+        null,
+        (req) -> {
+          Request request = (Request) req;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          return null;
+        },
+        userId,
+        JsonKey.USER_ID,
+        false);
+  }
+
   public Promise<Result> getUserByLoginId() {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
-    
+
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
         request().body().asJson(),

@@ -14,6 +14,7 @@ POST	/v1/user/create				      @controllers.usermanagement.UserController.createU
 POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
 PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
 GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
+GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
 POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
 POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
