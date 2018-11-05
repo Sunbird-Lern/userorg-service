@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
-import play.test.Helpers;
 
 public class CourseBatchControllerTest extends BaseControllerTest {
 
@@ -37,10 +36,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -57,9 +54,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -76,9 +72,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 MENTORS,
                 PARTICIPANTS));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -89,9 +84,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
             "POST",
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -108,9 +102,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -128,9 +121,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 INVALID_MENTORS_TYPE,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -148,9 +140,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -168,9 +159,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentdate,
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -181,9 +171,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
             "PATCH",
             createAndUpdateCourseBatchRequest(
                 COURSE_ID, COURSE_NAME, JsonKey.INVITE_ONLY, new Date(), null, null, null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -200,9 +189,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(false),
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -219,9 +207,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 getEndDate(true),
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -239,17 +226,15 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 currentDate,
                 null,
                 null));
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testGetBatchSuccess() {
     Result result = performTest("/v1/course/batch/read/" + BATCH_ID, "GET", null);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -261,9 +246,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.FILTERS, filters);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v1/course/batch/search", "POST", requestMap);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -272,9 +256,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v1/course/batch/search", "POST", requestMap);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -284,9 +267,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.FILTERS, null);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v1/course/batch/search", "POST", requestMap);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -300,10 +282,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     requestMap.put(JsonKey.REQUEST, innerMap);
 
     Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
-
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -313,9 +293,8 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", requestMap);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.userIdRequired.getErrorCode()));
-    assertEquals(400, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.userIdRequired.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   private Map<String, Object> createAndUpdateCourseBatchRequest(
