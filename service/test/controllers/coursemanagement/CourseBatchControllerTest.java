@@ -108,7 +108,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateBatchFailureWithInvalidMentorType() {
-
     Result result =
         performTest(
             "/v1/course/batch/create",
@@ -127,7 +126,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateBatchFailureWithEndDateBeforeStartDate() {
-
     Result result =
         performTest(
             "/v1/course/batch/create",
@@ -271,7 +269,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
 
   @Test
   public void testAddUserToBatchFailureWithoutUserIds() {
-
     Result result =
         performTest("/v1/course/batch/users/add/" + BATCH_ID, "POST", addUserToBatchRequest(false));
     assertEquals(getResponseCode(result), ResponseCode.userIdRequired.getErrorCode());
@@ -279,7 +276,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   }
 
   private Map<String, Object> searchCourseBatchRequest(boolean isFilter, boolean isEmpty) {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
 
@@ -297,7 +293,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   }
 
   private Map<String, Object> addUserToBatchRequest(boolean isUserIds) {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
 
@@ -343,4 +338,5 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     }
     return calendar.getTime();
   }
+
 }
