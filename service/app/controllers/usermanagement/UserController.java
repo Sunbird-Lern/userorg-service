@@ -62,7 +62,7 @@ public class UserController extends BaseController {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
 
     return handleRequest(
-        ActorOperations.GET_PROFILE.getValue(),
+        ActorOperations.GET_USER_PROFILE.getValue(),
         null,
         (req) -> {
           Request request = (Request) req;
@@ -78,7 +78,7 @@ public class UserController extends BaseController {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
 
     return handleRequest(
-        ActorOperations.GET_PROFILEV2.getValue(),
+        ActorOperations.GET_USER_PROFILE_V2.getValue(),
         null,
         (req) -> {
           Request request = (Request) req;
