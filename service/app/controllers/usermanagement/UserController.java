@@ -59,24 +59,16 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> getUserById(String userId) {
-    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
-
-    return handleRequest(
-        ActorOperations.GET_PROFILE.getValue(),
-        null,
-        (req) -> {
-          Request request = (Request) req;
-          request.getContext().put(JsonKey.FIELDS, requestedFields);
-          return null;
-        },
-        userId,
-        JsonKey.USER_ID,
-        false);
+    return handleGetUserProfile(ActorOperations.GET_USER_PROFILE.getValue(), userId);
   }
 
+  public Promise<Result> getUserByIdV2(String userId) {
+    return handleGetUserProfile(ActorOperations.GET_USER_PROFILE_V2.getValue(), userId);
+  }
+  
   public Promise<Result> getUserByLoginId() {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
-    
+
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
         request().body().asJson(),
@@ -105,4 +97,21 @@ public class UserController extends BaseController {
         getAllRequestHeaders(request()),
         EsType.user.getTypeName());
   }
+
+  private Promise<Result> handleGetUserProfile(String operation, String userId) {
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
+
+    return handleRequest(
+        operation,
+        null,
+        (req) -> {
+          Request request = (Request) req;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          return null;
+        },
+        userId,
+        JsonKey.USER_ID,
+        false);
+  }
+
 }
