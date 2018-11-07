@@ -162,6 +162,24 @@ public class CourseBatchControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testUpdateBatchSuccess() {
+    Result result =
+        performTest(
+            "/v1/course/batch/update",
+            "PATCH",
+            createAndUpdateCourseBatchRequest(
+                COURSE_ID,
+                COURSE_NAME,
+                JsonKey.INVITE_ONLY,
+                new Date(),
+                getEndDate(true),
+                null,
+                null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testUpdateBatchSuccessWithoutEndDate() {
     Result result =
         performTest(
@@ -189,24 +207,6 @@ public class CourseBatchControllerTest extends BaseControllerTest {
                 null));
     assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
-  }
-
-  @Test
-  public void testUpdateBatchSuccess() {
-    Result result =
-        performTest(
-            "/v1/course/batch/update",
-            "PATCH",
-            createAndUpdateCourseBatchRequest(
-                COURSE_ID,
-                COURSE_NAME,
-                JsonKey.INVITE_ONLY,
-                new Date(),
-                getEndDate(true),
-                null,
-                null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
