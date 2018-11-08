@@ -94,18 +94,14 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testGetOrgDetailsSuccess() {
-    Result result =
-        performTest(
-            "/v1/org/read", "POST", createOrganisationRequest(null, orgId, false, null, status));
+    Result result = performTest("/v1/org/read", "POST", getOrganisationRequest(orgId, status));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetOrgDetailsFailureWithoutOrgId() {
-    Result result =
-        performTest(
-            "/v1/org/read", "POST", createOrganisationRequest(null, null, false, null, status));
+    Result result = performTest("/v1/org/read", "POST", getOrganisationRequest(null, status));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -131,6 +127,16 @@ public class OrganisationControllerTest extends BaseControllerTest {
     Map<String, Object> innerMap = new HashMap<>();
     if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
     innerMap.put(JsonKey.FILTERS, filterMap);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
+  }
+
+  private Map getOrganisationRequest(String orgId, String status) {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
+    innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     requestMap.put(JsonKey.REQUEST, innerMap);
     return requestMap;
   }
