@@ -5,8 +5,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
@@ -50,7 +48,7 @@ public class BulkUploadController extends BaseBulkUploadController {
   public Promise<Result> getUploadStatus(String processId) {
     return handleRequest(
         ActorOperations.GET_BULK_OP_STATUS.getValue(),
-        request().body().asJson(),
+        null,
         null,
         processId,
         JsonKey.PROCESS_ID,
@@ -64,15 +62,13 @@ public class BulkUploadController extends BaseBulkUploadController {
    * @return Promise<Result>
    */
   public Promise<Result> getStatusDownloadLink(String processId) {
-    try {
-      ProjectLogger.log("get bulk operation status =" + processId, LoggerEnum.INFO.name());
-      Request request =
-          createAndInitRequest(ActorOperations.GET_BULK_STATUS_DOWNLOAD_LINK.getValue());
-      request.getRequest().put(JsonKey.PROCESS_ID, processId);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.GET_BULK_UPLOAD_STATUS_DOWNLOAD_LINK.getValue(),
+        null,
+        null,
+        processId,
+        JsonKey.PROCESS_ID,
+        false);
   }
 
   /*
