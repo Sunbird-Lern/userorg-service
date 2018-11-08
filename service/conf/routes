@@ -14,6 +14,7 @@ POST	/v1/user/create				      @controllers.usermanagement.UserController.createU
 POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
 PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
 GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
+GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
 POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
 POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
@@ -40,7 +41,7 @@ POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberControl
 
 POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType()
 PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType()
-GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.getOrgTypeList()
+GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType()
 
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
