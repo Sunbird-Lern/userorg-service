@@ -62,15 +62,17 @@ POST	/v1/search/compositesearch  			@controllers.search.SearchController.composi
 #Mock APIs to finish API Gateway onboarding
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
 
-#bulk upload
+# Bulk upload APIs
+POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
+POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
+POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
+POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
+POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
+GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
+GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
-POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
-POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
-GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
-POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
-POST /v1/batch/bulk/enrollment 			   @controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
-GET  /v1/user/data/encrypt				@controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
-GET  /v1/user/data/decrypt				@controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
+GET  /v1/user/data/encrypt              @controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
+GET  /v1/user/data/decrypt              @controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
@@ -165,9 +167,6 @@ POST    /v1/notification/audience             @controllers.geolocation.GeoLocati
 
 #System Settings
 POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
-
-#Bulk Upload Location API
-POST   /v1/bulk/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
 
 #Location API
 POST   /v1/location/create                      @controllers.location.LocationController.createLocation()
