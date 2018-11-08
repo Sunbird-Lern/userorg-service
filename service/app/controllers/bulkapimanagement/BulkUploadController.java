@@ -39,7 +39,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     }
   }
 
-  public Promise<Result> batchEnrolmentBulkUpload() {=
+  public Promise<Result> batchEnrollmentBulkUpload() {=
     try {
       Request request =
           createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH, false);
