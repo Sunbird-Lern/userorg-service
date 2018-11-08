@@ -187,7 +187,7 @@ public class Global extends GlobalSettings {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;
@@ -298,14 +298,17 @@ public class Global extends GlobalSettings {
     String path = requestPath;
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
+    final String ver3 = "/" + JsonKey.VERSION_3;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver) || path.startsWith(ver2)) {
+    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
-      } else {
+      } else if (requestUrl.contains(ver2)) {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
+      } else {
+        requestUrl = requestUrl.replaceFirst(ver3, "api");
       }
 
       String[] list = requestUrl.split("/");
@@ -328,11 +331,9 @@ public class Global extends GlobalSettings {
     Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
     Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
     SchedulerManager.schedule();
-    
-    // Run quartz scheduler in a separate thread as it waits for 4 minutes 
+
+    // Run quartz scheduler in a separate thread as it waits for 4 minutes
     // before scheduling various jobs.
-    new Thread(
-            () -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance())
-      .start();
+    new Thread(() -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance()).start();
   }
 }
