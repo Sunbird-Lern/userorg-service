@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.route;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseControllerTest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,168 +12,122 @@ import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
-import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import play.test.Helpers;
 
 public class UserControllerTest extends BaseControllerTest {
 
-  private static String userId = "user-id";
-  private static String emailId = "abbc@gmail.com";
+  private static String userId = "someUserId";
+  private static String emailId = "someone@someorg.com";
   private static String phoneNumber = "8800088000";
-  private static String userName = "userName";
-  private static String loginId = "login-id";
+  private static String userName = "someUserName";
+  private static String loginId = "someLoginId";
   private static String invalidPhonenumber = "00088000";
-  private static String firstName = "firstName";
-  private static String lastName = "lastName";
+  private static String firstName = "someFirstName";
+  private static String lastName = "someLastName";
   private static String query = "query";
   private static String language = "any-language";
   private static String role = "user";
 
   @Test
-  public void testCreateUserFailureWithoutContentType() {
-
-    String data = getRequestedData(userName, phoneNumber, null);
-    RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.contentTypeRequiredError.getErrorCode()));
-    assertEquals(400, result.status());
+  public void testCreateUserSuccess() {
+    Result result =
+        performTest(
+            "/v1/user/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testCreateUserSuccess() {
-
-    String data = getRequestedData(userName, phoneNumber, null);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/create").method("POST");
+  public void testCreateUserFailureWithoutContentType() {
+    String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false);
+    RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(getResponseCode(result), ResponseCode.contentTypeRequiredError.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testCreateUserFailureWithInvalidPhoneNumber() {
-
-    String data = getRequestedData(userName, invalidPhonenumber, null);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.phoneNoFormatError.getErrorCode()));
-    assertEquals(400, result.status());
+    Result result =
+        performTest(
+            "/v1/user/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true));
+    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
-  public void testUpdateUserProfileSuccess() {
-
-    String data = getRequestedData(null, phoneNumber, userId);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+  public void testUpdateUserSuccess() {
+    Result result =
+        performTest(
+            "/v1/user/update",
+            "PATCH",
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testUpdateUserFailureWithInvalidPhoneNumber() {
-
-    String data = getRequestedData(null, invalidPhonenumber, userId);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.phoneNoFormatError.getErrorCode()));
-    assertEquals(400, result.status());
+    Result result =
+        performTest(
+            "/v1/user/update",
+            "PATCH",
+            (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true));
+    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testGetUserDetailsSuccessByUserId() {
-    RequestBuilder req = new RequestBuilder().uri("/v1/user/read/user-id").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    Result result =
+        performTest(
+            "/v1/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetUserDetailsSuccessByLoginId() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.LOGIN_ID, loginId);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/getuser").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    Result result =
+        performTest(
+            "/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetUserDetailsFailureWithoutLoginId() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.LOGIN_ID, null);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/getuser").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.loginIdRequired.getErrorCode()));
-    assertEquals(400, result.status());
+    Result result =
+        performTest("/v1/user/getuser", "POST", getUserRequest(null, null));
+    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testSearchUserSuccess() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    Map<String, Object> filters = new HashMap<>();
-    innerMap.put(JsonKey.QUERY, query);
-    innerMap.put(JsonKey.FILTERS, filters);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    Result result =
+        performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testSearchUserFailureWithoutFilters() {
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/user/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    String response = Helpers.contentAsString(result);
-    assertTrue(response.contains(ResponseCode.mandatoryParamsMissing.getErrorCode()));
-    assertEquals(400, result.status());
+  public void testSearchUserFailureWithoutFilter() {
+    Result result = performTest("/v1/user/getuser", "POST", searchUserRequest(null));
+    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
-  private String getRequestedData(String userName, String phoneNumber, String userId) {
-
+  private Object createOrUpdateUserRequest(
+      String userName, String phoneNumber, String userId, boolean isContentType) {
     Map<String, Object> requestMap = new HashMap<>();
+
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.PHONE_VERIFIED, true);
     innerMap.put(JsonKey.PHONE, phoneNumber);
@@ -188,8 +141,10 @@ public class UserControllerTest extends BaseControllerTest {
     }
     innerMap.put(JsonKey.FIRST_NAME, firstName);
     innerMap.put(JsonKey.LAST_NAME, lastName);
+
     List<String> roles = new ArrayList<>();
     roles.add(role);
+
     List languages = new ArrayList<>();
     languages.add(language);
 
@@ -197,6 +152,34 @@ public class UserControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.LANGUAGE, languages);
 
     requestMap.put(JsonKey.REQUEST, innerMap);
+
+    if (isContentType) return requestMap;
+
     return mapToJson(requestMap);
   }
+
+  private Map<String, Object> getUserRequest(String userId, String loginId) {
+    Map<String, Object> requestMap = new HashMap<>();
+    
+    Map<String, Object> innerMap = new HashMap<>();
+    if (userId != null) innerMap.put(JsonKey.USER_ID, userId);
+    if (loginId != null) innerMap.put(JsonKey.LOGIN_ID, loginId);
+    
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    
+    return requestMap;
+  }
+
+  private Map<String, Object> searchUserRequest(Map<String, Object> filter) {
+    Map<String, Object> requestMap = new HashMap<>();
+
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.QUERY, query);
+    innerMap.put(JsonKey.FILTERS, filter);
+
+    requestMap.put(JsonKey.REQUEST, innerMap);
+
+    return requestMap;
+  }
+
 }
