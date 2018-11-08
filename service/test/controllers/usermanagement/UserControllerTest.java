@@ -87,9 +87,7 @@ public class UserControllerTest extends BaseControllerTest {
   public void testGetUserDetailsSuccessByUserId() {
     Result result =
         performTest(
-            "/v1/user/read/" + userId,
-            "GET",
-            (Map) getRequestedDataByRequiredParams(userId, null, false));
+            "/v1/user/read/" + userId, "GET", (Map) getRequestedDataByRequiredParams(userId, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -98,18 +96,22 @@ public class UserControllerTest extends BaseControllerTest {
   public void testGetUserDetailsSuccessByLoginId() {
     Result result =
         performTest(
-            "/v1/user/getuser",
-            "POST",
-            (Map) getRequestedDataByRequiredParams(null, loginId, false));
+            "/v1/user/getuser", "POST", (Map) getRequestedDataByRequiredParams(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testGetUserDetailsFailureWithoutRequiredParams() {
+  public void testGetUserDetailsFailureWithoutLoginId() {
     Result result =
-        performTest(
-            "/v1/user/getuser", "POST", (Map) getRequestedDataByRequiredParams(null, null, false));
+        performTest("/v1/user/getuser", "POST", getRequestedDataByRequiredParams(null, null));
+    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testSearchUserFailureWithoutFilter() {
+    Result result = performTest("/v1/user/getuser", "POST", getRequestedDataForUserSearch(null));
     assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -117,8 +119,7 @@ public class UserControllerTest extends BaseControllerTest {
   @Test
   public void testSearchUserSuccess() {
     Result result =
-        performTest(
-            "/v1/user/search", "POST", (Map) getRequestedDataByRequiredParams(null, null, true));
+        performTest("/v1/user/search", "POST", getRequestedDataForUserSearch(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -152,18 +153,22 @@ public class UserControllerTest extends BaseControllerTest {
     return mapToJson(requestMap);
   }
 
-  private Object getRequestedDataByRequiredParams(
-      String userId, String loginId, boolean isFilterReq) {
-    Map<String, Object> requestMap = new HashMap<>();
+  private Map<String, Object> getRequestedDataByRequiredParams(String userId, String loginId) {
 
+    Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     if (userId != null) innerMap.put(JsonKey.USER_ID, userId);
     if (loginId != null) innerMap.put(JsonKey.LOGIN_ID, loginId);
-    if (isFilterReq) {
-      Map<String, Object> filters = new HashMap<>();
-      innerMap.put(JsonKey.QUERY, query);
-      innerMap.put(JsonKey.FILTERS, filters);
-    }
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    return requestMap;
+  }
+
+  private Map<String, Object> getRequestedDataForUserSearch(Map<String, Object> filter) {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.QUERY, query);
+    innerMap.put(JsonKey.FILTERS, filter);
     requestMap.put(JsonKey.REQUEST, innerMap);
     return requestMap;
   }
