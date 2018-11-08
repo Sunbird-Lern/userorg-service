@@ -35,14 +35,14 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) getRequestedDataByPhoneNumber(userName, phoneNumber, null, true));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testCreateUserFailureWithoutContentType() {
-    String data = (String) getRequestedDataByPhoneNumber(userName, phoneNumber, null, false);
+    String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false);
     RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
     req.headers(headerMap);
     Result result = route(req);
@@ -56,7 +56,7 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) getRequestedDataByPhoneNumber(userName, invalidPhonenumber, null, true));
+            (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -67,7 +67,7 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) getRequestedDataByPhoneNumber(null, phoneNumber, userId, true));
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -78,7 +78,7 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) getRequestedDataByPhoneNumber(null, invalidPhonenumber, userId, true));
+            (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -87,7 +87,7 @@ public class UserControllerTest extends BaseControllerTest {
   public void testGetUserDetailsSuccessByUserId() {
     Result result =
         performTest(
-            "/v1/user/read/" + userId, "GET", (Map) getRequestedDataByRequiredParams(userId, null));
+            "/v1/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -96,7 +96,7 @@ public class UserControllerTest extends BaseControllerTest {
   public void testGetUserDetailsSuccessByLoginId() {
     Result result =
         performTest(
-            "/v1/user/getuser", "POST", (Map) getRequestedDataByRequiredParams(null, loginId));
+            "/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -104,14 +104,7 @@ public class UserControllerTest extends BaseControllerTest {
   @Test
   public void testGetUserDetailsFailureWithoutLoginId() {
     Result result =
-        performTest("/v1/user/getuser", "POST", getRequestedDataByRequiredParams(null, null));
-    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
-    assertTrue(getResponseStatus(result) == 400);
-  }
-
-  @Test
-  public void testSearchUserFailureWithoutFilter() {
-    Result result = performTest("/v1/user/getuser", "POST", getRequestedDataForUserSearch(null));
+        performTest("/v1/user/getuser", "POST", getUserRequest(null, null));
     assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -119,12 +112,19 @@ public class UserControllerTest extends BaseControllerTest {
   @Test
   public void testSearchUserSuccess() {
     Result result =
-        performTest("/v1/user/search", "POST", getRequestedDataForUserSearch(new HashMap<>()));
+        performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
-  private Object getRequestedDataByPhoneNumber(
+  @Test
+  public void testSearchUserFailureWithoutFilter() {
+    Result result = performTest("/v1/user/getuser", "POST", searchUserRequest(null));
+    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  private Object createOrUpdateUserRequest(
       String userName, String phoneNumber, String userId, boolean isContentType) {
     Map<String, Object> requestMap = new HashMap<>();
 
@@ -141,35 +141,45 @@ public class UserControllerTest extends BaseControllerTest {
     }
     innerMap.put(JsonKey.FIRST_NAME, firstName);
     innerMap.put(JsonKey.LAST_NAME, lastName);
+
     List<String> roles = new ArrayList<>();
     roles.add(role);
 
     List languages = new ArrayList<>();
     languages.add(language);
+
     innerMap.put(JsonKey.ROLES, roles);
     innerMap.put(JsonKey.LANGUAGE, languages);
+
     requestMap.put(JsonKey.REQUEST, innerMap);
+
     if (isContentType) return requestMap;
+
     return mapToJson(requestMap);
   }
 
-  private Map<String, Object> getRequestedDataByRequiredParams(String userId, String loginId) {
-
+  private Map<String, Object> getUserRequest(String userId, String loginId) {
     Map<String, Object> requestMap = new HashMap<>();
+    
     Map<String, Object> innerMap = new HashMap<>();
     if (userId != null) innerMap.put(JsonKey.USER_ID, userId);
     if (loginId != null) innerMap.put(JsonKey.LOGIN_ID, loginId);
+    
     requestMap.put(JsonKey.REQUEST, innerMap);
+    
     return requestMap;
   }
 
-  private Map<String, Object> getRequestedDataForUserSearch(Map<String, Object> filter) {
-
+  private Map<String, Object> searchUserRequest(Map<String, Object> filter) {
     Map<String, Object> requestMap = new HashMap<>();
+
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.QUERY, query);
     innerMap.put(JsonKey.FILTERS, filter);
+
     requestMap.put(JsonKey.REQUEST, innerMap);
+
     return requestMap;
   }
+
 }
