@@ -3,12 +3,10 @@ package util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
-
 import play.mvc.Http;
 import play.mvc.Http.Request;
 
@@ -38,6 +36,7 @@ public class RequestInterceptor {
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
+    apiHeaderIgnoreMap.put("/v3/user/create", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/v1/health", var);
     apiHeaderIgnoreMap.put("/v1/page/assemble", var);
