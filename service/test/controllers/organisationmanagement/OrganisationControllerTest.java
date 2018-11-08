@@ -1,404 +1,174 @@
 package controllers.organisationmanagement;
 
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static play.test.Helpers.route;
+import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.BaseController;
-import controllers.DummyActor;
-import java.io.IOException;
+import controllers.BaseControllerTest;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.HeaderParam;
-import play.libs.Json;
-import play.mvc.Http.RequestBuilder;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
-import play.test.FakeApplication;
-import play.test.Helpers;
-import util.RequestInterceptor;
 
-/** Created by arvind on 1/12/17. */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
-@PowerMockIgnore("javax.management.*")
-@Ignore
-public class OrganisationControllerTest {
+public class OrganisationControllerTest extends BaseControllerTest {
 
-  private static FakeApplication app;
-  private static Map<String, String[]> headerMap;
-  private static ActorSystem system;
-  private static final Props props = Props.create(DummyActor.class);
+  private static String orgName = "org-name";
+  private static String orgId = "org-Id";
+  private static String rootOrgId = "root-org-id";
+  private static String status = "1";
 
-  @BeforeClass
-  public static void startApp() {
-    app = Helpers.fakeApplication();
-    Helpers.start(app);
-    headerMap = new HashMap<String, String[]>();
-    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
-    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
-    headerMap.put(
-        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
-    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
+  @Test
+  public void testCreateOrgSuccess() {
 
-    system = ActorSystem.create("system");
-    ActorRef subject = system.actorOf(props);
-    BaseController.setActorRef(subject);
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(orgName, null, false, null, null, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
-  public void testCreateOrg() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+  public void testCreateOrgFailureWithoutOrgName() {
+
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(null, null, false, null, null, null));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testCreateOrgFailureWithRootOrgWithoutChannel() {
+
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            createOrganisationRequest(orgName, null, true, rootOrgId, null, null));
+    assertEquals(getResponseCode(result), ResponseCode.dependentParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testUpdateOrgSuccess() {
+
+    Result result =
+        performTest(
+            "/v1/org/update",
+            "PATCH",
+            createOrganisationRequest(null, orgId, false, rootOrgId, null, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testUpdateOrgFailureWithoutOrgId() {
+
+    Result result =
+        performTest(
+            "/v1/org/update",
+            "PATCH",
+            createOrganisationRequest(null, null, false, rootOrgId, null, null));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testUpdateOrgStatusSuccess() {
+
+    Result result =
+        performTest(
+            "/v1/org/status/update",
+            "PATCH",
+            createOrganisationRequest(null, orgId, false, null, status, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testUpdateOrgStatusFailureWithoutOrgId() {
+
+    Result result =
+        performTest(
+            "/v1/org/status/update",
+            "PATCH",
+            createOrganisationRequest(null, null, false, null, status, null));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testGetOrgDetailsSuccess() {
+
+    Result result =
+        performTest(
+            "/v1/org/read",
+            "POST",
+            createOrganisationRequest(null, orgId, false, null, status, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testGetOrgDetailsFailureWithoutOrgId() {
+
+    Result result =
+        performTest(
+            "/v1/org/read",
+            "POST",
+            createOrganisationRequest(null, null, false, null, status, null));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testSearchOrgSuccess() {
+
+    Result result =
+        performTest(
+            "/v1/org/search",
+            "POST",
+            createOrganisationRequest(null, null, false, null, status, new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testSearchOrgFailureWithoutFilters() {
+
+    Result result =
+        performTest(
+            "/v1/org/search",
+            "POST",
+            createOrganisationRequest(null, null, false, null, status, null));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  private Map createOrganisationRequest(
+      String orgName,
+      String orgId,
+      boolean isRootOrg,
+      String rootOrgId,
+      String status,
+      Map<String, Object> filterMap) {
+
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORG_NAME, "org123");
+    innerMap.put(JsonKey.ORG_NAME, orgName);
+    innerMap.put(JsonKey.ORGANISATION_ID, orgId);
+    innerMap.put(JsonKey.IS_ROOT_ORG, isRootOrg);
+    innerMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+
+    if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
+    innerMap.put(JsonKey.FILTERS, filterMap);
     requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testCreateOrgInvalidRequestData() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORG_NAME, null);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testApproveOrg() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/approve").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testApproveOrgInvalidRequestData() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, null);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/approve").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testUpdateOrg() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.ROOT_ORG_ID, "rootorg12");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testupdateOrgStatus() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/status/update").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(404, result.status());
-  }
-
-  @Test
-  public void testgetOrgDetails() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/read").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testaddMemberToOrganisation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.USER_ID, "userId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/member/add").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testremoveMemberFromOrganisation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.USER_ID, "userId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/member/remove").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testjoinUserOrganisation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.USER_ID, "userId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/member/join").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testapproveUserOrganisation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.USER_ID, "userId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/member/approve").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testrejectUserOrganisation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.USER_ID, "userId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/member/approve").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testdownloadOrgs() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/download").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testsearchOrgs() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/org/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetOrgTypeList() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    RequestBuilder req = new RequestBuilder().uri("/v1/org/type/list").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testcreateOrgType() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.NAME, "org123");
-    innerMap.put(JsonKey.STATUS, new BigInteger("1"));
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/type/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testupdateOrgType() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.NAME, "org123");
-    innerMap.put(JsonKey.ID, "1");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/org/type/update").method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
-
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
+    return requestMap;
   }
 }
