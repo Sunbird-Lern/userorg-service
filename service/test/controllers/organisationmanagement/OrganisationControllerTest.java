@@ -14,14 +14,13 @@ import play.mvc.Result;
 
 public class OrganisationControllerTest extends BaseControllerTest {
 
-  private static String orgName = "org-name";
-  private static String orgId = "org-Id";
-  private static String rootOrgId = "root-org-id";
+  private static String orgName = "someOrgName";
+  private static String orgId = "someOrgOId";
+  private static String rootOrgId = "someRootOrgId";
   private static String status = "1";
 
   @Test
   public void testCreateOrgSuccess() {
-
     Result result =
         performTest(
             "/v1/org/create",
@@ -33,7 +32,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateOrgFailureWithoutOrgName() {
-
     Result result =
         performTest(
             "/v1/org/create",
@@ -45,7 +43,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateOrgFailureWithRootOrgWithoutChannel() {
-
     Result result =
         performTest(
             "/v1/org/create",
@@ -57,7 +54,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgSuccess() {
-
     Result result =
         performTest(
             "/v1/org/update",
@@ -69,7 +65,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgFailureWithoutOrgId() {
-
     Result result =
         performTest(
             "/v1/org/update",
@@ -81,7 +76,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgStatusSuccess() {
-
     Result result =
         performTest(
             "/v1/org/status/update",
@@ -93,7 +87,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testUpdateOrgStatusFailureWithoutOrgId() {
-
     Result result =
         performTest(
             "/v1/org/status/update",
@@ -105,7 +98,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testGetOrgDetailsSuccess() {
-
     Result result =
         performTest(
             "/v1/org/read",
@@ -117,7 +109,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testGetOrgDetailsFailureWithoutOrgId() {
-
     Result result =
         performTest(
             "/v1/org/read",
@@ -129,7 +120,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testSearchOrgSuccess() {
-
     Result result =
         performTest(
             "/v1/org/search",
@@ -141,7 +131,6 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
   @Test
   public void testSearchOrgFailureWithoutFilters() {
-
     Result result =
         performTest(
             "/v1/org/search",
