@@ -67,7 +67,7 @@ POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploa
 POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
-POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrolmentBulkUpload()
+POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
