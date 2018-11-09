@@ -7,6 +7,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
+import org.sunbird.user.util.UserConstants;
+import org.sunbird.user.util.UserType;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -47,6 +49,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
+          request.getRequest().put(UserConstants.USER_TYPE, UserType.SELF_SIGNUP.name());
           new UserRequestValidator().validateCreateUserV3Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
           return null;
