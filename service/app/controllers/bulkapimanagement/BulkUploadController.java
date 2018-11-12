@@ -7,7 +7,6 @@ import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -19,9 +18,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, false);
-      Map<String, Object> reqObj = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
-      RequestValidator.validateUploadUser(reqObj);
+              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -32,7 +29,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, false);
+              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -48,7 +45,7 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   public Promise<Result> locationBulkUpload() {
     try {
       Request request =
@@ -62,7 +59,7 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   public Promise<Result> getUploadStatus(String processId) {
     return handleRequest(
         ActorOperations.GET_BULK_OP_STATUS.getValue(),
@@ -100,5 +97,4 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }
