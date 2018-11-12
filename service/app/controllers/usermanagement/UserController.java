@@ -7,6 +7,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
+import org.sunbird.user.util.UserConstants;
+import org.sunbird.user.util.UserType;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -27,7 +29,6 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> createUserV2() {
-
     return handleRequest(
         ActorOperations.CREATE_USER.getValue(),
         request().body().asJson(),
@@ -35,6 +36,22 @@ public class UserController extends BaseController {
           Request request = (Request) req;
           new UserRequestValidator().validateCreateUserV2Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        true);
+  }
+
+  public Promise<Result> createUserV3() {
+    return handleRequest(
+        ActorOperations.CREATE_USER.getValue(),
+        request().body().asJson(),
+        (req) -> {
+          Request request = (Request) req;
+          request.getRequest().put(UserConstants.USER_TYPE, UserType.SELF_SIGNUP.name());
+          new UserRequestValidator().validateCreateUserV3Request(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
           return null;
         },
         null,
@@ -65,7 +82,7 @@ public class UserController extends BaseController {
   public Promise<Result> getUserByIdV2(String userId) {
     return handleGetUserProfile(ActorOperations.GET_USER_PROFILE_V2.getValue(), userId);
   }
-  
+
   public Promise<Result> getUserByLoginId() {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
 
@@ -113,5 +130,4 @@ public class UserController extends BaseController {
         JsonKey.USER_ID,
         false);
   }
-
 }
