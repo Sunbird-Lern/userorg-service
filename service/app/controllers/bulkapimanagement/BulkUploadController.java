@@ -18,7 +18,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, false);
+              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -29,7 +29,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, false);
+              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -45,7 +45,7 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   public Promise<Result> locationBulkUpload() {
     try {
       Request request =
@@ -59,7 +59,7 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-  
+
   public Promise<Result> getUploadStatus(String processId) {
     return handleRequest(
         ActorOperations.GET_BULK_OP_STATUS.getValue(),
@@ -97,5 +97,4 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
 }
