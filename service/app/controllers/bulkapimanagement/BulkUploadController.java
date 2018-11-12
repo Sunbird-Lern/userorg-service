@@ -9,7 +9,6 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -33,8 +32,6 @@ public class BulkUploadController extends BaseBulkUploadController {
       Request request =
           createAndInitBulkRequest(
               BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, false);
-      Map<String, Object> reqObj = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
-      RequestValidator.validateUploadUser(reqObj);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
