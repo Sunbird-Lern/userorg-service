@@ -175,4 +175,4 @@ DELETE /v1/location/delete/:locationId                      @controllers.locatio
 # System Settings APIs
 GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
 GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
-POST  /v1/system/settings/upsert                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
+POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
