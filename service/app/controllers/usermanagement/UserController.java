@@ -7,8 +7,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
+import org.sunbird.models.user.UserType;
 import org.sunbird.user.util.UserConstants;
-import org.sunbird.user.util.UserType;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
