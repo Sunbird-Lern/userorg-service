@@ -131,6 +131,7 @@ public class PageController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
+      reqObj.getContext().put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.PAGE, reqObj.getRequest());
@@ -250,5 +251,15 @@ public class PageController extends BaseController {
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
+  }
+
+  private String getQueryString(Map<String, String[]> queryStringMap) {
+    return queryStringMap
+        .entrySet()
+        .stream()
+        .map(p -> p.getKey() + "=" + String.join(",", p.getValue()))
+        .reduce((p1, p2) -> p1 + "&" + p2)
+        .map(s -> "?" + s)
+        .orElse("");
   }
 }
