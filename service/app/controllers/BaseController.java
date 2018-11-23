@@ -5,6 +5,8 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -429,6 +431,17 @@ public class BaseController extends Controller {
      */
   }
 
+  public Result createCommonResponse(Object response) {
+    File file = null;
+    if(response instanceof File){
+      file = (File)response;
+    }
+    response().setContentType("application/x-download");
+    response().setHeader("Content-disposition","attachment; filename=" + file.getName());
+    return Results.ok(file);
+
+  }
+
   private void removeFields(Map<String, Object> params, String... properties) {
     for (String property : properties) {
       params.remove(property);
@@ -543,7 +556,9 @@ public class BaseController extends Controller {
               return createCommonResponse(response, responseKey, httpReq);
             } else if (result instanceof ProjectCommonException) {
               return createCommonExceptionResponse((ProjectCommonException) result, request());
-            } else {
+            }else if (result instanceof File) {
+              return createCommonResponse(result);
+            }  else {
               ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
