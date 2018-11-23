@@ -176,3 +176,6 @@ DELETE /v1/location/delete/:locationId                      @controllers.locatio
 GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
 GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
 POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
+
+# Textbook
+POST    /v1/textbook/upload/:textBookId            @controllers.textbook.TextBookController.uploadTOC(textBookId:String)
