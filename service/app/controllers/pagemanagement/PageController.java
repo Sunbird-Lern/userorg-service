@@ -132,7 +132,7 @@ public class PageController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       Map<String, Object> contextMap = new HashMap<>();
-      contextMap.put("queryString", getQueryString(request().queryString()));
+      contextMap.put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
       reqObj.setContext(contextMap);
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       HashMap<String, Object> map = new HashMap<>();
@@ -260,7 +260,7 @@ public class PageController extends BaseController {
     return queryStringMap
         .entrySet()
         .stream()
-        .map(p -> p.getKey() + "=" + ((String[]) p.getValue())[0])
+        .map(p -> p.getKey() + "=" + String.join(",", p.getValue()))
         .reduce((p1, p2) -> p1 + "&" + p2)
         .map(s -> "?" + s)
         .orElse("");
