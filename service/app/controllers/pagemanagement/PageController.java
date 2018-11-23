@@ -139,7 +139,6 @@ public class PageController extends BaseController {
       map.put(JsonKey.PAGE, reqObj.getRequest());
       map.put(JsonKey.HEADER, getAllRequestHeaders(request()));
       reqObj.setRequest(map);
-      // Map<String, String[]> queryStringMap = request().queryString();
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
