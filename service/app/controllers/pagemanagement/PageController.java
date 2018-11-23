@@ -131,9 +131,7 @@ public class PageController extends BaseController {
       reqObj.setOperation(ActorOperations.GET_PAGE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
-      Map<String, Object> contextMap = new HashMap<>();
-      contextMap.put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
-      reqObj.setContext(contextMap);
+      reqObj.getContext().put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
       reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.PAGE, reqObj.getRequest());
