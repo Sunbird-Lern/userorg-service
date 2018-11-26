@@ -178,5 +178,5 @@ GET   /v1/system/settings/list               @controllers.systemsettings.SystemS
 POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
 
 # Textbook
-POST    /v1/textbook/upload/:textBookId            @controllers.textbook.TextBookController.uploadTOC(textBookId:String)
-GET    /v1/textbook/download/:textBookId            @controllers.textbook.TextBookController.downloadTOC(textBookId:String)
+POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
+GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.downloadTOC(textbookId:String)
