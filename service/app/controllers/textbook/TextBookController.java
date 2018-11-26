@@ -1,7 +1,6 @@
 package controllers.textbook;
 
 import controllers.bulkapimanagement.BaseBulkUploadController;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -26,8 +25,6 @@ public class TextBookController extends BaseBulkUploadController {
 
     public Promise<Result> downloadTOC(String textBookId) {
         try {
-            //Request request = createAndInitBulkRequest(BulkUploadActorOperation.TEXTBOOK_TOC_DOWNLOAD.getValue(), JsonKey.TEXTBOOK, false);
-            //return actorResponseHandler(getActorRef(), request, timeout, null, request());
             return handleRequest(BulkUploadActorOperation.TEXTBOOK_TOC_DOWNLOAD.getValue(), textBookId, null);
         } catch (Exception e) {
             e.printStackTrace();

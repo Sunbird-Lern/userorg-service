@@ -431,6 +431,12 @@ public class BaseController extends Controller {
      */
   }
 
+  /**
+   *
+   * @param response
+   * @return
+   */
+  //TODO: Complete the implementation
   public Result createCommonResponse(Object response) {
     File file = null;
     if(response instanceof File){
