@@ -729,15 +729,9 @@ public class BaseController extends Controller {
     return map;
   }
 
-  /**
-   * @param operation
-   * @param objectType
-   * @return
-   * @throws IOException
-   */
   protected org.sunbird.common.request.Request createAndInitUploadRequest(
           String operation, String objectType) throws IOException {
-    ProjectLogger.log("API call for operation : " + operation);
+    ProjectLogger.log("BaseController: createAndInitUploadRequest called with operation = " + operation);
     org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
@@ -790,4 +784,5 @@ public class BaseController extends Controller {
     reqObj.setRequest(innerMap);
     return reqObj;
   }
+
 }
