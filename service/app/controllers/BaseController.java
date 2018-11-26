@@ -437,11 +437,6 @@ public class BaseController extends Controller {
      */
   }
 
-  /**
-   *
-   * @param file
-   * @return
-   */
   public Result createFileDownloadResponse(File file) {
     response().setContentType("application/x-download");
     response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
