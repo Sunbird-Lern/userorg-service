@@ -8,15 +8,12 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 /**
- * This controller class has all methods for Textbook Toc API
+ * Handles Textbook TOC APIs.
+ *
  * @author gauraw
  */
 public class TextbookController extends BaseController {
 
-    /**
-     * @param textbookId
-     * @return
-     */
     public Promise<Result> uploadTOC(String textbookId) {
         try {
             Request request = createAndInitUploadRequest(TextbookActorOperation.TEXTBOOK_TOC_UPLOAD.getValue(), JsonKey.TEXTBOOK);
@@ -26,10 +23,6 @@ public class TextbookController extends BaseController {
         }
     }
 
-    /**
-     * @param textbookId
-     * @return
-     */
     public Promise<Result> downloadTOC(String textbookId) {
         try {
             return handleRequest(TextbookActorOperation.TEXTBOOK_TOC_DOWNLOAD.getValue(), textbookId, null);
@@ -37,4 +30,5 @@ public class TextbookController extends BaseController {
             return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
         }
     }
+
 }
