@@ -1,5 +1,6 @@
 package controllers.textbook;
 
+import controllers.BaseController;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TextbookActorOperation;
 import org.sunbird.common.request.Request;
@@ -10,7 +11,7 @@ import play.mvc.Result;
  * This controller class has all methods for Textbook Toc API
  * @author gauraw
  */
-public class TextbookController extends BaseTextbookController {
+public class TextbookController extends BaseController {
 
     /**
      * @param textbookId
