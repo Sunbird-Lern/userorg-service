@@ -7,11 +7,13 @@ import controllers.BaseControllerTest;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
+@Ignore
 public class OrganisationControllerTest extends BaseControllerTest {
 
   private static String orgName = "someOrgName";
@@ -23,7 +25,9 @@ public class OrganisationControllerTest extends BaseControllerTest {
   public void testCreateOrgSuccess() {
     Result result =
         performTest(
-            "/v1/org/create", "POST", createOrUpdateOrganisationRequest(orgName, null, false, null, null));
+            "/v1/org/create",
+            "POST",
+            createOrUpdateOrganisationRequest(orgName, null, false, null, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -32,7 +36,9 @@ public class OrganisationControllerTest extends BaseControllerTest {
   public void testCreateOrgFailureWithoutOrgName() {
     Result result =
         performTest(
-            "/v1/org/create", "POST", createOrUpdateOrganisationRequest(null, null, false, null, null));
+            "/v1/org/create",
+            "POST",
+            createOrUpdateOrganisationRequest(null, null, false, null, null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -161,5 +167,4 @@ public class OrganisationControllerTest extends BaseControllerTest {
 
     return requestMap;
   }
-
 }

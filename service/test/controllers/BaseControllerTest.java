@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.keycloak.admin.client.Keycloak;
 import org.mockito.Mockito;
@@ -52,6 +53,7 @@ import util.RequestInterceptor;
 })
 @SuppressStaticInitializationFor({"util.AuthenticationHelper", "util.Global"})
 @PowerMockIgnore("javax.management.*")
+@Ignore
 public class BaseControllerTest {
 
   public static FakeApplication app;
@@ -155,5 +157,4 @@ public class BaseControllerTest {
   public int getResponseStatus(Result result) {
     return result.status();
   }
-
 }
