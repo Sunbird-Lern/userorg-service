@@ -6,11 +6,13 @@ import static org.junit.Assert.assertTrue;
 import controllers.BaseControllerTest;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
+@Ignore
 public class OrgTypeControllerTest extends BaseControllerTest {
 
   private static String orgTypeName = "org-type-name";
@@ -92,5 +94,4 @@ public class OrgTypeControllerTest extends BaseControllerTest {
     requestMap.put(JsonKey.REQUEST, innerMap);
     return requestMap;
   }
-
 }

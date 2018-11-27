@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -17,6 +18,7 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 /** @author arvind */
+@Ignore
 public class LearnerControllerTest extends BaseControllerTest {
 
   private static final String COURSE_ID = "course-123";

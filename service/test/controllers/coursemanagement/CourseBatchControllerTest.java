@@ -6,11 +6,13 @@ import static org.junit.Assert.assertTrue;
 import controllers.BaseControllerTest;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
+@Ignore
 public class CourseBatchControllerTest extends BaseControllerTest {
 
   public static String COURSE_ID = "courseId";
@@ -338,5 +340,4 @@ public class CourseBatchControllerTest extends BaseControllerTest {
     }
     return calendar.getTime();
   }
-
 }
