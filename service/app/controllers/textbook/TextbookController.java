@@ -14,7 +14,7 @@ import play.mvc.Result;
  */
 public class TextbookController extends BaseController {
 
-    public Promise<Result> uploadTOC(String textbookId) {
+    public Promise<Result> uploadTOC(String textbookId, String mode) {
         try {
             Request request = createAndInitUploadRequest(TextbookActorOperation.TEXTBOOK_TOC_UPLOAD.getValue(), JsonKey.TEXTBOOK);
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
