@@ -1,9 +1,11 @@
 package controllers.textbook;
 
 import controllers.BaseController;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TextbookActorOperation;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
@@ -16,7 +18,17 @@ public class TextbookController extends BaseController {
 
     public Promise<Result> uploadTOC(String textbookId, String mode) {
         try {
-            Request request = createAndInitUploadRequest(TextbookActorOperation.TEXTBOOK_TOC_UPLOAD.getValue(), JsonKey.TEXTBOOK);
+            String operation = null;
+            if (mode.equalsIgnoreCase(JsonKey.CREATE)) {
+                operation = TextbookActorOperation.TEXTBOOK_TOC_UPLOAD.getValue();
+            } else if (mode.equalsIgnoreCase(JsonKey.UPDATE)) {
+                operation = TextbookActorOperation.TEXTBOOK_TOC_UPDATE.getValue();
+            } else {
+                throw new ProjectCommonException("ERR_INAVLID_MODE", "Please Provide Valid mode.", ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
+
+            Request request = createAndInitUploadRequest(operation, JsonKey.TEXTBOOK);
+            request.put(JsonKey.TEXTBOOK_ID, textbookId);
             return actorResponseHandler(getActorRef(), request, timeout, null, request());
         } catch (Exception e) {
             return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
