@@ -45,10 +45,13 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    if (request.getRequest().containsKey(JsonKey.NAME)) {
-      validateParam(
+    if (request.getRequest().containsKey(JsonKey.NAME)
+        && StringUtils.isBlank((String) request.getRequest().get(JsonKey.NAME))) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue.getErrorMessage(),
+          ERROR_CODE,
           (String) request.getRequest().get(JsonKey.NAME),
-          ResponseCode.mandatoryParamsMissing,
           JsonKey.NAME);
     }
     if (request.getRequest().containsKey(JsonKey.ENROLLMENT_TYPE)) {
@@ -57,7 +60,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateParam(
         (String) request.getRequest().get(JsonKey.ID),
         ResponseCode.mandatoryParamsMissing,
-        JsonKey.BATCH_ID);
+        JsonKey.ID);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
 
