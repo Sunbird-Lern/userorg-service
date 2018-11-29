@@ -5,11 +5,11 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -559,7 +559,7 @@ public class BaseController extends Controller {
               return createCommonExceptionResponse((ProjectCommonException) result, request());
             } else if (result instanceof File) {
               return createFileDownloadResponse((File) result);
-            }  else {
+            } else {
               ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
@@ -730,8 +730,9 @@ public class BaseController extends Controller {
   }
 
   protected org.sunbird.common.request.Request createAndInitUploadRequest(
-          String operation, String objectType) throws IOException {
-    ProjectLogger.log("BaseController: createAndInitUploadRequest called with operation = " + operation);
+      String operation, String objectType) throws IOException {
+    ProjectLogger.log(
+        "BaseController: createAndInitUploadRequest called with operation = " + operation);
     org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
@@ -753,25 +754,25 @@ public class BaseController extends Controller {
         map.put(entry.getKey(), entry.getValue()[0]);
       }
       InputStream is =
-              new ByteArrayInputStream(
-                      ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+          new ByteArrayInputStream(
+              ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
       byteArray = IOUtils.toByteArray(is);
     } else if (null != requestData) {
       reqObj =
-              (org.sunbird.common.request.Request)
-                      mapper.RequestMapper.mapRequest(
-                              request().body().asJson(), org.sunbird.common.request.Request.class);
+          (org.sunbird.common.request.Request)
+              mapper.RequestMapper.mapRequest(
+                  request().body().asJson(), org.sunbird.common.request.Request.class);
       InputStream is =
-              new ByteArrayInputStream(
-                      ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+          new ByteArrayInputStream(
+              ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
       byteArray = IOUtils.toByteArray(is);
       reqObj.getRequest().remove(JsonKey.DATA);
       map.putAll(reqObj.getRequest());
     } else {
       throw new ProjectCommonException(
-              ResponseCode.invalidData.getErrorCode(),
-              ResponseCode.invalidData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.invalidData.getErrorCode(),
+          ResponseCode.invalidData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     reqObj.setOperation(operation);
     reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -785,4 +786,13 @@ public class BaseController extends Controller {
     return reqObj;
   }
 
+  protected String getQueryString(Map<String, String[]> queryStringMap) {
+    return queryStringMap
+        .entrySet()
+        .stream()
+        .map(p -> p.getKey() + "=" + String.join(",", p.getValue()))
+        .reduce((p1, p2) -> p1 + "&" + p2)
+        .map(s -> "?" + s)
+        .orElse("");
+  }
 }
