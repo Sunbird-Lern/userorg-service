@@ -2,6 +2,7 @@ package controllers;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -13,6 +14,7 @@ import play.mvc.Result;
  * Simple (JUnit) tests that can call all parts of a play app. If you are interested in mocking a
  * whole application, see the wiki for more details. extends WithApplication
  */
+@Ignore
 public class ApplicationTest {
 
   @Test

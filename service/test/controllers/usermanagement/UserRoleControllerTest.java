@@ -8,11 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
+@Ignore
 public class UserRoleControllerTest extends BaseControllerTest {
 
   private static String role = "someRole";
@@ -72,7 +74,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
     Map<String, Object> requestMap = new HashMap<>();
 
     Map<String, Object> innerMap = new HashMap<>();
-    
+
     if (isUserIdReq) innerMap.put(JsonKey.USER_ID, userId);
     if (isOrgReq) innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     if (isRoleReq) {
@@ -84,5 +86,4 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
     return requestMap;
   }
-
 }
