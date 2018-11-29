@@ -29,9 +29,9 @@ public class TextbookController extends BaseTextbookController {
      * @param textbookId
      * @return
      */
-    public Promise<Result> downloadTOC(String textbookId) {
+    public Promise<Result> getTocUrl(String textbookId) {
         try {
-            return handleRequest(TextbookActorOperation.TEXTBOOK_TOC_DOWNLOAD.getValue(), textbookId, null);
+            return handleRequest(TextbookActorOperation.TEXTBOOK_TOC_URL.getValue(), textbookId, JsonKey.TEXTBOOK_ID);
         } catch (Exception e) {
             return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
         }
