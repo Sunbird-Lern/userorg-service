@@ -71,16 +71,13 @@ public class TextbookController extends BaseController {
                     ResponseCode.CLIENT_ERROR.getResponseCode());
         }
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
-        System.out.println("Result Map : "+resultMap);
         reqObj.setOperation(operation);
         reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.setEnv(getEnvironment());
         map.put(JsonKey.OBJECT_TYPE, objectType);
         map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
-        map.put(JsonKey.FILE, resultMap);
-        HashMap<String, Object> innerMap = new HashMap<>();
-        innerMap.put(JsonKey.DATA, map);
-        reqObj.setRequest(innerMap);
+        map.put(JsonKey.DATA, resultMap);
+        reqObj.setRequest(map);
         return reqObj;
     }
 
