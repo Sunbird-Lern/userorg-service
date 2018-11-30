@@ -81,7 +81,7 @@ public class TextbookController extends BaseController {
         return reqObj;
     }
 
-    public static Map<String, Object> readAndValidateCSV(InputStream inputStream) throws IOException {
+    private Map<String, Object> readAndValidateCSV(InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> rows = new ArrayList<>();
@@ -130,7 +130,7 @@ public class TextbookController extends BaseController {
                 map.put(JsonKey.HIERARCHY, hierarchyMap);
                 rows.add(map);
             }
-            result.put(JsonKey.DATA, rows);
+            result.put(JsonKey.FILE_DATA, rows);
         } catch (Exception e) {
             // TODO: Throw Server Exception
         } finally {
@@ -142,7 +142,7 @@ public class TextbookController extends BaseController {
         return result;
     }
 
-    private static void validateCSV(List<CSVRecord> records) {
+    private void validateCSV(List<CSVRecord> records) {
         if (null == records || records.isEmpty()) {
             //TODO: throw invalid file exception
         }
