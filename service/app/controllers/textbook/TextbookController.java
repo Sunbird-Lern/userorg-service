@@ -152,7 +152,7 @@ public class TextbookController extends BaseController {
         }
         Integer allowedNumberOfRecord = Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.TEXTBOOK_TOC_MAX_CSV_ROWS));
         if (records.size() > allowedNumberOfRecord) {
-            throwClientErrorException(ResponseCode.csvRowsExceeds, ResponseCode.csvRowsExceeds.getErrorMessage()+allowedNumberOfRecord);
+            throwClientErrorException(ResponseCode.csvRowsExceeds, ResponseCode.csvRowsExceeds.getErrorMessage() + allowedNumberOfRecord);
         }
     }
 
