@@ -14,6 +14,7 @@ import org.sunbird.common.models.util.TextbookActorOperation;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import static org.sunbird.common.exception.ProjectCommonException.throwClientErrorException;
 import play.libs.F.Promise;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -109,7 +110,7 @@ public class TextbookController extends BaseController {
                 metadata.values().removeIf(key -> !csvHeaders.keySet().contains(key));
                 hierarchy.values().removeIf(key -> !csvHeaders.keySet().contains(key));
             } else {
-                // TODO: throw exception here
+                throwClientErrorException(ResponseCode.requiredHeaderMissing, ResponseCode.requiredHeaderMissing.getErrorMessage());
             }
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
 
@@ -132,7 +133,10 @@ public class TextbookController extends BaseController {
             }
             result.put(JsonKey.FILE_DATA, rows);
         } catch (Exception e) {
-            // TODO: Throw Server Exception
+            throw new ProjectCommonException(
+                    ResponseCode.errorProcessingRequest.getErrorCode(),
+                    ResponseCode.errorProcessingRequest.getErrorMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
         } finally {
             try {
                 csvFileParser.close();
@@ -144,11 +148,11 @@ public class TextbookController extends BaseController {
 
     private void validateCSV(List<CSVRecord> records) {
         if (null == records || records.isEmpty()) {
-            //TODO: throw invalid file exception
+            throwClientErrorException(ResponseCode.blankCsvData, ResponseCode.blankCsvData.getErrorMessage());
         }
         Integer allowedNumberOfRecord = Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.TEXTBOOK_TOC_MAX_CSV_ROWS));
         if (records.size() > allowedNumberOfRecord) {
-            // TODO: throw client error
+            throwClientErrorException(ResponseCode.csvRowsExceeds, ResponseCode.csvRowsExceeds.getErrorMessage()+allowedNumberOfRecord);
         }
     }
 
