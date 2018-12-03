@@ -14,7 +14,13 @@ public class CourseEnrollmentController extends BaseController {
     return handleRequest(
         ActorOperations.GET_COURSE.getValue(),
         request().body().asJson(),
-        null,
+        (req) -> {
+          Request request = (Request) req;
+          request
+              .getContext()
+              .put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
+          return null;
+        },
         uid,
         JsonKey.USER_ID,
         getAllRequestHeaders((request())),

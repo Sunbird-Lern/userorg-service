@@ -252,14 +252,4 @@ public class PageController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
-
-  private String getQueryString(Map<String, String[]> queryStringMap) {
-    return queryStringMap
-        .entrySet()
-        .stream()
-        .map(p -> p.getKey() + "=" + String.join(",", p.getValue()))
-        .reduce((p1, p2) -> p1 + "&" + p2)
-        .map(s -> "?" + s)
-        .orElse("");
-  }
 }
