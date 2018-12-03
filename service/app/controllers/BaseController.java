@@ -437,6 +437,11 @@ public class BaseController extends Controller {
      */
   }
 
+  /**
+   *
+   * @param file
+   * @return
+   */
   public Result createFileDownloadResponse(File file) {
     response().setContentType("application/x-download");
     response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
@@ -729,6 +734,12 @@ public class BaseController extends Controller {
     return map;
   }
 
+  /**
+   * @param operation
+   * @param objectType
+   * @return
+   * @throws IOException
+   */
   protected org.sunbird.common.request.Request createAndInitUploadRequest(
       String operation, String objectType) throws IOException {
     ProjectLogger.log(
@@ -795,4 +806,5 @@ public class BaseController extends Controller {
         .map(s -> "?" + s)
         .orElse("");
   }
+
 }
