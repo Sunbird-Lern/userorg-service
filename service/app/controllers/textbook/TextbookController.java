@@ -4,9 +4,11 @@ import static org.sunbird.common.exception.ProjectCommonException.throwClientErr
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -20,6 +22,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,20 +61,38 @@ public class TextbookController extends BaseController {
         ProjectLogger.log("API call for operation : " + operation);
         Request reqObj = new Request();
         Map<String, Object> map = new HashMap<>();
+
         Http.MultipartFormData body = request().body().asMultipartFormData();
         InputStream inputStream = null;
         if (body != null) {
+            Map<String, String[]> data = body.asFormUrlEncoded();
+            if (MapUtils.isNotEmpty(data)) {
+                String fileUrl = data.get(JsonKey.FILE_URL)[0].toLowerCase();
+                if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
+                    throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
+                }
+                URL url = new URL(fileUrl.trim());
+                inputStream = url.openStream();
+            }
             List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
             if (filePart != null && !filePart.isEmpty()) {
                 inputStream = new FileInputStream(filePart.get(0).getFile());
             }
+
         } else {
             throw new ProjectCommonException(
                     ResponseCode.invalidData.getErrorCode(),
                     ResponseCode.invalidData.getErrorMessage(),
                     ResponseCode.CLIENT_ERROR.getResponseCode());
         }
+
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
+        try {
+            if (null != inputStream) {
+                inputStream.close();
+            }
+        } catch (Exception e) {
+        }
         reqObj.setOperation(operation);
         reqObj.setRequestId(ExecutionContext.getRequestId());
         reqObj.setEnv(getEnvironment());
@@ -102,8 +123,7 @@ public class TextbookController extends BaseController {
             csvFileParser = csvFileFormat.parse(reader);
             Map<String, Integer> csvHeaders = csvFileParser.getHeaderMap();
 
-            //TODO: Take Value of key "id" from config. (e.g: identifier)
-            String mode = csvHeaders.containsKey("id") ? JsonKey.UPDATE : JsonKey.CREATE;
+            String mode = csvHeaders.containsKey(JsonKey.IDENTIFIER) ? JsonKey.UPDATE : JsonKey.CREATE;
             result.put(JsonKey.MODE, mode);
 
             if (null != csvHeaders && !csvHeaders.isEmpty()) {
