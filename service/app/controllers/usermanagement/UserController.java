@@ -49,7 +49,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.SELF_SIGNUP.name());
+          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.name());
           new UserRequestValidator().validateCreateUserV3Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
           return null;
