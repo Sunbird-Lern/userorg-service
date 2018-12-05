@@ -67,7 +67,7 @@ public class TextbookController extends BaseController {
         if (body != null) {
             Map<String, String[]> data = body.asFormUrlEncoded();
             if (MapUtils.isNotEmpty(data)) {
-                String fileUrl = data.get(JsonKey.FILE_URL)[0].toLowerCase();
+                String fileUrl = data.get(JsonKey.FILE_URL)[0];
                 if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
                     throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
                 }
@@ -80,10 +80,7 @@ public class TextbookController extends BaseController {
             }
 
         } else {
-            throw new ProjectCommonException(
-                    ResponseCode.invalidData.getErrorCode(),
-                    ResponseCode.invalidData.getErrorMessage(),
-                    ResponseCode.CLIENT_ERROR.getResponseCode());
+            throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
         }
 
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
