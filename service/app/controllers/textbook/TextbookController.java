@@ -156,6 +156,7 @@ public class TextbookController extends BaseController {
                     ResponseCode.SERVER_ERROR.getResponseCode());
         } finally {
             try {
+                if (null != csvFileParser)
                 csvFileParser.close();
             } catch (IOException e) {
             }
