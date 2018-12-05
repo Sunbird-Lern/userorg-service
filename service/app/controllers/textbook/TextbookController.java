@@ -67,7 +67,7 @@ public class TextbookController extends BaseController {
         if (body != null) {
             Map<String, String[]> data = body.asFormUrlEncoded();
             if (MapUtils.isNotEmpty(data)) {
-                String fileUrl = data.get(JsonKey.FILE_URL)[0].toLowerCase();
+                String fileUrl = data.get(JsonKey.FILE_URL)[0];
                 if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
                     throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
                 }
@@ -80,10 +80,7 @@ public class TextbookController extends BaseController {
             }
 
         } else {
-            throw new ProjectCommonException(
-                    ResponseCode.invalidData.getErrorCode(),
-                    ResponseCode.invalidData.getErrorMessage(),
-                    ResponseCode.CLIENT_ERROR.getResponseCode());
+            throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
         }
 
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
@@ -123,7 +120,7 @@ public class TextbookController extends BaseController {
             csvFileParser = csvFileFormat.parse(reader);
             Map<String, Integer> csvHeaders = csvFileParser.getHeaderMap();
 
-            String mode = csvHeaders.containsKey(JsonKey.IDENTIFIER) ? JsonKey.UPDATE : JsonKey.CREATE;
+            String mode = csvHeaders.containsKey(StringUtils.capitalize(JsonKey.IDENTIFIER)) ? JsonKey.UPDATE : JsonKey.CREATE;
             result.put(JsonKey.MODE, mode);
 
             if (null != csvHeaders && !csvHeaders.isEmpty()) {
@@ -154,11 +151,12 @@ public class TextbookController extends BaseController {
             result.put(JsonKey.FILE_DATA, rows);
         } catch (Exception e) {
             throw new ProjectCommonException(
-                    ResponseCode.errorProcessingRequest.getErrorCode(),
-                    ResponseCode.errorProcessingRequest.getErrorMessage(),
+                    ResponseCode.errorProcessingFile.getErrorCode(),
+                    ResponseCode.errorProcessingFile.getErrorMessage(),
                     ResponseCode.SERVER_ERROR.getResponseCode());
         } finally {
             try {
+                if (null != csvFileParser)
                 csvFileParser.close();
             } catch (IOException e) {
             }
