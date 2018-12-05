@@ -151,8 +151,8 @@ public class TextbookController extends BaseController {
             result.put(JsonKey.FILE_DATA, rows);
         } catch (Exception e) {
             throw new ProjectCommonException(
-                    ResponseCode.errorProcessingRequest.getErrorCode(),
-                    ResponseCode.errorProcessingRequest.getErrorMessage(),
+                    ResponseCode.errorProcessingFile.getErrorCode(),
+                    ResponseCode.errorProcessingFile.getErrorMessage(),
                     ResponseCode.SERVER_ERROR.getResponseCode());
         } finally {
             try {
