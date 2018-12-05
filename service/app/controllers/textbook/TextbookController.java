@@ -123,7 +123,7 @@ public class TextbookController extends BaseController {
             csvFileParser = csvFileFormat.parse(reader);
             Map<String, Integer> csvHeaders = csvFileParser.getHeaderMap();
 
-            String mode = csvHeaders.containsKey(JsonKey.IDENTIFIER) ? JsonKey.UPDATE : JsonKey.CREATE;
+            String mode = csvHeaders.containsKey(StringUtils.capitalize(JsonKey.IDENTIFIER)) ? JsonKey.UPDATE : JsonKey.CREATE;
             result.put(JsonKey.MODE, mode);
 
             if (null != csvHeaders && !csvHeaders.isEmpty()) {
