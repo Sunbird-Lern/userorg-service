@@ -10,10 +10,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.TextbookActorOperation;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -61,29 +58,35 @@ public class TextbookController extends BaseController {
         ProjectLogger.log("API call for operation : " + operation);
         Request reqObj = new Request();
         Map<String, Object> map = new HashMap<>();
-
-        Http.MultipartFormData body = request().body().asMultipartFormData();
         InputStream inputStream = null;
-        if (body != null) {
-            Map<String, String[]> data = body.asFormUrlEncoded();
-            if (MapUtils.isNotEmpty(data)) {
-                String fileUrl = data.get(JsonKey.FILE_URL)[0].toLowerCase();
-                if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
-                    throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
-                }
-                URL url = new URL(fileUrl.trim());
-                inputStream = url.openStream();
-            }
-            List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
-            if (filePart != null && !filePart.isEmpty()) {
-                inputStream = new FileInputStream(filePart.get(0).getFile());
-            }
 
+        String fileUrl = request().getQueryString("fileUrl");
+        if (StringUtils.isNotBlank(fileUrl)) {
+            ProjectLogger.log("Got fileUrl from path parameter: " + fileUrl, LoggerEnum.INFO.name());
+            URL url = new URL(fileUrl.trim());
+            inputStream = url.openStream();
         } else {
-            throw new ProjectCommonException(
-                    ResponseCode.invalidData.getErrorCode(),
-                    ResponseCode.invalidData.getErrorMessage(),
-                    ResponseCode.CLIENT_ERROR.getResponseCode());
+            Http.MultipartFormData body = request().body().asMultipartFormData();
+            if (body != null) {
+                Map<String, String[]> data = body.asFormUrlEncoded();
+                if (MapUtils.isNotEmpty(data) && data.containsKey(JsonKey.FILE_URL)) {
+                    fileUrl = data.getOrDefault(JsonKey.FILE_URL, new String[] {""})[0];
+                    if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
+                        throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
+                    }
+                    URL url = new URL(fileUrl.trim());
+                    inputStream = url.openStream();
+                } else {
+                    List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
+                    if (filePart == null || filePart.isEmpty()) {
+                        throwClientErrorException(ResponseCode.fileNotFound, ResponseCode.fileNotFound.getErrorMessage());
+                    }
+                    inputStream = new FileInputStream(filePart.get(0).getFile());
+                }
+            } else {
+                ProjectLogger.log("textbook toc upload request body is empty", LoggerEnum.INFO.name());
+                throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
+            }
         }
 
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
@@ -123,7 +126,7 @@ public class TextbookController extends BaseController {
             csvFileParser = csvFileFormat.parse(reader);
             Map<String, Integer> csvHeaders = csvFileParser.getHeaderMap();
 
-            String mode = csvHeaders.containsKey(JsonKey.IDENTIFIER) ? JsonKey.UPDATE : JsonKey.CREATE;
+            String mode = csvHeaders.containsKey(StringUtils.capitalize(JsonKey.IDENTIFIER)) ? JsonKey.UPDATE : JsonKey.CREATE;
             result.put(JsonKey.MODE, mode);
 
             if (null != csvHeaders && !csvHeaders.isEmpty()) {
@@ -154,11 +157,12 @@ public class TextbookController extends BaseController {
             result.put(JsonKey.FILE_DATA, rows);
         } catch (Exception e) {
             throw new ProjectCommonException(
-                    ResponseCode.errorProcessingRequest.getErrorCode(),
-                    ResponseCode.errorProcessingRequest.getErrorMessage(),
+                    ResponseCode.errorProcessingFile.getErrorCode(),
+                    ResponseCode.errorProcessingFile.getErrorMessage(),
                     ResponseCode.SERVER_ERROR.getResponseCode());
         } finally {
             try {
+                if (null != csvFileParser)
                 csvFileParser.close();
             } catch (IOException e) {
             }
