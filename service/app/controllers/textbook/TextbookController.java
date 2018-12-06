@@ -10,10 +10,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.TextbookActorOperation;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -66,20 +63,22 @@ public class TextbookController extends BaseController {
         InputStream inputStream = null;
         if (body != null) {
             Map<String, String[]> data = body.asFormUrlEncoded();
-            if (MapUtils.isNotEmpty(data)) {
-                String fileUrl = data.get(JsonKey.FILE_URL)[0];
+            if (MapUtils.isNotEmpty(data) && data.containsKey(JsonKey.FILE_URL)) {
+                String fileUrl = data.getOrDefault(JsonKey.FILE_URL, new String[] {""})[0];
                 if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
                     throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
                 }
                 URL url = new URL(fileUrl.trim());
                 inputStream = url.openStream();
-            }
-            List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
-            if (filePart != null && !filePart.isEmpty()) {
+            } else {
+                List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
+                if (filePart == null || filePart.isEmpty()) {
+                    throwClientErrorException(ResponseCode.fileNotFound, ResponseCode.fileNotFound.getErrorMessage());
+                }
                 inputStream = new FileInputStream(filePart.get(0).getFile());
             }
-
         } else {
+            ProjectLogger.log("textbook toc upload request body is empty", LoggerEnum.INFO.name());
             throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
         }
 
