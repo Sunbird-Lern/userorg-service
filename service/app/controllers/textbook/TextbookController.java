@@ -58,28 +58,35 @@ public class TextbookController extends BaseController {
         ProjectLogger.log("API call for operation : " + operation);
         Request reqObj = new Request();
         Map<String, Object> map = new HashMap<>();
-
-        Http.MultipartFormData body = request().body().asMultipartFormData();
         InputStream inputStream = null;
-        if (body != null) {
-            Map<String, String[]> data = body.asFormUrlEncoded();
-            if (MapUtils.isNotEmpty(data) && data.containsKey(JsonKey.FILE_URL)) {
-                String fileUrl = data.getOrDefault(JsonKey.FILE_URL, new String[] {""})[0];
-                if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
-                    throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
-                }
-                URL url = new URL(fileUrl.trim());
-                inputStream = url.openStream();
-            } else {
-                List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
-                if (filePart == null || filePart.isEmpty()) {
-                    throwClientErrorException(ResponseCode.fileNotFound, ResponseCode.fileNotFound.getErrorMessage());
-                }
-                inputStream = new FileInputStream(filePart.get(0).getFile());
-            }
+
+        String fileUrl = request().getQueryString("fileUrl");
+        if (StringUtils.isNotBlank(fileUrl)) {
+            ProjectLogger.log("Got fileUrl from path parameter: " + fileUrl, LoggerEnum.INFO.name());
+            URL url = new URL(fileUrl.trim());
+            inputStream = url.openStream();
         } else {
-            ProjectLogger.log("textbook toc upload request body is empty", LoggerEnum.INFO.name());
-            throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
+            Http.MultipartFormData body = request().body().asMultipartFormData();
+            if (body != null) {
+                Map<String, String[]> data = body.asFormUrlEncoded();
+                if (MapUtils.isNotEmpty(data) && data.containsKey(JsonKey.FILE_URL)) {
+                    fileUrl = data.getOrDefault(JsonKey.FILE_URL, new String[] {""})[0];
+                    if (StringUtils.isBlank(fileUrl) || !StringUtils.endsWith(fileUrl, ".csv")) {
+                        throwClientErrorException(ResponseCode.csvError, ResponseCode.csvError.getErrorMessage());
+                    }
+                    URL url = new URL(fileUrl.trim());
+                    inputStream = url.openStream();
+                } else {
+                    List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
+                    if (filePart == null || filePart.isEmpty()) {
+                        throwClientErrorException(ResponseCode.fileNotFound, ResponseCode.fileNotFound.getErrorMessage());
+                    }
+                    inputStream = new FileInputStream(filePart.get(0).getFile());
+                }
+            } else {
+                ProjectLogger.log("textbook toc upload request body is empty", LoggerEnum.INFO.name());
+                throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
+            }
         }
 
         Map<String, Object> resultMap = readAndValidateCSV(inputStream);
