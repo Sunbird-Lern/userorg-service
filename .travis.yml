@@ -3,7 +3,7 @@ jdk: openjdk8
 install: echo "Over-riding default script for travis-ci"
 script:
   - jdk_switcher use openjdk8
-  - mvn clean package clean package '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false
+  - mvn clean package '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false
 cache:
   directories:
   - "$HOME/.m2"
