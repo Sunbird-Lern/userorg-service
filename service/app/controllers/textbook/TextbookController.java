@@ -145,10 +145,12 @@ public class TextbookController extends BaseController {
                 HashMap<String, Object> recordMap = new HashMap<>();
                 HashMap<String, Object> hierarchyMap = new HashMap<>();
                 for (Map.Entry<String, String> entry : metadata.entrySet()) {
-                    recordMap.put(entry.getKey(), record.get(entry.getValue()));
+                    if (StringUtils.isNotBlank(entry.getValue()))
+                        recordMap.put(entry.getKey(), record.get(entry.getValue()));
                 }
                 for (Map.Entry<String, String> entry : hierarchy.entrySet()) {
-                    hierarchyMap.put(entry.getKey(), record.get(entry.getValue()));
+                    if (StringUtils.isNotBlank(entry.getValue()))
+                        hierarchyMap.put(entry.getKey(), record.get(entry.getValue()));
                 }
                 map.put(JsonKey.METADATA, recordMap);
                 map.put(JsonKey.HIERARCHY, hierarchyMap);
