@@ -84,7 +84,7 @@ public class TextbookController extends BaseController {
                     inputStream = new FileInputStream(filePart.get(0).getFile());
                 }
             } else {
-                ProjectLogger.log("textbook toc upload request body is empty", LoggerEnum.INFO.name());
+                ProjectLogger.log("Textbook toc upload request body is empty", LoggerEnum.INFO.name());
                 throwClientErrorException(ResponseCode.invalidData, ResponseCode.invalidData.getErrorMessage());
             }
         }
@@ -136,12 +136,11 @@ public class TextbookController extends BaseController {
                 throwClientErrorException(ResponseCode.requiredHeaderMissing, ResponseCode.requiredHeaderMissing.getErrorMessage());
             }
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
-
             validateCSV(csvRecords);
 
             for (int i = 0; i < csvRecords.size(); i++) {
                 CSVRecord record = csvRecords.get(i);
-                HashMap<String, Object> map = new HashMap<>();
+
                 HashMap<String, Object> recordMap = new HashMap<>();
                 HashMap<String, Object> hierarchyMap = new HashMap<>();
                 for (Map.Entry<String, String> entry : metadata.entrySet()) {
@@ -152,11 +151,17 @@ public class TextbookController extends BaseController {
                     if (StringUtils.isNotBlank(record.get(entry.getValue())))
                         hierarchyMap.put(entry.getKey(), record.get(entry.getValue()));
                 }
-                map.put(JsonKey.METADATA, recordMap);
-                map.put(JsonKey.HIERARCHY, hierarchyMap);
-                rows.add(map);
+
+                if (!(MapUtils.isEmpty(recordMap) && MapUtils.isEmpty(hierarchyMap))) {
+                    rows.add(new HashMap<String, Object>() {{
+                        put(JsonKey.METADATA, recordMap);
+                        put(JsonKey.HIERARCHY, hierarchyMap);
+                    }});
+                }
             }
             result.put(JsonKey.FILE_DATA, rows);
+        } catch (ProjectCommonException e) {
+            throw e;
         } catch (Exception e) {
             throw new ProjectCommonException(
                     ResponseCode.errorProcessingFile.getErrorCode(),
