@@ -5,4 +5,4 @@
 [submodule "actors/sunbird-lms-mw"]
 	path = actors/sunbird-lms-mw
 	url = https://github.com/project-sunbird/sunbird-lms-mw.git
-	branch = release-1.12
+	branch = travis-ci
