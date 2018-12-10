@@ -5,10 +5,19 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -26,6 +35,7 @@ import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Result;
@@ -184,6 +194,43 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
+      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          e);
+      return Promise.pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  protected Promise<Result> handleSearchRequest(
+      String operation,
+      JsonNode requestBodyJson,
+      java.util.function.Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers,
+      String esObjectType) {
+    try {
+      org.sunbird.common.request.Request request = null;
+      if (null != requestBodyJson) {
+        request = createAndInitRequest(operation, requestBodyJson);
+      } else {
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData, null);
+      }
+      if (pathId != null) {
+        request.getRequest().put(pathVariable, pathId);
+        request.getContext().put(pathVariable, pathId);
+      }
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
+      if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+      if (StringUtils.isNotBlank(esObjectType)) {
+        List<String> esObjectTypeList = new ArrayList<>();
+        esObjectTypeList.add(esObjectType);
+        ((Map) (request.getRequest().get(JsonKey.FILTERS)))
+            .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
+      }
+      request.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       ProjectLogger.log(
@@ -390,6 +437,17 @@ public class BaseController extends Controller {
      */
   }
 
+  /**
+   *
+   * @param file
+   * @return
+   */
+  public Result createFileDownloadResponse(File file) {
+    response().setContentType("application/x-download");
+    response().setHeader("Content-disposition", "attachment; filename=" + file.getName());
+    return Results.ok(file);
+  }
+
   private void removeFields(Map<String, Object> params, String... properties) {
     for (String property : properties) {
       params.remove(property);
@@ -504,6 +562,8 @@ public class BaseController extends Controller {
               return createCommonResponse(response, responseKey, httpReq);
             } else if (result instanceof ProjectCommonException) {
               return createCommonExceptionResponse((ProjectCommonException) result, request());
+            } else if (result instanceof File) {
+              return createFileDownloadResponse((File) result);
             } else {
               ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
@@ -673,4 +733,78 @@ public class BaseController extends Controller {
     }
     return map;
   }
+
+  /**
+   * @param operation
+   * @param objectType
+   * @return
+   * @throws IOException
+   */
+  protected org.sunbird.common.request.Request createAndInitUploadRequest(
+      String operation, String objectType) throws IOException {
+    ProjectLogger.log(
+        "BaseController: createAndInitUploadRequest called with operation = " + operation);
+    org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
+    Map<String, Object> map = new HashMap<>();
+    byte[] byteArray = null;
+    Http.MultipartFormData body = request().body().asMultipartFormData();
+    Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
+    JsonNode requestData = request().body().asJson();
+    if (body != null) {
+      Map<String, String[]> data = body.asFormUrlEncoded();
+      for (Map.Entry<String, String[]> entry : data.entrySet()) {
+        map.put(entry.getKey(), entry.getValue()[0]);
+      }
+      List<Http.MultipartFormData.FilePart> filePart = body.getFiles();
+      if (filePart != null && !filePart.isEmpty()) {
+        InputStream is = new FileInputStream(filePart.get(0).getFile());
+        byteArray = IOUtils.toByteArray(is);
+      }
+    } else if (null != formUrlEncodeddata) {
+      for (Map.Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
+        map.put(entry.getKey(), entry.getValue()[0]);
+      }
+      InputStream is =
+          new ByteArrayInputStream(
+              ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+      byteArray = IOUtils.toByteArray(is);
+    } else if (null != requestData) {
+      reqObj =
+          (org.sunbird.common.request.Request)
+              mapper.RequestMapper.mapRequest(
+                  request().body().asJson(), org.sunbird.common.request.Request.class);
+      InputStream is =
+          new ByteArrayInputStream(
+              ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+      byteArray = IOUtils.toByteArray(is);
+      reqObj.getRequest().remove(JsonKey.DATA);
+      map.putAll(reqObj.getRequest());
+    } else {
+      throw new ProjectCommonException(
+          ResponseCode.invalidData.getErrorCode(),
+          ResponseCode.invalidData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    reqObj.setOperation(operation);
+    reqObj.setRequestId(ExecutionContext.getRequestId());
+    reqObj.setEnv(getEnvironment());
+    map.put(JsonKey.OBJECT_TYPE, objectType);
+    map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+    map.put(JsonKey.FILE, byteArray);
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.DATA, map);
+    reqObj.setRequest(innerMap);
+    return reqObj;
+  }
+
+  protected String getQueryString(Map<String, String[]> queryStringMap) {
+    return queryStringMap
+        .entrySet()
+        .stream()
+        .map(p -> p.getKey() + "=" + String.join(",", p.getValue()))
+        .reduce((p1, p2) -> p1 + "&" + p2)
+        .map(s -> "?" + s)
+        .orElse("");
+  }
+
 }

@@ -17,6 +17,8 @@ node('build-slave') {
         print "Environment will be : ${env.NODE_ENV}"
         sh('git submodule update --init')
         sh('git submodule update --init --recursive --remote')
+        sh 'git log -1'
+        sh 'cat service/conf/routes | grep v2'
         sh 'sudo mvn clean install -DskipTests=true '
         dir ('service') {
         sh 'mvn play2:dist'

@@ -41,15 +41,18 @@ import play.mvc.Results;
  * @author Manzarul
  */
 public class Global extends GlobalSettings {
-
   public static ProjectUtil.Environment env;
 
   public static Map<String, Map<String, Object>> requestInfo = new HashMap<>();
 
   public static String ssoPublicKey = "";
   private static final String version = "v1";
-  private static final List<String> USER_UNAUTH_STATES =
+  private final List<String> USER_UNAUTH_STATES =
       Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+
+  static {
+    init();
+  }
 
   private class ActionWrapper extends Action.Simple {
     public ActionWrapper(Action<?> action) {
@@ -98,19 +101,6 @@ public class Global extends GlobalSettings {
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
     SunbirdMWService.init();
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
-    SchedulerManager.schedule();
-    // scheduler should start after few minutes so internally it is sleeping for 4 minute , so
-    // it is in separate thread.
-    new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance();
-              }
-            })
-        .start();
   }
 
   /**
@@ -173,7 +163,6 @@ public class Global extends GlobalSettings {
       ctx.flash().put(JsonKey.ACTOR_ID, consumerId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
     }
-
     context.setRequestContext(reqContext);
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.CONTEXT, TelemetryUtil.getTelemetryContext());
@@ -188,6 +177,9 @@ public class Global extends GlobalSettings {
       messageId = JsonKey.DEFAULT_CONSUMER_ID;
     }
     ctx.flash().put(JsonKey.REQUEST_ID, messageId);
+    if (requestInfo == null) {
+      requestInfo = new HashMap<>();
+    }
     requestInfo.put(messageId, map);
   }
 
@@ -195,7 +187,7 @@ public class Global extends GlobalSettings {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;
@@ -306,14 +298,17 @@ public class Global extends GlobalSettings {
     String path = requestPath;
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
+    final String ver3 = "/" + JsonKey.VERSION_3;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver) || path.startsWith(ver2)) {
+    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
-      } else {
+      } else if (requestUrl.contains(ver2)) {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
+      } else {
+        requestUrl = requestUrl.replaceFirst(ver3, "api");
       }
 
       String[] list = requestUrl.split("/");
@@ -329,5 +324,16 @@ public class Global extends GlobalSettings {
       }
     }
     return builder.toString();
+  }
+
+  private static void init() {
+
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
+    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
+    SchedulerManager.schedule();
+
+    // Run quartz scheduler in a separate thread as it waits for 4 minutes
+    // before scheduling various jobs.
+    new Thread(() -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance()).start();
   }
 }

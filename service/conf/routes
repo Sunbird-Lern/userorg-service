@@ -9,31 +9,41 @@ POST     /v1/content/state/read	        @controllers.LearnerController.getConten
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
-#user management api 
-POST	/v1/user/create				    @controllers.usermanagement.UserController.createUser()
-POST	/v2/user/create				    @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					@controllers.usermanagement.UserController.updateUserProfile()
-GET  	/v1/user/read/:uid				@controllers.usermanagement.UserController.getUserProfile(uid:String)
-POST    /v1/user/getuser                 @controllers.usermanagement.UserController.getUserDetailsByLoginId()
-POST  	/v1/user/block			         @controllers.usermanagement.UserController.blockUser()
-POST    /v1/user/assign/role			 @controllers.usermanagement.UserController.assignRoles()
-POST  	/v1/user/unblock			         @controllers.usermanagement.UserController.unBlockUser()
-PATCH   /v1/user/update/logintime			 @controllers.usermanagement.UserController.updateLoginTime()
-GET     /v1/user/mediatype/list               @controllers.usermanagement.UserController.getMediaTypes()
-POST    /v1/user/profile/visibility     @controllers.usermanagement.UserController.profileVisibility()
-POST   /v1/user/search							@controllers.usermanagement.UserController.search()
+# User management APIs 
+POST	/v1/user/create				      @controllers.usermanagement.UserController.createUser()
+POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
+POST	/v3/user/create				      @controllers.usermanagement.UserController.createUserV3()
+PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
+GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
+GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
+POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
+POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
-#organisation management api
-POST	 /v1/org/create		    @controllers.organisationmanagement.OrganisationController.createOrg()
-PATCH	 /v1/org/update		    @controllers.organisationmanagement.OrganisationController.updateOrg()
-POST	 /v1/org/read           @controllers.organisationmanagement.OrganisationController.getOrgDetails()
-PATCH	/v1/org/status/update   @controllers.organisationmanagement.OrganisationController.updateOrgStatus()
-POST     /v1/org/member/add		@controllers.organisationmanagement.OrganisationController.addMemberToOrganisation()
-POST    /v1/org/member/remove	@controllers.organisationmanagement.OrganisationController.removeMemberFromOrganisation()
-GET		/v1/org/type/list		@controllers.organisationmanagement.OrganisationController.getOrgTypeList()
-POST	/v1/org/type/create		@controllers.organisationmanagement.OrganisationController.createOrgType()
-PATCH	/v1/org/type/update		@controllers.organisationmanagement.OrganisationController.updateOrgType()
-POST    /v1/org/search		    @controllers.organisationmanagement.OrganisationController.search()
+GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
+POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
+
+POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser()
+POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.unblockUser()
+
+GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
+POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.assignRoles()
+
+PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
+
+# Organisation management APIs
+POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
+PATCH	/v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
+PATCH	/v1/org/status/update @controllers.organisationmanagement.OrgController.updateOrgStatus()
+POST  /v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails()
+POST  /v1/org/search		    @controllers.organisationmanagement.OrgController.search()
+
+POST  /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation()
+POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberController.removeMemberFromOrganisation()
+
+POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType()
+PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType()
+GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType()
+
 #page management api
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
@@ -47,26 +57,23 @@ PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.up
 GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
 GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
-#permission
-
-GET   /v1/role/read						@controllers.usermanagement.UserController.getRoles()
-
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
-
 
 #Mock APIs to finish API Gateway onboarding
 GET /threaddump									@controllers.ThreadDumpController.threaddump()
 
-#bulk upload
+# Bulk upload APIs
+POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
+POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
+POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
+POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
+POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
+GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
+GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
-POST /v1/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
-POST /v1/bulk/user/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadUser()
-GET  /v1/upload/status/:pid				@controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
-POST /v1/org/upload 						@controllers.bulkapimanagement.BulkUploadController.uploadOrg()
-POST /v1/batch/bulk/enrollment 			   @controllers.bulkapimanagement.BulkUploadController.bulkBatchEnrollment()
-GET  /v1/user/data/encrypt				@controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
-GET  /v1/user/data/decrypt				@controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
+GET  /v1/user/data/encrypt              @controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
+GET  /v1/user/data/decrypt              @controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
@@ -88,8 +95,6 @@ GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetri
 GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
 GET  /v1/dashboard/progress/course/:courseId/export      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
-
-
 
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync()
@@ -161,12 +166,6 @@ DELETE   /v1/notification/location/delete/:locationId  @controllers.geolocation.
 POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification()
 POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount()
 
-#System Settings
-POST /v1/system/settings			     @controllers.config.ApplicationConfigController.updateSystemSettings()
-
-#Bulk Upload Location API
-POST   /v1/bulk/location/upload                      @controllers.bulkapimanagement.BulkUploadController.uploadLocation()
-
 #Location API
 POST   /v1/location/create                      @controllers.location.LocationController.createLocation()
 PATCH  /v1/location/update                      @controllers.location.LocationController.updateLocation()
@@ -174,6 +173,10 @@ POST   /v1/location/search                      @controllers.location.LocationCo
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
 
 # System Settings APIs
-GET   /v1/system/setting/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
+GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
 GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
-POST  /v1/system/setting/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
+POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
+
+# Textbook
+POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
+GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
