@@ -180,3 +180,7 @@ POST  /v1/system/settings/set                 @controllers.systemsettings.System
 # Textbook
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
+
+#Terms and Conditions
+POST /v1/tac/accept                               @controllers.tac.TermsAndConditionController.acceptTAC()
+GET  /v1/tac/read                                 @controllers.tac.TermsAndConditionController.getTAC()
