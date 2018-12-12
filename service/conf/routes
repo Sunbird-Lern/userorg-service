@@ -180,3 +180,6 @@ POST  /v1/system/settings/set                 @controllers.systemsettings.System
 # Textbook
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
+
+# self-signup OTP
+POST /v1/otp/generate			@controllers.otp.OTPController.generateOTP()
