@@ -5,13 +5,12 @@ import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-/** Created by rajatgupta on 11/12/18. */
-public class TACRequestValidator extends BaseRequestValidator {
+public class UserTnCRequestValidator extends BaseRequestValidator {
 
-  public void validateTACRequest(Request request) {
+  public void validateTnCRequest(Request request) {
     validateParam(
-        (String) request.get(JsonKey.VERSION),
+        (String) request.get(JsonKey.TNC_ACCEPTED_VERSION),
         ResponseCode.mandatoryParamsMissing,
-        JsonKey.VERSION);
+        JsonKey.TNC_ACCEPTED_VERSION);
   }
 }
