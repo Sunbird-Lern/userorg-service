@@ -30,8 +30,7 @@ POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.as
 
 PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
-#Terms and Conditions
-POST /v1/user/tnc/accept                              @controllers.tac.UserTnCController.acceptTnC()
+POST  /v1/user/tnc/accept         @controllers.tac.UserTnCController.acceptTnC()
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
