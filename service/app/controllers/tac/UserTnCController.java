@@ -9,11 +9,6 @@ import play.mvc.Result;
 
 public class UserTnCController extends BaseController {
 
-  /**
-   * Method to accept the TAC
-   *
-   * @return Promise<Result>
-   */
   public Promise<Result> acceptTnC() {
     return handleRequest(
         ActorOperations.USER_TNC_ACCEPT.getValue(),
@@ -23,4 +18,5 @@ public class UserTnCController extends BaseController {
           return null;
         });
   }
+
 }
