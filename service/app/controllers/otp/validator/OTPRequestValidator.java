@@ -12,6 +12,18 @@ public class OTPRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateGenerateOTPRequest(Request otpRequest) {
+    commonValidation(otpRequest);
+  }
+
+  public void validateVerifyOTPRequest(Request otpRequest) {
+    commonValidation(otpRequest);
+    validateParam(
+        (String) otpRequest.getRequest().get(JsonKey.OTP),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.OTP);
+  }
+
+  private void commonValidation(Request otpRequest) {
     validateParam(
         (String) otpRequest.getRequest().get(JsonKey.KEY),
         ResponseCode.mandatoryParamsMissing,

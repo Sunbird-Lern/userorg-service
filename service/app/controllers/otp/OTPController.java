@@ -19,4 +19,15 @@ public class OTPController extends BaseController {
         },
         getAllRequestHeaders(request()));
   }
+
+  public Promise<Result> verifyOTP() {
+    return handleRequest(
+        ActorOperations.VERIFY_OTP.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new OTPRequestValidator().validateVerifyOTPRequest((Request) request);
+          return null;
+        },
+        getAllRequestHeaders(request()));
+  }
 }

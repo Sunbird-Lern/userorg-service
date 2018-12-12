@@ -183,3 +183,4 @@ GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.Tex
 
 # self-signup OTP
 POST /v1/otp/generate			@controllers.otp.OTPController.generateOTP()
+POST /v1/otp/verify  			@controllers.otp.OTPController.verifyOTP()
