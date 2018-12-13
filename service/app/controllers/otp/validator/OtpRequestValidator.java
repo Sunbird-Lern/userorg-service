@@ -7,7 +7,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class OtpRequestValidator extends BaseRequestValidator {
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateGenerateOTPRequest(Request otpRequest) {
     commonValidation(otpRequest);
