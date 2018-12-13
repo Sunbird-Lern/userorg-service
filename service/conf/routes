@@ -184,5 +184,5 @@ POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.Text
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
 
 # OTP APIs
-POST /v1/otp/generate @controllers.otp.OTPController.generateOTP()
-POST /v1/otp/verify   @controllers.otp.OTPController.verifyOTP()
+POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
+POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()

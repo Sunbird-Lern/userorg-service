@@ -14,7 +14,7 @@ public class OtpController extends BaseController {
         ActorOperations.GENERATE_OTP.getValue(),
         request().body().asJson(),
         (request) -> {
-          new OtpRequestValidator().validateGenerateOTPRequest((Request) request);
+          new OtpRequestValidator().validateGenerateOtpRequest((Request) request);
           return null;
         },
         getAllRequestHeaders(request()));
@@ -25,7 +25,7 @@ public class OtpController extends BaseController {
         ActorOperations.VERIFY_OTP.getValue(),
         request().body().asJson(),
         (request) -> {
-          new OtpRequestValidator().validateVerifyOTPRequest((Request) request);
+          new OtpRequestValidator().validateVerifyOtpRequest((Request) request);
           return null;
         },
         getAllRequestHeaders(request()));
