@@ -6,7 +6,7 @@ import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-public class OTPRequestValidator extends BaseRequestValidator {
+public class OtpRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateGenerateOTPRequest(Request otpRequest) {
@@ -40,10 +40,7 @@ public class OTPRequestValidator extends BaseRequestValidator {
     } else if (JsonKey.PHONE.equalsIgnoreCase((String) otpRequest.getRequest().get(JsonKey.TYPE))) {
       validatePhone((String) otpRequest.getRequest().get(JsonKey.KEY));
     } else {
-      throw new ProjectCommonException(
-          ResponseCode.invalidTypeValue.getErrorCode(),
-          ResponseCode.invalidTypeValue.getErrorMessage(),
-          ERROR_CODE);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidTypeValue);
     }
   }
 }
