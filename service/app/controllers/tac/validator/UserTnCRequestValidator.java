@@ -13,5 +13,4 @@ public class UserTnCRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.TNC_ACCEPTED_VERSION);
   }
-
 }

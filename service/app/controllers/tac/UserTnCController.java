@@ -18,5 +18,4 @@ public class UserTnCController extends BaseController {
           return null;
         });
   }
-
 }

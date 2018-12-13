@@ -7,9 +7,17 @@ import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-public class OTPRequestValidator extends BaseRequestValidator {
+public class OtpRequestValidator extends BaseRequestValidator {
 
-  public void validateGenerateOTPRequest(Request otpRequest) {
+  public void validateGenerateOtpRequest(Request otpRequest) {
+    commonValidation(otpRequest, false);
+  }
+
+  public void validateVerifyOtpRequest(Request otpRequest) {
+    commonValidation(otpRequest, true);
+  }
+
+  private void commonValidation(Request otpRequest, boolean isOtpMandatory) {
     validateParam(
         (String) otpRequest.getRequest().get(JsonKey.KEY),
         ResponseCode.mandatoryParamsMissing,
@@ -18,11 +26,16 @@ public class OTPRequestValidator extends BaseRequestValidator {
         (String) otpRequest.getRequest().get(JsonKey.TYPE),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.TYPE);
-
-    validateKeyFormat(otpRequest);
+    if (isOtpMandatory) {
+      validateParam(
+          (String) otpRequest.getRequest().get(JsonKey.OTP),
+          ResponseCode.mandatoryParamsMissing,
+          JsonKey.OTP);
+    }
+    validateTypeAndKey(otpRequest);
   }
 
-  private void validateKeyFormat(Request otpRequest) {
+  private void validateTypeAndKey(Request otpRequest) {
     Map<String, Object> requestMap = otpRequest.getRequest();
 
     String type = (String) requestMap.get(JsonKey.TYPE);
@@ -37,7 +50,8 @@ public class OTPRequestValidator extends BaseRequestValidator {
           ResponseCode.invalidParameterValue.getErrorCode(),
           ResponseCode.invalidParameterValue.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
-          type, JsonKey.TYPE);
+          type,
+          JsonKey.TYPE);
     }
   }
 }
