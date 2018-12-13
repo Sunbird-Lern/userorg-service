@@ -183,6 +183,6 @@ POST  /v1/system/settings/set                 @controllers.systemsettings.System
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
 
-# self-signup OTP
-POST /v1/otp/generate			@controllers.otp.OTPController.generateOTP()
-POST /v1/otp/verify  			@controllers.otp.OTPController.verifyOTP()
+# OTP APIs
+POST /v1/otp/generate @controllers.otp.OTPController.generateOTP()
+POST /v1/otp/verify @controllers.otp.OTPController.verifyOTP()
