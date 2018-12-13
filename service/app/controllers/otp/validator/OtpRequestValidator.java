@@ -32,10 +32,10 @@ public class OtpRequestValidator extends BaseRequestValidator {
           ResponseCode.mandatoryParamsMissing,
           JsonKey.OTP);
     }
-    validateDataFormat(otpRequest);
+    validateTypeAndKey(otpRequest);
   }
 
-  private void validateDataFormat(Request otpRequest) {
+  private void validateTypeAndKey(Request otpRequest) {
     Map<String, Object> requestMap = otpRequest.getRequest();
 
     String type = (String) requestMap.get(JsonKey.TYPE);
