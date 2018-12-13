@@ -185,4 +185,4 @@ GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.Tex
 
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OTPController.generateOTP()
-POST /v1/otp/verify @controllers.otp.OTPController.verifyOTP()
+POST /v1/otp/verify   @controllers.otp.OTPController.verifyOTP()
