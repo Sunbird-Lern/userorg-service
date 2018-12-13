@@ -30,6 +30,8 @@ POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.as
 
 PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
+POST  /v1/user/tnc/accept         @controllers.tac.UserTnCController.acceptTnC()
+
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
 PATCH	/v1/org/update		    @controllers.organisationmanagement.OrgController.updateOrg()
