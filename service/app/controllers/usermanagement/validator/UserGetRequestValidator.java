@@ -1,8 +1,9 @@
 package controllers.usermanagement.validator;
 
-import java.text.MessageFormat;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -24,8 +25,11 @@ public class UserGetRequestValidator extends BaseRequestValidator {
         || keyValue.equalsIgnoreCase(JsonKey.LOGIN_ID))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
-          MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(), new Object[] {JsonKey.KEY}));
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(),
+              JsonKey.KEY,
+              keyValue,
+              String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE, JsonKey.LOGIN_ID)));
     }
   }
 }
