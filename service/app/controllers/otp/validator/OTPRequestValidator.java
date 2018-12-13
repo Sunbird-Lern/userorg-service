@@ -29,8 +29,8 @@ public class OTPRequestValidator extends BaseRequestValidator {
       validatePhone((String) otpRequest.getRequest().get(JsonKey.KEY));
     } else {
       throw new ProjectCommonException(
-          ResponseCode.invalidTypeValue.getErrorCode(),
-          ResponseCode.invalidTypeValue.getErrorMessage(),
+          ResponseCode.invalidOTPType.getErrorCode(),
+          ResponseCode.invalidOTPType.getErrorMessage(),
           ERROR_CODE);
     }
   }
