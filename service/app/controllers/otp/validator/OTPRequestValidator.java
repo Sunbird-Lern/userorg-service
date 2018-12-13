@@ -1,5 +1,6 @@
 package controllers.otp.validator;
 
+import java.util.Map;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
@@ -7,7 +8,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class OTPRequestValidator extends BaseRequestValidator {
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateGenerateOTPRequest(Request otpRequest) {
     validateParam(
@@ -23,15 +23,20 @@ public class OTPRequestValidator extends BaseRequestValidator {
   }
 
   private void validateKeyFormat(Request otpRequest) {
-    if (JsonKey.EMAIL.equalsIgnoreCase((String) otpRequest.getRequest().get(JsonKey.TYPE))) {
-      validateEmail((String) otpRequest.getRequest().get(JsonKey.KEY));
-    } else if (JsonKey.PHONE.equalsIgnoreCase((String) otpRequest.getRequest().get(JsonKey.TYPE))) {
-      validatePhone((String) otpRequest.getRequest().get(JsonKey.KEY));
+    Map<String, Object> requestMap = otpRequest.getRequest();
+
+    String type = (String) requestMap.get(JsonKey.TYPE);
+    String key = (String) requestMap.get(JsonKey.KEY);
+
+    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
+      validateEmail(key);
+    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
+      validatePhone(key);
     } else {
       throw new ProjectCommonException(
           ResponseCode.invalidOTPType.getErrorCode(),
           ResponseCode.invalidOTPType.getErrorMessage(),
-          ERROR_CODE);
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }
