@@ -104,9 +104,9 @@ public class UserController extends BaseController {
         true);
   }
 
-  public Promise<Result> getUserByField() {
+  public Promise<Result> getUserByKey() {
     return handleRequest(
-        ActorOperations.GET_USER_DETAILS_BY_FIELD.getValue(),
+        ActorOperations.GET_USER_BY_KEY.getValue(),
         request().body().asJson(),
         (request) -> {
           new UserGetRequestValidator().validateGetRequest((Request) request);
