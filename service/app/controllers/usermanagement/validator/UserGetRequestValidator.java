@@ -18,15 +18,14 @@ public class UserGetRequestValidator extends BaseRequestValidator {
         (String) request.getRequest().get(JsonKey.VALUE),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.VALUE);
-    String fieldValue = (String) request.getRequest().get(JsonKey.FIELD);
-    if (!(fieldValue.equalsIgnoreCase(JsonKey.PHONE)
-        || fieldValue.equalsIgnoreCase(JsonKey.EMAIL)
-        || fieldValue.equalsIgnoreCase(JsonKey.USER_NAME))) {
+    String keyValue = (String) request.getRequest().get(JsonKey.KEY);
+    if (!(keyValue.equalsIgnoreCase(JsonKey.PHONE)
+        || keyValue.equalsIgnoreCase(JsonKey.EMAIL)
+        || keyValue.equalsIgnoreCase(JsonKey.LOGIN_ID))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
           MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(), new Object[] {JsonKey.FIELD}));
+              ResponseCode.invalidValue.getErrorMessage(), new Object[] {JsonKey.KEY}));
     }
   }
-
 }
