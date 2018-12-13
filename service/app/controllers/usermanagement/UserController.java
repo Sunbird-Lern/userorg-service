@@ -109,7 +109,7 @@ public class UserController extends BaseController {
         ActorOperations.GET_USER_BY_KEY.getValue(),
         request().body().asJson(),
         (request) -> {
-          new UserGetRequestValidator().validateGetRequest((Request) request);
+          new UserGetRequestValidator().validateGetUserByKeyRequest((Request) request);
           return null;
         });
   }
