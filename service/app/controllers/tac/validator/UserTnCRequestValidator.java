@@ -9,8 +9,8 @@ public class UserTnCRequestValidator extends BaseRequestValidator {
 
   public void validateTnCRequest(Request request) {
     validateParam(
-        (String) request.get(JsonKey.TNC_ACCEPTED_VERSION),
+        (String) request.get(JsonKey.VERSION),
         ResponseCode.mandatoryParamsMissing,
-        JsonKey.TNC_ACCEPTED_VERSION);
+        JsonKey.VERSION);
   }
 }
