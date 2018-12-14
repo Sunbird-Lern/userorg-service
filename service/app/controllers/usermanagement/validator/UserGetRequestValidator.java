@@ -11,25 +11,31 @@ import org.sunbird.common.responsecode.ResponseCode;
 public class UserGetRequestValidator extends BaseRequestValidator {
 
   public void validateGetUserByKeyRequest(Request request) {
+    String key = (String) request.getRequest().get(JsonKey.KEY);
+
     validateParam(
-        (String) request.getRequest().get(JsonKey.KEY),
+        key,
         ResponseCode.mandatoryParamsMissing,
         JsonKey.KEY);
+
     validateParam(
         (String) request.getRequest().get(JsonKey.VALUE),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.VALUE);
-    String keyValue = (String) request.getRequest().get(JsonKey.KEY);
-    if (!(keyValue.equalsIgnoreCase(JsonKey.PHONE)
-        || keyValue.equalsIgnoreCase(JsonKey.EMAIL)
-        || keyValue.equalsIgnoreCase(JsonKey.LOGIN_ID))) {
+
+    if (!(key.equalsIgnoreCase(JsonKey.PHONE)
+        || key.equalsIgnoreCase(JsonKey.EMAIL)
+        || key.equalsIgnoreCase(JsonKey.LOGIN_ID))) {
+
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
           ProjectUtil.formatMessage(
               ResponseCode.invalidValue.getErrorMessage(),
               JsonKey.KEY,
-              keyValue,
+              key,
               String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE, JsonKey.LOGIN_ID)));
+
     }
   }
+
 }
