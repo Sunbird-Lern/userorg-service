@@ -1,6 +1,7 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
+import controllers.usermanagement.validator.UserGetRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
@@ -101,6 +102,16 @@ public class UserController extends BaseController {
         null,
         null,
         true);
+  }
+
+  public Promise<Result> getUserByKey() {
+    return handleRequest(
+        ActorOperations.GET_USER_BY_KEY.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new UserGetRequestValidator().validateGetUserByKeyRequest((Request) request);
+          return null;
+        });
   }
 
   public Promise<Result> searchUser() {
