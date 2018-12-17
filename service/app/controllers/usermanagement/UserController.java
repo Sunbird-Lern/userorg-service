@@ -2,6 +2,7 @@ package controllers.usermanagement;
 
 import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
+import java.util.Arrays;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
@@ -115,13 +116,14 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> searchUser() {
-    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS).toLowerCase();
+
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
-          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          request.getContext().put(JsonKey.FIELDS, Arrays.asList(requestedFields.split(",")));
           new BaseRequestValidator().validateSearchRequest(request);
           return null;
         },
