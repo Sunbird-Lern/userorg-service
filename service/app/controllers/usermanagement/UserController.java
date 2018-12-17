@@ -116,14 +116,17 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> searchUser() {
-    final String requestedFields = request().getQueryString(JsonKey.FIELDS).toLowerCase();
-
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
-          request.getContext().put(JsonKey.FIELDS, Arrays.asList(requestedFields.split(",")));
+          if (requestedFields != null) {
+            request
+                .getContext()
+                .put(JsonKey.FIELDS, Arrays.asList(requestedFields.toLowerCase().split(",")));
+          }
           new BaseRequestValidator().validateSearchRequest(request);
           return null;
         },
