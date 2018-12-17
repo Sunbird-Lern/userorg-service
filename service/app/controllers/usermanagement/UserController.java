@@ -115,11 +115,14 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> searchUser() {
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
         userSearchRequest -> {
-          new BaseRequestValidator().validateSearchRequest((Request) userSearchRequest);
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
           return null;
         },
         null,
