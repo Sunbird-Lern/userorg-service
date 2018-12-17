@@ -12,7 +12,7 @@
   </properties>
 
   <modules>
-	  <module>actors/sunbird-lms-mw</module>
+	  <!--<module>actors/sunbird-lms-mw</module>-->
 	  <module>service</module>
   </modules>
 </project>
