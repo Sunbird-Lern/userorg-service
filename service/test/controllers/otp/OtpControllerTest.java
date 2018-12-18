@@ -6,11 +6,13 @@ import static org.junit.Assert.assertTrue;
 import controllers.BaseControllerTest;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
+@Ignore
 public class OtpControllerTest extends BaseControllerTest {
 
   private static String validEmail = "someEmail@someDomain.com";
