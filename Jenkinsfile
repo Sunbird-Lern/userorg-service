@@ -4,14 +4,15 @@ node('build-slave') {
 
    currentBuild.result = "SUCCESS"
    cleanWs()
+
    try {
 
-      stage('Checkout'){
+      stage('Checkout') {
 
          checkout scm
-       }
+      }
 
-      stage('Build'){
+      stage('Build') {
 
         env.NODE_ENV = "build"
         print "Environment will be : ${env.NODE_ENV}"
@@ -20,15 +21,25 @@ node('build-slave') {
         sh 'git log -1'
         sh 'cat service/conf/routes | grep v2'
         sh 'sudo mvn clean install -DskipTests=true '
-        dir ('service') {
-        sh 'mvn play2:dist'
-         }
-         sh('chmod 777 ./build.sh')
-         sh('./build.sh')
 
       }
 
-      stage('Publish'){
+      stage('Unit Tests') {
+
+
+      }
+
+      stage('Package') {
+
+        dir ('service') {
+          sh 'mvn play2:dist'
+        }
+        sh('chmod 777 ./build.sh')
+        sh('./build.sh')
+
+      }
+
+      stage('Publish') {
 
         echo 'Push to Repo'
         sh 'ls -al ~/'
@@ -39,7 +50,8 @@ node('build-slave') {
         archive includes: "metadata.json"
 
       }
-      }
+
+    }
     catch (err) {
         currentBuild.result = "FAILURE"
         throw err
