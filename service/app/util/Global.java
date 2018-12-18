@@ -1,6 +1,7 @@
 /** */
 package util;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -9,9 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.actorutil.systemsettings.SystemSettingClient;
+import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -23,6 +29,7 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.SchedulerManager;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import play.Application;
 import play.GlobalSettings;
@@ -49,6 +56,7 @@ public class Global extends GlobalSettings {
   private static final String version = "v1";
   private final List<String> USER_UNAUTH_STATES =
       Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+  private static String custodianOrgHashTagId;
 
   static {
     init();
@@ -136,7 +144,11 @@ public class Global extends GlobalSettings {
     // set env and channel to the
     String channel = request.getHeader(JsonKey.CHANNEL_ID);
     if (StringUtils.isBlank(channel)) {
-      channel = JsonKey.DEFAULT_ROOT_ORG_ID;
+      String custodianOrgHashTagid = getCustodianOrgHashTagId();
+      channel =
+          (StringUtils.isNotEmpty(custodianOrgHashTagid))
+              ? custodianOrgHashTagid
+              : JsonKey.DEFAULT_ROOT_ORG_ID;
     }
     reqContext.put(JsonKey.CHANNEL, channel);
     ctx.flash().put(JsonKey.CHANNEL, channel);
@@ -213,6 +225,8 @@ public class Global extends GlobalSettings {
       env = JsonKey.NOTE;
     } else if (uri.startsWith("/v1/location")) {
       env = JsonKey.LOCATION;
+    } else if (uri.startsWith("/v1/otp")) {
+      env = "otp";
     } else {
       env = "miscellaneous";
     }
@@ -335,5 +349,25 @@ public class Global extends GlobalSettings {
     // Run quartz scheduler in a separate thread as it waits for 4 minutes
     // before scheduling various jobs.
     new Thread(() -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance()).start();
+  }
+
+  private static String getCustodianOrgHashTagId() {
+    synchronized (Global.class) {
+      if (custodianOrgHashTagId == null) {
+        ActorRef actorRef = RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
+        SystemSettingClient ssc = SystemSettingClientImpl.getInstance();
+        try {
+          SystemSetting systemSetting =
+              ssc.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID);
+          custodianOrgHashTagId = Util.getHashTagIdFromOrgId(systemSetting.getValue());
+        } catch (ProjectCommonException e) {
+          if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
+          else throw e;
+        }
+      } else {
+        return custodianOrgHashTagId;
+      }
+    }
+    return custodianOrgHashTagId;
   }
 }
