@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -354,12 +356,16 @@ public class Global extends GlobalSettings {
   private static String getCustodianOrgHashTagId() {
     synchronized (Global.class) {
       if (custodianOrgHashTagId == null) {
-        ActorRef actorRef = RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
+        ActorRef sysSettingActorRef =
+            RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
+        ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
         SystemSettingClient ssc = SystemSettingClientImpl.getInstance();
         try {
           SystemSetting systemSetting =
-              ssc.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID);
-          custodianOrgHashTagId = Util.getHashTagIdFromOrgId(systemSetting.getValue());
+              ssc.getSystemSettingByField(sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
+          OrganisationClient orgClient = new OrganisationClientImpl();
+          custodianOrgHashTagId =
+              orgClient.getOrgById(orgActorRef, systemSetting.getValue()).getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
           else throw e;
