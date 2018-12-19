@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import controllers.BaseControllerTest;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.jetty.http.HttpMethods;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
@@ -15,13 +16,15 @@ import play.mvc.Result;
 @Ignore
 public class OtpControllerTest extends BaseControllerTest {
 
-  private static String validEmail = "someEmail@someDomain.com";
-  private static String invalidEmail = "someEmailWithoutAnyDomain";
-  private static String invalidPhone = "i73456";
-  private static String validPhoneType = "phone";
-  private static String validEmailType = "email";
-  private static String invalidType = "invalidType";
-  private static String otp = "123456";
+  private static final String VALID_EMAIL = "someEmail@someDomain.com";
+  private static final String INVALID_EMAIL = "someEmailWithoutAnyDomain";
+  private static final String INVALID_PHONE = "invalidPhone";
+  private static final String VALID_PHONE_TYPE = "phone";
+  private static final String VALID_EMAIL_TYPE = "email";
+  private static final String INVALID_TYPE = "invalidType";
+  private static final String INVALID_OTP = "anyOtp";
+  private static final String GENERATE_OTP_URL = "/v1/otp/generate";
+  private static final String VERIFY_OTP_URL = "/v1/otp/verify";
 
   // Generate Otp test case
 
@@ -29,9 +32,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testGenerateOtpWithoutPhoneKeyFailure() {
     Result result =
         performTest(
-            "/v1/otp/generate",
-            "POST",
-            createInvalidOtpRequest(false, null, true, validPhoneType, false, null));
+            GENERATE_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -40,9 +43,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testGenerateOtpWithInvalidPhoneFailure() {
     Result result =
         performTest(
-            "/v1/otp/generate",
-            "POST",
-            createInvalidOtpRequest(true, invalidPhone, true, validPhoneType, false, null));
+            GENERATE_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(true, INVALID_PHONE, true, VALID_PHONE_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -51,20 +54,20 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testGenerateOtpWithoutEmailKeyFailure() {
     Result result =
         performTest(
-            "/v1/otp/generate",
-            "POST",
-            createInvalidOtpRequest(false, null, true, validEmailType, false, null));
+            GENERATE_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
-  public void testGenerateOtpWithInvalidEmailFailure() {
+  public void testGenerateOtpWithInVALID_EMAILFailure() {
     Result result =
         performTest(
-            "/v1/otp/generate",
-            "POST",
-            createInvalidOtpRequest(true, invalidEmail, true, validEmailType, false, null));
+            GENERATE_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.emailFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -73,9 +76,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testGenerateOtpWithInvalidTypeFailure() {
     Result result =
         performTest(
-            "/v1/otp/generate",
-            "POST",
-            createInvalidOtpRequest(true, validEmail, true, invalidType, false, null));
+            GENERATE_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -85,9 +88,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testVerifyOtpWithoutPhoneKeyFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(false, null, true, validPhoneType, true, otp));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, true, INVALID_OTP));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -96,9 +99,10 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testVerifyOtpWithInvalidPhoneFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(true, invalidPhone, true, validPhoneType, true, otp));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(
+                true, INVALID_PHONE, true, VALID_PHONE_TYPE, true, INVALID_OTP));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -107,20 +111,21 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testVerifyOtpWithoutEmailKeyFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(false, null, true, validEmailType, true, otp));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, true, INVALID_OTP));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
-  public void testVerifyOtpWithInvalidEmailFailure() {
+  public void testVerifyOtpWithInVALID_EMAILFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(true, invalidEmail, true, validEmailType, true, otp));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(
+                true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, true, INVALID_OTP));
     assertEquals(getResponseCode(result), ResponseCode.emailFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -129,9 +134,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testVerifyOtpWithoutOtpFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(true, validEmail, true, validEmailType, false, null));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(true, VALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -140,9 +145,9 @@ public class OtpControllerTest extends BaseControllerTest {
   public void testVerifyOtpWithInvalidTypeFailure() {
     Result result =
         performTest(
-            "/v1/otp/verify",
-            "POST",
-            createInvalidOtpRequest(true, validEmail, true, invalidType, true, otp));
+            VERIFY_OTP_URL,
+            HttpMethods.POST,
+            createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, true, INVALID_OTP));
     assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
