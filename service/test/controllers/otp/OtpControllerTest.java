@@ -29,7 +29,7 @@ public class OtpControllerTest extends BaseControllerTest {
   // Generate Otp test case
 
   @Test
-  public void testGenerateOtpWithoutPhoneKeyFailure() {
+  public void testGenerateOtpFailureWithoutPhoneKey() {
     Result result =
         performTest(
             GENERATE_OTP_URL,
@@ -40,7 +40,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGenerateOtpWithInvalidPhoneFailure() {
+  public void testGenerateOtpFailureWithInvalidPhone() {
     Result result =
         performTest(
             GENERATE_OTP_URL,
@@ -51,7 +51,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGenerateOtpWithoutEmailKeyFailure() {
+  public void testGenerateOtpFailureWithoutEmailKey() {
     Result result =
         performTest(
             GENERATE_OTP_URL,
@@ -62,7 +62,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGenerateOtpWithInVALID_EMAILFailure() {
+  public void testGenerateOtpFailureWithInvalidEmail() {
     Result result =
         performTest(
             GENERATE_OTP_URL,
@@ -73,7 +73,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testGenerateOtpWithInvalidTypeFailure() {
+  public void testGenerateOtpFailureWithInvalidType() {
     Result result =
         performTest(
             GENERATE_OTP_URL,
@@ -85,7 +85,7 @@ public class OtpControllerTest extends BaseControllerTest {
 
   // VerifyOtptestCase
   @Test
-  public void testVerifyOtpWithoutPhoneKeyFailure() {
+  public void testVerifyOtpFailureWithoutPhoneKey() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
@@ -96,7 +96,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testVerifyOtpWithInvalidPhoneFailure() {
+  public void testVerifyOtpFailureWithInvalidPhone() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
@@ -108,7 +108,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testVerifyOtpWithoutEmailKeyFailure() {
+  public void testVerifyOtpFailureWithoutEmailKey() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
@@ -119,7 +119,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testVerifyOtpWithInVALID_EMAILFailure() {
+  public void testVerifyOtpFailureWithInvalidEmail() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
@@ -131,7 +131,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testVerifyOtpWithoutOtpFailure() {
+  public void testVerifyOtpFailureWithoutOtp() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
@@ -142,7 +142,7 @@ public class OtpControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testVerifyOtpWithInvalidTypeFailure() {
+  public void testVerifyOtpFailureWithInvalidType() {
     Result result =
         performTest(
             VERIFY_OTP_URL,
