@@ -1,4 +1,3 @@
-/** */
 package util;
 
 import akka.actor.ActorRef;
@@ -356,24 +355,25 @@ public class Global extends GlobalSettings {
   private static String getCustodianOrgHashTagId() {
     synchronized (Global.class) {
       if (custodianOrgHashTagId == null) {
-        ActorRef sysSettingActorRef =
-            RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
-        ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
-        SystemSettingClient ssc = SystemSettingClientImpl.getInstance();
         try {
+          // Get custodian org ID
+          SystemSettingClient sysSettingClient = SystemSettingClientImpl.getInstance();
+          ActorRef sysSettingActorRef =
+              RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
           SystemSetting systemSetting =
-              ssc.getSystemSettingByField(sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
+              sysSettingClient.getSystemSettingByField(sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
+
           OrganisationClient orgClient = new OrganisationClientImpl();
+          ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
           custodianOrgHashTagId =
               orgClient.getOrgById(orgActorRef, systemSetting.getValue()).getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
           else throw e;
         }
-      } else {
-        return custodianOrgHashTagId;
       }
     }
     return custodianOrgHashTagId;
   }
+
 }
