@@ -7,13 +7,11 @@ import controllers.BaseControllerTest;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.jetty.http.HttpMethods;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
-@Ignore
 public class OtpControllerTest extends BaseControllerTest {
 
   private static final String VALID_EMAIL = "someEmail@someDomain.com";
@@ -25,8 +23,6 @@ public class OtpControllerTest extends BaseControllerTest {
   private static final String INVALID_OTP = "anyOtp";
   private static final String GENERATE_OTP_URL = "/v1/otp/generate";
   private static final String VERIFY_OTP_URL = "/v1/otp/verify";
-
-  // Generate Otp test case
 
   @Test
   public void testGenerateOtpFailureWithoutPhoneKey() {
@@ -83,7 +79,6 @@ public class OtpControllerTest extends BaseControllerTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  // VerifyOtptestCase
   @Test
   public void testVerifyOtpFailureWithoutPhoneKey() {
     Result result =
