@@ -363,6 +363,7 @@ public class Global extends GlobalSettings {
           SystemSetting systemSetting =
               sysSettingClient.getSystemSettingByField(sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
 
+          // Get hash tag ID of custodian org
           OrganisationClient orgClient = new OrganisationClientImpl();
           ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
           custodianOrgHashTagId =
