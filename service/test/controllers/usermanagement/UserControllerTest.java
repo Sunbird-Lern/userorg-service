@@ -134,13 +134,13 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) UpdateUserFrameworkRequest(userId, "NCF",false));
+            (Map) updateUserFrameworkRequest(userId, "NCF",false));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
   
 
-  private Map UpdateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
+  private Map updateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> frameworkMap;
