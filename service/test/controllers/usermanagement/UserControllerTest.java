@@ -5,13 +5,17 @@ import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.route;
 
 import controllers.BaseControllerTest;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
+
+
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 
@@ -28,6 +32,7 @@ public class UserControllerTest extends BaseControllerTest {
   private static String query = "query";
   private static String language = "any-language";
   private static String role = "user";
+  private static final String UPDATE_URL = "/v1/user/update";
 
   @Test
   public void testCreateUserSuccess() {
@@ -122,7 +127,7 @@ public class UserControllerTest extends BaseControllerTest {
   public void testUpdateUserFrameworkSuccess() {
     Result result =
         performTest(
-            "/v1/user/update",
+            UPDATE_URL,
             "PATCH",
             (Map) updateUserFrameworkRequest(userId, "NCF",true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
@@ -132,7 +137,7 @@ public class UserControllerTest extends BaseControllerTest {
   public void testUpdateUserFrameworkFailure() {
     Result result =
         performTest(
-            "/v1/user/update",
+            UPDATE_URL,
             "PATCH",
             (Map) updateUserFrameworkRequest(userId, "NCF",false));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
@@ -151,18 +156,16 @@ public class UserControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.PHONE, phoneNumber);
     innerMap.put(JsonKey.COUNTRY_CODE, "+91");
     innerMap.put(JsonKey.EMAIL, emailId);
+    innerMap.put(JsonKey.EMAIL_VERIFIED, true);
     request.put(JsonKey.REQUEST, innerMap);
     return request;
   }
 
   private Map<String, Object> getFrameworkDetails(String frameworkId, boolean success) {
     Map<String, Object> frameworkMap = new HashMap<>();
-    List<String> medium = new ArrayList<>();
-    medium.add("English");
-    List<String> gradeLevel = new ArrayList<>();
-    gradeLevel.add("Grade 3");
-    List<String> board = new ArrayList<>();
-    board.add("NCERT");
+    List<String> medium = Arrays.asList("English");
+    List<String> gradeLevel = Arrays.asList("Grade 3");
+    List<String> board = Arrays.asList("NCERT");
     if (success) {
       frameworkMap.put(JsonKey.ID, frameworkId);
     } else {
