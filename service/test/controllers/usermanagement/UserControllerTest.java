@@ -124,7 +124,7 @@ public class UserControllerTest extends BaseControllerTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) UpdateUserFrameworkRequest(userId, "NCF",true));
+            (Map) updateUserFrameworkRequest(userId, "NCF",true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
