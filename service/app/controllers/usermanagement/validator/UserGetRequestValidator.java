@@ -33,10 +33,10 @@ public class UserGetRequestValidator extends BaseRequestValidator {
               String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE, JsonKey.LOGIN_ID)));
     }
 
-    if (request.get(JsonKey.KEY).equals(JsonKey.PHONE)) {
+    if (JsonKey.PHONE.equals(request.get(JsonKey.KEY))) {
       validatePhone((String) request.get(JsonKey.VALUE));
     }
-    if (request.get(JsonKey.KEY).equals(JsonKey.EMAIL)) {
+    if (JsonKey.EMAIL.equals(request.get(JsonKey.KEY))) {
       validateEmail((String) request.get(JsonKey.VALUE));
     }
   }
