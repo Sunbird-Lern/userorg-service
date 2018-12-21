@@ -76,7 +76,7 @@ public class UserController extends BaseController {
 
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
-        null,
+        request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
           new UserRequestValidator().validateVerifyUser(request);
@@ -99,9 +99,11 @@ public class UserController extends BaseController {
         (req) -> {
           Request request = (Request) req;
           request.setRequest(map);
-          new UserGetRequestValidator().validateGetUserByKeyRequest((Request) request);
+          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
           return null;
         },
+        null,
+        null,
         false);
   }
 
