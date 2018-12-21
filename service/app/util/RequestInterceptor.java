@@ -87,7 +87,10 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/bulk/location/upload", var);
     apiHeaderIgnoreMap.put("/v1/otp/generate", var);
     apiHeaderIgnoreMap.put("/v1/otp/verify", var);
-    apiHeaderIgnoreMap.put("/v1/user/getByKey", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/email", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/phone", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/loginId", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/loginid", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
   }

@@ -438,7 +438,6 @@ public class BaseController extends Controller {
   }
 
   /**
-   *
    * @param file
    * @return
    */
@@ -806,5 +805,4 @@ public class BaseController extends Controller {
         .map(s -> "?" + s)
         .orElse("");
   }
-
 }
