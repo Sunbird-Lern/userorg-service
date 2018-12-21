@@ -2,6 +2,7 @@ package controllers.usermanagement;
 
 import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
+import java.util.HashMap;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
@@ -75,7 +76,7 @@ public class UserController extends BaseController {
 
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
-        request().body().asJson(),
+        null,
         (req) -> {
           Request request = (Request) req;
           new UserRequestValidator().validateVerifyUser(request);
@@ -88,14 +89,20 @@ public class UserController extends BaseController {
         true);
   }
 
-  public Promise<Result> getUserByKey() {
+  public Promise<Result> getUserByKey(String idType, String id) {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, idType);
+    map.put(JsonKey.VALUE, id);
     return handleRequest(
         ActorOperations.GET_USER_BY_KEY.getValue(),
-        request().body().asJson(),
-        (request) -> {
+        null,
+        (req) -> {
+          Request request = (Request) req;
+          request.setRequest(map);
           new UserGetRequestValidator().validateGetUserByKeyRequest((Request) request);
           return null;
-        });
+        },
+        false);
   }
 
   public Promise<Result> searchUser() {
