@@ -133,7 +133,7 @@ public class TextbookController extends BaseController {
                 metadata.values().removeIf(key -> !csvHeaders.keySet().contains(key));
                 hierarchy.values().removeIf(key -> !csvHeaders.keySet().contains(key));
             } else {
-                throwClientErrorException(ResponseCode.requiredHeaderMissing, ResponseCode.requiredHeaderMissing.getErrorMessage());
+                throwClientErrorException(ResponseCode.blankCsvData, ResponseCode.blankCsvData.getErrorMessage());
             }
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
             validateCSV(csvRecords);
