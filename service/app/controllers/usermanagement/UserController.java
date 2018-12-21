@@ -90,8 +90,9 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> getUserByKey(String idType, String id) {
+
     HashMap<String, Object> map = new HashMap<>();
-    map.put(JsonKey.KEY, idType);
+    map.put(JsonKey.KEY, JsonKey.LOGIN_ID.equalsIgnoreCase(idType) ? JsonKey.LOGIN_ID : idType);
     map.put(JsonKey.VALUE, id);
     return handleRequest(
         ActorOperations.GET_USER_BY_KEY.getValue(),
