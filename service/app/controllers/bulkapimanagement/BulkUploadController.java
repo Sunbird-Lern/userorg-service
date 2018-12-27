@@ -1,5 +1,6 @@
 package controllers.bulkapimanagement;
 
+import controllers.bulkapimanagement.validator.BulkUploadRequestValidator;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
@@ -81,20 +82,24 @@ public class BulkUploadController extends BaseBulkUploadController {
   }
 
   public Promise<Result> userDataEncryption() {
-    try {
-      Request request = createAndInitRequest(ActorOperations.ENCRYPT_USER_DATA.getValue());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.ENCRYPT_USER_DATA.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new BulkUploadRequestValidator().validateEncryptRequest((Request) request);
+          return null;
+        },
+        getAllRequestHeaders(request()));
   }
 
   public Promise<Result> userDataDecryption() {
-    try {
-      Request request = createAndInitRequest(ActorOperations.DECRYPT_USER_DATA.getValue());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
+    return handleRequest(
+        ActorOperations.DECRYPT_USER_DATA.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new BulkUploadRequestValidator().validateDecryptRequest((Request) request);
+          return null;
+        },
+        getAllRequestHeaders(request()));
   }
 }
