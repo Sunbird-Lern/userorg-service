@@ -112,10 +112,14 @@ public class TextbookController extends BaseController {
         List<Map<String, Object>> rows = new ArrayList<>();
 
         String tocMapping = ProjectUtil.getConfigValue(JsonKey.TEXTBOOK_TOC_INPUT_MAPPING);
-        Map<String, Map<String, String>> configMap = mapper.readValue(tocMapping, new TypeReference<Map<String, Object>>() {
+        Map<String, Object> configMap = mapper.readValue(tocMapping, new TypeReference<Map<String, Object>>() {
         });
-        Map<String, String> metadata = configMap.get(JsonKey.METADATA);
-        Map<String, String> hierarchy = configMap.get(JsonKey.HIERARCHY);
+
+        Map<String, String> metadata = (Map<String, String>) configMap.get(JsonKey.METADATA);
+        Map<String, String> hierarchy = (Map<String, String>) configMap.get(JsonKey.HIERARCHY);
+        Map<String, String> fwMetadata = (Map<String, String>) configMap.get(JsonKey.FRAMEWORK_METADATA);
+        String id = configMap.getOrDefault(JsonKey.IDENTIFIER, StringUtils.capitalize(JsonKey.IDENTIFIER)).toString();
+        metadata.putAll(fwMetadata);
 
         CSVParser csvFileParser = null;
 
@@ -126,7 +130,7 @@ public class TextbookController extends BaseController {
             csvFileParser = csvFileFormat.parse(reader);
             Map<String, Integer> csvHeaders = csvFileParser.getHeaderMap();
 
-            String mode = csvHeaders.containsKey(StringUtils.capitalize(JsonKey.IDENTIFIER)) ? JsonKey.UPDATE : JsonKey.CREATE;
+            String mode = csvHeaders.containsKey(id) ? JsonKey.UPDATE : JsonKey.CREATE;
             result.put(JsonKey.MODE, mode);
 
             if (null != csvHeaders && !csvHeaders.isEmpty()) {
@@ -154,6 +158,8 @@ public class TextbookController extends BaseController {
 
                 if (!(MapUtils.isEmpty(recordMap) && MapUtils.isEmpty(hierarchyMap))) {
                     rows.add(new HashMap<String, Object>() {{
+                        if (JsonKey.UPDATE.equalsIgnoreCase(mode) && StringUtils.isNotBlank(record.get(id)))
+                            put(JsonKey.IDENTIFIER, record.get(id).trim());
                         put(JsonKey.METADATA, recordMap);
                         put(JsonKey.HIERARCHY, hierarchyMap);
                     }});
