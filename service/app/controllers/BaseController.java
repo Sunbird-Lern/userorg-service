@@ -270,6 +270,8 @@ public class BaseController extends Controller {
   }
 
   public static ResponseParams createResponseParamObj(ResponseCode code, String customMessage) {
+    ProjectLogger.log("BaseController: createResponseParamObj called " + operation, LoggerEnum.INFO.name());
+
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
@@ -299,6 +301,8 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createSuccessResponse(Request request, Response response) {
+    String operation = request.getOperation();
+    ProjectLogger.log("BaseController:createSuccessResponse: operation = " + operation, LoggerEnum.INFO.name());
 
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -392,6 +396,8 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonResponse(Object response, String key, Request request) {
+    String operation = request.getOperation();
+    ProjectLogger.log("BaseController:createCommonResponse: operation = " + operation, LoggerEnum.INFO.name());
 
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
@@ -415,6 +421,7 @@ public class BaseController extends Controller {
             (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
     // if any request is coming form /v1/telemetry/save then don't generate the telemetry log
     // for it.
+    ProjectLogger.log("BaseController:createCommonResponse: Write to telemetry to lmax for operation = " + operation, LoggerEnum.INFO.name());
     lmaxWriter.submitMessage(req);
 
     Response courseResponse = (Response) response;
@@ -548,6 +555,11 @@ public class BaseController extends Controller {
       Timeout timeout,
       String responseKey,
       Request httpReq) {
+
+    String operation = request.getOperation();
+
+    ProjectLogger.log("BaseController:actorResponseHandler: operation = " + operation, LoggerEnum.INFO.name());
+
     // set header to request object , setting actor type and channel headers value
     // ...
     setChannelAndActorInfo(ctx(), request);
@@ -556,15 +568,19 @@ public class BaseController extends Controller {
         new Function<Object, Result>() {
           @Override
           public Result apply(Object result) {
+            ProjectLogger.log("BaseController:actorResponseHandler:apply: operation = " + operation, LoggerEnum.INFO.name());
             if (result instanceof Response) {
+              ProjectLogger.log("BaseController:actorResponseHandler:apply: Response type for operation = " + operation, LoggerEnum.INFO.name());
               Response response = (Response) result;
               return createCommonResponse(response, responseKey, httpReq);
             } else if (result instanceof ProjectCommonException) {
+              ProjectLogger.log("BaseController:actorResponseHandler:apply: ProjectCommonException for operation = " + operation, LoggerEnum.INFO.name());
               return createCommonExceptionResponse((ProjectCommonException) result, request());
             } else if (result instanceof File) {
+              ProjectLogger.log("BaseController:actorResponseHandler:apply: file type for operation = " + operation, LoggerEnum.INFO.name());
               return createFileDownloadResponse((File) result);
             } else {
-              ProjectLogger.log("Unsupported Actor Response format", LoggerEnum.INFO.name());
+              ProjectLogger.log("BaseController:actorResponseHandler:apply: Unknown response for operation = " + operation, LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
           }
