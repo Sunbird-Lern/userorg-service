@@ -378,7 +378,7 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       String path, String method, ProjectCommonException exception) {
-    ProjectLogger.log("BaseController: createResponseOnException called for path " = path, LoggerEnum.INFO.name());
+    ProjectLogger.log("BaseController: createResponseOnException called for path = " + path, LoggerEnum.INFO.name());
 
     Response response = new Response();
     response.setVer(getApiVersion(path));
