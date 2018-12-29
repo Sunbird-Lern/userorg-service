@@ -259,6 +259,7 @@ public class BaseController extends Controller {
    */
   public static Response createFailureResponse(
       Request request, ResponseCode code, ResponseCode headerCode) {
+    ProjectLogger.log("BaseController: createFailureResponse called", LoggerEnum.INFO.name());
 
     Response response = new Response();
     response.setVer(getApiVersion(request.path()));
@@ -336,6 +337,8 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       Request request, ProjectCommonException exception) {
+    ProjectLogger.log("BaseController: createResponseOnException called", LoggerEnum.INFO.name());
+
     ProjectLogger.log(
         exception != null ? exception.getMessage() : "Message is not coming",
         exception,
@@ -375,6 +378,7 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       String path, String method, ProjectCommonException exception) {
+    ProjectLogger.log("BaseController: createResponseOnException called for path " = path, LoggerEnum.INFO.name());
 
     Response response = new Response();
     response.setVer(getApiVersion(path));
@@ -486,6 +490,8 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonExceptionResponse(Exception e, Request request) {
+    ProjectLogger.log("BaseController: createCommonExceptionResponse called", LoggerEnum.INFO.name());
+
     Request req = request;
     ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
     if (req == null) {
