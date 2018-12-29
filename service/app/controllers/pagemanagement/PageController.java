@@ -141,7 +141,7 @@ public class PageController extends BaseController {
     } catch (Exception e) {
       ProjectLogger.log(
               "PageController:getPageData: Exception occurred with error message = " + e.getMessage(),
-              LoggerEnum.INFO.name());
+              LoggerEnum.ERROR.name());
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
