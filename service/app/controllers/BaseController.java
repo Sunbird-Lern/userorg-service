@@ -270,7 +270,7 @@ public class BaseController extends Controller {
   }
 
   public static ResponseParams createResponseParamObj(ResponseCode code, String customMessage) {
-    ProjectLogger.log("BaseController: createResponseParamObj called " + operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("BaseController: createResponseParamObj called", LoggerEnum.INFO.name());
 
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
@@ -301,8 +301,7 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createSuccessResponse(Request request, Response response) {
-    String operation = request.getOperation();
-    ProjectLogger.log("BaseController:createSuccessResponse: operation = " + operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("BaseController: createSuccessResponse called", LoggerEnum.INFO.name());
 
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
@@ -396,8 +395,7 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonResponse(Object response, String key, Request request) {
-    String operation = request.getOperation();
-    ProjectLogger.log("BaseController:createCommonResponse: operation = " + operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("BaseController: createCommonResponse called", LoggerEnum.INFO.name());
 
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
@@ -421,7 +419,7 @@ public class BaseController extends Controller {
             (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
     // if any request is coming form /v1/telemetry/save then don't generate the telemetry log
     // for it.
-    ProjectLogger.log("BaseController:createCommonResponse: Write to telemetry to lmax for operation = " + operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("BaseController:createCommonResponse: Write to telemetry to lmax", LoggerEnum.INFO.name());
     lmaxWriter.submitMessage(req);
 
     Response courseResponse = (Response) response;
