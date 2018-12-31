@@ -26,7 +26,7 @@ node('build-slave') {
 
       stage('Unit Tests') {
 
-          sh "sudo mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
+        sh "sudo mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
 
       }
 
