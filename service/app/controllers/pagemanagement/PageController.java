@@ -139,6 +139,9 @@ public class PageController extends BaseController {
       reqObj.setRequest(map);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
+      ProjectLogger.log(
+              "PageController:getPageData: Exception occurred with error message = " + e.getMessage(),
+              LoggerEnum.ERROR.name());
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }

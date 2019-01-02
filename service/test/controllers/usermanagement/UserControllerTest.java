@@ -5,13 +5,17 @@ import static org.junit.Assert.assertTrue;
 import static play.test.Helpers.route;
 
 import controllers.BaseControllerTest;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
+
+
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 
@@ -28,6 +32,7 @@ public class UserControllerTest extends BaseControllerTest {
   private static String query = "query";
   private static String language = "any-language";
   private static String role = "user";
+  private static final String UPDATE_URL = "/v1/user/update";
 
   @Test
   public void testCreateUserSuccess() {
@@ -86,33 +91,28 @@ public class UserControllerTest extends BaseControllerTest {
   @Test
   public void testGetUserDetailsSuccessByUserId() {
     Result result =
-        performTest(
-            "/v1/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+        performTest("/v1/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetUserDetailsSuccessByLoginId() {
-    Result result =
-        performTest(
-            "/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
+    Result result = performTest("/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetUserDetailsFailureWithoutLoginId() {
-    Result result =
-        performTest("/v1/user/getuser", "POST", getUserRequest(null, null));
+    Result result = performTest("/v1/user/getuser", "POST", getUserRequest(null, null));
     assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testSearchUserSuccess() {
-    Result result =
-        performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
+    Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -123,6 +123,62 @@ public class UserControllerTest extends BaseControllerTest {
     assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
+  @Test
+  public void testUpdateUserFrameworkSuccess() {
+    Result result =
+        performTest(
+            UPDATE_URL,
+            "PATCH",
+            (Map) updateUserFrameworkRequest(userId, "NCF",true));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+  @Test
+  public void testUpdateUserFrameworkFailure() {
+    Result result =
+        performTest(
+            UPDATE_URL,
+            "PATCH",
+            (Map) updateUserFrameworkRequest(userId, "NCF",false));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+  
+
+  private Map updateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> frameworkMap;
+    frameworkMap = getFrameworkDetails(frameworkId, success);
+    innerMap.put(JsonKey.USER_ID, userId);
+    innerMap.put(JsonKey.FRAMEWORK, frameworkMap);
+    innerMap.put(JsonKey.PHONE_VERIFIED, true);
+    innerMap.put(JsonKey.PHONE, phoneNumber);
+    innerMap.put(JsonKey.COUNTRY_CODE, "+91");
+    innerMap.put(JsonKey.EMAIL, emailId);
+    innerMap.put(JsonKey.EMAIL_VERIFIED, true);
+    request.put(JsonKey.REQUEST, innerMap);
+    return request;
+  }
+
+  private Map<String, Object> getFrameworkDetails(String frameworkId, boolean success) {
+    Map<String, Object> frameworkMap = new HashMap<>();
+    List<String> medium = Arrays.asList("English");
+    List<String> gradeLevel = Arrays.asList("Grade 3");
+    List<String> board = Arrays.asList("NCERT");
+    if (success) {
+      frameworkMap.put(JsonKey.ID, frameworkId);
+    } else {
+      frameworkMap.put(JsonKey.ID, "");
+    }
+    frameworkMap.put("medium", medium);
+    frameworkMap.put("gradeLevel", gradeLevel);
+    frameworkMap.put("board", board);
+    return frameworkMap;
+  }
+  
+  
+  
 
   private Object createOrUpdateUserRequest(
       String userName, String phoneNumber, String userId, boolean isContentType) {
@@ -160,13 +216,13 @@ public class UserControllerTest extends BaseControllerTest {
 
   private Map<String, Object> getUserRequest(String userId, String loginId) {
     Map<String, Object> requestMap = new HashMap<>();
-    
+
     Map<String, Object> innerMap = new HashMap<>();
     if (userId != null) innerMap.put(JsonKey.USER_ID, userId);
     if (loginId != null) innerMap.put(JsonKey.LOGIN_ID, loginId);
-    
+
     requestMap.put(JsonKey.REQUEST, innerMap);
-    
+
     return requestMap;
   }
 
@@ -181,5 +237,4 @@ public class UserControllerTest extends BaseControllerTest {
 
     return requestMap;
   }
-
 }

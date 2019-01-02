@@ -1,6 +1,6 @@
-/** */
 package util;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -9,9 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
+import org.sunbird.actorutil.systemsettings.SystemSettingClient;
+import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -23,6 +30,7 @@ import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.SchedulerManager;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import play.Application;
 import play.GlobalSettings;
@@ -49,6 +57,7 @@ public class Global extends GlobalSettings {
   private static final String version = "v1";
   private final List<String> USER_UNAUTH_STATES =
       Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+  private static String custodianOrgHashTagId;
 
   static {
     init();
@@ -136,7 +145,11 @@ public class Global extends GlobalSettings {
     // set env and channel to the
     String channel = request.getHeader(JsonKey.CHANNEL_ID);
     if (StringUtils.isBlank(channel)) {
-      channel = JsonKey.DEFAULT_ROOT_ORG_ID;
+      String custodianOrgHashTagid = getCustodianOrgHashTagId();
+      channel =
+          (StringUtils.isNotEmpty(custodianOrgHashTagid))
+              ? custodianOrgHashTagid
+              : JsonKey.DEFAULT_ROOT_ORG_ID;
     }
     reqContext.put(JsonKey.CHANNEL, channel);
     ctx.flash().put(JsonKey.CHANNEL, channel);
@@ -187,7 +200,7 @@ public class Global extends GlobalSettings {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;
@@ -213,6 +226,8 @@ public class Global extends GlobalSettings {
       env = JsonKey.NOTE;
     } else if (uri.startsWith("/v1/location")) {
       env = JsonKey.LOCATION;
+    } else if (uri.startsWith("/v1/otp")) {
+      env = "otp";
     } else {
       env = "miscellaneous";
     }
@@ -245,21 +260,24 @@ public class Global extends GlobalSettings {
    */
   @Override
   public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
-
+    ProjectLogger.log("Global: onError called for path = " + request.path(), LoggerEnum.INFO.name());
     Response response = null;
     ProjectCommonException commonException = null;
     if (t instanceof ProjectCommonException) {
+      ProjectLogger.log("Global:onError: ProjectCommonException occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException = (ProjectCommonException) t;
       response =
           BaseController.createResponseOnException(
               request.path(), request.method(), (ProjectCommonException) t);
     } else if (t instanceof akka.pattern.AskTimeoutException) {
+      ProjectLogger.log("Global:onError: AskTimeoutException occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.actorConnectionError.getErrorCode(),
               ResponseCode.actorConnectionError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     } else {
+      ProjectLogger.log("Global:onError: Unknown exception occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.internalError.getErrorCode(),
@@ -298,17 +316,14 @@ public class Global extends GlobalSettings {
     String path = requestPath;
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
-    final String ver3 = "/" + JsonKey.VERSION_3;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
+    if (path.startsWith(ver) || path.startsWith(ver2)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
       } else if (requestUrl.contains(ver2)) {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
-      } else {
-        requestUrl = requestUrl.replaceFirst(ver3, "api");
       }
 
       String[] list = requestUrl.split("/");
@@ -335,5 +350,31 @@ public class Global extends GlobalSettings {
     // Run quartz scheduler in a separate thread as it waits for 4 minutes
     // before scheduling various jobs.
     new Thread(() -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance()).start();
+  }
+
+  private static String getCustodianOrgHashTagId() {
+    synchronized (Global.class) {
+      if (custodianOrgHashTagId == null) {
+        try {
+          // Get custodian org ID
+          SystemSettingClient sysSettingClient = SystemSettingClientImpl.getInstance();
+          ActorRef sysSettingActorRef =
+              RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
+          SystemSetting systemSetting =
+              sysSettingClient.getSystemSettingByField(
+                  sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
+
+          // Get hash tag ID of custodian org
+          OrganisationClient orgClient = new OrganisationClientImpl();
+          ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
+          custodianOrgHashTagId =
+              orgClient.getOrgById(orgActorRef, systemSetting.getValue()).getHashTagId();
+        } catch (ProjectCommonException e) {
+          if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
+          else throw e;
+        }
+      }
+    }
+    return custodianOrgHashTagId;
   }
 }

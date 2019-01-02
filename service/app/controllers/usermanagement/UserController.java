@@ -1,6 +1,8 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
+import controllers.usermanagement.validator.UserGetRequestValidator;
+import java.util.HashMap;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
@@ -20,7 +22,7 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.name());
+          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.getTypeName());
           new UserRequestValidator().validateCreateUserV1Request(request);
           return null;
         },
@@ -35,25 +37,9 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.name());
+          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.getTypeName());
           new UserRequestValidator().validateCreateUserV2Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-          return null;
-        },
-        null,
-        null,
-        true);
-  }
-
-  public Promise<Result> createUserV3() {
-    return handleRequest(
-        ActorOperations.CREATE_USER.getValue(),
-        request().body().asJson(),
-        (req) -> {
-          Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.name());
-          new UserRequestValidator().validateCreateUserV3Request(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
           return null;
         },
         null,
@@ -103,12 +89,34 @@ public class UserController extends BaseController {
         true);
   }
 
+  public Promise<Result> getUserByKey(String idType, String id) {
+
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, JsonKey.LOGIN_ID.equalsIgnoreCase(idType) ? JsonKey.LOGIN_ID : idType);
+    map.put(JsonKey.VALUE, id);
+    return handleRequest(
+        ActorOperations.GET_USER_BY_KEY.getValue(),
+        null,
+        (req) -> {
+          Request request = (Request) req;
+          request.setRequest(map);
+          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+          return null;
+        },
+        null,
+        null,
+        false);
+  }
+
   public Promise<Result> searchUser() {
+    final String requestedFields = request().getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
         userSearchRequest -> {
-          new BaseRequestValidator().validateSearchRequest((Request) userSearchRequest);
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
           return null;
         },
         null,
