@@ -1,11 +1,11 @@
-package controllers.bulkapimanagement.validator;
+package controllers.datasecurity.validator;
 
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-public class BulkUploadRequestValidator extends BaseRequestValidator {
+public class DataSecurityRequestValidator extends BaseRequestValidator {
 
   public void validateEncryptRequest(Request request) {
     commonValidation(request);

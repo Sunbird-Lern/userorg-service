@@ -1,6 +1,5 @@
 package controllers.bulkapimanagement;
 
-import controllers.bulkapimanagement.validator.BulkUploadRequestValidator;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
@@ -79,27 +78,5 @@ public class BulkUploadController extends BaseBulkUploadController {
         processId,
         JsonKey.PROCESS_ID,
         false);
-  }
-
-  public Promise<Result> userDataEncryption() {
-    return handleRequest(
-        ActorOperations.ENCRYPT_USER_DATA.getValue(),
-        request().body().asJson(),
-        (request) -> {
-          new BulkUploadRequestValidator().validateEncryptRequest((Request) request);
-          return null;
-        },
-        getAllRequestHeaders(request()));
-  }
-
-  public Promise<Result> userDataDecryption() {
-    return handleRequest(
-        ActorOperations.DECRYPT_USER_DATA.getValue(),
-        request().body().asJson(),
-        (request) -> {
-          new BulkUploadRequestValidator().validateDecryptRequest((Request) request);
-          return null;
-        },
-        getAllRequestHeaders(request()));
   }
 }
