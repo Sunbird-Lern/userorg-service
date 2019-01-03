@@ -3,7 +3,7 @@
 # set -o errexit
 
 commit_hash=$1
-name=learner
+name=learner_service
 version=$2
 node=$3
 org=$4
