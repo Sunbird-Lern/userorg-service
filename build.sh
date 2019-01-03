@@ -1,14 +1,12 @@
 #!/bin/sh
 # Build script
 # set -o errexit
-e () {
-    echo $( echo ${1} | jq ".${2}" | sed 's/\"//g')
-}
-m=$(./metadata.sh)
 
-org=$(e "${m}" "org")
-name=$(e "${m}" "name")
-version=$(e "${m}" "version")
+commit_hash=$1
+name=player
+version=$2
+node=$3
+org=$4
 
-
-docker build -f ./Dockerfile -t ${org}/${name}:${version}-bronze .
+docker build -f ./Dockerfile --label commitHash=$(git rev-parse --short HEAD) -t ${org}/${name}:${version}_${commit_hash} .
+echo {\"image_name\" : \"${name}\", \"image_tag\" : \"${version}_${commit_hash}\", \"node_name\" : \"$node\"} > metadata.json
