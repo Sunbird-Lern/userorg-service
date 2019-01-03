@@ -22,12 +22,12 @@ node('build-slave') {
         sh('git submodule update --init --recursive --remote')
         sh 'git log -1'
         sh 'cat service/conf/routes | grep v2'
-        sh 'sudo mvn clean install -DskipTests=true '
+        sh 'mvn clean install -DskipTests=true '
 
       }
 
       stage('Unit Tests') {
-        sh "sudo mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
+        sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
       }
 
       stage('Package') {
