@@ -6,8 +6,9 @@ node('build-slave') {
    cleanWs()
 
    try {
-
       stage('Checkout') {
+         if(!env.hub_org)
+            error 'Please set a Jenkins environment variable named hub_org with value as registery/sunbidrded'
          checkout scm
          commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
          branch_name = sh(script: 'git name-rev --name-only HEAD | rev | cut -d "/" -f1| rev', returnStdout: true).trim()
