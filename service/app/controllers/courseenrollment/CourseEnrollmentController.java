@@ -19,7 +19,7 @@ public class CourseEnrollmentController extends BaseController {
           request
               .getContext()
               .put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
-          request.getContext().put(JsonKey.REQUEST_PARAMS, request().queryString());
+          request.getContext().put(JsonKey.FIELDS, request().queryString().get(JsonKey.FIELDS));
           return null;
         },
         uid,
