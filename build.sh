@@ -2,11 +2,10 @@
 # Build script
 # set -o errexit
 
-commit_hash=$1
+build_tag=$1
 name=learner_service
-version=$2
-node=$3
-org=$4
+node=$2
+org=$3
 
-docker build -f ./Dockerfile --label commitHash=$(git rev-parse --short HEAD) -t ${org}/${name}:${version}_${commit_hash} .
-echo {\"image_name\" : \"${name}\", \"image_tag\" : \"${version}_${commit_hash}\", \"node_name\" : \"$node\"} > metadata.json
+docker build -f ./Dockerfile --label commitHash=$(git rev-parse --short HEAD) -t ${org}/${name}:${build_tag} .
+echo {\"image_name\" : \"${name}\", \"image_tag\" : \"${build_tag}\", \"node_name\" : \"$node\"} > metadata.json
