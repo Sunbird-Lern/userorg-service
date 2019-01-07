@@ -1,4 +1,4 @@
-package controllers.datasecurity;
+package controllers.usermanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,7 +12,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
-public class DataSecurityControllerTest extends BaseControllerTest {
+public class UserDataEncryptionControllerTest extends BaseControllerTest {
 
   private static final String USER_ID = "someUserId";
   private static final String ENCRYPT_DATA_URL = "/v1/user/data/encrypt";
