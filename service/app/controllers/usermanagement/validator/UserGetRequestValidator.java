@@ -13,10 +13,7 @@ public class UserGetRequestValidator extends BaseRequestValidator {
   public void validateGetUserByKeyRequest(Request request) {
     String key = (String) request.getRequest().get(JsonKey.KEY);
 
-    validateParam(
-        key,
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.KEY);
+    validateParam(key, ResponseCode.mandatoryParamsMissing, JsonKey.KEY);
 
     validateParam(
         (String) request.getRequest().get(JsonKey.VALUE),
@@ -34,8 +31,13 @@ public class UserGetRequestValidator extends BaseRequestValidator {
               JsonKey.KEY,
               key,
               String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE, JsonKey.LOGIN_ID)));
+    }
 
+    if (JsonKey.PHONE.equals(request.get(JsonKey.KEY))) {
+      validatePhone((String) request.get(JsonKey.VALUE));
+    }
+    if (JsonKey.EMAIL.equals(request.get(JsonKey.KEY))) {
+      validateEmail((String) request.get(JsonKey.VALUE));
     }
   }
-
 }

@@ -79,22 +79,4 @@ public class BulkUploadController extends BaseBulkUploadController {
         JsonKey.PROCESS_ID,
         false);
   }
-
-  public Promise<Result> userDataEncryption() {
-    try {
-      Request request = createAndInitRequest(ActorOperations.ENCRYPT_USER_DATA.getValue());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  public Promise<Result> userDataDecryption() {
-    try {
-      Request request = createAndInitRequest(ActorOperations.DECRYPT_USER_DATA.getValue());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
 }

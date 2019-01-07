@@ -260,21 +260,24 @@ public class Global extends GlobalSettings {
    */
   @Override
   public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
-
+    ProjectLogger.log("Global: onError called for path = " + request.path(), LoggerEnum.INFO.name());
     Response response = null;
     ProjectCommonException commonException = null;
     if (t instanceof ProjectCommonException) {
+      ProjectLogger.log("Global:onError: ProjectCommonException occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException = (ProjectCommonException) t;
       response =
           BaseController.createResponseOnException(
               request.path(), request.method(), (ProjectCommonException) t);
     } else if (t instanceof akka.pattern.AskTimeoutException) {
+      ProjectLogger.log("Global:onError: AskTimeoutException occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.actorConnectionError.getErrorCode(),
               ResponseCode.actorConnectionError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     } else {
+      ProjectLogger.log("Global:onError: Unknown exception occurred for path = " + request.path(), LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.internalError.getErrorCode(),

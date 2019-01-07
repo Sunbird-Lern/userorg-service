@@ -16,7 +16,7 @@ PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateU
 GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
 GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
 POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
-POST  /v1/user/getByKey           @controllers.usermanagement.UserController.getUserByKey()
+GET  /v1/user/get/:idType/:id           @controllers.usermanagement.UserController.getUserByKey(idType:String,id:String)
 POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
 
 GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
@@ -74,8 +74,8 @@ POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploa
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
-GET  /v1/user/data/encrypt              @controllers.bulkapimanagement.BulkUploadController.userDataEncryption()
-GET  /v1/user/data/decrypt              @controllers.bulkapimanagement.BulkUploadController.userDataDecryption()
+POST  /v1/user/data/encrypt              @controllers.datasecurity.DataSecurityController.userDataEncryption()
+POST  /v1/user/data/decrypt              @controllers.datasecurity.DataSecurityController.userDataDecryption()
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 

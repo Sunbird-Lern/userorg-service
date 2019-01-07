@@ -3,6 +3,8 @@ package controllers.otp.validator;
 import java.util.Map;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -46,12 +48,13 @@ public class OtpRequestValidator extends BaseRequestValidator {
     } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
       validatePhone(key);
     } else {
-      throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
-          ResponseCode.invalidParameterValue.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode(),
-          type,
-          JsonKey.TYPE);
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.invalidValue,
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(),
+              JsonKey.TYPE,
+              type,
+              String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE)));
     }
   }
 }
