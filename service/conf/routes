@@ -74,8 +74,8 @@ POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploa
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
-POST  /v1/user/data/encrypt              @controllers.datasecurity.DataSecurityController.userDataEncryption()
-POST  /v1/user/data/decrypt              @controllers.datasecurity.DataSecurityController.userDataDecryption()
+POST  /v1/user/data/encrypt              @controllers.usermanagement.UserDataEncryptionController.encrypt()
+POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEncryptionController.decrypt()
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 

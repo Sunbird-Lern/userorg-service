@@ -1,11 +1,11 @@
-package controllers.datasecurity.validator;
+package controllers.usermanagement.validator;
 
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
-public class DataSecurityRequestValidator extends BaseRequestValidator {
+public class UserDataEncryptionRequestValidator extends BaseRequestValidator {
 
   public void validateEncryptRequest(Request request) {
     commonValidation(request);
