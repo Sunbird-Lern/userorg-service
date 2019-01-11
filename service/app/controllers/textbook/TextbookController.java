@@ -44,10 +44,6 @@ public class TextbookController extends BaseController {
     }
   }
 
-  /**
-   * @param textbookId
-   * @return
-   */
   public Promise<Result> getTocUrl(String textbookId) {
     try {
       return handleRequest(
