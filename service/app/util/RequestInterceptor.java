@@ -93,6 +93,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
     apiHeaderIgnoreMap.put("/v1/course/batch/search", var);
+    apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
   }
 
   /**
