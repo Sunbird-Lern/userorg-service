@@ -109,7 +109,7 @@ public class RequestInterceptor {
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
     String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
     String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-    if (!isRequestInExcludeList(request.path())) {
+    if (!isRequestInExcludeList(request.path()) && !isRequestIsPrivate(request.path())) {
       if (StringUtils.isNotBlank(accessToken)) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
       } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
@@ -137,6 +137,13 @@ public class RequestInterceptor {
       }
       return JsonKey.ANONYMOUS;
     }
+  }
+
+  private static boolean isRequestIsPrivate(String path) {
+    if (path.contains(JsonKey.PRIVATE)) {
+      return true;
+    }
+    return false;
   }
 
   /**

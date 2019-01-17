@@ -40,4 +40,19 @@ public class UserGetRequestValidator extends BaseRequestValidator {
       validateEmail((String) request.get(JsonKey.VALUE));
     }
   }
+
+  public void validateGetUserByExternalIdRequest(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.ID_TYPE),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ID_TYPE);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.EXTERNAL_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.EXTERNAL_ID);
+    validateParam(
+        (String) request.getRequest().get(JsonKey.PROVIDER),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.PROVIDER);
+  }
 }

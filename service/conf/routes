@@ -18,6 +18,7 @@ GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUser
 POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
 GET  /v1/user/get/:idType/:id           @controllers.usermanagement.UserController.getUserByKey(idType:String,id:String)
 POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
+GET /v1/user/private/read/:externalId  @controllers.usermanagement.UserController.getUserById(externalId:String)
 
 GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
 POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
