@@ -9,16 +9,17 @@ POST     /v1/content/state/read	        @controllers.LearnerController.getConten
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
-# User management APIs 
-POST	/v1/user/create				      @controllers.usermanagement.UserController.createUser()
-POST	/v2/user/create				      @controllers.usermanagement.UserController.createUserV2()
-PATCH	/v1/user/update					    @controllers.usermanagement.UserController.updateUser()
-GET  	/v1/user/read/:uid				  @controllers.usermanagement.UserController.getUserById(uid:String)
-GET  	/v2/user/read/:uid				  @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
-POST  /v1/user/getuser            @controllers.usermanagement.UserController.getUserByLoginId()
-GET  /v1/user/get/:idType/:id           @controllers.usermanagement.UserController.getUserByKey(idType:String,id:String)
-POST  /v1/user/search					    @controllers.usermanagement.UserController.searchUser()
-GET /private/user/v1/read/:externalId  @controllers.usermanagement.UserController.getUserById(externalId:String)
+# User management APIs
+POST	/v1/user/create				            @controllers.usermanagement.UserController.createUser()
+POST	/v2/user/create				            @controllers.usermanagement.UserController.createUserV2()
+PATCH	/v1/user/update					          @controllers.usermanagement.UserController.updateUser()
+GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserById(uid:String)
+GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
+POST  /v1/user/getuser                  @controllers.usermanagement.UserController.getUserByLoginId()
+GET   /v1/user/get/:idType/:id          @controllers.usermanagement.UserController.getUserByKey(idType:String,id:String)
+POST  /v1/user/search					          @controllers.usermanagement.UserController.searchUser()
+GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserController.getUserById(externalId:String)
+
 
 GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes()
 POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility()
