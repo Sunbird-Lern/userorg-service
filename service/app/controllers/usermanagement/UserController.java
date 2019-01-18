@@ -50,14 +50,22 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> updateUser() {
+    final boolean isPrivate;
+    if (request().path().contains(JsonKey.PRIVATE)) {
+      isPrivate = true;
+    } else {
+      isPrivate = false;
+    }
     return handleRequest(
         ActorOperations.UPDATE_USER.getValue(),
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
           request.getContext().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
+          request.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRequestValidator().validateUpdateUserRequest(request);
           request.getContext().put(JsonKey.IS_AUTH_REQ, ctx().flash().get(JsonKey.IS_AUTH_REQ));
+
           return null;
         },
         null,
