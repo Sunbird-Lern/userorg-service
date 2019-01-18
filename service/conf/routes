@@ -29,6 +29,7 @@ POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.
 
 GET   /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles()
 POST  /v1/user/assign/role			  @controllers.usermanagement.UserRoleController.assignRoles()
+POST  /private/v1/user/assign/role	  @controllers.usermanagement.UserRoleController.assignRoles()
 
 PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
