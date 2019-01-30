@@ -142,6 +142,7 @@ public class UserController extends BaseController {
   }
 
   private Promise<Result> handleGetUserProfile(String operation, String userId) {
+    final boolean isPrivate = request().path().contains(JsonKey.PRIVATE) ? true : false;
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
     final String provider = request().getQueryString(JsonKey.PROVIDER);
     final String idType = request().getQueryString(JsonKey.ID_TYPE);
@@ -153,6 +154,7 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.FIELDS, requestedFields);
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
+          request.getContext().put(JsonKey.PRIVATE, isPrivate);
           return null;
         },
         userId,
