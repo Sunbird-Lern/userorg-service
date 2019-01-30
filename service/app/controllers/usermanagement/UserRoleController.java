@@ -15,12 +15,7 @@ public class UserRoleController extends BaseController {
   }
 
   public Promise<Result> assignRoles() {
-    final boolean isPrivate;
-    if (request().path().contains(JsonKey.PRIVATE)) {
-      isPrivate = true;
-    } else {
-      isPrivate = false;
-    }
+     final boolean isPrivate = request().path().contains(JsonKey.PRIVATE)?true:false;
 
     return handleRequest(
         ActorOperations.ASSIGN_ROLES.getValue(),
