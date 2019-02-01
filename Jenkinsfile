@@ -26,9 +26,6 @@ node('build-slave') {
 
       stage('Unit Tests') {
 		sh "sudo mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
-		archive "service/target/**/*"
-    	junit 'service/target/surefire-reports/*.xml'
-		step( [ $class: 'JacocoPublisher', execPattern: 'target/coverage-reports/*.exec' ] )
       }
 
       stage('Package') {
