@@ -24,7 +24,6 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.getTypeName());
           new UserRequestValidator().validateCreateUserV1Request(request);
           return null;
         },
@@ -39,7 +38,6 @@ public class UserController extends BaseController {
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(UserConstants.USER_TYPE, UserType.OTHER.getTypeName());
           new UserRequestValidator().validateCreateUserV2Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
