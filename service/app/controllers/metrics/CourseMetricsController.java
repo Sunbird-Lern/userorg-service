@@ -1,6 +1,7 @@
 package controllers.metrics;
 
 import controllers.BaseController;
+import controllers.usermanagement.validator.UserRoleRequestValidator;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
@@ -29,6 +30,23 @@ public class CourseMetricsController extends BaseController {
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
+  }
+
+  public Promise<Result> courseProgressV2(String batchId) {
+    final String limit = request().getQueryString(JsonKey.LIMIT);
+    final String offset = request().getQueryString(JsonKey.OFFSET);
+
+    return handleRequest(
+        ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          Request req = (Request) request;
+          req.getContext().put(JsonKey.LIMIT, limit);
+          req.getContext().put(JsonKey.BATCH_ID, batchId);
+          req.getContext().put(JsonKey.OFFSET, offset);
+          new UserRoleRequestValidator().validateAssignRolesRequest(req);
+          return null;
+        });
   }
 
   public Promise<Result> courseCreation(String courseId) {
