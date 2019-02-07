@@ -44,7 +44,6 @@ public class CourseMetricsController extends BaseController {
           req.getContext().put(JsonKey.LIMIT, limit);
           req.getContext().put(JsonKey.BATCH_ID, batchId);
           req.getContext().put(JsonKey.OFFSET, offset);
-          new UserRoleRequestValidator().validateAssignRolesRequest(req);
           return null;
         });
   }
