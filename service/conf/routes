@@ -94,6 +94,7 @@ POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.Course
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
 GET  /v1/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgress(batchId:String)
+GET  /v2/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgressV2(batchId:String)
 GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation(courseId:String)
 GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
 GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
