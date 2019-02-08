@@ -35,6 +35,7 @@ public class CourseMetricsController extends BaseController {
     final String limit = request().getQueryString(JsonKey.LIMIT);
     final String offset = request().getQueryString(JsonKey.OFFSET);
     final String sortBy = request().getQueryString(JsonKey.SORT_BY);
+    final String userName = request().getQueryString(JsonKey.USERNAME);
 
     return handleRequest(
         ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
@@ -44,6 +45,7 @@ public class CourseMetricsController extends BaseController {
           req.getContext().put(JsonKey.BATCH_ID, batchId);
           req.getContext().put(JsonKey.OFFSET, Integer.parseInt(offset));
           req.getContext().put(JsonKey.SORT_BY, sortBy);
+          req.getContext().put(JsonKey.USERNAME, userName);
           return null;
         });
   }
