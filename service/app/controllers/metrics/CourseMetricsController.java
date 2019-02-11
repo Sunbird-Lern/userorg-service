@@ -34,24 +34,26 @@ public class CourseMetricsController extends BaseController {
   }
 
   public Promise<Result> courseProgressV2(String batchId) {
-    final String limit =
-        StringUtils.isEmpty(request().getQueryString(JsonKey.LIMIT))
-            ? "200"
-            : request().getQueryString(JsonKey.LIMIT);
-    final String offset =
-        StringUtils.isEmpty(request().getQueryString(JsonKey.OFFSET))
-            ? "0"
-            : request().getQueryString(JsonKey.OFFSET);
-    final String sortBy = request().getQueryString(JsonKey.SORTBY);
-    final String userName = request().getQueryString(JsonKey.USERNAME);
-    new CourseMetricsProgressValidator().courseProgressMetricsV2Validator(limit, offset);
+    String limit = request().getQueryString(JsonKey.LIMIT);
+    limit = StringUtils.isEmpty(limit) ? JsonKey.DEFAULT_LIMIT : limit;
+
+    String offset = request().getQueryString(JsonKey.OFFSET);
+    offset =
+        StringUtils.isEmpty(offset) ? JsonKey.OFFSET : request().getQueryString(JsonKey.OFFSET);
+    final int dataLimit = Integer.parseInt(limit);
+    final int dataOffset = Integer.parseInt(offset);
+    String sortBy = request().getQueryString(JsonKey.SORTBY);
+    String userName = request().getQueryString(JsonKey.USERNAME);
+    String sortOrder = request().getQueryString(JsonKey.SORT_ORDER);
+    new CourseMetricsProgressValidator()
+        .validateCourseProgressMetricsV2Request(limit, offset, sortOrder);
     return handleRequest(
         ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
         (request) -> {
           Request req = (Request) request;
-          req.getContext().put(JsonKey.LIMIT, Integer.parseInt(limit));
+          req.getContext().put(JsonKey.LIMIT, dataLimit);
           req.getContext().put(JsonKey.BATCH_ID, batchId);
-          req.getContext().put(JsonKey.OFFSET, Integer.parseInt(offset));
+          req.getContext().put(JsonKey.OFFSET, dataOffset);
           req.getContext().put(JsonKey.SORT_BY, sortBy);
           req.getContext().put(JsonKey.USERNAME, userName);
           return null;

@@ -8,7 +8,8 @@ import org.sunbird.common.responsecode.ResponseCode;
 /** Created by rajatgupta on 11/02/19. */
 public class CourseMetricsProgressValidator {
 
-  public void courseProgressMetricsV2Validator(String limit, String Offset) {
+  public void validateCourseProgressMetricsV2Request(
+      String limit, String offset, String sortOrder) {
 
     if (!StringUtils.isNumeric(limit)) {
       throw new ProjectCommonException(
@@ -16,16 +17,25 @@ public class CourseMetricsProgressValidator {
           ResponseCode.dataTypeError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
           JsonKey.LIMIT,
-          "NUMERIC");
+          JsonKey.NUMERIC);
     }
 
-    if (!StringUtils.isNumeric(Offset)) {
+    if (!StringUtils.isNumeric(offset)) {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
           ResponseCode.dataTypeError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
           JsonKey.OFFSET,
-          "NUMERIC");
+          JsonKey.NUMERIC);
+    }
+    if (!StringUtils.isEmpty(sortOrder)
+        && !(JsonKey.ASC.equalsIgnoreCase(sortOrder) || JsonKey.DESC.equalsIgnoreCase(sortOrder))) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode(),
+          sortOrder,
+          JsonKey.SORT_ORDER);
     }
   }
 }
