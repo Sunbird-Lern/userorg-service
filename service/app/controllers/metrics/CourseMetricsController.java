@@ -1,8 +1,10 @@
 package controllers.metrics;
 
 import controllers.BaseController;
+import controllers.metrics.validator.CourseMetricsProgressValidator;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.ExecutionContext;
@@ -11,6 +13,8 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 public class CourseMetricsController extends BaseController {
+  private static final String DEFAULT_LIMIT = "200";
+  private static final String DEFAULT_OFFSET = "0";
 
   public Promise<Result> courseProgress(String batchId) {
     try {
@@ -32,18 +36,30 @@ public class CourseMetricsController extends BaseController {
   }
 
   public Promise<Result> courseProgressV2(String batchId) {
-    final String limit = request().getQueryString(JsonKey.LIMIT);
-    final String offset = request().getQueryString(JsonKey.OFFSET);
-    final String sortBy = request().getQueryString(JsonKey.SORT_BY);
+    String limit = request().getQueryString(JsonKey.LIMIT);
+    limit = StringUtils.isEmpty(limit) ? DEFAULT_LIMIT : limit;
+
+    String offset = request().getQueryString(JsonKey.OFFSET);
+    offset =
+        StringUtils.isEmpty(offset) ? DEFAULT_OFFSET : request().getQueryString(JsonKey.OFFSET);
+
+    final String sortOrder = request().getQueryString(JsonKey.SORT_ORDER);
+    final String sortBy = request().getQueryString(JsonKey.SORTBY);
+    final String userName = request().getQueryString(JsonKey.USERNAME);
+    new CourseMetricsProgressValidator()
+        .validateCourseProgressMetricsV2Request(limit, offset, sortOrder);
+    final int dataLimit = Integer.parseInt(limit);
+    final int dataOffset = Integer.parseInt(offset);
 
     return handleRequest(
         ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
         (request) -> {
           Request req = (Request) request;
-          req.getContext().put(JsonKey.LIMIT, Integer.parseInt(limit));
+          req.getContext().put(JsonKey.LIMIT, dataLimit);
           req.getContext().put(JsonKey.BATCH_ID, batchId);
-          req.getContext().put(JsonKey.OFFSET, Integer.parseInt(offset));
+          req.getContext().put(JsonKey.OFFSET, dataOffset);
           req.getContext().put(JsonKey.SORT_BY, sortBy);
+          req.getContext().put(JsonKey.USERNAME, userName);
           return null;
         });
   }
