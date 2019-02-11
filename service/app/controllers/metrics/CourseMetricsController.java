@@ -13,6 +13,8 @@ import play.libs.F.Promise;
 import play.mvc.Result;
 
 public class CourseMetricsController extends BaseController {
+  private static final String DEFAULT_LIMIT = "200";
+  private static final String DEFAULT_OFFSET = "0";
 
   public Promise<Result> courseProgress(String batchId) {
     try {
@@ -35,18 +37,20 @@ public class CourseMetricsController extends BaseController {
 
   public Promise<Result> courseProgressV2(String batchId) {
     String limit = request().getQueryString(JsonKey.LIMIT);
-    limit = StringUtils.isEmpty(limit) ? JsonKey.DEFAULT_LIMIT : limit;
+    limit = StringUtils.isEmpty(limit) ? DEFAULT_LIMIT : limit;
 
     String offset = request().getQueryString(JsonKey.OFFSET);
     offset =
-        StringUtils.isEmpty(offset) ? JsonKey.OFFSET : request().getQueryString(JsonKey.OFFSET);
-    final int dataLimit = Integer.parseInt(limit);
-    final int dataOffset = Integer.parseInt(offset);
-    String sortBy = request().getQueryString(JsonKey.SORTBY);
-    String userName = request().getQueryString(JsonKey.USERNAME);
-    String sortOrder = request().getQueryString(JsonKey.SORT_ORDER);
+        StringUtils.isEmpty(offset) ? DEFAULT_OFFSET : request().getQueryString(JsonKey.OFFSET);
+
+    final String sortOrder = request().getQueryString(JsonKey.SORT_ORDER);
+    final String sortBy = request().getQueryString(JsonKey.SORTBY);
+    final String userName = request().getQueryString(JsonKey.USERNAME);
     new CourseMetricsProgressValidator()
         .validateCourseProgressMetricsV2Request(limit, offset, sortOrder);
+    final int dataLimit = Integer.parseInt(limit);
+    final int dataOffset = Integer.parseInt(offset);
+
     return handleRequest(
         ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
         (request) -> {
