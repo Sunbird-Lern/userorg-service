@@ -42,7 +42,7 @@ public class CourseMetricsController extends BaseController {
         StringUtils.isEmpty(request().getQueryString(JsonKey.OFFSET))
             ? "0"
             : request().getQueryString(JsonKey.OFFSET);
-    final String sortBy = request().getQueryString(JsonKey.SORT);
+    final String sortBy = request().getQueryString(JsonKey.SORTBY);
     final String userName = request().getQueryString(JsonKey.USERNAME);
     new CourseMetricsProgressValidator().courseProgressMetricsV2Validator(limit, offset);
     return handleRequest(
