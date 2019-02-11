@@ -5,7 +5,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 
-/** Created by rajatgupta on 11/02/19. */
 public class CourseMetricsProgressValidator {
 
   public void validateCourseProgressMetricsV2Request(
@@ -28,6 +27,7 @@ public class CourseMetricsProgressValidator {
           JsonKey.OFFSET,
           JsonKey.NUMERIC);
     }
+
     if (!StringUtils.isEmpty(sortOrder)
         && !(JsonKey.ASC.equalsIgnoreCase(sortOrder) || JsonKey.DESC.equalsIgnoreCase(sortOrder))) {
       throw new ProjectCommonException(
@@ -38,4 +38,5 @@ public class CourseMetricsProgressValidator {
           JsonKey.SORT_ORDER);
     }
   }
+
 }
