@@ -1,8 +1,10 @@
 package controllers.metrics;
 
 import controllers.BaseController;
+import controllers.metrics.validator.CourseMetricsProgressValidator;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.ExecutionContext;
@@ -32,11 +34,17 @@ public class CourseMetricsController extends BaseController {
   }
 
   public Promise<Result> courseProgressV2(String batchId) {
-    final String limit = request().getQueryString(JsonKey.LIMIT);
-    final String offset = request().getQueryString(JsonKey.OFFSET);
-    final String sortBy = request().getQueryString(JsonKey.SORT_BY);
+    final String limit =
+        StringUtils.isEmpty(request().getQueryString(JsonKey.LIMIT))
+            ? "200"
+            : request().getQueryString(JsonKey.LIMIT);
+    final String offset =
+        StringUtils.isEmpty(request().getQueryString(JsonKey.OFFSET))
+            ? "0"
+            : request().getQueryString(JsonKey.OFFSET);
+    final String sortBy = request().getQueryString(JsonKey.SORT);
     final String userName = request().getQueryString(JsonKey.USERNAME);
-
+    new CourseMetricsProgressValidator().courseProgressMetricsV2Validator(limit, offset);
     return handleRequest(
         ActorOperations.COURSE_PROGRESS_METRICS_V2.getValue(),
         (request) -> {
