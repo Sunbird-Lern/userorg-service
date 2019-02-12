@@ -193,3 +193,6 @@ GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.Tex
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
 POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()
+
+# UserTypes
+GET   /v1/user/type/list						    @controllers.usermanagement.UserTypeController.getUserTypes()
