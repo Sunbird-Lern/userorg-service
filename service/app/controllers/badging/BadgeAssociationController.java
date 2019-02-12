@@ -38,7 +38,7 @@ public class BadgeAssociationController extends BaseController {
         true);
   }
 
-  public Promise<Result> getAssociationHistory() {
+  public Promise<Result> search() {
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
@@ -49,6 +49,6 @@ public class BadgeAssociationController extends BaseController {
         null,
         null,
         getAllRequestHeaders(request()),
-        EsType.badge.getTypeName());
+        EsType.badgeassociations.getTypeName());
   }
 }
