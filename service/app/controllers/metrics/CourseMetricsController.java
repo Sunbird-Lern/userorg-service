@@ -58,8 +58,9 @@ public class CourseMetricsController extends BaseController {
           req.getContext().put(JsonKey.LIMIT, dataLimit);
           req.getContext().put(JsonKey.BATCH_ID, batchId);
           req.getContext().put(JsonKey.OFFSET, dataOffset);
-          req.getContext().put(JsonKey.SORT_BY, sortBy);
+          req.getContext().put(JsonKey.SORTBY, sortBy);
           req.getContext().put(JsonKey.USERNAME, userName);
+          req.getContext().put(JsonKey.SORT_ORDER, sortOrder);
           return null;
         });
   }
