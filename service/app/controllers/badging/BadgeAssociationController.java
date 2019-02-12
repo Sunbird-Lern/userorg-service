@@ -2,7 +2,10 @@ package controllers.badging;
 
 import controllers.BaseController;
 import controllers.badging.validator.BadgeAssociationValidator;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BadgingActorOperations;
+import org.sunbird.common.models.util.ProjectUtil.EsType;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -33,5 +36,19 @@ public class BadgeAssociationController extends BaseController {
         null,
         null,
         true);
+  }
+
+  public Promise<Result> getAssociationHistory() {
+    return handleSearchRequest(
+        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        request().body().asJson(),
+        request -> {
+          new BaseRequestValidator().validateSearchRequest((Request) request);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(request()),
+        EsType.badge.getTypeName());
   }
 }
