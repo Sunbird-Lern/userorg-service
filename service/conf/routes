@@ -126,7 +126,7 @@ POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertion
 DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
 POST   /v1/content/link                       @controllers.badging.BadgeAssociationController.createAssociation()
 POST   /v1/content/unlink                     @controllers.badging.BadgeAssociationController.removeAssociation()
-POST   /v1/content/search 		              @controllers.badging.BadgeAssociationController.searchAssociation()
+POST   /v1/content/link/search 		              @controllers.badging.BadgeAssociationController.searchAssociation()
 
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth()
