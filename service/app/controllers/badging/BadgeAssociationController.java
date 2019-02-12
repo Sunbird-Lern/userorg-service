@@ -38,7 +38,7 @@ public class BadgeAssociationController extends BaseController {
         true);
   }
 
-  public Promise<Result> search() {
+  public Promise<Result> searchAssociation() {
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
         request().body().asJson(),
