@@ -35,6 +35,7 @@ POST  /private/user/v1/assign/role	  @controllers.usermanagement.UserRoleControl
 PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginController.updateLoginTime()
 
 POST  /v1/user/tnc/accept         @controllers.tac.UserTnCController.acceptTnC()
+GET   /v1/user/type/list						    @controllers.usermanagement.UserTypeController.getUserTypes()
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
@@ -194,6 +195,3 @@ GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.Tex
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
 POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()
-
-# UserTypes
-GET   /v1/user/type/list						    @controllers.usermanagement.UserTypeController.getUserTypes()
