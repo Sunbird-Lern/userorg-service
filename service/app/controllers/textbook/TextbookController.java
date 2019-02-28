@@ -2,6 +2,7 @@ package controllers.textbook;
 
 import static org.sunbird.common.exception.ProjectCommonException.throwClientErrorException;
 
+import akka.util.Timeout;
 import controllers.BaseController;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
@@ -32,13 +34,17 @@ import play.mvc.Result;
  */
 public class TextbookController extends BaseController {
 
+  private static final int UPLOAD_TOC_TIMEOUT = 30;
+
   public Promise<Result> uploadTOC(String textbookId) {
     try {
       Request request =
           createAndInitUploadRequest(
               TextbookActorOperation.TEXTBOOK_TOC_UPLOAD.getValue(), JsonKey.TEXTBOOK);
       request.put(JsonKey.TEXTBOOK_ID, textbookId);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      request.setTimeout(UPLOAD_TOC_TIMEOUT);
+      Timeout uploadTimeout = new Timeout(UPLOAD_TOC_TIMEOUT, TimeUnit.SECONDS);
+      return actorResponseHandler(getActorRef(), request, uploadTimeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
