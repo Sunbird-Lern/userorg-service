@@ -87,6 +87,9 @@ public class CourseMetricsController extends BaseController {
     try {
       String periodStr = request().getQueryString(JsonKey.PERIOD);
       String reportType = request().getQueryString(JsonKey.FORMAT);
+      if (StringUtils.isEmpty(periodStr)) {
+        periodStr = JsonKey.FROM_BEGINING;
+      }
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
       request.setEnv(getEnvironment());
