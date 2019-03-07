@@ -1,14 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # Build script
-# set -o errexit
-e () {
-    echo $( echo ${1} | jq ".${2}" | sed 's/\"//g')
-}
-m=$(./metadata.sh)
+set -eo pipefail
 
-org=$(e "${m}" "org")
-name=$(e "${m}" "name")
-version=$(e "${m}" "version")
+build_tag=$1
+name=learner_service
+node=$2
+org=$3
 
-
-docker build -f ./Dockerfile -t ${org}/${name}:${version}-bronze .
+docker build -f ./Dockerfile --label commitHash=$(git rev-parse --short HEAD) -t ${org}/${name}:${build_tag} .
+echo {\"image_name\" : \"${name}\", \"image_tag\" : \"${build_tag}\", \"node_name\" : \"$node\"} > metadata.json

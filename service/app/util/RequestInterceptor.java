@@ -75,6 +75,9 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/issuer/badge/delete", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
+    apiHeaderIgnoreMap.put("/v1/content/link", var);
+    apiHeaderIgnoreMap.put("/v1/content/unlink", var);
+    apiHeaderIgnoreMap.put("/v1/content/link/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
     // making org read as public access
@@ -84,7 +87,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/location/update", var);
     apiHeaderIgnoreMap.put("/v1/location/search", var);
     apiHeaderIgnoreMap.put("/v1/location/delete", var);
-    apiHeaderIgnoreMap.put("/v1/bulk/location/upload", var);
     apiHeaderIgnoreMap.put("/v1/otp/generate", var);
     apiHeaderIgnoreMap.put("/v1/otp/verify", var);
     apiHeaderIgnoreMap.put("/v1/user/get/email", var);
@@ -93,6 +95,8 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/get/loginid", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
+    apiHeaderIgnoreMap.put("/v1/course/batch/search", var);
+    apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
   }
 
   /**
@@ -108,7 +112,7 @@ public class RequestInterceptor {
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
     String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
     String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
-    if (!isRequestInExcludeList(request.path())) {
+    if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       if (StringUtils.isNotBlank(accessToken)) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
       } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
@@ -136,6 +140,13 @@ public class RequestInterceptor {
       }
       return JsonKey.ANONYMOUS;
     }
+  }
+
+  private static boolean isRequestPrivate(String path) {
+    if (path.contains(JsonKey.PRIVATE)) {
+      return true;
+    }
+    return false;
   }
 
   /**
