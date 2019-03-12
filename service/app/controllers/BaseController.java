@@ -23,6 +23,7 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -378,7 +379,9 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       String path, String method, ProjectCommonException exception) {
-    ProjectLogger.log("BaseController: createResponseOnException called for path = " + path, LoggerEnum.INFO.name());
+    ProjectLogger.log(
+        "BaseController: createResponseOnException called for path = " + path,
+        LoggerEnum.INFO.name());
 
     Response response = new Response();
     response.setVer(getApiVersion(path));
@@ -489,7 +492,8 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonExceptionResponse(Exception e, Request request) {
-    ProjectLogger.log("BaseController: createCommonExceptionResponse called", LoggerEnum.INFO.name());
+    ProjectLogger.log(
+        "BaseController: createCommonExceptionResponse called", LoggerEnum.INFO.name());
 
     Request req = request;
     ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
@@ -561,7 +565,8 @@ public class BaseController extends Controller {
 
     String operation = request.getOperation();
 
-    ProjectLogger.log("BaseController:actorResponseHandler: operation = " + operation, LoggerEnum.INFO.name());
+    ProjectLogger.log(
+        "BaseController:actorResponseHandler: operation = " + operation, LoggerEnum.INFO.name());
 
     // set header to request object , setting actor type and channel headers value
     // ...
@@ -571,25 +576,43 @@ public class BaseController extends Controller {
         new Function<Object, Result>() {
           @Override
           public Result apply(Object result) {
-            ProjectLogger.log("BaseController:actorResponseHandler:apply: operation = " + operation, LoggerEnum.INFO.name());
+            if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
+              setGlobalHealthFlag(result);
+            }
+            ProjectLogger.log(
+                "BaseController:actorResponseHandler:apply: operation = " + operation,
+                LoggerEnum.INFO.name());
             if (result instanceof Response) {
-              ProjectLogger.log("BaseController:actorResponseHandler:apply: Response type for operation = " + operation, LoggerEnum.INFO.name());
+              ProjectLogger.log(
+                  "BaseController:actorResponseHandler:apply: Response type for operation = "
+                      + operation,
+                  LoggerEnum.INFO.name());
               Response response = (Response) result;
               return createCommonResponse(response, responseKey, httpReq);
             } else if (result instanceof ProjectCommonException) {
-              ProjectLogger.log("BaseController:actorResponseHandler:apply: ProjectCommonException for operation = " + operation, LoggerEnum.INFO.name());
+              ProjectLogger.log(
+                  "BaseController:actorResponseHandler:apply: ProjectCommonException for operation = "
+                      + operation,
+                  LoggerEnum.INFO.name());
               return createCommonExceptionResponse((ProjectCommonException) result, request());
             } else if (result instanceof File) {
-              ProjectLogger.log("BaseController:actorResponseHandler:apply: file type for operation = " + operation, LoggerEnum.INFO.name());
+              ProjectLogger.log(
+                  "BaseController:actorResponseHandler:apply: file type for operation = "
+                      + operation,
+                  LoggerEnum.INFO.name());
               return createFileDownloadResponse((File) result);
             } else {
-              ProjectLogger.log("BaseController:actorResponseHandler:apply: Unknown response for operation = " + operation, LoggerEnum.INFO.name());
+              ProjectLogger.log(
+                  "BaseController:actorResponseHandler:apply: Unknown response for operation = "
+                      + operation,
+                  LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
           }
         };
 
     if (actorRef instanceof ActorRef) {
+      System.out.println();
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
       return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout)).map(function);
@@ -813,6 +836,23 @@ public class BaseController extends Controller {
     innerMap.put(JsonKey.DATA, map);
     reqObj.setRequest(innerMap);
     return reqObj;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void setGlobalHealthFlag(Object result) {
+    if (result instanceof Response) {
+      Response response = (Response) result;
+      if (JsonKey.ON.equalsIgnoreCase(System.getenv(JsonKey.SUNBIRD_HEALTH_CHECK_FLAG))
+          && ((HashMap<String, Object>) response.getResult().get(JsonKey.RESPONSE))
+              .containsKey(JsonKey.Healthy)) {
+        Global.isServiceHealthy =
+            (boolean)
+                ((HashMap<String, Object>) response.getResult().get(JsonKey.RESPONSE))
+                    .get(JsonKey.Healthy);
+      }
+    } else {
+      Global.isServiceHealthy = false;
+    }
   }
 
   protected String getQueryString(Map<String, String[]> queryStringMap) {
