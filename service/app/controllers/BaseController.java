@@ -612,7 +612,6 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      System.out.println();
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
       return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout)).map(function);
