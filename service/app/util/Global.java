@@ -389,7 +389,7 @@ public class Global extends GlobalSettings {
   }
 
   public Promise<Result> checkForServiceHealth(Http.Context ctx) {
-    if (Boolean.parseBoolean((System.getenv(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
+    if (Boolean.parseBoolean((ProjectUtil.getConfigValue(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
         && !ctx.request().path().endsWith(JsonKey.HEALTH)) {
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;

@@ -841,7 +841,7 @@ public class BaseController extends Controller {
   private void setGlobalHealthFlag(Object result) {
     if (result instanceof Response) {
       Response response = (Response) result;
-      if (Boolean.parseBoolean((System.getenv(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
+      if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE))
           && ((HashMap<String, Object>) response.getResult().get(JsonKey.RESPONSE))
               .containsKey(JsonKey.Healthy)) {
         Global.isServiceHealthy =
