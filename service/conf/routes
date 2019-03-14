@@ -131,7 +131,7 @@ POST   /v1/content/link/search 		              @controllers.badging.BadgeAssocia
 
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth()
-GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
+GET  /:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
 
 #Notes API
 POST   /v1/note/create                         @controllers.notesmanagement.NotesController.createNote()

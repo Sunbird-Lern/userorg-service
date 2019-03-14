@@ -58,6 +58,7 @@ public class Global extends GlobalSettings {
   private final List<String> USER_UNAUTH_STATES =
       Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
   private static String custodianOrgHashTagId;
+  public static boolean isServiceHealthy = true;
 
   static {
     init();
@@ -71,8 +72,10 @@ public class Global extends GlobalSettings {
     @Override
     public Promise<Result> call(Http.Context ctx) throws java.lang.Throwable {
       ctx.request().headers();
-      Promise<Result> result = null;
+      Promise<Result> result = checkForServiceHealth(ctx);
+      if (result != null) return result;
       ctx.response().setHeader("Access-Control-Allow-Origin", "*");
+
       // Unauthorized, Anonymous, UserID
       String message = RequestInterceptor.verifyRequestData(ctx);
       // call method to set all the required params for the telemetry event(log)...
@@ -260,24 +263,31 @@ public class Global extends GlobalSettings {
    */
   @Override
   public Promise<Result> onError(Http.RequestHeader request, Throwable t) {
-    ProjectLogger.log("Global: onError called for path = " + request.path(), LoggerEnum.INFO.name());
+    ProjectLogger.log(
+        "Global: onError called for path = " + request.path(), LoggerEnum.INFO.name());
     Response response = null;
     ProjectCommonException commonException = null;
     if (t instanceof ProjectCommonException) {
-      ProjectLogger.log("Global:onError: ProjectCommonException occurred for path = " + request.path(), LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "Global:onError: ProjectCommonException occurred for path = " + request.path(),
+          LoggerEnum.INFO.name());
       commonException = (ProjectCommonException) t;
       response =
           BaseController.createResponseOnException(
               request.path(), request.method(), (ProjectCommonException) t);
     } else if (t instanceof akka.pattern.AskTimeoutException) {
-      ProjectLogger.log("Global:onError: AskTimeoutException occurred for path = " + request.path(), LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "Global:onError: AskTimeoutException occurred for path = " + request.path(),
+          LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.actorConnectionError.getErrorCode(),
               ResponseCode.actorConnectionError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     } else {
-      ProjectLogger.log("Global:onError: Unknown exception occurred for path = " + request.path(), LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "Global:onError: Unknown exception occurred for path = " + request.path(),
+          LoggerEnum.INFO.name());
       commonException =
           new ProjectCommonException(
               ResponseCode.internalError.getErrorCode(),
@@ -376,5 +386,18 @@ public class Global extends GlobalSettings {
       }
     }
     return custodianOrgHashTagId;
+  }
+
+  public Promise<Result> checkForServiceHealth(Http.Context ctx) {
+    if (Boolean.parseBoolean((System.getenv(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
+        && !ctx.request().path().endsWith(JsonKey.HEALTH)) {
+      if (!isServiceHealthy) {
+        ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
+        Response resp = BaseController.createFailureResponse(ctx.request(), headerCode, headerCode);
+        return Promise.<Result>pure(
+            Results.status(ResponseCode.SERVICE_UNAVAILABLE.getResponseCode(), Json.toJson(resp)));
+      }
+    }
+    return null;
   }
 }
