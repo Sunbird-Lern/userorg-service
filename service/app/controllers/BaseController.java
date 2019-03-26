@@ -99,7 +99,6 @@ public class BaseController extends Controller {
    */
   protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
     org.sunbird.common.request.Request request = new org.sunbird.common.request.Request();
-
     return initRequest(request, operation);
   }
 
@@ -240,6 +239,7 @@ public class BaseController extends Controller {
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
+
   /**
    * This method will provide remote Actor selection
    *

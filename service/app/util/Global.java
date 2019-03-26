@@ -163,6 +163,7 @@ public class Global extends GlobalSettings {
     // be pass in search telemetry.
     if (StringUtils.isNotBlank(appId)) {
       ctx.flash().put(JsonKey.APP_ID, appId);
+      reqContext.put(JsonKey.APP_ID, appId);
     }
     if (!USER_UNAUTH_STATES.contains(userId)) {
       reqContext.put(JsonKey.ACTOR_ID, userId);
