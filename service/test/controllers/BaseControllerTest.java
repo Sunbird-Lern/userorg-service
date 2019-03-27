@@ -71,6 +71,7 @@ public class BaseControllerTest {
     headerMap.put(
         HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Some authenticated user ID"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Some message ID"});
+    headerMap.put(HeaderParam.X_APP_ID.getName(), new String[] {"Some app Id"});
 
     system = ActorSystem.create("system");
     ActorRef subject = system.actorOf(props);
