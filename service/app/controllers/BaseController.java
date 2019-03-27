@@ -737,6 +737,7 @@ public class BaseController extends Controller {
     reqObj.getContext().put(JsonKey.ACTOR_ID, ctx().flash().get(JsonKey.ACTOR_ID));
     reqObj.getContext().put(JsonKey.ACTOR_TYPE, ctx().flash().get(JsonKey.ACTOR_TYPE));
     reqObj.getContext().put(JsonKey.APP_ID, ctx().flash().get(JsonKey.APP_ID));
+    reqObj.getContext().put(JsonKey.DEVICE_ID, ctx.flash().get(JsonKey.DEVICE_ID));
     ctx().current().flash().remove(JsonKey.APP_ID);
   }
 

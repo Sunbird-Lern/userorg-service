@@ -165,6 +165,12 @@ public class Global extends GlobalSettings {
       ctx.flash().put(JsonKey.APP_ID, appId);
       reqContext.put(JsonKey.APP_ID, appId);
     }
+    // checking device id in headers
+    String deviceId = request.getHeader(HeaderParam.X_Device_ID.getName());
+    if (StringUtils.isNotBlank(deviceId)) {
+      ctx.flash().put(JsonKey.DEVICE_ID, deviceId);
+      reqContext.put(JsonKey.DEVICE_ID, deviceId);
+    }
     if (!USER_UNAUTH_STATES.contains(userId)) {
       reqContext.put(JsonKey.ACTOR_ID, userId);
       reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
