@@ -99,7 +99,6 @@ public class BaseController extends Controller {
    */
   protected org.sunbird.common.request.Request createAndInitRequest(String operation) {
     org.sunbird.common.request.Request request = new org.sunbird.common.request.Request();
-
     return initRequest(request, operation);
   }
 
@@ -240,6 +239,7 @@ public class BaseController extends Controller {
       return Promise.pure(createCommonExceptionResponse(e, request()));
     }
   }
+
   /**
    * This method will provide remote Actor selection
    *
@@ -737,6 +737,7 @@ public class BaseController extends Controller {
     reqObj.getContext().put(JsonKey.ACTOR_ID, ctx().flash().get(JsonKey.ACTOR_ID));
     reqObj.getContext().put(JsonKey.ACTOR_TYPE, ctx().flash().get(JsonKey.ACTOR_TYPE));
     reqObj.getContext().put(JsonKey.APP_ID, ctx().flash().get(JsonKey.APP_ID));
+    reqObj.getContext().put(JsonKey.DEVICE_ID, ctx.flash().get(JsonKey.DEVICE_ID));
     ctx().current().flash().remove(JsonKey.APP_ID);
   }
 
