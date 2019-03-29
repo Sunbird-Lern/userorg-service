@@ -12,7 +12,7 @@ import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http;
 
-public class TestContextRequest extends BaseControllerTest {
+public class ContextRequestTest extends BaseControllerTest {
 
   private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";
 
