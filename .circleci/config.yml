@@ -8,14 +8,12 @@ jobs:
       - run: git submodule update --init --recursive --remote
       - restore_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
-      - run: mvn clean install -DskipTests=true
+      - run: mvn clean install #-DskipTests=true
       - run: cd service && mvn play2:dist
       - save_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
           paths: ~/.m2
-      - store_artifacts:
-          path: service/target/learning-service-1.0-SNAPSHOT-dist.zip
-          destination: learning-service-1.0-SNAPSHOT-dist.zip
+      
 workflows:
   version: 2.1
   workflow:
