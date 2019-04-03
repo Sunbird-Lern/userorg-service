@@ -1,11 +1,13 @@
 package util;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -108,6 +110,7 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
+    replaceFederatedUserIdWithUserIdInRequestBody(request.body().asJson());
     String clientId = JsonKey.UNAUTHORIZED;
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
     String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -142,11 +145,33 @@ public class RequestInterceptor {
     }
   }
 
-  private static boolean isRequestPrivate(String path) {
-    if (path.contains(JsonKey.PRIVATE)) {
-      return true;
+  private static void replaceFederatedUserIdWithUserIdInRequestBody(JsonNode requestBodyJson) {
+    if (null != requestBodyJson) {
+      org.sunbird.common.request.Request request =
+          (org.sunbird.common.request.Request)
+              mapper.RequestMapper.mapRequest(
+                  requestBodyJson, org.sunbird.common.request.Request.class);
+      String id = (String) request.getRequest().get(JsonKey.ID);
+      getUserIdFromFederatedUserID(request, JsonKey.ID, id);
+      id = (String) request.getRequest().get(JsonKey.USER_ID);
+      getUserIdFromFederatedUserID(request, JsonKey.USER_ID, id);
     }
-    return false;
+  }
+
+  private static void getUserIdFromFederatedUserID(
+      org.sunbird.common.request.Request request, String key, String keyValue) {
+    String prefix =
+        "f:" + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYCLOAK_USER_FEDERATION_PROVIDER_ID);
+    if (StringUtils.isNotBlank(keyValue)
+        && keyValue.contains(prefix)
+        && keyValue.startsWith(prefix)) {
+      String value = keyValue.replace(prefix, "");
+      request.getRequest().put(key, value);
+    }
+  }
+
+  private static boolean isRequestPrivate(String path) {
+    return path.contains(JsonKey.PRIVATE);
   }
 
   /**
