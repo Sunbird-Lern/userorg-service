@@ -72,8 +72,7 @@ public class UserController extends BaseController {
 
   public Promise<Result> getUserById(String userId) {
     return handleGetUserProfile(
-        ActorOperations.GET_USER_PROFILE.getValue(),
-        ProjectUtil.getUserIdFromFederatedUserId(userId));
+        ActorOperations.GET_USER_PROFILE.getValue(), ProjectUtil.getLmsUserId(userId));
   }
 
   public Result getUserByIdMock(String userId) {
@@ -84,8 +83,7 @@ public class UserController extends BaseController {
 
   public Promise<Result> getUserByIdV2(String userId) {
     return handleGetUserProfile(
-        ActorOperations.GET_USER_PROFILE_V2.getValue(),
-        ProjectUtil.getUserIdFromFederatedUserId(userId));
+        ActorOperations.GET_USER_PROFILE_V2.getValue(), ProjectUtil.getLmsUserId(userId));
   }
 
   public Promise<Result> getUserByLoginId() {
@@ -110,7 +108,7 @@ public class UserController extends BaseController {
 
     HashMap<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, JsonKey.LOGIN_ID.equalsIgnoreCase(idType) ? JsonKey.LOGIN_ID : idType);
-    map.put(JsonKey.VALUE, ProjectUtil.getUserIdFromFederatedUserId(id));
+    map.put(JsonKey.VALUE, ProjectUtil.getLmsUserId(id));
     return handleRequest(
         ActorOperations.GET_USER_BY_KEY.getValue(),
         null,

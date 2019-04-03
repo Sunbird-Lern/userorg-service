@@ -25,7 +25,7 @@ public class CourseEnrollmentController extends BaseController {
               .put(JsonKey.BATCH_DETAILS, request().queryString().get(JsonKey.BATCH_DETAILS));
           return null;
         },
-        ProjectUtil.getUserIdFromFederatedUserId(uid),
+        ProjectUtil.getLmsUserId(uid),
         JsonKey.USER_ID,
         getAllRequestHeaders((request())),
         false);

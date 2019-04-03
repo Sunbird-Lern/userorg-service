@@ -110,7 +110,7 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
-    replaceFederatedUserIdWithUserIdInRequestBody(request.body().asJson());
+    transformUserId(request.body().asJson());
     String clientId = JsonKey.UNAUTHORIZED;
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
     String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -145,28 +145,16 @@ public class RequestInterceptor {
     }
   }
 
-  private static void replaceFederatedUserIdWithUserIdInRequestBody(JsonNode requestBodyJson) {
+  private static void transformUserId(JsonNode requestBodyJson) {
     if (null != requestBodyJson) {
       org.sunbird.common.request.Request request =
           (org.sunbird.common.request.Request)
               mapper.RequestMapper.mapRequest(
                   requestBodyJson, org.sunbird.common.request.Request.class);
       String id = (String) request.getRequest().get(JsonKey.ID);
-      getUserIdFromFederatedUserID(request, JsonKey.ID, id);
+      request.getRequest().put(JsonKey.ID, ProjectUtil.getLmsUserId(id));
       id = (String) request.getRequest().get(JsonKey.USER_ID);
-      getUserIdFromFederatedUserID(request, JsonKey.USER_ID, id);
-    }
-  }
-
-  private static void getUserIdFromFederatedUserID(
-      org.sunbird.common.request.Request request, String key, String keyValue) {
-    String prefix =
-        "f:" + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYCLOAK_USER_FEDERATION_PROVIDER_ID);
-    if (StringUtils.isNotBlank(keyValue)
-        && keyValue.contains(prefix)
-        && keyValue.startsWith(prefix)) {
-      String value = keyValue.replace(prefix, "");
-      request.getRequest().put(key, value);
+      request.getRequest().put(JsonKey.USER_ID, ProjectUtil.getLmsUserId(id));
     }
   }
 
