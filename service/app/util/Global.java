@@ -48,7 +48,7 @@ import play.mvc.Results;
  *
  * @author Manzarul
  */
-public class Global extends GlobalSettings {
+public class  Global extends GlobalSettings {
   public static ProjectUtil.Environment env;
 
   public static Map<String, Map<String, Object>> requestInfo = new HashMap<>();
@@ -74,7 +74,7 @@ public class Global extends GlobalSettings {
       ctx.request().headers();
       Promise<Result> result = checkForServiceHealth(ctx);
       if (result != null) return result;
-      ctx.response().setHeader("Access-Control-Allow-Origin", "*");
+    ctx.response().setHeader("Access-Control-Allow-Origin", "*");
 
       // Unauthorized, Anonymous, UserID
       String message = RequestInterceptor.verifyRequestData(ctx);
