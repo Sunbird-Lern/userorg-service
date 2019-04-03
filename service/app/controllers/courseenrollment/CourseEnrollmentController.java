@@ -4,6 +4,7 @@ import controllers.BaseController;
 import controllers.courseenrollment.validator.CourseEnrollmentRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -19,10 +20,12 @@ public class CourseEnrollmentController extends BaseController {
           request
               .getContext()
               .put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
-          request.getContext().put(JsonKey.BATCH_DETAILS, request().queryString().get(JsonKey.BATCH_DETAILS));
+          request
+              .getContext()
+              .put(JsonKey.BATCH_DETAILS, request().queryString().get(JsonKey.BATCH_DETAILS));
           return null;
         },
-        uid,
+        ProjectUtil.getLmsUserId(uid),
         JsonKey.USER_ID,
         getAllRequestHeaders((request())),
         false);

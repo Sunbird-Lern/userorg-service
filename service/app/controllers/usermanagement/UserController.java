@@ -5,12 +5,11 @@ import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
-import org.sunbird.models.user.UserType;
-import org.sunbird.user.util.UserConstants;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
@@ -22,7 +21,7 @@ public class UserController extends BaseController {
     return handleRequest(
         ActorOperations.CREATE_USER.getValue(),
         request().body().asJson(),
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateCreateUserV1Request(request);
           return null;
@@ -36,7 +35,7 @@ public class UserController extends BaseController {
     return handleRequest(
         ActorOperations.CREATE_USER.getValue(),
         request().body().asJson(),
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateCreateUserV2Request(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
@@ -57,7 +56,7 @@ public class UserController extends BaseController {
     return handleRequest(
         ActorOperations.UPDATE_USER.getValue(),
         request().body().asJson(),
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           request.getContext().put(JsonKey.USER_ID, ctx().flash().get(JsonKey.USER_ID));
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
@@ -72,7 +71,8 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> getUserById(String userId) {
-    return handleGetUserProfile(ActorOperations.GET_USER_PROFILE.getValue(), userId);
+    return handleGetUserProfile(
+        ActorOperations.GET_USER_PROFILE.getValue(), ProjectUtil.getLmsUserId(userId));
   }
 
   public Result getUserByIdMock(String userId) {
@@ -82,7 +82,8 @@ public class UserController extends BaseController {
   }
 
   public Promise<Result> getUserByIdV2(String userId) {
-    return handleGetUserProfile(ActorOperations.GET_USER_PROFILE_V2.getValue(), userId);
+    return handleGetUserProfile(
+        ActorOperations.GET_USER_PROFILE_V2.getValue(), ProjectUtil.getLmsUserId(userId));
   }
 
   public Promise<Result> getUserByLoginId() {
@@ -91,7 +92,7 @@ public class UserController extends BaseController {
     return handleRequest(
         ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue(),
         request().body().asJson(),
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateVerifyUser(request);
           request.getContext().put(JsonKey.FIELDS, requestedFields);
@@ -107,11 +108,11 @@ public class UserController extends BaseController {
 
     HashMap<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, JsonKey.LOGIN_ID.equalsIgnoreCase(idType) ? JsonKey.LOGIN_ID : idType);
-    map.put(JsonKey.VALUE, id);
+    map.put(JsonKey.VALUE, ProjectUtil.getLmsUserId(id));
     return handleRequest(
         ActorOperations.GET_USER_BY_KEY.getValue(),
         null,
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           request.setRequest(map);
           new UserGetRequestValidator().validateGetUserByKeyRequest(request);
@@ -147,7 +148,7 @@ public class UserController extends BaseController {
     return handleRequest(
         operation,
         null,
-        (req) -> {
+        req -> {
           Request request = (Request) req;
           request.getContext().put(JsonKey.FIELDS, requestedFields);
           request.getContext().put(JsonKey.PROVIDER, provider);
