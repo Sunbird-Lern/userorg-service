@@ -853,6 +853,10 @@ public class BaseController extends Controller {
     } else {
       Global.isServiceHealthy = false;
     }
+    ProjectLogger.log(
+        "BaseController:setGlobalHealthFlag: The value for the global flag iseServiceHealthy is: "
+            + Global.isServiceHealthy,
+        LoggerEnum.INFO.name());
   }
 
   protected String getQueryString(Map<String, String[]> queryStringMap) {
