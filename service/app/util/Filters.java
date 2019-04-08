@@ -16,17 +16,23 @@ import play.filters.gzip.GzipFilter;
 import scala.Function2;
 import scala.runtime.AbstractFunction2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 
 public class Filters implements HttpFilters {
   private EssentialFilter[] filters;
-  
-  private static boolean GzipFilterEnabled = Boolean.parseBoolean(
-      PropertiesCache.getInstance()
-          .getProperty(JsonKey.SUNBIRD_GZIP_FILTER_ENABLED));
+
+  private static boolean GzipFilterEnabled = Boolean
+      .parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_FILTER_ENABLED));
+  private static final String GZIP = "gzip";
+  //bufferSize The size of the buffer to use for gzipping.
+  private static final int BUFFER_SIZE = 8192;
+  //chunkedThreshold The content length threshold, after which the filter will switch to chunking the result.
+  private static final int  CHUNKED_THRESHOLD = 102400;
 
   private Function2<RequestHeader, ResponseHeader, Object> shouldGzip = new AbstractFunction2<RequestHeader, ResponseHeader, Object>() {
 
@@ -44,12 +50,13 @@ public class Filters implements HttpFilters {
   @Inject
   public Filters(LoggingFilter loggingFilter, GzipFilter filter) {
     this.loggingFilter = loggingFilter;
-    this.filter = new GzipFilter(Gzip.gzip(8192), 102400, shouldGzip);
+    this.filter = new GzipFilter(Gzip.gzip(BUFFER_SIZE), CHUNKED_THRESHOLD, shouldGzip);
   }
 
+  //shouldGzip Whether the given request/result should be gzipped.
   private boolean shouldGzipFunction(RequestHeader v1, ResponseHeader v2) {
-    if (GzipFilterEnabled && (v1.headers().get("Accept-Encoding") != null)) {
-      if (v1.headers().get("Accept-Encoding").toString().toLowerCase().contains("gzip")) {
+    if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
+      if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
         return true;
       }
     }
