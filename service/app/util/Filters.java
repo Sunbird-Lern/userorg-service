@@ -48,7 +48,6 @@ public class Filters implements HttpFilters {
   }
 
   private boolean shouldGzipFunction(RequestHeader v1, ResponseHeader v2) {
-    ProjectLogger.log("********************************* : "+GzipFilterEnabled, LoggerEnum.INFO);
     if (GzipFilterEnabled && (v1.headers().get("Accept-Encoding") != null)) {
       if (v1.headers().get("Accept-Encoding").toString().toLowerCase().contains("gzip")) {
         return true;
