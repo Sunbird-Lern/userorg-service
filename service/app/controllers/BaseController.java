@@ -854,7 +854,7 @@ public class BaseController extends Controller {
       Global.isServiceHealthy = false;
     }
     ProjectLogger.log(
-        "BaseController:setGlobalHealthFlag: The value for the global flag iseServiceHealthy is: "
+        "BaseController:setGlobalHealthFlag: isServiceHealthy = "
             + Global.isServiceHealthy,
         LoggerEnum.INFO.name());
   }
