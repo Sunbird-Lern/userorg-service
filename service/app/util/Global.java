@@ -173,7 +173,7 @@ public class Global extends GlobalSettings {
     }
     if (!USER_UNAUTH_STATES.contains(userId)) {
       reqContext.put(JsonKey.ACTOR_ID, userId);
-      reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+      reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
       ctx.flash().put(JsonKey.ACTOR_ID, userId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
     } else {
@@ -182,7 +182,7 @@ public class Global extends GlobalSettings {
         consumerId = JsonKey.DEFAULT_CONSUMER_ID;
       }
       reqContext.put(JsonKey.ACTOR_ID, consumerId);
-      reqContext.put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
+      reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.CONSUMER));
       ctx.flash().put(JsonKey.ACTOR_ID, consumerId);
       ctx.flash().put(JsonKey.ACTOR_TYPE, JsonKey.CONSUMER);
     }
