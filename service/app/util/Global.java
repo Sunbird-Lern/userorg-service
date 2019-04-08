@@ -399,7 +399,7 @@ public class Global extends GlobalSettings {
     if (Boolean.parseBoolean((ProjectUtil.getConfigValue(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
         && !ctx.request().path().endsWith(JsonKey.HEALTH)) {
       ProjectLogger.log(
-          "Global:checkForServiceHealth: The value of health flag is " + isServiceHealthy,
+          "Global:checkForServiceHealth: isServiceHealthy = " + isServiceHealthy,
           LoggerEnum.INFO.name());
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
