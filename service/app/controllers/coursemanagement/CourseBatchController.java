@@ -79,7 +79,8 @@ public class CourseBatchController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-
+      String requestedField = request().getQueryString(JsonKey.FIELDS);
+      reqObj.getContext().put(JsonKey.PARTICIPANTS, requestedField);
       List<String> esObjectType = new ArrayList<>();
       esObjectType.add(EsType.course.getTypeName());
       if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
