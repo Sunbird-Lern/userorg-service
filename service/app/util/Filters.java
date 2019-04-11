@@ -26,7 +26,7 @@ import org.sunbird.common.models.util.PropertiesCache;
 public class Filters implements HttpFilters {
   private EssentialFilter[] filters;
   private static boolean GzipFilterEnabled = Boolean
-      .parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_FILTER_ENABLED));
+      .parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_ENABLE));
   private static final String GZIP = "gzip";
   // Size of buffer to use for gzip.
   private static final int BUFFER_SIZE = 8192;
