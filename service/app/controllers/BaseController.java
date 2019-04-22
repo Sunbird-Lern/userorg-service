@@ -314,12 +314,15 @@ public class BaseController extends Controller {
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(createResponseParamObj(code));
     try {
-      String json = new ObjectMapper().writeValueAsString(response.getResult());
-      String value = getResponseSize(json);
-      ctx().response().setHeader(HeaderParam.Response_Length.getName(), value);
-      return response;
+      if (response.getResult() != null) {
+        String json = new ObjectMapper().writeValueAsString(response.getResult());
+        String value = getResponseSize(json);
+        ctx().response().setHeader(HeaderParam.Response_Length.getName(), value);
+      }
     } catch (Exception e) {
       ctx().response().setHeader(HeaderParam.Response_Length.getName(), "0.0");
+    } finally {
+
       return response;
     }
   }

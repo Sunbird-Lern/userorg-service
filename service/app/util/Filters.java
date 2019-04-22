@@ -54,9 +54,9 @@ public class Filters implements HttpFilters {
       String strValue = v2.headers().get(HeaderParam.Response_Length.getName()).get();
       responseSize = Double.parseDouble(strValue);
     }
-    if (responseSize >= sunbird_gzip_size_threshold) {
-      if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
-        if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
+    if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
+      if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
+        if (responseSize >= sunbird_gzip_size_threshold) {
           return true;
         }
       }
