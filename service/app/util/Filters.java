@@ -20,14 +20,13 @@ public class Filters implements HttpFilters {
   private EssentialFilter[] filters;
   private static boolean GzipFilterEnabled =
       Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_ENABLE));
+  private static final double gZipThreshold =
+      Double.parseDouble(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_SIZE_THRESHOLD));
   private static final String GZIP = "gzip";
   // Size of buffer to use for gzip.
   private static final int BUFFER_SIZE = 8192;
   // Content length threshold, after which the filter will switch to chunking the result.
   private static final int CHUNKED_THRESHOLD = 102400;
-
-  public static final double sunbird_gzip_size_threshold = 256000.0;
-
   private Function2<RequestHeader, ResponseHeader, Object> shouldGzip =
       new AbstractFunction2<RequestHeader, ResponseHeader, Object>() {
 
@@ -56,7 +55,7 @@ public class Filters implements HttpFilters {
     }
     if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
       if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
-        if (responseSize >= sunbird_gzip_size_threshold) {
+        if (responseSize >= gZipThreshold) {
           return true;
         }
       }
