@@ -20,7 +20,7 @@ public class Filters implements HttpFilters {
   private EssentialFilter[] filters;
   private static boolean GzipFilterEnabled =
       Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_ENABLE));
-  private static final double gZipThreshold =
+  private static final double gzipThreshold =
       Double.parseDouble(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_GZIP_SIZE_THRESHOLD));
   private static final String GZIP = "gzip";
   // Size of buffer to use for gzip.
@@ -55,7 +55,7 @@ public class Filters implements HttpFilters {
     }
     if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
       if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
-        if (responseSize >= gZipThreshold) {
+        if (responseSize >= gzipThreshold) {
           return true;
         }
       }
