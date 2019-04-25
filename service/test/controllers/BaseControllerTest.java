@@ -8,12 +8,11 @@ import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.keycloak.admin.client.Keycloak;
 import org.mockito.Mockito;
@@ -53,7 +52,7 @@ import util.RequestInterceptor;
 })
 @SuppressStaticInitializationFor({"util.AuthenticationHelper", "util.Global"})
 @PowerMockIgnore("javax.management.*")
-@Ignore
+// @Ignore
 public class BaseControllerTest {
 
   public static FakeApplication app;
@@ -157,5 +156,79 @@ public class BaseControllerTest {
 
   public int getResponseStatus(Result result) {
     return result.status();
+  }
+
+  @Test
+  public void testGetResponseSizeSuccess() throws UnsupportedEncodingException {
+    String jsonResponse =
+        "\"{\n"
+            + "    \\\"id\\\": \\\"api.org.search\\\",\n"
+            + "    \\\"ver\\\": \\\"v1\\\",\n"
+            + "    \\\"ts\\\": \\\"2019-04-24 08:56:28:795+0000\\\",\n"
+            + "    \\\"params\\\": {\n"
+            + "        \\\"resmsgid\\\": null,\n"
+            + "        \\\"msgid\\\": \\\"8e27cbf5-e299-43b0-bca7-8347f7e5abcf\\\",\n"
+            + "        \\\"err\\\": null,\n"
+            + "        \\\"status\\\": \\\"success\\\",\n"
+            + "        \\\"errmsg\\\": null\n"
+            + "    },\n"
+            + "    \\\"responseCode\\\": \\\"OK\\\",\n"
+            + "    \\\"result\\\": {\n"
+            + "        \\\"response\\\": {\n"
+            + "            \\\"count\\\": 1,\n"
+            + "            \\\"content\\\": [\n"
+            + "                {\n"
+            + "                    \\\"dateTime\\\": null,\n"
+            + "                    \\\"preferredLanguage\\\": null,\n"
+            + "                    \\\"approvedBy\\\": null,\n"
+            + "                    \\\"channel\\\": \\\"ORG_001\\\",\n"
+            + "                    \\\"description\\\": null,\n"
+            + "                    \\\"updatedDate\\\": null,\n"
+            + "                    \\\"addressId\\\": null,\n"
+            + "                    \\\"orgType\\\": null,\n"
+            + "                    \\\"provider\\\": null,\n"
+            + "                    \\\"locationId\\\": null,\n"
+            + "                    \\\"orgCode\\\": null,\n"
+            + "                    \\\"theme\\\": null,\n"
+            + "                    \\\"id\\\": \\\"0126322873849692160\\\",\n"
+            + "                    \\\"communityId\\\": null,\n"
+            + "                    \\\"isApproved\\\": null,\n"
+            + "                    \\\"slug\\\": \\\"org_001\\\",\n"
+            + "                    \\\"identifier\\\": \\\"0126322873849692160\\\",\n"
+            + "                    \\\"thumbnail\\\": null,\n"
+            + "                    \\\"orgName\\\": \\\"Sunbird_Framework_Testing\\\",\n"
+            + "                    \\\"updatedBy\\\": null,\n"
+            + "                    \\\"address\\\": {},\n"
+            + "                    \\\"locationIds\\\": [],\n"
+            + "                    \\\"externalId\\\": null,\n"
+            + "                    \\\"isRootOrg\\\": true,\n"
+            + "                    \\\"rootOrgId\\\": \\\"0126322873849692160\\\",\n"
+            + "                    \\\"approvedDate\\\": null,\n"
+            + "                    \\\"imgUrl\\\": null,\n"
+            + "                    \\\"homeUrl\\\": null,\n"
+            + "                    \\\"orgTypeId\\\": null,\n"
+            + "                    \\\"isDefault\\\": null,\n"
+            + "                    \\\"contactDetail\\\": [],\n"
+            + "                    \\\"createdDate\\\": \\\"2018-11-12 12:47:22:133+0000\\\",\n"
+            + "                    \\\"createdBy\\\": null,\n"
+            + "                    \\\"parentOrgId\\\": null,\n"
+            + "                    \\\"hashTagId\\\": \\\"0126322873849692160\\\",\n"
+            + "                    \\\"noOfMembers\\\": null,\n"
+            + "                    \\\"status\\\": 1\n"
+            + "                }\n"
+            + "            ]\n"
+            + "        }\n"
+            + "    }\n"
+            + "}\"";
+
+    String jsonResponseSize = BaseController.getResponseSize(jsonResponse);
+    Assert.assertEquals("2138", jsonResponseSize);
+  }
+
+  @Test
+  public void testGetResponseSizeFailure() throws UnsupportedEncodingException {
+    String jsonResponse = "";
+    String jsonResponseSize = BaseController.getResponseSize(jsonResponse);
+    Assert.assertEquals("0.0", jsonResponseSize);
   }
 }
