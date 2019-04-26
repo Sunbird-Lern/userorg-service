@@ -5,11 +5,8 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +26,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryLmaxWriter;
@@ -310,11 +308,23 @@ public class BaseController extends Controller {
     } else {
       response.setVer("");
     }
+
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(createResponseParamObj(code));
+
+    try {
+      if (response.getResult() != null) {
+        String json = new ObjectMapper().writeValueAsString(response.getResult());
+        String value = getResponseSize(json);
+        ctx().response().setHeader(HeaderParam.X_Response_Length.getName(), value);
+      }
+    } catch (Exception e) {
+      ctx().response().setHeader(HeaderParam.X_Response_Length.getName(), "0.0");
+    }
+
     return response;
   }
 
@@ -854,8 +864,7 @@ public class BaseController extends Controller {
       Global.isServiceHealthy = false;
     }
     ProjectLogger.log(
-        "BaseController:setGlobalHealthFlag: isServiceHealthy = "
-            + Global.isServiceHealthy,
+        "BaseController:setGlobalHealthFlag: isServiceHealthy = " + Global.isServiceHealthy,
         LoggerEnum.INFO.name());
   }
 
@@ -867,5 +876,12 @@ public class BaseController extends Controller {
         .reduce((p1, p2) -> p1 + "&" + p2)
         .map(s -> "?" + s)
         .orElse("");
+  }
+
+  public static String getResponseSize(String response) throws UnsupportedEncodingException {
+    if (StringUtils.isNotBlank(response)) {
+      return response.getBytes("UTF-8").length + "";
+    }
+    return "0.0";
   }
 }
