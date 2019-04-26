@@ -308,11 +308,13 @@ public class BaseController extends Controller {
     } else {
       response.setVer("");
     }
+
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(createResponseParamObj(code));
+
     try {
       if (response.getResult() != null) {
         String json = new ObjectMapper().writeValueAsString(response.getResult());
@@ -321,10 +323,9 @@ public class BaseController extends Controller {
       }
     } catch (Exception e) {
       ctx().response().setHeader(HeaderParam.X_Response_Length.getName(), "0.0");
-    } finally {
-
-      return response;
     }
+
+    return response;
   }
 
   /**
@@ -879,7 +880,7 @@ public class BaseController extends Controller {
 
   public static String getResponseSize(String response) throws UnsupportedEncodingException {
     if (StringUtils.isNotBlank(response)) {
-      return response.getBytes("utf-8").length + "";
+      return response.getBytes("UTF-8").length + "";
     }
     return "0.0";
   }
