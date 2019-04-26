@@ -52,7 +52,6 @@ import util.RequestInterceptor;
 })
 @SuppressStaticInitializationFor({"util.AuthenticationHelper", "util.Global"})
 @PowerMockIgnore("javax.management.*")
-// @Ignore
 public class BaseControllerTest {
 
   public static FakeApplication app;
