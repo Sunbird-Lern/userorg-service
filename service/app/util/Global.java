@@ -165,6 +165,12 @@ public class Global extends GlobalSettings {
       ctx.flash().put(JsonKey.APP_ID, appId);
       reqContext.put(JsonKey.APP_ID, appId);
     }
+
+    String logLevel = request.getHeader(JsonKey.LOG_LEVEL_HEADER_KEY.toLowerCase());
+    if (StringUtils.isNotBlank(logLevel)) {
+      ctx.flash().put(JsonKey.LOG_LEVEL_HEADER_KEY, logLevel);
+      reqContext.put(JsonKey.LOG_LEVEL_HEADER_KEY, logLevel);
+    }
     // checking device id in headers
     String deviceId = request.getHeader(HeaderParam.X_Device_ID.getName());
     if (StringUtils.isNotBlank(deviceId)) {
