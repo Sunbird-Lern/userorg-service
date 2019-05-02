@@ -168,8 +168,8 @@ public class Global extends GlobalSettings {
 
     String logLevel = request.getHeader(JsonKey.LOG_LEVEL_HEADER_KEY.toLowerCase());
     if (StringUtils.isNotBlank(logLevel)) {
-      ctx.flash().put(JsonKey.LOG_LEVEL_HEADER_KEY, logLevel);
-      reqContext.put(JsonKey.LOG_LEVEL_HEADER_KEY, logLevel);
+      ctx.flash().put(JsonKey.LOG_LEVEL, logLevel);
+      reqContext.put(JsonKey.LOG_LEVEL, logLevel);
     }
     // checking device id in headers
     String deviceId = request.getHeader(HeaderParam.X_Device_ID.getName());
