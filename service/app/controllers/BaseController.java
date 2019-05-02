@@ -68,6 +68,8 @@ public class BaseController extends Controller {
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+    request.getContext().put(JsonKey.DEVICE_ID, ctx().flash().get(JsonKey.DEVICE_ID));
+    request.getContext().put(JsonKey.LOG_LEVEL, ctx().flash().get(JsonKey.LOG_LEVEL));
     return request;
   }
 
