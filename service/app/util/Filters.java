@@ -47,17 +47,17 @@ public class Filters implements HttpFilters {
   }
 
   // Whether the given request/result should be gzipped or not
-  private boolean shouldGzipFunction(RequestHeader v1, ResponseHeader v2) {
+   private boolean shouldGzipFunction(RequestHeader requestHeader , ResponseHeader responseHeader) {
     double responseSize = 0.0;
-    boolean checkResponseLength=v2.headers().contains(HeaderParam.X_Response_Length.getName());
-    if(checkResponseLength) {
-        if (v2.headers().get(HeaderParam.X_Response_Length.getName()).get() != null) {
-            String strValue = v2.headers().get(HeaderParam.X_Response_Length.getName()).get();
+    boolean responseLengthKeyExist=responseHeader.headers().contains(HeaderParam.X_Response_Length.getName());
+    if(responseLengthKeyExist) {
+        if (responseHeader.headers().get(HeaderParam.X_Response_Length.getName()).get() != null) {
+            String strValue = responseHeader.headers().get(HeaderParam.X_Response_Length.getName()).get();
             responseSize = Double.parseDouble(strValue);
         }
     }
-    if (GzipFilterEnabled && (v1.headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
-      if (v1.headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
+    if (GzipFilterEnabled && (requestHeader .headers().get(HttpHeaders.ACCEPT_ENCODING) != null)) {
+      if (requestHeader .headers().get(HttpHeaders.ACCEPT_ENCODING).toString().toLowerCase().contains(GZIP)) {
         if (responseSize >= gzipThreshold) {
           return true;
         }
