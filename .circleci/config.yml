@@ -13,9 +13,7 @@ jobs:
       - save_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
           paths: ~/.m2
-      - store_artifacts:
-          path: service/target/learning-service-1.0-SNAPSHOT-dist.zip
-          destination: learning-service-1.0-SNAPSHOT-dist.zip
+      
 workflows:
   version: 2.1
   workflow:

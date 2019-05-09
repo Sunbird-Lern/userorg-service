@@ -131,7 +131,7 @@ POST   /v1/content/link/search 		              @controllers.badging.BadgeAssocia
 
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth()
-GET  /v1/:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
+GET  /:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String)
 
 #Notes API
 POST   /v1/note/create                         @controllers.notesmanagement.NotesController.createNote()
@@ -139,9 +139,6 @@ GET    /v1/note/read/:noteId                   @controllers.notesmanagement.Note
 PATCH  /v1/note/update/:noteId                 @controllers.notesmanagement.NotesController.updateNote(noteId:String)
 POST   /v1/note/search                         @controllers.notesmanagement.NotesController.searchNote()
 DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.NotesController.deleteNote(noteId:String)
-
-#Audit History API
-POST   /v1/audit/history                       @controllers.audit.AuditLogController.searchAuditHistory()
 
 # Skill tag and endorsement
 POST /v1/user/skill/add                        @controllers.skills.UserSkillController.addSkill()

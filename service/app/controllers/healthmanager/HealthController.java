@@ -25,7 +25,7 @@ public class HealthController extends BaseController {
   private static List<String> list = new ArrayList<>();
 
   static {
-    list.add("learner");
+    list.add("service");
     list.add("actor");
     list.add("cassandra");
     list.add("es");
@@ -59,7 +59,7 @@ public class HealthController extends BaseController {
     ProjectLogger.log("Call to get play service health api = " + val, LoggerEnum.INFO.name());
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
-    if (list.contains(val) && !"learner".equalsIgnoreCase(val)) {
+    if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
       if (ActorOperations.EKSTEP.name().equalsIgnoreCase(val)) {
         return getEkStepHealtCheck(request());
       } else {
