@@ -194,4 +194,4 @@ POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
 POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()
 
 # Cache APIs
-POST /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String)
+DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String)
