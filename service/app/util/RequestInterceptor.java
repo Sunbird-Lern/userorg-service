@@ -1,13 +1,11 @@
 package util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -110,7 +108,6 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Context ctx) {
     Request request = ctx.request();
-    transformUserId(request.body().asJson());
     String clientId = JsonKey.UNAUTHORIZED;
     String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
     String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -142,19 +139,6 @@ public class RequestInterceptor {
             : JsonKey.ANONYMOUS;
       }
       return JsonKey.ANONYMOUS;
-    }
-  }
-
-  private static void transformUserId(JsonNode requestBodyJson) {
-    if (null != requestBodyJson) {
-      org.sunbird.common.request.Request request =
-          (org.sunbird.common.request.Request)
-              mapper.RequestMapper.mapRequest(
-                  requestBodyJson, org.sunbird.common.request.Request.class);
-      String id = (String) request.getRequest().get(JsonKey.ID);
-      request.getRequest().put(JsonKey.ID, ProjectUtil.getLmsUserId(id));
-      id = (String) request.getRequest().get(JsonKey.USER_ID);
-      request.getRequest().put(JsonKey.USER_ID, ProjectUtil.getLmsUserId(id));
     }
   }
 
