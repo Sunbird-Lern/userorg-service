@@ -583,9 +583,8 @@ public class BaseController extends Controller {
             }
           }
         };
-
     if (actorRef instanceof ActorRef) {
-      Object obj = ApiCacher.getDataFromCache(operation, request.getRequest());
+      Object obj = ApiCacher.getCachedResponse(operation, request.getRequest());
       if (obj != null) {
         Response response = new Response();
         response.put("response", obj);
