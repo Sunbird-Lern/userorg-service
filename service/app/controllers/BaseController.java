@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import cacher.ApiCacher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
@@ -585,12 +584,6 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      Object obj = ApiCacher.getDataFromCache(operation, request.getRequest());
-      if (obj != null) {
-        Response response = new Response();
-        response.put("response", obj);
-        return Promise.pure(createCommonResponse(response, responseKey, httpReq));
-      }
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
       return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout)).map(function);
