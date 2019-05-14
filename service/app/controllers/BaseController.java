@@ -626,19 +626,19 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      Object obj =
+      Response obj =
           fetchApiResponseFromCache(
               request,
-              Object.class); // This method is responsible to bring the api response from cache.
+              Response.class); // This method is responsible to bring the api response from cache.
       if (obj != null) {
-        Response cachedResponse = new Response();
-        cachedResponse.put("response", obj);
+        //        Response cachedResponse = new Response();
+        //        cachedResponse.put("response", obj);
         ProjectLogger.log(
             "BaseController:actorResponseHandler:apply: Response type for operation = "
                 + operation
                 + "Got Api Response From Cache",
             LoggerEnum.INFO.name());
-        return Promise.pure(createCommonResponse(cachedResponse, responseKey, httpReq));
+        return Promise.pure(createCommonResponse(obj, responseKey, httpReq));
       }
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
@@ -903,14 +903,14 @@ public class BaseController extends Controller {
     return "0.0";
   }
 
-  private static Object fetchApiResponseFromCache(
+  private static Response fetchApiResponseFromCache(
       org.sunbird.common.request.Request request, Class<?> clsType) {
     if (request.getRequest() != null && request.getOperation() != null) {
       String field =
           HashGeneratorUtil.getHashCodeAsString(
               request.getRequest()); // generating HashCode for full request.
       if (field != null && !field.equalsIgnoreCase("")) {
-        return cache.get(request.getOperation(), field, clsType);
+        return (Response) cache.get(request.getOperation(), field, clsType);
       }
       return null;
     }
