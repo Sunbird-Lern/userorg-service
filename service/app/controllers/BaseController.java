@@ -8,12 +8,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
@@ -626,19 +623,21 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      Response obj =
-          fetchApiResponseFromCache(
-              request,
-              Response.class); // This method is responsible to bring the api response from cache.
-      if (obj != null) {
-        //        Response cachedResponse = new Response();
-        //        cachedResponse.put("response", obj);
-        ProjectLogger.log(
-            "BaseController:actorResponseHandler:apply: Response type for operation = "
-                + operation
-                + "Got Api Response From Cache",
-            LoggerEnum.INFO.name());
-        return Promise.pure(createCommonResponse(obj, responseKey, httpReq));
+      if (isOperationIsCachable(operation)) {
+        Response obj =
+            fetchApiResponseFromCache(
+                request,
+                Response.class); // This method is responsible to bring the api response from cache.
+        if (obj != null) {
+          //        Response cachedResponse = new Response();
+          //        cachedResponse.put("response", obj);
+          ProjectLogger.log(
+              "BaseController:actorResponseHandler:apply: Response type for operation = "
+                  + operation
+                  + "Got Api Response From Cache",
+              LoggerEnum.INFO.name());
+          return Promise.pure(createCommonResponse(obj, responseKey, httpReq));
+        }
       }
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
@@ -914,6 +913,16 @@ public class BaseController extends Controller {
       }
       return null;
     }
+
     return null;
+  }
+
+  private static boolean isOperationIsCachable(String actorOpration) {
+    Map<String, String> properties = cache.readConfig();
+    List<String> mapNameList = Arrays.asList(properties.get("cache.mapNames").split(","));
+    if (!CollectionUtils.isEmpty(mapNameList) && mapNameList.contains(actorOpration)) {
+      return true;
+    }
+    return false;
   }
 }
