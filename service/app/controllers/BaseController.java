@@ -17,7 +17,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.cache.CacheFactory;
+import org.sunbird.cache.interfaces.Cache;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.hash.HashGeneratorUtil;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.ActorOperations;
@@ -53,6 +56,7 @@ public class BaseController extends Controller {
   private static Object actorRef = null;
   private TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
+  private static Cache cache = CacheFactory.getInstance();
 
   static {
     try {
@@ -622,6 +626,20 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
+      Object obj =
+          fetchApiResponseFromCache(
+              request,
+              Object.class); // This method is responsible to bring the api response from cache.
+      if (obj != null) {
+        Response cachedResponse = new Response();
+        cachedResponse.put("response", obj);
+        ProjectLogger.log(
+            "BaseController:actorResponseHandler:apply: Response type for operation = "
+                + operation
+                + "Got Api Response From Cache",
+            LoggerEnum.INFO.name());
+        return Promise.pure(createCommonResponse(cachedResponse, responseKey, httpReq));
+      }
       return Promise.wrap(Patterns.ask((ActorRef) actorRef, request, timeout)).map(function);
     } else {
       return Promise.wrap(Patterns.ask((ActorSelection) actorRef, request, timeout)).map(function);
@@ -883,5 +901,19 @@ public class BaseController extends Controller {
       return response.getBytes("UTF-8").length + "";
     }
     return "0.0";
+  }
+
+  private static Object fetchApiResponseFromCache(
+      org.sunbird.common.request.Request request, Class<?> clsType) {
+    if (request.getRequest() != null && request.getOperation() != null) {
+      String field =
+          HashGeneratorUtil.getHashCodeAsString(
+              request.getRequest()); // generating HashCode for full request.
+      if (field != null && !field.equalsIgnoreCase("")) {
+        return cache.get(request.getOperation(), field, clsType);
+      }
+      return null;
+    }
+    return null;
   }
 }
