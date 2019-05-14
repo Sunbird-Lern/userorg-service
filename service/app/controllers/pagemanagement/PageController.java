@@ -33,8 +33,6 @@ public class PageController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "getting create page data request = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateCreatePage(reqObj);
       reqObj.setOperation(ActorOperations.CREATE_PAGE.getValue());
@@ -59,8 +57,6 @@ public class PageController extends BaseController {
 
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(
-          "getting update page data request = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdatepage(reqObj);
       reqObj.setOperation(ActorOperations.UPDATE_PAGE.getValue());
