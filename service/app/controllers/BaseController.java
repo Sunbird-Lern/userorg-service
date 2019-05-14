@@ -5,11 +5,8 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,10 +22,10 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryLmaxWriter;
@@ -51,7 +48,7 @@ import util.Global;
  */
 public class BaseController extends Controller {
 
-  public static final int AKKA_WAIT_TIME = 10;
+  public static final int AKKA_WAIT_TIME = 30;
   private static Object actorRef = null;
   private TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
@@ -261,7 +258,6 @@ public class BaseController extends Controller {
    */
   public static Response createFailureResponse(
       Request request, ResponseCode code, ResponseCode headerCode) {
-    ProjectLogger.log("BaseController: createFailureResponse called", LoggerEnum.INFO.name());
 
     Response response = new Response();
     response.setVer(getApiVersion(request.path()));
@@ -273,8 +269,6 @@ public class BaseController extends Controller {
   }
 
   public static ResponseParams createResponseParamObj(ResponseCode code, String customMessage) {
-    ProjectLogger.log("BaseController: createResponseParamObj called", LoggerEnum.INFO.name());
-
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
@@ -304,18 +298,28 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createSuccessResponse(Request request, Response response) {
-    ProjectLogger.log("BaseController: createSuccessResponse called", LoggerEnum.INFO.name());
-
     if (request != null) {
       response.setVer(getApiVersion(request.path()));
     } else {
       response.setVer("");
     }
+
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(createResponseParamObj(code));
+
+    try {
+      if (response.getResult() != null) {
+        String json = new ObjectMapper().writeValueAsString(response.getResult());
+        String value = getResponseSize(json);
+        ctx().response().setHeader(HeaderParam.X_Response_Length.getName(), value);
+      }
+    } catch (Exception e) {
+      ctx().response().setHeader(HeaderParam.X_Response_Length.getName(), "0.0");
+    }
+
     return response;
   }
 
@@ -339,8 +343,6 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       Request request, ProjectCommonException exception) {
-    ProjectLogger.log("BaseController: createResponseOnException called", LoggerEnum.INFO.name());
-
     ProjectLogger.log(
         exception != null ? exception.getMessage() : "Message is not coming",
         exception,
@@ -380,10 +382,6 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       String path, String method, ProjectCommonException exception) {
-    ProjectLogger.log(
-        "BaseController: createResponseOnException called for path = " + path,
-        LoggerEnum.INFO.name());
-
     Response response = new Response();
     response.setVer(getApiVersion(path));
     response.setId(getApiResponseId(path, method));
@@ -403,8 +401,6 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonResponse(Object response, String key, Request request) {
-    ProjectLogger.log("BaseController: createCommonResponse called", LoggerEnum.INFO.name());
-
     Map<String, Object> requestInfo = Global.requestInfo.get(ctx().flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
 
@@ -493,9 +489,6 @@ public class BaseController extends Controller {
    * @return Result
    */
   public Result createCommonExceptionResponse(Exception e, Request request) {
-    ProjectLogger.log(
-        "BaseController: createCommonExceptionResponse called", LoggerEnum.INFO.name());
-
     Request req = request;
     ProjectLogger.log(e.getMessage(), e, genarateTelemetryInfoForError());
     if (req == null) {
@@ -566,9 +559,6 @@ public class BaseController extends Controller {
 
     String operation = request.getOperation();
 
-    ProjectLogger.log(
-        "BaseController:actorResponseHandler: operation = " + operation, LoggerEnum.INFO.name());
-
     // set header to request object , setting actor type and channel headers value
     // ...
     setChannelAndActorInfo(ctx(), request);
@@ -580,33 +570,15 @@ public class BaseController extends Controller {
             if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
               setGlobalHealthFlag(result);
             }
-            ProjectLogger.log(
-                "BaseController:actorResponseHandler:apply: operation = " + operation,
-                LoggerEnum.INFO.name());
+
             if (result instanceof Response) {
-              ProjectLogger.log(
-                  "BaseController:actorResponseHandler:apply: Response type for operation = "
-                      + operation,
-                  LoggerEnum.INFO.name());
               Response response = (Response) result;
               return createCommonResponse(response, responseKey, httpReq);
             } else if (result instanceof ProjectCommonException) {
-              ProjectLogger.log(
-                  "BaseController:actorResponseHandler:apply: ProjectCommonException for operation = "
-                      + operation,
-                  LoggerEnum.INFO.name());
               return createCommonExceptionResponse((ProjectCommonException) result, request());
             } else if (result instanceof File) {
-              ProjectLogger.log(
-                  "BaseController:actorResponseHandler:apply: file type for operation = "
-                      + operation,
-                  LoggerEnum.INFO.name());
               return createFileDownloadResponse((File) result);
             } else {
-              ProjectLogger.log(
-                  "BaseController:actorResponseHandler:apply: Unknown response for operation = "
-                      + operation,
-                  LoggerEnum.INFO.name());
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
           }
@@ -868,7 +840,6 @@ public class BaseController extends Controller {
         .map(s -> "?" + s)
         .orElse("");
   }
-
   public org.sunbird.common.request.Request transformUserId(
       org.sunbird.common.request.Request request) {
     if (request != null && request.getRequest() != null) {
@@ -879,5 +850,11 @@ public class BaseController extends Controller {
       return request;
     }
     return request;
+  }
+  public static String getResponseSize(String response) throws UnsupportedEncodingException {
+    if (StringUtils.isNotBlank(response)) {
+      return response.getBytes("UTF-8").length + "";
+    }
+    return "0.0";
   }
 }

@@ -192,3 +192,6 @@ GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.Tex
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
 POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()
+
+# Cache APIs
+DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String)
