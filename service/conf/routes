@@ -18,7 +18,8 @@ GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.g
 GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV2(uid:String)
 POST  /v1/user/getuser                  @controllers.usermanagement.UserController.getUserByLoginId()
 GET   /v1/user/get/:idType/:id          @controllers.usermanagement.UserController.getUserByKey(idType:String,id:String)
-POST  /v1/user/search					          @controllers.usermanagement.UserController.searchUser()
+POST  /v1/user/search					 @controllers.usermanagement.UserController.searchUser()
+POST  /private/user/v1/search            @controllers.usermanagement.UserController.searchUser()
 GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserController.getUserById(externalId:String)
 GET   /v1/user/mock/read/:externalId @controllers.usermanagement.UserController.getUserByIdMock(externalId:String)
 
