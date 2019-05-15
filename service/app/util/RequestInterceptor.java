@@ -100,6 +100,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/course/batch/search", var);
     apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
     apiHeaderIgnoreMap.put("/v1/cache/clear", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/search", var);
   }
 
   /**
