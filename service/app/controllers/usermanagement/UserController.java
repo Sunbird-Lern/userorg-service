@@ -145,6 +145,7 @@ public class UserController extends BaseController {
     final String requestedFields = request().getQueryString(JsonKey.FIELDS);
     final String provider = request().getQueryString(JsonKey.PROVIDER);
     final String idType = request().getQueryString(JsonKey.ID_TYPE);
+    userId = ProjectUtil.getLmsUserId(userId);
     return handleRequest(
         operation,
         null,

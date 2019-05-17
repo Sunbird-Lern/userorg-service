@@ -35,6 +35,7 @@ public class LearnerController extends BaseController {
       JsonNode requestJson = request().body().asJson();
       Request request = createAndInitRequest(ActorOperations.GET_CONTENT.getValue(), requestJson);
       validator.validateGetContentState(request);
+      request = transformUserId(request);
       return actorResponseHandler(getActorRef(), request, timeout, JsonKey.CONTENT_LIST, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
@@ -52,6 +53,7 @@ public class LearnerController extends BaseController {
       ProjectLogger.log(" get content request data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateContent(reqObj);
+      reqObj = transformUserId(reqObj);
       reqObj.setOperation(ActorOperations.ADD_CONTENT.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());

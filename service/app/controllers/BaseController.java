@@ -6,7 +6,12 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +27,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
@@ -67,6 +73,7 @@ public class BaseController extends Controller {
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+    request = transformUserId(request);
     return request;
   }
 
@@ -825,6 +832,9 @@ public class BaseController extends Controller {
     } else {
       Global.isServiceHealthy = false;
     }
+    ProjectLogger.log(
+        "BaseController:setGlobalHealthFlag: isServiceHealthy = " + Global.isServiceHealthy,
+        LoggerEnum.INFO.name());
   }
 
   protected String getQueryString(Map<String, String[]> queryStringMap) {
@@ -842,5 +852,17 @@ public class BaseController extends Controller {
       return response.getBytes("UTF-8").length + "";
     }
     return "0.0";
+  }
+
+  public org.sunbird.common.request.Request transformUserId(
+      org.sunbird.common.request.Request request) {
+    if (request != null && request.getRequest() != null) {
+      String id = (String) request.getRequest().get(JsonKey.ID);
+      request.getRequest().put(JsonKey.ID, ProjectUtil.getLmsUserId(id));
+      id = (String) request.getRequest().get(JsonKey.USER_ID);
+      request.getRequest().put(JsonKey.USER_ID, ProjectUtil.getLmsUserId(id));
+      return request;
+    }
+    return request;
   }
 }
