@@ -143,11 +143,13 @@ public class Global extends GlobalSettings {
     String url = request.uri();
     String methodName = actionMethod;
     long startTime = System.currentTimeMillis();
-    JsonNode requestNode =
-        request.body().asJson().get("params"); // extracting signup type from request
     String signType = "";
-    if (requestNode != null) {
-      signType = requestNode.get(JsonKey.signupType).asText();
+    if (request.body() != null && request.body().asJson() != null) {
+      JsonNode requestNode =
+          request.body().asJson().get("params"); // extracting signup type from request
+      if (requestNode != null) {
+        signType = requestNode.get(JsonKey.signupType).asText();
+      }
     }
     ctx.flash().put(JsonKey.signupType, signType);
     ExecutionContext context = ExecutionContext.getCurrent();
