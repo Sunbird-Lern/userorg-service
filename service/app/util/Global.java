@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.util.TextUtils;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -144,9 +143,12 @@ public class Global extends GlobalSettings {
     String url = request.uri();
     String methodName = actionMethod;
     long startTime = System.currentTimeMillis();
-    JsonNode requestNode = request.body().asJson().get("params");
-    String signType = requestNode.get(JsonKey.signupType).asText();
-    signType = TextUtils.isEmpty(signType) ? "" : signType;
+    JsonNode requestNode =
+        request.body().asJson().get("params"); // extracting signup type from request
+    String signType = "";
+    if (requestNode != null) {
+      signType = requestNode.get(JsonKey.signupType).asText();
+    }
     ctx.flash().put(JsonKey.signupType, signType);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
