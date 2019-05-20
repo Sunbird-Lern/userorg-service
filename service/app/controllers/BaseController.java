@@ -474,14 +474,7 @@ public class BaseController extends Controller {
       builder.append(element.toString());
       builder.append("\n");
     }
-    String firstHundredChars = "";
-    String stackTrace = builder.toString();
-    if (stackTrace.length() > 100) {
-      firstHundredChars = stackTrace.substring(0, 100);
-    } else {
-      firstHundredChars = stackTrace;
-    }
-    return firstHundredChars;
+    return ProjectUtil.getFirstNCharacterString(builder.toString(), 100);
   }
 
   private Map<String, Object> generateTelemetryRequestForController(
