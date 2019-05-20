@@ -474,7 +474,7 @@ public class BaseController extends Controller {
       builder.append(element.toString());
       builder.append("\n");
     }
-    return builder.toString();
+    return ProjectUtil.getFirstNCharacterString(builder.toString(), 100);
   }
 
   private Map<String, Object> generateTelemetryRequestForController(
@@ -526,7 +526,7 @@ public class BaseController extends Controller {
     params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
     reqForTelemetry.setRequest(
         generateTelemetryRequestForController(
-            TelemetryEvents.LOG.getName(),
+            TelemetryEvents.ERROR.getName(),
             params,
             (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
     lmaxWriter.submitMessage(reqForTelemetry);
