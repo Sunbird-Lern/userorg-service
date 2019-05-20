@@ -1,6 +1,7 @@
 package util;
 
 import akka.actor.ActorRef;
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -142,7 +143,13 @@ public class Global extends GlobalSettings {
     String url = request.uri();
     String methodName = actionMethod;
     long startTime = System.currentTimeMillis();
-
+    JsonNode requestNode =
+        request.body().asJson().get("params"); // extracting signup type from request
+    String signType = "";
+    if (requestNode != null) {
+      signType = requestNode.get(JsonKey.signupType).asText();
+    }
+    ctx.flash().put(JsonKey.signupType, signType);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
