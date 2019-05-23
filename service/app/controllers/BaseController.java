@@ -720,8 +720,13 @@ public class BaseController extends Controller {
     reqObj
         .getContext()
         .put(
-            JsonKey.signupType,
-            ctx.flash().get(JsonKey.signupType)); // adding signup type in request context
+            JsonKey.SIGNUP_TYPE,
+            ctx.flash().get(JsonKey.SIGNUP_TYPE)); // adding signup type in request context
+    reqObj
+        .getContext()
+        .put(
+            JsonKey.TELEMETRY_SOURCE,
+            ctx.flash().get(JsonKey.TELEMETRY_SOURCE)); // ADDING Source under params in context
     ctx().current().flash().remove(JsonKey.APP_ID);
   }
 

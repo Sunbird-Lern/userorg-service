@@ -144,14 +144,19 @@ public class Global extends GlobalSettings {
     String methodName = actionMethod;
     long startTime = System.currentTimeMillis();
     String signType = "";
+    String source = "";
     if (request.body() != null && request.body().asJson() != null) {
       JsonNode requestNode =
           request.body().asJson().get("params"); // extracting signup type from request
-      if (requestNode != null && requestNode.get(JsonKey.signupType) != null) {
-        signType = requestNode.get(JsonKey.signupType).asText();
+      if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
+        signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
+      }
+      if (requestNode != null && requestNode.get(JsonKey.TELEMETRY_SOURCE) != null) {
+        source = requestNode.get(JsonKey.TELEMETRY_SOURCE).asText();
       }
     }
-    ctx.flash().put(JsonKey.signupType, signType);
+    ctx.flash().put(JsonKey.SIGNUP_TYPE, signType);
+    ctx.flash().put(JsonKey.TELEMETRY_SOURCE, source);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
