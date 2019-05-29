@@ -198,4 +198,4 @@ POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP()
 DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String)
 
 #Tenant Migration
-PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.migrate()
+PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate()
