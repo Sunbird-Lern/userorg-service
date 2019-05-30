@@ -16,9 +16,19 @@ DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(ma
 GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnrollmentController.getEnrolledCourses(uid:String)
 POST     /v1/course/enroll	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
 POST     /v1/course/unenroll             @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
+POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
+
+# Upload Job Management APIs - Check with Krisha  - TODO
+GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
+GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
+
+# Badging Content - Should move to content-service - TODO
+POST   /v1/content/link                       @controllers.badging.BadgeAssociationController.createAssociation()
+POST   /v1/content/unlink                     @controllers.badging.BadgeAssociationController.removeAssociation()
+POST   /v1/content/link/search 		              @controllers.badging.BadgeAssociationController.searchAssociation()
 
 # Page Management APIs
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
@@ -39,11 +49,6 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToCourseBatch(batchId:String)
-
-# System Settings APIs
-GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
-GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
-POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
 
 # Textbook APIs
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)

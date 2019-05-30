@@ -13,6 +13,11 @@ POST /v1/data/sync                          @controllers.search.SearchController
 # Cache APIs
 DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String)
 
+# System Settings APIs
+GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSettingsController.getSystemSetting(field:String)
+GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
+POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
+
 # User management APIs
 POST	/v1/user/create				            @controllers.usermanagement.UserController.createUser()
 POST	/v2/user/create				            @controllers.usermanagement.UserController.createUserV2()
@@ -65,7 +70,6 @@ POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploa
 POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
-POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
@@ -75,7 +79,7 @@ POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEnc
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
 
-#metrics APIs for dashboard
+#Metrics APIs for dashboard
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
 GET  /v1/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgress(batchId:String)
@@ -106,9 +110,7 @@ POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertio
 GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String)
 POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList()
 DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
-POST   /v1/content/link                       @controllers.badging.BadgeAssociationController.createAssociation()
-POST   /v1/content/unlink                     @controllers.badging.BadgeAssociationController.removeAssociation()
-POST   /v1/content/link/search 		              @controllers.badging.BadgeAssociationController.searchAssociation()
+
 
 #Notes API
 POST   /v1/note/create                         @controllers.notesmanagement.NotesController.createNote()
@@ -117,14 +119,15 @@ PATCH  /v1/note/update/:noteId                 @controllers.notesmanagement.Note
 POST   /v1/note/search                         @controllers.notesmanagement.NotesController.searchNote()
 DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.NotesController.deleteNote(noteId:String)
 
-# Skill tag and endorsement
+
+# Skill tag and endorsement - Check with Rahul and Remove
 POST /v1/user/skill/add                        @controllers.skills.UserSkillController.addSkill()
 POST /v1/user/skill/read                       @controllers.skills.UserSkillController.getSkill()
 GET  /v1/skills                                @controllers.skills.UserSkillController.getSkillsList()
 POST /v1/user/skill/update                     @controllers.skills.UserSkillController.updateSkill()
 POST /v1/user/skill/endorse/add                @controllers.skills.UserSkillEndorsementController.addEndorsement()
 
-#T&C
+#T&C - Check implementation/usage and remove.
 POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference()
 POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference()
 POST  /v1/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference()
@@ -138,12 +141,12 @@ POST   /v1/object/delete                 @controllers.datapersistence.DbOperatio
 POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search()
 POST   /v1/object/metrics                @controllers.datapersistence.DbOperationController.getMetrics()
 
-#Master Key API
+#Master Key API - Check implementation/usage and remove.
 POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient()
 PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey
 GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String)
 
-#GEO LOCATION API
+#Notification APIs - Used in announcements - check and do refactoring.
 POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation()
 GET  /v1/notification/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String)
 PATCH  /v1/notification/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String)
@@ -156,7 +159,6 @@ POST   /v1/location/create                      @controllers.location.LocationCo
 PATCH  /v1/location/update                      @controllers.location.LocationController.updateLocation()
 POST   /v1/location/search                      @controllers.location.LocationController.searchLocation()
 DELETE /v1/location/delete/:locationId                      @controllers.location.LocationController.deleteLocation(locationId:String)
-
 
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()
