@@ -151,12 +151,12 @@ public class Global extends GlobalSettings {
       if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
         signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
       }
-      if (requestNode != null && requestNode.get(JsonKey.TELEMETRY_SOURCE) != null) {
-        source = requestNode.get(JsonKey.TELEMETRY_SOURCE).asText();
+      if (requestNode != null && requestNode.get(JsonKey.REQUEST_SOURCE) != null) {
+        source = requestNode.get(JsonKey.REQUEST_SOURCE).asText();
       }
     }
     ctx.flash().put(JsonKey.SIGNUP_TYPE, signType);
-    ctx.flash().put(JsonKey.TELEMETRY_SOURCE, source);
+    ctx.flash().put(JsonKey.REQUEST_SOURCE, source);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the

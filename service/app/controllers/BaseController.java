@@ -725,8 +725,8 @@ public class BaseController extends Controller {
     reqObj
         .getContext()
         .put(
-            JsonKey.TELEMETRY_SOURCE,
-            ctx.flash().get(JsonKey.TELEMETRY_SOURCE)); // ADDING Source under params in context
+            JsonKey.REQUEST_SOURCE,
+            ctx.flash().get(JsonKey.REQUEST_SOURCE)); // ADDING Source under params in context
     ctx().current().flash().remove(JsonKey.APP_ID);
   }
 
