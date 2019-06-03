@@ -147,11 +147,11 @@ public class Global extends GlobalSettings {
     if (request.body() != null && request.body().asJson() != null) {
       JsonNode requestNode =
           request.body().asJson().get("params"); // extracting signup type from request
-      if (requestNode != null && requestNode.get(JsonKey.signupType) != null) {
-        signType = requestNode.get(JsonKey.signupType).asText();
+      if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
+        signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
       }
     }
-    ctx.flash().put(JsonKey.signupType, signType);
+    ctx.flash().put(JsonKey.SIGNUP_TYPE, signType);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
