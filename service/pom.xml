@@ -63,13 +63,17 @@
 			<version>${play2.version}</version>
 			<exclusions>
 				<exclusion>
-				  <groupId>com.fasterxml.jackson.core</groupId>
-		                  <artifactId>jackson-core</artifactId>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
 				</exclusion>
-                                <exclusion>
-                                  <groupId>joda-time</groupId>
-                                  <artifactId>joda-time</artifactId>
-                                </exclusion>
+				<exclusion>
+					<groupId>joda-time</groupId>
+					<artifactId>joda-time</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
