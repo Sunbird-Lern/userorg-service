@@ -1,6 +1,7 @@
 package util;
 
 import akka.actor.ActorRef;
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -142,7 +143,20 @@ public class Global extends GlobalSettings {
     String url = request.uri();
     String methodName = actionMethod;
     long startTime = System.currentTimeMillis();
-
+    String signType = "";
+    String source = "";
+    if (request.body() != null && request.body().asJson() != null) {
+      JsonNode requestNode =
+          request.body().asJson().get("params"); // extracting signup type from request
+      if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
+        signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
+      }
+      if (requestNode != null && requestNode.get(JsonKey.REQUEST_SOURCE) != null) {
+        source = requestNode.get(JsonKey.REQUEST_SOURCE).asText();
+      }
+    }
+    ctx.flash().put(JsonKey.SIGNUP_TYPE, signType);
+    ctx.flash().put(JsonKey.REQUEST_SOURCE, source);
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
@@ -398,9 +412,6 @@ public class Global extends GlobalSettings {
   public Promise<Result> checkForServiceHealth(Http.Context ctx) {
     if (Boolean.parseBoolean((ProjectUtil.getConfigValue(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
         && !ctx.request().path().endsWith(JsonKey.HEALTH)) {
-      ProjectLogger.log(
-          "Global:checkForServiceHealth: isServiceHealthy = " + isServiceHealthy,
-          LoggerEnum.INFO.name());
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
         Response resp = BaseController.createFailureResponse(ctx.request(), headerCode, headerCode);
