@@ -53,3 +53,4 @@ POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.Course
 # Textbook APIs
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
+
