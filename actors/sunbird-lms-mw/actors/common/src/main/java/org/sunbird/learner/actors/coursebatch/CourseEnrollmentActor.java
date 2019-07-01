@@ -273,8 +273,20 @@ public class CourseEnrollmentActor extends BaseActor {
       Date todaydate = format.parse(format.format(new Date()));
       // there might be chance end date is not present
       Date courseBatchEndDate = null;
+      Date courseBatchEnrollmentEndDate = null;
       if (StringUtils.isNotBlank(courseBatchDetails.getEndDate())) {
         courseBatchEndDate = format.parse(courseBatchDetails.getEndDate());
+      }
+      if (StringUtils.isNotBlank(courseBatchDetails.getEnrollmentEndDate())) {
+        courseBatchEnrollmentEndDate = format.parse(courseBatchDetails.getEnrollmentEndDate());
+      }
+      if (courseBatchEnrollmentEndDate != null && courseBatchEnrollmentEndDate.before(todaydate)) {
+        ProjectLogger.log(
+            "CourseEnrollmentActor validateCourseBatch Enrollment Date has ended.",
+            LoggerEnum.INFO.name());
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.courseBatchEnrollmentDateEnded,
+            ResponseCode.courseBatchEnrollmentDateEnded.getErrorMessage());
       }
       if (ProgressStatus.COMPLETED.getValue() == courseBatchDetails.getStatus()
           || (courseBatchEndDate != null && courseBatchEndDate.before(todaydate))) {
