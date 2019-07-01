@@ -29,8 +29,10 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateEnrolmentType(request);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
+    String enrollmentEndDate = (String) request.getRequest().get(JsonKey.ENROLLMENT_END_DATE);
     validateStartDate(startDate);
     validateEndDate(startDate, endDate);
+    validateEnrollmentEndDate(enrollmentEndDate, startDate, endDate);
     validateCreatedForAndMentors(request);
     validateParticipants(request);
   }
@@ -184,6 +186,45 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.endDateError.getErrorCode(),
           ResponseCode.endDateError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+  }
+
+  private static void validateEnrollmentEndDate(
+      String enrollmentEndDate, String startDate, String endDate) {
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    format.setLenient(false);
+    Date batchEndDate = null;
+    Date batchStartDate = null;
+    Date batchenrollmentEndDate = null;
+    try {
+      if (StringUtils.isNotEmpty(enrollmentEndDate)) {
+        batchenrollmentEndDate = format.parse(enrollmentEndDate);
+        batchStartDate = format.parse(startDate);
+      }
+      if (StringUtils.isNotEmpty(endDate)) {
+        batchEndDate = format.parse(endDate);
+      }
+
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+          ResponseCode.dateFormatError.getErrorCode(),
+          ResponseCode.dateFormatError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (StringUtils.isNotEmpty(enrollmentEndDate)
+        && batchStartDate.getTime() > batchenrollmentEndDate.getTime()) {
+      throw new ProjectCommonException(
+          ResponseCode.enrollmentEndDateStartError.getErrorCode(),
+          ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (StringUtils.isNotEmpty(enrollmentEndDate)
+        && StringUtils.isNotEmpty(endDate)
+        && batchEndDate.getTime() < batchenrollmentEndDate.getTime()) {
+      throw new ProjectCommonException(
+          ResponseCode.enrollmentEndDateEndError.getErrorCode(),
+          ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
