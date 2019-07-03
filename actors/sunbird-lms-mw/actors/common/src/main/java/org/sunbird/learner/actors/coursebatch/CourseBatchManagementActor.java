@@ -25,7 +25,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.ProjectUtil.ProgressStatus;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
@@ -41,7 +40,13 @@ import org.sunbird.learner.util.CourseBatchUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.course.batch.CourseBatch;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.userorg.UserOrgService;
+import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.Future;
+
+import static org.sunbird.common.models.util.JsonKey.*;
+import static org.sunbird.common.models.util.LoggerEnum.ERROR;
+import static org.sunbird.common.models.util.ProjectLogger.log;
 
 @ActorConfig(
   tasks = {
@@ -57,6 +62,7 @@ import scala.concurrent.Future;
 public class CourseBatchManagementActor extends BaseActor {
 
   private CourseBatchDao courseBatchDao = new CourseBatchDaoImpl();
+  private UserOrgService userOrgService = new UserOrgServiceImpl();
   private UserCoursesService userCoursesService = new UserCoursesService();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -117,9 +123,8 @@ public class CourseBatchManagementActor extends BaseActor {
     String courseId = (String) request.get(JsonKey.COURSE_ID);
     Map<String, Object> contentDetails = getContentDetails(courseId, headers);
     courseBatch.setContentDetails(contentDetails, requestedBy);
-
-    validateContentOrg(courseBatch.getCreatedFor());
-    validateMentors(courseBatch);
+   validateContentOrg(courseBatch.getCreatedFor());
+   validateMentors(courseBatch);
     Map<String, Object> participantsMap = null;
     if (participants != null) {
       validateParticipants(participants, courseBatch);
@@ -498,11 +503,8 @@ public class CourseBatchManagementActor extends BaseActor {
       String batchCreatorRootOrgId = getRootOrg(courseBatch.getCreatedBy());
 
       for (String userId : mentors) {
-        Future<Map<String, Object>> resultF =
-            esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
-        Map<String, Object> result =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
+        Map<String,Object>  result= userOrgService.getUserById(userId);
+        String check=(String) result.get(IS_DELETED);
         String mentorRootOrgId = getRootOrg(userId);
         if (!batchCreatorRootOrgId.equals(mentorRootOrgId)) {
           throw new ProjectCommonException(
@@ -650,10 +652,8 @@ public class CourseBatchManagementActor extends BaseActor {
     Date todayDate = getDate(null, DATE_FORMAT, null);
     Date dbBatchStartDate = getDate(JsonKey.START_DATE, DATE_FORMAT, courseBatchMap);
     Date dbBatchEndDate = getDate(JsonKey.END_DATE, DATE_FORMAT, courseBatchMap);
-    Date dbEnrollmentEndDate = getDate(JsonKey.ENROLLMENT_END_DATE, DATE_FORMAT, courseBatchMap);
     Date requestedStartDate = getDate(JsonKey.START_DATE, DATE_FORMAT, req);
     Date requestedEndDate = getDate(JsonKey.END_DATE, DATE_FORMAT, req);
-    Date requestedEnrollmentEndDate = getDate(JsonKey.ENROLLMENT_END_DATE, DATE_FORMAT, req);
 
     validateUpdateBatchStartDate(requestedStartDate);
     validateBatchStartAndEndDate(
@@ -662,20 +662,12 @@ public class CourseBatchManagementActor extends BaseActor {
       courseBatch.setStatus(ProgressStatus.STARTED.getValue());
       CourseBatchSchedulerUtil.updateCourseBatchDbStatus(req, true);
     }
-    validateBatchEnrollmentEndDate(
-        dbBatchStartDate,
-        dbBatchEndDate,
-        dbEnrollmentEndDate,
-        requestedEnrollmentEndDate,
-        todayDate);
     courseBatch.setStartDate(
         requestedStartDate != null
             ? (String) req.get(JsonKey.START_DATE)
             : courseBatch.getStartDate());
     courseBatch.setEndDate(
         requestedEndDate != null ? (String) req.get(JsonKey.END_DATE) : courseBatch.getEndDate());
-    courseBatch.setEnrollmentEndDate(
-        requestedEnrollmentEndDate == null ? null : (String) req.get(JsonKey.ENROLLMENT_END_DATE));
   }
 
   private void validateUserPermission(CourseBatch courseBatch, String requestedBy) {
@@ -695,40 +687,19 @@ public class CourseBatchManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private Map<String, String> getRootOrgForMultipleUsers(List<String> userIds) {
 
+    List<Map<String, Object>> userlist = userOrgService.getUsersByIds(userIds);
     Map<String, String> userWithRootOrgs = new HashMap<>();
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.ID, userIds);
-
-    List<String> fields = new ArrayList<>();
-    fields.add(JsonKey.ROOT_ORG_ID);
-    fields.add(JsonKey.ID);
-    fields.add(JsonKey.REGISTERED_ORG);
-
-    SearchDTO searchDTO = new SearchDTO();
-    if (CollectionUtils.isNotEmpty(userIds)) {
-      searchDTO.setLimit(userIds.size());
-      searchDTO.setOffset(0);
-    }
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    searchDTO.setFields(fields);
-
-    Future<Map<String, Object>> resultF = esService.search(searchDTO, EsType.user.getTypeName());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
-    List<Map<String, Object>> esContent = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    for (Map<String, Object> user : esContent) {
+    if(CollectionUtils.isNotEmpty(userlist)) {
+      userlist.forEach(user ->{
       String rootOrg = getRootOrgFromUserMap(user);
-      userWithRootOrgs.put((String) user.get(JsonKey.ID), rootOrg);
-    }
+      userWithRootOrgs.put((String) user.get(JsonKey.ID), rootOrg);});
+      }
     return userWithRootOrgs;
   }
 
   private String getRootOrg(String batchCreator) {
-    Future<Map<String, Object>> userInfoF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), batchCreator);
-    Map<String, Object> userInfo =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userInfoF);
+
+    Map<String,Object> userInfo = userOrgService.getUserById(batchCreator);
     return getRootOrgFromUserMap(userInfo);
   }
 
@@ -765,6 +736,7 @@ public class CourseBatchManagementActor extends BaseActor {
     if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
       if (!dataMapList.isEmpty()) {
         throw new ProjectCommonException(
+
             ResponseCode.invalidHashTagId.getErrorCode(),
             ResponseCode.invalidHashTagId.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -851,47 +823,6 @@ public class CourseBatchManagementActor extends BaseActor {
     }
   }
 
-  private void validateBatchEnrollmentEndDate(
-      Date existingStartDate,
-      Date existingEndDate,
-      Date existingEnrollmentEndDate,
-      Date requestedEnrollmentEndDate,
-      Date todayDate) {
-    ProjectLogger.log(
-        "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedEnrollmentEndDate, todayDate"
-            + existingStartDate
-            + ","
-            + existingEndDate
-            + ","
-            + existingEnrollmentEndDate
-            + ","
-            + requestedEnrollmentEndDate
-            + ","
-            + todayDate,
-        LoggerEnum.INFO.name());
-    if (requestedEnrollmentEndDate != null
-        && requestedEnrollmentEndDate.before(existingStartDate)) {
-      throw new ProjectCommonException(
-          ResponseCode.enrollmentEndDateStartError.getErrorCode(),
-          ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (requestedEnrollmentEndDate != null
-        && existingEndDate != null
-        && requestedEnrollmentEndDate.after(existingEndDate)) {
-      throw new ProjectCommonException(
-          ResponseCode.enrollmentEndDateEndError.getErrorCode(),
-          ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (requestedEnrollmentEndDate != null && requestedEnrollmentEndDate.before(todayDate)) {
-      throw new ProjectCommonException(
-          ResponseCode.enrollmentEndDateUpdateError.getErrorCode(),
-          ResponseCode.enrollmentEndDateUpdateError.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-  }
-
   private Date getDate(String key, SimpleDateFormat format, Map<String, Object> map) {
     try {
       if (MapUtils.isEmpty(map)) {
@@ -913,17 +844,23 @@ public class CourseBatchManagementActor extends BaseActor {
   }
 
   private boolean isOrgValid(String orgId) {
-    Future<Map<String, Object>> respF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
-    Map<String, Object> resp =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(respF);
-    if (resp != null && resp.size() > 0) {
-      ProjectLogger.log(
-          "CourseBatchManagementActor:isOrgValid: Organisation found in ES with id = " + orgId);
-      return true;
+
+    try {
+      Map<String,Object> result = userOrgService.getOrganisationById(orgId);
+
+      if (MapUtils.isEmpty(result)) {
+        ProjectLogger.log(
+                "CourseBatchManagementActor:isOrgValid: Organisation NOT found with id = " + orgId);
+        return false;
+      }
+      else {
+        return( result.get(ID)==orgId );
+      }
+    } catch (Exception e) {
+      log(
+              "Error while fetching OrgID : " + orgId,
+              ERROR.name());
     }
-    ProjectLogger.log(
-        "CourseBatchManagementActor:isOrgValid: Organisation NOT found in ES with id = " + orgId);
     return false;
   }
 
