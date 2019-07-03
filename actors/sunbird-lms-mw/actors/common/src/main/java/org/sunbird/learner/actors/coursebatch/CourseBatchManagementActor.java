@@ -898,18 +898,16 @@ public class CourseBatchManagementActor extends BaseActor {
     try {
       Map<String,Object> result = userOrgService.getOrganisationById(orgId);
 
-      if (MapUtils.isEmpty(result)) {
-        ProjectLogger.log(
-                "CourseBatchManagementActor:isOrgValid: Organisation NOT found with id = " + orgId);
-        return false;
-      }
-      else {
-        return( result.get(ID)==orgId );
-      }
+      ProjectLogger.log(
+              "CourseBatchManagementActor:isOrgValid: orgId = " + (MapUtils.isNotEmpty(result)?result.get(ID):null));
+
+      return ((MapUtils.isNotEmpty(result) && orgId.equals(result.get(ID))));
+
+
     } catch (Exception e) {
       log(
-              "Error while fetching OrgID : " + orgId,
-              ERROR.name());
+              "Error while fetching OrgID : " + orgId, e);
+
     }
     return false;
   }
