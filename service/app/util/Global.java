@@ -148,7 +148,7 @@ public class Global extends GlobalSettings {
     String source = "";
     if (request.body() != null && request.body().asJson() != null) {
       JsonNode requestNode =
-              request.body().asJson().get("params"); // extracting signup type from request
+          request.body().asJson().get("params"); // extracting signup type from request
       if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
         signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
       }
@@ -161,16 +161,16 @@ public class Global extends GlobalSettings {
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> reqContext = new HashMap<>();
     // set env and channel to the
-    String channel = request.getHeader(HeaderParam.CHANNEL_ID.getName());
-    if (StringUtils.isBlank(channel)) {
-      String custodianOrgHashTagid = getCustodianOrgHashTagId();
-      channel =
-              (StringUtils.isNotEmpty(custodianOrgHashTagid))
-                      ? custodianOrgHashTagid
-                      : JsonKey.DEFAULT_ROOT_ORG_ID;
-    }
-    reqContext.put(JsonKey.CHANNEL, channel);
-    ctx.flash().put(JsonKey.CHANNEL, channel);
+    //    String channel = request.getHeader(HeaderParam.CHANNEL_ID.getName());
+    //    if (StringUtils.isBlank(channel)) {
+    //      String custodianOrgHashTagid = getCustodianOrgHashTagId();
+    //      channel =
+    //              (StringUtils.isNotEmpty(custodianOrgHashTagid))
+    //                      ? custodianOrgHashTagid
+    //                      : JsonKey.DEFAULT_ROOT_ORG_ID;
+    //    }
+    //    reqContext.put(JsonKey.CHANNEL, channel);
+    //    ctx.flash().put(JsonKey.CHANNEL, channel);
     reqContext.put(JsonKey.ENV, getEnv(request));
     reqContext.put(JsonKey.REQUEST_ID, ExecutionContext.getRequestId());
     String appId = request.getHeader(HeaderParam.X_APP_ID.getName());
