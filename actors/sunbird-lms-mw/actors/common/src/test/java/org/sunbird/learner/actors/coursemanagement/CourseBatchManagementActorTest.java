@@ -180,14 +180,14 @@ public class CourseBatchManagementActorTest {
       existingEnrollmentEndDate = calculateDate(3);
       existingEndDate = calculateDate(4);
       courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.FALSE);
-      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.TRUE);
+      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.FALSE);
     } else {
 
       existingStartDate = calculateDate(-4);
       existingEnrollmentEndDate = calculateDate(-3);
       existingEndDate = calculateDate(-2);
-      courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.FALSE);
-      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.FALSE);
+      courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.TRUE);
+      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.TRUE);
     }
 
     courseResponseMap.put(JsonKey.START_DATE, existingStartDate);
