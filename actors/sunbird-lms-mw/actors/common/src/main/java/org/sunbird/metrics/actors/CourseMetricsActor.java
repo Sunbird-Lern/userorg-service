@@ -1,5 +1,7 @@
 package org.sunbird.metrics.actors;
 
+import static org.sunbird.common.models.util.JsonKey.CONTENT;
+import static org.sunbird.common.models.util.JsonKey.RESPONSE;
 import static org.sunbird.common.models.util.ProjectUtil.isNotNull;
 import static org.sunbird.common.models.util.ProjectUtil.isNull;
 
@@ -40,6 +42,8 @@ import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserUtility;
+import org.sunbird.userorg.UserOrgService;
+import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -56,6 +60,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
   private static final String COURSE_PROGRESS_REPORT = "Course Progress Report";
   protected static final String CONTENT_ID = "content_id";
+  private UserOrgService userOrgService = new UserOrgServiceImpl();
   private static ObjectMapper mapper = new ObjectMapper();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private DecryptionService decryptionService =
@@ -199,11 +204,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
   }
 
   private void validateUserId(String requestedBy) {
-
-    Future<Map<String, Object>> requestedByInfoF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), requestedBy);
-    Map<String, Object> requestedByInfo =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(requestedByInfoF);
+    Map<String,Object> requestedByInfo = userOrgService.getUserById(requestedBy);
     if (isNull(requestedByInfo)
         || StringUtils.isBlank((String) requestedByInfo.get(JsonKey.FIRST_NAME))) {
       throw new ProjectCommonException(
@@ -221,11 +222,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
     simpleDateFormat.setLenient(false);
 
     String requestedBy = (String) actorMessage.get(JsonKey.REQUESTED_BY);
-
-    Future<Map<String, Object>> requestedByInfoF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), requestedBy);
-    Map<String, Object> requestedByInfo =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(requestedByInfoF);
+    Map<String,Object> requestedByInfo = userOrgService.getUserById(requestedBy);
     if (isNull(requestedByInfo)
         || StringUtils.isBlank((String) requestedByInfo.get(JsonKey.FIRST_NAME))) {
       throw new ProjectCommonException(
@@ -309,10 +306,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     String requestedBy = (String) actorMessage.get(JsonKey.REQUESTED_BY);
 
-    Future<Map<String, Object>> requestedByInfoF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), requestedBy);
-    Map<String, Object> requestedByInfo =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(requestedByInfoF);
+    Map<String,Object> requestedByInfo = userOrgService.getUserById(requestedBy);
 
     if (isNull(requestedByInfo)
         || StringUtils.isBlank((String) requestedByInfo.get(JsonKey.FIRST_NAME))) {
@@ -402,52 +396,40 @@ public class CourseMetricsActor extends BaseMetricsActor {
       userfields.add(JsonKey.ROOT_ORG_ID);
       userfields.add(JsonKey.FIRST_NAME);
       userfields.add(JsonKey.LAST_NAME);
-      Future<Map<String, Object>> userresultF =
-          esService.search(
-              createESRequest(userfilter, null, userfields), EsType.user.getTypeName());
-      Map<String, Object> userresult =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userresultF);
-      List<Map<String, Object>> useresContent =
-          (List<Map<String, Object>>) userresult.get(JsonKey.CONTENT);
-
-      Map<String, Map<String, Object>> userInfoCache = new HashMap<>();
-      Set<String> orgSet = new HashSet<>();
-      for (Map<String, Object> map : useresContent) {
-        String userId = (String) map.get(JsonKey.USER_ID);
-        map.put("user", userId);
-        map.put(
-            JsonKey.USERNAME, decryptionService.decryptData((String) map.get(JsonKey.USERNAME)));
-        String registerdOrgId = (String) map.get(JsonKey.ROOT_ORG_ID);
-        if (isNotNull(registerdOrgId)) {
-          orgSet.add(registerdOrgId);
+      List<Map<String, Object>> useresContent= userOrgService.getUsersByIds(userIds);
+        Map<String, Map<String, Object>> userInfoCache = new HashMap<>();
+        Set<String> orgSet = new HashSet<>();
+        if(CollectionUtils.isNotEmpty(useresContent)) {
+          for (Map<String, Object> map : useresContent) {
+            String userId = (String) map.get(JsonKey.USER_ID);
+            map.put("user", userId);
+            map.put(
+                    JsonKey.USERNAME, decryptionService.decryptData((String) map.get(JsonKey.USERNAME)));
+            String registerdOrgId = (String) map.get(JsonKey.ROOT_ORG_ID);
+            if (isNotNull(registerdOrgId)) {
+              orgSet.add(registerdOrgId);
+            }
+            userInfoCache.put(userId, new HashMap<String, Object>(map));
+            // remove the org info from user content bcoz it is not desired in the user info
+            // result
+            map.remove(JsonKey.ROOT_ORG_ID);
+            map.remove(JsonKey.USER_ID);
+          }
         }
-        userInfoCache.put(userId, new HashMap<String, Object>(map));
-        // remove the org info from user content bcoz it is not desired in the user info
-        // result
-        map.remove(JsonKey.ROOT_ORG_ID);
-        map.remove(JsonKey.USER_ID);
-      }
 
-      Map<String, Object> orgfilter = new HashMap<>();
-      orgfilter.put(JsonKey.ID, orgSet.stream().collect(Collectors.toList()));
-      List<String> orgfields = new ArrayList<>();
-      orgfields.add(JsonKey.ID);
-      orgfields.add(JsonKey.ORGANISATION_NAME);
-      Future<Map<String, Object>> orgresultF =
-          esService.search(
-              createESRequest(orgfilter, null, orgfields), EsType.organisation.getTypeName());
-      Map<String, Object> orgresult =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(orgresultF);
-      List<Map<String, Object>> orgContent =
-          (List<Map<String, Object>>) orgresult.get(JsonKey.CONTENT);
+      List<String> orgfields=orgSet.stream().collect(Collectors.toList());
+      List<Map<String, Object>> orgContent = userOrgService.getOrganisationsByIds(orgfields);
+        Map<String, String> orgInfoCache = new HashMap<>();
 
-      Map<String, String> orgInfoCache = new HashMap<>();
-      for (Map<String, Object> map : orgContent) {
+        if(CollectionUtils.isNotEmpty(orgContent)) {
+          for (Map<String, Object> map : orgContent) {
 
-        String regOrgId = (String) map.get(JsonKey.ID);
-        String regOrgName = (String) map.get(JsonKey.ORGANISATION_NAME);
-        orgInfoCache.put(regOrgId, regOrgName);
-      }
+            String regOrgId = (String) map.get(JsonKey.ID);
+            String regOrgName = (String) map.get(JsonKey.ORGANISATION_NAME);
+            orgInfoCache.put(regOrgId, regOrgName);
+          }
+        }
+
 
       Map<String, Object> batchFilter = new HashMap<>();
       batchFilter.put(JsonKey.ID, batchId);
@@ -558,10 +540,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
       filterMap.put(CONTENT_ID, courseId);
       requestObject.put(JsonKey.FILTER, filterMap);
 
-      Future<Map<String, Object>> resultF =
-          esService.getDataByIdentifier(EsType.user.getTypeName(), requestedBy);
-      Map<String, Object> result =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+      Map<String,Object> result= userOrgService.getUserById(requestedBy);
       if (null == result || result.isEmpty()) {
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -581,11 +560,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
       }
-      Future<Map<String, Object>> rootOrgDataF =
-          esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), rootOrgId);
-      Map<String, Object> rootOrgData =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(rootOrgDataF);
-
+      Map<String,Object> rootOrgData= userOrgService.getOrganisationById(rootOrgId);
       if (null == rootOrgData || rootOrgData.isEmpty()) {
         ProjectCommonException exception =
             new ProjectCommonException(
