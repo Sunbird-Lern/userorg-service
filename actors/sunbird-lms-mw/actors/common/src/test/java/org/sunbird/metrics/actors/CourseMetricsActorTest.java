@@ -65,6 +65,7 @@ import scala.concurrent.Promise;
   EsClientFactory.class
 })
 @PowerMockIgnore("javax.management.*")
+@Ignore
 public class CourseMetricsActorTest {
 
   private static ActorSystem system;

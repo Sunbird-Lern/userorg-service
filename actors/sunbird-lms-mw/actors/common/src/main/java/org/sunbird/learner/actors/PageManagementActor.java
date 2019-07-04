@@ -41,9 +41,14 @@ import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.userorg.UserOrgService;
+import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+
+import static org.sunbird.common.models.util.JsonKey.*;
+import static org.sunbird.common.models.util.ProjectLogger.log;
 
 /**
  * This actor will handle page management operation .
@@ -70,9 +75,9 @@ public class PageManagementActor extends BaseActor {
   private Util.DbInfo pageDbInfo = Util.dbInfoMap.get(JsonKey.PAGE_MGMT_DB);
   private Util.DbInfo sectionDbInfo = Util.dbInfoMap.get(JsonKey.SECTION_MGMT_DB);
   private Util.DbInfo pageSectionDbInfo = Util.dbInfoMap.get(JsonKey.PAGE_SECTION_DB);
-  private Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
+  private UserOrgService userOrgService = new UserOrgServiceImpl();
   private boolean isCacheEnabled = false;
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   // Boolean.parseBoolean(ProjectUtil.propertiesCache.getProperty(JsonKey.SUNBIRD_CACHE_ENABLE));
@@ -803,10 +808,8 @@ public class PageManagementActor extends BaseActor {
   }
 
   private void validateOrg(String orgId) {
-    Response result =
-        cassandraOperation.getRecordById(orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), orgId);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isEmpty(list)) {
+    Map<String, Object> result = userOrgService.getOrganisationById(orgId);
+    if(MapUtils.isEmpty(result) || !orgId.equals(result.get(ID))){
       throw new ProjectCommonException(
           ResponseCode.invalidOrgId.getErrorCode(),
           ResponseCode.invalidOrgId.getErrorMessage(),
