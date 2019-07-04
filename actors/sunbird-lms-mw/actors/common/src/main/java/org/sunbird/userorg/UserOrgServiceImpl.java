@@ -44,7 +44,7 @@ public class UserOrgServiceImpl implements UserOrgService {
     private Response getUserOrgResponse(String requestAPI, HttpMethod requestType, Map<String, Object> requestMap, Map<String,String> headers)
     {
         Response response=null;
-        String requestUrl= getConfigValue(SUNBIRD_API_BASE_URL) + getConfigValue(requestAPI);
+        String requestUrl= getConfigValue(SUNBIRD_USER_ORG_API_BASE_URL) + getConfigValue(requestAPI);
         HttpResponse<String> httpResponse=null;
         String responseBody=null;
         log(
