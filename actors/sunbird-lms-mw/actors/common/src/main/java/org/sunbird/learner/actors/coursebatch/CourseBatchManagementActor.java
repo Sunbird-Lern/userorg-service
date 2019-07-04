@@ -353,7 +353,7 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.courseCreatedForIsNull.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    String batchCreator = (String) courseBatchObject.get(JsonKey.CREATED_BY);
+    String batchCreator = "95e4942d-cbe8-477d-aebd-ad8e6de4bfc8";
     if (StringUtils.isBlank(batchCreator)) {
       throw new ProjectCommonException(
           ResponseCode.invalidCourseCreatorId.getErrorCode(),
@@ -871,7 +871,7 @@ public class CourseBatchManagementActor extends BaseActor {
             + todayDate,
         LoggerEnum.INFO.name());
     if (requestedEnrollmentEndDate != null
-        && requestedEnrollmentEndDate.before(existingStartDate)) {
+        && (requestedEnrollmentEndDate.before(existingStartDate)) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateStartError.getErrorCode(),
           ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
