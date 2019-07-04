@@ -43,7 +43,7 @@ public class UserOrgServiceImpl implements UserOrgService {
       Map<String, Object> requestMap,
       Map<String, String> headers) {
     Response response = null;
-    String requestUrl = getConfigValue(SUNBIRD_USER_ORG_API_BASE_URL) + getConfigValue(requestAPI);
+    String requestUrl = getConfigValue(SUNBIRD_USER_ORG_API_BASE_URL) + requestAPI;
     HttpResponse<String> httpResponse = null;
     String responseBody = null;
     log(
@@ -59,7 +59,6 @@ public class UserOrgServiceImpl implements UserOrgService {
         httpResponse = Unirest.post(requestUrl).headers(headers).body(reqBody).asString();
       }
       if (HttpMethod.GET.equals(requestType)) {
-        requestUrl += FORWARD_SLASH + requestMap.get(ID);
         httpResponse = Unirest.get(requestUrl).headers(headers).asString();
       }
       log(
@@ -117,7 +116,8 @@ public class UserOrgServiceImpl implements UserOrgService {
     Map<String, Object> requestMap = getRequestMap(filterlist);
     Map<String, String> headers = getdefaultHeaders();
     Response response =
-        getUserOrgResponse(SUNBIRD_GET_ORGANISATION_API, HttpMethod.POST, requestMap, headers);
+        getUserOrgResponse(
+            getConfigValue(SUNBIRD_GET_ORGANISATION_API), HttpMethod.POST, requestMap, headers);
     Map<String, Object> orgDetails = (Map<String, Object>) response.get(RESPONSE);
     List<Map<String, Object>> list = (List<Map<String, Object>>) orgDetails.get(CONTENT);
     return list.get(0);
@@ -130,7 +130,8 @@ public class UserOrgServiceImpl implements UserOrgService {
     Map<String, Object> requestMap = getRequestMap(filterlist);
     Map<String, String> headers = getdefaultHeaders();
     Response response =
-        getUserOrgResponse(SUNBIRD_GET_ORGANISATION_API, HttpMethod.POST, requestMap, headers);
+        getUserOrgResponse(
+            getConfigValue(SUNBIRD_GET_ORGANISATION_API), HttpMethod.POST, requestMap, headers);
     Map<String, Object> orgMap = (Map<String, Object>) response.get(RESPONSE);
     List<Map<String, Object>> orglist = (List<Map<String, Object>>) orgMap.get(CONTENT);
     return orglist;
@@ -147,9 +148,8 @@ public class UserOrgServiceImpl implements UserOrgService {
         ssoManager.login(
             getConfigValue(JsonKey.SUNBIRD_SSO_USERNAME),
             getConfigValue(JsonKey.SUNBIRD_SSO_PASSWORD)));
-
-    Response response =
-        getUserOrgResponse(SUNBIRD_GET_SINGLE_USER_API, HttpMethod.GET, requestMap, headers);
+    String relativeUrl = getConfigValue(SUNBIRD_GET_SINGLE_USER_API) + FORWARD_SLASH + id;
+    Response response = getUserOrgResponse(relativeUrl, HttpMethod.GET, requestMap, headers);
     Map<String, Object> userMap = (Map<String, Object>) response.get(RESPONSE);
     return userMap;
   }
@@ -166,7 +166,8 @@ public class UserOrgServiceImpl implements UserOrgService {
             getConfigValue(JsonKey.SUNBIRD_SSO_USERNAME),
             getConfigValue(JsonKey.SUNBIRD_SSO_PASSWORD)));
     Response response =
-        getUserOrgResponse(SUNBIRD_GET_MULTIPLE_USER_API, HttpMethod.POST, requestMap, headers);
+        getUserOrgResponse(
+            getConfigValue(SUNBIRD_GET_MULTIPLE_USER_API), HttpMethod.POST, requestMap, headers);
     Map<String, Object> userMap = (Map<String, Object>) response.get(RESPONSE);
     List<Map<String, Object>> userlist = (List<Map<String, Object>>) userMap.get(CONTENT);
     return userlist;

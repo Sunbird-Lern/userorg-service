@@ -1,5 +1,8 @@
 package org.sunbird.learner.actors.coursebatch;
 
+import static org.sunbird.common.models.util.JsonKey.*;
+import static org.sunbird.common.models.util.ProjectLogger.log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,10 +46,6 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.userorg.UserOrgService;
 import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.Future;
-
-import static org.sunbird.common.models.util.JsonKey.*;
-import static org.sunbird.common.models.util.LoggerEnum.ERROR;
-import static org.sunbird.common.models.util.ProjectLogger.log;
 
 @ActorConfig(
   tasks = {
@@ -123,8 +122,8 @@ public class CourseBatchManagementActor extends BaseActor {
     String courseId = (String) request.get(JsonKey.COURSE_ID);
     Map<String, Object> contentDetails = getContentDetails(courseId, headers);
     courseBatch.setContentDetails(contentDetails, requestedBy);
-   validateContentOrg(courseBatch.getCreatedFor());
-   validateMentors(courseBatch);
+    validateContentOrg(courseBatch.getCreatedFor());
+    validateMentors(courseBatch);
     Map<String, Object> participantsMap = null;
     if (participants != null) {
       validateParticipants(participants, courseBatch);
@@ -499,11 +498,11 @@ public class CourseBatchManagementActor extends BaseActor {
 
   private void validateMentors(CourseBatch courseBatch) {
     List<String> mentors = courseBatch.getMentors();
-    if (mentors != null) {
+    if (CollectionUtils.isNotEmpty(mentors)) {
       String batchCreatorRootOrgId = getRootOrg(courseBatch.getCreatedBy());
 
       for (String userId : mentors) {
-        Map<String,Object>  result= userOrgService.getUserById(userId);
+        Map<String, Object> result = userOrgService.getUserById(userId);
         String mentorRootOrgId = getRootOrg(userId);
         if (!batchCreatorRootOrgId.equals(mentorRootOrgId)) {
           throw new ProjectCommonException(
@@ -664,11 +663,11 @@ public class CourseBatchManagementActor extends BaseActor {
       CourseBatchSchedulerUtil.updateCourseBatchDbStatus(req, true);
     }
     validateBatchEnrollmentEndDate(
-            dbBatchStartDate,
-            dbBatchEndDate,
-            dbEnrollmentEndDate,
-            requestedEnrollmentEndDate,
-            todayDate);
+        dbBatchStartDate,
+        dbBatchEndDate,
+        dbEnrollmentEndDate,
+        requestedEnrollmentEndDate,
+        todayDate);
     courseBatch.setStartDate(
         requestedStartDate != null
             ? (String) req.get(JsonKey.START_DATE)
@@ -676,7 +675,7 @@ public class CourseBatchManagementActor extends BaseActor {
     courseBatch.setEndDate(
         requestedEndDate != null ? (String) req.get(JsonKey.END_DATE) : courseBatch.getEndDate());
     courseBatch.setEnrollmentEndDate(
-            requestedEnrollmentEndDate == null ? null : (String) req.get(JsonKey.ENROLLMENT_END_DATE));
+        requestedEnrollmentEndDate == null ? null : (String) req.get(JsonKey.ENROLLMENT_END_DATE));
   }
 
   private void validateUserPermission(CourseBatch courseBatch, String requestedBy) {
@@ -698,17 +697,19 @@ public class CourseBatchManagementActor extends BaseActor {
 
     List<Map<String, Object>> userlist = userOrgService.getUsersByIds(userIds);
     Map<String, String> userWithRootOrgs = new HashMap<>();
-    if(CollectionUtils.isNotEmpty(userlist)) {
-      userlist.forEach(user ->{
-      String rootOrg = getRootOrgFromUserMap(user);
-      userWithRootOrgs.put((String) user.get(JsonKey.ID), rootOrg);});
-      }
+    if (CollectionUtils.isNotEmpty(userlist)) {
+      userlist.forEach(
+          user -> {
+            String rootOrg = getRootOrgFromUserMap(user);
+            userWithRootOrgs.put((String) user.get(JsonKey.ID), rootOrg);
+          });
+    }
     return userWithRootOrgs;
   }
 
   private String getRootOrg(String batchCreator) {
 
-    Map<String,Object> userInfo = userOrgService.getUserById(batchCreator);
+    Map<String, Object> userInfo = userOrgService.getUserById(batchCreator);
     return getRootOrgFromUserMap(userInfo);
   }
 
@@ -745,7 +746,6 @@ public class CourseBatchManagementActor extends BaseActor {
     if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
       if (!dataMapList.isEmpty()) {
         throw new ProjectCommonException(
-
             ResponseCode.invalidHashTagId.getErrorCode(),
             ResponseCode.invalidHashTagId.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -853,61 +853,59 @@ public class CourseBatchManagementActor extends BaseActor {
   }
 
   private void validateBatchEnrollmentEndDate(
-          Date existingStartDate,
-          Date existingEndDate,
-          Date existingEnrollmentEndDate,
-          Date requestedEnrollmentEndDate,
-          Date todayDate) {
+      Date existingStartDate,
+      Date existingEndDate,
+      Date existingEnrollmentEndDate,
+      Date requestedEnrollmentEndDate,
+      Date todayDate) {
     ProjectLogger.log(
-            "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedEnrollmentEndDate, todayDate"
-                    + existingStartDate
-                    + ","
-                    + existingEndDate
-                    + ","
-                    + existingEnrollmentEndDate
-                    + ","
-                    + requestedEnrollmentEndDate
-                    + ","
-                    + todayDate,
-            LoggerEnum.INFO.name());
+        "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedEnrollmentEndDate, todayDate"
+            + existingStartDate
+            + ","
+            + existingEndDate
+            + ","
+            + existingEnrollmentEndDate
+            + ","
+            + requestedEnrollmentEndDate
+            + ","
+            + todayDate,
+        LoggerEnum.INFO.name());
     if (requestedEnrollmentEndDate != null
-            && requestedEnrollmentEndDate.before(existingStartDate)) {
+        && requestedEnrollmentEndDate.before(existingStartDate)) {
       throw new ProjectCommonException(
-              ResponseCode.enrollmentEndDateStartError.getErrorCode(),
-              ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.enrollmentEndDateStartError.getErrorCode(),
+          ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (requestedEnrollmentEndDate != null
-            && existingEndDate != null
-            && requestedEnrollmentEndDate.after(existingEndDate)) {
+        && existingEndDate != null
+        && requestedEnrollmentEndDate.after(existingEndDate)) {
       throw new ProjectCommonException(
-              ResponseCode.enrollmentEndDateEndError.getErrorCode(),
-              ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.enrollmentEndDateEndError.getErrorCode(),
+          ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (requestedEnrollmentEndDate != null && requestedEnrollmentEndDate.before(todayDate)) {
       throw new ProjectCommonException(
-              ResponseCode.enrollmentEndDateUpdateError.getErrorCode(),
-              ResponseCode.enrollmentEndDateUpdateError.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.enrollmentEndDateUpdateError.getErrorCode(),
+          ResponseCode.enrollmentEndDateUpdateError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 
   private boolean isOrgValid(String orgId) {
 
     try {
-      Map<String,Object> result = userOrgService.getOrganisationById(orgId);
+      Map<String, Object> result = userOrgService.getOrganisationById(orgId);
 
       ProjectLogger.log(
-              "CourseBatchManagementActor:isOrgValid: orgId = " + (MapUtils.isNotEmpty(result)?result.get(ID):null));
+          "CourseBatchManagementActor:isOrgValid: orgId = "
+              + (MapUtils.isNotEmpty(result) ? result.get(ID) : null));
 
       return ((MapUtils.isNotEmpty(result) && orgId.equals(result.get(ID))));
 
-
     } catch (Exception e) {
-      log(
-              "Error while fetching OrgID : " + orgId, e);
-
+      log("Error while fetching OrgID : " + orgId, e);
     }
     return false;
   }
