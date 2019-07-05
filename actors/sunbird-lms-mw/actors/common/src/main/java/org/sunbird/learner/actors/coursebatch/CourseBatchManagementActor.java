@@ -666,6 +666,8 @@ public class CourseBatchManagementActor extends BaseActor {
         dbBatchStartDate,
         dbBatchEndDate,
         dbEnrollmentEndDate,
+        requestedStartDate,
+        requestedEndDate,
         requestedEnrollmentEndDate,
         todayDate);
     courseBatch.setStartDate(
@@ -856,30 +858,37 @@ public class CourseBatchManagementActor extends BaseActor {
       Date existingStartDate,
       Date existingEndDate,
       Date existingEnrollmentEndDate,
+      Date requestedStartDate,
+      Date requestedEndDate,
       Date requestedEnrollmentEndDate,
       Date todayDate) {
     ProjectLogger.log(
-        "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedEnrollmentEndDate, todayDate"
+        "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedStartDate, requestedEndDate, requestedEnrollmentEndDate, todayDate"
             + existingStartDate
             + ","
             + existingEndDate
             + ","
             + existingEnrollmentEndDate
             + ","
+            + requestedStartDate
+            + ","
+            + requestedEndDate
+            + ","
             + requestedEnrollmentEndDate
             + ","
             + todayDate,
         LoggerEnum.INFO.name());
+    Date endDate = requestedEndDate != null ? requestedEndDate : existingEndDate;
     if (requestedEnrollmentEndDate != null
-        && requestedEnrollmentEndDate.before(existingStartDate)) {
+        && (requestedEnrollmentEndDate.before(requestedStartDate))) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateStartError.getErrorCode(),
           ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (requestedEnrollmentEndDate != null
-        && existingEndDate != null
-        && requestedEnrollmentEndDate.after(existingEndDate)) {
+        && endDate != null
+        && requestedEnrollmentEndDate.after(endDate)) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateEndError.getErrorCode(),
           ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
