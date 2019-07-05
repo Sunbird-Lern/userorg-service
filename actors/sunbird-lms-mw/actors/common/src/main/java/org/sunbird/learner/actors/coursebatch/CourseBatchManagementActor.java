@@ -123,7 +123,7 @@ public class CourseBatchManagementActor extends BaseActor {
     String courseId = (String) request.get(JsonKey.COURSE_ID);
     Map<String, Object> contentDetails = getContentDetails(courseId, headers);
     courseBatch.setContentDetails(contentDetails, requestedBy);
-   validateContentOrg(courseBatch.getCreatedFor());
+  validateContentOrg(courseBatch.getCreatedFor());
    validateMentors(courseBatch);
     Map<String, Object> participantsMap = null;
     if (participants != null) {
@@ -206,7 +206,7 @@ public class CourseBatchManagementActor extends BaseActor {
 
     Map<String, Object> request = actorMessage.getRequest();
     List<String> participants = (List<String>) request.get(JsonKey.PARTICIPANTS);
-    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+   String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
 
     CourseBatch oldBatch = courseBatchDao.readById((String) request.get(JsonKey.ID));
     CourseBatch courseBatch = getUpdateCourseBatch(request);
@@ -667,6 +667,8 @@ public class CourseBatchManagementActor extends BaseActor {
             dbBatchStartDate,
             dbBatchEndDate,
             dbEnrollmentEndDate,
+            requestedStartDate,
+            requestedEndDate,
             requestedEnrollmentEndDate,
             todayDate);
     courseBatch.setStartDate(
@@ -856,30 +858,37 @@ public class CourseBatchManagementActor extends BaseActor {
           Date existingStartDate,
           Date existingEndDate,
           Date existingEnrollmentEndDate,
+          Date requestedStartDate,
+          Date requestedEndDate,
           Date requestedEnrollmentEndDate,
           Date todayDate) {
     ProjectLogger.log(
-            "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedEnrollmentEndDate, todayDate"
+            "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedStartDate, requestedEndDate, requestedEnrollmentEndDate, todayDate"
                     + existingStartDate
                     + ","
                     + existingEndDate
                     + ","
                     + existingEnrollmentEndDate
                     + ","
+                    + requestedStartDate
+                    + ","
+                    + requestedEndDate
+                    + ","
                     + requestedEnrollmentEndDate
                     + ","
                     + todayDate,
             LoggerEnum.INFO.name());
-    if (requestedEnrollmentEndDate != null
-            && requestedEnrollmentEndDate.before(existingStartDate)) {
+
+    Date EndDate = requestedEndDate!=null ? requestedEndDate : existingEndDate;
+    if (requestedEnrollmentEndDate != null && requestedEnrollmentEndDate.before(requestedStartDate) ) {
       throw new ProjectCommonException(
               ResponseCode.enrollmentEndDateStartError.getErrorCode(),
               ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (requestedEnrollmentEndDate != null
-            && existingEndDate != null
-            && requestedEnrollmentEndDate.after(existingEndDate)) {
+            && EndDate != null
+            && requestedEnrollmentEndDate.after(EndDate)) {
       throw new ProjectCommonException(
               ResponseCode.enrollmentEndDateEndError.getErrorCode(),
               ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
