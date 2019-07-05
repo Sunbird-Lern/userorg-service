@@ -353,7 +353,7 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.courseCreatedForIsNull.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    String batchCreator = "95e4942d-cbe8-477d-aebd-ad8e6de4bfc8";
+    String batchCreator = (String) courseBatchObject.get(JsonKey.CREATED_BY);
     if (StringUtils.isBlank(batchCreator)) {
       throw new ProjectCommonException(
           ResponseCode.invalidCourseCreatorId.getErrorCode(),
@@ -666,8 +666,8 @@ public class CourseBatchManagementActor extends BaseActor {
         dbBatchStartDate,
         dbBatchEndDate,
         dbEnrollmentEndDate,
-            requestedStartDate,
-            requestedEndDate,
+        requestedStartDate,
+        requestedEndDate,
         requestedEnrollmentEndDate,
         todayDate);
     courseBatch.setStartDate(
@@ -864,23 +864,23 @@ public class CourseBatchManagementActor extends BaseActor {
       Date todayDate) {
     ProjectLogger.log(
         "existingStartDate, existingEndDate, existingEnrollmentEndDate, requestedStartDate, requestedEndDate, requestedEnrollmentEndDate, todayDate"
-                + existingStartDate
-                + ","
-                + existingEndDate
-                + ","
-                + existingEnrollmentEndDate
-                + ","
-                + requestedStartDate
-                + ","
-                + requestedEndDate
-                + ","
-                + requestedEnrollmentEndDate
-                + ","
-                + todayDate,
+            + existingStartDate
+            + ","
+            + existingEndDate
+            + ","
+            + existingEnrollmentEndDate
+            + ","
+            + requestedStartDate
+            + ","
+            + requestedEndDate
+            + ","
+            + requestedEnrollmentEndDate
+            + ","
+            + todayDate,
         LoggerEnum.INFO.name());
     Date endDate = requestedEndDate != null ? requestedEndDate : existingEndDate;
     if (requestedEnrollmentEndDate != null
-        && (requestedEnrollmentEndDate.before(requestedStartDate))){
+        && (requestedEnrollmentEndDate.before(requestedStartDate))) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateStartError.getErrorCode(),
           ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
