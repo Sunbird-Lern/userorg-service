@@ -11,6 +11,7 @@
 		<play2.plugin.version>1.0.0-beta5</play2.plugin.version>
 	</properties>
 	<modules>
+		<module>sunbird-utils</module>
 		<module>actors</module>
 		<module>service</module>
 	</modules>
