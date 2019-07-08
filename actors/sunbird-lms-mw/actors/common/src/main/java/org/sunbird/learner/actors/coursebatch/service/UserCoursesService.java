@@ -1,7 +1,6 @@
 package org.sunbird.learner.actors.coursebatch.service;
 
 import java.util.*;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -69,11 +68,7 @@ public class UserCoursesService {
             + batchId);
   }
 
-  public void enroll(
-      String batchId,
-      String courseId,
-      List<String> userIds,
-      Map<String, String> additionalCourseInfo) {
+  public void enroll(String batchId, String courseId, List<String> userIds) {
     Integer count = 0;
 
     List<Map<String, Object>> records = new ArrayList<>();
@@ -88,15 +83,6 @@ public class UserCoursesService {
       userCourses.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
       userCourses.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
       userCourses.put(JsonKey.COURSE_PROGRESS, 0);
-      userCourses.put(JsonKey.COURSE_LOGO_URL, additionalCourseInfo.get(JsonKey.COURSE_LOGO_URL));
-      userCourses.put(JsonKey.COURSE_NAME, additionalCourseInfo.get(JsonKey.COURSE_NAME));
-      userCourses.put(JsonKey.DESCRIPTION, additionalCourseInfo.get(JsonKey.DESCRIPTION));
-      if (!StringUtils.isBlank(additionalCourseInfo.get(JsonKey.LEAF_NODE_COUNT))) {
-        userCourses.put(
-            JsonKey.LEAF_NODE_COUNT,
-            Integer.parseInt("" + additionalCourseInfo.get(JsonKey.LEAF_NODE_COUNT)));
-      }
-      userCourses.put(JsonKey.TOC_URL, additionalCourseInfo.get(JsonKey.TOC_URL));
 
       count++;
       records.add(userCourses);

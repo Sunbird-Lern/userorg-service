@@ -19,7 +19,6 @@ public class CourseBatch implements Serializable {
   private Boolean countDecrementStatus;
   private String countIncrementDate;
   private Boolean countIncrementStatus;
-  private Map<String, String> courseAdditionalInfo;
   private String courseCreator;
   private String courseId;
   private String createdBy;
@@ -78,14 +77,6 @@ public class CourseBatch implements Serializable {
 
   public void setCountIncrementStatus(boolean countIncrementStatus) {
     this.countIncrementStatus = countIncrementStatus;
-  }
-
-  public Map<String, String> getCourseAdditionalInfo() {
-    return courseAdditionalInfo;
-  }
-
-  public void setCourseAdditionalInfo(Map<String, String> courseAdditionalInfo) {
-    this.courseAdditionalInfo = courseAdditionalInfo;
   }
 
   public String getCourseCreator() {
@@ -223,7 +214,6 @@ public class CourseBatch implements Serializable {
 
   public void setContentDetails(Map<String, Object> contentDetails, String createdBy) {
     this.setCourseCreator((String) contentDetails.get(JsonKey.CREATED_BY));
-    this.setCourseAdditionalInfo(getAdditionalCourseInfo(contentDetails));
     this.setCreatedBy(createdBy);
     this.setCreatedDate(ProjectUtil.getFormattedDate());
   }

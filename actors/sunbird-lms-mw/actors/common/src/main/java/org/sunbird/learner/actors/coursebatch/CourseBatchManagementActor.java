@@ -384,10 +384,7 @@ public class CourseBatchManagementActor extends BaseActor {
     }
 
     userCoursesService.enroll(
-        batchId,
-        (String) courseBatchObject.get(JsonKey.COURSE_ID),
-        addedParticipants,
-        (Map<String, String>) (courseBatchObject.get(JsonKey.COURSE_ADDITIONAL_INFO)));
+        batchId, (String) courseBatchObject.get(JsonKey.COURSE_ID), addedParticipants);
     for (String userId : addedParticipants) {
       participants.add(userId);
       response.getResult().put(userId, JsonKey.SUCCESS);
@@ -545,11 +542,7 @@ public class CourseBatchManagementActor extends BaseActor {
         dbParticipants.remove(userId);
       }
     }
-    userCoursesService.enroll(
-        batchId,
-        courseBatchObject.getCourseId(),
-        addedParticipants,
-        (courseBatchObject.getCourseAdditionalInfo()));
+    userCoursesService.enroll(batchId, courseBatchObject.getCourseId(), addedParticipants);
     if (!dbParticipants.isEmpty()) {
       removeParticipants(dbParticipants, batchId, courseBatchObject.getCourseId());
     }

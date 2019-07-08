@@ -132,29 +132,12 @@ public class CourseEnrollmentActor extends BaseActor {
       // this will create user batch data for new user
       Timestamp ts = new Timestamp(new Date().getTime());
       String addedBy = (String) courseMap.get(JsonKey.REQUESTED_BY);
-      courseMap.put(
-          JsonKey.COURSE_LOGO_URL,
-          courseBatchResult.getCourseAdditionalInfo().get(JsonKey.COURSE_LOGO_URL));
       courseMap.put(JsonKey.CONTENT_ID, (String) courseMap.get(JsonKey.COURSE_ID));
-      courseMap.put(
-          JsonKey.COURSE_NAME,
-          courseBatchResult.getCourseAdditionalInfo().get(JsonKey.COURSE_NAME));
-      courseMap.put(
-          JsonKey.DESCRIPTION,
-          courseBatchResult.getCourseAdditionalInfo().get(JsonKey.DESCRIPTION));
       courseMap.put(JsonKey.ADDED_BY, addedBy);
       courseMap.put(JsonKey.COURSE_ENROLL_DATE, ProjectUtil.getFormattedDate());
       courseMap.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
       courseMap.put(JsonKey.DATE_TIME, ts);
       courseMap.put(JsonKey.COURSE_PROGRESS, 0);
-      if (null != courseBatchResult.getCourseAdditionalInfo().get(JsonKey.LEAF_NODE_COUNT)) {
-        courseMap.put(
-            JsonKey.LEAF_NODE_COUNT,
-            Integer.parseInt(
-                courseBatchResult.getCourseAdditionalInfo().get(JsonKey.LEAF_NODE_COUNT).trim()));
-      } else {
-        courseMap.put(JsonKey.LEAF_NODE_COUNT, 0);
-      }
     }
     return courseMap;
   }
