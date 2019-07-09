@@ -31,7 +31,6 @@ import org.sunbird.learner.actors.coursebatch.dao.UserCoursesDao;
 import org.sunbird.learner.actors.coursebatch.dao.impl.CourseBatchDaoImpl;
 import org.sunbird.learner.actors.coursebatch.dao.impl.UserCoursesDaoImpl;
 import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
-import org.sunbird.learner.util.CourseBatchUtil;
 import org.sunbird.learner.util.EkStepRequestUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.course.batch.CourseBatch;
@@ -75,7 +74,9 @@ public class CourseEnrollmentActor extends BaseActor {
   private void enrollCourseBatch(Request actorMessage) {
     ProjectLogger.log("enrollCourseClass called");
     Map<String, Object> courseMap = (Map<String, Object>) actorMessage.getRequest();
-    CourseBatch courseBatch = courseBatchDao.readById((String) courseMap.get(JsonKey.BATCH_ID));
+    CourseBatch courseBatch =
+        courseBatchDao.readById(
+            (String) courseMap.get(JsonKey.COURSE_ID), (String) courseMap.get(JsonKey.BATCH_ID));
     validateCourseBatch(
         courseBatch, courseMap, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
 
@@ -146,7 +147,9 @@ public class CourseEnrollmentActor extends BaseActor {
     ProjectLogger.log("unenrollCourseClass called");
     // objects of telemetry event...
     Map<String, Object> request = actorMessage.getRequest();
-    CourseBatch courseBatch = courseBatchDao.readById((String) request.get(JsonKey.BATCH_ID));
+    CourseBatch courseBatch =
+        courseBatchDao.readById(
+            (String) request.get(JsonKey.COURSE_ID), (String) request.get(JsonKey.BATCH_ID));
     validateCourseBatch(
         courseBatch, request, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
     UserCourses userCourseResult = userCourseDao.read(UserCoursesService.getPrimaryKey(request));
@@ -304,20 +307,5 @@ public class CourseEnrollmentActor extends BaseActor {
           LoggerEnum.INFO.name());
     }
     return result;
-  }
-
-  @SuppressWarnings("unchecked")
-  private void updateCourseBatch(CourseBatch courseBatch) {
-    Map<String, Object> CourseBatchUpdatedAttributes = new HashMap<>();
-    CourseBatchUpdatedAttributes.put(JsonKey.ID, (String) courseBatch.getId());
-    Response response = courseBatchDao.update(CourseBatchUpdatedAttributes);
-    Map<String, Object> courseBatchMap = mapper.convertValue(courseBatch, Map.class);
-    if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      CourseBatchUtil.syncCourseBatchForeground((String) courseBatch.getId(), courseBatchMap);
-    } else {
-      ProjectLogger.log(
-          "CourseBatchManagementActor:updateCourseBatch: Course batch not synced to ES as response is not successful",
-          LoggerEnum.INFO.name());
-    }
   }
 }

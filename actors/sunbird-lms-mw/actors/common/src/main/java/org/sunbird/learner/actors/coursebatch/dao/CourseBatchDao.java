@@ -20,7 +20,7 @@ public interface CourseBatchDao {
    * @param courseBatchMap Course batch information to be updated
    * @return Response containing status of course batch update
    */
-  Response update(Map<String, Object> courseBatchMap);
+  Response update(String courseId, String batchId, Map<String, Object> courseBatchMap);
 
   /**
    * Read course batch for given identifier.
@@ -28,7 +28,7 @@ public interface CourseBatchDao {
    * @param courseBatchId Course batch identifier
    * @return Course batch information
    */
-  CourseBatch readById(String courseBatchId);
+  CourseBatch readById(String courseId, String batchId);
 
   /**
    * Delete specified course batch.
