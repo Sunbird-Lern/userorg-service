@@ -220,8 +220,6 @@ public class CourseBatchNotificationActorSucessTest {
     mentors.add(USER_ID);
     participants.add(USER_ID);
     courseBatch.setMentors(mentors);
-    courseBatch.setCountDecrementStatus(false);
-    courseBatch.setCountIncrementStatus(false);
     courseBatch.setParticipant(participants);
     courseBatch.setStatus(0);
     Map<String, String> courseAdditionalInfo = new HashMap<>();
@@ -247,8 +245,6 @@ public class CourseBatchNotificationActorSucessTest {
       }
     }
     courseBatch.setStatus(0);
-    courseBatch.setCountDecrementStatus(false);
-    courseBatch.setCountIncrementStatus(false);
     courseBatch.setMentors(mentors);
     courseBatch.setParticipant(participants);
     Map<String, String> courseAdditionalInfo = new HashMap<>();
