@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "Bulk Upload Service API(s)",
+    "_postman_id": "d47f022a-91a4-4154-a471-5a3e221f48f8",
+    "description": "\nThe  Bulk Upload resources perform operations related to uploads on the Sunbird Platform. The Bulk Upload API(s) operations include Uploads, Updations ,",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/"
+  },
+  "item": [
+    {
+      "name": "Bulk Operation APIs",
+      "item": [
+        {
+          "id": "36c499f9-aa2e-47c6-b72f-955d74215cb5",
+          "name": "bulk upload user req1",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/bulk/user/upload",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Authorization",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "organisationId",
+                  "value": "organisationId",
+                  "disabled": false,
+                  "description": {
+                    "content": "The Id identifies an Organisation uniquely. This Id is provided at the time of organisational registration"
+                  }
+                },
+                {
+                  "key": "user",
+                  "disabled": false,
+                  "type": "file",
+                  "description": {
+                    "content": "This is a .csv file.\n\n  - Each line of the file is a data record. Each record consists of one or more fields, separated by commas.\n\n  \n\nThis format of this file is as :\n\n  - firstName,\n\n  - lastName,\n\n  - phone,\n\n  - email,\n\n  - userName,\n\n  - password,\n\n  - phoneVerified, \n\n  - roles,\n\n  - position,\n\n  - grade,\n\n  - location,\n\n  - dob,\n\n  - gender,\n\n  - language,\n\n  - profileSummary,\n\n  - subject,'"
+                  }
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"bulk upload user\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"bulk upload user\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with upload users in bulk on the Sunbird Platform.\n\n   - The **_/bulk/user/upload_** endpoint executes \" bulk upload user\" request based on parameters provided as metadata in the request body.\n\n   - It is mandatory to provide values for parameters marked with *. \n\n   - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "8984f896-df7b-41d6-950c-39ae71e88ba9",
+          "name": "bulk batch enrollment req",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/batch/bulk/enrollment",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Authorization",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "batch",
+                  "disabled": false,
+                  "type": "file",
+                  "description": {
+                    "content": "This is a .csv file.\n\n  - Each line of the file is a data record. Each record consists of one or more fields, separated by commas.\n\n This format of this file is as :\n\n  - batchId,\n\n  - userIds,\n\n  Please omit (-) \n\n   (-) is used to enhance readibility here."
+                  }
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"bulk batch enrollment \" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"bulk batch enrollment\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with bulk batch enrollment on the Sunbird Platform.\n\n   - The **_/batch/bulk/enrollment_** endpoint executes \"bulk batch enrollment\" request based on parameters provided as metadata in the request body.\n\n   - It is mandatory to provide values for parameters marked with *. \n\n   - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "639805a1-d141-4579-be96-bf00cb309e86",
+          "name": "getStatus",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "upload/status/:Job_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Job_Id",
+                  "value": "01233701572763648024",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkMTc1MDIwNDdlODc0ODZjOTM0ZDQ1ODdlYTQ4MmM3MyJ9.7LWocwCn5rrCScFQYOne8_Op2EOo-xTCK5JCFarHKSs",
+                "description": {
+                  "content": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"get status\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"get status\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with check the uploasd status on the Sunbird Platform.\n\n   - The **_/upload/status/_** endpoint executes \"get status\" request based on parameters provided as metadata in the request body.\n\n   - It is mandatory to provide values for parameters marked with *. \n\n   - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "bedac117-3a84-4495-b8ad-fbc465f74256",
+          "name": "bulk org upload req",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/org/upload",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Authorization",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "org",
+                  "disabled": false,
+                  "type": "file",
+                  "description": {
+                    "content": "This is a .csv file.\n\n  - Each line of the file is a data record. Each record consists of one or more fields, separated by commas.\n\n  \n\nThis format of this file is as :\n\n  - orgName,\n\n  - isRootOrg,\n\n  - channel,\n\n  - externalId,\n\n  - provider,\n\n  - description,\n\n  - homeUrl,\n\n  - orgCode,\n\n  - orgType,\n\n  - preferredLanguage,\n\n  - theme,\n\n  - contactDetail"
+                  }
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"bulk org upload \" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"bulk org upload \" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with bulk uploading organisations on the Sunbird Platform.\n\n   - The **_/org/upload_** endpoint executes \"bulk org upload\" request based on parameters provided as metadata in the request body.\n\n   - It is mandatory to provide values for parameters marked with *. \n\n   - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        }
+      ]
+    }
+  ]
+}

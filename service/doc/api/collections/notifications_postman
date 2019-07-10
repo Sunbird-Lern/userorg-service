@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "Notification (Email) API(s)",
+    "_postman_id": "5966a20e-0046-42e0-9aef-db5d2511ea88",
+    "description": "\nThe Email resources provides the notification mechanism for all the users on Sunbird .The Resource notifies users officially about something on Sunbird.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/"
+  },
+  "item": [
+    {
+      "name": "Notification APIs",
+      "item": [
+        {
+          "id": "adddec68-4909-4a50-b35b-0572abb2cf21",
+          "name": "{{host}}/v1/notification/email ",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/email ",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Notifying User\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Notifying User\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with notifying a user on the Sunbird Platform.\n\n   - {{host}}/v1/notification/email , This is the format of the API URL for sending notifications. \n\n   - The **_/email/_** endpoint executes the notification request based on parameters provided as metadata in the request body.\n\n   - It is mandatory to provide values for parameters marked with *. \n\n   - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        }
+      ]
+    }
+  ]
+}
