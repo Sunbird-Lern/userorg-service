@@ -28,7 +28,6 @@ public class CourseBatch implements Serializable {
   private String hashTagId;
   private List<String> mentors;
   private String name;
-  private List<String> participant;
   private String startDate;
   private Integer status;
   private String updatedDate;
@@ -127,14 +126,6 @@ public class CourseBatch implements Serializable {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public List<String> getParticipant() {
-    return participant;
-  }
-
-  public void setParticipant(List<String> participant) {
-    this.participant = participant;
   }
 
   public String getStartDate() {
