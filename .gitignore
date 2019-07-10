@@ -18,3 +18,4 @@ RUNNING_PID
 /.target/
 /bin/
 /logs
+actors/sunbird-lms-mw/service/dependency-reduced-pom.xml
