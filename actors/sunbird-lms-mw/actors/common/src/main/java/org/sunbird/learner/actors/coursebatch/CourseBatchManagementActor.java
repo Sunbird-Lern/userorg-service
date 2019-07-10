@@ -54,7 +54,8 @@ import scala.concurrent.Future;
     "addUserBatch",
     "removeUserFromBatch",
     "getBatch",
-    "getCourseBatchDetail"
+    "getCourseBatchDetail",
+    "getParticipants"
   },
   asyncTasks = {}
 )
@@ -94,13 +95,15 @@ public class CourseBatchManagementActor extends BaseActor {
       case "getCourseBatchDetail":
         //        getCourseBatchDetails(request);
         break;
+      case "getParticipants":
+        getParticipants(request);
+        break;
       default:
         onReceiveUnsupportedOperation(request.getOperation());
         break;
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void createCourseBatch(Request actorMessage) {
     Map<String, Object> request = actorMessage.getRequest();
     Map<String, Object> targetObject;
@@ -943,5 +946,21 @@ public class CourseBatchManagementActor extends BaseActor {
   private void updateBatchCount(CourseBatch courseBatch) {
     CourseBatchSchedulerUtil.doOperationInEkStepCourse(
         courseBatch.getCourseId(), true, courseBatch.getEnrollmentType());
+  }
+
+  private void getParticipants(Request actorMessage) {
+    String batchID = (String) actorMessage.getContext().get(JsonKey.BATCH_ID);
+    List<String> participants =
+            userCoursesService.getEnrolledUserFromBatch(batchID);
+
+    if(CollectionUtils.isEmpty(participants)){
+      participants = new ArrayList<>();
+    }
+
+    Response response = new Response();
+    Map<String, Object> result = new HashMap<String, Object>();
+    result.put(JsonKey.PARTICIPANTS, participants);
+    response.put(JsonKey.COURSE_BATCH, result);
+    sender().tell(response, self());
   }
 }

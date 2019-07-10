@@ -67,7 +67,7 @@ public class Filters implements HttpFilters {
   }
 
   public EssentialAction apply(EssentialAction next) {
-    return filter.apply(next);
+    return (EssentialAction) filter.apply(next);
   }
 
   @Override
