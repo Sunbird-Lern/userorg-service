@@ -220,7 +220,6 @@ public class CourseBatchNotificationActorSucessTest {
     mentors.add(USER_ID);
     participants.add(USER_ID);
     courseBatch.setMentors(mentors);
-    courseBatch.setParticipant(participants);
     courseBatch.setStatus(0);
     Map<String, String> courseAdditionalInfo = new HashMap<>();
     courseAdditionalInfo.put(JsonKey.ORG_NAME, orgName);
@@ -246,7 +245,6 @@ public class CourseBatchNotificationActorSucessTest {
     }
     courseBatch.setStatus(0);
     courseBatch.setMentors(mentors);
-    courseBatch.setParticipant(participants);
     Map<String, String> courseAdditionalInfo = new HashMap<>();
     courseAdditionalInfo.put(JsonKey.ORG_NAME, orgName);
     return courseBatch;
