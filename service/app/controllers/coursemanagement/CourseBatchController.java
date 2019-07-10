@@ -98,4 +98,9 @@ public class CourseBatchController extends BaseController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
+
+  public Promise<Result> getParticipants(String batchId) {
+      return handleRequest(ActorOperations.GET_PARTICIPANTS.getValue(), batchId, JsonKey.BATCH_ID, false);
+  }
 }
