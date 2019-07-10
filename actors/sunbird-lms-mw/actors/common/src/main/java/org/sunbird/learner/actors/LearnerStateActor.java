@@ -36,6 +36,7 @@ import org.sunbird.learner.actors.coursebatch.CourseEnrollmentActor;
 import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
 import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.CourseBatchSchedulerUtil;
+import org.sunbird.learner.util.SearchUtil;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
 
@@ -285,13 +286,9 @@ public class LearnerStateActor extends BaseActor {
         if (CollectionUtils.isEmpty(contentIds)) {
             Map<String, Object> courseData = CourseEnrollmentActor.getCourseObjectFromEkStep(courseId, CourseBatchSchedulerUtil.headerMap);
             if (MapUtils.isEmpty(courseData)) {
-                throw new ProjectCommonException(
-                        ResponseCode.invalidCourseId.getErrorCode(),
-                        ResponseCode.invalidCourseId.getErrorMessage(),
-                        ResponseCode.CLIENT_ERROR.getResponseCode());
+                throw new ProjectCommonException(ResponseCode.invalidCourseId.getErrorCode(), ResponseCode.invalidCourseId.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
             }
             List<String> leafNodes = (List<String>) courseData.get("leafNodes");
-            System.out.println("LeafNodes: " + leafNodes);
             if (CollectionUtils.isNotEmpty(leafNodes)) {
                 contentIds = leafNodes;
             }
@@ -320,7 +317,6 @@ public class LearnerStateActor extends BaseActor {
         return contentList;
     }
 
-    @SuppressWarnings("unchecked")
     private void removeUnwantedProperties(Response response) {
         List<Map<String, Object>> list =
                 (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
@@ -328,18 +324,5 @@ public class LearnerStateActor extends BaseActor {
             ProjectUtil.removeUnwantedFields(
                     map, JsonKey.DATE_TIME, JsonKey.USER_ID, JsonKey.ADDED_BY, JsonKey.LAST_UPDATED_TIME);
         }
-    }
-
-    private String generatePrimaryKeyForContent(
-            String userId, String batchId, String courseId, String contentId) {
-        String key =
-                userId
-                        + JsonKey.PRIMARY_KEY_DELIMETER
-                        + contentId
-                        + JsonKey.PRIMARY_KEY_DELIMETER
-                        + courseId
-                        + JsonKey.PRIMARY_KEY_DELIMETER
-                        + batchId;
-        return OneWayHashing.encryptVal(key);
     }
 }

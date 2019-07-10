@@ -24,7 +24,7 @@ public class SearchUtil {
     private static ObjectMapper mapper = new ObjectMapper();
 
 
-    private Map<String, String> getHeaders() {
+    private static Map<String, String> getHeaders() {
         return new HashMap<String, String>() {{
             put(JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.EKSTEP_AUTHORIZATION));
             put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -32,7 +32,7 @@ public class SearchUtil {
         }};
     }
 
-    public List<Map<String, Object>> search(String payload) throws UnirestException, IOException {
+    public static List<Map<String, Object>> search(String payload) throws UnirestException, IOException {
         if(StringUtils.isNotBlank(payload)){
             HttpResponse<String> httpResponse = Unirest.post(BASE_URL + SEARCH_URL).headers(getHeaders()).body(payload).asString();
             if(httpResponse.getStatus() == 200){
