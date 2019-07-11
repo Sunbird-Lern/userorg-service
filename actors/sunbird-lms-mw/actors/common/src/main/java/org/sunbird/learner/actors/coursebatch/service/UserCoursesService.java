@@ -24,6 +24,10 @@ public class UserCoursesService {
 
   protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
 
+  public static String generateUserCourseESId(String batchId, String userId) {
+    return (OneWayHashing.encryptVal(batchId + UNDERSCORE + userId));
+  }
+
   public static void validateUserUnenroll(UserCourses userCourseResult) {
     if (userCourseResult == null || !userCourseResult.isActive()) {
       ProjectLogger.log(
@@ -97,13 +101,10 @@ public class UserCoursesService {
   private void syncUsersToES(List<Map<String, Object>> records) {
 
     for (Map<String, Object> userCourses : records) {
-      String id =
-          OneWayHashing.encryptVal(
-              (String) userCourses.get(JsonKey.BATCH_ID)
-                  + UNDERSCORE
-                  + (String) userCourses.get(JsonKey.USER_ID));
-      userCourses.put(JsonKey.ID, id);
-      sync(userCourses, id);
+      sync(
+          userCourses,
+          (String) userCourses.get(JsonKey.BATCH_ID),
+          (String) userCourses.get(JsonKey.USER_ID));
     }
   }
 
@@ -130,13 +131,13 @@ public class UserCoursesService {
     }
   }
 
-  public void unenroll(String userId, String courseId, String batchId) {
-    UserCourses userCourses = userCourseDao.read(getPrimaryKey(userId, courseId, batchId));
+  public void unenroll(String batchId, String userId) {
+    UserCourses userCourses = userCourseDao.read(batchId, userId);
     validateUserUnenroll(userCourses);
     Map<String, Object> updateAttributes = new HashMap<>();
     updateAttributes.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.INACTIVE.getValue());
-    userCourseDao.update(userCourses.getBatchId(), userCourses.getCourseId(), updateAttributes);
-    sync(updateAttributes, userCourses.getId());
+    userCourseDao.update(userCourses.getBatchId(), userCourses.getUserId(), updateAttributes);
+    sync(updateAttributes, userCourses.getBatchId(), userCourses.getUserId());
   }
 
   public Map<String, Object> getActiveUserCourses(String userId) {
@@ -152,7 +153,8 @@ public class UserCoursesService {
     return result;
   }
 
-  public static void sync(Map<String, Object> courseMap, String id) {
+  public static void sync(Map<String, Object> courseMap, String batchId, String userId) {
+    String id = generateUserCourseESId(batchId, userId);
     Future<Boolean> responseF =
         esService.upsert(ProjectUtil.EsType.usercourses.getTypeName(), id, courseMap);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);

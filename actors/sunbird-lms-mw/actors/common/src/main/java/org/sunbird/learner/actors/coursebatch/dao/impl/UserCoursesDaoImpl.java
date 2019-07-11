@@ -30,8 +30,11 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
   }
 
   @Override
-  public UserCourses read(String id) {
-    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id);
+  public UserCourses read(String batchId, String userId) {
+    Map<String, Object> primaryKey = new HashMap<>();
+    primaryKey.put(JsonKey.BATCH_ID, batchId);
+    primaryKey.put(JsonKey.USER_ID, userId);
+    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, primaryKey);
     List<Map<String, Object>> userCoursesList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(userCoursesList)) {
@@ -47,7 +50,14 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
 
   @Override
   public Response update(String batchId, String userId, Map<String, Object> updateAttributes) {
-    return cassandraOperation.updateRecord(KEYSPACE_NAME, TABLE_NAME, updateAttributes);
+    Map<String, Object> primaryKey = new HashMap<>();
+    primaryKey.put(JsonKey.BATCH_ID, batchId);
+    primaryKey.put(JsonKey.USER_ID, userId);
+    Map<String, Object> updateList = new HashMap<>();
+    updateList.putAll(updateAttributes);
+    updateList.remove(JsonKey.BATCH_ID);
+    updateList.remove(JsonKey.USER_ID);
+    return cassandraOperation.updateRecord(KEYSPACE_NAME, TABLE_NAME, updateList, primaryKey);
   }
 
   @Override

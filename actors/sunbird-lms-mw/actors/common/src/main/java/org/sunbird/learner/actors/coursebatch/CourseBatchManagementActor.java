@@ -446,8 +446,7 @@ public class CourseBatchManagementActor extends BaseActor {
     userIds.forEach(
         id -> {
           if (participantsList.contains(id)) {
-            userCoursesService.unenroll(
-                id, (String) courseBatchObject.get(JsonKey.COURSE_ID), batchId);
+            userCoursesService.unenroll(id, batchId);
             removedParticipants.add(id);
           }
           response.getResult().put(id, JsonKey.SUCCESS);
