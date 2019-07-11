@@ -10,10 +10,10 @@ public interface UserCoursesDao {
   /**
    * Get user courses information.
    *
-   * @param id Identifier generated using courseId, batchId and userId
+   * @param batchId,userId user courses identifiers
    * @return User courses information
    */
-  UserCourses read(String id);
+  UserCourses read(String batchId, String userId);
 
   /**
    * Create an entry for user courses information
@@ -27,7 +27,7 @@ public interface UserCoursesDao {
    *
    * @param updateAttributes Map containing user courses attributes which needs to be updated
    */
-  Response update(Map<String, Object> updateAttributes);
+  Response update(Map<String, Object> updateAttributes, String batchId, String userId);
 
   /**
    * Get all active participant IDs in given batch

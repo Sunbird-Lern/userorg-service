@@ -9,34 +9,20 @@ import java.io.Serializable;
 public class UserCourses implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  private String id;
   private boolean active;
   private String addedBy;
   private String batchId;
-  private String contentId;
   private String courseId;
-  private String courseLogoUrl;
-  private String courseName;
-  private String timestamp;
   private String delta;
-  private String description;
   private String enrolledDate;
   private String grade;
+  private String datetime;
   private String lastReadContentId;
+  private String completedon;
   private int lastReadContentStatus;
-  private int leafNodesCount;
   private int progress;
   private int status;
-  private String tocUrl;
   private String userId;
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
 
   public boolean isActive() {
     return active;
@@ -62,14 +48,6 @@ public class UserCourses implements Serializable {
     this.batchId = batchId;
   }
 
-  public String getContentId() {
-    return contentId;
-  }
-
-  public void setContentId(String contentId) {
-    this.contentId = contentId;
-  }
-
   public String getCourseId() {
     return courseId;
   }
@@ -78,29 +56,6 @@ public class UserCourses implements Serializable {
     this.courseId = courseId;
   }
 
-  public String getCourseLogoUrl() {
-    return courseLogoUrl;
-  }
-
-  public void setCourseLogoUrl(String courseLogoUrl) {
-    this.courseLogoUrl = courseLogoUrl;
-  }
-
-  public String getCourseName() {
-    return courseName;
-  }
-
-  public void setCourseName(String courseName) {
-    this.courseName = courseName;
-  }
-
-  public String getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(String timestamp) {
-    this.timestamp = timestamp;
-  }
 
   public String getDelta() {
     return delta;
@@ -108,14 +63,6 @@ public class UserCourses implements Serializable {
 
   public void setDelta(String delta) {
     this.delta = delta;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public String getEnrolledDate() {
@@ -150,12 +97,20 @@ public class UserCourses implements Serializable {
     this.lastReadContentStatus = lastReadContentStatus;
   }
 
-  public int getLeafNodesCount() {
-    return leafNodesCount;
+  public String getCompletedon() {
+    return completedon;
   }
 
-  public void setLeafNodesCount(int leafNodesCount) {
-    this.leafNodesCount = leafNodesCount;
+  public void setCompletedon(String completedon) {
+    this.completedon = completedon;
+  }
+
+  public String getDatetime() {
+    return datetime;
+  }
+
+  public void setDatetime(String datetime) {
+    this.datetime = datetime;
   }
 
   public int getProgress() {
@@ -172,14 +127,6 @@ public class UserCourses implements Serializable {
 
   public void setStatus(int status) {
     this.status = status;
-  }
-
-  public String getTocUrl() {
-    return tocUrl;
-  }
-
-  public void setTocUrl(String tocUrl) {
-    this.tocUrl = tocUrl;
   }
 
   public String getUserId() {

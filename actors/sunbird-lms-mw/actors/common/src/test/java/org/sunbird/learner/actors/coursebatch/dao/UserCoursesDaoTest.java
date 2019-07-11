@@ -50,7 +50,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.ID);
+    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID,JsonKey.USER_ID);
     Assert.assertEquals(null, response);
   }
 
@@ -61,7 +61,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.ID);
+    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID,JsonKey.USER_ID);
     Assert.assertNotEquals(null, response);
   }
 
@@ -73,7 +73,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.ID);
+    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID,JsonKey.USER_ID);
     Assert.assertEquals(null, response);
   }
 
@@ -93,7 +93,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(new Response());
-    Response response = userCoursesDao.update(userCourseMap);
+    Response response = userCoursesDao.update(userCourseMap,JsonKey.BATCH_ID,JsonKey.USER_ID);
     Assert.assertNotEquals(null, response);
   }
 
