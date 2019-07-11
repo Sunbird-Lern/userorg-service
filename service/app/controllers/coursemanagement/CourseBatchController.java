@@ -57,6 +57,18 @@ public class CourseBatchController extends BaseController {
         JsonKey.BATCH_ID);
   }
 
+  public Promise<Result> removeUserFromCourseBatch(String batchId) {
+    return handleRequest(
+        ActorOperations.REMOVE_USER_FROM_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateAddUserToCourseBatchRequest((Request) request);
+          return null;
+        },
+        batchId,
+        JsonKey.BATCH_ID);
+  }
+
   public Promise<Result> deleteBatch() {
     return handleRequest(
         ActorOperations.REMOVE_BATCH.getValue(),
@@ -97,5 +109,10 @@ public class CourseBatchController extends BaseController {
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
+  }
+
+  public Promise<Result> getParticipants(String batchId) {
+    return handleRequest(
+        ActorOperations.GET_PARTICIPANTS.getValue(), batchId, JsonKey.BATCH_ID, false);
   }
 }

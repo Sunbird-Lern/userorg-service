@@ -56,10 +56,7 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
     queryMap.put(JsonKey.BATCH_ID, batchId);
     Response response =
         cassandraOperation.getRecordsByProperties(
-            KEYSPACE_NAME,
-            TABLE_NAME,
-            queryMap,
-            Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE, JsonKey.BATCH_ID));
+            KEYSPACE_NAME, TABLE_NAME, queryMap, Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE));
     List<Map<String, Object>> userCoursesList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(userCoursesList)) {

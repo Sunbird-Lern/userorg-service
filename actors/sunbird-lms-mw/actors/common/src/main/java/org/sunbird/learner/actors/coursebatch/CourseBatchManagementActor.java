@@ -48,7 +48,14 @@ import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createBatch", "updateBatch", "addUserBatch", "removeUserFromBatch", "getBatch"},
+  tasks = {
+    "createBatch",
+    "updateBatch",
+    "addUserBatch",
+    "removeUserFromBatch",
+    "getBatch",
+    "getParticipants"
+  },
   asyncTasks = {}
 )
 public class CourseBatchManagementActor extends BaseActor {
@@ -87,13 +94,15 @@ public class CourseBatchManagementActor extends BaseActor {
       case "removeUserFromBatch":
         removeUserCourseBatch(request);
         break;
+      case "getParticipants":
+        getParticipants(request);
+        break;
       default:
         onReceiveUnsupportedOperation(request.getOperation());
         break;
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void createCourseBatch(Request actorMessage) {
     Map<String, Object> request = actorMessage.getRequest();
     Map<String, Object> targetObject;
@@ -334,7 +343,7 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.invalidCourseCreatorId.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    //    String batchCreatorRootOrgId = getRootOrg(batchCreator);
+    String batchCreatorRootOrgId = getRootOrg(batchCreator);
     List<String> participants =
         userCoursesService.getEnrolledUserFromBatch(
             (String) courseBatchObject.get(JsonKey.BATCH_ID));
@@ -343,15 +352,15 @@ public class CourseBatchManagementActor extends BaseActor {
     if (participants == null) {
       participants = new ArrayList<>();
     }
-    //    Map<String, String> participantWithRootOrgIds = getRootOrgForMultipleUsers(userIds);
+    Map<String, String> participantWithRootOrgIds = getRootOrgForMultipleUsers(userIds);
     List<String> addedParticipants = new ArrayList<>();
     for (String userId : userIds) {
       if (!(participants.contains(userId))) {
-        //        if (!participantWithRootOrgIds.containsKey(userId)
-        //            || (!batchCreatorRootOrgId.equals(participantWithRootOrgIds.get(userId)))) {
-        //          response.put(userId, ResponseCode.userNotAssociatedToRootOrg.getErrorMessage());
-        //          continue;
-        //        }
+        if (!participantWithRootOrgIds.containsKey(userId)
+            || (!batchCreatorRootOrgId.equals(participantWithRootOrgIds.get(userId)))) {
+          response.put(userId, ResponseCode.userNotAssociatedToRootOrg.getErrorMessage());
+          continue;
+        }
         addedParticipants.add(userId);
 
       } else {
@@ -818,5 +827,20 @@ public class CourseBatchManagementActor extends BaseActor {
   private void updateBatchCount(CourseBatch courseBatch) {
     CourseBatchSchedulerUtil.doOperationInEkStepCourse(
         courseBatch.getCourseId(), true, courseBatch.getEnrollmentType());
+  }
+
+  private void getParticipants(Request actorMessage) {
+    String batchID = (String) actorMessage.getContext().get(JsonKey.BATCH_ID);
+    List<String> participants = userCoursesService.getEnrolledUserFromBatch(batchID);
+
+    if (CollectionUtils.isEmpty(participants)) {
+      participants = new ArrayList<>();
+    }
+
+    Response response = new Response();
+    Map<String, Object> result = new HashMap<String, Object>();
+    result.put(JsonKey.PARTICIPANTS, participants);
+    response.put(JsonKey.COURSE_BATCH, result);
+    sender().tell(response, self());
   }
 }
