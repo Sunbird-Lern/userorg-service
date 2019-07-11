@@ -321,12 +321,7 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.enrollmentTypeValidation.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    Map<String, Object> course =
-        getContentDetails(
-            (String) courseBatchObject.get(JsonKey.COURSE_ID),
-            CourseBatchSchedulerUtil.getHeader());
-    if (ProjectUtil.isNull(course.get(JsonKey.CREATED_BY))
-        || ((List) courseBatchObject.get(JsonKey.CREATED_BY)).isEmpty()) {
+    if (CollectionUtils.isEmpty((List) courseBatchObject.get(JsonKey.COURSE_CREATED_FOR))) {
       throw new ProjectCommonException(
           ResponseCode.courseCreatedForIsNull.getErrorCode(),
           ResponseCode.courseCreatedForIsNull.getErrorMessage(),
@@ -339,7 +334,7 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.invalidCourseCreatorId.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    String batchCreatorRootOrgId = getRootOrg(batchCreator);
+    //    String batchCreatorRootOrgId = getRootOrg(batchCreator);
     List<String> participants =
         userCoursesService.getEnrolledUserFromBatch(
             (String) courseBatchObject.get(JsonKey.BATCH_ID));
@@ -348,15 +343,15 @@ public class CourseBatchManagementActor extends BaseActor {
     if (participants == null) {
       participants = new ArrayList<>();
     }
-    Map<String, String> participantWithRootOrgIds = getRootOrgForMultipleUsers(userIds);
+    //    Map<String, String> participantWithRootOrgIds = getRootOrgForMultipleUsers(userIds);
     List<String> addedParticipants = new ArrayList<>();
     for (String userId : userIds) {
       if (!(participants.contains(userId))) {
-        if (!participantWithRootOrgIds.containsKey(userId)
-            || (!batchCreatorRootOrgId.equals(participantWithRootOrgIds.get(userId)))) {
-          response.put(userId, ResponseCode.userNotAssociatedToRootOrg.getErrorMessage());
-          continue;
-        }
+        //        if (!participantWithRootOrgIds.containsKey(userId)
+        //            || (!batchCreatorRootOrgId.equals(participantWithRootOrgIds.get(userId)))) {
+        //          response.put(userId, ResponseCode.userNotAssociatedToRootOrg.getErrorMessage());
+        //          continue;
+        //        }
         addedParticipants.add(userId);
 
       } else {
@@ -473,8 +468,6 @@ public class CourseBatchManagementActor extends BaseActor {
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
-
-    result = new HashMap<>();
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
   }

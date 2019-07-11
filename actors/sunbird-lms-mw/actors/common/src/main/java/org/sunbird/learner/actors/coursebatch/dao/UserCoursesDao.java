@@ -27,7 +27,7 @@ public interface UserCoursesDao {
    *
    * @param updateAttributes Map containing user courses attributes which needs to be updated
    */
-  Response update(Map<String, Object> updateAttributes);
+  Response update(String batchId, String userId, Map<String, Object> updateAttributes);
 
   /**
    * Get all active participant IDs in given batch

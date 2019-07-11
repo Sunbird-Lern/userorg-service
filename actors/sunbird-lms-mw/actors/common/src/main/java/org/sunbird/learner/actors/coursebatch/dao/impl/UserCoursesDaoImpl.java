@@ -46,7 +46,7 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
   }
 
   @Override
-  public Response update(Map<String, Object> updateAttributes) {
+  public Response update(String batchId, String userId, Map<String, Object> updateAttributes) {
     return cassandraOperation.updateRecord(KEYSPACE_NAME, TABLE_NAME, updateAttributes);
   }
 
@@ -59,7 +59,7 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
             KEYSPACE_NAME,
             TABLE_NAME,
             queryMap,
-            Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE, JsonKey.ID));
+            Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE, JsonKey.BATCH_ID));
     List<Map<String, Object>> userCoursesList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(userCoursesList)) {

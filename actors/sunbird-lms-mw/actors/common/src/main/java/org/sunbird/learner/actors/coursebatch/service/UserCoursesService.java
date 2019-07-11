@@ -20,11 +20,12 @@ import scala.concurrent.Future;
 public class UserCoursesService {
   private UserCoursesDao userCourseDao = UserCoursesDaoImpl.getInstance();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  public static final String UNDERSCORE = "_";
 
   protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
 
   public static void validateUserUnenroll(UserCourses userCourseResult) {
-    if (userCourseResult == null) {
+    if (userCourseResult == null || !userCourseResult.isActive()) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User is not enrolled yet",
           LoggerEnum.INFO.name());
@@ -33,16 +34,7 @@ public class UserCoursesService {
           ResponseCode.userNotEnrolledCourse.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (!userCourseResult.isActive()) {
-      ProjectLogger.log(
-          "UserCoursesService:validateUserUnenroll: User does not have an enrolled course");
-      throw new ProjectCommonException(
-          ResponseCode.userNotEnrolledCourse.getErrorCode(),
-          ResponseCode.userNotEnrolledCourse.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (userCourseResult.getProgress() > 0
-        && (userCourseResult.getProgress() == userCourseResult.getLeafNodesCount())) {
+    if (userCourseResult.getStatus() == 2) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User already completed the course");
       throw new ProjectCommonException(
@@ -72,17 +64,18 @@ public class UserCoursesService {
     Integer count = 0;
 
     List<Map<String, Object>> records = new ArrayList<>();
+    Map<String, Object> userCoursesCommon = new HashMap<>();
+    userCoursesCommon.put(JsonKey.BATCH_ID, batchId);
+    userCoursesCommon.put(JsonKey.COURSE_ID, courseId);
+    userCoursesCommon.put(JsonKey.COURSE_ENROLL_DATE, ProjectUtil.getFormattedDate());
+    userCoursesCommon.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
+    userCoursesCommon.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
+    userCoursesCommon.put(JsonKey.COURSE_PROGRESS, 0);
+
     for (String userId : userIds) {
       Map<String, Object> userCourses = new HashMap<>();
       userCourses.put(JsonKey.USER_ID, userId);
-      userCourses.put(JsonKey.BATCH_ID, batchId);
-      userCourses.put(JsonKey.COURSE_ID, courseId);
-      userCourses.put(JsonKey.ID, getPrimaryKey(userId, courseId, batchId));
-      userCourses.put(JsonKey.CONTENT_ID, courseId);
-      userCourses.put(JsonKey.COURSE_ENROLL_DATE, ProjectUtil.getFormattedDate());
-      userCourses.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
-      userCourses.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
-      userCourses.put(JsonKey.COURSE_PROGRESS, 0);
+      userCourses.putAll(userCoursesCommon);
 
       count++;
       records.add(userCourses);
@@ -104,7 +97,13 @@ public class UserCoursesService {
   private void syncUsersToES(List<Map<String, Object>> records) {
 
     for (Map<String, Object> userCourses : records) {
-      sync(userCourses, (String) userCourses.get(JsonKey.ID));
+      String id =
+          OneWayHashing.encryptVal(
+              (String) userCourses.get(JsonKey.BATCH_ID)
+                  + UNDERSCORE
+                  + (String) userCourses.get(JsonKey.USER_ID));
+      userCourses.put(JsonKey.ID, id);
+      sync(userCourses, id);
     }
   }
 
@@ -136,8 +135,7 @@ public class UserCoursesService {
     validateUserUnenroll(userCourses);
     Map<String, Object> updateAttributes = new HashMap<>();
     updateAttributes.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.INACTIVE.getValue());
-    updateAttributes.put(JsonKey.ID, userCourses.getId());
-    userCourseDao.update(updateAttributes);
+    userCourseDao.update(userCourses.getBatchId(), userCourses.getCourseId(), updateAttributes);
     sync(updateAttributes, userCourses.getId());
   }
 
