@@ -38,7 +38,7 @@ public class UserCoursesService {
           ResponseCode.userNotEnrolledCourse.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (userCourseResult.getStatus() == 2) {
+    if (userCourseResult.getStatus() == ProjectUtil.ProgressStatus.COMPLETED.getValue()) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User already completed the course");
       throw new ProjectCommonException(
@@ -163,9 +163,9 @@ public class UserCoursesService {
         LoggerEnum.INFO.name());
   }
 
-  public List<String> getEnrolledUserFromBatch(String id) {
+  public List<String> getEnrolledUserFromBatch(String batchId) {
 
-    return userCourseDao.getAllActiveUserOfBatch(id);
+    return userCourseDao.getAllActiveUserOfBatch(batchId);
   }
 
   public Integer getBatchSize(String key) {

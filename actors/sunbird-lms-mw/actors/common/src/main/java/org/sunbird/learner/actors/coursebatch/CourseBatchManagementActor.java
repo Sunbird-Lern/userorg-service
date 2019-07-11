@@ -315,34 +315,8 @@ public class CourseBatchManagementActor extends BaseActor {
 
     String batchId = (String) req.get(JsonKey.BATCH_ID);
     TelemetryUtil.generateCorrelatedObject(batchId, TelemetryEnvKey.BATCH, null, correlatedObject);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.course.getTypeName(),
-            (String) actorMessage.getContext().get(JsonKey.BATCH_ID));
-    Map<String, Object> courseBatchObject =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
-    if (ProjectUtil.isNull(courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
-        || !((String) courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
-            .equalsIgnoreCase(JsonKey.INVITE_ONLY)) {
-      throw new ProjectCommonException(
-          ResponseCode.enrollmentTypeValidation.getErrorCode(),
-          ResponseCode.enrollmentTypeValidation.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (CollectionUtils.isEmpty((List) courseBatchObject.get(JsonKey.COURSE_CREATED_FOR))) {
-      throw new ProjectCommonException(
-          ResponseCode.courseCreatedForIsNull.getErrorCode(),
-          ResponseCode.courseCreatedForIsNull.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
+    Map<String, Object> courseBatchObject = getValidatedCourseBatch(batchId);
     String batchCreator = (String) courseBatchObject.get(JsonKey.CREATED_BY);
-    if (StringUtils.isBlank(batchCreator)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidCourseCreatorId.getErrorCode(),
-          ResponseCode.invalidCourseCreatorId.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
     String batchCreatorRootOrgId = getRootOrg(batchCreator);
     List<String> participants =
         userCoursesService.getEnrolledUserFromBatch(
@@ -399,39 +373,7 @@ public class CourseBatchManagementActor extends BaseActor {
 
     String batchId = (String) req.get(JsonKey.BATCH_ID);
     TelemetryUtil.generateCorrelatedObject(batchId, TelemetryEnvKey.BATCH, null, correlatedObject);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.course.getTypeName(),
-            (String) actorMessage.getContext().get(JsonKey.BATCH_ID));
-    Map<String, Object> courseBatchObject =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
-    if (ProjectUtil.isNull(courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
-        || !((String) courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
-            .equalsIgnoreCase(JsonKey.INVITE_ONLY)) {
-      throw new ProjectCommonException(
-          ResponseCode.enrollmentTypeValidation.getErrorCode(),
-          ResponseCode.enrollmentTypeValidation.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    Map<String, Object> course =
-        getContentDetails(
-            (String) courseBatchObject.get(JsonKey.COURSE_ID),
-            CourseBatchSchedulerUtil.getHeader());
-    if (ProjectUtil.isNull(course.get(JsonKey.CREATED_BY))
-        || ((List) courseBatchObject.get(JsonKey.CREATED_BY)).isEmpty()) {
-      throw new ProjectCommonException(
-          ResponseCode.courseCreatedForIsNull.getErrorCode(),
-          ResponseCode.courseCreatedForIsNull.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-    String batchCreator = (String) courseBatchObject.get(JsonKey.CREATED_BY);
-    if (StringUtils.isBlank(batchCreator)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidCourseCreatorId.getErrorCode(),
-          ResponseCode.invalidCourseCreatorId.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
+    Map<String, Object> courseBatchObject = getValidatedCourseBatch(batchId);
     List<String> participants =
         userCoursesService.getEnrolledUserFromBatch(
             (String) courseBatchObject.get(JsonKey.BATCH_ID));
@@ -445,11 +387,17 @@ public class CourseBatchManagementActor extends BaseActor {
     List<String> removedParticipants = new ArrayList<>();
     userIds.forEach(
         id -> {
-          if (participantsList.contains(id)) {
-            userCoursesService.unenroll(id, batchId);
-            removedParticipants.add(id);
+          if (!participantsList.contains(id)) {
+            response.getResult().put(id, ResponseCode.userNotEnrolledCourse.getErrorMessage());
+          } else {
+            try {
+              userCoursesService.unenroll(batchId, id);
+              removedParticipants.add(id);
+              response.getResult().put(id, JsonKey.SUCCESS);
+            } catch (ProjectCommonException ex) {
+              response.getResult().put(id, ex.getMessage());
+            }
           }
-          response.getResult().put(id, JsonKey.SUCCESS);
         });
 
     for (String userId : removedParticipants) {
@@ -466,6 +414,36 @@ public class CourseBatchManagementActor extends BaseActor {
       participantMentorMap.put(JsonKey.REMOVED_PARTICIPANTS, removedParticipants);
       batchOperationNotifier(courseBatch, participantMentorMap);
     }
+  }
+
+  private Map<String, Object> getValidatedCourseBatch(String batchId) {
+    Future<Map<String, Object>> resultF =
+        esService.getDataByIdentifier(ProjectUtil.EsType.course.getTypeName(), batchId);
+    Map<String, Object> courseBatchObject =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+
+    if (ProjectUtil.isNull(courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
+        || !((String) courseBatchObject.get(JsonKey.ENROLLMENT_TYPE))
+            .equalsIgnoreCase(JsonKey.INVITE_ONLY)) {
+      throw new ProjectCommonException(
+          ResponseCode.enrollmentTypeValidation.getErrorCode(),
+          ResponseCode.enrollmentTypeValidation.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (CollectionUtils.isEmpty((List) courseBatchObject.get(JsonKey.COURSE_CREATED_FOR))) {
+      throw new ProjectCommonException(
+          ResponseCode.courseCreatedForIsNull.getErrorCode(),
+          ResponseCode.courseCreatedForIsNull.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    String batchCreator = (String) courseBatchObject.get(JsonKey.CREATED_BY);
+    if (StringUtils.isBlank(batchCreator)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidCourseCreatorId.getErrorCode(),
+          ResponseCode.invalidCourseCreatorId.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    return courseBatchObject;
   }
 
   private void getCourseBatch(Request actorMessage) {

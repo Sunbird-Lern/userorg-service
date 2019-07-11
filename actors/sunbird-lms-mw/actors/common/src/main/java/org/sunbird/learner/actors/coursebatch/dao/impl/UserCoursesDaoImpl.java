@@ -2,6 +2,7 @@ package org.sunbird.learner.actors.coursebatch.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -72,14 +73,11 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
     if (CollectionUtils.isEmpty(userCoursesList)) {
       return null;
     }
-    List<String> users = new ArrayList<>();
-
-    userCoursesList.forEach(
-        userCourses -> {
-          if ((boolean) userCourses.get(JsonKey.ACTIVE))
-            users.add((String) userCourses.get(JsonKey.USER_ID));
-        });
-    return users;
+    return userCoursesList
+        .stream()
+        .filter(userCourse -> (boolean) userCourse.get(JsonKey.ACTIVE))
+        .map(userCourse -> (String) userCourse.get(JsonKey.USER_ID))
+        .collect(Collectors.toList());
   }
 
   @Override
