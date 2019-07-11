@@ -23,6 +23,11 @@ public class UserCoursesService {
 
   protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
 
+
+   public static String generateUserCourseESId(String batchId, String userId)
+   {
+     return(OneWayHashing.encryptVal(batchId + "_" + userId));
+   }
   public static void validateUserUnenroll(UserCourses userCourseResult) {
     if (userCourseResult == null) {
       ProjectLogger.log(
@@ -42,7 +47,7 @@ public class UserCoursesService {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (userCourseResult.getProgress() > 0
-        && (userCourseResult.getProgress() == userCourseResult.getLeafNodesCount())) {
+        /*&& (userCourseResult.getProgress() == userCourseResult.getLeafNodesCount())*/) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User already completed the course");
       throw new ProjectCommonException(
@@ -104,7 +109,7 @@ public class UserCoursesService {
   private void syncUsersToES(List<Map<String, Object>> records) {
 
     for (Map<String, Object> userCourses : records) {
-      sync(userCourses, (String) userCourses.get(JsonKey.ID));
+      sync(userCourses, (String) userCourses.get(JsonKey.BATCH_ID),(String) userCourses.get(JsonKey.USER_ID));
     }
   }
 
@@ -132,13 +137,13 @@ public class UserCoursesService {
   }
 
   public void unenroll(String userId, String courseId, String batchId) {
-    UserCourses userCourses = userCourseDao.read(getPrimaryKey(userId, courseId, batchId));
+    UserCourses userCourses = userCourseDao.read(batchId,userId);
     validateUserUnenroll(userCourses);
     Map<String, Object> updateAttributes = new HashMap<>();
     updateAttributes.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.INACTIVE.getValue());
-    updateAttributes.put(JsonKey.ID, userCourses.getId());
-    userCourseDao.update(updateAttributes);
-    sync(updateAttributes, userCourses.getId());
+    updateAttributes.put(JsonKey.USER_ID, userCourses.getUserId());
+    userCourseDao.update(updateAttributes,batchId,userId);
+    sync(updateAttributes,userCourses.getBatchId(),userCourses.getUserId());
   }
 
   public Map<String, Object> getActiveUserCourses(String userId) {
@@ -154,7 +159,8 @@ public class UserCoursesService {
     return result;
   }
 
-  public static void sync(Map<String, Object> courseMap, String id) {
+  public static void sync(Map<String, Object> courseMap, String batchId, String userId) {
+     String id=generateUserCourseESId(batchId,userId);
     Future<Boolean> responseF =
         esService.upsert(ProjectUtil.EsType.usercourses.getTypeName(), id, courseMap);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
