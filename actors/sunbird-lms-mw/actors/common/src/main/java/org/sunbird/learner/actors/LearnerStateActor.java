@@ -32,9 +32,12 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.actors.coursebatch.dao.UserCoursesDao;
+import org.sunbird.learner.actors.coursebatch.dao.impl.UserCoursesDaoImpl;
 import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
 import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.courses.UserCourses;
 import scala.concurrent.Future;
 
 /**
@@ -51,6 +54,7 @@ public class LearnerStateActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserCoursesService userCoursesService = new UserCoursesService();
+  private UserCoursesDao userCourseDao = UserCoursesDaoImpl.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   /**
@@ -79,6 +83,7 @@ public class LearnerStateActor extends BaseActor {
   public void getCourse(Request request) {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     Map<String, Object> result = userCoursesService.getActiveUserCourses(userId);
+  //  calculateProgressForUserCourses(request,result);
     if (MapUtils.isNotEmpty(result)) {
       addCourseDetails(request, result);
     } else {
@@ -103,7 +108,8 @@ public class LearnerStateActor extends BaseActor {
     if (CollectionUtils.isEmpty(batches)) {
       return;
     }
-    String requestBody = prepareCourseSearchRequest(batches);
+    //String requestBody = prepareCourseSearchRequest(batches);
+    String requestBody = "{\"request\":{\"filters\":{\"identifier\":[\"do_112736824142061568168\"],\"contentType\":[\"course\"]}}}";
     ProjectLogger.log(
         MessageFormatter.format(
                 "LearnerStateActor:addCourseDetails: request body = {0}, query string = {1}",
@@ -439,5 +445,46 @@ public class LearnerStateActor extends BaseActor {
             + JsonKey.PRIMARY_KEY_DELIMETER
             + batchId;
     return OneWayHashing.encryptVal(key);
+  }
+
+  private int calculateProgressForUserCourses(Request request, Map<String, Object> result)
+  {
+  List<Map<String,Object>> activeCourses = (List<Map<String,Object>>)(result.get(JsonKey.CONTENT));
+
+   int progress = 0;
+    for(Map<String,Object> course : activeCourses) {
+      UserCourses userCourseResult = userCourseDao.read((String) course.get(JsonKey.BATCH_ID), (String) course.get(JsonKey.USER_ID));
+        if(userCourseResult.getProgress()==100)
+           progress=100;
+        else {
+          Map<String, Object> primaryKey = new HashMap<>();
+          primaryKey.put(JsonKey.USER_ID, course.get(JsonKey.USER_ID));
+          primaryKey.put(JsonKey.BATCH_ID, course.get(JsonKey.BATCH_ID));
+          primaryKey.put(JsonKey.COURSE_ID, course.get(JsonKey.COURSE_ID));
+          List<Map<String, Object>> contentsForCourses = getcontentsForCourses(request,activeCourses);
+          for (int i = 0; i <contentsForCourses.size(); i++) {
+            primaryKey.put(JsonKey.COURSE_ID, contentsForCourses.get(i).get(JsonKey.IDENTIFIER));
+            List<String> contentIds = (List<String>) contentsForCourses.get(i).get("leafnodes");
+            for (String contentId : contentIds) {
+              primaryKey.put(JsonKey.BATCH_ID, contentId);
+
+            }
+          }
+        }
+    }
+    return progress;
+  }
+
+  private List<Map<String, Object>> getcontentsForCourses(Request request,List<Map<String,Object>> activeCourses)
+  {
+    //  String requestBody = prepareCourseSearchRequest(activeCourses);
+    String requestBody = "{\"request\":{\"filters\":{\"identifier\":[\"do_112736824142061568168\",\"do_1124785353783377921154\"],\"contentType\":[\"course\"]}}}";
+    Map<String, Object> contentsList =
+            ContentSearchUtil.searchContentSync(
+                    (String) request.getContext().get(JsonKey.URL_QUERY_STRING),
+                    requestBody,
+                    (Map<String, String>) request.getRequest().get(JsonKey.HEADER));
+
+    return((List<Map<String, Object>>) (contentsList.get(JsonKey.CONTENTS)));
   }
 }
