@@ -38,6 +38,10 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   public void validateUpdateCourseBatchRequest(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.COURSE_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.COURSE_ID);
     if (null != request.getRequest().get(JsonKey.STATUS)) {
       boolean status = validateBatchStatus(request);
       if (!status) {
