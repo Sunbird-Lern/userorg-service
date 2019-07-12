@@ -69,7 +69,6 @@ public class LearnerStateActor extends BaseActor {
             Response res = new Response();
             Map<String, Object> requestMap = request.getRequest();
             String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-
             res = getCourseContentState(userId, requestMap);
             removeUnwantedProperties(res);
             sender().tell(res, self());
