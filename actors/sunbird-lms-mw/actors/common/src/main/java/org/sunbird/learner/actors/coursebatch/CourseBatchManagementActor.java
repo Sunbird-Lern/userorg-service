@@ -18,6 +18,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import java.util.stream.Collectors;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -500,27 +501,31 @@ public class CourseBatchManagementActor extends BaseActor {
     List<String> mentors = courseBatch.getMentors();
     if (CollectionUtils.isNotEmpty(mentors)) {
       String batchCreatorRootOrgId = getRootOrg(courseBatch.getCreatedBy());
-
+      List<Map<String, Object>> mentorDetailList = userOrgService.getUsersByIds(mentors);
+      Map<String, Map<String, Object>> mentorDetails =
+              mentorDetailList
+                      .stream()
+                      .collect(Collectors.toMap(map -> (String) map.get(JsonKey.ID), map -> map));
       for (String userId : mentors) {
-        Map<String, Object> result = userOrgService.getUserById(userId);
-        String mentorRootOrgId = getRootOrg(userId);
+        Map<String, Object> result = mentorDetails.get(userId);
+        String mentorRootOrgId = getRootOrgFromUserMap(result);
         if (!batchCreatorRootOrgId.equals(mentorRootOrgId)) {
           throw new ProjectCommonException(
-              ResponseCode.userNotAssociatedToRootOrg.getErrorCode(),
-              ResponseCode.userNotAssociatedToRootOrg.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode(),
-              userId);
+                  ResponseCode.userNotAssociatedToRootOrg.getErrorCode(),
+                  ResponseCode.userNotAssociatedToRootOrg.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode(),
+                  userId);
         }
         if ((ProjectUtil.isNull(result))
-            || (ProjectUtil.isNotNull(result) && result.isEmpty())
-            || (ProjectUtil.isNotNull(result)
+                || (ProjectUtil.isNotNull(result) && result.isEmpty())
+                || (ProjectUtil.isNotNull(result)
                 && result.containsKey(JsonKey.IS_DELETED)
                 && ProjectUtil.isNotNull(result.get(JsonKey.IS_DELETED))
                 && (Boolean) result.get(JsonKey.IS_DELETED))) {
           throw new ProjectCommonException(
-              ResponseCode.invalidUserId.getErrorCode(),
-              ResponseCode.invalidUserId.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+                  ResponseCode.invalidUserId.getErrorCode(),
+                  ResponseCode.invalidUserId.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
     }
