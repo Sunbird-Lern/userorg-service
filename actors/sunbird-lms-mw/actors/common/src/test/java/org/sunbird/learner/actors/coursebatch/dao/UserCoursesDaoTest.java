@@ -110,7 +110,7 @@ public class UserCoursesDaoTest {
   @Test
   public void getAllActiveUserWithoutParticipantsSuccess() {
 
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
         .thenReturn(new Response());
     List<String> participants = userCoursesDao.getAllActiveUserOfBatch(JsonKey.BATCH_ID);
@@ -125,7 +125,7 @@ public class UserCoursesDaoTest {
     userCoursesMap.put(JsonKey.ACTIVE, true);
 
     readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
         .thenReturn(readResponse);
     List<String> participants = userCoursesDao.getAllActiveUserOfBatch(JsonKey.BATCH_ID);
@@ -145,7 +145,7 @@ public class UserCoursesDaoTest {
     userCoursesMap.put(JsonKey.ACTIVE, true);
 
     readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
             .thenReturn(readResponse);
     List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, true);
@@ -160,7 +160,7 @@ public class UserCoursesDaoTest {
     userCoursesMap.put(JsonKey.ACTIVE, false);
 
     readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
             .thenReturn(readResponse);
     List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, false);
@@ -175,7 +175,7 @@ public class UserCoursesDaoTest {
     userCoursesMap.put(JsonKey.ACTIVE, false);
 
     readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
             .thenReturn(readResponse);
     List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, true);
