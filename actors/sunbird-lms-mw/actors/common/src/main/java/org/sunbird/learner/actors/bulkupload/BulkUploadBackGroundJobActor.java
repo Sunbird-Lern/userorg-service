@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -175,23 +176,21 @@ public class BulkUploadBackGroundJobActor extends BaseActor {
 
     Map<String, Object> map = null;
     List<String> createdFor = (List<String>) courseBatchObject.get(JsonKey.COURSE_CREATED_FOR);
-    //    List<Map<String, Object>> userDetails = userOrgService.getUsersByIds(userIds);
-    //    Map<String, String> userToRootOrg =
-    //        userDetails
-    //            .stream()
-    //            .collect(
-    //                Collectors.toMap(
-    //                    user -> (String) user.get(JsonKey.ID), user ->
-    // getRootOrgFromUserMap(user)));
+    List<Map<String, Object>> userDetails = userOrgService.getUsersByIds(userIds);
+    Map<String, String> userToRootOrg =
+        userDetails
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    user -> (String) user.get(JsonKey.ID), user -> getRootOrgFromUserMap(user)));
     // check whether can update user or not
     for (String userId : userIds) {
-      //      if (!userToRootOrg.containsKey(userId) ||
-      // createdFor.contains(userToRootOrg.get(userId))) {
-      //        map = new HashMap<>();
-      //        map.put(userId, ResponseCode.userNotAssociatedToOrg.getErrorMessage());
-      //        failedUserList.add(map);
-      //        continue;
-      //      }
+      if (!userToRootOrg.containsKey(userId) || createdFor.contains(userToRootOrg.get(userId))) {
+        map = new HashMap<>();
+        map.put(userId, ResponseCode.userNotAssociatedToOrg.getErrorMessage());
+        failedUserList.add(map);
+        continue;
+      }
       UserCourses userCourses = userCourseDao.read(batchId, userId);
       if (userCourses != null) {
         if (!userCourses.isActive()) {
