@@ -18,10 +18,8 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.BulkProcessStatus;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -32,7 +30,6 @@ import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
-import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.learner.actors.bulkupload.model.StorageDetails;
 import org.sunbird.learner.util.Util;
 
@@ -113,9 +110,6 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
   private void getUploadStatus(Request actorMessage) {
     String processId = (String) actorMessage.getRequest().get(JsonKey.PROCESS_ID);
-    DecryptionService decryptionService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-            .getDecryptionServiceInstance(null);
     Response response = null;
     List<String> fields =
         Arrays.asList(
@@ -132,52 +126,10 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         ((List<Map<String, Object>>) response.get(JsonKey.RESPONSE));
     if (!resList.isEmpty()) {
       Map<String, Object> resMap = resList.get(0);
-      String objectType = (String) resMap.get(JsonKey.OBJECT_TYPE);
       if ((int) resMap.get(JsonKey.STATUS) == ProjectUtil.BulkProcessStatus.COMPLETED.getValue()) {
         resMap.put(JsonKey.PROCESS_ID, resMap.get(JsonKey.ID));
         updateResponseStatus(resMap);
         ProjectUtil.removeUnwantedFields(resMap, JsonKey.ID);
-        if (!(JsonKey.LOCATION.equalsIgnoreCase(objectType))) {
-          Object[] successMap = null;
-          Object[] failureMap = null;
-          try {
-            if (null != resMap.get(JsonKey.SUCCESS_RESULT)) {
-              successMap =
-                  mapper.readValue(
-                      decryptionService.decryptData((String) resMap.get(JsonKey.SUCCESS_RESULT)),
-                      Object[].class);
-              resMap.put(JsonKey.SUCCESS_RESULT, successMap);
-            }
-            if (null != resMap.get(JsonKey.FAILURE_RESULT)) {
-              failureMap =
-                  mapper.readValue(
-                      decryptionService.decryptData((String) resMap.get(JsonKey.FAILURE_RESULT)),
-                      Object[].class);
-              resMap.put(JsonKey.FAILURE_RESULT, failureMap);
-            }
-          } catch (IOException e) {
-            ProjectLogger.log(e.getMessage(), e);
-          }
-        } else {
-          Map<String, Object> queryMap = new HashMap<>();
-          queryMap.put(JsonKey.PROCESS_ID, processId);
-          List<BulkUploadProcessTask> tasks = bulkUploadProcessTaskDao.readByPrimaryKeys(queryMap);
-
-          List<Map> successList = new ArrayList<>();
-          List<Map> failureList = new ArrayList<>();
-          tasks
-              .stream()
-              .forEach(
-                  x -> {
-                    if (x.getStatus() == BulkProcessStatus.COMPLETED.getValue()) {
-                      addTaskDataToList(successList, x.getSuccessResult());
-                    } else {
-                      addTaskDataToList(failureList, x.getFailureResult());
-                    }
-                  });
-          resMap.put(JsonKey.SUCCESS_RESULT, successList);
-          resMap.put(JsonKey.FAILURE_RESULT, failureList);
-        }
         sender().tell(response, self());
       } else {
         resMap.put(JsonKey.PROCESS_ID, resMap.get(JsonKey.ID));
