@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -35,7 +34,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import scala.concurrent.Future;
 
 /**
@@ -51,12 +49,12 @@ import scala.concurrent.Future;
 public class LearnerStateUpdateActor extends BaseActor {
 
     private static final String CONTENT_STATE_INFO = "contentStateInfo";
-
     private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
     private Util.DbInfo consumptionDBInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
     private Util.DbInfo batchDBInfo = Util.dbInfoMap.get(JsonKey.COURSE_BATCH_DB);
     private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+    private SimpleDateFormat simpleDateFormat = ProjectUtil.getDateFormatter();
 
     private enum ContentUpdateResponseKeys {
         SUCCESS_CONTENTS, NOT_A_ON_GOING_BATCH, BATCH_NOT_EXISTS
@@ -88,12 +86,19 @@ public class LearnerStateUpdateActor extends BaseActor {
                     Map<String, Object> batchDetails = batches.get(batchId).get(0);
                         int status = ((Number) batchDetails.get("status")).intValue();
                         if (status == 1) {
-                            List<Map<String, Object>> contents = input.getValue().stream()
-                                    .map(c -> processContent(c)).collect(Collectors.toList());
+                            String courseId = (String) batchDetails.get("courseId");
+                            List<String> contentIds = input.getValue().stream()
+                                    .map(c -> (String) c.get("contentId")).collect(Collectors.toList());
+                            Map<String, Map<String, Object>> contents = getContents(userId, contentIds, batchId)
+                                    .stream().collect(Collectors.groupingBy(x -> { return (String) x.get("contentid"); }))
+                                    .entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().get(0)));
 
+                            input.getValue().stream().map(inputContent -> {
+                                Map<String, Object> existingContent = contents.get(inputContent.get("contentId"));
+                                return processContent(inputContent, existingContent, userId);
+                            }).collect(Collectors.toList());
 
-
-                            updateMessages(respMessages, ContentUpdateResponseKeys.SUCCESS_CONTENTS.name(), contents);
+                            updateMessages(respMessages, ContentUpdateResponseKeys.SUCCESS_CONTENTS.name(), contentIds);
                         } else {
                             updateMessages(respMessages, ContentUpdateResponseKeys.NOT_A_ON_GOING_BATCH.name(), batchId);
                         }
@@ -121,22 +126,31 @@ public class LearnerStateUpdateActor extends BaseActor {
         Future<Map<String, Object>> searchFuture = esService.search(dto, ProjectUtil.EsType.courseBatch.getTypeName());
         Map<String, Object> response =
                 (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(searchFuture);
-        System.out.println("Batches: " + response);
         return (List<Map<String, Object>>) response.get(JsonKey.CONTENT);
     }
 
-    private Map<String, Object> processContent(Map<String, Object> content, String userId) {
+    private List<Map<String, Object>> getContents(String userId, List<String> contentIds, String batchId) {
         Map<String, Object> filters = new HashMap<String, Object>() {{
-           put("userid", userId);
-           put("contentid", content.get("contentId"));
-           put("batchid", content.get("batchId"));
+            put("userid", userId);
+            put("contentid", contentIds);
+            put("batchid", batchId);
         }};
         Response response = cassandraOperation.getRecords(consumptionDBInfo.getKeySpace(), consumptionDBInfo.getTableName(), filters, null);
         List<Map<String, Object>> resultList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
         if (CollectionUtils.isEmpty(resultList)) {
+            resultList = new ArrayList<>();
+        }
+        return resultList;
+    }
+
+    private Map<String, Object> processContent(Map<String, Object> inputContent, Map<String, Object> existingContent, String userId) {
+        if (MapUtils.isEmpty(existingContent)) {
+
+        } else {
 
         }
-        return content;
+
+        return inputContent;
     }
 
     private void updateMessages(Map<String, List<Object>> errors, String key, Object value) {
