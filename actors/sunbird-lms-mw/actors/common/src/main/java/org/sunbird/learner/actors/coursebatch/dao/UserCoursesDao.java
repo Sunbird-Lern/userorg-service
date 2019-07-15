@@ -42,4 +42,12 @@ public interface UserCoursesDao {
    * @param userCoursesDetails List of participant details
    */
   Response batchInsert(List<Map<String, Object>> userCoursesDetails);
+
+  /**
+   * Get all active participant IDs in given batch
+   *
+   * @param batchId Batch ID
+   * @param active
+   */
+  List<String> getBatchParticipants(String batchId, boolean active);
 }
