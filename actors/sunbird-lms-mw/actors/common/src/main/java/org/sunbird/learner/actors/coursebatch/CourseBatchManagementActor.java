@@ -807,8 +807,13 @@ public class CourseBatchManagementActor extends BaseActor {
   }
 
   private void getParticipants(Request actorMessage) {
-    String batchID = (String) actorMessage.getContext().get(JsonKey.BATCH_ID);
-    List<String> participants = userCoursesService.getEnrolledUserFromBatch(batchID);
+    Map<String, Object> request = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.BATCH);
+    boolean active = true;
+    if(null != request.get(JsonKey.ACTIVE)){
+        active = (boolean) request.get(JsonKey.ACTIVE);
+    }
+    String batchID = (String) request.get(JsonKey.BATCH_ID);
+    List<String> participants = userCoursesService.getParticipantsList(batchID, active);
 
     if (CollectionUtils.isEmpty(participants)) {
       participants = new ArrayList<>();
@@ -817,7 +822,7 @@ public class CourseBatchManagementActor extends BaseActor {
     Response response = new Response();
     Map<String, Object> result = new HashMap<String, Object>();
     result.put(JsonKey.PARTICIPANTS, participants);
-    response.put(JsonKey.COURSE_BATCH, result);
+    response.put(JsonKey.BATCH, result);
     sender().tell(response, self());
   }
 }

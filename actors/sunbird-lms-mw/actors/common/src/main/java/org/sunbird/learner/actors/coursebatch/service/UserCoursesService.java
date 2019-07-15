@@ -178,4 +178,8 @@ public class UserCoursesService {
     }
     return batchSize;
   }
+
+  public List<String> getParticipantsList(String batchId, boolean active) {
+    return userCourseDao.getBatchParticipants(batchId, active);
+  }
 }

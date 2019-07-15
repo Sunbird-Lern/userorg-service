@@ -63,21 +63,7 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
 
   @Override
   public List<String> getAllActiveUserOfBatch(String batchId) {
-    Map<String, Object> queryMap = new HashMap<>();
-    queryMap.put(JsonKey.BATCH_ID, batchId);
-    Response response =
-        cassandraOperation.getRecordsByProperties(
-            KEYSPACE_NAME, TABLE_NAME, queryMap, Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE));
-    List<Map<String, Object>> userCoursesList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isEmpty(userCoursesList)) {
-      return null;
-    }
-    return userCoursesList
-        .stream()
-        .filter(userCourse -> (boolean) userCourse.get(JsonKey.ACTIVE))
-        .map(userCourse -> (String) userCourse.get(JsonKey.USER_ID))
-        .collect(Collectors.toList());
+    return getBatchParticipants(batchId, true);
   }
 
   @Override
@@ -88,5 +74,23 @@ public class UserCoursesDaoImpl implements UserCoursesDao {
   @Override
   public Response insert(Map<String, Object> userCoursesDetails) {
     return cassandraOperation.insertRecord(KEYSPACE_NAME, TABLE_NAME, userCoursesDetails);
+  }
+
+
+  @Override
+  public List<String> getBatchParticipants(String batchId, boolean active) {
+    Map<String, Object> queryMap = new HashMap<>();
+    queryMap.put(JsonKey.BATCH_ID, batchId);
+    Response response = cassandraOperation.getRecords(KEYSPACE_NAME, TABLE_NAME, queryMap, Arrays.asList(JsonKey.USER_ID, JsonKey.ACTIVE));
+    List<Map<String, Object>> userCoursesList =
+            (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isEmpty(userCoursesList)) {
+      return null;
+    }
+    return userCoursesList
+            .stream()
+            .filter(userCourse -> (active == (boolean) userCourse.get(JsonKey.ACTIVE)))
+            .map(userCourse -> (String) userCourse.get(JsonKey.USER_ID))
+            .collect(Collectors.toList());
   }
 }

@@ -111,8 +111,14 @@ public class CourseBatchController extends BaseController {
     }
   }
 
-  public Promise<Result> getParticipants(String batchId) {
-    return handleRequest(
-        ActorOperations.GET_PARTICIPANTS.getValue(), batchId, JsonKey.BATCH_ID, false);
+  public Promise<Result> getParticipants() {
+      return handleRequest(
+              ActorOperations.GET_PARTICIPANTS.getValue(),
+              request().body().asJson(),
+              (request) -> {
+                  new CourseBatchRequestValidator().validateGetParticipantsRequest((Request) request);
+                  return null;
+              },
+              getAllRequestHeaders(request()));
   }
 }
