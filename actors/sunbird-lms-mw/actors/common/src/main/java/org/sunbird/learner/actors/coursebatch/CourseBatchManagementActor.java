@@ -418,7 +418,7 @@ public class CourseBatchManagementActor extends BaseActor {
 
   private Map<String, Object> getValidatedCourseBatch(String batchId) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchObject =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -449,7 +449,7 @@ public class CourseBatchManagementActor extends BaseActor {
   private void getCourseBatch(Request actorMessage) {
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(
-            ProjectUtil.EsType.course.getTypeName(),
+            ProjectUtil.EsType.courseBatch.getTypeName(),
             (String) actorMessage.getContext().get(JsonKey.BATCH_ID));
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
@@ -807,10 +807,11 @@ public class CourseBatchManagementActor extends BaseActor {
   }
 
   private void getParticipants(Request actorMessage) {
-    Map<String, Object> request = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.BATCH);
+    Map<String, Object> request =
+        (Map<String, Object>) actorMessage.getRequest().get(JsonKey.BATCH);
     boolean active = true;
-    if(null != request.get(JsonKey.ACTIVE)){
-        active = (boolean) request.get(JsonKey.ACTIVE);
+    if (null != request.get(JsonKey.ACTIVE)) {
+      active = (boolean) request.get(JsonKey.ACTIVE);
     }
     String batchID = (String) request.get(JsonKey.BATCH_ID);
     List<String> participants = userCoursesService.getParticipantsList(batchID, active);
