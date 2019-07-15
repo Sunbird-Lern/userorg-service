@@ -56,7 +56,7 @@ public class LearnerStateActor extends BaseActor {
   private UserCoursesService userCoursesService = new UserCoursesService();
   private UserCoursesDao userCourseDao = UserCoursesDaoImpl.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-
+  private int Content_Completed= 2;
   /**
    * Receives the actor message and perform the operation like get course , get content etc.
    *
@@ -83,16 +83,16 @@ public class LearnerStateActor extends BaseActor {
   public void getCourse(Request request) {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     Map<String, Object> result = userCoursesService.getActiveUserCourses(userId);
-  //  calculateProgressForUserCourses(request,result);
+  List<Map<String, Object>> updatedCourses=calculateProgressForUserCourses(request,result);
     if (MapUtils.isNotEmpty(result)) {
-      addCourseDetails(request, result);
+     addCourseDetails(request, result);
     } else {
       ProjectLogger.log(
           "LearnerStateActor:getCourse: returning batch without course details",
           LoggerEnum.INFO.name());
     }
     Response response = new Response();
-    response.put(JsonKey.COURSES, result.get(JsonKey.CONTENT));
+    response.put(JsonKey.COURSES, updatedCourses);
     sender().tell(response, self());
   }
 
@@ -108,8 +108,7 @@ public class LearnerStateActor extends BaseActor {
     if (CollectionUtils.isEmpty(batches)) {
       return;
     }
-    //String requestBody = prepareCourseSearchRequest(batches);
-    String requestBody = "{\"request\":{\"filters\":{\"identifier\":[\"do_112736824142061568168\"],\"contentType\":[\"course\"]}}}";
+    String requestBody = prepareCourseSearchRequest(batches);
     ProjectLogger.log(
         MessageFormatter.format(
                 "LearnerStateActor:addCourseDetails: request body = {0}, query string = {1}",
@@ -447,38 +446,54 @@ public class LearnerStateActor extends BaseActor {
     return OneWayHashing.encryptVal(key);
   }
 
-  private int calculateProgressForUserCourses(Request request, Map<String, Object> result)
+  private List<Map<String,Object>> calculateProgressForUserCourses(Request request, Map<String, Object> result)
   {
-  List<Map<String,Object>> activeCourses = (List<Map<String,Object>>)(result.get(JsonKey.CONTENT));
-
-   int progress = 0;
+    List<Map<String,Object>> activeCourses = (List<Map<String,Object>>)(result.get(JsonKey.CONTENT));
+    List<Map<String, Object>> contentsForCourses = getcontentsForCourses(request,activeCourses);
+    List<Map<String,Object>> updatedCourses = new ArrayList<>();
+    int progress=0;
     for(Map<String,Object> course : activeCourses) {
       UserCourses userCourseResult = userCourseDao.read((String) course.get(JsonKey.BATCH_ID), (String) course.get(JsonKey.USER_ID));
-        if(userCourseResult.getProgress()==100)
+        if(userCourseResult !=null && userCourseResult.getProgress()==100)
            progress=100;
         else {
+          Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
           Map<String, Object> primaryKey = new HashMap<>();
           primaryKey.put(JsonKey.USER_ID, course.get(JsonKey.USER_ID));
           primaryKey.put(JsonKey.BATCH_ID, course.get(JsonKey.BATCH_ID));
           primaryKey.put(JsonKey.COURSE_ID, course.get(JsonKey.COURSE_ID));
-          List<Map<String, Object>> contentsForCourses = getcontentsForCourses(request,activeCourses);
-          for (int i = 0; i <contentsForCourses.size(); i++) {
-            primaryKey.put(JsonKey.COURSE_ID, contentsForCourses.get(i).get(JsonKey.IDENTIFIER));
-            List<String> contentIds = (List<String>) contentsForCourses.get(i).get("leafnodes");
-            for (String contentId : contentIds) {
-              primaryKey.put(JsonKey.BATCH_ID, contentId);
+          course.get(JsonKey.COURSE_ID);
 
+          List<String> contentIds = new ArrayList<>();
+          for (Map<String,Object> courseContent : contentsForCourses) {
+            if(courseContent.get(JsonKey.IDENTIFIER).equals(course.get(JsonKey.COURSE_ID)))
+              contentIds =(List<String>) courseContent.get("leafNodes");
+          }
+
+          if(CollectionUtils.isNotEmpty(contentIds)) {
+            int contentIdsCompleted = 0;
+            for (String contentId : contentIds) {
+              primaryKey.put(JsonKey.CONTENT_ID, contentId);
+              Response response =
+                      cassandraOperation.getRecordById(dbInfo.getKeySpace(), dbInfo.getTableName(), primaryKey);
+              List<Map<String, Object>> courseList =
+                      (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+              if (CollectionUtils.isNotEmpty(courseList) && (Integer) courseList.get(0).get(JsonKey.STATUS) == Content_Completed)
+                contentIdsCompleted++;
             }
+            progress = (contentIdsCompleted * 100) / contentIds.size();
           }
         }
+         course.put(JsonKey.PROGRESS,progress);
+         updatedCourses.add(course);
     }
-    return progress;
+
+    return updatedCourses;
   }
 
   private List<Map<String, Object>> getcontentsForCourses(Request request,List<Map<String,Object>> activeCourses)
   {
-    //  String requestBody = prepareCourseSearchRequest(activeCourses);
-    String requestBody = "{\"request\":{\"filters\":{\"identifier\":[\"do_112736824142061568168\",\"do_1124785353783377921154\"],\"contentType\":[\"course\"]}}}";
+    String requestBody = prepareCourseSearchRequest(activeCourses);
     Map<String, Object> contentsList =
             ContentSearchUtil.searchContentSync(
                     (String) request.getContext().get(JsonKey.URL_QUERY_STRING),
