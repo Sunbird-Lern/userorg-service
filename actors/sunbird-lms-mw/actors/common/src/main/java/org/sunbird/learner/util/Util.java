@@ -192,7 +192,8 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_ACTION_ROLE, getDbInfoObject(KEY_SPACE_NAME, "user_action_role"));
     dbInfoMap.put(JsonKey.ROLE_GROUP, getDbInfoObject(KEY_SPACE_NAME, "role_group"));
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_org"));
-    dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
+    dbInfoMap.put(
+        JsonKey.BULK_OP_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "bulk_upload_process"));
     dbInfoMap.put(JsonKey.COURSE_BATCH_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "course_batch"));
     dbInfoMap.put(
         JsonKey.COURSE_PUBLISHED_STATUS, getDbInfoObject(KEY_SPACE_NAME, "course_publish_status"));

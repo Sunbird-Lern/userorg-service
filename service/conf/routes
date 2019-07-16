@@ -17,6 +17,7 @@ GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnro
 POST     /v1/course/enroll	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
 POST     /v1/course/unenroll             @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
 POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
+POST /v1/batch/bulk/unenrollment          @controllers.bulkapimanagement.BulkUploadController.batchUnEnrollmentBulkUpload()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
