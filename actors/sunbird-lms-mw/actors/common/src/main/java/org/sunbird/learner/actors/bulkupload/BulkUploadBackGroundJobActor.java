@@ -410,30 +410,4 @@ public class BulkUploadBackGroundJobActor extends BaseActor {
         cassandraOperation.getRecordById(bulkDb.getKeySpace(), bulkDb.getTableName(), processId);
     return (((List<Map<String, Object>>) res.get(JsonKey.RESPONSE)).get(0));
   }
-
-  /**
-   * This method will make some requested key value as lower case.
-   *
-   * @param map Request
-   */
-  public static void updateMapSomeValueTOLowerCase(Map<String, Object> map) {
-    if (map.get(JsonKey.SOURCE) != null) {
-      map.put(JsonKey.SOURCE, ((String) map.get(JsonKey.SOURCE)).toLowerCase());
-    }
-    if (map.get(JsonKey.EXTERNAL_ID) != null) {
-      map.put(JsonKey.EXTERNAL_ID, ((String) map.get(JsonKey.EXTERNAL_ID)).toLowerCase());
-    }
-    if (map.get(JsonKey.USERNAME) != null) {
-      map.put(JsonKey.USERNAME, ((String) map.get(JsonKey.USERNAME)).toLowerCase());
-    }
-    if (map.get(JsonKey.USER_NAME) != null) {
-      map.put(JsonKey.USER_NAME, ((String) map.get(JsonKey.USER_NAME)).toLowerCase());
-    }
-    if (map.get(JsonKey.PROVIDER) != null) {
-      map.put(JsonKey.PROVIDER, ((String) map.get(JsonKey.PROVIDER)).toLowerCase());
-    }
-    if (map.get(JsonKey.LOGIN_ID) != null) {
-      map.put(JsonKey.LOGIN_ID, ((String) map.get(JsonKey.LOGIN_ID)).toLowerCase());
-    }
-  }
 }
