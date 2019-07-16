@@ -27,7 +27,7 @@ public interface UserCoursesDao {
    *
    * @param updateAttributes Map containing user courses attributes which needs to be updated
    */
-  Response update(Map<String, Object> updateAttributes, String batchId, String userId);
+  Response update(String batchId, String userId, Map<String, Object> updateAttributes);
 
   /**
    * Get all active participant IDs in given batch
@@ -42,4 +42,12 @@ public interface UserCoursesDao {
    * @param userCoursesDetails List of participant details
    */
   Response batchInsert(List<Map<String, Object>> userCoursesDetails);
+
+  /**
+   * Get all active participant IDs in given batch
+   *
+   * @param batchId Batch ID
+   * @param active
+   */
+  List<String> getBatchParticipants(String batchId, boolean active);
 }

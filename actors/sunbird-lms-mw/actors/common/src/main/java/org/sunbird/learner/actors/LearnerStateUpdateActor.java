@@ -6,17 +6,18 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -29,9 +30,10 @@ import org.sunbird.common.models.util.datasecurity.OneWayHashing;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.telemetry.util.TelemetryUtil;
+import scala.concurrent.Future;
 
 /**
  * This actor to handle learner's state update operation .
@@ -46,147 +48,167 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 public class LearnerStateUpdateActor extends BaseActor {
 
   private static final String CONTENT_STATE_INFO = "contentStateInfo";
-
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
+  private Util.DbInfo consumptionDBInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
+  private Util.DbInfo batchDBInfo = Util.dbInfoMap.get(JsonKey.COURSE_BATCH_DB);
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private SimpleDateFormat simpleDateFormat = ProjectUtil.getDateFormatter();
+
+  private enum ContentUpdateResponseKeys {
+    SUCCESS_CONTENTS,
+    NOT_A_ON_GOING_BATCH,
+    BATCH_NOT_EXISTS
+  }
+
   /**
-   * Receives the actor message and perform the add content operation .
+   * Receives the actor message and perform the add content operation.
    *
    * @param request Request
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    // set request id fto thread loacl...
     ExecutionContext.setRequestId(request.getRequestId());
 
-    Response response = new Response();
     if (request.getOperation().equalsIgnoreCase(ActorOperations.ADD_CONTENT.getValue())) {
-      Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-      Util.DbInfo batchdbInfo = Util.dbInfoMap.get(JsonKey.COURSE_BATCH_DB);
-      // objects of telemetry event...
-      Map<String, Object> targetObject = null;
-      List<Map<String, Object>> correlatedObject = null;
-
       String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-      List<Map<String, Object>> requestedcontentList =
+      List<Map<String, Object>> contentList =
           (List<Map<String, Object>>) request.getRequest().get(JsonKey.CONTENTS);
-      CopyOnWriteArrayList<Map<String, Object>> contentList =
-          new CopyOnWriteArrayList<>(requestedcontentList);
-      request.getRequest().put(JsonKey.CONTENTS, contentList);
-      // map to hold the status of requested state of contents
-      Map<String, Integer> contentStatusHolder = new HashMap<>();
-      List<String> validBatchIds = new ArrayList<>();
-      List<String> invalidBatchIds = new ArrayList<>();
-      if (!(contentList.isEmpty())) {
-        ProjectLogger.log(
-            "LearnerStateUpdateActor:onReceive content state update method called for user and total content "
-                + userId
-                + " Contnet length="
-                + contentList.size(),
-            LoggerEnum.INFO.name());
-        int count = 0;
-        for (Map<String, Object> map : contentList) {
-          // replace the course id (equivalent to Ekstep content id) with One way hashing
-          // userId#courseId , bcoz in cassndra we are saving course id as userId#courseId
-          String batchId = (String) map.get(JsonKey.BATCH_ID);
-          boolean flag = true;
+      if (CollectionUtils.isNotEmpty(contentList)) {
+        Map<String, List<Map<String, Object>>> batchContentList =
+            contentList
+                .stream()
+                .filter(x -> StringUtils.isNotBlank((String) x.get("batchId")))
+                .collect(
+                    Collectors.groupingBy(
+                        x -> {
+                          return (String) x.get("batchId");
+                        }));
+        List<String> batchIds = batchContentList.keySet().stream().collect(Collectors.toList());
+        Map<String, List<Map<String, Object>>> batches =
+            getBatches(batchIds)
+                .stream()
+                .collect(
+                    Collectors.groupingBy(
+                        x -> {
+                          return (String) x.get("batchId");
+                        }));
+        Map<String, List<Object>> respMessages = new HashMap<>();
+        for (Map.Entry<String, List<Map<String, Object>>> input : batchContentList.entrySet()) {
+          String batchId = input.getKey();
+          if (batches.containsKey(batchId)) {
+            Map<String, Object> batchDetails = batches.get(batchId).get(0);
+            int status = ((Number) batchDetails.get("status")).intValue();
+            if (status == 1) {
+              String courseId = (String) batchDetails.get("courseId");
+              List<String> contentIds =
+                  input
+                      .getValue()
+                      .stream()
+                      .map(c -> (String) c.get("contentId"))
+                      .collect(Collectors.toList());
+              Map<String, Map<String, Object>> contents =
+                  getContents(userId, contentIds, batchId)
+                      .stream()
+                      .collect(
+                          Collectors.groupingBy(
+                              x -> {
+                                return (String) x.get("contentid");
+                              }))
+                      .entrySet()
+                      .stream()
+                      .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().get(0)));
 
-          // code to validate the whether request for valid batch range(start and end
-          // date)
-          if (!(StringUtils.isBlank(batchId)) && !validBatchIds.contains(batchId)) {
-            if (invalidBatchIds.contains(batchId)) {
-              contentList.remove(map);
-              continue;
-            }
-            Response batchResponse =
-                cassandraOperation.getRecordById(
-                    batchdbInfo.getKeySpace(), batchdbInfo.getTableName(), batchId);
-            List<Map<String, Object>> batches =
-                (List<Map<String, Object>>) batchResponse.getResult().get(JsonKey.RESPONSE);
-            if (batches.isEmpty()) {
-              invalidBatchIds.add(batchId);
-              flag = false;
+              input
+                  .getValue()
+                  .stream()
+                  .map(
+                      inputContent -> {
+                        Map<String, Object> existingContent =
+                            contents.get(inputContent.get("contentId"));
+                        return processContent(inputContent, existingContent, userId);
+                      })
+                  .collect(Collectors.toList());
+
+              updateMessages(
+                  respMessages, ContentUpdateResponseKeys.SUCCESS_CONTENTS.name(), contentIds);
             } else {
-              Map<String, Object> batchInfo = batches.get(0);
-              flag = validateBatchRange(batchInfo);
-              if (flag) {
-                validBatchIds.add(batchId);
-              }
+              updateMessages(
+                  respMessages, ContentUpdateResponseKeys.NOT_A_ON_GOING_BATCH.name(), batchId);
             }
-
-            if (!flag) {
-              response
-                  .getResult()
-                  .put((String) map.get(JsonKey.CONTENT_ID), "BATCH NOT STARTED OR BATCH CLOSED");
-              contentList.remove(map);
-              continue;
-            }
-          }
-          map.putIfAbsent(JsonKey.COURSE_ID, JsonKey.NOT_AVAILABLE);
-          preOperation(map, userId, contentStatusHolder);
-          map.put(JsonKey.USER_ID, userId);
-          map.put(JsonKey.DATE_TIME, new Timestamp(new Date().getTime()));
-          try {
-            ProjectLogger.log(
-                "LearnerStateUpdateActor:onReceive: map  " + map, LoggerEnum.INFO.name());
-            if (count == 0
-                && map.get(JsonKey.COURSE_ID) != null
-                && !(JsonKey.NOT_AVAILABLE.equalsIgnoreCase((String) map.get(JsonKey.COURSE_ID)))) {
-              updateUserCourseStatus(
-                  generateUserCoursesPrimaryKey(map),
-                  ProjectUtil.BulkProcessStatus.IN_PROGRESS.name());
-              count++;
-            }
-            cassandraOperation.upsertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), map);
-            response.getResult().put((String) map.get(JsonKey.CONTENT_ID), JsonKey.SUCCESS);
-          } catch (Exception e) {
-            ProjectLogger.log(
-                "LearnerStateUpdateActor:onReceive Error occured during db update:" + e,
-                LoggerEnum.ERROR.name());
-            response.getResult().put((String) map.get(JsonKey.CONTENT_ID), JsonKey.FAILED);
-            contentList.remove(map);
-            continue;
-          }
-          // create telemetry for user for each content ...
-          try {
-            targetObject =
-                TelemetryUtil.generateTargetObject(
-                    (String) map.get(JsonKey.CONTENT_ID),
-                    StringUtils.capitalize(JsonKey.CONTENT),
-                    JsonKey.CREATE,
-                    null);
-            // since this event will generate multiple times so nedd to recreate correlated
-            // objects every time ...
-            correlatedObject = new ArrayList<>();
-            TelemetryUtil.generateCorrelatedObject(
-                (String) map.get(JsonKey.COURSE_ID), JsonKey.COURSE, null, correlatedObject);
-            TelemetryUtil.generateCorrelatedObject(
-                (String) map.get(JsonKey.BATCH_ID), TelemetryEnvKey.BATCH, null, correlatedObject);
-            Map<String, String> rollUp = new HashMap<>();
-            rollUp.put("l1", (String) map.get(JsonKey.COURSE_ID));
-            TelemetryUtil.addTargetObjectRollUp(rollUp, targetObject);
-            TelemetryUtil.telemetryProcessingCall(
-                request.getRequest(), targetObject, correlatedObject);
-          } catch (Exception ex) {
-            ProjectLogger.log(
-                "LearnerStateUpdateActor:onReceive Error occured during telemetry:" + ex,
-                LoggerEnum.ERROR.name());
+          } else {
+            updateMessages(
+                respMessages, ContentUpdateResponseKeys.BATCH_NOT_EXISTS.name(), batchId);
           }
         }
+        Response response = new Response();
+        response.getResult().putAll(respMessages);
+        sender().tell(response, self());
       } else {
-        ProjectLogger.log(
-            "LearnerStateUpdateActor:onReceive content state update method called for user and total content "
-                + userId
-                + " Contnet length= 0 ",
-            LoggerEnum.INFO.name());
+        //   throw new
+        // ProjectCommonException(ResponseCode.emptyContentsForUpdateBatchStatus.getErrorCode(),
+        // ResponseCode.emptyContentsForUpdateBatchStatus.getErrorMessage(),
+        // ResponseCode.CLIENT_ERROR.getResponseCode());
       }
-      request.getRequest().put(CONTENT_STATE_INFO, contentStatusHolder);
-      updateUserCourses(request);
-      sender().tell(response, self());
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
+    }
+  }
+
+  private List<Map<String, Object>> getBatches(List<String> batchIds) {
+    Map<String, Object> filters =
+        new HashMap<String, Object>() {
+          {
+            put("batchId", batchIds);
+          }
+        };
+    SearchDTO dto = new SearchDTO();
+    dto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+    Future<Map<String, Object>> searchFuture =
+        esService.search(dto, ProjectUtil.EsType.courseBatch.getTypeName());
+    Map<String, Object> response =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(searchFuture);
+    return (List<Map<String, Object>>) response.get(JsonKey.CONTENT);
+  }
+
+  private List<Map<String, Object>> getContents(
+      String userId, List<String> contentIds, String batchId) {
+    Map<String, Object> filters =
+        new HashMap<String, Object>() {
+          {
+            put("userid", userId);
+            put("contentid", contentIds);
+            put("batchid", batchId);
+          }
+        };
+    Response response = null;
+    List<Map<String, Object>> resultList =
+        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+    if (CollectionUtils.isEmpty(resultList)) {
+      resultList = new ArrayList<>();
+    }
+    return resultList;
+  }
+
+  private Map<String, Object> processContent(
+      Map<String, Object> inputContent, Map<String, Object> existingContent, String userId) {
+    if (MapUtils.isEmpty(existingContent)) {
+
+    } else {
+
+    }
+
+    return inputContent;
+  }
+
+  private void updateMessages(Map<String, List<Object>> errors, String key, Object value) {
+    if (errors.containsKey(key)) {
+      errors.get(key).add(value);
+    } else {
+      List<Object> list = new ArrayList<Object>();
+      list.add(value);
+      errors.put(key, list);
     }
   }
 
@@ -391,6 +413,7 @@ public class LearnerStateUpdateActor extends BaseActor {
     ProjectLogger.log(
         "LearnerStateUpdateActor:preOperation method called.", LoggerEnum.INFO.name());
     SimpleDateFormat simpleDateFormat = ProjectUtil.getDateFormatter();
+    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
     simpleDateFormat.setLenient(false);
 
     Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);

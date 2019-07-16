@@ -56,7 +56,6 @@ public class UserCourses implements Serializable {
     this.courseId = courseId;
   }
 
-
   public String getDelta() {
     return delta;
   }

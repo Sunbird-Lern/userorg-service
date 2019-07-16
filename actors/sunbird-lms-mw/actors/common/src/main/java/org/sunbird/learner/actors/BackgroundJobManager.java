@@ -24,10 +24,10 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.datasecurity.OneWayHashing;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
 import org.sunbird.learner.util.CourseBatchSchedulerUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
@@ -217,12 +217,12 @@ public class BackgroundJobManager extends BaseActor {
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER_COURSES);
     String userId = (String) batch.get(JsonKey.USER_ID);
     String batchId = (String) batch.get(JsonKey.BATCH_ID);
-    String identifier = OneWayHashing.encryptVal(
-            batchId + "_" + userId);
+    String identifier = UserCoursesService.generateUserCourseESId(batchId, userId);
     insertDataToElastic(
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.usercourses.getTypeName(),
-        identifier, batch);
+        identifier,
+        batch);
   }
 
   @SuppressWarnings("unchecked")

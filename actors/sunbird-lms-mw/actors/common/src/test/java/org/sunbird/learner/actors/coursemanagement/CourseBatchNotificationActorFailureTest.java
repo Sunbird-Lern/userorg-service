@@ -189,9 +189,6 @@ public class CourseBatchNotificationActorFailureTest {
     mentors.add(USER_ID);
     participants.add(USER_ID);
     courseBatch.setMentors(mentors);
-    courseBatch.setCountDecrementStatus(false);
-    courseBatch.setCountIncrementStatus(false);
-    courseBatch.setParticipant(participants);
     courseBatch.setStatus(0);
 
     return courseBatch;
@@ -214,10 +211,7 @@ public class CourseBatchNotificationActorFailureTest {
       }
     }
     courseBatch.setStatus(0);
-    courseBatch.setCountDecrementStatus(false);
-    courseBatch.setCountIncrementStatus(false);
     courseBatch.setMentors(mentors);
-    courseBatch.setParticipant(participants);
     return courseBatch;
   }
 

@@ -50,7 +50,7 @@ public class LearnerController extends BaseController {
   public Promise<Result> updateContentState() {
     try {
       JsonNode requestData = request().body().asJson();
-      ProjectLogger.log(" get content request data=" + requestData, LoggerEnum.INFO.name());
+      ProjectLogger.log(" updateContentState request data=" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateContent(reqObj);
       reqObj = transformUserId(reqObj);

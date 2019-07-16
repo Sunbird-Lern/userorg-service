@@ -49,6 +49,8 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToCourseBatch(batchId:String)
+POST	 /v1/course/batch/users/remove/:batchId			@controllers.coursemanagement.CourseBatchController.removeUserFromCourseBatch(batchId:String)
+POST		 /v1/batch/participants/list			@controllers.coursemanagement.CourseBatchController.getParticipants()
 
 # Textbook APIs
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)

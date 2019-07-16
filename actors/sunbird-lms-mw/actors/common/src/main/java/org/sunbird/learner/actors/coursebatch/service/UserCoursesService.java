@@ -20,16 +20,16 @@ import scala.concurrent.Future;
 public class UserCoursesService {
   private UserCoursesDao userCourseDao = UserCoursesDaoImpl.getInstance();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  public static final String UNDERSCORE = "_";
 
   protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
 
+  public static String generateUserCourseESId(String batchId, String userId) {
+    return (OneWayHashing.encryptVal(batchId + UNDERSCORE + userId));
+  }
 
-   public static String generateUserCourseESId(String batchId, String userId)
-   {
-     return(OneWayHashing.encryptVal(batchId + "_" + userId));
-   }
   public static void validateUserUnenroll(UserCourses userCourseResult) {
-    if (userCourseResult == null) {
+    if (userCourseResult == null || !userCourseResult.isActive()) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User is not enrolled yet",
           LoggerEnum.INFO.name());
@@ -38,16 +38,7 @@ public class UserCoursesService {
           ResponseCode.userNotEnrolledCourse.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (!userCourseResult.isActive()) {
-      ProjectLogger.log(
-          "UserCoursesService:validateUserUnenroll: User does not have an enrolled course");
-      throw new ProjectCommonException(
-          ResponseCode.userNotEnrolledCourse.getErrorCode(),
-          ResponseCode.userNotEnrolledCourse.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (userCourseResult.getProgress() > 0
-        /*&& (userCourseResult.getProgress() == userCourseResult.getLeafNodesCount())*/) {
+    if (userCourseResult.getStatus() == ProjectUtil.ProgressStatus.COMPLETED.getValue()) {
       ProjectLogger.log(
           "UserCoursesService:validateUserUnenroll: User already completed the course");
       throw new ProjectCommonException(
@@ -77,17 +68,18 @@ public class UserCoursesService {
     Integer count = 0;
 
     List<Map<String, Object>> records = new ArrayList<>();
+    Map<String, Object> userCoursesCommon = new HashMap<>();
+    userCoursesCommon.put(JsonKey.BATCH_ID, batchId);
+    userCoursesCommon.put(JsonKey.COURSE_ID, courseId);
+    userCoursesCommon.put(JsonKey.COURSE_ENROLL_DATE, ProjectUtil.getFormattedDate());
+    userCoursesCommon.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
+    userCoursesCommon.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
+    userCoursesCommon.put(JsonKey.COURSE_PROGRESS, 0);
+
     for (String userId : userIds) {
       Map<String, Object> userCourses = new HashMap<>();
       userCourses.put(JsonKey.USER_ID, userId);
-      userCourses.put(JsonKey.BATCH_ID, batchId);
-      userCourses.put(JsonKey.COURSE_ID, courseId);
-      userCourses.put(JsonKey.ID, getPrimaryKey(userId, courseId, batchId));
-      userCourses.put(JsonKey.CONTENT_ID, courseId);
-      userCourses.put(JsonKey.COURSE_ENROLL_DATE, ProjectUtil.getFormattedDate());
-      userCourses.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.ACTIVE.getValue());
-      userCourses.put(JsonKey.STATUS, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
-      userCourses.put(JsonKey.COURSE_PROGRESS, 0);
+      userCourses.putAll(userCoursesCommon);
 
       count++;
       records.add(userCourses);
@@ -109,7 +101,10 @@ public class UserCoursesService {
   private void syncUsersToES(List<Map<String, Object>> records) {
 
     for (Map<String, Object> userCourses : records) {
-      sync(userCourses, (String) userCourses.get(JsonKey.BATCH_ID),(String) userCourses.get(JsonKey.USER_ID));
+      sync(
+          userCourses,
+          (String) userCourses.get(JsonKey.BATCH_ID),
+          (String) userCourses.get(JsonKey.USER_ID));
     }
   }
 
@@ -136,14 +131,13 @@ public class UserCoursesService {
     }
   }
 
-  public void unenroll(String userId, String courseId, String batchId) {
-    UserCourses userCourses = userCourseDao.read(batchId,userId);
+  public void unenroll(String batchId, String userId) {
+    UserCourses userCourses = userCourseDao.read(batchId, userId);
     validateUserUnenroll(userCourses);
     Map<String, Object> updateAttributes = new HashMap<>();
     updateAttributes.put(JsonKey.ACTIVE, ProjectUtil.ActiveStatus.INACTIVE.getValue());
-    updateAttributes.put(JsonKey.USER_ID, userCourses.getUserId());
-    userCourseDao.update(updateAttributes,batchId,userId);
-    sync(updateAttributes,userCourses.getBatchId(),userCourses.getUserId());
+    userCourseDao.update(userCourses.getBatchId(), userCourses.getUserId(), updateAttributes);
+    sync(updateAttributes, userCourses.getBatchId(), userCourses.getUserId());
   }
 
   public Map<String, Object> getActiveUserCourses(String userId) {
@@ -160,7 +154,7 @@ public class UserCoursesService {
   }
 
   public static void sync(Map<String, Object> courseMap, String batchId, String userId) {
-     String id=generateUserCourseESId(batchId,userId);
+    String id = generateUserCourseESId(batchId, userId);
     Future<Boolean> responseF =
         esService.upsert(ProjectUtil.EsType.usercourses.getTypeName(), id, courseMap);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
@@ -169,9 +163,9 @@ public class UserCoursesService {
         LoggerEnum.INFO.name());
   }
 
-  public List<String> getEnrolledUserFromBatch(String id) {
+  public List<String> getEnrolledUserFromBatch(String batchId) {
 
-    return userCourseDao.getAllActiveUserOfBatch(id);
+    return userCourseDao.getAllActiveUserOfBatch(batchId);
   }
 
   public Integer getBatchSize(String key) {
@@ -183,5 +177,9 @@ public class UserCoursesService {
           "UserCoursesService:getBatchSize: Failed to read cassandra batch size for " + key, ex);
     }
     return batchSize;
+  }
+
+  public List<String> getParticipantsList(String batchId, boolean active) {
+    return userCourseDao.getBatchParticipants(batchId, active);
   }
 }

@@ -93,7 +93,7 @@ public class UserCourseServiceTest {
     try {
       UserCourses userCourses = new UserCourses();
       userCourses.setActive(true);
-     // userCourses.setLeafNodesCount(1);
+      // userCourses.setLeafNodesCount(1);
       userCourses.setProgress(1);
       UserCoursesService.validateUserUnenroll(userCourses);
     } catch (ProjectCommonException e) {

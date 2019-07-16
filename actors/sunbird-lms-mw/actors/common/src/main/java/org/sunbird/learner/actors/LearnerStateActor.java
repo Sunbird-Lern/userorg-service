@@ -5,14 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.helpers.MessageFormatter;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -27,15 +25,14 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.datasecurity.OneWayHashing;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.coursebatch.dao.UserCoursesDao;
-import org.sunbird.learner.actors.coursebatch.dao.impl.UserCoursesDaoImpl;
+import org.sunbird.learner.actors.coursebatch.CourseEnrollmentActor;
 import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
 import org.sunbird.learner.util.ContentSearchUtil;
+import org.sunbird.learner.util.CourseBatchSchedulerUtil;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
 
@@ -53,8 +50,8 @@ public class LearnerStateActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserCoursesService userCoursesService = new UserCoursesService();
-  private UserCoursesDao userCourseDao = UserCoursesDaoImpl.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+
   /**
    * Receives the actor message and perform the operation like get course , get content etc.
    *
@@ -65,11 +62,9 @@ public class LearnerStateActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.GET_COURSE.getValue())) {
       getCourse(request);
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.GET_CONTENT.getValue())) {
-
       Response res = new Response();
       Map<String, Object> requestMap = request.getRequest();
       String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-
       res = getCourseContentState(userId, requestMap);
       removeUnwantedProperties(res);
       sender().tell(res, self());
@@ -282,147 +277,53 @@ public class LearnerStateActor extends BaseActor {
   private Response getCourseContentState(String userId, Map<String, Object> requestMap) {
 
     Response response = new Response();
-    List<Map<String, Object>> contentList = new ArrayList<>();
-
     String batchId = (String) requestMap.get(JsonKey.BATCH_ID);
-    List<String> courseIds = (List<String>) requestMap.get(JsonKey.COURSE_IDS);
+    String courseId = (String) requestMap.get(JsonKey.COURSE_ID);
     List<String> contentIds = (List<String>) requestMap.get(JsonKey.CONTENT_IDS);
-
-    if (null != courseIds) {
-      if (courseIds.size() > 1 && StringUtils.isNotBlank(batchId)) {
-        ProjectLogger.log(
-            "LearnerStateActor:getContentByBatch: multiple course ids not allowed for batch",
-            LoggerEnum.ERROR.name());
+    if (CollectionUtils.isEmpty(contentIds)) {
+      Map<String, Object> courseData =
+          CourseEnrollmentActor.getCourseObjectFromEkStep(
+              courseId, CourseBatchSchedulerUtil.headerMap);
+      if (MapUtils.isEmpty(courseData)) {
         throw new ProjectCommonException(
-            ResponseCode.multipleCoursesNotAllowedForBatch.getErrorCode(),
-            ResponseCode.multipleCoursesNotAllowedForBatch.getErrorMessage(),
+            ResponseCode.invalidCourseId.getErrorCode(),
+            ResponseCode.invalidCourseId.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
+      List<String> leafNodes = (List<String>) courseData.get("leafNodes");
+      if (CollectionUtils.isNotEmpty(leafNodes)) {
+        contentIds = leafNodes;
+      }
     }
-
-    if (CollectionUtils.isNotEmpty(contentIds)
-        && contentIds.size() > 0
-        && CollectionUtils.isNotEmpty(courseIds)
-        && courseIds.size() == 1
-        && StringUtils.isNotBlank(batchId)) {
-      List<Object> primaryKeyList = new ArrayList<>();
-      String courseId = courseIds.get(0);
-      for (String contentId : contentIds) {
-        String key = generatePrimaryKeyForContent(userId, batchId, courseId, contentId);
-        primaryKeyList.add(key);
-      }
-      contentList = getContentByPrimaryKeys(primaryKeyList);
-    } else if (StringUtils.isNotBlank(batchId)) {
-      contentList = getContentByBatch(userId, batchId);
-      if (CollectionUtils.isNotEmpty(contentIds)) {
-        contentList = filterForMatchingContentIds(contentList, requestMap);
-      }
-    } else if (CollectionUtils.isNotEmpty(courseIds)) {
-      contentList = getContentByCourses(userId, requestMap);
-      if (courseIds.size() == 1) {
-        if (CollectionUtils.isNotEmpty(contentIds)) {
-          contentList = filterForMatchingContentIds(contentList, requestMap);
-        }
-      }
-    } else if (CollectionUtils.isNotEmpty(contentIds)) {
-      contentList = getContentByContentIds(userId, requestMap);
+    List<Map<String, Object>> contentList = null;
+    if (CollectionUtils.isEmpty(contentIds)) {
+      contentList = new ArrayList<>();
+    } else {
+      contentList = getContents(userId, contentIds, batchId, courseId);
     }
     response.getResult().put(JsonKey.RESPONSE, contentList);
     return response;
   }
 
-  private List<Map<String, Object>> filterForMatchingContentIds(
-      List<Map<String, Object>> contentList, Map<String, Object> requestMap) {
-
-    List<String> contentIds =
-        new ArrayList<String>((List<String>) requestMap.get(JsonKey.CONTENT_IDS));
-    List<Map<String, Object>> matchedContentList = new ArrayList<>();
-
-    if (CollectionUtils.isNotEmpty(contentIds)) {
-      for (Map<String, Object> content : contentList) {
-        for (int i = 0; i < contentIds.size(); i++) {
-          String contentId = contentIds.get(i);
-          if (contentId.equals((String) content.get(JsonKey.CONTENT_ID))) {
-            matchedContentList.add(content);
-            break;
+  private List<Map<String, Object>> getContents(
+      String userId, List<String> contentIds, String batchId, String courseId) {
+    List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
+    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
+    Map<String, Object> filters =
+        new HashMap<String, Object>() {
+          {
+            put("userid", userId);
+            put("contentid", contentIds);
+            put("batchid", batchId);
+            put("courseid", courseId);
           }
-        }
-      }
-    }
-    return matchedContentList;
-  }
-
-  private List<Map<String, Object>> getContentByBatch(String userId, String batchId) {
-
-    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-    List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
-    Map<String, Object> queryMap = new HashMap<String, Object>();
-    queryMap.put(JsonKey.USER_ID, userId);
-    queryMap.put(JsonKey.BATCH_ID, batchId);
-    Response response =
-        cassandraOperation.getRecordsByProperties(
-            dbInfo.getKeySpace(), dbInfo.getTableName(), queryMap);
-    contentList.addAll((List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE));
+        };
+    //  Response response = cassandraOperation.getRecords(dbInfo.getKeySpace(),
+    // dbInfo.getTableName(), filters, null);
+    //  contentList.addAll((List<Map<String, Object>>)response.getResult().get(JsonKey.RESPONSE));
     return contentList;
   }
 
-  private List<Map<String, Object>> getContentByPrimaryKeys(List<Object> primaryKeyList) {
-
-    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-
-    List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
-    Response response =
-        cassandraOperation.getRecordsByProperty(
-            dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, primaryKeyList);
-    contentList.addAll((List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE));
-    return contentList;
-  }
-
-  @SuppressWarnings("unchecked")
-  private List<Map<String, Object>> getContentByCourses(
-      String userId, Map<String, Object> request) {
-
-    Response response = new Response();
-    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-    List<String> courseIds = new ArrayList<String>((List<String>) request.get(JsonKey.COURSE_IDS));
-    List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
-    Map<String, Object> queryMap = new HashMap<String, Object>();
-    queryMap.put(JsonKey.USER_ID, userId);
-
-    for (String courseId : courseIds) {
-      queryMap.put(JsonKey.COURSE_ID, courseId);
-      response =
-          cassandraOperation.getRecordsByProperties(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), queryMap);
-      contentList.addAll((List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE));
-    }
-    return contentList;
-  }
-
-  @SuppressWarnings("unchecked")
-  private List<Map<String, Object>> getContentByContentIds(
-      String userId, Map<String, Object> request) {
-    Response response = null;
-    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-    List<String> contentIds =
-        new ArrayList<String>((List<String>) request.get(JsonKey.CONTENT_IDS));
-
-    LinkedHashMap<String, Object> queryMap = new LinkedHashMap<String, Object>();
-    queryMap.put(JsonKey.USER_ID, userId);
-
-    List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
-
-    for (String contentId : contentIds) {
-      queryMap.put(JsonKey.CONTENT_ID, contentId);
-      response =
-          cassandraOperation.getRecordsByProperties(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), queryMap);
-      contentList.addAll((List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE));
-    }
-    return contentList;
-  }
-
-  @SuppressWarnings("unchecked")
   private void removeUnwantedProperties(Response response) {
     List<Map<String, Object>> list =
         (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
@@ -430,19 +331,6 @@ public class LearnerStateActor extends BaseActor {
       ProjectUtil.removeUnwantedFields(
           map, JsonKey.DATE_TIME, JsonKey.USER_ID, JsonKey.ADDED_BY, JsonKey.LAST_UPDATED_TIME);
     }
-  }
-
-  private String generatePrimaryKeyForContent(
-      String userId, String batchId, String courseId, String contentId) {
-    String key =
-        userId
-            + JsonKey.PRIMARY_KEY_DELIMETER
-            + contentId
-            + JsonKey.PRIMARY_KEY_DELIMETER
-            + courseId
-            + JsonKey.PRIMARY_KEY_DELIMETER
-            + batchId;
-    return OneWayHashing.encryptVal(key);
   }
 
   private List<Map<String, Object>> calculateProgressForUserCourses(
@@ -513,6 +401,9 @@ public class LearnerStateActor extends BaseActor {
     fields.add(JsonKey.IDENTIFIER);
     fields.add("leafNodes");
     String requestBody = prepareCourseSearchRequest(activeCourses, fields);
+    ProjectLogger.log(
+        "LearnerStateActor:getcontentsForCourses: Request Body = " + requestBody,
+        LoggerEnum.INFO.name());
     Map<String, Object> contentsList =
         ContentSearchUtil.searchContentSync(
             null, requestBody, (Map<String, String>) request.getRequest().get(JsonKey.HEADER));

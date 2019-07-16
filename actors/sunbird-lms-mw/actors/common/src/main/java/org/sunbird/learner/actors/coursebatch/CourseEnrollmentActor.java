@@ -23,7 +23,6 @@ import org.sunbird.common.models.util.ProjectUtil.EnrolmentType;
 import org.sunbird.common.models.util.ProjectUtil.ProgressStatus;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.models.util.datasecurity.OneWayHashing;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -79,10 +78,12 @@ public class CourseEnrollmentActor extends BaseActor {
     CourseBatch courseBatch =
         courseBatchDao.readById(
             (String) courseMap.get(JsonKey.COURSE_ID), (String) courseMap.get(JsonKey.BATCH_ID));
-  validateCourseBatch(
-     courseBatch, courseMap, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+    validateCourseBatch(
+        courseBatch, courseMap, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
 
-    UserCourses userCourseResult = userCourseDao.read((String) courseMap.get(JsonKey.BATCH_ID),(String) courseMap.get(JsonKey.USER_ID));
+    UserCourses userCourseResult =
+        userCourseDao.read(
+            (String) courseMap.get(JsonKey.BATCH_ID), (String) courseMap.get(JsonKey.USER_ID));
 
     if (!ProjectUtil.isNull(userCourseResult) && userCourseResult.isActive()) {
       ProjectLogger.log("User Already Enrolled Course ");
@@ -97,7 +98,7 @@ public class CourseEnrollmentActor extends BaseActor {
       userCourseDao.insert(courseMap);
     } else {
       // second time user is doing enrollment for same course batch
-      userCourseDao.update(courseMap,userCourseResult.getBatchId(),userCourseResult.getUserId());
+      userCourseDao.update(userCourseResult.getBatchId(), userCourseResult.getUserId(), courseMap);
     }
     result.put("response", "SUCCESS");
     sender().tell(result, self());
@@ -109,7 +110,10 @@ public class CourseEnrollmentActor extends BaseActor {
       ProjectLogger.log(
           "CourseEnrollmentActor:enrollCourseBatch user is enrolling second time.",
           LoggerEnum.INFO.name());
-      UserCoursesService.sync(courseMap, (String)courseMap.get(JsonKey.BATCH_ID),(String)courseMap.get(JsonKey.USER_ID));
+      UserCoursesService.sync(
+          courseMap,
+          (String) courseMap.get(JsonKey.BATCH_ID),
+          (String) courseMap.get(JsonKey.USER_ID));
     }
     if (courseNotificationActive()) {
       batchOperationNotifier(courseMap, courseBatch, JsonKey.ADD);
@@ -153,9 +157,11 @@ public class CourseEnrollmentActor extends BaseActor {
     CourseBatch courseBatch =
         courseBatchDao.readById(
             (String) request.get(JsonKey.COURSE_ID), (String) request.get(JsonKey.BATCH_ID));
-   validateCourseBatch(
-       courseBatch, request, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
-    UserCourses userCourseResult = userCourseDao.read((String) request.get(JsonKey.BATCH_ID),(String) request.get(JsonKey.USER_ID));
+    validateCourseBatch(
+        courseBatch, request, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+    UserCourses userCourseResult =
+        userCourseDao.read(
+            (String) request.get(JsonKey.BATCH_ID), (String) request.get(JsonKey.USER_ID));
     UserCoursesService.validateUserUnenroll(userCourseResult);
     Response result = updateUserCourses(userCourseResult);
     sender().tell(result, self());
@@ -298,12 +304,14 @@ public class CourseEnrollmentActor extends BaseActor {
   }
 
   private Response updateUserCourses(UserCourses userCourses) {
-    Map<String, Object> UserCourseUpdateAttributes = new HashMap<>();
-    UserCourseUpdateAttributes.put(JsonKey.ACTIVE, false);
-    Response result=new Response();
-    userCourseDao.update(UserCourseUpdateAttributes,userCourses.getBatchId(),userCourses.getUserId());
+    Map<String, Object> userCourseUpdateAttributes = new HashMap<>();
+    userCourseUpdateAttributes.put(JsonKey.ACTIVE, false);
+    Response result = new Response();
+    userCourseDao.update(
+        userCourses.getBatchId(), userCourses.getUserId(), userCourseUpdateAttributes);
     result.put("response", "SUCCESS");
-      UserCoursesService.sync(UserCourseUpdateAttributes, userCourses.getBatchId() , userCourses.getUserId() );
+    UserCoursesService.sync(
+        userCourseUpdateAttributes, userCourses.getBatchId(), userCourses.getUserId());
     return result;
   }
 }
