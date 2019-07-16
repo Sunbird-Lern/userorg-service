@@ -99,42 +99,11 @@ public class SearchHandlerActorTest {
     HashMap<String, Object> response = new HashMap<>();
     List<Map<String, Object>> content = new ArrayList<>();
     HashMap<String, Object> innerMap = new HashMap<>();
-    List<Map<String, Object>> orgList = new ArrayList<>();
-    Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
-
-    innerMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
-    innerMap.put(JsonKey.ORGANISATIONS, orgList);
-    innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
+    List<Map<String, Object>> batchList = new ArrayList<>();
+    innerMap.put(JsonKey.BATCHES, batchList);
     content.add(innerMap);
     response.put(JsonKey.CONTENT, content);
     return response;
-  }
-
-  @Test
-  public void searchUser() {
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-
-    Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-    HashMap<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.QUERY, "");
-    Map<String, Object> filters = new HashMap<>();
-    List<String> objectType = new ArrayList<String>();
-    objectType.add("user");
-    filters.put(JsonKey.OBJECT_TYPE, objectType);
-    filters.put(JsonKey.ROOT_ORG_ID, "ORG_001");
-    innerMap.put(JsonKey.FILTERS, filters);
-    innerMap.put(JsonKey.LIMIT, 1);
-
-    Map<String, Object> contextMap = new HashMap<>();
-    contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);
-    reqObj.setContext(contextMap);
-    reqObj.setRequest(innerMap);
-    subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("200 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
   @Test
@@ -148,9 +117,8 @@ public class SearchHandlerActorTest {
     innerMap.put(JsonKey.QUERY, "");
     Map<String, Object> filters = new HashMap<>();
     List<String> objectType = new ArrayList<String>();
-    objectType.add("cbatch");
+    objectType.add("course-batch");
     filters.put(JsonKey.OBJECT_TYPE, objectType);
-    filters.put(JsonKey.ROOT_ORG_ID, "ORG_001");
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);
     reqObj.setRequest(innerMap);
