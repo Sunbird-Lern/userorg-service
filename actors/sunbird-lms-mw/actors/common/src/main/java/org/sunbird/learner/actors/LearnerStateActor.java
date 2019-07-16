@@ -373,23 +373,26 @@ public class LearnerStateActor extends BaseActor {
         int contentIdscompleted = 0;
         List<Map<String, Object>> contentIdsForBatch =
             batchContentIdMap.get(course.get(JsonKey.BATCH_ID));
-        for (Map<String, Object> contentIdDetails : contentIdsForBatch) {
-          if ((Integer) contentIdDetails.get(JsonKey.STATUS)
-                  == ProjectUtil.ProgressStatus.COMPLETED.getValue()
-              && CollectionUtils.isNotEmpty(
-                  contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)))
-              && contentIdsMapForCourses
-                  .get(course.get(JsonKey.COURSE_ID))
-                  .contains(contentIdDetails.get(JsonKey.CONTENT_ID))) contentIdscompleted++;
+        if (CollectionUtils.isNotEmpty(contentIdsForBatch)) {
+          for (Map<String, Object> contentIdDetails : contentIdsForBatch) {
+            if ((Integer) contentIdDetails.get(JsonKey.STATUS)
+                    == ProjectUtil.ProgressStatus.COMPLETED.getValue()
+                && CollectionUtils.isNotEmpty(
+                    contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)))
+                && contentIdsMapForCourses
+                    .get(course.get(JsonKey.COURSE_ID))
+                    .contains(contentIdDetails.get(JsonKey.CONTENT_ID))) contentIdscompleted++;
+          }
+          if (CollectionUtils.isNotEmpty(
+              contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID))))
+            progressPercentage =
+                (int)
+                    Math.round(
+                        (contentIdscompleted * 100.0)
+                            / contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).size());
+          course.put(JsonKey.PROGRESS, progressPercentage);
+          updatedCourses.add(course);
         }
-        if (CollectionUtils.isNotEmpty(contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID))))
-          progressPercentage =
-              (int)
-                  Math.round(
-                      (contentIdscompleted * 100.0)
-                          / contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).size());
-        course.put(JsonKey.PROGRESS, progressPercentage);
-        updatedCourses.add(course);
       }
     }
     return updatedCourses;
@@ -407,7 +410,12 @@ public class LearnerStateActor extends BaseActor {
     Map<String, Object> contentsList =
         ContentSearchUtil.searchContentSync(
             null, requestBody, (Map<String, String>) request.getRequest().get(JsonKey.HEADER));
-
+    if (contentsList == null) {
+      new ProjectCommonException(
+          ResponseCode.internalError.getErrorCode(),
+          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
     return ((List<Map<String, Object>>) (contentsList.get(JsonKey.CONTENTS)));
   }
 }
