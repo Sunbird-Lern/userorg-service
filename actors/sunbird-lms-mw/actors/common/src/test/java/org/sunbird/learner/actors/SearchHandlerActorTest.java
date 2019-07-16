@@ -100,7 +100,7 @@ public class SearchHandlerActorTest {
     List<Map<String, Object>> content = new ArrayList<>();
     HashMap<String, Object> innerMap = new HashMap<>();
     List<Map<String, Object>> batchList = new ArrayList<>();
-    innerMap.put(JsonKey.ORGANISATIONS, batchList);
+    innerMap.put(JsonKey.BATCHES, batchList);
     content.add(innerMap);
     response.put(JsonKey.CONTENT, content);
     return response;
