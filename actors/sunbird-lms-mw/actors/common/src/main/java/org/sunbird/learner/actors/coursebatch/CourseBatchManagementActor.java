@@ -5,6 +5,7 @@ import static org.sunbird.common.models.util.JsonKey.PARTICIPANTS;
 import static org.sunbird.common.models.util.ProjectLogger.log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -332,7 +333,10 @@ public class CourseBatchManagementActor extends BaseActor {
       if (!(participants.contains(userId))) {
         if (!participantWithRootOrgIds.containsKey(userId)
             || (!batchCreatorRootOrgId.equals(participantWithRootOrgIds.get(userId)))) {
-          response.put(userId, ResponseCode.userNotAssociatedToRootOrg.getErrorMessage());
+          response.put(
+              userId,
+              MessageFormat.format(
+                  ResponseCode.userNotAssociatedToRootOrg.getErrorMessage(), userId));
           continue;
         }
         addedParticipants.add(userId);
