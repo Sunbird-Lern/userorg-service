@@ -51,6 +51,7 @@ public class LearnerStateActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserCoursesService userCoursesService = new UserCoursesService();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private static final String COMPLETE_PERCENT = "completionPercentage";
 
   /**
    * Receives the actor message and perform the operation like get course , get content etc.
@@ -368,6 +369,7 @@ public class LearnerStateActor extends BaseActor {
 
     List<Map<String, Object>> updatedCourses = new ArrayList<>();
     for (Map<String, Object> course : activeCourses) {
+      course.put(COMPLETE_PERCENT, Integer.valueOf("0"));
       if (contentIdsMapForCourses.containsKey(course.get(JsonKey.COURSE_ID))) {
         Integer progressPercentage = Integer.valueOf("0");
         int contentIdscompleted = 0;
@@ -391,7 +393,7 @@ public class LearnerStateActor extends BaseActor {
                         (contentIdscompleted * 100.0)
                             / contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).size());
           course.put(JsonKey.PROGRESS, contentIdscompleted);
-          course.put(JsonKey.COMPLETED_PERCENT, progressPercentage);
+          course.put(COMPLETE_PERCENT, progressPercentage);
           updatedCourses.add(course);
         }
       }
