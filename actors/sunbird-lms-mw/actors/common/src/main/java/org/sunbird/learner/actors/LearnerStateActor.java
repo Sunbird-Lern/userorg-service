@@ -390,7 +390,8 @@ public class LearnerStateActor extends BaseActor {
                     Math.round(
                         (contentIdscompleted * 100.0)
                             / contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).size());
-          course.put(JsonKey.PROGRESS, progressPercentage);
+          course.put(JsonKey.PROGRESS, contentIdscompleted);
+          course.put(JsonKey.COMPLETED_PERCENT, progressPercentage);
           updatedCourses.add(course);
         }
       }
