@@ -76,12 +76,11 @@ public class CourseEnrollmentActor extends BaseActor {
     ProjectLogger.log("enrollCourseClass called");
     Map<String, Object> courseMap = (Map<String, Object>) actorMessage.getRequest();
     CourseBatch courseBatch = courseBatchDao.readById((String) courseMap.get(JsonKey.BATCH_ID));
-    String operation = "enrollCourse";
     validateCourseBatch(
         courseBatch,
         courseMap,
         (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY),
-        operation);
+        ActorOperations.ENROLL_COURSE.getValue());
 
     UserCourses userCourseResult = userCourseDao.read(UserCoursesService.getPrimaryKey(courseMap));
 
@@ -168,12 +167,11 @@ public class CourseEnrollmentActor extends BaseActor {
     // objects of telemetry event...
     Map<String, Object> request = actorMessage.getRequest();
     CourseBatch courseBatch = courseBatchDao.readById((String) request.get(JsonKey.BATCH_ID));
-    String operation = "unenrollCourse";
     validateCourseBatch(
         courseBatch,
         request,
         (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY),
-        operation);
+        ActorOperations.UNENROLL_COURSE.getValue());
     UserCourses userCourseResult = userCourseDao.read(UserCoursesService.getPrimaryKey(request));
     UserCoursesService.validateUserUnenroll(userCourseResult);
     Response result = updateUserCourses(userCourseResult);
@@ -260,7 +258,7 @@ public class CourseEnrollmentActor extends BaseActor {
       CourseBatch courseBatchDetails,
       Map<String, Object> request,
       String requestedBy,
-      String operation) {
+      String actorOperation) {
 
     if (ProjectUtil.isNull(courseBatchDetails)) {
       ProjectCommonException.throwClientErrorException(
@@ -291,7 +289,7 @@ public class CourseEnrollmentActor extends BaseActor {
       if (StringUtils.isNotBlank(courseBatchDetails.getEnrollmentEndDate())) {
         courseBatchEnrollmentEndDate = format.parse(courseBatchDetails.getEnrollmentEndDate());
       }
-      if (operation.equals("enrollCourse")
+      if (actorOperation.equals(ActorOperations.ENROLL_COURSE.getValue())
           && courseBatchEnrollmentEndDate != null
           && courseBatchEnrollmentEndDate.before(todaydate)) {
         ProjectLogger.log(
