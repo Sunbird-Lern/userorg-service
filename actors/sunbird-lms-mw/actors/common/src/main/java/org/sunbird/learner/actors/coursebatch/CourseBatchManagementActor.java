@@ -826,6 +826,7 @@ public class CourseBatchManagementActor extends BaseActor {
 
     Response response = new Response();
     Map<String, Object> result = new HashMap<String, Object>();
+    result.put(JsonKey.COUNT, participants.size());
     result.put(JsonKey.PARTICIPANTS, participants);
     response.put(JsonKey.BATCH, result);
     sender().tell(response, self());
