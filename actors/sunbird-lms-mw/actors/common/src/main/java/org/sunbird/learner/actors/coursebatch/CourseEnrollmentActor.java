@@ -78,8 +78,12 @@ public class CourseEnrollmentActor extends BaseActor {
     CourseBatch courseBatch =
         courseBatchDao.readById(
             (String) courseMap.get(JsonKey.COURSE_ID), (String) courseMap.get(JsonKey.BATCH_ID));
+    String operation = "enrollCourse";
     validateCourseBatch(
-        courseBatch, courseMap, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+        courseBatch,
+        courseMap,
+        (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY),
+        operation);
 
     UserCourses userCourseResult =
         userCourseDao.read(
@@ -157,8 +161,12 @@ public class CourseEnrollmentActor extends BaseActor {
     CourseBatch courseBatch =
         courseBatchDao.readById(
             (String) request.get(JsonKey.COURSE_ID), (String) request.get(JsonKey.BATCH_ID));
+    String operation = "unenrollCourse";
     validateCourseBatch(
-        courseBatch, request, (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+        courseBatch,
+        request,
+        (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY),
+        operation);
     UserCourses userCourseResult =
         userCourseDao.read(
             (String) request.get(JsonKey.BATCH_ID), (String) request.get(JsonKey.USER_ID));
@@ -244,13 +252,17 @@ public class CourseEnrollmentActor extends BaseActor {
    * @Params
    */
   private void validateCourseBatch(
-      CourseBatch courseBatchDetails, Map<String, Object> request, String requestedBy) {
+      CourseBatch courseBatchDetails,
+      Map<String, Object> request,
+      String requestedBy,
+      String operation) {
 
     if (ProjectUtil.isNull(courseBatchDetails)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidCourseBatchId, ResponseCode.invalidCourseBatchId.getErrorMessage());
     }
-    verifyRequestedByAndThrowErrorIfNotMatch((String) request.get(JsonKey.USER_ID), requestedBy);
+    //  verifyRequestedByAndThrowErrorIfNotMatch((String) request.get(JsonKey.USER_ID),
+    // requestedBy);
     if (EnrolmentType.inviteOnly.getVal().equals(courseBatchDetails.getEnrollmentType())) {
       ProjectLogger.log(
           "CourseEnrollmentActor validateCourseBatch self enrollment or unenrollment is not applicable for invite only batch.",
@@ -275,7 +287,9 @@ public class CourseEnrollmentActor extends BaseActor {
       if (StringUtils.isNotBlank(courseBatchDetails.getEnrollmentEndDate())) {
         courseBatchEnrollmentEndDate = format.parse(courseBatchDetails.getEnrollmentEndDate());
       }
-      if (courseBatchEnrollmentEndDate != null && courseBatchEnrollmentEndDate.before(todaydate)) {
+      if (operation.equals("enrollCourse")
+          && courseBatchEnrollmentEndDate != null
+          && courseBatchEnrollmentEndDate.before(todaydate)) {
         ProjectLogger.log(
             "CourseEnrollmentActor validateCourseBatch Enrollment Date has ended.",
             LoggerEnum.INFO.name());
