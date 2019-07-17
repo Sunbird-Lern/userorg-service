@@ -289,7 +289,7 @@ public class CourseEnrollmentActor extends BaseActor {
       if (StringUtils.isNotBlank(courseBatchDetails.getEnrollmentEndDate())) {
         courseBatchEnrollmentEndDate = format.parse(courseBatchDetails.getEnrollmentEndDate());
       }
-      if (actorOperation.equals(ActorOperations.ENROLL_COURSE.getValue())
+      if (ActorOperations.ENROLL_COURSE.getValue().equals(actorOperation)
           && courseBatchEnrollmentEndDate != null
           && courseBatchEnrollmentEndDate.before(todaydate)) {
         ProjectLogger.log(
