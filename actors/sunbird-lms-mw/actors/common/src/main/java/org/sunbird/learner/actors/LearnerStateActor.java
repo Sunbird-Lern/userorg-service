@@ -339,11 +339,10 @@ public class LearnerStateActor extends BaseActor {
     List<Map<String, Object>> activeCourses =
         (List<Map<String, Object>>) (result.get(JsonKey.CONTENT));
     List<Map<String, Object>> contentsForCourses = getcontentsForCourses(request, activeCourses);
-    Map<String, List<String>> contentIdsMapForCourses = new HashMap<>();
+    Map<String, Map<String, Object>> contentIdsMapForCourses = new HashMap<>();
     for (Map<String, Object> contentIdForCourse : contentsForCourses) {
       contentIdsMapForCourses.put(
-          (String) contentIdForCourse.get(JsonKey.IDENTIFIER),
-          (List<String>) contentIdForCourse.get("leafNodes"));
+          (String) contentIdForCourse.get(JsonKey.IDENTIFIER), contentIdForCourse);
     }
 
     Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
@@ -371,6 +370,21 @@ public class LearnerStateActor extends BaseActor {
     for (Map<String, Object> course : activeCourses) {
       course.put(COMPLETE_PERCENT, Integer.valueOf("0"));
       if (contentIdsMapForCourses.containsKey(course.get(JsonKey.COURSE_ID))) {
+        course.put(
+            JsonKey.COURSE_NAME,
+            contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get(JsonKey.NAME));
+        course.put(
+            JsonKey.DESCRIPTION,
+            contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get(JsonKey.DESCRIPTION));
+        course.put(
+            JsonKey.LEAF_NODE_COUNT,
+            contentIdsMapForCourses
+                .get(course.get(JsonKey.COURSE_ID))
+                .get(JsonKey.LEAF_NODE_COUNT));
+        course.put(
+            JsonKey.COURSE_LOGO_URL,
+            contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get(JsonKey.APP_ICON));
+        course.put(JsonKey.CONTENT_ID, course.get(JsonKey.COURSE_ID));
         Integer progressPercentage = Integer.valueOf("0");
         int contentIdscompleted = 0;
         List<Map<String, Object>> contentIdsForBatch =
@@ -380,18 +394,24 @@ public class LearnerStateActor extends BaseActor {
             if ((Integer) contentIdDetails.get(JsonKey.STATUS)
                     == ProjectUtil.ProgressStatus.COMPLETED.getValue()
                 && CollectionUtils.isNotEmpty(
-                    contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)))
-                && contentIdsMapForCourses
-                    .get(course.get(JsonKey.COURSE_ID))
+                    (List<String>)
+                        contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get("leafNodes"))
+                && ((List<String>)
+                        contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get("leafNodes"))
                     .contains(contentIdDetails.get(JsonKey.CONTENT_ID))) contentIdscompleted++;
           }
           if (CollectionUtils.isNotEmpty(
-              contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID))))
+              (List<String>)
+                  contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).get("leafNodes")))
             progressPercentage =
                 (int)
                     Math.round(
                         (contentIdscompleted * 100.0)
-                            / contentIdsMapForCourses.get(course.get(JsonKey.COURSE_ID)).size());
+                            / ((List<String>)
+                                    contentIdsMapForCourses
+                                        .get(course.get(JsonKey.COURSE_ID))
+                                        .get("leafNodes"))
+                                .size());
           course.put(JsonKey.PROGRESS, contentIdscompleted);
           course.put(COMPLETE_PERCENT, progressPercentage);
           updatedCourses.add(course);
@@ -405,6 +425,10 @@ public class LearnerStateActor extends BaseActor {
       Request request, List<Map<String, Object>> activeCourses) {
     List<String> fields = new ArrayList<>();
     fields.add(JsonKey.IDENTIFIER);
+    fields.add(JsonKey.DESCRIPTION);
+    fields.add(JsonKey.NAME);
+    fields.add(JsonKey.LEAF_NODE_COUNT);
+    fields.add(JsonKey.APP_ICON);
     fields.add("leafNodes");
     String requestBody = prepareCourseSearchRequest(activeCourses, fields);
     ProjectLogger.log(
