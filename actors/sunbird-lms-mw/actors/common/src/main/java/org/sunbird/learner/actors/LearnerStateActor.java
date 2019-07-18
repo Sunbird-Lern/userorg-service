@@ -166,7 +166,7 @@ public class LearnerStateActor extends BaseActor {
     dto.getAdditionalProperties().put(JsonKey.FILTERS, esQueryMap);
 
     Future<Map<String, Object>> responseF =
-        esService.search(dto, ProjectUtil.EsType.course.getTypeName());
+        esService.search(dto, ProjectUtil.EsType.courseBatch.getTypeName());
     Map<String, Object> response =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(responseF);
     return response;
