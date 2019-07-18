@@ -78,7 +78,7 @@ public class PageController extends BaseController {
    * @param pageId String
    * @return Promise<Result>
    */
-  public Promise<Result> getPageSetting(String pageId) {
+  public Promise<Result> getPageSetting(String pageId, String organisationId) {
 
     try {
       ProjectLogger.log(
@@ -88,6 +88,7 @@ public class PageController extends BaseController {
       reqObj.setRequestId(ExecutionContext.getRequestId());
       reqObj.setEnv(getEnvironment());
       reqObj.getRequest().put(JsonKey.ID, pageId);
+      reqObj.getRequest().put(JsonKey.ORGANISATION_ID, organisationId);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

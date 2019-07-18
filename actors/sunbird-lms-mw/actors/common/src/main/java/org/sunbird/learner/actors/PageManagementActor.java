@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -283,23 +286,15 @@ public class PageManagementActor extends BaseActor {
     filterMap.remove(JsonKey.CREATED_BY);
     Map<String, Object> reqFilters = (Map<String, Object>) req.get(JsonKey.FILTERS);
 
-    /** if orgId is not then consider default page */
-    if (StringUtils.isBlank(orgId)) {
-      orgId = "NA";
-    }
-    ProjectLogger.log(
-        "Fetching data from Cache for " + orgId + ":" + pageName, LoggerEnum.INFO.name());
-    Map<String, Object> pageMapData =
-        PageCacheLoaderService.getDataFromCache(
-            ActorOperations.GET_PAGE_DATA.getValue(), orgId + ":" + pageName, Map.class);
-
-    Map<String, Object> pageMap = pageMapData;
+    Map<String, Object> pageMap = getPageMapData(orgId, pageName);
+    if(null == pageMap && StringUtils.isNotBlank(orgId))
+      pageMap = getPageMapData("NA", pageName);
 
     if (null == pageMap) {
-      throw new ProjectCommonException(
-          ResponseCode.pageDoesNotExist.getErrorCode(),
-          ResponseCode.pageDoesNotExist.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+        throw new ProjectCommonException(
+                ResponseCode.pageDoesNotExist.getErrorCode(),
+                ResponseCode.pageDoesNotExist.getErrorMessage(),
+                ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     if (source.equalsIgnoreCase(ProjectUtil.Source.WEB.getValue())) {
       if (null != pageMap && null != pageMap.get(JsonKey.PORTAL_MAP)) {
@@ -378,6 +373,7 @@ public class PageManagementActor extends BaseActor {
 
       Future<Iterable<Map<String, Object>>> sectionsFuture =
           Futures.sequence(sectionList, getContext().dispatcher());
+      Map<String, Object> finalPageMap = pageMap;
       Future<Response> response =
           sectionsFuture.map(
               new Mapper<Iterable<Map<String, Object>>, Response>() {
@@ -385,8 +381,8 @@ public class PageManagementActor extends BaseActor {
                 public Response apply(Iterable<Map<String, Object>> sections) {
                   ArrayList<Map<String, Object>> sectionList = Lists.newArrayList(sections);
                   Map<String, Object> result = new HashMap<>();
-                  result.put(JsonKey.NAME, pageMap.get(JsonKey.NAME));
-                  result.put(JsonKey.ID, pageMap.get(JsonKey.ID));
+                  result.put(JsonKey.NAME, finalPageMap.get(JsonKey.NAME));
+                  result.put(JsonKey.ID, finalPageMap.get(JsonKey.ID));
                   result.put(JsonKey.SECTIONS, sectionList);
                   Response response = new Response();
                   response.put(JsonKey.RESPONSE, result);
@@ -416,9 +412,10 @@ public class PageManagementActor extends BaseActor {
   private void getPageSetting(Request actorMessage) {
     Map<String, Object> req = actorMessage.getRequest();
     String pageName = (String) req.get(JsonKey.ID);
+    String organisationId = (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID)))? (String) req.get(JsonKey.ORGANISATION_ID) : "";
     Response response =
         PageCacheLoaderService.getDataFromCache(
-            ActorOperations.GET_PAGE_SETTING.name(), pageName, Response.class);
+            ActorOperations.GET_PAGE_SETTING.name(), organisationId + ":" + pageName, Response.class);
     if (response == null) {
       response =
           cassandraOperation.getRecordsByProperty(
@@ -427,13 +424,24 @@ public class PageManagementActor extends BaseActor {
           (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       if (!(result.isEmpty())) {
         Map<String, Object> pageDO = result.get(0);
+        if(StringUtils.isNotBlank(organisationId)){
+          List<Map<String, Object>> resp = result.stream().filter(res -> (StringUtils.equalsIgnoreCase(organisationId, (String)res.get(JsonKey.ORGANISATION_ID)))).collect(Collectors.toList());
+          if(CollectionUtils.isNotEmpty(resp)){
+            pageDO = resp.get(0);
+          }else {
+            throw new ProjectCommonException(
+                    ResponseCode.pageDoesNotExist.getErrorCode(),
+                    ResponseCode.pageDoesNotExist.getErrorMessage(),
+                    ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+          }
+        }
         Map<String, Object> responseMap = getPageSetting(pageDO);
         response.getResult().put(JsonKey.PAGE, responseMap);
         response.getResult().remove(JsonKey.RESPONSE);
       }
 
       PageCacheLoaderService.putDataIntoCache(
-          ActorOperations.GET_PAGE_SETTING.name(), pageName, response);
+          ActorOperations.GET_PAGE_SETTING.name(), organisationId + ":" + pageName, response);
     }
     sender().tell(response, self());
   }
@@ -757,6 +765,10 @@ public class PageManagementActor extends BaseActor {
     responseMap.put(JsonKey.NAME, pageDO.get(JsonKey.NAME));
     responseMap.put(JsonKey.ID, pageDO.get(JsonKey.ID));
 
+    if(null != pageDO.get(JsonKey.ORGANISATION_ID)){
+      responseMap.put(JsonKey.ORGANISATION_ID, pageDO.get(JsonKey.ORGANISATION_ID));
+    }
+
     if (pageDO.containsKey(JsonKey.APP_MAP) && null != pageDO.get(JsonKey.APP_MAP)) {
       responseMap.put(JsonKey.APP_SECTIONS, parsePage(pageDO, JsonKey.APP_MAP));
     }
@@ -813,5 +825,19 @@ public class PageManagementActor extends BaseActor {
           ResponseCode.invalidOrgId.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
+  }
+
+  private Map<String,Object> getPageMapData(String orgId, String pageName) {
+    /** if orgId is not then consider default page */
+    if (StringUtils.isBlank(orgId)) {
+      orgId = "NA";
+    }
+    ProjectLogger.log(
+            "Fetching data from Cache for " + orgId + ":" + pageName, LoggerEnum.INFO.name());
+    Map<String, Object> pageMapData =
+            PageCacheLoaderService.getDataFromCache(
+                    ActorOperations.GET_PAGE_DATA.getValue(), orgId + ":" + pageName, Map.class);
+
+    return pageMapData;
   }
 }
