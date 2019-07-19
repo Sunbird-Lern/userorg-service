@@ -413,7 +413,7 @@ public class PageManagementActor extends BaseActor {
   private void getPageSetting(Request actorMessage) {
     Map<String, Object> req = actorMessage.getRequest();
     String pageName = (String) req.get(JsonKey.ID);
-    String organisationId = (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID)))? (String) req.get(JsonKey.ORGANISATION_ID) : "";
+    String organisationId = (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID)))? (String) req.get(JsonKey.ORGANISATION_ID) : "NA";
     Response response =
         PageCacheLoaderService.getDataFromCache(
             ActorOperations.GET_PAGE_SETTING.name(), organisationId + ":" + pageName, Response.class);
@@ -425,7 +425,7 @@ public class PageManagementActor extends BaseActor {
           (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       if (!(result.isEmpty())) {
         Map<String, Object> pageDO = result.get(0);
-        if(StringUtils.isNotBlank(organisationId)){
+        if(!StringUtils.equalsIgnoreCase("NA", organisationId)){
           List<Map<String, Object>> resp = result.stream().filter(res -> (StringUtils.equalsIgnoreCase(organisationId, (String)res.get(JsonKey.ORGANISATION_ID)))).collect(Collectors.toList());
           if(CollectionUtils.isNotEmpty(resp)){
             pageDO = resp.get(0);
