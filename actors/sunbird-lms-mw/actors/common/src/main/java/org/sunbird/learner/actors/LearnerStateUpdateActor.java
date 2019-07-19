@@ -171,6 +171,9 @@ public class LearnerStateUpdateActor extends BaseActor {
                 }
                 inputContent.put(JsonKey.COMPLETED_COUNT, completedCount);
             }
+            if (completedCount >= 1) {
+                inputContent.put(JsonKey.STATUS, 2);
+            }
         } else {
             if (inputStatus == 2) {
                 inputContent.put(JsonKey.COMPLETED_COUNT, 1);
