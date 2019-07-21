@@ -83,6 +83,7 @@ public class LearnerStateUpdateActor extends BaseActor {
                     String batchId = input.getKey();
                     if (batches.containsKey(batchId)) {
                     Map<String, Object> batchDetails = batches.get(batchId).get(0);
+                        String courseId = (String) batchDetails.get("courseId");
                         int status = getInteger(batchDetails.get("status"), 0);
                         if (status == 1) {
                             List<String> contentIds = input.getValue().stream()
@@ -96,9 +97,9 @@ public class LearnerStateUpdateActor extends BaseActor {
                             }).collect(Collectors.toList());
 
                             cassandraOperation.batchInsert(consumptionDBInfo.getKeySpace(), consumptionDBInfo.getTableName(), contents);
-
                             Map<String, Object> updatedBatch = getBatchCurrentStatus(batchId, userId, contents);
                             cassandraOperation.upsertRecord(userCourseDBInfo.getKeySpace(), userCourseDBInfo.getTableName(), updatedBatch);
+                            // TODO: Generate Instruction event. Send userId, batchId, courseId, contents.
                             updateMessages(respMessages, ContentUpdateResponseKeys.SUCCESS_CONTENTS.name(), contentIds);
                         } else {
                             updateMessages(respMessages, ContentUpdateResponseKeys.NOT_A_ON_GOING_BATCH.name(), batchId);
