@@ -20,7 +20,7 @@ public class CourseBatchUtil {
             + uniqueId,
         LoggerEnum.INFO.name());
     Future<String> esResponseF =
-        esUtil.save(ProjectUtil.EsType.courseBatch.getTypeName(), uniqueId, req);
+        esUtil.save(ProjectUtil.EsType.course.getTypeName(), uniqueId, req);
     String esResponse = (String) ElasticSearchHelper.getResponseFromFuture(esResponseF);
 
     ProjectLogger.log(

@@ -22,6 +22,28 @@ import play.mvc.Result;
 public class SearchController extends BaseController {
 
   /**
+   * This method will do data search for user and organization. Search type will be decide based on
+   * request object type coming with filter if objectType key is not coming then we need to do the
+   * search for all the types.
+   *
+   * @return Promise<Result>
+   */
+  public Promise<Result> compositeSearch() {
+    try {
+      JsonNode requestData = request().body().asJson();
+      ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.setEnv(getEnvironment());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  /**
    * This method will do data Sync form Cassandra db to Elasticsearch.
    *
    * @return Promise<Result>

@@ -1,7 +1,5 @@
 package org.sunbird.learner.actors;
 
-import static org.sunbird.common.models.util.JsonKey.*;
-
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
@@ -50,6 +48,9 @@ import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+
+import static org.sunbird.common.models.util.JsonKey.*;
+import static org.sunbird.common.models.util.ProjectLogger.log;
 
 /**
  * This actor will handle page management operation .
@@ -697,7 +698,7 @@ public class PageManagementActor extends BaseActor {
     searcDto.setSortBy((Map<String, Object>) map.get(JsonKey.SORT_BY));
     String type = "";
     if (JsonKey.BATCH.equalsIgnoreCase(dataSource)) {
-      type = ProjectUtil.EsType.courseBatch.getTypeName();
+      type = ProjectUtil.EsType.course.getTypeName();
     } else {
       return null;
     }
@@ -819,7 +820,7 @@ public class PageManagementActor extends BaseActor {
 
   private void validateOrg(String orgId) {
     Map<String, Object> result = userOrgService.getOrganisationById(orgId);
-    if (MapUtils.isEmpty(result) || !orgId.equals(result.get(ID))) {
+    if(MapUtils.isEmpty(result) || !orgId.equals(result.get(ID))){
       throw new ProjectCommonException(
           ResponseCode.invalidOrgId.getErrorCode(),
           ResponseCode.invalidOrgId.getErrorMessage(),

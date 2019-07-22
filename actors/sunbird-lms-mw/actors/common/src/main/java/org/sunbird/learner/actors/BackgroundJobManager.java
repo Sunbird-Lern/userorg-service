@@ -2,11 +2,7 @@ package org.sunbird.learner.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -20,14 +16,15 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.coursebatch.service.UserCoursesService;
 import org.sunbird.learner.util.CourseBatchSchedulerUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
@@ -83,7 +80,9 @@ public class BackgroundJobManager extends BaseActor {
     }
     String operation = request.getOperation();
     ProjectLogger.log("Operation name is ==" + operation);
-    if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue())) {
+    if (operation.equalsIgnoreCase(ActorOperations.PUBLISH_COURSE.getValue())) {
+      // manageBackgroundJob(request);
+    } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue())) {
       ProjectLogger.log("Update user info to ES called.", LoggerEnum.INFO.name());
       updateUserInfoToEs(request);
     } else if (operation.equalsIgnoreCase(
@@ -215,13 +214,10 @@ public class BackgroundJobManager extends BaseActor {
 
     Map<String, Object> batch =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER_COURSES);
-    String userId = (String) batch.get(JsonKey.USER_ID);
-    String batchId = (String) batch.get(JsonKey.BATCH_ID);
-    String identifier = UserCoursesService.generateUserCourseESId(batchId, userId);
     insertDataToElastic(
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.usercourses.getTypeName(),
-        identifier,
+        (String) batch.get(JsonKey.ID),
         batch);
   }
 
@@ -412,6 +408,74 @@ public class BackgroundJobManager extends BaseActor {
     } else {
       ProjectLogger.log("USER COUNT NOT UPDATED SUCCESSFULLY IN COURSE MGMT TABLE");
     }
+  }
+
+  /**
+   * @param request
+   * @return boolean
+   */
+  @SuppressWarnings("unchecked")
+  private boolean manageBackgroundJob(Request request) {
+    Map<String, Object> data = null;
+    if (request.getRequest() == null) {
+      return false;
+    } else {
+      data = request.getRequest();
+    }
+
+    List<Map<String, Object>> list = (List<Map<String, Object>>) data.get(JsonKey.RESPONSE);
+    Map<String, Object> content = list.get(0);
+    String contentId = (String) content.get(JsonKey.CONTENT_ID);
+    if (!StringUtils.isBlank(contentId)) {
+      String contentData = getCourseData(contentId);
+      if (!StringUtils.isBlank(contentData)) {
+        Map<String, Object> map = getContentDetails(contentData);
+        map.put(JsonKey.ID, content.get(JsonKey.COURSE_ID));
+        updateCourseManagement(map);
+        List<String> createdForValue = null;
+        Object obj = content.get(JsonKey.COURSE_CREATED_FOR);
+        if (obj != null) {
+          createdForValue = (List<String>) obj;
+        }
+        content.remove(JsonKey.COURSE_CREATED_FOR);
+        content.put(JsonKey.APPLICABLE_FOR, createdForValue);
+        Map<String, Object> finalResponseMap = (Map<String, Object>) map.get(JsonKey.RESULT);
+        finalResponseMap.putAll(content);
+        finalResponseMap.put(JsonKey.OBJECT_TYPE, ProjectUtil.EsType.course.getTypeName());
+        insertDataToElastic(
+            ProjectUtil.EsIndex.sunbird.getIndexName(),
+            ProjectUtil.EsType.course.getTypeName(),
+            (String) map.get(JsonKey.ID),
+            finalResponseMap);
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Method to get the course data.
+   *
+   * @param contnetId String
+   * @return String
+   */
+  private String getCourseData(String contnetId) {
+    String responseData = null;
+    try {
+      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
+      if (StringUtils.isBlank(ekStepBaseUrl)) {
+        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
+      }
+
+      responseData =
+          HttpUtil.sendGetRequest(
+              ekStepBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_URL)
+                  + contnetId,
+              headerMap);
+    } catch (IOException e) {
+      ProjectLogger.log(e.getMessage(), e);
+    }
+    return responseData;
   }
 
   /**

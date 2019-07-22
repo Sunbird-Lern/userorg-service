@@ -83,7 +83,6 @@ public class CourseBatchNotificationActorFailureTest {
   }
 
   @Test // Needs to test run
-  @Ignore
   public void testCourseBatchEnrollForLearnerFailure() {
     mockCassandraRequestForReadRecordById();
     mockCassandraRequestForReadTemplate();
@@ -93,7 +92,6 @@ public class CourseBatchNotificationActorFailureTest {
   }
 
   @Test
-  @Ignore
   public void testCourseBatchEnrollForMentorFailure() {
     mockCassandraRequestForReadRecordById();
     mockCassandraRequestForReadTemplate();
@@ -189,7 +187,13 @@ public class CourseBatchNotificationActorFailureTest {
     mentors.add(USER_ID);
     participants.add(USER_ID);
     courseBatch.setMentors(mentors);
+    courseBatch.setCountDecrementStatus(false);
+    courseBatch.setCountIncrementStatus(false);
+    courseBatch.setParticipant(participants);
     courseBatch.setStatus(0);
+    Map<String, String> courseAdditionalInfo = new HashMap<>();
+    courseAdditionalInfo.put(JsonKey.ORG_NAME, orgName);
+    courseBatch.setCourseAdditionalInfo(courseAdditionalInfo);
 
     return courseBatch;
   }
@@ -211,7 +215,13 @@ public class CourseBatchNotificationActorFailureTest {
       }
     }
     courseBatch.setStatus(0);
+    courseBatch.setCountDecrementStatus(false);
+    courseBatch.setCountIncrementStatus(false);
     courseBatch.setMentors(mentors);
+    courseBatch.setParticipant(participants);
+    Map<String, String> courseAdditionalInfo = new HashMap<>();
+    courseAdditionalInfo.put(JsonKey.ORG_NAME, orgName);
+    courseBatch.setCourseAdditionalInfo(courseAdditionalInfo);
     return courseBatch;
   }
 

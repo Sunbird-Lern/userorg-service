@@ -1,13 +1,9 @@
 package controllers.coursemanagement.validator;
 
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
@@ -42,10 +38,6 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   public void validateUpdateCourseBatchRequest(Request request) {
-    validateParam(
-        (String) request.getRequest().get(JsonKey.COURSE_ID),
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.COURSE_ID);
     if (null != request.getRequest().get(JsonKey.STATUS)) {
       boolean status = validateBatchStatus(request);
       if (!status) {
@@ -344,18 +336,5 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
       }
     }
     return false;
-  }
-
-  public void validateGetParticipantsRequest(Request request) {
-    if(MapUtils.isEmpty((Map) request.getRequest().get(JsonKey.BATCH))){
-        throw new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
-                MessageFormat.format(ResponseCode.invalidRequestData.getErrorMessage(), JsonKey.BATCH),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    validateParam(
-            (String) ((Map<String, Object>)request.getRequest().get(JsonKey.BATCH)).get(JsonKey.BATCH_ID),
-            ResponseCode.mandatoryParamsMissing,
-            JsonKey.BATCH_ID);
   }
 }

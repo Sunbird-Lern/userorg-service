@@ -50,7 +50,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID, JsonKey.USER_ID);
+    UserCourses response = userCoursesDao.read(JsonKey.ID);
     Assert.assertEquals(null, response);
   }
 
@@ -61,7 +61,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID, JsonKey.USER_ID);
+    UserCourses response = userCoursesDao.read(JsonKey.ID);
     Assert.assertNotEquals(null, response);
   }
 
@@ -73,7 +73,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(readResponse);
-    UserCourses response = userCoursesDao.read(JsonKey.BATCH_ID, JsonKey.USER_ID);
+    UserCourses response = userCoursesDao.read(JsonKey.ID);
     Assert.assertEquals(null, response);
   }
 
@@ -93,7 +93,7 @@ public class UserCoursesDaoTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(new Response());
-    Response response = userCoursesDao.update(JsonKey.BATCH_ID, JsonKey.USER_ID, userCourseMap);
+    Response response = userCoursesDao.update(userCourseMap);
     Assert.assertNotEquals(null, response);
   }
 
@@ -110,7 +110,7 @@ public class UserCoursesDaoTest {
   @Test
   public void getAllActiveUserWithoutParticipantsSuccess() {
 
-    when(cassandraOperation.getRecords(
+    when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
         .thenReturn(new Response());
     List<String> participants = userCoursesDao.getAllActiveUserOfBatch(JsonKey.BATCH_ID);
@@ -125,7 +125,7 @@ public class UserCoursesDaoTest {
     userCoursesMap.put(JsonKey.ACTIVE, true);
 
     readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecords(
+    when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
         .thenReturn(readResponse);
     List<String> participants = userCoursesDao.getAllActiveUserOfBatch(JsonKey.BATCH_ID);
@@ -135,50 +135,5 @@ public class UserCoursesDaoTest {
   @Test
   public void getInstanceTest() {
     Assert.assertNotEquals(null, UserCoursesDaoImpl.getInstance());
-  }
-
-  @Test
-  public void getBatchParticipantsSuccess() {
-    Response readResponse = new Response();
-    Map<String, Object> userCoursesMap = new HashMap<>();
-    userCoursesMap.put(JsonKey.USER_ID, JsonKey.USER_ID);
-    userCoursesMap.put(JsonKey.ACTIVE, true);
-
-    readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
-            .thenReturn(readResponse);
-    List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, true);
-    Assert.assertEquals(1, participants.size());
-  }
-
-  @Test
-  public void getBatchParticipantsWithInactiveSuccess() {
-    Response readResponse = new Response();
-    Map<String, Object> userCoursesMap = new HashMap<>();
-    userCoursesMap.put(JsonKey.USER_ID, JsonKey.USER_ID);
-    userCoursesMap.put(JsonKey.ACTIVE, false);
-
-    readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
-            .thenReturn(readResponse);
-    List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, false);
-    Assert.assertEquals(1, participants.size());
-  }
-
-  @Test
-  public void getBatchParticipantsWithEmptySuccess() {
-    Response readResponse = new Response();
-    Map<String, Object> userCoursesMap = new HashMap<>();
-    userCoursesMap.put(JsonKey.USER_ID, JsonKey.USER_ID);
-    userCoursesMap.put(JsonKey.ACTIVE, false);
-
-    readResponse.put(JsonKey.RESPONSE, Arrays.asList(userCoursesMap));
-    when(cassandraOperation.getRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
-            .thenReturn(readResponse);
-    List<String> participants = userCoursesDao.getBatchParticipants(JsonKey.BATCH_ID, true);
-    Assert.assertEquals(0, participants.size());
   }
 }
