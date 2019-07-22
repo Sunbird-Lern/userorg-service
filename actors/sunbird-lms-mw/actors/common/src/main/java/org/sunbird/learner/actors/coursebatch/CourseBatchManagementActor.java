@@ -6,13 +6,7 @@ import static org.sunbird.common.models.util.ProjectLogger.log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -845,11 +839,15 @@ public class CourseBatchManagementActor extends BaseActor {
         return format.parse(format.format(new Date()));
       } else {
         if (StringUtils.isNotBlank((String) map.get(key))) {
-          Date date = format.parse((String) map.get(key));
-          if (key.equals(JsonKey.END_DATE) || key.equals(JsonKey.ENROLLMENT_END_DATE)) {
-            date.setTime(date.getTime() + 86340 * 1000);
+          Calendar cal =
+              Calendar.getInstance(
+                  TimeZone.getTimeZone(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_TIMEZONE)));
+          cal.setTime(format.parse((String) map.get(key)));
+          if (key.equals(END_DATE) || key.equals(ENROLLMENT_END_DATE)) {
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
           }
-          return date;
+          return cal.getTime();
         } else {
           return null;
         }
