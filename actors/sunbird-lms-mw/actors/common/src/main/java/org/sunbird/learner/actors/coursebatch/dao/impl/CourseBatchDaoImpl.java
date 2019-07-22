@@ -32,10 +32,12 @@ public class CourseBatchDaoImpl implements CourseBatchDao {
     Map<String, Object> primaryKey = new HashMap<>();
     primaryKey.put(JsonKey.COURSE_ID, courseId);
     primaryKey.put(JsonKey.BATCH_ID, batchId);
-    map.remove(JsonKey.COURSE_ID);
-    map.remove(JsonKey.BATCH_ID);
+    Map<String, Object> attributeMap = new HashMap<>();
+    attributeMap.putAll(map);
+    attributeMap.remove(JsonKey.COURSE_ID);
+    attributeMap.remove(JsonKey.BATCH_ID);
     return cassandraOperation.updateRecord(
-        courseBatchDb.getKeySpace(), courseBatchDb.getTableName(), map, primaryKey);
+        courseBatchDb.getKeySpace(), courseBatchDb.getTableName(), attributeMap, primaryKey);
   }
 
   @Override
