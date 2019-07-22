@@ -1,7 +1,5 @@
 package org.sunbird.learner.actors;
 
-import static org.sunbird.common.models.util.JsonKey.*;
-
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
@@ -16,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +48,9 @@ import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
+
+import static org.sunbird.common.models.util.JsonKey.*;
+import static org.sunbird.common.models.util.ProjectLogger.log;
 
 /**
  * This actor will handle page management operation .
@@ -286,7 +288,8 @@ public class PageManagementActor extends BaseActor {
     Map<String, Object> reqFilters = (Map<String, Object>) req.get(JsonKey.FILTERS);
 
     Map<String, Object> pageMap = getPageMapData(pageName, orgId);
-    if (null == pageMap && StringUtils.isNotBlank(orgId)) pageMap = getPageMapData(pageName, "NA");
+    if(null == pageMap && StringUtils.isNotBlank(orgId))
+      pageMap = getPageMapData(pageName, "NA");
 
     if (null == pageMap) {
       throw new ProjectCommonException(
@@ -410,15 +413,10 @@ public class PageManagementActor extends BaseActor {
   private void getPageSetting(Request actorMessage) {
     Map<String, Object> req = actorMessage.getRequest();
     String pageName = (String) req.get(JsonKey.ID);
-    String organisationId =
-        (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID)))
-            ? (String) req.get(JsonKey.ORGANISATION_ID)
-            : "NA";
+    String organisationId = (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID)))? (String) req.get(JsonKey.ORGANISATION_ID) : "NA";
     Response response =
         PageCacheLoaderService.getDataFromCache(
-            ActorOperations.GET_PAGE_SETTING.name(),
-            organisationId + ":" + pageName,
-            Response.class);
+            ActorOperations.GET_PAGE_SETTING.name(), organisationId + ":" + pageName, Response.class);
     if (response == null) {
       response =
           cassandraOperation.getRecordsByProperty(
@@ -427,22 +425,15 @@ public class PageManagementActor extends BaseActor {
           (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       if (!(result.isEmpty())) {
         Map<String, Object> pageDO = result.get(0);
-        if (!StringUtils.equalsIgnoreCase("NA", organisationId)) {
-          List<Map<String, Object>> resp =
-              result
-                  .stream()
-                  .filter(
-                      res ->
-                          (StringUtils.equalsIgnoreCase(
-                              organisationId, (String) res.get(JsonKey.ORGANISATION_ID))))
-                  .collect(Collectors.toList());
-          if (CollectionUtils.isNotEmpty(resp)) {
+        if(!StringUtils.equalsIgnoreCase("NA", organisationId)){
+          List<Map<String, Object>> resp = result.stream().filter(res -> (StringUtils.equalsIgnoreCase(organisationId, (String)res.get(JsonKey.ORGANISATION_ID)))).collect(Collectors.toList());
+          if(CollectionUtils.isNotEmpty(resp)){
             pageDO = resp.get(0);
-          } else {
+          }else {
             throw new ProjectCommonException(
-                ResponseCode.pageDoesNotExist.getErrorCode(),
-                ResponseCode.pageDoesNotExist.getErrorMessage(),
-                ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+                    ResponseCode.pageDoesNotExist.getErrorCode(),
+                    ResponseCode.pageDoesNotExist.getErrorMessage(),
+                    ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
           }
         }
         Map<String, Object> responseMap = getPageSetting(pageDO);
@@ -707,7 +698,7 @@ public class PageManagementActor extends BaseActor {
     searcDto.setSortBy((Map<String, Object>) map.get(JsonKey.SORT_BY));
     String type = "";
     if (JsonKey.BATCH.equalsIgnoreCase(dataSource)) {
-      type = ProjectUtil.EsType.courseBatch.getTypeName();
+      type = ProjectUtil.EsType.course.getTypeName();
     } else {
       return null;
     }
@@ -775,7 +766,7 @@ public class PageManagementActor extends BaseActor {
     responseMap.put(JsonKey.NAME, pageDO.get(JsonKey.NAME));
     responseMap.put(JsonKey.ID, pageDO.get(JsonKey.ID));
 
-    if (null != pageDO.get(JsonKey.ORGANISATION_ID)) {
+    if(null != pageDO.get(JsonKey.ORGANISATION_ID)){
       responseMap.put(JsonKey.ORGANISATION_ID, pageDO.get(JsonKey.ORGANISATION_ID));
     }
 
@@ -829,7 +820,7 @@ public class PageManagementActor extends BaseActor {
 
   private void validateOrg(String orgId) {
     Map<String, Object> result = userOrgService.getOrganisationById(orgId);
-    if (MapUtils.isEmpty(result) || !orgId.equals(result.get(ID))) {
+    if(MapUtils.isEmpty(result) || !orgId.equals(result.get(ID))){
       throw new ProjectCommonException(
           ResponseCode.invalidOrgId.getErrorCode(),
           ResponseCode.invalidOrgId.getErrorMessage(),
@@ -837,16 +828,16 @@ public class PageManagementActor extends BaseActor {
     }
   }
 
-  private Map<String, Object> getPageMapData(String pageName, String orgId) {
+  private Map<String,Object> getPageMapData(String pageName, String orgId) {
     /** if orgId is not then consider default page */
     if (StringUtils.isBlank(orgId)) {
       orgId = "NA";
     }
     ProjectLogger.log(
-        "Fetching data from Cache for " + orgId + ":" + pageName, LoggerEnum.INFO.name());
+            "Fetching data from Cache for " + orgId + ":" + pageName, LoggerEnum.INFO.name());
     Map<String, Object> pageMapData =
-        PageCacheLoaderService.getDataFromCache(
-            ActorOperations.GET_PAGE_DATA.getValue(), orgId + ":" + pageName, Map.class);
+            PageCacheLoaderService.getDataFromCache(
+                    ActorOperations.GET_PAGE_DATA.getValue(), orgId + ":" + pageName, Map.class);
 
     return pageMapData;
   }
