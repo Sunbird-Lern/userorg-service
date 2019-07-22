@@ -33,7 +33,7 @@ POST   /v1/content/link/search 		              @controllers.badging.BadgeAssocia
 # Page Management APIs
 POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
 PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
-GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
+GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String, organisationId:String ?= null)
 GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
 POST     /v1/page/assemble		  @controllers.pagemanagement.PageController.getPageData()
 
