@@ -1,9 +1,6 @@
 package controllers.bulkapimanagement;
 
-import java.util.Map;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -14,46 +11,22 @@ public class BulkUploadController extends BaseBulkUploadController {
 
   BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
 
-  public Promise<Result> userBulkUpload() {
-    try {
-      Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  public Promise<Result> orgBulkUpload() {
-    try {
-      Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
   public Promise<Result> batchEnrollmentBulkUpload() {
     try {
       Request request =
-          createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH, false);
+          createAndInitBulkRequest(
+              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH_LEARNER_ENROL, false);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
 
-  public Promise<Result> locationBulkUpload() {
+  public Promise<Result> batchUnEnrollmentBulkUpload() {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION, true);
-      baseRequestValidator.checkMandatoryFieldsPresent(
-          (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
-          GeoLocationJsonKey.LOCATION_TYPE);
+              ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH_LEARNER_UNENROL, false);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));

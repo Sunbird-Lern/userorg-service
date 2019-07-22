@@ -1,5 +1,7 @@
 package org.sunbird.learner.util;
 
+import static org.sunbird.common.models.util.ProjectLogger.log;
+
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
@@ -73,8 +75,6 @@ import org.sunbird.userorg.UserOrgService;
 import org.sunbird.userorg.UserOrgServiceImpl;
 import scala.concurrent.Future;
 
-import static org.sunbird.common.models.util.ProjectLogger.log;
-
 /**
  * Utility class for actors
  *
@@ -88,20 +88,21 @@ public final class Util {
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
+  public static final String COURSE_KEY_SPACE_NAME = "sunbird_courses";
   private static Properties prop = new Properties();
   private static Map<String, String> headers = new HashMap<>();
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static final String SUNBIRD_WEB_URL = "sunbird_web_url";
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-          org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-                  null);
+      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+          null);
   private static DecryptionService decService =
-          org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-                  null);
+      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+          null);
   private static DataMaskingService maskingService =
-          org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
-                  null);
+      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
+          null);
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -119,7 +120,7 @@ public final class Util {
                 SchedulerManager.getInstance();
               }
             })
-            .start();
+        .start();
   }
 
   private Util() {}
@@ -130,30 +131,30 @@ public final class Util {
    */
   private static void initializeOrgStatusTransition() {
     orgStatusTransition.put(
+        OrgStatus.ACTIVE.getValue(),
+        Arrays.asList(
             OrgStatus.ACTIVE.getValue(),
-            Arrays.asList(
-                    OrgStatus.ACTIVE.getValue(),
-                    OrgStatus.INACTIVE.getValue(),
-                    OrgStatus.BLOCKED.getValue(),
-                    OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
             OrgStatus.INACTIVE.getValue(),
-            Arrays.asList(OrgStatus.ACTIVE.getValue(), OrgStatus.INACTIVE.getValue()));
-    orgStatusTransition.put(
             OrgStatus.BLOCKED.getValue(),
-            Arrays.asList(
-                    OrgStatus.ACTIVE.getValue(),
-                    OrgStatus.BLOCKED.getValue(),
-                    OrgStatus.RETIRED.getValue()));
+            OrgStatus.RETIRED.getValue()));
     orgStatusTransition.put(
-            OrgStatus.RETIRED.getValue(), Arrays.asList(OrgStatus.RETIRED.getValue()));
+        OrgStatus.INACTIVE.getValue(),
+        Arrays.asList(OrgStatus.ACTIVE.getValue(), OrgStatus.INACTIVE.getValue()));
     orgStatusTransition.put(
-            null,
-            Arrays.asList(
-                    OrgStatus.ACTIVE.getValue(),
-                    OrgStatus.INACTIVE.getValue(),
-                    OrgStatus.BLOCKED.getValue(),
-                    OrgStatus.RETIRED.getValue()));
+        OrgStatus.BLOCKED.getValue(),
+        Arrays.asList(
+            OrgStatus.ACTIVE.getValue(),
+            OrgStatus.BLOCKED.getValue(),
+            OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        OrgStatus.RETIRED.getValue(), Arrays.asList(OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        null,
+        Arrays.asList(
+            OrgStatus.ACTIVE.getValue(),
+            OrgStatus.INACTIVE.getValue(),
+            OrgStatus.BLOCKED.getValue(),
+            OrgStatus.RETIRED.getValue()));
   }
 
   /** This method will initialize the cassandra data base property */
@@ -162,11 +163,12 @@ public final class Util {
     // this map will be used during cassandra data base interaction.
     // this map will have each DB name and it's corresponding keyspace and table
     // name.
-    dbInfoMap.put(JsonKey.LEARNER_COURSE_DB, getDbInfoObject(KEY_SPACE_NAME, "user_courses"));
     dbInfoMap.put(
-            JsonKey.LEARNER_CONTENT_DB, getDbInfoObject(KEY_SPACE_NAME, "content_consumption"));
+        JsonKey.LEARNER_COURSE_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "user_courses"));
     dbInfoMap.put(
-            JsonKey.COURSE_MANAGEMENT_DB, getDbInfoObject(KEY_SPACE_NAME, "course_management"));
+        JsonKey.LEARNER_CONTENT_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "content_consumption"));
+    dbInfoMap.put(
+        JsonKey.COURSE_MANAGEMENT_DB, getDbInfoObject(KEY_SPACE_NAME, "course_management"));
     dbInfoMap.put(JsonKey.USER_DB, getDbInfoObject(KEY_SPACE_NAME, "user"));
     dbInfoMap.put(JsonKey.USER_AUTH_DB, getDbInfoObject(KEY_SPACE_NAME, "user_auth"));
     dbInfoMap.put(JsonKey.ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "organisation"));
@@ -190,10 +192,11 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_ACTION_ROLE, getDbInfoObject(KEY_SPACE_NAME, "user_action_role"));
     dbInfoMap.put(JsonKey.ROLE_GROUP, getDbInfoObject(KEY_SPACE_NAME, "role_group"));
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_org"));
-    dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
-    dbInfoMap.put(JsonKey.COURSE_BATCH_DB, getDbInfoObject(KEY_SPACE_NAME, "course_batch"));
     dbInfoMap.put(
-            JsonKey.COURSE_PUBLISHED_STATUS, getDbInfoObject(KEY_SPACE_NAME, "course_publish_status"));
+        JsonKey.BULK_OP_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "bulk_upload_process"));
+    dbInfoMap.put(JsonKey.COURSE_BATCH_DB, getDbInfoObject(COURSE_KEY_SPACE_NAME, "course_batch"));
+    dbInfoMap.put(
+        JsonKey.COURSE_PUBLISHED_STATUS, getDbInfoObject(KEY_SPACE_NAME, "course_publish_status"));
     dbInfoMap.put(JsonKey.REPORT_TRACKING_DB, getDbInfoObject(KEY_SPACE_NAME, "report_tracking"));
     dbInfoMap.put(JsonKey.BADGES_DB, getDbInfoObject(KEY_SPACE_NAME, "badge"));
     dbInfoMap.put(JsonKey.USER_BADGES_DB, getDbInfoObject(KEY_SPACE_NAME, "user_badge"));
@@ -202,19 +205,19 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_SKILL_DB, getDbInfoObject(KEY_SPACE_NAME, "user_skills"));
     dbInfoMap.put(JsonKey.SKILLS_LIST_DB, getDbInfoObject(KEY_SPACE_NAME, "skills"));
     dbInfoMap.put(
-            JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
+        JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
     dbInfoMap.put(JsonKey.GEO_LOCATION_DB, getDbInfoObject(KEY_SPACE_NAME, "geo_location"));
 
     dbInfoMap.put(JsonKey.CLIENT_INFO_DB, getDbInfoObject(KEY_SPACE_NAME, "client_info"));
     dbInfoMap.put(JsonKey.SYSTEM_SETTINGS_DB, getDbInfoObject(KEY_SPACE_NAME, "system_settings"));
 
     dbInfoMap.put(
-            BadgingJsonKey.USER_BADGE_ASSERTION_DB,
-            getDbInfoObject(KEY_SPACE_NAME, "user_badge_assertion"));
+        BadgingJsonKey.USER_BADGE_ASSERTION_DB,
+        getDbInfoObject(KEY_SPACE_NAME, "user_badge_assertion"));
 
     dbInfoMap.put(
-            BadgingJsonKey.CONTENT_BADGE_ASSOCIATION_DB,
-            getDbInfoObject(KEY_SPACE_NAME, "content_badge_association"));
+        BadgingJsonKey.CONTENT_BADGE_ASSOCIATION_DB,
+        getDbInfoObject(KEY_SPACE_NAME, "content_badge_association"));
   }
 
   /**
@@ -245,17 +248,17 @@ public final class Util {
 
     String cassandraMode = propertiesCache.getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE);
     if (StringUtils.isBlank(cassandraMode)
-            || cassandraMode.equalsIgnoreCase(JsonKey.EMBEDDED_MODE)) {
+        || cassandraMode.equalsIgnoreCase(JsonKey.EMBEDDED_MODE)) {
 
       // configure the Embedded mode and return true here ....
       CassandraConnectionManager cassandraConnectionManager =
-              CassandraConnectionMngrFactory.getObject(cassandraMode);
+          CassandraConnectionMngrFactory.getObject(cassandraMode);
       boolean result =
-              cassandraConnectionManager.createConnection(null, null, null, null, keySpace);
+          cassandraConnectionManager.createConnection(null, null, null, null, keySpace);
       if (result) {
         ProjectLogger.log(
-                "CONNECTION CREATED SUCCESSFULLY FOR IP:" + " : KEYSPACE :" + keySpace,
-                LoggerEnum.INFO.name());
+            "CONNECTION CREATED SUCCESSFULLY FOR IP:" + " : KEYSPACE :" + keySpace,
+            LoggerEnum.INFO.name());
       } else {
         ProjectLogger.log("CONNECTION CREATION FAILED FOR IP: " + " : KEYSPACE :" + keySpace);
       }
@@ -266,7 +269,7 @@ public final class Util {
         return;
       }
       CassandraConnectionManager cassandraConnectionManager =
-              CassandraConnectionMngrFactory.getObject(JsonKey.STANDALONE_MODE);
+          CassandraConnectionMngrFactory.getObject(JsonKey.STANDALONE_MODE);
       String[] ipList = prop.getProperty(JsonKey.DB_IP).split(",");
       String[] portList = prop.getProperty(JsonKey.DB_PORT).split(",");
       // String[] keyspaceList = prop.getProperty(JsonKey.DB_KEYSPACE).split(",");
@@ -282,14 +285,14 @@ public final class Util {
         try {
 
           boolean result =
-                  cassandraConnectionManager.createConnection(ip, port, userName, password, keySpace);
+              cassandraConnectionManager.createConnection(ip, port, userName, password, keySpace);
           if (result) {
             ProjectLogger.log(
-                    "CONNECTION CREATED SUCCESSFULLY FOR IP: " + ip + " : KEYSPACE :" + keySpace,
-                    LoggerEnum.INFO.name());
+                "CONNECTION CREATED SUCCESSFULLY FOR IP: " + ip + " : KEYSPACE :" + keySpace,
+                LoggerEnum.INFO.name());
           } else {
             ProjectLogger.log(
-                    "CONNECTION CREATION FAILED FOR IP: " + ip + " : KEYSPACE :" + keySpace);
+                "CONNECTION CREATION FAILED FOR IP: " + ip + " : KEYSPACE :" + keySpace);
           }
 
         } catch (ProjectCommonException ex) {
@@ -309,7 +312,7 @@ public final class Util {
     String ips = System.getenv(JsonKey.SUNBIRD_CASSANDRA_IP);
     String envPort = System.getenv(JsonKey.SUNBIRD_CASSANDRA_PORT);
     CassandraConnectionManager cassandraConnectionManager =
-            CassandraConnectionMngrFactory.getObject(JsonKey.STANDALONE_MODE);
+        CassandraConnectionMngrFactory.getObject(JsonKey.STANDALONE_MODE);
 
     if (StringUtils.isBlank(ips) || StringUtils.isBlank(envPort)) {
       ProjectLogger.log("Configuration value is not coming form System variable.");
@@ -324,28 +327,28 @@ public final class Util {
       String port = portList[i];
       try {
         boolean result =
-                cassandraConnectionManager.createConnection(ip, port, userName, password, keyspace);
+            cassandraConnectionManager.createConnection(ip, port, userName, password, keyspace);
         if (result) {
           response = true;
           ProjectLogger.log(
-                  "CONNECTION CREATED SUCCESSFULLY FOR IP: " + ip + " : KEYSPACE :" + keyspace,
-                  LoggerEnum.INFO.name());
+              "CONNECTION CREATED SUCCESSFULLY FOR IP: " + ip + " : KEYSPACE :" + keyspace,
+              LoggerEnum.INFO.name());
         } else {
           ProjectLogger.log(
-                  "CONNECTION CREATION FAILED FOR IP: " + ip + " : KEYSPACE :" + keyspace,
-                  LoggerEnum.INFO.name());
+              "CONNECTION CREATION FAILED FOR IP: " + ip + " : KEYSPACE :" + keyspace,
+              LoggerEnum.INFO.name());
         }
       } catch (ProjectCommonException ex) {
         ProjectLogger.log(
-                "Util:readConfigFromEnv: Exception occurred with message = " + ex.getMessage(),
-                LoggerEnum.ERROR);
+            "Util:readConfigFromEnv: Exception occurred with message = " + ex.getMessage(),
+            LoggerEnum.ERROR);
       }
     }
     if (!response) {
       throw new ProjectCommonException(
-              ResponseCode.invaidConfiguration.getErrorCode(),
-              ResponseCode.invaidConfiguration.getErrorCode(),
-              ResponseCode.SERVER_ERROR.hashCode());
+          ResponseCode.invaidConfiguration.getErrorCode(),
+          ResponseCode.invaidConfiguration.getErrorCode(),
+          ResponseCode.SERVER_ERROR.hashCode());
     }
     return response;
   }
@@ -402,12 +405,12 @@ public final class Util {
      * @param password
      */
     DbInfo(
-            String keySpace,
-            String tableName,
-            String userName,
-            String password,
-            String ip,
-            String port) {
+        String keySpace,
+        String tableName,
+        String userName,
+        String password,
+        String ip,
+        String port) {
       this.keySpace = keySpace;
       this.tableName = tableName;
       this.userName = userName;
@@ -424,8 +427,8 @@ public final class Util {
       if (obj instanceof DbInfo) {
         DbInfo ob = (DbInfo) obj;
         if (this.ip.equals(ob.getIp())
-                && this.port.equals(ob.getPort())
-                && this.keySpace.equals(ob.getKeySpace())) {
+            && this.port.equals(ob.getPort())
+            && this.keySpace.equals(ob.getKeySpace())) {
           return true;
         }
       }
@@ -531,13 +534,13 @@ public final class Util {
     }
     if (searchQueryMap.containsKey(JsonKey.NOT_EXISTS)) {
       search
-              .getAdditionalProperties()
-              .put(JsonKey.NOT_EXISTS, searchQueryMap.get(JsonKey.NOT_EXISTS));
+          .getAdditionalProperties()
+          .put(JsonKey.NOT_EXISTS, searchQueryMap.get(JsonKey.NOT_EXISTS));
     }
     if (searchQueryMap.containsKey(JsonKey.SORT_BY)) {
       search
-              .getSortBy()
-              .putAll((Map<? extends String, ? extends String>) searchQueryMap.get(JsonKey.SORT_BY));
+          .getSortBy()
+          .putAll((Map<? extends String, ? extends String>) searchQueryMap.get(JsonKey.SORT_BY));
     }
     if (searchQueryMap.containsKey(JsonKey.OFFSET)) {
       if ((searchQueryMap.get(JsonKey.OFFSET)) instanceof Integer) {
@@ -561,16 +564,16 @@ public final class Util {
     }
     if (searchQueryMap.containsKey(JsonKey.GROUP_QUERY)) {
       search
-              .getGroupQuery()
-              .addAll(
-                      (Collection<? extends Map<String, Object>>) searchQueryMap.get(JsonKey.GROUP_QUERY));
+          .getGroupQuery()
+          .addAll(
+              (Collection<? extends Map<String, Object>>) searchQueryMap.get(JsonKey.GROUP_QUERY));
     }
     if (searchQueryMap.containsKey(JsonKey.SOFT_CONSTRAINTS)) {
       // Play is converting int value to bigInt so need to cnvert back those data to iny
       // SearchDto soft constraints expect Map<String, Integer>
       Map<String, Integer> constraintsMap = new HashMap<>();
       Set<Entry<String, BigInteger>> entrySet =
-              ((Map<String, BigInteger>) searchQueryMap.get(JsonKey.SOFT_CONSTRAINTS)).entrySet();
+          ((Map<String, BigInteger>) searchQueryMap.get(JsonKey.SOFT_CONSTRAINTS)).entrySet();
       Iterator<Entry<String, BigInteger>> itr = entrySet.iterator();
       while (itr.hasNext()) {
         Entry<String, BigInteger> entry = itr.next();
@@ -595,18 +598,18 @@ public final class Util {
     try {
       String baseSearchUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       headers.put(
-              JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.EKSTEP_AUTHORIZATION));
+          JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.EKSTEP_AUTHORIZATION));
       if (StringUtils.isBlank(headers.get(JsonKey.AUTHORIZATION))) {
         headers.put(
-                JsonKey.AUTHORIZATION,
-                PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
+            JsonKey.AUTHORIZATION,
+            PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
       }
       response =
-              HttpUtil.sendPostRequest(
-                      baseSearchUrl
-                              + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
-                      (String) section.get(JsonKey.SEARCH_QUERY),
-                      headers);
+          HttpUtil.sendPostRequest(
+              baseSearchUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
+              (String) section.get(JsonKey.SEARCH_QUERY),
+              headers);
       jObject = new JSONObject(response);
       data = jObject.getJSONObject(JsonKey.RESULT);
       JSONArray contentArray = data.getJSONArray(JsonKey.CONTENT);
@@ -647,8 +650,8 @@ public final class Util {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response result =
-            cassandraOperation.getRecordById(
-                    userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (!(list.isEmpty())) {
       return (String) (list.get(0).get(JsonKey.USERNAME));
@@ -668,8 +671,8 @@ public final class Util {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response result =
-            cassandraOperation.getRecordById(
-                    userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (!(list.isEmpty())) {
       return list.get(0);
@@ -681,9 +684,9 @@ public final class Util {
     String hashTagId = "";
     Map<String, Object> organisation = getOrgDetails(orgId);
     hashTagId =
-            StringUtils.isNotEmpty((String) organisation.get(JsonKey.HASHTAGID))
-                    ? (String) organisation.get(JsonKey.HASHTAGID)
-                    : (String) organisation.get(JsonKey.ID);
+        StringUtils.isNotEmpty((String) organisation.get(JsonKey.HASHTAGID))
+            ? (String) organisation.get(JsonKey.HASHTAGID)
+            : (String) organisation.get(JsonKey.ID);
     return hashTagId;
   }
 
@@ -710,40 +713,40 @@ public final class Util {
         filters.put(JsonKey.CHANNEL, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_CHANNEL));
       } else {
         throw new ProjectCommonException(
-                ResponseCode.mandatoryParamsMissing.getErrorCode(),
-                ProjectUtil.formatMessage(
-                        ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
     Map<String, Object> esResult =
-            elasticSearchComplexSearch(
-                    filters, EsIndex.sunbird.getIndexName(), EsType.organisation.getTypeName());
+        elasticSearchComplexSearch(
+            filters, EsIndex.sunbird.getIndexName(), EsType.organisation.getTypeName());
     if (MapUtils.isNotEmpty(esResult)
-            && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
+        && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
       Map<String, Object> esContent =
-              ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
+          ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
       if (!isName) return (String) esContent.get(JsonKey.ID);
       else return (String) esContent.get(JsonKey.ORG_NAME);
     } else {
       if (StringUtils.isNotBlank(channel)) {
         throw new ProjectCommonException(
-                ResponseCode.invalidParameterValue.getErrorCode(),
-                ProjectUtil.formatMessage(
-                        ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.invalidParameterValue.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       } else {
         throw new ProjectCommonException(
-                ResponseCode.mandatoryParamsMissing.getErrorCode(),
-                ProjectUtil.formatMessage(
-                        ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
   }
 
   private static Map<String, Object> elasticSearchComplexSearch(
-          Map<String, Object> filters, String index, String type) {
+      Map<String, Object> filters, String index, String type) {
 
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
@@ -783,7 +786,7 @@ public final class Util {
     String regStatus = "";
     try {
       ProjectLogger.log(
-              "start call for registering the channel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          "start call for registering the channel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -802,16 +805,16 @@ public final class Util {
 
       reqString = mapper.writeValueAsString(map);
       ProjectLogger.log(
-              "Util:registerChannel: Channel registration request data = " + reqString,
-              LoggerEnum.DEBUG.name());
+          "Util:registerChannel: Channel registration request data = " + reqString,
+          LoggerEnum.DEBUG.name());
       regStatus =
-              HttpUtil.sendPostRequest(
-                      (ekStepBaseUrl
-                              + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
-                      reqString,
-                      headerMap);
+          HttpUtil.sendPostRequest(
+              (ekStepBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
+              reqString,
+              headerMap);
       ProjectLogger.log(
-              "end call for channel registration for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          "end call for channel registration for hashTag id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       ProjectLogger.log("Exception occurred while registarting channel in ekstep.", e);
     }
@@ -836,7 +839,7 @@ public final class Util {
     String regStatus = "";
     try {
       ProjectLogger.log(
-              "start call for registering the channel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          "start call for registering the channel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -853,16 +856,16 @@ public final class Util {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-              HttpUtil.sendPatchRequest(
-                      (ekStepBaseUrl
-                              + PropertiesCache.getInstance()
-                              .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
-                              + "/"
-                              + req.get(JsonKey.HASHTAGID),
-                      reqString,
-                      headerMap);
+          HttpUtil.sendPatchRequest(
+              (ekStepBaseUrl
+                      + PropertiesCache.getInstance()
+                          .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
+                  + "/"
+                  + req.get(JsonKey.HASHTAGID),
+              reqString,
+              headerMap);
       ProjectLogger.log(
-              "end call for channel registration for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          "end call for channel registration for hashTag id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       ProjectLogger.log("Exception occurred while registarting channel in ekstep.", e);
     }
@@ -877,7 +880,7 @@ public final class Util {
     if (actorMessage.getContext().get(JsonKey.TELEMETRY_CONTEXT) != null) {
       // means request context is already set by some other actor ...
       requestContext =
-              (Map<String, Object>) actorMessage.getContext().get(JsonKey.TELEMETRY_CONTEXT);
+          (Map<String, Object>) actorMessage.getContext().get(JsonKey.TELEMETRY_CONTEXT);
     } else {
       requestContext = new HashMap<>();
       // request level info ...
@@ -899,10 +902,12 @@ public final class Util {
       requestContext.put(JsonKey.DEVICE_ID, deviceId);
 
       if (JsonKey.USER.equalsIgnoreCase(
-              (String) actorMessage.getContext().get(JsonKey.ACTOR_TYPE))) {
+          (String) actorMessage.getContext().get(JsonKey.ACTOR_TYPE))) {
         // assign rollup of user ...
         try {
-          Map<String, Object> result = userOrgService.getUserById((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+          Map<String, Object> result =
+              userOrgService.getUserById(
+                  (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
           if (result != null) {
             String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
 
@@ -913,12 +918,8 @@ public final class Util {
               requestContext.put(JsonKey.ROLLUP, rollup);
             }
           }
-        }
-        catch(Exception e)
-        {
-          log(
-                  "Util:initializeContext:Exception occurred with error message = ",
-                  e);
+        } catch (Exception e) {
+          log("Util:initializeContext:Exception occurred with error message = ", e);
         }
       }
       context.setRequestContext(requestContext);
@@ -929,12 +930,12 @@ public final class Util {
 
   public static String getKeyFromContext(String key, Request actorMessage) {
     return actorMessage.getContext() != null && actorMessage.getContext().containsKey(key)
-            ? (String) actorMessage.getContext().get(key)
-            : "";
+        ? (String) actorMessage.getContext().get(key)
+        : "";
   }
 
   public static void initializeContextForSchedulerJob(
-          String actorType, String actorId, String environment) {
+      String actorType, String actorId, String environment) {
 
     ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, Object> requestContext = new HashMap<>();
@@ -966,8 +967,8 @@ public final class Util {
   public static Map<String, Object> getOrgDetails(String identifier) {
     DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     Response response =
-            cassandraOperation.getRecordById(
-                    orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier);
+        cassandraOperation.getRecordById(
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier);
     List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != res && !res.isEmpty()) {
       return res.get(0);
@@ -983,9 +984,9 @@ public final class Util {
       return encryptionService.encryptData(value);
     } catch (Exception e) {
       throw new ProjectCommonException(
-              ResponseCode.userDataEncryptionError.getErrorCode(),
-              ResponseCode.userDataEncryptionError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 
@@ -1000,10 +1001,10 @@ public final class Util {
     searchQueryMap.put(JsonKey.LOGIN_ID, getEncryptedData(user.getLoginId()));
     if (CollectionUtils.isNotEmpty(searchUser(searchQueryMap))) {
       throw new ProjectCommonException(
-              ResponseCode.userAlreadyExists.getErrorCode(),
-              ProjectUtil.formatMessage(
-                      ResponseCode.userAlreadyExists.getErrorMessage(), JsonKey.USERNAME),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.userAlreadyExists.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.userAlreadyExists.getErrorMessage(), JsonKey.USERNAME),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 
@@ -1016,53 +1017,53 @@ public final class Util {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       for (Map<String, String> externalId : user.getExternalIds()) {
         if (StringUtils.isNotBlank(externalId.get(JsonKey.ID))
-                && StringUtils.isNotBlank(externalId.get(JsonKey.PROVIDER))
-                && StringUtils.isNotBlank(externalId.get(JsonKey.ID_TYPE))) {
+            && StringUtils.isNotBlank(externalId.get(JsonKey.PROVIDER))
+            && StringUtils.isNotBlank(externalId.get(JsonKey.ID_TYPE))) {
           Map<String, Object> externalIdReq = new HashMap<>();
           externalIdReq.put(JsonKey.PROVIDER, externalId.get(JsonKey.PROVIDER));
           externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
           externalIdReq.put(JsonKey.EXTERNAL_ID, encryptData(externalId.get(JsonKey.ID)));
           Response response =
-                  cassandraOperation.getRecordsByCompositeKey(
-                          KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
+              cassandraOperation.getRecordsByCompositeKey(
+                  KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
           List<Map<String, Object>> externalIdsRecord =
-                  (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+              (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
           if (CollectionUtils.isNotEmpty(externalIdsRecord)) {
             if (JsonKey.CREATE.equalsIgnoreCase(operation)) {
               throwUserAlreadyExistsException(
-                      externalId.get(JsonKey.ID),
-                      externalId.get(JsonKey.ID_TYPE),
-                      externalId.get(JsonKey.PROVIDER));
+                  externalId.get(JsonKey.ID),
+                  externalId.get(JsonKey.ID_TYPE),
+                  externalId.get(JsonKey.PROVIDER));
             } else if (JsonKey.UPDATE.equalsIgnoreCase(operation)) {
               // If end user will try to add,edit or remove other user extIds throw exception
               String userId = (String) externalIdsRecord.get(0).get(JsonKey.USER_ID);
               if (!(user.getUserId().equalsIgnoreCase(userId))) {
                 if (JsonKey.ADD.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))
-                        || StringUtils.isBlank(externalId.get(JsonKey.OPERATION))) {
+                    || StringUtils.isBlank(externalId.get(JsonKey.OPERATION))) {
                   throw new ProjectCommonException(
-                          ResponseCode.externalIdAssignedToOtherUser.getErrorCode(),
-                          ProjectUtil.formatMessage(
-                                  ResponseCode.externalIdAssignedToOtherUser.getErrorMessage(),
-                                  externalId.get(JsonKey.ID),
-                                  externalId.get(JsonKey.ID_TYPE),
-                                  externalId.get(JsonKey.PROVIDER)),
-                          ResponseCode.CLIENT_ERROR.getResponseCode());
-                } else {
-                  throwExternalIDNotFoundException(
+                      ResponseCode.externalIdAssignedToOtherUser.getErrorCode(),
+                      ProjectUtil.formatMessage(
+                          ResponseCode.externalIdAssignedToOtherUser.getErrorMessage(),
                           externalId.get(JsonKey.ID),
                           externalId.get(JsonKey.ID_TYPE),
-                          externalId.get(JsonKey.PROVIDER));
+                          externalId.get(JsonKey.PROVIDER)),
+                      ResponseCode.CLIENT_ERROR.getResponseCode());
+                } else {
+                  throwExternalIDNotFoundException(
+                      externalId.get(JsonKey.ID),
+                      externalId.get(JsonKey.ID_TYPE),
+                      externalId.get(JsonKey.PROVIDER));
                 }
               }
             }
           } else {
             // if user will try to delete non existing extIds
             if (JsonKey.UPDATE.equalsIgnoreCase(operation)
-                    && JsonKey.REMOVE.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))) {
+                && JsonKey.REMOVE.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))) {
               throwExternalIDNotFoundException(
-                      externalId.get(JsonKey.ID),
-                      externalId.get(JsonKey.ID_TYPE),
-                      externalId.get(JsonKey.PROVIDER));
+                  externalId.get(JsonKey.ID),
+                  externalId.get(JsonKey.ID_TYPE),
+                  externalId.get(JsonKey.PROVIDER));
             }
           }
         }
@@ -1075,30 +1076,30 @@ public final class Util {
       return encryptionService.encryptData(value);
     } catch (Exception e) {
       throw new ProjectCommonException(
-              ResponseCode.userDataEncryptionError.getErrorCode(),
-              ResponseCode.userDataEncryptionError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 
   private static void throwExternalIDNotFoundException(
-          String externalId, String idType, String provider) {
+      String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-            ResponseCode.externalIdNotFound.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ResponseCode.externalIdNotFound.getErrorCode(),
+        ProjectUtil.formatMessage(
+            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   private static void throwUserAlreadyExistsException(
-          String externalId, String idType, String provider) {
+      String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-            ResponseCode.userAlreadyExists.getErrorCode(),
+        ResponseCode.userAlreadyExists.getErrorCode(),
+        ProjectUtil.formatMessage(
+            ResponseCode.userAlreadyExists.getErrorMessage(),
             ProjectUtil.formatMessage(
-                    ResponseCode.userAlreadyExists.getErrorMessage(),
-                    ProjectUtil.formatMessage(
-                            ResponseMessage.Message.EXTERNAL_ID_FORMAT, externalId, idType, provider)),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+                ResponseMessage.Message.EXTERNAL_ID_FORMAT, externalId, idType, provider)),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   /**
@@ -1113,18 +1114,18 @@ public final class Util {
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     Future<Map<String, Object>> resultf =
-            esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+        esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
     Map<String, Object> result =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
     if (MapUtils.isNotEmpty(result)) {
       List<Map<String, Object>> searchResult =
-              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       if (CollectionUtils.isNotEmpty(searchResult)) {
         userList =
-                searchResult
-                        .stream()
-                        .map(s -> mapper.convertValue(s, User.class))
-                        .collect(Collectors.toList());
+            searchResult
+                .stream()
+                .map(s -> mapper.convertValue(s, User.class))
+                .collect(Collectors.toList());
       }
     }
     return userList;
@@ -1134,7 +1135,7 @@ public final class Util {
     String loginId;
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.CHANNEL))) {
       loginId =
-              (String) userMap.get(JsonKey.USERNAME) + "@" + (String) userMap.get(JsonKey.CHANNEL);
+          (String) userMap.get(JsonKey.USERNAME) + "@" + (String) userMap.get(JsonKey.CHANNEL);
     } else {
       loginId = (String) userMap.get(JsonKey.USERNAME);
     }
@@ -1143,11 +1144,11 @@ public final class Util {
 
   public static void addUserExtIds(Map<String, Object> requestMap) {
     List<Map<String, String>> externalIds =
-            (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
+        (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdsMap : externalIds) {
         if (StringUtils.isBlank(extIdsMap.get(JsonKey.OPERATION))
-                || JsonKey.ADD.equalsIgnoreCase(extIdsMap.get(JsonKey.OPERATION))) {
+            || JsonKey.ADD.equalsIgnoreCase(extIdsMap.get(JsonKey.OPERATION))) {
           upsertUserExternalIdentityData(extIdsMap, requestMap, JsonKey.CREATE);
         }
       }
@@ -1155,12 +1156,12 @@ public final class Util {
   }
 
   private static void upsertUserExternalIdentityData(
-          Map<String, String> extIdsMap, Map<String, Object> requestMap, String operation) {
+      Map<String, String> extIdsMap, Map<String, Object> requestMap, String operation) {
     try {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.EXTERNAL_ID, encryptData(extIdsMap.get(JsonKey.ID)));
       map.put(
-              JsonKey.ORIGINAL_EXTERNAL_ID, encryptData(extIdsMap.get(JsonKey.ORIGINAL_EXTERNAL_ID)));
+          JsonKey.ORIGINAL_EXTERNAL_ID, encryptData(extIdsMap.get(JsonKey.ORIGINAL_EXTERNAL_ID)));
       map.put(JsonKey.PROVIDER, extIdsMap.get(JsonKey.PROVIDER));
       map.put(JsonKey.ORIGINAL_PROVIDER, extIdsMap.get(JsonKey.ORIGINAL_PROVIDER));
       map.put(JsonKey.ID_TYPE, extIdsMap.get(JsonKey.ID_TYPE));
@@ -1182,11 +1183,11 @@ public final class Util {
   private static List<Map<String, String>> getUserExternalIds(Map<String, Object> requestMap) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
     Response response =
-            cassandraOperation.getRecordsByIndexedProperty(
-                    KEY_SPACE_NAME,
-                    JsonKey.USR_EXT_IDNT_TABLE,
-                    JsonKey.USER_ID,
-                    requestMap.get(JsonKey.USER_ID));
+        cassandraOperation.getRecordsByIndexedProperty(
+            KEY_SPACE_NAME,
+            JsonKey.USR_EXT_IDNT_TABLE,
+            JsonKey.USER_ID,
+            requestMap.get(JsonKey.USER_ID));
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -1196,7 +1197,7 @@ public final class Util {
   public static void updateUserExtId(Map<String, Object> requestMap) {
     List<Map<String, String>> dbResExternalIds = getUserExternalIds(requestMap);
     List<Map<String, String>> externalIds =
-            (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
+        (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
     if (CollectionUtils.isNotEmpty(externalIds)) {
       // will not allow user to update idType value, if user will try to update idType will
       // ignore
@@ -1207,7 +1208,7 @@ public final class Util {
         Map<String, String> map = extMap.orElse(null);
         // Allowed operation type for externalIds ("add", "remove", "edit")
         if (JsonKey.ADD.equalsIgnoreCase(extIdMap.get(JsonKey.OPERATION))
-                || StringUtils.isBlank(extIdMap.get(JsonKey.OPERATION))) {
+            || StringUtils.isBlank(extIdMap.get(JsonKey.OPERATION))) {
           if (MapUtils.isEmpty(map)) {
             upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.CREATE);
           } else {
@@ -1222,8 +1223,8 @@ public final class Util {
           if (MapUtils.isNotEmpty(map)) {
             if (JsonKey.REMOVE.equalsIgnoreCase(extIdMap.get(JsonKey.OPERATION))) {
               if (StringUtils.isNotBlank(map.get(JsonKey.ID_TYPE))
-                      && StringUtils.isNotBlank((String) requestMap.get(JsonKey.USER_ID))
-                      && StringUtils.isNotBlank(map.get(JsonKey.PROVIDER))) {
+                  && StringUtils.isNotBlank((String) requestMap.get(JsonKey.USER_ID))
+                  && StringUtils.isNotBlank(map.get(JsonKey.PROVIDER))) {
                 deleteUserExternalId(requestMap, map);
               }
             } else if (JsonKey.EDIT.equalsIgnoreCase(extIdMap.get(JsonKey.OPERATION))) {
@@ -1234,9 +1235,9 @@ public final class Util {
             }
           } else {
             throwExternalIDNotFoundException(
-                    extIdMap.get(JsonKey.ID),
-                    extIdMap.get(JsonKey.ID_TYPE),
-                    extIdMap.get(JsonKey.PROVIDER));
+                extIdMap.get(JsonKey.ID),
+                extIdMap.get(JsonKey.ID_TYPE),
+                extIdMap.get(JsonKey.PROVIDER));
           }
         }
       }
@@ -1244,7 +1245,7 @@ public final class Util {
   }
 
   private static void deleteUserExternalId(
-          Map<String, Object> requestMap, Map<String, String> map) {
+      Map<String, Object> requestMap, Map<String, String> map) {
     map.remove(JsonKey.LAST_UPDATED_BY);
     map.remove(JsonKey.CREATED_BY);
     map.remove(JsonKey.LAST_UPDATED_ON);
@@ -1282,25 +1283,25 @@ public final class Util {
     Map<String, Object> user = null;
     Map<String, Object> externalIdReq = new WeakHashMap<>();
     externalIdReq.put(
-            JsonKey.PROVIDER, ((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER)).toLowerCase());
+        JsonKey.PROVIDER, ((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER)).toLowerCase());
     externalIdReq.put(
-            JsonKey.ID_TYPE, ((String) userMap.get(JsonKey.EXTERNAL_ID_TYPE)).toLowerCase());
+        JsonKey.ID_TYPE, ((String) userMap.get(JsonKey.EXTERNAL_ID_TYPE)).toLowerCase());
     externalIdReq.put(
-            JsonKey.EXTERNAL_ID,
-            encryptData(((String) userMap.get(JsonKey.EXTERNAL_ID)).toLowerCase()));
+        JsonKey.EXTERNAL_ID,
+        encryptData(((String) userMap.get(JsonKey.EXTERNAL_ID)).toLowerCase()));
     Response response =
-            cassandraOperation.getRecordsByCompositeKey(
-                    KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
+        cassandraOperation.getRecordsByCompositeKey(
+            KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
     List<Map<String, Object>> userRecordList =
-            (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
     if (CollectionUtils.isNotEmpty(userRecordList)) {
       Map<String, Object> userExtIdRecord = userRecordList.get(0);
       Response res =
-              cassandraOperation.getRecordById(
-                      usrDbInfo.getKeySpace(),
-                      usrDbInfo.getTableName(),
-                      (String) userExtIdRecord.get(JsonKey.USER_ID));
+          cassandraOperation.getRecordById(
+              usrDbInfo.getKeySpace(),
+              usrDbInfo.getTableName(),
+              (String) userExtIdRecord.get(JsonKey.USER_ID));
       if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) res.get(JsonKey.RESPONSE))) {
         // user exist
         user = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE)).get(0);
@@ -1313,12 +1314,12 @@ public final class Util {
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     String channel = null;
     Response resultFrRootOrg =
-            cassandraOperation.getRecordById(
-                    orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId);
+        cassandraOperation.getRecordById(
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId);
     if (CollectionUtils.isNotEmpty(
-            (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
+        (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
       Map<String, Object> rootOrg =
-              ((List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE)).get(0);
+          ((List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE)).get(0);
       channel = (String) rootOrg.get(JsonKey.CHANNEL);
     }
     return channel;
@@ -1331,8 +1332,8 @@ public final class Util {
     map.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     Response response =
-            cassandraOperation.getRecordsByProperties(
-                    usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map);
+        cassandraOperation.getRecordsByProperties(
+            usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map);
     List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (!resList.isEmpty()) {
       Map<String, Object> res = resList.get(0);
@@ -1360,20 +1361,20 @@ public final class Util {
   public static void validateUserExternalIds(Map<String, Object> requestMap) {
     List<Map<String, String>> dbResExternalIds = getUserExternalIds(requestMap);
     List<Map<String, String>> externalIds =
-            (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
+        (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
         Optional<Map<String, String>> extMap = checkExternalID(dbResExternalIds, extIdMap);
         Map<String, String> map = extMap.orElse(null);
         // Allowed operation type for externalIds ("add", "remove", "edit")
         if (!(JsonKey.ADD.equalsIgnoreCase(extIdMap.get(JsonKey.OPERATION))
-                || StringUtils.isBlank(extIdMap.get(JsonKey.OPERATION)))) {
+            || StringUtils.isBlank(extIdMap.get(JsonKey.OPERATION)))) {
           // operation is either edit or remove
           if (MapUtils.isEmpty(map)) {
             throwExternalIDNotFoundException(
-                    extIdMap.get(JsonKey.ID),
-                    extIdMap.get(JsonKey.ID_TYPE),
-                    extIdMap.get(JsonKey.PROVIDER));
+                extIdMap.get(JsonKey.ID),
+                extIdMap.get(JsonKey.ID_TYPE),
+                extIdMap.get(JsonKey.PROVIDER));
           }
         }
       }
@@ -1381,43 +1382,43 @@ public final class Util {
   }
 
   private static Optional<Map<String, String>> checkExternalID(
-          List<Map<String, String>> dbResExternalIds, Map<String, String> extIdMap) {
+      List<Map<String, String>> dbResExternalIds, Map<String, String> extIdMap) {
     Optional<Map<String, String>> extMap =
-            dbResExternalIds
-                    .stream()
-                    .filter(
-                            s -> {
-                              if (((s.get(JsonKey.ID_TYPE)).equalsIgnoreCase(extIdMap.get(JsonKey.ID_TYPE)))
-                                      && ((s.get(JsonKey.PROVIDER))
-                                      .equalsIgnoreCase(extIdMap.get(JsonKey.PROVIDER)))) {
-                                return true;
-                              } else {
-                                return false;
-                              }
-                            })
-                    .findFirst();
+        dbResExternalIds
+            .stream()
+            .filter(
+                s -> {
+                  if (((s.get(JsonKey.ID_TYPE)).equalsIgnoreCase(extIdMap.get(JsonKey.ID_TYPE)))
+                      && ((s.get(JsonKey.PROVIDER))
+                          .equalsIgnoreCase(extIdMap.get(JsonKey.PROVIDER)))) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                })
+            .findFirst();
     return extMap;
   }
 
   public static List<Map<String, String>> convertExternalIdsValueToLowerCase(
-          List<Map<String, String>> externalIds) {
+      List<Map<String, String>> externalIds) {
     ConvertValuesToLowerCase mapper =
-            s -> {
-              s.put(JsonKey.ID, s.get(JsonKey.ID).toLowerCase());
-              s.put(JsonKey.PROVIDER, s.get(JsonKey.PROVIDER).toLowerCase());
-              s.put(JsonKey.ID_TYPE, s.get(JsonKey.ID_TYPE).toLowerCase());
-              return s;
-            };
+        s -> {
+          s.put(JsonKey.ID, s.get(JsonKey.ID).toLowerCase());
+          s.put(JsonKey.PROVIDER, s.get(JsonKey.PROVIDER).toLowerCase());
+          s.put(JsonKey.ID_TYPE, s.get(JsonKey.ID_TYPE).toLowerCase());
+          return s;
+        };
     return externalIds.stream().map(s -> mapper.convertToLowerCase(s)).collect(Collectors.toList());
   }
 
   public static void storeOriginalExternalIdsValue(List<Map<String, String>> externalIds) {
     externalIds.forEach(
-            externalIdMap -> {
-              externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, externalIdMap.get(JsonKey.ID));
-              externalIdMap.put(JsonKey.ORIGINAL_PROVIDER, externalIdMap.get(JsonKey.PROVIDER));
-              externalIdMap.put(JsonKey.ORIGINAL_ID_TYPE, externalIdMap.get(JsonKey.ID_TYPE));
-            });
+        externalIdMap -> {
+          externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, externalIdMap.get(JsonKey.ID));
+          externalIdMap.put(JsonKey.ORIGINAL_PROVIDER, externalIdMap.get(JsonKey.PROVIDER));
+          externalIdMap.put(JsonKey.ORIGINAL_ID_TYPE, externalIdMap.get(JsonKey.ID_TYPE));
+        });
   }
 
   @SuppressWarnings("unchecked")
@@ -1429,12 +1430,12 @@ public final class Util {
     Map<String, Object> userDetails = null;
     try {
       response =
-              cassandraOperation.getRecordById(
-                      userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId);
+          cassandraOperation.getRecordById(
+              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId);
       userList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log(
-              "Util:getUserProfile: collecting user data to save for userId : " + userId,
-              LoggerEnum.INFO.name());
+          "Util:getUserProfile: collecting user data to save for userId : " + userId,
+          LoggerEnum.INFO.name());
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }
@@ -1463,8 +1464,8 @@ public final class Util {
       addEmailAndPhone(userDetails);
     } else {
       ProjectLogger.log(
-              "Util:getUserProfile: User data not available to save in ES for userId : " + userId,
-              LoggerEnum.INFO.name());
+          "Util:getUserProfile: User data not available to save in ES for userId : " + userId,
+          LoggerEnum.INFO.name());
     }
     userDetails.put(JsonKey.USERNAME, username);
     return userDetails;
@@ -1487,20 +1488,20 @@ public final class Util {
 
   public static void checkUserProfileVisibility(Map<String, Object> userMap, ActorRef actorRef) {
     ProjectLogger.log(
-            "Util:checkUserProfileVisibility: userId = " + userMap.get(JsonKey.USER_ID),
-            LoggerEnum.INFO.name());
+        "Util:checkUserProfileVisibility: userId = " + userMap.get(JsonKey.USER_ID),
+        LoggerEnum.INFO.name());
     Map<String, String> userProfileVisibilityMap =
-            (Map<String, String>) userMap.get(JsonKey.PROFILE_VISIBILITY);
+        (Map<String, String>) userMap.get(JsonKey.PROFILE_VISIBILITY);
     Map<String, String> completeProfileVisibilityMap =
-            getCompleteProfileVisibilityMap(userProfileVisibilityMap, actorRef);
+        getCompleteProfileVisibilityMap(userProfileVisibilityMap, actorRef);
     ProjectLogger.log(
-            "Util:checkUserProfileVisibility: completeProfileVisibilityMap is "
-                    + completeProfileVisibilityMap,
-            LoggerEnum.INFO.name());
+        "Util:checkUserProfileVisibility: completeProfileVisibilityMap is "
+            + completeProfileVisibilityMap,
+        LoggerEnum.INFO.name());
     ProjectLogger.log(
-            "Util:checkUserProfileVisibility: userMap contains username and the encrypted value before removing"
-                    + userMap.get(JsonKey.USER_NAME),
-            LoggerEnum.INFO.name());
+        "Util:checkUserProfileVisibility: userMap contains username and the encrypted value before removing"
+            + userMap.get(JsonKey.USER_NAME),
+        LoggerEnum.INFO.name());
     if (MapUtils.isNotEmpty(completeProfileVisibilityMap)) {
       Map<String, Object> privateFieldsMap = new HashMap<>();
       for (String field : completeProfileVisibilityMap.keySet()) {
@@ -1509,25 +1510,25 @@ public final class Util {
         }
       }
       ProjectLogger.log(
-              "Util:checkUserProfileVisibility: private fields key are " + privateFieldsMap.keySet(),
-              LoggerEnum.INFO.name());
+          "Util:checkUserProfileVisibility: private fields key are " + privateFieldsMap.keySet(),
+          LoggerEnum.INFO.name());
       ProjectLogger.log(
-              "Util:checkUserProfileVisibility: userMap contains username and the encrypted value after removing"
-                      + userMap.get(JsonKey.USER_NAME),
-              LoggerEnum.INFO.name());
+          "Util:checkUserProfileVisibility: userMap contains username and the encrypted value after removing"
+              + userMap.get(JsonKey.USER_NAME),
+          LoggerEnum.INFO.name());
       esService.upsert(
-              ProjectUtil.EsType.userprofilevisibility.getTypeName(),
-              (String) userMap.get(JsonKey.USER_ID),
-              privateFieldsMap);
+          ProjectUtil.EsType.userprofilevisibility.getTypeName(),
+          (String) userMap.get(JsonKey.USER_ID),
+          privateFieldsMap);
     } else {
       userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     }
   }
 
   public static Map<String, String> getCompleteProfileVisibilityPrivateMap(
-          Map<String, String> userProfileVisibilityMap, ActorRef actorRef) {
+      Map<String, String> userProfileVisibilityMap, ActorRef actorRef) {
     Map<String, String> completeProfileVisibilityMap =
-            getCompleteProfileVisibilityMap(userProfileVisibilityMap, actorRef);
+        getCompleteProfileVisibilityMap(userProfileVisibilityMap, actorRef);
     Map<String, String> completeProfileVisibilityPrivateMap = new HashMap<String, String>();
     for (String key : completeProfileVisibilityMap.keySet()) {
       if (JsonKey.PRIVATE.equalsIgnoreCase(completeProfileVisibilityMap.get(key))) {
@@ -1538,16 +1539,16 @@ public final class Util {
   }
 
   public static Map<String, String> getCompleteProfileVisibilityMap(
-          Map<String, String> userProfileVisibilityMap, ActorRef actorRef) {
+      Map<String, String> userProfileVisibilityMap, ActorRef actorRef) {
     String defaultProfileVisibility =
-            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_USER_PROFILE_FIELD_DEFAULT_VISIBILITY);
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_USER_PROFILE_FIELD_DEFAULT_VISIBILITY);
     if (!(JsonKey.PUBLIC.equalsIgnoreCase(defaultProfileVisibility)
-            || JsonKey.PRIVATE.equalsIgnoreCase(defaultProfileVisibility))) {
+        || JsonKey.PRIVATE.equalsIgnoreCase(defaultProfileVisibility))) {
       ProjectLogger.log(
-              "Util:getCompleteProfileVisibilityMap: Invalid configuration - "
-                      + defaultProfileVisibility
-                      + " - for default profile visibility (public / private)",
-              LoggerEnum.ERROR.name());
+          "Util:getCompleteProfileVisibilityMap: Invalid configuration - "
+              + defaultProfileVisibility
+              + " - for default profile visibility (public / private)",
+          LoggerEnum.ERROR.name());
       ProjectCommonException.throwServerErrorException(ResponseCode.invaidConfiguration, "");
     }
 
@@ -1588,10 +1589,10 @@ public final class Util {
   public static List<Map<String, Object>> getUserSkills(String userId) {
     Util.DbInfo userSkillDbInfo = Util.dbInfoMap.get(JsonKey.USER_SKILL_DB);
     Response skillresponse =
-            cassandraOperation.getRecordsByIndexedProperty(
-                    userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), JsonKey.USER_ID, userId);
+        cassandraOperation.getRecordsByIndexedProperty(
+            userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), JsonKey.USER_ID, userId);
     List<Map<String, Object>> responseList =
-            (List<Map<String, Object>>) skillresponse.get(JsonKey.RESPONSE);
+        (List<Map<String, Object>>) skillresponse.get(JsonKey.RESPONSE);
     return responseList;
   }
 
@@ -1600,8 +1601,8 @@ public final class Util {
     List<Map<String, Object>> badges = new ArrayList<>();
     try {
       Response result =
-              cassandraOperation.getRecordsByIndexedProperty(
-                      badgeDbInfo.getKeySpace(), badgeDbInfo.getTableName(), JsonKey.USER_ID, userId);
+          cassandraOperation.getRecordsByIndexedProperty(
+              badgeDbInfo.getKeySpace(), badgeDbInfo.getTableName(), JsonKey.USER_ID, userId);
       badges = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
@@ -1618,23 +1619,23 @@ public final class Util {
       reqMap.put(JsonKey.IS_DELETED, false);
       Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
-              cassandraOperation.getRecordsByProperties(
-                      orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
+          cassandraOperation.getRecordsByProperties(
+              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
       userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(userOrgList)) {
         List<String> organisationIds =
-                userOrgList
-                        .stream()
-                        .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
-                        .distinct()
-                        .collect(Collectors.toList());
+            userOrgList
+                .stream()
+                .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
+                .distinct()
+                .collect(Collectors.toList());
         List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.PARENT_ORG_ID, JsonKey.ID);
 
         Future<Map<String, Map<String, Object>>> orgInfoMapF =
-                esService.getEsResultByListOfIds(organisationIds, fields, EsType.organisation.name());
+            esService.getEsResultByListOfIds(organisationIds, fields, EsType.organisation.name());
         Map<String, Map<String, Object>> orgInfoMap =
-                (Map<String, Map<String, Object>>)
-                        ElasticSearchHelper.getResponseFromFuture(orgInfoMapF);
+            (Map<String, Map<String, Object>>)
+                ElasticSearchHelper.getResponseFromFuture(orgInfoMapF);
 
         for (Map<String, Object> userOrg : userOrgList) {
           Map<String, Object> esOrgMap = orgInfoMap.get(userOrg.get(JsonKey.ORGANISATION_ID));
@@ -1656,10 +1657,10 @@ public final class Util {
     try {
       ProjectLogger.log("collecting user jobprofile user Id : " + userId);
       jobProfileResponse =
-              cassandraOperation.getRecordsByIndexedProperty(
-                      jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), JsonKey.USER_ID, userId);
+          cassandraOperation.getRecordsByIndexedProperty(
+              jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), JsonKey.USER_ID, userId);
       userJobProfileList =
-              (List<Map<String, Object>>) jobProfileResponse.getResult().get(JsonKey.RESPONSE);
+          (List<Map<String, Object>>) jobProfileResponse.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log("collecting user jobprofile collection completed userId : " + userId);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
@@ -1680,8 +1681,8 @@ public final class Util {
     Response eduResponse = null;
     try {
       eduResponse =
-              cassandraOperation.getRecordsByIndexedProperty(
-                      eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), JsonKey.USER_ID, userId);
+          cassandraOperation.getRecordsByIndexedProperty(
+              eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), JsonKey.USER_ID, userId);
       userEducationList = (List<Map<String, Object>>) eduResponse.getResult().get(JsonKey.RESPONSE);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
@@ -1705,12 +1706,12 @@ public final class Util {
         ProjectLogger.log("collecting user address operation user Id : " + userId);
         String encUserId = encryptData(userId);
         addrResponse =
-                cassandraOperation.getRecordsByIndexedProperty(
-                        addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, encUserId);
+            cassandraOperation.getRecordsByIndexedProperty(
+                addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, encUserId);
       } else {
         addrResponse =
-                cassandraOperation.getRecordById(
-                        addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId);
+            cassandraOperation.getRecordById(
+                addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId);
       }
       userAddressList = (List<Map<String, Object>>) addrResponse.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log("collecting user address operation completed user Id : " + userId);
@@ -1722,24 +1723,24 @@ public final class Util {
 
   public static void saveUserDataToES(Map<String, Object> userData) {
     boolean flag =
-            insertDataToElastic(
-                    ProjectUtil.EsIndex.sunbird.getIndexName(),
-                    ProjectUtil.EsType.user.getTypeName(),
-                    (String) userData.get(JsonKey.USER_ID),
-                    userData);
+        insertDataToElastic(
+            ProjectUtil.EsIndex.sunbird.getIndexName(),
+            ProjectUtil.EsType.user.getTypeName(),
+            (String) userData.get(JsonKey.USER_ID),
+            userData);
     if (flag) {
       ProjectLogger.log(
-              "Util:saveUserDataToES : ES save operation is successful for userId : "
-                      + (String) userData.get(JsonKey.USER_ID));
+          "Util:saveUserDataToES : ES save operation is successful for userId : "
+              + (String) userData.get(JsonKey.USER_ID));
     } else {
       ProjectLogger.log(
-              "Util:saveUserDataToES : ES save operation is unsuccessful for userId : "
-                      + (String) userData.get(JsonKey.USER_ID));
+          "Util:saveUserDataToES : ES save operation is unsuccessful for userId : "
+              + (String) userData.get(JsonKey.USER_ID));
     }
   }
 
   private static boolean insertDataToElastic(
-          String index, String type, String identifier, Map<String, Object> data) {
+      String index, String type, String identifier, Map<String, Object> data) {
     Future<String> responseF = esService.save(type, identifier, data);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (!StringUtils.isBlank(response)) {
@@ -1747,7 +1748,7 @@ public final class Util {
       return true;
     }
     ProjectLogger.log(
-            "unbale to save the data inside ES with identifier " + identifier, LoggerEnum.INFO.name());
+        "unbale to save the data inside ES with identifier " + identifier, LoggerEnum.INFO.name());
     return false;
   }
 
@@ -1765,24 +1766,24 @@ public final class Util {
         }
         DbInfo userDb = dbInfoMap.get(JsonKey.USER_DB);
         Response result =
-                cassandraOperation.getRecordsByIndexedProperty(
-                        userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
+            cassandraOperation.getRecordsByIndexedProperty(
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
         List<Map<String, Object>> userMapList =
-                (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
           if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
             throw new ProjectCommonException(
-                    ResponseCode.PhoneNumberInUse.getErrorCode(),
-                    ResponseCode.PhoneNumberInUse.getErrorMessage(),
-                    ResponseCode.CLIENT_ERROR.getResponseCode());
+                ResponseCode.PhoneNumberInUse.getErrorCode(),
+                ResponseCode.PhoneNumberInUse.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
           } else {
             Map<String, Object> user = userMapList.get(0);
             if (!(((String) user.get(JsonKey.ID))
-                    .equalsIgnoreCase((String) userMap.get(JsonKey.ID)))) {
+                .equalsIgnoreCase((String) userMap.get(JsonKey.ID)))) {
               throw new ProjectCommonException(
-                      ResponseCode.PhoneNumberInUse.getErrorCode(),
-                      ResponseCode.PhoneNumberInUse.getErrorMessage(),
-                      ResponseCode.CLIENT_ERROR.getResponseCode());
+                  ResponseCode.PhoneNumberInUse.getErrorCode(),
+                  ResponseCode.PhoneNumberInUse.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           }
         }
@@ -1809,25 +1810,25 @@ public final class Util {
         map.put(JsonKey.FILTERS, filters);
         SearchDTO searchDto = Util.createSearchDto(map);
         Future<Map<String, Object>> resultF =
-                esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+            esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
         Map<String, Object> result =
-                (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
         List<Map<String, Object>> userMapList =
-                (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+            (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
         if (!userMapList.isEmpty()) {
           if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
             throw new ProjectCommonException(
-                    ResponseCode.emailInUse.getErrorCode(),
-                    ResponseCode.emailInUse.getErrorMessage(),
-                    ResponseCode.CLIENT_ERROR.getResponseCode());
+                ResponseCode.emailInUse.getErrorCode(),
+                ResponseCode.emailInUse.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
           } else {
             Map<String, Object> user = userMapList.get(0);
             if (!(((String) user.get(JsonKey.ID))
-                    .equalsIgnoreCase((String) userMap.get(JsonKey.ID)))) {
+                .equalsIgnoreCase((String) userMap.get(JsonKey.ID)))) {
               throw new ProjectCommonException(
-                      ResponseCode.emailInUse.getErrorCode(),
-                      ResponseCode.emailInUse.getErrorMessage(),
-                      ResponseCode.CLIENT_ERROR.getResponseCode());
+                  ResponseCode.emailInUse.getErrorCode(),
+                  ResponseCode.emailInUse.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           }
         }
@@ -1845,19 +1846,19 @@ public final class Util {
       reciptientsMail.add((String) emailTemplateMap.get(JsonKey.EMAIL));
       emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
       emailTemplateMap.put(
-              JsonKey.BODY, propertiesCache.getProperty(JsonKey.ONBOARDING_WELCOME_MAIL_BODY));
+          JsonKey.BODY, propertiesCache.getProperty(JsonKey.ONBOARDING_WELCOME_MAIL_BODY));
       emailTemplateMap.put(JsonKey.NOTE, propertiesCache.getProperty(JsonKey.MAIL_NOTE));
       emailTemplateMap.put(JsonKey.ORG_NAME, envName);
       String welcomeMessage = propertiesCache.getProperty(JsonKey.ONBOARDING_MAIL_MESSAGE);
       emailTemplateMap.put(
-              JsonKey.WELCOME_MESSAGE, ProjectUtil.formatMessage(welcomeMessage, envName));
+          JsonKey.WELCOME_MESSAGE, ProjectUtil.formatMessage(welcomeMessage, envName));
 
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "welcome");
       setRequiredActionLink(emailTemplateMap);
       if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.SET_PASSWORD_LINK))
-              && StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
+          && StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
         ProjectLogger.log(
-                "Util:sendOnboardingMail: Email not sent as generated link is empty", LoggerEnum.ERROR);
+            "Util:sendOnboardingMail: Email not sent as generated link is empty", LoggerEnum.ERROR);
         return null;
       }
 
@@ -1883,27 +1884,27 @@ public final class Util {
   public static void getUserRequiredActionLink(Map<String, Object> templateMap) {
     URLShortner urlShortner = new URLShortnerImpl();
     String redirectUri =
-            StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
-                    ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
-                    : null;
+        StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
+            ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
+            : null;
     ProjectLogger.log(
-            "Util:getUserRequiredActionLink redirectURI = " + redirectUri, LoggerEnum.INFO.name());
+        "Util:getUserRequiredActionLink redirectURI = " + redirectUri, LoggerEnum.INFO.name());
     if (StringUtils.isBlank((String) templateMap.get(JsonKey.PASSWORD))) {
       templateMap.put(
-              JsonKey.SET_PASSWORD_LINK,
-              urlShortner.shortUrl(
-                      KeycloakRequiredActionLinkUtil.getLink(
-                              (String) templateMap.get(JsonKey.USERNAME),
-                              redirectUri,
-                              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD)));
+          JsonKey.SET_PASSWORD_LINK,
+          urlShortner.shortUrl(
+              KeycloakRequiredActionLinkUtil.getLink(
+                  (String) templateMap.get(JsonKey.USERNAME),
+                  redirectUri,
+                  KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD)));
     } else {
       templateMap.put(
-              JsonKey.VERIFY_EMAIL_LINK,
-              urlShortner.shortUrl(
-                      KeycloakRequiredActionLinkUtil.getLink(
-                              (String) templateMap.get(JsonKey.USERNAME),
-                              redirectUri,
-                              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL)));
+          JsonKey.VERIFY_EMAIL_LINK,
+          urlShortner.shortUrl(
+              KeycloakRequiredActionLinkUtil.getLink(
+                  (String) templateMap.get(JsonKey.USERNAME),
+                  redirectUri,
+                  KeycloakRequiredActionLinkUtil.VERIFY_EMAIL)));
     }
   }
 
@@ -1912,9 +1913,9 @@ public final class Util {
       String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       setRequiredActionLink(userMap);
       if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
-              && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
+          && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
         ProjectLogger.log(
-                "Util:sendSMS: SMS not sent as generated link is empty", LoggerEnum.ERROR);
+            "Util:sendSMS: SMS not sent as generated link is empty", LoggerEnum.ERROR);
         return;
       }
       Map<String, String> smsTemplate = new HashMap<>();
@@ -1929,30 +1930,30 @@ public final class Util {
       String countryCode = "";
       if (StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
         countryCode =
-                PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
+            PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
       } else {
         countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
       }
       ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
       ProjectLogger.log(
-              "SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE),
-              LoggerEnum.INFO.name());
+          "SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE),
+          LoggerEnum.INFO.name());
       boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms);
       ProjectLogger.log("Response from smsProvider : " + response, LoggerEnum.INFO);
       if (response) {
         ProjectLogger.log(
-                "Welcome Message sent successfully to ." + (String) userMap.get(JsonKey.PHONE),
-                LoggerEnum.INFO.name());
+            "Welcome Message sent successfully to ." + (String) userMap.get(JsonKey.PHONE),
+            LoggerEnum.INFO.name());
       } else {
         ProjectLogger.log(
-                "Welcome Message failed for ." + (String) userMap.get(JsonKey.PHONE),
-                LoggerEnum.INFO.name());
+            "Welcome Message failed for ." + (String) userMap.get(JsonKey.PHONE),
+            LoggerEnum.INFO.name());
       }
     }
   }
 
   public static List<Map<String, String>> copyAndConvertExternalIdsToLower(
-          List<Map<String, String>> externalIds) {
+      List<Map<String, String>> externalIds) {
     List<Map<String, String>> list = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       storeOriginalExternalIdsValue(externalIds);
@@ -1967,14 +1968,14 @@ public final class Util {
       try {
         SystemSettingClient client = SystemSettingClientImpl.getInstance();
         SystemSetting systemSetting =
-                client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL);
+            client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL);
         if (null != systemSetting && StringUtils.isNotBlank(systemSetting.getValue())) {
           channel = systemSetting.getValue();
         }
       } catch (Exception ex) {
         ProjectLogger.log(
-                "Util:getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
-                ex);
+            "Util:getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
+            ex);
       }
     }
     if (StringUtils.isBlank(channel)) {
@@ -1992,10 +1993,10 @@ public final class Util {
    */
   public static Config getUserProfileConfig(ActorRef actorRef) {
     SystemSetting userProfileConfigSetting =
-            getSystemSettingByField(JsonKey.USER_PROFILE_CONFIG, actorRef);
+        getSystemSettingByField(JsonKey.USER_PROFILE_CONFIG, actorRef);
     String userProfileConfigString = userProfileConfigSetting.getValue();
     Config userProfileConfig =
-            ConfigUtil.getConfigFromJsonString(userProfileConfigString, JsonKey.USER_PROFILE_CONFIG);
+        ConfigUtil.getConfigFromJsonString(userProfileConfigString, JsonKey.USER_PROFILE_CONFIG);
     validateUserProfileConfig(userProfileConfig);
     return userProfileConfig;
   }
@@ -2003,8 +2004,8 @@ public final class Util {
   private static void validateUserProfileConfig(Config userProfileConfig) {
     if (CollectionUtils.isEmpty(userProfileConfig.getStringList(JsonKey.FIELDS))) {
       ProjectLogger.log(
-              "Util:validateUserProfileConfig: User profile fields is not configured.",
-              LoggerEnum.ERROR.name());
+          "Util:validateUserProfileConfig: User profile fields is not configured.",
+          LoggerEnum.ERROR.name());
       ProjectCommonException.throwServerErrorException(ResponseCode.invaidConfiguration, "");
     }
     List<String> publicFields = null;
@@ -2014,26 +2015,26 @@ public final class Util {
       privateFields = userProfileConfig.getStringList(JsonKey.PRIVATE_FIELDS);
     } catch (Exception e) {
       ProjectLogger.log(
-              "Util:validateUserProfileConfig: Invalid configuration for public / private fields.",
-              LoggerEnum.ERROR.name());
+          "Util:validateUserProfileConfig: Invalid configuration for public / private fields.",
+          LoggerEnum.ERROR.name());
     }
 
     if (CollectionUtils.isNotEmpty(privateFields) && CollectionUtils.isNotEmpty(publicFields)) {
       for (String field : publicFields) {
         if (privateFields.contains(field)) {
           ProjectLogger.log(
-                  "Field "
-                          + field
-                          + " in user configuration is conflicting in publicFields and privateFields.",
-                  LoggerEnum.ERROR.name());
+              "Field "
+                  + field
+                  + " in user configuration is conflicting in publicFields and privateFields.",
+              LoggerEnum.ERROR.name());
           ProjectCommonException.throwServerErrorException(
-                  ResponseCode.errorConflictingFieldConfiguration,
-                  ProjectUtil.formatMessage(
-                          ResponseCode.errorConflictingFieldConfiguration.getErrorMessage(),
-                          field,
-                          JsonKey.USER,
-                          JsonKey.PUBLIC_FIELDS,
-                          JsonKey.PRIVATE_FIELDS));
+              ResponseCode.errorConflictingFieldConfiguration,
+              ProjectUtil.formatMessage(
+                  ResponseCode.errorConflictingFieldConfiguration.getErrorMessage(),
+                  field,
+                  JsonKey.USER,
+                  JsonKey.PUBLIC_FIELDS,
+                  JsonKey.PRIVATE_FIELDS));
         }
       }
     }
@@ -2047,7 +2048,7 @@ public final class Util {
    * @return system setting
    */
   public static SystemSetting getSystemSettingByField(
-          String systemSettingField, ActorRef actorRef) {
+      String systemSettingField, ActorRef actorRef) {
     SystemSetting systemSetting = null;
     try {
       SystemSettingClient client = SystemSettingClientImpl.getInstance();
@@ -2057,13 +2058,13 @@ public final class Util {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "Util:getSystemSettingByField: System setting not found for field - "
-                      + systemSettingField,
-              e);
+          "Util:getSystemSettingByField: System setting not found for field - "
+              + systemSettingField,
+          e);
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.errorSystemSettingNotFound,
-              ProjectUtil.formatMessage(
-                      ResponseCode.errorSystemSettingNotFound.getErrorMessage(), systemSettingField));
+          ResponseCode.errorSystemSettingNotFound,
+          ProjectUtil.formatMessage(
+              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), systemSettingField));
     }
     return systemSetting;
   }

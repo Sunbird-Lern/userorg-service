@@ -479,9 +479,6 @@ public class CourseMetricsActorTest {
     Map<String, Object> batchData = new HashMap<>();
     batchData.put(JsonKey.START_DATE, "startDate");
     batchData.put(JsonKey.END_DATE, "endDate");
-    Map<String, Object> additionalInfo = new HashMap<>();
-    additionalInfo.put(JsonKey.LEAF_NODE_COUNT, progress + "");
-    batchData.put(JsonKey.COURSE_ADDITIONAL_INFO, additionalInfo);
     batchData.put(JsonKey.COMPLETED_COUNT, 1);
     return batchData;
   }

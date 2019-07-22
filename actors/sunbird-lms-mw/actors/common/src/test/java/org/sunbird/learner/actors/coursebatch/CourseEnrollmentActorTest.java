@@ -238,11 +238,6 @@ public class CourseEnrollmentActorTest {
     userMap.put(JsonKey.STATUS, status);
     userMap.put(JsonKey.START_DATE, calculateDate(0));
     userMap.put(JsonKey.END_DATE, calculateDate(4));
-    Map<String, Object> courseInfo = new HashMap<>();
-    courseInfo.put(JsonKey.NAME, courseName);
-    courseInfo.put(JsonKey.DESCRIPTION, courseDescription);
-    courseInfo.put(JsonKey.APP_ICON, courseAppIcon);
-    userMap.put(JsonKey.COURSE_ADDITIONAL_INFO, courseInfo);
     List<Map<String, Object>> result = new ArrayList<>();
     result.add(userMap);
     response.put(JsonKey.RESPONSE, result);

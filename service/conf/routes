@@ -17,6 +17,7 @@ GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnro
 POST     /v1/course/enroll	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
 POST     /v1/course/unenroll             @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
 POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
+POST /v1/batch/bulk/unenrollment          @controllers.bulkapimanagement.BulkUploadController.batchUnEnrollmentBulkUpload()
 POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
 PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
 PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
@@ -49,6 +50,8 @@ PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchCont
 GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
 POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
 POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToCourseBatch(batchId:String)
+POST	 /v1/course/batch/users/remove/:batchId			@controllers.coursemanagement.CourseBatchController.removeUserFromCourseBatch(batchId:String)
+POST		 /v1/batch/participants/list			@controllers.coursemanagement.CourseBatchController.getParticipants()
 
 # Textbook APIs
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
