@@ -33,6 +33,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.kafka.client.InstructionEventGenerator;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
 
@@ -48,6 +49,8 @@ import scala.concurrent.Future;
 )
 public class LearnerStateUpdateActor extends BaseActor {
 
+    private final String actorId = "Course Batch Updater";
+    private final String actorType = "System";
     private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
     private Util.DbInfo consumptionDBInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
@@ -99,7 +102,8 @@ public class LearnerStateUpdateActor extends BaseActor {
                             cassandraOperation.batchInsert(consumptionDBInfo.getKeySpace(), consumptionDBInfo.getTableName(), contents);
                             Map<String, Object> updatedBatch = getBatchCurrentStatus(batchId, userId, contents);
                             cassandraOperation.upsertRecord(userCourseDBInfo.getKeySpace(), userCourseDBInfo.getTableName(), updatedBatch);
-                            // TODO: Generate Instruction event. Send userId, batchId, courseId, contents.
+                            // Generate Instruction event. Send userId, batchId, courseId, contents.
+                            pushInstructionEvent(userId, batchId, courseId, contents);
                             updateMessages(respMessages, ContentUpdateResponseKeys.SUCCESS_CONTENTS.name(), contentIds);
                         } else {
                             updateMessages(respMessages, ContentUpdateResponseKeys.NOT_A_ON_GOING_BATCH.name(), batchId);
@@ -603,5 +607,48 @@ public class LearnerStateUpdateActor extends BaseActor {
                             + status,
                     LoggerEnum.INFO.name());
         }
+    }
+
+    /**
+     * Construct the instruction event data and push the event data as BEInstructionEvent.
+     * @param userId
+     * @param batchId
+     * @param courseId
+     * @param contents
+     * @throws Exception
+     */
+    private void pushInstructionEvent(String userId, String batchId, String courseId, List<Map<String, Object>> contents) throws Exception {
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("actor" , new HashMap<String, Object>() {{
+            put("id", actorId);
+            put("type", actorType);
+        }});
+
+        data.put("object", new HashMap<String, Object>() {{
+            put("id", batchId + "_" + userId);
+            put("type", "CourseBatchEnrolment");
+        }});
+
+        data.put("action", "batch-enrolment-update");
+
+        List<Map<String, Object>> contentsMap = contents.stream().map(c -> {
+           return new HashMap<String, Object>() {{
+                put("contentId", c.get("contentId"));
+                put("status", c.get("status"));
+            }};
+        }).collect(Collectors.toList());
+
+        data.put("edata", new HashMap<String, Object>() {{
+            put("userId", userId);
+            put("batchId", batchId);
+            put("courseId", courseId);
+            put("contents", contentsMap);
+            put("action", "batch-enrolment-update");
+            put("iteration", 1);
+        }});
+
+        InstructionEventGenerator.pushInstructionEvent(data);
+
     }
 }
