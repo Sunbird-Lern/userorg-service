@@ -839,15 +839,17 @@ public class CourseBatchManagementActor extends BaseActor {
         return format.parse(format.format(new Date()));
       } else {
         if (StringUtils.isNotBlank((String) map.get(key))) {
-          Calendar cal =
-              Calendar.getInstance(
-                  TimeZone.getTimeZone(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_TIMEZONE)));
-          cal.setTime(format.parse((String) map.get(key)));
+          Date d = format.parse((String) map.get(key));
           if (key.equals(END_DATE) || key.equals(ENROLLMENT_END_DATE)) {
+            Calendar cal =
+                Calendar.getInstance(
+                    TimeZone.getTimeZone(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_TIMEZONE)));
+            cal.setTime(d);
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
+            return cal.getTime();
           }
-          return cal.getTime();
+          return d;
         } else {
           return null;
         }
