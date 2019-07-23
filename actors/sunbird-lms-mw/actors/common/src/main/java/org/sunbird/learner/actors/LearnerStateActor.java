@@ -344,28 +344,6 @@ public class LearnerStateActor extends BaseActor {
         contentsForCourses
             .stream()
             .collect(Collectors.toMap(cMap -> (String) cMap.get(JsonKey.IDENTIFIER), cMap -> cMap));
-    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.LEARNER_CONTENT_DB);
-    Map<String, Object> primaryKey = new HashMap<>();
-    primaryKey.put(JsonKey.USER_ID, request.getRequest().get(JsonKey.USER_ID));
-    Response response =
-        cassandraOperation.getRecordById(dbInfo.getKeySpace(), dbInfo.getTableName(), primaryKey);
-    List<Map<String, Object>> userContentIdsForCourses =
-        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-    Map<String, List<Map<String, Object>>> batchContentIdMap = new HashMap<>();
-    userContentIdsForCourses
-        .stream()
-        .forEach(
-            contentConsumption -> {
-              if (!batchContentIdMap.containsKey(
-                  (String) contentConsumption.get(JsonKey.BATCH_ID))) {
-                batchContentIdMap.put(
-                    (String) contentConsumption.get(JsonKey.BATCH_ID),
-                    new ArrayList<Map<String, Object>>());
-              }
-              batchContentIdMap
-                  .get(contentConsumption.get(JsonKey.BATCH_ID))
-                  .add(contentConsumption);
-            });
 
     List<Map<String, Object>> updatedCourses = new ArrayList<>();
     for (Map<String, Object> course : activeCourses) {
@@ -380,35 +358,27 @@ public class LearnerStateActor extends BaseActor {
       course.put(JsonKey.LEAF_NODE_COUNT, courseContent.get(JsonKey.LEAF_NODE_COUNT));
       course.put(JsonKey.COURSE_LOGO_URL, courseContent.get(JsonKey.APP_ICON));
       course.put(JsonKey.CONTENT_ID, course.get(JsonKey.COURSE_ID));
-      Integer progressPercentage = Integer.valueOf("0");
-      int contentIdscompleted = 0;
-      List<Map<String, Object>> contentIdsForBatch =
-          batchContentIdMap.get(course.get(JsonKey.BATCH_ID));
-      if (CollectionUtils.isEmpty(contentIdsForBatch)
-          || CollectionUtils.isEmpty((List<String>) courseContent.get("leafNodes"))) {
-        continue;
-      }
-      contentIdscompleted =
-          (int)
-              contentIdsForBatch
-                  .stream()
-                  .filter(
-                      content ->
-                          ProjectUtil.ProgressStatus.COMPLETED.getValue()
-                              == (Integer) content.get(JsonKey.STATUS))
-                  .filter(
-                      content ->
-                          ((List<String>) courseContent.get("leafNodes"))
-                              .contains((String) content.get(JsonKey.CONTENT_ID)))
-                  .count();
+      List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
+      if (course.get("contentStatus") != null && CollectionUtils.isNotEmpty(leafNodes)) {
+        Map<String, Object> contentStatus =
+            new ObjectMapper().convertValue(course.get("contentStatus"), Map.class);
+        int contentIdscompleted =
+            (int)
+                contentStatus
+                    .entrySet()
+                    .stream()
+                    .filter(
+                        content ->
+                            ProjectUtil.ProgressStatus.COMPLETED.getValue()
+                                == (Integer) content.getValue())
+                    .filter(content -> (leafNodes).contains((String) content.getKey()))
+                    .count();
 
-      progressPercentage =
-          (int)
-              Math.round(
-                  (contentIdscompleted * 100.0)
-                      / ((List<String>) courseContent.get("leafNodes")).size());
-      course.put(JsonKey.PROGRESS, contentIdscompleted);
-      course.put(COMPLETE_PERCENT, progressPercentage);
+        Integer completionPercentage =
+            (int) Math.round((contentIdscompleted * 100.0) / (leafNodes).size());
+        course.put(JsonKey.PROGRESS, contentIdscompleted);
+        course.put(COMPLETE_PERCENT, completionPercentage);
+      }
       updatedCourses.add(course);
     }
     return updatedCourses;
