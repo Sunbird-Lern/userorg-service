@@ -358,7 +358,7 @@ public class LearnerStateActor extends BaseActor {
       course.put(JsonKey.LEAF_NODE_COUNT, courseContent.get(JsonKey.LEAF_NODE_COUNT));
       course.put(JsonKey.COURSE_LOGO_URL, courseContent.get(JsonKey.APP_ICON));
       course.put(JsonKey.CONTENT_ID, course.get(JsonKey.COURSE_ID));
-      Integer progressPercentage;
+      Integer completionPercentage;
       int contentIdscompleted;
       Map<String, Object> contentIdsForCourse =
           new ObjectMapper().convertValue(course.get("contentstatus"), Map.class);
@@ -381,13 +381,13 @@ public class LearnerStateActor extends BaseActor {
                               .contains((String) content.getKey()))
                   .count();
 
-      progressPercentage =
+      completionPercentage =
           (int)
               Math.round(
                   (contentIdscompleted * 100.0)
                       / ((List<String>) courseContent.get("leafNodes")).size());
       course.put(JsonKey.PROGRESS, contentIdscompleted);
-      course.put(COMPLETE_PERCENT, progressPercentage);
+      course.put(COMPLETE_PERCENT, completionPercentage);
       updatedCourses.add(course);
     }
     return updatedCourses;
