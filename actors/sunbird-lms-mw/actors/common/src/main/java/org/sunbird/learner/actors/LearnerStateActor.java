@@ -358,36 +358,27 @@ public class LearnerStateActor extends BaseActor {
       course.put(JsonKey.LEAF_NODE_COUNT, courseContent.get(JsonKey.LEAF_NODE_COUNT));
       course.put(JsonKey.COURSE_LOGO_URL, courseContent.get(JsonKey.APP_ICON));
       course.put(JsonKey.CONTENT_ID, course.get(JsonKey.COURSE_ID));
-      Integer completionPercentage;
-      int contentIdscompleted;
-      Map<String, Object> contentIdsForCourse =
-          new ObjectMapper().convertValue(course.get("contentstatus"), Map.class);
-      if (MapUtils.isEmpty(contentIdsForCourse)
-          || CollectionUtils.isEmpty((List<String>) courseContent.get("leafNodes"))) {
-        continue;
-      }
-      contentIdscompleted =
-          (int)
-              contentIdsForCourse
-                  .entrySet()
-                  .stream()
-                  .filter(
-                      content ->
-                          ProjectUtil.ProgressStatus.COMPLETED.getValue()
-                              == (Integer) content.getValue())
-                  .filter(
-                      content ->
-                          ((List<String>) courseContent.get("leafNodes"))
-                              .contains((String) content.getKey()))
-                  .count();
+      List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
+      if (course.get("contentStatus") != null && CollectionUtils.isNotEmpty(leafNodes)) {
+        Map<String, Object> contentStatus =
+            new ObjectMapper().convertValue(course.get("contentStatus"), Map.class);
+        int contentIdscompleted =
+            (int)
+                contentStatus
+                    .entrySet()
+                    .stream()
+                    .filter(
+                        content ->
+                            ProjectUtil.ProgressStatus.COMPLETED.getValue()
+                                == (Integer) content.getValue())
+                    .filter(content -> (leafNodes).contains((String) content.getKey()))
+                    .count();
 
-      completionPercentage =
-          (int)
-              Math.round(
-                  (contentIdscompleted * 100.0)
-                      / ((List<String>) courseContent.get("leafNodes")).size());
-      course.put(JsonKey.PROGRESS, contentIdscompleted);
-      course.put(COMPLETE_PERCENT, completionPercentage);
+        Integer completionPercentage =
+            (int) Math.round((contentIdscompleted * 100.0) / (leafNodes).size());
+        course.put(JsonKey.PROGRESS, contentIdscompleted);
+        course.put(COMPLETE_PERCENT, completionPercentage);
+      }
       updatedCourses.add(course);
     }
     return updatedCourses;
