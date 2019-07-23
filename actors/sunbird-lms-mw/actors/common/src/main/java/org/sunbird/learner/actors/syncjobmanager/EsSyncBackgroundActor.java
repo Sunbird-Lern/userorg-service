@@ -1,21 +1,21 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import com.datastax.driver.core.ResultSet;
+import com.google.common.util.concurrent.FutureCallback;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.CassandraUtil;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -51,11 +51,8 @@ public class EsSyncBackgroundActor extends BaseActor {
 
   private void sync(Request message) {
     ProjectLogger.log("EsSyncBackgroundActor: sync called", LoggerEnum.INFO);
-    long startTime = System.currentTimeMillis();
+
     Map<String, Object> req = message.getRequest();
-    List<Map<String, Object>> reponseList = null;
-    Map<String, Object> responseMap = new HashMap<>();
-    List<Map<String, Object>> result = new ArrayList<>();
     Map<String, Object> dataMap = (Map<String, Object>) req.get(JsonKey.DATA);
 
     String objectType = (String) dataMap.get(JsonKey.OBJECT_TYPE);
@@ -71,11 +68,14 @@ public class EsSyncBackgroundActor extends BaseActor {
           ResponseCode.invalidObjectType.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    String primaryKey = JsonKey.COURSE_ID;
-    String identifier = JsonKey.BATCH_ID;
+    final String primaryKey;
+    final String identifier;
     if (objectType.equals(JsonKey.USER_COURSE)) {
       primaryKey = JsonKey.BATCH_ID;
-      identifier = UserCoursesService.generateUserCourseESId(JsonKey.BATCH_ID, JsonKey.USER_ID);
+      identifier = JsonKey.USER_ID;
+    } else {
+      primaryKey = JsonKey.COURSE_ID;
+      identifier = JsonKey.BATCH_ID;
     }
     String requestLogMsg = "";
 
@@ -87,103 +87,54 @@ public class EsSyncBackgroundActor extends BaseActor {
       ProjectLogger.log(
           "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " started",
           LoggerEnum.INFO);
+
+      Map<String, Object> filters = new HashMap<>();
       if (objectIds.get(0) instanceof String) {
-        Response response =
-            cassandraOperation.getRecordsByProperty(
-                dbInfo.getKeySpace(), dbInfo.getTableName(), primaryKey, objectIds);
-        reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        filters.put(primaryKey, objectIds);
+        cassandraOperation.applyOperationOnRecordsAsync(
+            dbInfo.getKeySpace(),
+            dbInfo.getTableName(),
+            filters,
+            null,
+            getSyncCallback(objectType));
       }
 
       if (objectIds.get(0) instanceof Map) {
-        Map<String, Object> filters = new HashMap<>();
         objectIds
             .stream()
             .forEach(
                 objectId -> {
-                  if (!filters.containsKey(
-                      ((Map<String, Object>) objectId).get(JsonKey.BATCH_ID))) {
-                    filters.put(
-                        (String) ((Map<String, Object>) objectId).get(JsonKey.BATCH_ID),
-                        new ArrayList<Map<String, Object>>());
-                  }
-                  ((List<String>)
-                          filters.get(((Map<String, Object>) objectId).get(JsonKey.BATCH_ID)))
-                      .add(JsonKey.COURSE_ID);
+                  Map<String, Object> filterMap = new HashMap<>();
+                  filterMap.put(primaryKey, ((Map<String, Object>) objectId).get(primaryKey));
+                  filterMap.put(identifier, ((Map<String, Object>) objectId).get(identifier));
+                  cassandraOperation.applyOperationOnRecordsAsync(
+                      dbInfo.getKeySpace(),
+                      dbInfo.getTableName(),
+                      filterMap,
+                      null,
+                      getSyncCallback(objectType));
                 });
-        Response response =
-            cassandraOperation.getRecords(
-                dbInfo.getKeySpace(), dbInfo.getTableName(), filters, null);
-        reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       }
       ProjectLogger.log(
           "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " completed",
           LoggerEnum.INFO);
+      return;
     }
 
     ProjectLogger.log(
-        "EsSyncBackgroundActor:sync: Fetching all data for type = " + objectType + " completed",
-        LoggerEnum.INFO);
-    if (null != reponseList && !reponseList.isEmpty()) {
-      for (Map<String, Object> map : reponseList) {
-        map.put(JsonKey.IDENTIFIER, map.get(identifier));
-        responseMap.put((String) map.get(identifier), map);
-      }
-    } else {
-      if (objectIds.size() > 0) {
-        ProjectLogger.log(
-            "EsSyncBackgroundActor:sync: Skip sync for "
-                + requestLogMsg
-                + " as all IDs are invalid",
-            LoggerEnum.ERROR);
-        return;
-      }
-
-      ProjectLogger.log(
-          "EsSyncBackgroundActor:sync: Sync all data for type = "
-              + objectType
-              + " as no IDs provided",
-          LoggerEnum.INFO);
-      Response response =
-          cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName());
-      reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-
-      ProjectLogger.log(
-          "EsSyncBackgroundActor:sync: Number of entries to sync for type = "
-              + objectType
-              + " is "
-              + reponseList.size(),
-          LoggerEnum.INFO);
-
-      if (null != reponseList) {
-        for (Map<String, Object> map : reponseList) {
-          map.put(JsonKey.IDENTIFIER, map.get(JsonKey.BATCH_ID));
-          responseMap.put((String) map.get(JsonKey.BATCH_ID), map);
-        }
-      }
-    }
-
-    Iterator<Entry<String, Object>> itr = responseMap.entrySet().iterator();
-    while (itr.hasNext()) {
-      result.add((Map<String, Object>) (itr.next().getValue()));
-    }
-
-    esService.bulkInsert(getType(objectType), result);
-    long stopTime = System.currentTimeMillis();
-    long elapsedTime = stopTime - startTime;
-
-    ProjectLogger.log(
-        "EsSyncBackgroundActor:sync: Total time taken to sync for type = "
+        "EsSyncBackgroundActor:sync: Sync all data for type = "
             + objectType
-            + " is "
-            + elapsedTime
-            + " ms",
+            + " as no IDs provided",
         LoggerEnum.INFO);
+
+    cassandraOperation.applyOperationOnRecordsAsync(
+        dbInfo.getKeySpace(), dbInfo.getTableName(), null, null, getSyncCallback(objectType));
   }
 
   private String getType(String objectType) {
     String type = "";
     if (objectType.equals(JsonKey.BATCH)) {
-      type = ProjectUtil.EsType.course.getTypeName();
+      type = ProjectUtil.EsType.courseBatch.getTypeName();
     } else if (objectType.equals(JsonKey.USER_COURSE)) {
       type = ProjectUtil.EsType.usercourses.getTypeName();
     }
@@ -199,5 +150,42 @@ public class EsSyncBackgroundActor extends BaseActor {
     }
 
     return null;
+  }
+
+  private FutureCallback<ResultSet> getSyncCallback(String objectType) {
+    return new FutureCallback<ResultSet>() {
+      @Override
+      public void onSuccess(ResultSet result) {
+        Map<String, String> columnMap = CassandraUtil.fetchColumnsMapping(result);
+        result
+            .iterator()
+            .forEachRemaining(
+                row -> {
+                  Map<String, Object> rowMap = new HashMap<>();
+                  columnMap
+                      .entrySet()
+                      .stream()
+                      .forEach(
+                          entry -> rowMap.put(entry.getKey(), row.getObject(entry.getValue())));
+                  String id = (String) rowMap.get(JsonKey.ID);
+                  if (objectType.equals(JsonKey.USER_COURSE)) {
+                    id =
+                        UserCoursesService.generateUserCourseESId(
+                            (String) rowMap.get(JsonKey.BATCH_ID),
+                            (String) rowMap.get(JsonKey.USER_ID));
+                  } else if (objectType.equals(JsonKey.BATCH)) {
+                    id = (String) rowMap.get(JsonKey.BATCH_ID);
+                  }
+                  rowMap.put(JsonKey.ID, id);
+                  esService.save(getType(objectType), id, rowMap);
+                });
+        ProjectLogger.log("getSyncCallback sync successful " + objectType, LoggerEnum.INFO.name());
+      }
+
+      @Override
+      public void onFailure(Throwable t) {
+        ProjectLogger.log("Exception occurred while getSyncCallback ", t);
+      }
+    };
   }
 }
