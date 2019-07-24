@@ -136,7 +136,7 @@ public class EsSyncBackgroundActor extends BaseActor {
   private String getType(String objectType) {
     String type = "";
     if (objectType.equals(JsonKey.BATCH)) {
-      type = ProjectUtil.EsType.course.getTypeName();
+      type = ProjectUtil.EsType.courseBatch.getTypeName();
     } else if (objectType.equals(JsonKey.USER_COURSE)) {
       type = ProjectUtil.EsType.usercourses.getTypeName();
     }
