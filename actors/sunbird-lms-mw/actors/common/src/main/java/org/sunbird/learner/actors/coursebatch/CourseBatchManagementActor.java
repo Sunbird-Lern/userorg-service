@@ -903,7 +903,9 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (requestedEnrollmentEndDate != null && requestedEnrollmentEndDate.before(todayDate)) {
+    if (requestedEnrollmentEndDate != null
+        && !requestedEnrollmentEndDate.equals(existingEnrollmentEndDate)
+        && requestedEnrollmentEndDate.before(todayDate)) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateUpdateError.getErrorCode(),
           ResponseCode.enrollmentEndDateUpdateError.getErrorMessage(),
