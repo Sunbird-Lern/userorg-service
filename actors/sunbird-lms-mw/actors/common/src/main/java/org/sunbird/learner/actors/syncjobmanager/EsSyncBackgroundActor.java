@@ -1,6 +1,8 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FutureCallback;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -134,7 +136,7 @@ public class EsSyncBackgroundActor extends BaseActor {
   private String getType(String objectType) {
     String type = "";
     if (objectType.equals(JsonKey.BATCH)) {
-      type = ProjectUtil.EsType.courseBatch.getTypeName();
+      type = ProjectUtil.EsType.course.getTypeName();
     } else if (objectType.equals(JsonKey.USER_COURSE)) {
       type = ProjectUtil.EsType.usercourses.getTypeName();
     }
@@ -161,23 +163,11 @@ public class EsSyncBackgroundActor extends BaseActor {
             .iterator()
             .forEachRemaining(
                 row -> {
-                  Map<String, Object> rowMap = new HashMap<>();
-                  columnMap
-                      .entrySet()
-                      .stream()
-                      .forEach(
-                          entry -> rowMap.put(entry.getKey(), row.getObject(entry.getValue())));
-                  String id = (String) rowMap.get(JsonKey.ID);
-                  if (objectType.equals(JsonKey.USER_COURSE)) {
-                    id =
-                        UserCoursesService.generateUserCourseESId(
-                            (String) rowMap.get(JsonKey.BATCH_ID),
-                            (String) rowMap.get(JsonKey.USER_ID));
-                  } else if (objectType.equals(JsonKey.BATCH)) {
-                    id = (String) rowMap.get(JsonKey.BATCH_ID);
+                  try {
+                    syncDataForEachRow(row, columnMap, objectType);
+                  } catch (Exception e) {
+                    ProjectLogger.log("Exception occurred while getSyncCallback ", e);
                   }
-                  rowMap.put(JsonKey.ID, id);
-                  esService.save(getType(objectType), id, rowMap);
                 });
         ProjectLogger.log("getSyncCallback sync successful " + objectType, LoggerEnum.INFO.name());
       }
@@ -187,5 +177,35 @@ public class EsSyncBackgroundActor extends BaseActor {
         ProjectLogger.log("Exception occurred while getSyncCallback ", t);
       }
     };
+  }
+
+  private void syncDataForEachRow(Row row, Map<String, String> columnMap, String objectType) {
+    Map<String, Object> rowMap = new HashMap<>();
+    columnMap
+        .entrySet()
+        .stream()
+        .forEach(
+            entry -> {
+              Object value = row.getObject(entry.getValue());
+              if (entry.getKey().equals("contentStatus") && value != null) {
+                try {
+                  rowMap.put(entry.getKey(), new ObjectMapper().writeValueAsString(value));
+                } catch (Exception e) {
+                  ProjectLogger.log("Exception occurred while getSyncCallback ", e);
+                }
+              } else {
+                rowMap.put(entry.getKey(), value);
+              }
+            });
+    String id = (String) rowMap.get(JsonKey.ID);
+    if (objectType.equals(JsonKey.USER_COURSE)) {
+      id =
+          UserCoursesService.generateUserCourseESId(
+              (String) rowMap.get(JsonKey.BATCH_ID), (String) rowMap.get(JsonKey.USER_ID));
+    } else if (objectType.equals(JsonKey.BATCH)) {
+      id = (String) rowMap.get(JsonKey.BATCH_ID);
+    }
+    rowMap.put(JsonKey.ID, id);
+    esService.save(getType(objectType), id, rowMap);
   }
 }
