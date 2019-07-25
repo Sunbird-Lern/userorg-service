@@ -189,7 +189,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
     }
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -245,7 +245,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -317,7 +317,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -389,8 +389,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
         for (Map<String, Object> map : useresContent) {
           String userId = (String) map.get(JsonKey.USER_ID);
           map.put("user", userId);
-          map.put(
-              JsonKey.USERNAME, decryptionService.decryptData((String) map.get(JsonKey.USERNAME)));
+          map.put(JsonKey.USERNAME, (String) map.get(JsonKey.USERNAME));
           String registerdOrgId = (String) map.get(JsonKey.ROOT_ORG_ID);
           if (isNotNull(registerdOrgId)) {
             orgSet.add(registerdOrgId);
@@ -628,7 +627,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     List<String> coursefields = new ArrayList<>();
     coursefields.add(JsonKey.USER_ID);
-    coursefields.add(JsonKey.PROGRESS);
     coursefields.add(JsonKey.STATUS);
 
     Future<Map<String, Object>> resultF =
