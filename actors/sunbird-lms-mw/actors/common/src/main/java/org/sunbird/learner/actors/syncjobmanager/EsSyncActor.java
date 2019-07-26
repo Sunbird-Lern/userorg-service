@@ -55,25 +55,6 @@ public class EsSyncActor extends BaseActor {
     }
   }
 
-  private void triggerBackgroundSync(Request request) {
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    sender().tell(response, self());
-
-    Request backgroundSyncRequest = new Request();
-    backgroundSyncRequest.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
-    backgroundSyncRequest.getRequest().put(JsonKey.DATA, request.getRequest().get(JsonKey.DATA));
-
-    try {
-      tellToAnother(backgroundSyncRequest);
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "EsSyncActor:triggerBackgroundSync: Exception occurred with error message = "
-              + e.getMessage(),
-          e);
-    }
-  }
-
   private void triggerSync(Request req) {
     Map<String, Object> dataMap = (Map<String, Object>) req.get(JsonKey.DATA);
     String objectType = (String) dataMap.get(JsonKey.OBJECT_TYPE);
@@ -192,12 +173,12 @@ public class EsSyncActor extends BaseActor {
           if (!docList.isEmpty()) {
             esService.bulkInsert(getType(objectType), docList);
           }
+          ProjectLogger.log(
+              "getSyncCallback sync successful objectType=" + objectType + " count=" + count,
+              LoggerEnum.INFO.name());
         } catch (Exception e) {
           ProjectLogger.log("Exception occurred while getSyncCallback on count" + count, e);
         }
-        ProjectLogger.log(
-            "getSyncCallback sync successful objectType=" + objectType + " count=" + count,
-            LoggerEnum.INFO.name());
       }
 
       @Override
@@ -212,7 +193,6 @@ public class EsSyncActor extends BaseActor {
     Map<String, Object> rowMap = new HashMap<>();
     columnMap
         .entrySet()
-        .stream()
         .forEach(
             entry -> {
               Object value = row.getObject(entry.getValue());
