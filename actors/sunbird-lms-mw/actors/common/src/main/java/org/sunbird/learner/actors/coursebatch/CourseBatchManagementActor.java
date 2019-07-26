@@ -6,19 +6,13 @@ import static org.sunbird.common.models.util.ProjectLogger.log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import java.util.stream.Collectors;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -503,29 +497,29 @@ public class CourseBatchManagementActor extends BaseActor {
       String batchCreatorRootOrgId = getRootOrg(courseBatch.getCreatedBy());
       List<Map<String, Object>> mentorDetailList = userOrgService.getUsersByIds(mentors);
       Map<String, Map<String, Object>> mentorDetails =
-              mentorDetailList
-                      .stream()
-                      .collect(Collectors.toMap(map -> (String) map.get(JsonKey.ID), map -> map));
+          mentorDetailList
+              .stream()
+              .collect(Collectors.toMap(map -> (String) map.get(JsonKey.ID), map -> map));
       for (String userId : mentors) {
         Map<String, Object> result = mentorDetails.get(userId);
         String mentorRootOrgId = getRootOrgFromUserMap(result);
         if (!batchCreatorRootOrgId.equals(mentorRootOrgId)) {
           throw new ProjectCommonException(
-                  ResponseCode.userNotAssociatedToRootOrg.getErrorCode(),
-                  ResponseCode.userNotAssociatedToRootOrg.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode(),
-                  userId);
+              ResponseCode.userNotAssociatedToRootOrg.getErrorCode(),
+              ResponseCode.userNotAssociatedToRootOrg.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode(),
+              userId);
         }
         if ((ProjectUtil.isNull(result))
-                || (ProjectUtil.isNotNull(result) && result.isEmpty())
-                || (ProjectUtil.isNotNull(result)
+            || (ProjectUtil.isNotNull(result) && result.isEmpty())
+            || (ProjectUtil.isNotNull(result)
                 && result.containsKey(JsonKey.IS_DELETED)
                 && ProjectUtil.isNotNull(result.get(JsonKey.IS_DELETED))
                 && (Boolean) result.get(JsonKey.IS_DELETED))) {
           throw new ProjectCommonException(
-                  ResponseCode.invalidUserId.getErrorCode(),
-                  ResponseCode.invalidUserId.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
+              ResponseCode.invalidUserId.getErrorCode(),
+              ResponseCode.invalidUserId.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
     }
@@ -845,7 +839,17 @@ public class CourseBatchManagementActor extends BaseActor {
         return format.parse(format.format(new Date()));
       } else {
         if (StringUtils.isNotBlank((String) map.get(key))) {
-          return format.parse((String) map.get(key));
+          Date d = format.parse((String) map.get(key));
+          if (key.equals(END_DATE) || key.equals(ENROLLMENT_END_DATE)) {
+            Calendar cal =
+                Calendar.getInstance(
+                    TimeZone.getTimeZone(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_TIMEZONE)));
+            cal.setTime(d);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            return cal.getTime();
+          }
+          return d;
         } else {
           return null;
         }
@@ -899,7 +903,9 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (requestedEnrollmentEndDate != null && requestedEnrollmentEndDate.before(todayDate)) {
+    if (requestedEnrollmentEndDate != null
+        && !requestedEnrollmentEndDate.equals(existingEnrollmentEndDate)
+        && requestedEnrollmentEndDate.before(todayDate)) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateUpdateError.getErrorCode(),
           ResponseCode.enrollmentEndDateUpdateError.getErrorMessage(),
