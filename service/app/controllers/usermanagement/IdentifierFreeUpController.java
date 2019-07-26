@@ -14,9 +14,14 @@ import play.mvc.Result;
  */
 public class IdentifierFreeUpController extends BaseController {
 
+
+    /**
+     * this action method will be used to free Up user Identifier
+     * @return
+     */
     public Promise<Result> freeUpIdentifier() {
         return handleRequest(
-                ActorOperations.FREEUP_USER.getValue(),
+                ActorOperations.FREEUP_USER_IDENTITY.getValue(),
                 request().body().asJson(),
                 req -> {
                     Request request = (Request) req;
