@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -32,13 +31,11 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.userorg.UserOrgService;
 import org.sunbird.userorg.UserOrgServiceImpl;
@@ -60,10 +57,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
   protected static final String CONTENT_ID = "content_id";
   private UserOrgService userOrgService = new UserOrgServiceImpl();
   private static ObjectMapper mapper = new ObjectMapper();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
+
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
@@ -375,14 +369,17 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
       Set<String> uniqueUserIds = new HashSet<>(userIds);
       Map<String, Object> userfilter = new HashMap<>();
-      userfilter.put(JsonKey.USER_ID, uniqueUserIds.stream().collect(Collectors.toList()));
+      userfilter.put(JsonKey.ID, uniqueUserIds.stream().collect(Collectors.toList()));
       List<String> userfields = new ArrayList<>();
       userfields.add(JsonKey.USER_ID);
       userfields.add(JsonKey.USERNAME);
       userfields.add(JsonKey.ROOT_ORG_ID);
       userfields.add(JsonKey.FIRST_NAME);
       userfields.add(JsonKey.LAST_NAME);
-      List<Map<String, Object>> useresContent = userOrgService.getUsersByIds(userIds);
+      Map<String, Object> userRequest = new HashMap<>();
+      userRequest.put(JsonKey.FILTERS, userfilter);
+      userRequest.put(JsonKey.FIELDS, userfields);
+      List<Map<String, Object>> useresContent = userOrgService.getUsers(userRequest);
       Map<String, Map<String, Object>> userInfoCache = new HashMap<>();
       Set<String> orgSet = new HashSet<>();
       if (CollectionUtils.isNotEmpty(useresContent)) {
@@ -418,7 +415,8 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Map<String, Object> batchFilter = new HashMap<>();
       batchFilter.put(JsonKey.ID, batchId);
       Future<Map<String, Object>> batchresultF =
-          esService.search(createESRequest(batchFilter, null, null), EsType.course.getTypeName());
+          esService.search(
+              createESRequest(batchFilter, null, null), EsType.courseBatch.getTypeName());
       Map<String, Object> batchresult =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(batchresultF);
       List<Map<String, Object>> batchContent =
@@ -476,7 +474,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Response response = new Response();
       response.putAll(responseMap);
       sender().tell(response, self());
-      return;
     } else {
 
       ProjectLogger.log(
@@ -505,8 +502,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Response response = new Response();
       response.putAll(responseMap);
       sender().tell(response, self());
-
-      return;
     }
   }
 
