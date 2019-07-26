@@ -10,11 +10,8 @@ import akka.testkit.javadsl.TestKit;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -39,12 +36,14 @@ import org.sunbird.learner.util.CourseBatchUtil;
 import org.sunbird.learner.util.Util;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServiceFactory.class,
-        EsClientFactory.class,
-        RequestRouter.class,
-        SystemSettingClientImpl.class,
-        CourseBatchUtil.class,
-        Util.class})
+@PrepareForTest({
+  ServiceFactory.class,
+  EsClientFactory.class,
+  RequestRouter.class,
+  SystemSettingClientImpl.class,
+  CourseBatchUtil.class,
+  Util.class
+})
 @PowerMockIgnore({"javax.management.*"})
 public class CourseBatchManagementActorTest {
 
@@ -57,7 +56,7 @@ public class CourseBatchManagementActorTest {
 
   private String existingStartDate = "";
   private String existingEndDate = "";
-  private String existingEnrollmentEndDate="";
+  private String existingEnrollmentEndDate = "";
 
   @Before
   public void setUp() {
@@ -78,10 +77,13 @@ public class CourseBatchManagementActorTest {
   }
 
   private ProjectCommonException performUpdateCourseBatchFailureTest(
-          String startDate, String enrollmentEndDate , String endDate, Response mockGetRecordByIdResponse) {
+      String startDate,
+      String enrollmentEndDate,
+      String endDate,
+      Response mockGetRecordByIdResponse) {
     when(mockCassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(mockGetRecordByIdResponse);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(mockGetRecordByIdResponse);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -93,32 +95,30 @@ public class CourseBatchManagementActorTest {
     innerMap.put(JsonKey.END_DATE, endDate);
     innerMap.put(JsonKey.ENROLLMENT_END_DATE, enrollmentEndDate);
     reqObj.getRequest().putAll(innerMap);
-
     subject.tell(reqObj, probe.getRef());
 
     ProjectCommonException exception =
-            probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     return exception;
   }
 
-
   private Response performUpdateCourseBatchSuccessTest(
-          String startDate,
-          String enrollmentEndDate,
-          String endDate,
-          Response mockGetRecordByIdResponse,
-          Response mockUpdateRecordResponse) {
+      String startDate,
+      String enrollmentEndDate,
+      String endDate,
+      Response mockGetRecordByIdResponse,
+      Response mockUpdateRecordResponse) {
 
     when(mockCassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(mockGetRecordByIdResponse);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(mockGetRecordByIdResponse);
 
     when(mockCassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-            .thenReturn(mockUpdateRecordResponse);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+        .thenReturn(mockUpdateRecordResponse);
 
     PowerMockito.doNothing().when(CourseBatchUtil.class);
-    CourseBatchUtil.syncCourseBatchForeground(BATCH_ID,new HashMap<>());
+    CourseBatchUtil.syncCourseBatchForeground(BATCH_ID, new HashMap<>());
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -126,6 +126,7 @@ public class CourseBatchManagementActorTest {
     reqObj.setOperation(ActorOperations.UPDATE_BATCH.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ID, BATCH_ID);
+    innerMap.put(JsonKey.COURSE_ID, "someCourseId");
     innerMap.put(JsonKey.NAME, BATCH_NAME);
 
     if (startDate != null) {
@@ -134,11 +135,10 @@ public class CourseBatchManagementActorTest {
     if (endDate != null) {
       innerMap.put(JsonKey.END_DATE, endDate);
     }
-    if(enrollmentEndDate!=null){
+    if (enrollmentEndDate != null) {
       innerMap.put(JsonKey.ENROLLMENT_END_DATE, enrollmentEndDate);
     }
     reqObj.getRequest().putAll(innerMap);
-
     subject.tell(reqObj, probe.getRef());
 
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -158,10 +158,9 @@ public class CourseBatchManagementActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> courseResponseMap = new HashMap<>();
 
-    courseResponseMap.put(JsonKey.ID, BATCH_ID);
+    courseResponseMap.put(JsonKey.BATCH_ID, BATCH_ID);
     courseResponseMap.put(JsonKey.VER, "v1");
     courseResponseMap.put(JsonKey.NAME, BATCH_NAME);
-    courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.FALSE);
     courseResponseMap.put(JsonKey.ENROLMENTTYPE, JsonKey.INVITE_ONLY);
     courseResponseMap.put(JsonKey.COURSE_ID, "someCourseId");
     courseResponseMap.put(JsonKey.COURSE_CREATED_FOR, new ArrayList<Object>());
@@ -172,22 +171,16 @@ public class CourseBatchManagementActorTest {
       existingStartDate = calculateDate(-4);
       existingEnrollmentEndDate = calculateDate(1);
       existingEndDate = calculateDate(3);
-      courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.TRUE);
-      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.FALSE);
     } else if (batchProgressStatus == ProjectUtil.ProgressStatus.NOT_STARTED.getValue()) {
 
       existingStartDate = calculateDate(2);
       existingEnrollmentEndDate = calculateDate(3);
       existingEndDate = calculateDate(4);
-      courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.FALSE);
-      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.FALSE);
     } else {
 
       existingStartDate = calculateDate(-4);
       existingEnrollmentEndDate = calculateDate(-3);
       existingEndDate = calculateDate(-2);
-      courseResponseMap.put(JsonKey.COUNTER_INCREMENT_STATUS, Boolean.TRUE);
-      courseResponseMap.put(JsonKey.COUNTER_DECREMENT_STATUS, Boolean.TRUE);
     }
 
     courseResponseMap.put(JsonKey.START_DATE, existingStartDate);
@@ -213,62 +206,63 @@ public class CourseBatchManagementActorTest {
     return null;
   }
 
-
   @Test
   public void checkTelemetryKeyFailure() throws Exception {
 
     String telemetryEnvKey = "batch";
     PowerMockito.mockStatic(Util.class);
     doNothing()
-            .when(
-                    Util.class,
-                    "initializeContext",
-                    Mockito.any(Request.class),
-                    Mockito.eq(telemetryEnvKey));
+        .when(
+            Util.class,
+            "initializeContext",
+            Mockito.any(Request.class),
+            Mockito.eq(telemetryEnvKey));
 
     int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     Response mockUpdateRecordResponse = getMockCassandraResult();
     Response response =
-            performUpdateCourseBatchSuccessTest(
-                    existingStartDate,
-                    null,
-                    existingEndDate,
-                    mockGetRecordByIdResponse,
-                    mockUpdateRecordResponse);
+        performUpdateCourseBatchSuccessTest(
+            existingStartDate,
+            null,
+            existingEndDate,
+            mockGetRecordByIdResponse,
+            mockUpdateRecordResponse);
     Assert.assertTrue(!(telemetryEnvKey.charAt(0) >= 65 && telemetryEnvKey.charAt(0) <= 90));
   }
 
   @Test
-  public void testUpdateEnrollmentEndDateFailureBeforeStartDate()
-  {
+  public void testUpdateEnrollmentEndDateFailureBeforeStartDate() {
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate,0),getOffsetDate(existingEnrollmentEndDate, -2),getOffsetDate(existingEndDate, 0), mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 0),
+            getOffsetDate(existingEnrollmentEndDate, -2),
+            getOffsetDate(existingEndDate, 0),
+            mockGetRecordByIdResponse);
 
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.enrollmentEndDateStartError.getErrorCode()));
-
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.enrollmentEndDateStartError.getErrorCode()));
   }
 
   @Test
-  public void testUpdateEnrollmentEndDateFailureAfterEndDate()
-  {
+  public void testUpdateEnrollmentEndDateFailureAfterEndDate() {
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate,0),getOffsetDate(existingEnrollmentEndDate, 2),getOffsetDate(existingEndDate, 0), mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 0),
+            getOffsetDate(existingEnrollmentEndDate, 2),
+            getOffsetDate(existingEndDate, 0),
+            mockGetRecordByIdResponse);
 
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.enrollmentEndDateEndError.getErrorCode()));
-
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.enrollmentEndDateEndError.getErrorCode()));
   }
 
   @Test
@@ -277,12 +271,12 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate, 1), null,null, mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 1), null, null, mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
   }
 
   @Test
@@ -291,13 +285,12 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    null, getOffsetDate(existingEndDate, 4), null,mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            null, getOffsetDate(existingEndDate, 4), null, mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
-
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
   }
 
   @Test
@@ -306,30 +299,30 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate, 2),
-                    null,getOffsetDate(existingEndDate, 4),
-                    mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 2),
+            null,
+            getOffsetDate(existingEndDate, 4),
+            mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
   }
 
-
   @Test
-  public void testUpdateStartedCourseBatchSuccessWithSameStartDateAndEndDate() {
+  public void testUpdateStartedCourseBatchSuccessWithFutureEndDate() {
 
     int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     Response mockUpdateRecordResponse = getMockCassandraResult();
     Response response =
-            performUpdateCourseBatchSuccessTest(
-                    existingStartDate,
-                    null,
-                    existingEndDate,
-                    mockGetRecordByIdResponse,
-                    mockUpdateRecordResponse);
+        performUpdateCourseBatchSuccessTest(
+            existingStartDate,
+            null,
+            getOffsetDate(existingEndDate, 2),
+            mockGetRecordByIdResponse,
+            mockUpdateRecordResponse);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
   }
 
@@ -340,16 +333,15 @@ public class CourseBatchManagementActorTest {
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     Response mockUpdateRecordResponse = getMockCassandraResult();
     Response response =
-            performUpdateCourseBatchSuccessTest(getOffsetDate(existingStartDate,0),
-                    getOffsetDate(existingEnrollmentEndDate,1),
-                    getOffsetDate(existingEndDate,0),
-                    mockGetRecordByIdResponse,
-                    mockUpdateRecordResponse);
+        performUpdateCourseBatchSuccessTest(
+            getOffsetDate(existingStartDate, 0),
+            getOffsetDate(existingEnrollmentEndDate, 1),
+            getOffsetDate(existingEndDate, 0),
+            mockGetRecordByIdResponse,
+            mockUpdateRecordResponse);
 
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
   }
-
-
 
   @Test
   public void testUpdateNotStartedCourseBatchSuccessWithFutureStartDate() {
@@ -358,12 +350,12 @@ public class CourseBatchManagementActorTest {
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     Response mockUpdateRecordResponse = getMockCassandraResult();
     Response response =
-            performUpdateCourseBatchSuccessTest(
-                    getOffsetDate(existingStartDate, 2),
-                    null,
-                    null,
-                    mockGetRecordByIdResponse,
-                    mockUpdateRecordResponse);
+        performUpdateCourseBatchSuccessTest(
+            getOffsetDate(existingStartDate, 2),
+            null,
+            null,
+            mockGetRecordByIdResponse,
+            mockUpdateRecordResponse);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
   }
 
@@ -373,25 +365,27 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(null, null,calculateDate(4), mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            null, null, calculateDate(4), mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
   }
 
+  @Test
   public void testUpdateNotStartedCourseBatchSuccessWithFutureStartDateAndEndDate() {
 
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     Response mockUpdateRecordResponse = getMockCassandraResult();
     Response response =
-            performUpdateCourseBatchSuccessTest(
-                    getOffsetDate(existingStartDate, 2),
-                    null,
-                    getOffsetDate(existingEndDate, 4),
-                    mockGetRecordByIdResponse,
-                    mockUpdateRecordResponse);
+        performUpdateCourseBatchSuccessTest(
+            getOffsetDate(existingStartDate, 2),
+            null,
+            getOffsetDate(existingEndDate, 4),
+            mockGetRecordByIdResponse,
+            mockUpdateRecordResponse);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
   }
 
@@ -402,11 +396,12 @@ public class CourseBatchManagementActorTest {
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
 
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(calculateDate(-4), null,null, mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            calculateDate(-4), null, null, mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
   }
 
   @Test
@@ -415,13 +410,13 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(null,null, calculateDate(-2), mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            null, null, calculateDate(-2), mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
   }
-
 
   @Test
   public void testUpdateNotStartedCourseBatchFailureWithEndDateBeforeFutureStartDate() {
@@ -429,15 +424,15 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.NOT_STARTED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate, 6),
-                    null,
-                    getOffsetDate(existingEndDate, 2),
-                    mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 6),
+            null,
+            getOffsetDate(existingEndDate, 2),
+            mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchEndDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchEndDateError.getErrorCode()));
   }
 
   @Test
@@ -446,12 +441,12 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.COMPLETED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate, 2),null, null, mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 2), null, null, mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
   }
 
   @Test
@@ -460,12 +455,12 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.COMPLETED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    null,null, getOffsetDate(existingEndDate, 4), mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            null, null, getOffsetDate(existingEndDate, 4), mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.courseBatchStartDateRequired.getErrorCode()));
   }
 
   @Test
@@ -474,14 +469,14 @@ public class CourseBatchManagementActorTest {
     int batchProgressStatus = ProjectUtil.ProgressStatus.COMPLETED.getValue();
     Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
     ProjectCommonException exception =
-            performUpdateCourseBatchFailureTest(
-                    getOffsetDate(existingStartDate, 2),
-                    null,
-                    getOffsetDate(existingEndDate, 4),
-                    mockGetRecordByIdResponse);
+        performUpdateCourseBatchFailureTest(
+            getOffsetDate(existingStartDate, 2),
+            null,
+            getOffsetDate(existingEndDate, 4),
+            mockGetRecordByIdResponse);
     Assert.assertTrue(
-            ((ProjectCommonException) exception)
-                    .getCode()
-                    .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
+        ((ProjectCommonException) exception)
+            .getCode()
+            .equals(ResponseCode.invalidBatchStartDateError.getErrorCode()));
   }
 }

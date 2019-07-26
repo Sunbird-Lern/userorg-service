@@ -25,7 +25,7 @@ public class UserCoursesService {
   protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
 
   public static String generateUserCourseESId(String batchId, String userId) {
-    return (OneWayHashing.encryptVal(batchId + UNDERSCORE + userId));
+    return batchId + UNDERSCORE + userId;
   }
 
   public static void validateUserUnenroll(UserCourses userCourseResult) {
