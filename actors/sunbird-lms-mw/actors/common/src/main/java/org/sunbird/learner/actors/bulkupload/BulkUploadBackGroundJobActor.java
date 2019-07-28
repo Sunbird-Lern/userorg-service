@@ -185,7 +185,7 @@ public class BulkUploadBackGroundJobActor extends BaseActor {
                     user -> (String) user.get(JsonKey.ID), user -> getRootOrgFromUserMap(user)));
     // check whether can update user or not
     for (String userId : userIds) {
-      if (!userToRootOrg.containsKey(userId) || createdFor.contains(userToRootOrg.get(userId))) {
+      if (!userToRootOrg.containsKey(userId) || !createdFor.contains(userToRootOrg.get(userId))) {
         map = new HashMap<>();
         map.put(userId, ResponseCode.userNotAssociatedToOrg.getErrorMessage());
         failedUserList.add(map);
