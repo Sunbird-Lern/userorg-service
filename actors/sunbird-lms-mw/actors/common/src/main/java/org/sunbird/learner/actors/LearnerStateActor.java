@@ -335,7 +335,7 @@ public class LearnerStateActor extends BaseActor {
   }
 
   private List<Map<String, Object>> calculateProgressForUserCourses(
-      Request request, Map<String, Object> result) {
+      Request request, Map<String, Object> result) throws Exception {
     List<Map<String, Object>> activeCourses =
         (List<Map<String, Object>>) (result.get(JsonKey.CONTENT));
     List<Map<String, Object>> contentsForCourses = getcontentsForCourses(request, activeCourses);
@@ -361,7 +361,7 @@ public class LearnerStateActor extends BaseActor {
       List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
       if (course.get("contentStatus") != null && CollectionUtils.isNotEmpty(leafNodes)) {
         Map<String, Object> contentStatus =
-            new ObjectMapper().convertValue(course.get("contentStatus"), Map.class);
+            new ObjectMapper().readValue(((String) course.get("contentStatus")).replaceAll("\\\\", ""), Map.class);
         int contentIdscompleted =
             (int)
                 contentStatus
