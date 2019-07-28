@@ -172,4 +172,21 @@ public class UserOrgServiceImpl implements UserOrgService {
     List<Map<String, Object>> userlist = (List<Map<String, Object>>) userMap.get(CONTENT);
     return userlist;
   }
+
+  public List<Map<String, Object>> getUsers(Map<String, Object> request) {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.REQUEST, request);
+    Map<String, String> headers = getdefaultHeaders();
+    headers.put(
+        "x-authenticated-user-token",
+        ssoManager.login(
+            getConfigValue(JsonKey.SUNBIRD_SSO_USERNAME),
+            getConfigValue(JsonKey.SUNBIRD_SSO_PASSWORD)));
+    Response response =
+        getUserOrgResponse(
+            getConfigValue(SUNBIRD_GET_MULTIPLE_USER_API), HttpMethod.POST, requestMap, headers);
+    Map<String, Object> userMap = (Map<String, Object>) response.get(RESPONSE);
+    List<Map<String, Object>> userlist = (List<Map<String, Object>>) userMap.get(CONTENT);
+    return userlist;
+  }
 }
