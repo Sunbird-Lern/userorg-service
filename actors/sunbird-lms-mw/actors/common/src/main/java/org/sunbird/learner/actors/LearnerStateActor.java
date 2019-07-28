@@ -74,7 +74,7 @@ public class LearnerStateActor extends BaseActor {
     }
   }
 
-  public void getCourse(Request request) {
+  public void getCourse(Request request) throws Exception {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     Map<String, Object> result = userCoursesService.getActiveUserCourses(userId);
     List<Map<String, Object>> updatedCourses = calculateProgressForUserCourses(request, result);
