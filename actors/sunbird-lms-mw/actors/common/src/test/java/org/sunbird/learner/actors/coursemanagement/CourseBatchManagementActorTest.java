@@ -145,6 +145,29 @@ public class CourseBatchManagementActorTest {
     return response;
   }
 
+  private Response performGetParticipantsSuccessTest(
+      Response mockGetRecordByIdResponse, Response mockGetParticipantsRecordResponse) {
+
+    when(mockCassandraOperation.getRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
+        .thenReturn(mockGetRecordByIdResponse);
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.GET_PARTICIPANTS.getValue());
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.BATCH_ID, BATCH_ID);
+    innerMap.put(JsonKey.COURSE_ID, "someCourseId");
+    innerMap.put(JsonKey.NAME, BATCH_NAME);
+    innerMap.put(JsonKey.ACTIVE, true);
+    reqObj.getRequest().put(JsonKey.BATCH, innerMap);
+    subject.tell(reqObj, probe.getRef());
+
+    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    return response;
+  }
+
   private Response getMockCassandraResult() {
 
     Response response = new Response();
@@ -323,6 +346,17 @@ public class CourseBatchManagementActorTest {
             getOffsetDate(existingEndDate, 2),
             mockGetRecordByIdResponse,
             mockUpdateRecordResponse);
+    Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void testGetParticipantsSuccess() {
+    int batchProgressStatus = ProjectUtil.ProgressStatus.STARTED.getValue();
+    Response mockGetRecordByIdResponse = getMockCassandraRecordByIdResponse(batchProgressStatus);
+    Response mockGetParticipantsRecordResponse = getMockCassandraResult();
+    Response response =
+        performGetParticipantsSuccessTest(
+            mockGetRecordByIdResponse, mockGetParticipantsRecordResponse);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
   }
 
