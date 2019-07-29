@@ -202,3 +202,6 @@ PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigration
 
 #Freeup API
 POST /private/user/v1/identifier/freeup        @controllers.usermanagement.IdentifierFreeUpController.freeUpIdentifier()
+
+#reset password API
+POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword()
