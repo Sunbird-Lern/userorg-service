@@ -52,6 +52,7 @@ public class LearnerStateActor extends BaseActor {
   private UserCoursesService userCoursesService = new UserCoursesService();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private static final String COMPLETE_PERCENT = "completionPercentage";
+  private ObjectMapper mapper = new ObjectMapper();
 
   /**
    * Receives the actor message and perform the operation like get course , get content etc.
@@ -361,7 +362,7 @@ public class LearnerStateActor extends BaseActor {
       List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
       if (course.get("contentStatus") != null && CollectionUtils.isNotEmpty(leafNodes)) {
         Map<String, Object> contentStatus =
-            new ObjectMapper().readValue(((String) course.get("contentStatus")).replaceAll("\\\\", ""), Map.class);
+            mapper.readValue(((String) course.get("contentStatus")).replaceAll("\\\\", ""), Map.class);
         int contentIdscompleted =
             (int)
                 contentStatus
