@@ -9,6 +9,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.ContentSearchUtil;
+import org.sunbird.learner.util.EkStepRequestUtil;
 import scala.concurrent.Promise;
 
 /** @author arvind */
@@ -50,7 +52,8 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   EsClientFactory.class,
   ContentSearchUtil.class,
-  ElasticSearchRestHighImpl.class
+  ElasticSearchRestHighImpl.class,
+  EkStepRequestUtil.class
 })
 @PowerMockIgnore({"javax.management.*", "javax.crypto.*", "javax.net.ssl.*", "javax.security.*"})
 public class LearnerStateActorTest {
@@ -64,6 +67,8 @@ public class LearnerStateActorTest {
   private static String batchId = "115";
   private static final String contentId = "cont3544TeBuk";
   private static ElasticSearchService esService;
+  private static final String contentResponse =
+      "{\"result\":{\"content\":[{\"id\":\"alpha01crs12\"}]}}";
 
   @BeforeClass
   public static void setUp() {
@@ -71,18 +76,20 @@ public class LearnerStateActorTest {
   }
 
   @Before
-  public void beforeTest() {
+  public void beforeTest() throws IOException {
     cassandraOperation = mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(ContentSearchUtil.class);
     PowerMockito.mockStatic(ElasticSearchHelper.class);
+    PowerMockito.mockStatic(EkStepRequestUtil.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
 
     Map<String, Object> esResult = new HashMap<>();
+    esResult.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
     promise.success(esResult);
     when(esService.search(Mockito.anyObject(), Mockito.anyObject())).thenReturn(promise.future());
 
@@ -95,6 +102,9 @@ public class LearnerStateActorTest {
     when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(dbResponse);
+    when(cassandraOperation.getRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
+        .thenReturn(dbResponse);
   }
 
   @Test
@@ -102,13 +112,13 @@ public class LearnerStateActorTest {
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
-
+    mockEsUtilforUserNcourseBatch();
+    mockContentUtil();
     Request request = new Request();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.USER_ID, userId);
     request.setRequest(map);
     request.setOperation(ActorOperations.GET_COURSE.getValue());
-    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(new HashMap<>());
     subject.tell(request, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertNotNull(res);
@@ -156,9 +166,11 @@ public class LearnerStateActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     HashMap<String, Object> innerMap = new HashMap<>();
+    mockEkstepContentUtil();
     Request request = new Request();
     innerMap.put(JsonKey.USER_ID, userId);
     innerMap.put(JsonKey.BATCH_ID, batchId);
+    innerMap.put(JsonKey.COURSE_ID, courseId);
     request.setRequest(innerMap);
     request.setOperation(ActorOperations.GET_CONTENT.getValue());
     subject.tell(request, probe.getRef());
@@ -190,11 +202,11 @@ public class LearnerStateActorTest {
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
+    mockEkstepContentUtil();
     HashMap<String, Object> innerMap = new HashMap<>();
     Request request = new Request();
     innerMap.put(JsonKey.USER_ID, userId);
-    List<String> courseList = Arrays.asList(courseId, courseId2);
-    innerMap.put(JsonKey.COURSE_IDS, courseList);
+    innerMap.put(JsonKey.COURSE_ID, courseId);
     request.setRequest(innerMap);
     request.setOperation(ActorOperations.GET_CONTENT.getValue());
     subject.tell(request, probe.getRef());
@@ -209,6 +221,7 @@ public class LearnerStateActorTest {
     ActorRef subject = system.actorOf(props);
     HashMap<String, Object> innerMap = new HashMap<>();
     Request request = new Request();
+    mockEkstepContentUtil();
     innerMap.put(JsonKey.USER_ID, userId);
     List<String> contentList = Arrays.asList(courseId, courseId2);
     innerMap.put(JsonKey.CONTENT_IDS, contentList);
@@ -272,6 +285,18 @@ public class LearnerStateActorTest {
 
     when(ContentSearchUtil.searchContentSync(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(courses);
+  }
+
+  private void mockEkstepContentUtil() {
+    Map<String, Object> courses = new HashMap<>();
+    List<Map<String, Object>> l1 = new ArrayList<>();
+    l1.add(getMapforCourse("q1", "q1", "first"));
+    l1.add(getMapforCourse("q2", "q2", "second"));
+    l1.add(getMapforCourse("q3", "q3", "third"));
+    courses.put(JsonKey.CONTENTS, l1);
+
+    when(EkStepRequestUtil.searchContent(Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(courses);
   }
 
