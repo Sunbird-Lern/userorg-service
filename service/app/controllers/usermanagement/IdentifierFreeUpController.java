@@ -16,7 +16,7 @@ public class IdentifierFreeUpController extends BaseController {
 
 
     /**
-     * this action method will be used to free Up user Identifier
+     * this action method will be used to free Up user Identifier from user DB
      * @return
      */
     public Promise<Result> freeUpIdentifier() {
