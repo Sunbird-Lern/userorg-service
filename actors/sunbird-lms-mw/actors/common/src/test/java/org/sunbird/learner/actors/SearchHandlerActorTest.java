@@ -17,6 +17,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -107,6 +108,7 @@ public class SearchHandlerActorTest {
   }
 
   @Test
+  @Ignore
   public void searchCourse() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
