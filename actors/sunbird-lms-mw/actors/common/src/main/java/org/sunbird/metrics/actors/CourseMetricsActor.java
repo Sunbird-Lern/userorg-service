@@ -3,6 +3,7 @@ package org.sunbird.metrics.actors;
 import static org.sunbird.common.models.util.ProjectUtil.isNotNull;
 import static org.sunbird.common.models.util.ProjectUtil.isNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.text.MessageFormat;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -32,13 +32,12 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.userorg.UserOrgService;
 import org.sunbird.userorg.UserOrgServiceImpl;
@@ -60,10 +59,8 @@ public class CourseMetricsActor extends BaseMetricsActor {
   protected static final String CONTENT_ID = "content_id";
   private UserOrgService userOrgService = new UserOrgServiceImpl();
   private static ObjectMapper mapper = new ObjectMapper();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
+  private static final String COMPLETE_PERCENT = "completionPercentage";
+
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
@@ -189,7 +186,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
     }
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -245,7 +242,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -317,7 +314,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     // check batch exist in ES or not
     Future<Map<String, Object>> courseBatchResultF =
-        esService.getDataByIdentifier(EsType.course.getTypeName(), batchId);
+        esService.getDataByIdentifier(EsType.courseBatch.getTypeName(), batchId);
     Map<String, Object> courseBatchResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(courseBatchResultF);
     if (isNull(courseBatchResult) || courseBatchResult.size() == 0) {
@@ -327,6 +324,18 @@ public class CourseMetricsActor extends BaseMetricsActor {
           new ProjectCommonException(
               ResponseCode.invalidCourseBatchId.getErrorCode(),
               ResponseCode.invalidCourseBatchId.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+      sender().tell(exception, self());
+      return;
+    }
+
+    String courseId = (String) courseBatchResult.get(JsonKey.COURSE_ID);
+    Map<String, Object> course = getcontentForCourse(actorMessage, courseId);
+    if (ProjectUtil.isNull(course)) {
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              ResponseCode.invalidCourseId.getErrorCode(),
+              ResponseCode.invalidCourseId.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
       sender().tell(exception, self());
       return;
@@ -354,11 +363,11 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     List<String> coursefields = new ArrayList<>();
     coursefields.add(JsonKey.USER_ID);
-    coursefields.add(JsonKey.PROGRESS);
     coursefields.add(JsonKey.COURSE_ENROLL_DATE);
     coursefields.add(JsonKey.BATCH_ID);
     coursefields.add(JsonKey.DATE_TIME);
-    coursefields.add(JsonKey.LEAF_NODE_COUNT);
+    coursefields.add(JsonKey.PROGRESS);
+    coursefields.add("contentStatus");
     Future<Map<String, Object>> resultF =
         esService.search(
             createESRequest(filter, null, coursefields), EsType.usercourses.getTypeName());
@@ -375,22 +384,24 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
       Set<String> uniqueUserIds = new HashSet<>(userIds);
       Map<String, Object> userfilter = new HashMap<>();
-      userfilter.put(JsonKey.USER_ID, uniqueUserIds.stream().collect(Collectors.toList()));
+      userfilter.put(JsonKey.ID, uniqueUserIds.stream().collect(Collectors.toList()));
       List<String> userfields = new ArrayList<>();
       userfields.add(JsonKey.USER_ID);
       userfields.add(JsonKey.USERNAME);
       userfields.add(JsonKey.ROOT_ORG_ID);
       userfields.add(JsonKey.FIRST_NAME);
       userfields.add(JsonKey.LAST_NAME);
-      List<Map<String, Object>> useresContent = userOrgService.getUsersByIds(userIds);
+      Map<String, Object> userRequest = new HashMap<>();
+      userRequest.put(JsonKey.FILTERS, userfilter);
+      userRequest.put(JsonKey.FIELDS, userfields);
+      List<Map<String, Object>> useresContent = userOrgService.getUsers(userRequest);
       Map<String, Map<String, Object>> userInfoCache = new HashMap<>();
       Set<String> orgSet = new HashSet<>();
       if (CollectionUtils.isNotEmpty(useresContent)) {
         for (Map<String, Object> map : useresContent) {
           String userId = (String) map.get(JsonKey.USER_ID);
           map.put("user", userId);
-          map.put(
-              JsonKey.USERNAME, decryptionService.decryptData((String) map.get(JsonKey.USERNAME)));
+          map.put(JsonKey.USERNAME, (String) map.get(JsonKey.USERNAME));
           String registerdOrgId = (String) map.get(JsonKey.ROOT_ORG_ID);
           if (isNotNull(registerdOrgId)) {
             orgSet.add(registerdOrgId);
@@ -419,7 +430,8 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Map<String, Object> batchFilter = new HashMap<>();
       batchFilter.put(JsonKey.ID, batchId);
       Future<Map<String, Object>> batchresultF =
-          esService.search(createESRequest(batchFilter, null, null), EsType.course.getTypeName());
+          esService.search(
+              createESRequest(batchFilter, null, null), EsType.courseBatch.getTypeName());
       Map<String, Object> batchresult =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(batchresultF);
       List<Map<String, Object>> batchContent =
@@ -432,6 +444,7 @@ public class CourseMetricsActor extends BaseMetricsActor {
       }
       for (Map<String, Object> map : esContent) {
         String userId = (String) map.get(JsonKey.USER_ID);
+        populateProgress(course, map);
         map.put("user", userId);
         map.put("enrolledOn", map.get(JsonKey.COURSE_ENROLL_DATE));
         map.put("lastAccessTime", map.get(JsonKey.DATE_TIME));
@@ -477,7 +490,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Response response = new Response();
       response.putAll(responseMap);
       sender().tell(response, self());
-      return;
     } else {
 
       ProjectLogger.log(
@@ -506,8 +518,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
       Response response = new Response();
       response.putAll(responseMap);
       sender().tell(response, self());
-
-      return;
     }
   }
 
@@ -628,7 +638,6 @@ public class CourseMetricsActor extends BaseMetricsActor {
 
     List<String> coursefields = new ArrayList<>();
     coursefields.add(JsonKey.USER_ID);
-    coursefields.add(JsonKey.PROGRESS);
     coursefields.add(JsonKey.STATUS);
 
     Future<Map<String, Object>> resultF =
@@ -819,6 +828,87 @@ public class CourseMetricsActor extends BaseMetricsActor {
           MessageFormat.format(
               ResponseCode.invalidParameterValue.getErrorMessage(), sortBy, JsonKey.SORT_BY),
           ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+  }
+
+  private Map<String, Object> getcontentForCourse(Request request, String courseId) {
+    List<String> fields = new ArrayList<>();
+    fields.add(JsonKey.IDENTIFIER);
+    fields.add(JsonKey.DESCRIPTION);
+    fields.add(JsonKey.NAME);
+    fields.add(JsonKey.LEAF_NODE_COUNT);
+    fields.add(JsonKey.APP_ICON);
+    fields.add("leafNodes");
+    String requestBody = prepareCourseSearchRequest(courseId, fields);
+    ProjectLogger.log(
+        "LearnerStateActor:getcontentsForCourses: Request Body = " + requestBody,
+        LoggerEnum.INFO.name());
+    Map<String, Object> contentsList =
+        ContentSearchUtil.searchContentSync(
+            null, requestBody, (Map<String, String>) request.getRequest().get(JsonKey.HEADER));
+    if (contentsList == null) {
+      new ProjectCommonException(
+          ResponseCode.internalError.getErrorCode(),
+          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    List<Map<String, Object>> contents =
+        ((List<Map<String, Object>>) (contentsList.get(JsonKey.CONTENTS)));
+    return contents.get(0);
+  }
+
+  private String prepareCourseSearchRequest(String courseId, List<String> fields) {
+
+    Map<String, Object> filters = new HashMap<String, Object>();
+    filters.put(JsonKey.CONTENT_TYPE, new String[] {JsonKey.COURSE});
+    filters.put(JsonKey.IDENTIFIER, courseId);
+    ProjectLogger.log(
+        "LearnerStateActor:prepareCourseSearchRequest: courseIds = " + courseId,
+        LoggerEnum.INFO.name());
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.FILTERS, filters);
+    if (fields != null) requestMap.put(JsonKey.FIELDS, fields);
+    Map<String, Map<String, Object>> request = new HashMap<>();
+    request.put(JsonKey.REQUEST, requestMap);
+
+    String requestJson = null;
+    try {
+      requestJson = new ObjectMapper().writeValueAsString(request);
+    } catch (JsonProcessingException e) {
+      ProjectLogger.log(
+          "LearnerStateActor:prepareCourseSearchRequest: Exception occurred with error message = "
+              + e.getMessage(),
+          e);
+    }
+
+    return requestJson;
+  }
+
+  public void populateProgress(
+      Map<String, Object> courseContent, Map<String, Object> userCoursesEsContent) {
+    List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
+    userCoursesEsContent.put(COMPLETE_PERCENT, 0);
+    userCoursesEsContent.put(JsonKey.LEAF_NODE_COUNT, courseContent.get(JsonKey.LEAF_NODE_COUNT));
+    if (userCoursesEsContent.get("contentStatus") != null
+        && CollectionUtils.isNotEmpty(leafNodes)) {
+      Map<String, Object> contentStatus =
+          new ObjectMapper().convertValue(userCoursesEsContent.get("contentStatus"), Map.class);
+      int contentIdscompleted =
+          (int)
+              contentStatus
+                  .entrySet()
+                  .stream()
+                  .filter(
+                      content ->
+                          ProjectUtil.ProgressStatus.COMPLETED.getValue()
+                              == (Integer) content.getValue())
+                  .filter(content -> (leafNodes).contains((String) content.getKey()))
+                  .count();
+
+      Integer completionPercentage =
+          (int) Math.round((contentIdscompleted * 100.0) / (leafNodes).size());
+      userCoursesEsContent.put(JsonKey.PROGRESS, contentIdscompleted);
+      userCoursesEsContent.put(COMPLETE_PERCENT, completionPercentage);
     }
   }
 }

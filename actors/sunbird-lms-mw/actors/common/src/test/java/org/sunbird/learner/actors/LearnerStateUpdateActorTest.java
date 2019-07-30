@@ -7,13 +7,17 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -21,24 +25,28 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.kafka.client.InstructionEventGenerator;
 import org.sunbird.learner.util.ContentSearchUtil;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  Util.class,
-  DataCacheHandler.class,
-  PageManagementActor.class,
-  ContentSearchUtil.class
+  ContentSearchUtil.class,
+  ElasticSearchHelper.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class,
+  InstructionEventGenerator.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class LearnerStateUpdateActorTest {
@@ -51,6 +59,7 @@ public class LearnerStateUpdateActorTest {
   private static final String contentId = "cont3544TeBukGame";
   private static final String batchId = "220j2536h37841hc3u";
   private static CassandraOperationImpl cassandraOperation;
+  private static ElasticSearchService esService;
 
   @BeforeClass
   public static void setUp() {
@@ -60,39 +69,64 @@ public class LearnerStateUpdateActorTest {
   }
 
   @Before
-  public void beforeTest() {
+  public void beforeTest() throws Exception {
 
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(ElasticSearchHelper.class);
+    PowerMockito.mockStatic(EsClientFactory.class);
+    PowerMockito.mockStatic(InstructionEventGenerator.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.updateRecord(
+    when(cassandraOperation.batchInsert(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList()))
+        .thenReturn(getSuccessResponse());
+
+    when(cassandraOperation.upsertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(getSuccessResponse());
 
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getCassandraRecordByProperty());
-
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
         .thenReturn(getCassandraRecordById());
+
+    PowerMockito.doNothing()
+        .when(InstructionEventGenerator.class, "pushInstructionEvent", Mockito.anyMap());
+
+    mockEsUtilforCourseBatch();
   }
 
-  private Response getCassandraRecordByProperty() {
-    return new Response();
+  private void mockEsUtilforCourseBatch() {
+    Map<String, Object> courseBatches = new HashMap<>();
+    List<Map<String, Object>> l1 = new ArrayList<>();
+    l1.add(getMapforCourseBatch(batchId));
+    l1.add(getMapforCourseBatch("cb2"));
+    l1.add(getMapforCourseBatch("cb3"));
+    courseBatches.put(JsonKey.CONTENT, l1);
+    Promise<Map<String, Object>> promiseCourseBatch = Futures.promise();
+    promiseCourseBatch.success(courseBatches);
+
+    when(esService.search(Mockito.any(), Mockito.any())).thenReturn(promiseCourseBatch.future());
+    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(courseBatches);
+  }
+
+  private Map<String, Object> getMapforCourseBatch(String id) {
+    Map<String, Object> m1 = new HashMap<>();
+    m1.put(JsonKey.BATCH_ID, id);
+    m1.put(JsonKey.STATUS, 1);
+    return m1;
   }
 
   private Response getCassandraRecordById() {
 
     Response response = new Response();
     List<Map> list = new ArrayList<>();
-    Map<String, Object> map = new HashMap();
-    map.put(JsonKey.ID, "anyID");
-    map.put(JsonKey.START_DATE, "2019-01-01");
-    map.put(JsonKey.END_DATE, "2019-01-30");
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.USER_ID, "anyUserID");
+    map.put(JsonKey.CONTENT_ID, contentId);
+    map.put(JsonKey.BATCH_ID, batchId);
+    map.put(JsonKey.COURSE_ID, "anyCourseId");
     map.put(JsonKey.STATUS, 2);
-    map.put(JsonKey.CONTENT_PROGRESS, 2);
-    map.put(JsonKey.LAST_ACCESS_TIME, "2014-07-04 12:08:56:235-0700");
-    map.put(JsonKey.LAST_COMPLETED_TIME, "2014-07-05 12:08:56:235-0700");
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -122,9 +156,7 @@ public class LearnerStateUpdateActorTest {
     req.setRequest(innerMap);
     subject.tell(req, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    List<String> list = new ArrayList<>();
-    list.add("name");
-    Assert.assertEquals(1, list.size());
+    Assert.assertNotNull(response);
   }
 
   @Test
@@ -146,9 +178,7 @@ public class LearnerStateUpdateActorTest {
     req.setRequest(innerMap);
     subject.tell(req, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    List<String> list = new ArrayList<>();
-    list.add("name");
-    Assert.assertEquals(1, list.size());
+    Assert.assertNotNull(response);
   }
 
   @Test
@@ -175,9 +205,7 @@ public class LearnerStateUpdateActorTest {
 
     subject.tell(req, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    List<String> list = new ArrayList<>();
-    list.add("name");
-    Assert.assertEquals(1, list.size());
+    Assert.assertNotNull(response);
   }
 
   private Response getCassandraEmptyRecordById() {
@@ -188,14 +216,14 @@ public class LearnerStateUpdateActorTest {
   }
 
   @Test
-  public void updateContentTestWithInvalidDateFormat() throws Throwable {
+  public void updateContentTestWithInvalidBatch() throws Throwable {
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request req = new Request();
     List<Map<String, Object>> contentList = new ArrayList<Map<String, Object>>();
     Map<String, Object> content1 = createContent();
-    content1.remove(JsonKey.BATCH_ID);
+    content1.put(JsonKey.BATCH_ID, "randomWrongBatchId");
     content1.put(JsonKey.STATUS, new BigInteger("2"));
     contentList.add(content1);
     HashMap<String, Object> innerMap = new HashMap<>();
@@ -204,32 +232,10 @@ public class LearnerStateUpdateActorTest {
     req.setOperation(ActorOperations.ADD_CONTENT.getValue());
     req.setRequest(innerMap);
 
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getCassandraRecordByIdDateImproper());
-
     subject.tell(req, probe.getRef());
     subject.tell(req, probe.getRef());
-    ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
-  }
-
-  private Response getCassandraRecordByIdDateImproper() {
-
-    Response response = new Response();
-    List<Map> list = new ArrayList<>();
-    Map<String, Object> map = new HashMap();
-    map.put(JsonKey.ID, "anyID");
-    map.put(JsonKey.START_DATE, "2019-01-01");
-    map.put(JsonKey.END_DATE, "2019-01-30");
-    map.put(JsonKey.STATUS, 2);
-    map.put(JsonKey.CONTENT_PROGRESS, 2);
-    map.put(JsonKey.LAST_ACCESS_TIME, "2014-07-04");
-    map.put(JsonKey.LAST_COMPLETED_TIME, "2014-07-05");
-    list.add(map);
-    response.put(JsonKey.RESPONSE, list);
-    return response;
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertNotNull(res.getResult().get("BATCH_NOT_EXISTS"));
   }
 
   private Map<String, Object> createContent() {

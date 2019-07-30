@@ -61,14 +61,12 @@ public class CourseEnrollmentActorTest {
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
-    Mockito.reset(cassandraOperation);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
     PowerMockito.mockStatic(ElasticSearchHelper.class);
   }
 
   @Test
-  @Ignore
   public void testEnrollCourseSuccessForNotStartedBatch() {
     Response response =
         getEnrollSuccessTestResponse(true, false, ProgressStatus.NOT_STARTED.getValue());
@@ -76,7 +74,6 @@ public class CourseEnrollmentActorTest {
   }
 
   @Test
-  @Ignore
   public void testEnrollCourseSuccessForStartedBatch() {
     Response response =
         getEnrollSuccessTestResponse(true, false, ProgressStatus.STARTED.getValue());
@@ -84,7 +81,6 @@ public class CourseEnrollmentActorTest {
   }
 
   @Test
-  @Ignore
   public void testEnrollCourseSuccessAfterUnenroll() {
     Response response =
         getEnrollSuccessTestResponse(false, false, ProgressStatus.STARTED.getValue());
@@ -196,13 +192,13 @@ public class CourseEnrollmentActorTest {
       boolean isUserFirstTimeEnrolled, boolean userEnrollStatus, int batchStatus) {
     if (isUserFirstTimeEnrolled)
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
           .thenReturn(
               createGetCourseBatchSuccessResponse(batchStatus),
               createGetUserCourseFailureResponse());
     else
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
           .thenReturn(
               createGetCourseBatchSuccessResponse(batchStatus),
               createGetUserCourseSuccessResponse(userEnrollStatus, batchStatus));
