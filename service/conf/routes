@@ -206,4 +206,3 @@ POST /private/user/v1/identifier/freeup        @controllers.usermanagement.Ident
 
 #reset password API
 POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword()
->>>>>>> upstream/release-2.3.0
