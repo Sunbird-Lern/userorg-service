@@ -67,8 +67,6 @@ public class LearnerStateActorTest {
   private static String batchId = "115";
   private static final String contentId = "cont3544TeBuk";
   private static ElasticSearchService esService;
-  private static final String contentResponse =
-      "{\"result\":{\"content\":[{\"id\":\"alpha01crs12\"}]}}";
 
   @BeforeClass
   public static void setUp() {
