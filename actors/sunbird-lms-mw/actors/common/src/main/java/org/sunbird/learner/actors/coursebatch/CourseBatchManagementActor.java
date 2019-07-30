@@ -1,19 +1,13 @@
 package org.sunbird.learner.actors.coursebatch;
 
-import static org.sunbird.common.models.util.JsonKey.ID;
-import static org.sunbird.common.models.util.JsonKey.PARTICIPANTS;
+import static org.sunbird.common.models.util.JsonKey.*;
 import static org.sunbird.common.models.util.ProjectLogger.log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -541,10 +535,10 @@ public class CourseBatchManagementActor extends BaseActor {
     Map<String, Object> courseBatchMap = new ObjectMapper().convertValue(courseBatch, Map.class);
     Date todayDate = getDate(null, DATE_FORMAT, null);
     Date dbBatchStartDate = getDate(JsonKey.START_DATE, DATE_FORMAT, courseBatchMap);
-    Date dbBatchEndDate = getDate(JsonKey.END_DATE, DATE_FORMAT, courseBatchMap);
+    Date dbBatchEndDate = getDate(END_DATE, DATE_FORMAT, courseBatchMap);
     Date dbEnrollmentEndDate = getDate(JsonKey.ENROLLMENT_END_DATE, DATE_FORMAT, courseBatchMap);
     Date requestedStartDate = getDate(JsonKey.START_DATE, DATE_FORMAT, req);
-    Date requestedEndDate = getDate(JsonKey.END_DATE, DATE_FORMAT, req);
+    Date requestedEndDate = getDate(END_DATE, DATE_FORMAT, req);
     Date requestedEnrollmentEndDate = getDate(JsonKey.ENROLLMENT_END_DATE, DATE_FORMAT, req);
 
     validateUpdateBatchStartDate(requestedStartDate);
@@ -566,8 +560,7 @@ public class CourseBatchManagementActor extends BaseActor {
         requestedStartDate != null
             ? (String) req.get(JsonKey.START_DATE)
             : courseBatch.getStartDate());
-    courseBatch.setEndDate(
-        requestedEndDate != null ? (String) req.get(JsonKey.END_DATE) : courseBatch.getEndDate());
+    courseBatch.setEndDate(requestedEndDate == null ? null : (String) req.get(END_DATE));
     courseBatch.setEnrollmentEndDate(
         requestedEnrollmentEndDate == null ? null : (String) req.get(JsonKey.ENROLLMENT_END_DATE));
   }
@@ -697,7 +690,17 @@ public class CourseBatchManagementActor extends BaseActor {
         return format.parse(format.format(new Date()));
       } else {
         if (StringUtils.isNotBlank((String) map.get(key))) {
-          return format.parse((String) map.get(key));
+          Date d = format.parse((String) map.get(key));
+          if (key.equals(END_DATE) || key.equals(ENROLLMENT_END_DATE)) {
+            Calendar cal =
+                Calendar.getInstance(
+                    TimeZone.getTimeZone(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_TIMEZONE)));
+            cal.setTime(d);
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            return cal.getTime();
+          }
+          return d;
         } else {
           return null;
         }
@@ -744,8 +747,8 @@ public class CourseBatchManagementActor extends BaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (requestedEnrollmentEndDate != null
-        && endDate != null
-        && requestedEnrollmentEndDate.after(endDate)) {
+        && !requestedEnrollmentEndDate.equals(existingEnrollmentEndDate)
+        && requestedEnrollmentEndDate.before(todayDate)) {
       throw new ProjectCommonException(
           ResponseCode.enrollmentEndDateEndError.getErrorCode(),
           ResponseCode.enrollmentEndDateEndError.getErrorMessage(),

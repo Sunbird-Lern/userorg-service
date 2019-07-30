@@ -19,6 +19,8 @@ public class CourseBatch implements Serializable {
   private String createdDate;
   private List<String> createdFor;
   private String description;
+
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private String endDate;
 
   @JsonInclude(JsonInclude.Include.ALWAYS)
