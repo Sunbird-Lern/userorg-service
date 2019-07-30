@@ -63,7 +63,7 @@ public class CourseBatchDaoTest {
   public void updateCourseBatchSuccess() {
     Map<String, Object> courseBatch = new HashMap<>();
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
         .thenReturn(new Response());
     Response response = courseBatchDao.update(JsonKey.COURSE_ID, JsonKey.BATCH_ID, courseBatch);
     Assert.assertNotEquals(null, response);
@@ -76,7 +76,7 @@ public class CourseBatchDaoTest {
     courseBatchMap.put(JsonKey.ID, JsonKey.BATCH_ID);
     response.put(JsonKey.RESPONSE, Arrays.asList(courseBatchMap));
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(response);
     CourseBatch courseBatch = courseBatchDao.readById(JsonKey.COURSE_ID, JsonKey.BATCH_ID);
     Assert.assertNotEquals(null, courseBatch);
@@ -87,7 +87,7 @@ public class CourseBatchDaoTest {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, Arrays.asList());
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(response);
     try {
       courseBatchDao.readById(JsonKey.COURSE_ID, JsonKey.BATCH_ID);
