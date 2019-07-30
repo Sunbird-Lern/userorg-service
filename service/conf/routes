@@ -199,3 +199,9 @@ DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(ma
 
 #Tenant Migration
 PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate()
+
+#Freeup API
+POST /private/user/v1/identifier/freeup        @controllers.usermanagement.IdentifierFreeUpController.freeUpIdentifier()
+
+#reset password API
+POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword()
