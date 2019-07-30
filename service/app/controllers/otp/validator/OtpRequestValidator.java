@@ -47,6 +47,8 @@ public class OtpRequestValidator extends BaseRequestValidator {
       validateEmail(key);
     } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
       validatePhone(key);
+    } else if (JsonKey.PREV_USED_EMAIL.equalsIgnoreCase(type) || JsonKey.PREV_USED_PHONE.equalsIgnoreCase(type)) {
+        return;
     } else {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
