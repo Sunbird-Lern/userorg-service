@@ -54,3 +54,6 @@ POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.Course
 POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
 GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
 
+
+#QR Code Download APIs
+POST  /v1/course/qrcode/download                @controllers.qrcodedownload.QRCodeDownload.downloadQRCodes()
