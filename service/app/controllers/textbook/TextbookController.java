@@ -16,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -24,13 +25,17 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.textbook.TextbookActorOperation;
 import play.libs.F.Promise;
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.Results;
 
 /**
  * Handles Textbook TOC APIs.
+ * Handles Textbook Content Bulk Upload APIs.
  *
  * @author gauraw
+ * @author Jaikumar Soundara Rajan
  */
 public class TextbookController extends BaseController {
 
@@ -54,6 +59,17 @@ public class TextbookController extends BaseController {
     try {
       return handleRequest(
           TextbookActorOperation.TEXTBOOK_TOC_URL.getValue(), textbookId, JsonKey.TEXTBOOK_ID);
+    } catch (Exception e) {
+      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+    }
+  }
+
+  public Promise<Result> bulkUploadContent() {
+    try {
+      Response response = new Response();
+      response.setResponseCode(ResponseCode.OK);
+      response.put("processId", "012813442982903808142");
+      return Promise.<Result>pure(Results.ok(Json.toJson(response)));
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
