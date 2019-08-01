@@ -40,12 +40,6 @@ public class CourseEnrollmentController extends BaseController {
           request.getRequest().put(JsonKey.USER_ID, uid);
           request.getRequest().put(JsonKey.BATCH_ID, batchId);
           new CourseEnrollmentRequestValidator().validateEnrolledCourse((Request) request);
-          request
-              .getContext()
-              .put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
-          request
-              .getContext()
-              .put(JsonKey.BATCH_DETAILS, request().queryString().get(JsonKey.BATCH_DETAILS));
           return null;
         },
         ProjectUtil.getLmsUserId(uid),

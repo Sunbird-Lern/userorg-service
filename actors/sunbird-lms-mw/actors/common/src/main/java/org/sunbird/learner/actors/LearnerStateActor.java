@@ -423,18 +423,16 @@ public class LearnerStateActor extends BaseActor {
         esService.getDataByIdentifier(ProjectUtil.EsType.usercourses.getTypeName(), id);
 
     Map<String, Object> map = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(mapF);
-    if (MapUtils.isEmpty(map)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidCourseBatchId);
+    if (MapUtils.isEmpty(map)
+        || !Boolean.TRUE.toString().equalsIgnoreCase((String) map.get(JsonKey.ACTIVE))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.userNotEnrolledCourse);
     }
     List<Map<String, Object>> content = new ArrayList<>();
     content.add(map);
     Map<String, Object> result = new HashMap<>();
     result.put(JsonKey.CONTENT, content);
     List<Map<String, Object>> updatedCourses = calculateProgressForUserCourses(request, result);
-    if (MapUtils.isNotEmpty(result)) {
-      //    	should not be required
-      //      addCourseDetails(request, result);
-    } else {
+    if (MapUtils.isEmpty(result)) {
       ProjectLogger.log(
           "LearnerStateActor:getCourse: returning batch without course details",
           LoggerEnum.INFO.name());
