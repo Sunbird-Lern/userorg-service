@@ -35,6 +35,11 @@ import static org.sunbird.common.models.util.JsonKey.CLOUD_FOLDER_CONTENT;
 import static org.sunbird.common.models.util.JsonKey.CONTENT_AZURE_STORAGE_CONTAINER;
 import static org.sunbird.common.models.util.ProjectUtil.getConfigValue;
 
+/**
+ * @Author : Rhea Fernandes
+ * This actor is used to create an html file for all the qr code images that are
+ * linked to courses that are created userIds given
+ */
 @ActorConfig(
         tasks = {"downloadQRCodes"},
         asyncTasks = {}
@@ -101,6 +106,10 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         }
     }
 
+    /**
+     * The request must contain list of userIds (Users Ids of people who have created courses)
+     * @param request
+     */
     private void downloadQRCodes(Request request) {
         Map<String, String> headers = (Map<String, String>) request.getRequest().get(JsonKey.HEADER);
         Map<String, Object> requestMap = (Map<String, Object>) request.getRequest().get(JsonKey.FILTER);

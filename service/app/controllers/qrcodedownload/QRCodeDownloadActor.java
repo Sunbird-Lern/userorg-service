@@ -9,7 +9,7 @@ import org.sunbird.common.request.Request;
 import play.libs.F;
 import play.mvc.Result;
 
-public class QRCodeDownload extends BaseController {
+public class QRCodeDownloadActor extends BaseController {
 
     public F.Promise<Result> downloadQRCodes() {
         ProjectLogger.log("Download QR Code method is called = " + request().body().asJson(), LoggerEnum.DEBUG.name());
