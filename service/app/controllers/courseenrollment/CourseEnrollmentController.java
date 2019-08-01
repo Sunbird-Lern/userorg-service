@@ -31,6 +31,29 @@ public class CourseEnrollmentController extends BaseController {
         false);
   }
 
+  public Promise<Result> getEnrolledCourse(String uid, String batchId) {
+    return handleRequest(
+        ActorOperations.GET_USER_COURSE.getValue(),
+        request().body().asJson(),
+        (req) -> {
+          Request request = (Request) req;
+          request.getRequest().put(JsonKey.USER_ID, uid);
+          request.getRequest().put(JsonKey.BATCH_ID, batchId);
+          new CourseEnrollmentRequestValidator().validateEnrolledCourse((Request) request);
+          request
+              .getContext()
+              .put(JsonKey.URL_QUERY_STRING, getQueryString(request().queryString()));
+          request
+              .getContext()
+              .put(JsonKey.BATCH_DETAILS, request().queryString().get(JsonKey.BATCH_DETAILS));
+          return null;
+        },
+        ProjectUtil.getLmsUserId(uid),
+        JsonKey.USER_ID,
+        getAllRequestHeaders((request())),
+        false);
+  }
+
   public Promise<Result> enrollCourse() {
     return handleRequest(
         ActorOperations.ENROLL_COURSE.getValue(),
