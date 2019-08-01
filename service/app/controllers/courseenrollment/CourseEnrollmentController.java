@@ -31,6 +31,18 @@ public class CourseEnrollmentController extends BaseController {
         false);
   }
 
+  public Promise<Result> getEnrolledCourse() {
+    return handleRequest(
+        ActorOperations.GET_USER_COURSE.getValue(),
+        request().body().asJson(),
+        (req) -> {
+          Request request = (Request) req;
+          new CourseEnrollmentRequestValidator().validateEnrolledCourse(request);
+          return null;
+        },
+        getAllRequestHeaders((request())));
+  }
+
   public Promise<Result> enrollCourse() {
     return handleRequest(
         ActorOperations.ENROLL_COURSE.getValue(),

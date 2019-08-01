@@ -43,7 +43,7 @@ import scala.concurrent.Future;
  * @author Arvind
  */
 @ActorConfig(
-  tasks = {"getCourse", "getContent"},
+  tasks = {"getCourse", "getUserCourse", "getContent"},
   asyncTasks = {}
 )
 public class LearnerStateActor extends BaseActor {
@@ -62,6 +62,10 @@ public class LearnerStateActor extends BaseActor {
   public void onReceive(Request request) throws Exception {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.GET_COURSE.getValue())) {
       getCourse(request);
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.GET_USER_COURSE.getValue())) {
+      getUserCourse(request);
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.GET_CONTENT.getValue())) {
       Response res = new Response();
       Map<String, Object> requestMap = request.getRequest();
@@ -361,7 +365,9 @@ public class LearnerStateActor extends BaseActor {
       List<String> leafNodes = (List<String>) courseContent.get("leafNodes");
       if (course.get("contentStatus") != null && CollectionUtils.isNotEmpty(leafNodes)) {
         Map<String, Object> contentStatus =
-            new ObjectMapper().readValue(((String) course.get("contentStatus")).replaceAll("\\\\", ""), Map.class);
+            new ObjectMapper()
+                .readValue(
+                    ((String) course.get("contentStatus")).replaceAll("\\\\", ""), Map.class);
         int contentIdscompleted =
             (int)
                 contentStatus
@@ -407,5 +413,31 @@ public class LearnerStateActor extends BaseActor {
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return ((List<Map<String, Object>>) (contentsList.get(JsonKey.CONTENTS)));
+  }
+
+  public void getUserCourse(Request request) throws Exception {
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+    String batchId = (String) request.getRequest().get(JsonKey.BATCH_ID);
+    String id = UserCoursesService.generateUserCourseESId(batchId, userId);
+    Future<Map<String, Object>> mapF =
+        esService.getDataByIdentifier(ProjectUtil.EsType.usercourses.getTypeName(), id);
+
+    Map<String, Object> map = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(mapF);
+    if (MapUtils.isEmpty(map) || !(boolean) map.get(JsonKey.ACTIVE)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.userNotEnrolledCourse);
+    }
+    List<Map<String, Object>> content = new ArrayList<>();
+    content.add(map);
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.CONTENT, content);
+    List<Map<String, Object>> updatedCourses = calculateProgressForUserCourses(request, result);
+    if (MapUtils.isEmpty(result)) {
+      ProjectLogger.log(
+          "LearnerStateActor:getCourse: returning batch without course details",
+          LoggerEnum.INFO.name());
+    }
+    Response response = new Response();
+    response.put(JsonKey.COURSE, updatedCourses.get(0));
+    sender().tell(response, self());
   }
 }
