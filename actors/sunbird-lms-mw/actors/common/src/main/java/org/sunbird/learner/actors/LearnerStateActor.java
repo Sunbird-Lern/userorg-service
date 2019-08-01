@@ -424,7 +424,7 @@ public class LearnerStateActor extends BaseActor {
 
     Map<String, Object> map = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(mapF);
     if (MapUtils.isEmpty(map)
-        || !Boolean.TRUE.toString().equalsIgnoreCase((String) map.get(JsonKey.ACTIVE))) {
+        || !Boolean.TRUE.equals(Boolean.valueOf((String) map.get(JsonKey.ACTIVE)))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userNotEnrolledCourse);
     }
     List<Map<String, Object>> content = new ArrayList<>();
