@@ -1,5 +1,7 @@
 package org.sunbird.learner.actors.qrcodedownload;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,17 +17,23 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.io.File.separator;
+import static org.sunbird.common.models.util.JsonKey.CLOUD_FOLDER_CONTENT;
+import static org.sunbird.common.models.util.JsonKey.CONTENT_AZURE_STORAGE_CONTAINER;
+import static org.sunbird.common.models.util.ProjectUtil.getConfigValue;
 
 @ActorConfig(
         tasks = {"downloadQRCodes"},
@@ -39,7 +47,6 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         put(JsonKey.CONTENT_TYPE, JsonKey.CONTENT_TYPE);
     }};
 
-    private static final ObjectMapper mapper = new ObjectMapper();
     private static final String htmlHeader = "<!DOCTYPE html>\n" +
             "<html lang=\"en\">\n" +
             "\n" +
@@ -108,12 +115,8 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         Map<String, List<String>> dialCodesMap = contents.stream().filter(content -> content.get("dialcodes") != null).collect(Collectors.toMap(content -> (String) ((Map) content).get("identifier"), content -> (List) ((Map) content).get("dialcodes")));
         File file = createHtmlFile(dialCodesMap);
         Response response = uploadToAws(file);
-        response.put("identifiers", requestMap.get("userIds"));
-        response.put("dialcodes", new ArrayList<String>() {{
-            add("YY7Q9T");
-        }});
-        response.put("qrCodes", new ArrayList<>());
-        response.put("htmlLink", "https://sunbirddev.blob.core.windows.net/dial/Sunbird/YY7Q9T.png");
+        response.put(JsonKey.USER_IDs, requestMap.get("userIds"));
+        response.put(JsonKey.MESSAGE, "Successfully uploaded file to cloud.");
         sender().tell(response, self());
     }
 
@@ -145,7 +148,7 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         File file = null;
         try {
             if (MapUtils.isNotEmpty(dialCodeMap)) {
-                file = new File("./index.html");
+                file = new File(UUID.randomUUID().toString() + ".html");
                 StringBuilder htmlFile = new StringBuilder();
                 htmlFile.append(htmlHeader);
                 dialCodeMap.keySet().forEach(identifier -> {
@@ -158,7 +161,6 @@ public class QRCodeDownloadManagementActor extends BaseActor {
                     });
                 });
                 htmlFile.append(htmlFooter);
-                System.out.println(htmlFile);
                 FileUtils.writeStringToFile(file, htmlFile.toString());
             }
         } catch (IOException e) {
@@ -171,13 +173,25 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         return "https://sunbirddev.blob.core.windows.net/dial/Sunbird/YY7Q9T.png";
     }
 
-    private Response createResponse(String url, Map<String, List<String>> dialCodes) {
-        return null;
-    }
-
     private Response uploadToAws(File file) {
-        return new Response();
+        String objectKey = getConfigValue(CLOUD_FOLDER_CONTENT) + separator + "textbook" + separator + "toc" + separator;
+        Response response = new Response();
+        try {
+            if (file.isFile()) {
+                objectKey += file.getName();
+                String fileUrl = CloudStorageUtil.upload(CloudStorageUtil.CloudStorageType.AZURE, getConfigValue(CONTENT_AZURE_STORAGE_CONTAINER), objectKey, file.getAbsolutePath());
+                if (StringUtils.isBlank(fileUrl))
+                    throw new ProjectCommonException(
+                            ResponseCode.errorUploadQRCodeHTMLfailed.getErrorCode(),
+                            ResponseCode.errorUploadQRCodeHTMLfailed.getErrorMessage(),
+                            ResponseCode.SERVER_ERROR.getResponseCode());
+                response.put("qrCodeHtmlFile", fileUrl);
+            }
+            FileUtils.deleteQuietly(file);
+            return response;
+        } catch (Exception e) {
+            FileUtils.deleteQuietly(file);
+            throw e;
+        }
     }
-
-
 }
