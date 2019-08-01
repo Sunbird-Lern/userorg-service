@@ -31,21 +31,16 @@ public class CourseEnrollmentController extends BaseController {
         false);
   }
 
-  public Promise<Result> getEnrolledCourse(String uid, String batchId) {
+  public Promise<Result> getEnrolledCourse() {
     return handleRequest(
         ActorOperations.GET_USER_COURSE.getValue(),
         request().body().asJson(),
         (req) -> {
           Request request = (Request) req;
-          request.getRequest().put(JsonKey.USER_ID, uid);
-          request.getRequest().put(JsonKey.BATCH_ID, batchId);
-          new CourseEnrollmentRequestValidator().validateEnrolledCourse((Request) request);
+          new CourseEnrollmentRequestValidator().validateEnrolledCourse(request);
           return null;
         },
-        ProjectUtil.getLmsUserId(uid),
-        JsonKey.USER_ID,
-        getAllRequestHeaders((request())),
-        false);
+        getAllRequestHeaders((request())));
   }
 
   public Promise<Result> enrollCourse() {
