@@ -252,6 +252,8 @@ public class Global extends GlobalSettings {
       env = JsonKey.LOCATION;
     } else if (uri.startsWith("/v1/otp")) {
       env = "otp";
+    } else if (uri.startsWith("/private/user/v1/account/merge")) {
+      env = JsonKey.USER;
     } else {
       env = "miscellaneous";
     }
