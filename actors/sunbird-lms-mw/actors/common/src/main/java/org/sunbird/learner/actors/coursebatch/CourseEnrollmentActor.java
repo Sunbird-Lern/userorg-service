@@ -73,8 +73,11 @@ public class CourseEnrollmentActor extends BaseActor {
 
   private void enrollCourseBatch(Request actorMessage) {
     ProjectLogger.log("enrollCourseClass called");
-    Map<String, Object> courseMap = (Map<String, Object>) actorMessage.getRequest();
-    courseMap.remove(JsonKey.ID);
+    Map<String, Object> requestMap = (Map<String, Object>) actorMessage.getRequest();
+    Map<String, Object> courseMap = new HashMap<>();
+    courseMap.put(JsonKey.COURSE_ID, requestMap.get(JsonKey.COURSE_ID));
+    courseMap.put(JsonKey.BATCH_ID, requestMap.get(JsonKey.BATCH_ID));
+    courseMap.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
     CourseBatch courseBatch =
         courseBatchDao.readById(
             (String) courseMap.get(JsonKey.COURSE_ID), (String) courseMap.get(JsonKey.BATCH_ID));

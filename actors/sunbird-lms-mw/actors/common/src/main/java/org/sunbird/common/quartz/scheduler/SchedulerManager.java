@@ -59,7 +59,7 @@ public final class SchedulerManager {
         scheduler = new StdSchedulerFactory().getScheduler();
       }
       String identifier = "NetOps-PC1502295457753";
-      scheduleCourseBatchCount(identifier);
+      //    scheduleCourseBatchCount(identifier);
       scheduleBulkUploadJob(identifier);
       // scheduleCoursePublishJob(identifier);
       scheduleMetricsReportJob(identifier);
