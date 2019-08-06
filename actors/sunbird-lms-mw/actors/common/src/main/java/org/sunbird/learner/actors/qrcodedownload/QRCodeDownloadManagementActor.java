@@ -18,6 +18,7 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
+
 import org.sunbird.learner.util.ContentSearchUtil;
 import org.sunbird.learner.util.Util;
 
@@ -45,50 +46,12 @@ import static org.sunbird.common.models.util.ProjectUtil.getConfigValue;
         asyncTasks = {}
 )
 public class QRCodeDownloadManagementActor extends BaseActor {
-    private static final List<String> fields = Arrays.asList("identifier", "dialcodes");
+    private static final List<String> fields = Arrays.asList("identifier", "dialcodes", "name");
     private static final Map<String, String> filtersHelperMap = new HashMap<String, String>() {{
         put(JsonKey.USER_IDs, JsonKey.CREATED_BY);
         put(JsonKey.STATUS, JsonKey.STATUS);
         put(JsonKey.CONTENT_TYPE, JsonKey.CONTENT_TYPE);
     }};
-
-    private static final String htmlHeader = "<!DOCTYPE html>\n" +
-            "<html lang=\"en\">\n" +
-            "\n" +
-            "<head>\n" +
-            "    <title>QR Code Generation Sheet</title>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "    <meta name=\"viewport\" content=\"width= device-widthcharset, initial scale = 1.0\">\n" +
-            "    <link href=\"https://fonts.googleapis.com/css?family=Pacifico\" rel=\"stylesheet\">\n" +
-            "    <style>\n" +
-            "        body {\n" +
-            "            background-color: linen;\n" +
-            "        }\n" +
-            "\n" +
-            "        /* .ids-list, .dialcodes-list, .images-list {\n" +
-            "            width: 30vw;\n" +
-            "            border: \n" +
-            "        } */\n" +
-            "        table,\n" +
-            "        th,\n" +
-            "        td {\n" +
-            "            border: 1px solid black;\n" +
-            "            border-collapse: collapse;\n" +
-            "        }\n" +
-            "    </style>\n" +
-            "</head>\n" +
-            "\n" +
-            "<body class>\n" +
-            "    <table style=\"width:100%\">\n" +
-            "        <tr>\n" +
-            "            <th>Course Id's</th>\n" +
-            "            <th>Dialcodes</th>\n" +
-            "            <th>QR Codes</th>\n" +
-            "        </tr>";
-    private static final String htmlFooter = "</table>\n" +
-            "</body>\n" +
-            "\n" +
-            "</html>";
 
     @Override
     public void onReceive(Request request) throws Throwable {
@@ -121,23 +84,45 @@ public class QRCodeDownloadManagementActor extends BaseActor {
                     ResponseCode.errorUserHasNotCreatedAnyCourse.getErrorCode(),
                     ResponseCode.errorUserHasNotCreatedAnyCourse.getErrorMessage(),
                     ResponseCode.CLIENT_ERROR.getResponseCode());
-        Map<String, List<String>> dialCodesMap = contents.stream().filter(content -> content.get("dialcodes") != null).collect(Collectors.toMap(content -> (String) ((Map) content).get("identifier"), content -> (List) ((Map) content).get("dialcodes")));
-        File file = createHtmlFile(dialCodesMap);
-        Response response = uploadToAws(file);
+        Map<String, List<String>> dialCodesMap = contents.stream()
+                .filter(content -> content.get("dialcodes") != null)
+                .filter(content -> content.get("name") != null)
+                .collect(Collectors.toMap(content -> ((String) content.get("identifier")) + "<<<" + (String) content.get("name"), content -> (List) content.get("dialcodes")));
+        File file = generateCSVFile(dialCodesMap);
+        Response response = new Response();
+        if (null == file)
+            throw new ProjectCommonException(
+                    ResponseCode.errorProcessingFile.getErrorCode(),
+                    ResponseCode.errorProcessingFile.getErrorMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
+
+        response = uploadToAws(file);
         response.put(JsonKey.USER_IDs, requestMap.get("userIds"));
-        response.put(JsonKey.MESSAGE, "Successfully uploaded file to cloud.");
         sender().tell(response, self());
     }
 
+    /**
+     * Search call to LP composite search engine
+     * @param requestMap
+     * @param headers
+     * @return
+     */
     private Map<String, Object> searchCourses(Map<String, Object> requestMap, Map<String, String> headers) {
         String request = prepareSearchRequest(requestMap);
         Map<String, Object> searchResponse = ContentSearchUtil.searchContentSync(null, request, headers);
         return searchResponse;
     }
 
+    /**
+     * Request Preparation for search Request
+     * @param requestMap
+     * @return
+     */
     private String prepareSearchRequest(Map<String, Object> requestMap) {
         Map<String, Object> searchRequestMap = new HashMap<String, Object>() {{
-            put(JsonKey.FILTERS, requestMap.keySet().stream().filter(key -> filtersHelperMap.containsKey(key)).collect(Collectors.toMap(key -> filtersHelperMap.get(key), key -> requestMap.get(key))));
+            put(JsonKey.FILTERS, requestMap.keySet().stream()
+                    .filter(key -> filtersHelperMap.containsKey(key))
+                    .collect(Collectors.toMap(key -> filtersHelperMap.get(key), key -> requestMap.get(key))));
             put(JsonKey.FIELDS, fields);
             put(JsonKey.LIMIT, 200);
         }};
@@ -153,35 +138,46 @@ public class QRCodeDownloadManagementActor extends BaseActor {
         return requestJson;
     }
 
-    private File createHtmlFile(Map<String, List<String>> dialCodeMap) {
+    /**
+     * Generates the CSV File for the data provided
+     * @param dialCodeMap
+     * @return
+     */
+    private File generateCSVFile(Map<String, List<String>> dialCodeMap) {
         File file = null;
-        try {
-            if (MapUtils.isNotEmpty(dialCodeMap)) {
-                file = new File(UUID.randomUUID().toString() + ".html");
-                StringBuilder htmlFile = new StringBuilder();
-                htmlFile.append(htmlHeader);
-                dialCodeMap.keySet().forEach(identifier -> {
-                    dialCodeMap.get(identifier).forEach(dialCode -> {
-                        htmlFile.append(" <tr>\n" +
-                                "            <td>" + identifier + "</td>\n" +
-                                "            <td>" + dialCode + "</td>\n" +
-                                "            <td><img src=\"" + getQRCodeImageUrl(dialCode) + "\" alt=\"" + dialCode + "\"></td>\n" +
-                                "        </tr>");
+        if (MapUtils.isNotEmpty(dialCodeMap)) {
+            try {
+                file = new File(UUID.randomUUID().toString() + ".csv");
+                StringBuilder csvFile = new StringBuilder();
+                csvFile.append("Course Name,Dialcodes,Image Url");
+                dialCodeMap.keySet().forEach(name -> {
+                    dialCodeMap.get(name).forEach(dialCode -> {
+                        csvFile.append("\n");
+                        csvFile.append(name.split("<<<")[1]).append(",").append(dialCode).append(",").append(getQRCodeImageUrl(dialCode));
                     });
                 });
-                htmlFile.append(htmlFooter);
-                FileUtils.writeStringToFile(file, htmlFile.toString());
+                FileUtils.writeStringToFile(file, csvFile.toString());
+            } catch (IOException e) {
+                ProjectLogger.log("QRCodeDownloadManagement:createHtmlFile: Exception occurred with error message = " + e.getMessage(), e);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return file;
     }
 
+    /**
+     * Fetch the QR code Url for the given dialcodes
+     * @param dialCode
+     * @return
+     */
     private String getQRCodeImageUrl(String dialCode) {
         return "https://sunbirddev.blob.core.windows.net/dial/Sunbird/YY7Q9T.png";
     }
 
+    /**
+     * Uploading the generated csv to aws
+     * @param file
+     * @return
+     */
     private Response uploadToAws(File file) {
         String objectKey = getConfigValue(CLOUD_FOLDER_CONTENT) + separator + "textbook" + separator + "toc" + separator;
         Response response = new Response();
@@ -195,6 +191,7 @@ public class QRCodeDownloadManagementActor extends BaseActor {
                             ResponseCode.errorUploadQRCodeHTMLfailed.getErrorMessage(),
                             ResponseCode.SERVER_ERROR.getResponseCode());
                 response.put("qrCodeHtmlFile", fileUrl);
+                response.put(JsonKey.MESSAGE, "Successfully uploaded file to cloud.");
             }
             FileUtils.deleteQuietly(file);
             return response;
