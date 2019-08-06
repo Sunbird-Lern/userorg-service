@@ -30,6 +30,8 @@ public class CertificateController extends BaseController {
            Request request=(Request)req;
            CertAddRequestValidator.getInstance(request).validate();
            return null;
-       });
+       },null,
+               null,
+               true);
    }
 }
