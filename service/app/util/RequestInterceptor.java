@@ -102,6 +102,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/migrate", var);
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
   }
 
   /**

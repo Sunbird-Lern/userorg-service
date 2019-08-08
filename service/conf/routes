@@ -206,3 +206,7 @@ POST /private/user/v1/identifier/freeup        @controllers.usermanagement.Ident
 
 #reset password API
 POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword()
+
+#user certificate validate API
+POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate()
+POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate()
