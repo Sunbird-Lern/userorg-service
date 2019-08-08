@@ -3,7 +3,7 @@ package controllers.organisationmanagement;
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.orgvalidator.AssignKeyValidator;
+import org.sunbird.common.request.orgvalidator.KeyManagementValidator;
 import play.libs.F;
 import play.mvc.Result;
 
@@ -23,7 +23,7 @@ public class KeyManagementController extends BaseController {
                 ActorOperations.ASSIGN_KEYS.getValue(),
                 request().body().asJson(),
                 orgRequest -> {
-                    AssignKeyValidator.getInstance((Request) orgRequest).validate();
+                    KeyManagementValidator.getInstance((Request) orgRequest).validate();
                     return null;
                 },
                 null, null, true);
