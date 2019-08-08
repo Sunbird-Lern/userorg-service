@@ -7,9 +7,17 @@ import org.sunbird.common.request.orgvalidator.AssignKeyValidator;
 import play.libs.F;
 import play.mvc.Result;
 
-public class AssignKeysController extends BaseController {
+
+/**
+ * this Class is responsible for managing the signIn and enc keys for organisation
+ */
+public class KeyManagementController extends BaseController {
 
 
+    /**
+     * this action method will validate and save the enc and signIn keys into organisation db.
+     * @return Result
+     */
     public F.Promise<Result> assignKeys() {
         return handleRequest(
                 ActorOperations.ASSIGN_KEYS.getValue(),
