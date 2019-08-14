@@ -21,9 +21,13 @@ public class ResetPasswordRequestValidator extends BaseRequestValidator {
 		        ResponseCode.mandatoryParamsMissing,
 		        JsonKey.USER_ID);
 		    validateParam(
-		        (String) request.getRequest().get(JsonKey.PASSWORD),
+		        (String) request.getRequest().get(JsonKey.KEY),
 		        ResponseCode.mandatoryParamsMissing,
-		        JsonKey.PASSWORD);
+		        JsonKey.KEY);
+		    validateParam(
+			        (String) request.getRequest().get(JsonKey.TYPE),
+			        ResponseCode.mandatoryParamsMissing,
+			        JsonKey.TYPE);
 	}
 
 }
