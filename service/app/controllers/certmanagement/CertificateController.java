@@ -34,4 +34,8 @@ public class CertificateController extends BaseController {
                null,
                true);
    }
+
+   public Promise<Result> mergeCertificate() {
+     return handleRequest(ActorOperations.MERGE_USER_CERTIFICATE.getValue());
+   }
 }
