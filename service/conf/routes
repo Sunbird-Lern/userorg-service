@@ -210,4 +210,6 @@ POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPas
 #user certificate validate API
 POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate()
 POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate()
+PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate()
+
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys()
