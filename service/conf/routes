@@ -211,3 +211,4 @@ POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPas
 POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate()
 POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate()
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys()
+POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl()
