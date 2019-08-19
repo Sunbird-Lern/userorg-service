@@ -2,6 +2,7 @@ package controllers.certmanagement;
 
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.request.certificatevalidator.CertAddRequestValidator;
@@ -34,6 +35,14 @@ public class CertificateController extends BaseController {
                null,
                true);
    }
+   
+	public Promise<Result> getSignUrl() {
+		return handleRequest(ActorOperations.GET_SIGN_URL.getValue(), request().body().asJson(), req -> {
+			Request request = (Request) req;
+			CertAddRequestValidator.getInstance(request).validateDownlaodFileData();
+			return null;
+		}, null, null, true);
+	}
 
    public Promise<Result> mergeCertificate() {
      return handleRequest(ActorOperations.MERGE_USER_CERTIFICATE.getValue(),request().body().asJson());
