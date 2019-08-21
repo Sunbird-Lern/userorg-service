@@ -111,6 +111,7 @@ POST /v1/data/sync                          @controllers.search.SearchController
 
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
+POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail()
 
 # Badging APIs
 POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer()
