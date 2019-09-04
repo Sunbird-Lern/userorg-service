@@ -18,7 +18,7 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true);
+              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
