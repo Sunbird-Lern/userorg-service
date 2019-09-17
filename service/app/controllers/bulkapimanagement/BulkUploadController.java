@@ -24,11 +24,12 @@ public class BulkUploadController extends BaseBulkUploadController {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
   }
+
   public Promise<Result> userBulkMigrate() {
     try {
       Request request =
-              createAndInitBulkRequest(
-                      BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true);
+          createAndInitBulkRequest(
+              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true);
       return actorResponseHandler(getActorRef(), request, timeout, null, request());
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
