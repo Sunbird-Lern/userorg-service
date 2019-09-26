@@ -30,7 +30,6 @@ public class RequestInterceptor {
     restrictedUriList.add("/v1/note/search");
     restrictedUriList.add("/v1/note/read");
     restrictedUriList.add("/v1/note/delete");
-    restrictedUriList.add("/v1/content/state/update");
 
     // ---------------------------
     short var = 1;
@@ -38,7 +37,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v2/user/create", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/service/health", var);
-    apiHeaderIgnoreMap.put("/v1/page/assemble", var);
     apiHeaderIgnoreMap.put("/health", var);
     apiHeaderIgnoreMap.put("/v1/notification/email", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
@@ -75,9 +73,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/issuer/badge/delete", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
-    apiHeaderIgnoreMap.put("/v1/content/link", var);
-    apiHeaderIgnoreMap.put("/v1/content/unlink", var);
-    apiHeaderIgnoreMap.put("/v1/content/link/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
     // making org read as public access
@@ -95,7 +90,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/get/loginid", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
-    apiHeaderIgnoreMap.put("/v1/course/batch/search", var);
     apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
     apiHeaderIgnoreMap.put("/v1/cache/clear", var);
     apiHeaderIgnoreMap.put("/private/user/v1/search", var);
