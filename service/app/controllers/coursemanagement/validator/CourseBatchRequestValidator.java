@@ -33,11 +33,7 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateEnrolmentType(request);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
-<<<<<<< HEAD
     String enrollmentEndDate= (String) request.getRequest().get(JsonKey.ENROLLMENT_END_DATE);
-=======
-    String enrollmentEndDate = (String) request.getRequest().get(JsonKey.ENROLLMENT_END_DATE);
->>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     validateStartDate(startDate);
     validateEndDate(startDate, endDate);
     validateEnrollmentEndDate(enrollmentEndDate, startDate, endDate);
@@ -202,12 +198,8 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     }
   }
 
-<<<<<<< HEAD
-  private static void validateEnrollmentEndDate(String enrollmentEndDate, String startDate, String endDate) {
-=======
   private static void validateEnrollmentEndDate(
       String enrollmentEndDate, String startDate, String endDate) {
->>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     format.setLenient(false);
     Date batchEndDate = null;
@@ -219,16 +211,11 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
         batchStartDate = format.parse(startDate);
       }
       if (StringUtils.isNotEmpty(endDate)) {
-<<<<<<< HEAD
           batchEndDate = format.parse(endDate);
-=======
-        batchEndDate = format.parse(endDate);
->>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
       }
 
     } catch (Exception e) {
       throw new ProjectCommonException(
-<<<<<<< HEAD
               ResponseCode.dateFormatError.getErrorCode(),
               ResponseCode.dateFormatError.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -244,10 +231,6 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
               ResponseCode.enrollmentEndDateEndError.getErrorCode(),
               ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
-=======
-          ResponseCode.dateFormatError.getErrorCode(),
-          ResponseCode.dateFormatError.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (StringUtils.isNotEmpty(enrollmentEndDate)
         && batchStartDate.getTime() > batchenrollmentEndDate.getTime()) {
@@ -263,7 +246,6 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
           ResponseCode.enrollmentEndDateEndError.getErrorCode(),
           ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
->>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     }
   }
 
