@@ -57,6 +57,18 @@ public class CourseBatchController extends BaseController {
         JsonKey.BATCH_ID);
   }
 
+  public Promise<Result> removeUserFromCourseBatch(String batchId) {
+    return handleRequest(
+        ActorOperations.REMOVE_USER_FROM_BATCH.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateAddUserToCourseBatchRequest((Request) request);
+          return null;
+        },
+        batchId,
+        JsonKey.BATCH_ID);
+  }
+
   public Promise<Result> deleteBatch() {
     return handleRequest(
         ActorOperations.REMOVE_BATCH.getValue(),
@@ -82,7 +94,7 @@ public class CourseBatchController extends BaseController {
       String requestedField = request().getQueryString(JsonKey.FIELDS);
       reqObj.getContext().put(JsonKey.PARTICIPANTS, requestedField);
       List<String> esObjectType = new ArrayList<>();
-      esObjectType.add(EsType.course.getTypeName());
+      esObjectType.add(EsType.courseBatch.getTypeName());
       if (reqObj.getRequest().containsKey(JsonKey.FILTERS)
           && reqObj.getRequest().get(JsonKey.FILTERS) != null
           && reqObj.getRequest().get(JsonKey.FILTERS) instanceof Map) {
@@ -97,5 +109,16 @@ public class CourseBatchController extends BaseController {
     } catch (Exception e) {
       return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
     }
+  }
+
+  public Promise<Result> getParticipants() {
+    return handleRequest(
+        ActorOperations.GET_PARTICIPANTS.getValue(),
+        request().body().asJson(),
+        (request) -> {
+          new CourseBatchRequestValidator().validateGetParticipantsRequest((Request) request);
+          return null;
+        },
+        getAllRequestHeaders(request()));
   }
 }

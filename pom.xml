@@ -9,10 +9,45 @@
   <properties>
 	  <maven.compiler.source>1.8</maven.compiler.source>
 	  <maven.compiler.target>1.8</maven.compiler.target>
+	  <play2.plugin.version>1.0.0-beta5</play2.plugin.version>
   </properties>
 
-  <modules>
-	  <module>actors/sunbird-lms-mw</module>
-	  <module>service</module>
-  </modules>
+  <profiles>
+  	<profile>
+  		<id>default</id>
+  		<activation>
+  			<activeByDefault>true</activeByDefault>
+  		</activation>
+  		<modules>
+  			<module>actors/sunbird-lms-mw</module>
+	  		<module>service</module>
+  		</modules>
+  	</profile>
+  	<profile>
+  		<id>play-run</id>
+  		<modules>
+	  		<module>service</module>
+  		</modules>
+  	</profile>
+  </profiles>
+  
+  <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+				<groupId>com.google.code.play2-maven-plugin</groupId>
+				<artifactId>play2-maven-plugin</artifactId>
+				<version>${play2.plugin.version}</version>
+				<extensions>true</extensions>
+				<dependencies>
+					<dependency>
+						<groupId>com.google.code.play2-maven-plugin</groupId>
+						<artifactId>play2-provider-play24</artifactId>
+						<version>${play2.plugin.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

@@ -1,9 +1,13 @@
 package controllers.coursemanagement.validator;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
@@ -29,7 +33,11 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     validateEnrolmentType(request);
     String startDate = (String) request.getRequest().get(JsonKey.START_DATE);
     String endDate = (String) request.getRequest().get(JsonKey.END_DATE);
+<<<<<<< HEAD
     String enrollmentEndDate= (String) request.getRequest().get(JsonKey.ENROLLMENT_END_DATE);
+=======
+    String enrollmentEndDate = (String) request.getRequest().get(JsonKey.ENROLLMENT_END_DATE);
+>>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     validateStartDate(startDate);
     validateEndDate(startDate, endDate);
     validateEnrollmentEndDate(enrollmentEndDate, startDate, endDate);
@@ -38,6 +46,10 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
   }
 
   public void validateUpdateCourseBatchRequest(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.COURSE_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.COURSE_ID);
     if (null != request.getRequest().get(JsonKey.STATUS)) {
       boolean status = validateBatchStatus(request);
       if (!status) {
@@ -190,7 +202,12 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
     }
   }
 
+<<<<<<< HEAD
   private static void validateEnrollmentEndDate(String enrollmentEndDate, String startDate, String endDate) {
+=======
+  private static void validateEnrollmentEndDate(
+      String enrollmentEndDate, String startDate, String endDate) {
+>>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     format.setLenient(false);
     Date batchEndDate = null;
@@ -202,11 +219,16 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
         batchStartDate = format.parse(startDate);
       }
       if (StringUtils.isNotEmpty(endDate)) {
+<<<<<<< HEAD
           batchEndDate = format.parse(endDate);
+=======
+        batchEndDate = format.parse(endDate);
+>>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
       }
 
     } catch (Exception e) {
       throw new ProjectCommonException(
+<<<<<<< HEAD
               ResponseCode.dateFormatError.getErrorCode(),
               ResponseCode.dateFormatError.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -222,6 +244,26 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
               ResponseCode.enrollmentEndDateEndError.getErrorCode(),
               ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
+=======
+          ResponseCode.dateFormatError.getErrorCode(),
+          ResponseCode.dateFormatError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (StringUtils.isNotEmpty(enrollmentEndDate)
+        && batchStartDate.getTime() > batchenrollmentEndDate.getTime()) {
+      throw new ProjectCommonException(
+          ResponseCode.enrollmentEndDateStartError.getErrorCode(),
+          ResponseCode.enrollmentEndDateStartError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (StringUtils.isNotEmpty(enrollmentEndDate)
+        && StringUtils.isNotEmpty(endDate)
+        && batchEndDate.getTime() < batchenrollmentEndDate.getTime()) {
+      throw new ProjectCommonException(
+          ResponseCode.enrollmentEndDateEndError.getErrorCode(),
+          ResponseCode.enrollmentEndDateEndError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+>>>>>>> 9a314b8aeb1c97b3d2263aead41843af5203cd71
     }
   }
 
@@ -332,5 +374,18 @@ public class CourseBatchRequestValidator extends BaseRequestValidator {
       }
     }
     return false;
+  }
+
+  public void validateGetParticipantsRequest(Request request) {
+    if(MapUtils.isEmpty((Map) request.getRequest().get(JsonKey.BATCH))){
+        throw new ProjectCommonException(
+                ResponseCode.invalidRequestData.getErrorCode(),
+                MessageFormat.format(ResponseCode.invalidRequestData.getErrorMessage(), JsonKey.BATCH),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    validateParam(
+            (String) ((Map<String, Object>)request.getRequest().get(JsonKey.BATCH)).get(JsonKey.BATCH_ID),
+            ResponseCode.mandatoryParamsMissing,
+            JsonKey.BATCH_ID);
   }
 }

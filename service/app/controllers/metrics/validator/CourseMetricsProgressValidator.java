@@ -38,5 +38,4 @@ public class CourseMetricsProgressValidator {
           JsonKey.SORT_ORDER);
     }
   }
-
 }
