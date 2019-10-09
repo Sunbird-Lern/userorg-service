@@ -115,25 +115,6 @@ public class BulkUploadControllerTest {
     assertEquals(200, result.status());
   }
 
-  @Test
-  public void testBulkBatchEnrollment() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
-    // innerMap.put(JsonKey.ORGANISATION_ID , "org123");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/batch/bulk/enrollment").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(200, result.status());
-  }
 
   @Test
   public void testUserDataEncryption() {

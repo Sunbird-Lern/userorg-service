@@ -1,13 +1,6 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
-OPTIONS    /*all                        @controllers.LearnerController.preflight(all)
 # ~~~~
-GET      /v1/user/courses/list/:uid	    @controllers.courseenrollment.CourseEnrollmentController.getEnrolledCourses(uid:String)
-POST     /v1/course/enroll	    		@controllers.courseenrollment.CourseEnrollmentController.enrollCourse()
-POST     /v1/course/unenroll             @controllers.courseenrollment.CourseEnrollmentController.unenrollCourse()
-POST     /v1/content/state/read	        @controllers.LearnerController.getContentState()
-PATCH    /v1/user/content/state     	@controllers.LearnerController.updateContentState()
-PATCH    /v1/content/state/update     	@controllers.LearnerController.updateContentState()
 
 # User management APIs
 POST	/v1/user/create				            @controllers.usermanagement.UserController.createUser()
@@ -53,18 +46,6 @@ POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.c
 PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType()
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType()
 
-#page management api
-POST	/v1/page/create				  @controllers.pagemanagement.PageController.createPage()
-PATCH	/v1/page/update				  @controllers.pagemanagement.PageController.updatePage()
-GET	    /v1/page/read/:pageId    		  @controllers.pagemanagement.PageController.getPageSetting(pageId:String)
-GET	    /v1/page/all/settings			  @controllers.pagemanagement.PageController.getPageSettings()
-POST     /v1/page/assemble		  @controllers.pagemanagement.PageController.getPageData()
-
-#Section management
-POST	/v1/page/section/create				  @controllers.pagemanagement.PageController.createPageSection()
-PATCH	/v1/page/section/update				  @controllers.pagemanagement.PageController.updatePageSection()
-GET	    /v1/page/section/list			@controllers.pagemanagement.PageController.getSections()
-GET     /v1/page/section/read/:sectionId		      @controllers.pagemanagement.PageController.getSection(sectionId:String)
 
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch()
@@ -78,7 +59,6 @@ POST /v2/bulk/user/upload                   @controllers.bulkapimanagement.BulkU
 POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
-POST /v1/batch/bulk/enrollment          @controllers.bulkapimanagement.BulkUploadController.batchEnrollmentBulkUpload()
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String)
 
@@ -87,25 +67,15 @@ POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEnc
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService()
 
-#Course batch
-POST     /v1/course/batch/create				@controllers.coursemanagement.CourseBatchController.createBatch()
-PATCH 	 /v1/course/batch/update				@controllers.coursemanagement.CourseBatchController.updateBatch()
-GET		 /v1/course/batch/read/:batchId			@controllers.coursemanagement.CourseBatchController.getBatch(batchId:String)
-POST     /v1/course/batch/search                @controllers.coursemanagement.CourseBatchController.search()
-POST	 /v1/course/batch/users/add/:batchId			@controllers.coursemanagement.CourseBatchController.addUserToCourseBatch(batchId:String)
 
 #metrics APIs for dashboard
 GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String)
-GET  /v1/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgress(batchId:String)
-GET  /v2/dashboard/progress/course/:batchId      @controllers.metrics.CourseMetricsController.courseProgressV2(batchId:String)
-GET  /v1/dashboard/consumption/course/:courseId   @controllers.metrics.CourseMetricsController.courseCreation(courseId:String)
 GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String)
 GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String)
 
 GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String)
 GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String)
-GET  /v1/dashboard/progress/course/:courseId/export      @controllers.metrics.CourseMetricsController.courseProgressReport(courseId:String)
 
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync()
@@ -129,9 +99,7 @@ POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertio
 GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String)
 POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList()
 DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion()
-POST   /v1/content/link                       @controllers.badging.BadgeAssociationController.createAssociation()
-POST   /v1/content/unlink                     @controllers.badging.BadgeAssociationController.removeAssociation()
-POST   /v1/content/link/search 		              @controllers.badging.BadgeAssociationController.searchAssociation()
+
 
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth()
@@ -189,9 +157,6 @@ GET   /v1/system/settings/get/:field      @controllers.systemsettings.SystemSett
 GET   /v1/system/settings/list               @controllers.systemsettings.SystemSettingsController.getAllSystemSettings()
 POST  /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting()
 
-# Textbook
-POST    /v1/textbook/toc/upload/:textbookId           @controllers.textbook.TextbookController.uploadTOC(textbookId:String)
-GET    /v1/textbook/toc/download/:textbookId           @controllers.textbook.TextbookController.getTocUrl(textbookId:String)
 
 # OTP APIs
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP()

@@ -47,15 +47,6 @@ public class BulkUploadController extends BaseBulkUploadController {
     }
   }
 
-  public Promise<Result> batchEnrollmentBulkUpload() {
-    try {
-      Request request =
-          createAndInitBulkRequest(ActorOperations.BULK_UPLOAD.getValue(), JsonKey.BATCH, false);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
 
   public Promise<Result> locationBulkUpload() {
     try {
