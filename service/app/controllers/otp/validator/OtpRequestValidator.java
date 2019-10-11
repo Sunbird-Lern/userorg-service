@@ -73,7 +73,7 @@ public class OtpRequestValidator extends BaseRequestValidator {
                   JsonKey.EMAIL,
                   JsonKey.PHONE,
                   JsonKey.PREV_USED_EMAIL,
-                  JsonKey.PREV_USED_PHONE)));
+                  JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
     }
   }
 }
