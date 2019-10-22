@@ -5,41 +5,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import java.text.MessageFormat;
 
 public class MigrationRejectRequestValidator extends BaseRequestValidator {
 
-    private Request request;
-    private String authToken;
-    private static List<String> mandatoryParamsList = new ArrayList<>(Arrays.asList(JsonKey.ACTION, JsonKey.USER_ID, JsonKey.USER_EXT_ID));
-    private static SSOManager ssoManager = new KeyCloakServiceImpl();
 
-    private MigrationRejectRequestValidator(Request request, String authToken) {
-        this.request = request;
-        this.authToken = authToken;
+    private String tokenUserId,userId;
+
+    private MigrationRejectRequestValidator(String tokenUserId, String userId) {
+
+        this.tokenUserId=tokenUserId;
+        this.userId=userId;
     }
 
-    public static MigrationRejectRequestValidator getInstance(Request request, String authToken) {
-        return new MigrationRejectRequestValidator(request, authToken);
+    public static MigrationRejectRequestValidator getInstance(String tokenUserId, String authToken) {
+        return new MigrationRejectRequestValidator(tokenUserId, authToken);
     }
 
     public void validate() {
-        validateAuthToken();
-    }
-
-    private void validateAuthToken() {
-        String userId = ssoManager.verifyToken(authToken);
-        if (!StringUtils.equalsIgnoreCase(userId, (String) request.getContext().get(JsonKey.USER_ID))) {
-            throw new ProjectCommonException(ResponseCode.invalidAuthToken.getErrorCode(), ResponseCode.invalidAuthToken.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
+        if(!StringUtils.equalsIgnoreCase(tokenUserId,userId)){
+            throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
 
     }
+
 }

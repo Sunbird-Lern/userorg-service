@@ -34,12 +34,12 @@ public class TenantMigrationController extends BaseController {
   }
 
     public Promise<Result> tenantReject(String userId) {
-        String authUserToken = ctx().request().getHeader(JsonKey.X_AUTHENTICATED_USER_TOKEN);
+      String tokenUserId=ctx().flash().get(JsonKey.USER_ID);
         return handleRequest(
                 ActorOperations.REJECT_MIGRATION.getValue(),
                 null,
                 request -> {
-                    MigrationRejectRequestValidator.getInstance((Request) request,authUserToken).validate();
+                    MigrationRejectRequestValidator.getInstance(tokenUserId,userId).validate();
                     return null;
                 },
                 userId,
