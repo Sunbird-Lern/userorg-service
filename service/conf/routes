@@ -180,3 +180,4 @@ POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateControll
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys()
 POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl()
 PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate()
+PUT   /v1/user/migrate/reject/:userId  @controllers.tenantmigration.TenantMigrationController.tenantReject(userId:String)
