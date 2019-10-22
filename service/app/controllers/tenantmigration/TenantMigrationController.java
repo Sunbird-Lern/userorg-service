@@ -20,17 +20,17 @@ public class TenantMigrationController extends BaseController {
    * @return Result
    */
   public Promise<Result> userTenantMigrate() {
-    return handleRequest(
-        ActorOperations.USER_TENANT_MIGRATE.getValue(),
-        request().body().asJson(),
-        req -> {
-          Request request = (Request) req;
-          new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
-          return null;
-        },
-        null,
-        null,
-        true);
+      return handleRequest(
+              ActorOperations.USER_TENANT_MIGRATE.getValue(),
+              request().body().asJson(),
+              req -> {
+                  Request request = (Request) req;
+                  new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
+                  return null;
+              },
+              null,
+              null,
+              true);
   }
 
     public Promise<Result> tenantReject(String userId) {
