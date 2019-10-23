@@ -46,6 +46,6 @@ public class TenantMigrationController extends BaseController {
                     return null;
                 },
                 userId,
-                JsonKey.USER_ID, false);
+                JsonKey.USER_ID, false, httpRequest);
     }
 }
