@@ -2,7 +2,6 @@ package controllers.tenantmigration;
 
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserTenantMigrationRequestValidator;
 import play.libs.F.Promise;
@@ -29,15 +28,4 @@ public class TenantMigrationController extends BaseController {
         null,
         true);
   }
-    public Promise<Result> tenantReject(String userId) {
-        return handleRequest(
-                ActorOperations.REJECT_MIGRATION.getValue(),
-                null,
-            null,
-                userId,
-                JsonKey.USER_ID,
-                false);
-    }
-    }
-
-
+}
