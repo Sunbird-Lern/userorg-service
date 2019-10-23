@@ -2,6 +2,7 @@ package controllers.tenantmigration;
 
 import controllers.BaseController;
 import controllers.usermanagement.validator.MigrationRejectRequestValidator;
+import controllers.usermanagement.validator.UserSelfMigrationReqValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -45,4 +46,20 @@ public class TenantMigrationController extends BaseController {
                 userId,
                 JsonKey.USER_ID, false);
     }
+
+    public Promise<Result> userSelfMigrate() {
+        String tokenUserId=ctx().flash().get(JsonKey.USER_ID);
+        return handleRequest(
+                ActorOperations.MIGRATE_USER.getValue(),
+                request().body().asJson(),
+                req -> {
+                    Request request = (Request) req;
+                    UserSelfMigrationReqValidator.getInstance(request,tokenUserId).validate();
+                    return null;
+                },
+                null,
+                null,
+                true);
+    }
+
     }
