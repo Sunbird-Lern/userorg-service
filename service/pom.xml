@@ -28,13 +28,15 @@
 		</pluginRepository>
 	</pluginRepositories>
 	<properties>
-		<play2.version>2.4.6</play2.version>
-		<play2.plugin.version>1.0.0-beta5</play2.plugin.version>
+		<play2.version>2.7.2</play2.version>
+		<play2.plugin.version>1.0.0-rc5</play2.plugin.version>
+		<sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
+		<scala.major.version>2.11</scala.major.version>
 		<scala.version>2.11.8</scala.version>
 	</properties>
 
 	<dependencies>
-		<!-- Don't move this dependency below play dependency otherwise it will 
+		<!-- Don't move this dependency below play dependency otherwise it will
 			be overriden by play jackson jar, which uses older version -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -43,15 +45,15 @@
 		</dependency>
 		<!-- Add actor here itself to avoid netty jar conflict. -->
 		<dependency>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play-guice_${scala.major.version}</artifactId>
+			<version>${play2.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.sunbird</groupId>
 			<artifactId>mw-service</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.6.0</version>
-		</dependency>-->
 		<dependency>
 			<groupId>com.typesafe</groupId>
 			<artifactId>config</artifactId>
@@ -59,7 +61,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.play</groupId>
-			<artifactId>play_2.11</artifactId>
+			<artifactId>play_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<exclusions>
 				<exclusion>
@@ -78,13 +80,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-netty-server_2.11</artifactId>
-			<version>${play2.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-specs2_2.11</artifactId>
+			<artifactId>play-specs2_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<scope>test</scope>
 			<exclusions>
@@ -99,11 +95,6 @@
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-actor_2.11</artifactId>
-			<version>2.5.16</version>
-		</dependency>
 		<!-- required for IntegrationSpec -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -113,18 +104,13 @@
 
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-slf4j_2.11</artifactId>
-			<version>2.5.16</version>
+			<artifactId>akka-slf4j_${scala.major.version}</artifactId>
+			<version>2.5.19</version>
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-remote_2.11</artifactId>
-			<version>2.5.16</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-testkit_2.11</artifactId>
-			<version>2.5.16</version>
+			<artifactId>akka-testkit_${scala.major.version}</artifactId>
+			<version>2.5.19</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -153,7 +139,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.play</groupId>
-			<artifactId>filters-helpers_2.11</artifactId>
+			<artifactId>filters-helpers_${scala.major.version}</artifactId>
+			<version>${play2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play-akka-http-server_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 		</dependency>
 	</dependencies>
@@ -180,13 +171,14 @@
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>${play2.plugin.version}</version>
 				<extensions>true</extensions>
-				<dependencies>
-					<dependency>
-						<groupId>com.google.code.play2-maven-plugin</groupId>
-						<artifactId>play2-provider-play24</artifactId>
-						<version>${play2.plugin.version}</version>
-					</dependency>
-				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
+				<artifactId>sbt-compiler-maven-plugin</artifactId>
+				<version>${sbt-compiler.plugin.version}</version>
+				<configuration>
+					<scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -202,16 +194,17 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
+				<version>0.8.4</version>
 				<configuration>
 					<destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
 					<dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
 					<excludes>
-						<exclude>**/common/**</exclude>
-						<exclude>**/routes/**</exclude>
-						<exclude>**/Reverse*/**</exclude>
-						<exclude>**/*.javascript/**</exclude>
-					</excludes>
+					<exclude>**/common/**</exclude>
+					<exclude>**/router/**</exclude>
+					<exclude>**/Reverse*/**</exclude>
+					<exclude>**/routes.*</exclude>
+						<exclude>**/routes$javascript.**</exclude>
+				</excludes>
 				</configuration>
 				<executions>
 					<execution>
@@ -226,6 +219,17 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>default-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

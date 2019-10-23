@@ -1,35 +1,33 @@
 package controllers.notesmanagement;
 
-import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
-import static play.test.Helpers.route;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseControllerTest;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import controllers.BaseApplicationTest;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import util.RequestInterceptor;
+import play.test.Helpers;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static controllers.TestUtil.mapToJson;
+import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
 @Ignore
-public class NotesControllerTest extends BaseControllerTest {
+public class NotesControllerTest extends BaseApplicationTest {
 
   private static String USER_ID = "{userId} uuiuhcf784508 8y8c79-fhh";
   private static String COURSE_ID = "someUserId";
@@ -49,8 +47,8 @@ public class NotesControllerTest extends BaseControllerTest {
     String data = mapToJson(requestMap);
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -62,16 +60,16 @@ public class NotesControllerTest extends BaseControllerTest {
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(400, result.status());
   }
 
   @Test
   public void testGetNoteSuccess() {
     RequestBuilder req = new RequestBuilder().uri("/v1/note/read/" + NOTE_ID).method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -85,8 +83,8 @@ public class NotesControllerTest extends BaseControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/note/update/" + NOTE_ID).method("PATCH");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -101,8 +99,8 @@ public class NotesControllerTest extends BaseControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/note/delete/123").method("DELETE");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -118,8 +116,8 @@ public class NotesControllerTest extends BaseControllerTest {
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 

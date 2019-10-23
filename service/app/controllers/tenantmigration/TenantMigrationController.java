@@ -4,8 +4,10 @@ import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserTenantMigrationRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 /** @author Amit Kumar This controller will handle all the request related for user migration. */
 public class TenantMigrationController extends BaseController {
@@ -15,10 +17,10 @@ public class TenantMigrationController extends BaseController {
    *
    * @return Result
    */
-  public Promise<Result> userTenantMigrate() {
+  public CompletionStage<Result> userTenantMigrate(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.USER_TENANT_MIGRATE.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
@@ -26,6 +28,7 @@ public class TenantMigrationController extends BaseController {
         },
         null,
         null,
-        true);
+        true,
+            httpRequest);
   }
 }

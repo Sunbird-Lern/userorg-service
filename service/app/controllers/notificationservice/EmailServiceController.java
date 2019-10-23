@@ -3,6 +3,8 @@ package controllers.notificationservice;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -10,7 +12,7 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
 
 public class EmailServiceController extends BaseController {
@@ -18,12 +20,12 @@ public class EmailServiceController extends BaseController {
   /**
    * This method will add a new course entry into cassandra DB.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> sendMail() {
+  public CompletionStage<Result> sendMail(Http.Request httpRequest) {
 
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("send Mail : =" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
@@ -32,12 +34,12 @@ public class EmailServiceController extends BaseController {
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
 
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

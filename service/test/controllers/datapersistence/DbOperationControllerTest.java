@@ -1,25 +1,13 @@
 package controllers.datapersistence;
 
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static play.test.Helpers.route;
-
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.BaseController;
+import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -30,13 +18,20 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.learner.util.Util;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /** Created by arvind on 5/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -44,38 +39,24 @@ import util.RequestInterceptor;
 @PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
 @Ignore
-public class DbOperationControllerTest {
-
-  private static FakeApplication app;
+public class DbOperationControllerTest extends BaseApplicationTest {
+  
   private static Map<String, String[]> headerMap;
-  private static ActorSystem system;
-  private static final Props props = Props.create(DummyActor.class);
-  /* private static List<String> tableList = null;
-  private static CassandraConnectionManager manager = CassandraConnectionMngrFactory
-      .getObject(PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));*/
   private static String entityName = null;
   private static final String PAYLOAD = "payload";
   private static final String ENTITY_NAME = "entityName";
   private static final String INDEXED = "indexed";
   private static final String REQUIRED_FIELDS = "requiredFields";
 
-  @BeforeClass
-  public static void startApp() {
-    // createtableList();
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
-    entityName = "announcement";
-    app = Helpers.fakeApplication();
-    Helpers.start(app);
+  @Before
+  public void before() {
+    setup(DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
     headerMap.put(
-        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
-
-    system = ActorSystem.create("system");
-    ActorRef subject = system.actorOf(props);
-    BaseController.setActorRef(subject);
   }
 
   /*private static void createtableList(){
@@ -115,8 +96,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -139,8 +120,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
     try {
       Thread.sleep(4000);
@@ -167,8 +148,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -191,8 +172,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/update").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -216,8 +197,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/delete").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -241,8 +222,8 @@ public class DbOperationControllerTest {
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/object/read").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    /*//req.headers(headerMap);*/
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -266,8 +247,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/read/list").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -291,8 +272,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -316,8 +297,8 @@ public class DbOperationControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/object/metrics").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 

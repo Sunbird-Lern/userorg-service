@@ -3,6 +3,11 @@ package controllers.badging;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.badging.validator.BadgeClassValidator;
+import play.libs.Files;
+import play.mvc.Http;
+import play.mvc.Result;
+import util.Common;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -15,9 +20,8 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
-import play.libs.F;
-import play.mvc.Http;
-import play.mvc.Result;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * BadgeClassController handles BadgeClass APIs.
@@ -37,15 +41,15 @@ public class BadgeClassController extends BaseController {
    *
    * @return Return a promise for create badge class API result.
    */
-  public F.Promise<Result> createBadgeClass() {
+  public CompletionStage<Result> createBadgeClass(Http.Request httpRequest) {
     ProjectLogger.log("createBadgeClass called", LoggerEnum.DEBUG.name());
 
     try {
-      Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue());
+      Request request = createAndInitRequest(BadgingActorOperations.CREATE_BADGE_CLASS.getValue(), httpRequest);
 
       HashMap<String, Object> map = new HashMap<>();
 
-      Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
+      Http.MultipartFormData multipartBody = httpRequest.body().asMultipartFormData();
 
       if (multipartBody != null) {
         Map<String, String[]> data = multipartBody.asFormUrlEncoded();
@@ -53,9 +57,9 @@ public class BadgeClassController extends BaseController {
           map.put(entry.getKey(), entry.getValue()[0]);
         }
 
-        List<Http.MultipartFormData.FilePart> imageFilePart = multipartBody.getFiles();
+        List<Http.MultipartFormData.FilePart<Files.TemporaryFile>> imageFilePart = multipartBody.getFiles();
         if (imageFilePart.size() > 0) {
-          InputStream inputStream = new FileInputStream(imageFilePart.get(0).getFile());
+          InputStream inputStream = new FileInputStream(imageFilePart.get(0).getRef().path().toFile());
           byte[] imageByteArray = IOUtils.toByteArray(inputStream);
           map.put(JsonKey.IMAGE, imageByteArray);
         }
@@ -63,13 +67,13 @@ public class BadgeClassController extends BaseController {
 
       request.setRequest(map);
 
-      new BadgeClassValidator().validateCreateBadgeClass(request, request().headers());
+      new BadgeClassValidator().validateCreateBadgeClass(request, Common.getRequestHeadersInArray(httpRequest.getHeaders().toMap()));
 
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log("createBadgeClass: exception = ", e);
 
-      return F.Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -79,20 +83,20 @@ public class BadgeClassController extends BaseController {
    * @param badgeId The ID of the Badge Class whose details to view
    * @return Return a promise for get badge class API result.
    */
-  public F.Promise<Result> getBadgeClass(String badgeId) {
+  public CompletionStage<Result> getBadgeClass(String badgeId, Http.Request httpRequest) {
     ProjectLogger.log("getBadgeClass called.", LoggerEnum.DEBUG.name());
 
     try {
-      Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue());
+      Request request = createAndInitRequest(BadgingActorOperations.GET_BADGE_CLASS.getValue(), httpRequest);
       request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
       new BadgeClassValidator().validateGetBadgeClass(request);
 
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log("getBadgeClass: exception = ", e);
 
-      return F.Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -106,22 +110,22 @@ public class BadgeClassController extends BaseController {
    *
    * @return Return a promise for search badge class API result.
    */
-  public F.Promise<Result> searchBadgeClass() {
+  public CompletionStage<Result> searchBadgeClass(Http.Request httpRequest) {
     ProjectLogger.log("searchBadgeClass called.", LoggerEnum.DEBUG.name());
 
     try {
-      JsonNode bodyJson = request().body().asJson();
+      JsonNode bodyJson = httpRequest.body().asJson();
 
       Request request =
-          createAndInitRequest(BadgingActorOperations.SEARCH_BADGE_CLASS.getValue(), bodyJson);
+          createAndInitRequest(BadgingActorOperations.SEARCH_BADGE_CLASS.getValue(), bodyJson, httpRequest);
 
       new BadgeClassValidator().validateSearchBadgeClass(request);
 
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log("searchBadgeClass: exception = ", e);
 
-      return F.Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -131,20 +135,20 @@ public class BadgeClassController extends BaseController {
    * @param badgeId The ID of the Badge Class to delete
    * @return Return a promise for delete badge class API result.
    */
-  public F.Promise<Result> deleteBadgeClass(String badgeId) {
+  public CompletionStage<Result> deleteBadgeClass(String badgeId, Http.Request httpRequest) {
     ProjectLogger.log("deleteBadgeClass called.", LoggerEnum.DEBUG.name());
 
     try {
-      Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue());
+      Request request = createAndInitRequest(BadgingActorOperations.DELETE_BADGE_CLASS.getValue(), httpRequest);
       request.put(BadgingJsonKey.BADGE_ID, badgeId);
 
       new BadgeClassValidator().validateDeleteBadgeClass(request);
 
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log("deleteBadgeClass: exception = ", e);
 
-      return F.Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

@@ -2,13 +2,13 @@ package util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
-import play.mvc.Http.Request;
 
 /**
  * Request interceptor responsible to authenticated HTTP requests
@@ -17,7 +17,7 @@ import play.mvc.Http.Request;
  */
 public class RequestInterceptor {
 
-  protected static List<String> restrictedUriList = null;
+  public static List<String> restrictedUriList = null;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
 
   private RequestInterceptor() {}
@@ -102,31 +102,32 @@ public class RequestInterceptor {
   /**
    * Authenticates given HTTP request context
    *
-   * @param ctx HTTP play request context
+   * @param request HTTP play request
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned
    */
-  public static String verifyRequestData(Http.Context ctx) {
-    Request request = ctx.request();
+  public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
-    String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
-    String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
-    String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
+    Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
+    Optional<String> authClientToken =
+            request.header(HeaderParam.X_Authenticated_Client_Token.getName());
+    Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
-      if (StringUtils.isNotBlank(accessToken)) {
-        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
-      } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
-        clientId = AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
+      if (accessToken.isPresent()) {
+        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+      } else if (authClientToken.isPresent() && authClientId.isPresent()) {
+        clientId =
+                AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
         if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
-          ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
+          request.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
         }
       }
       return clientId;
     } else {
-      if (StringUtils.isNotBlank(accessToken)) {
+      if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
         try {
-          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
           if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }
@@ -135,8 +136,8 @@ public class RequestInterceptor {
           clientAccessTokenId = null;
         }
         return StringUtils.isNotBlank(clientAccessTokenId)
-            ? clientAccessTokenId
-            : JsonKey.ANONYMOUS;
+                ? clientAccessTokenId
+                : JsonKey.ANONYMOUS;
       }
       return JsonKey.ANONYMOUS;
     }

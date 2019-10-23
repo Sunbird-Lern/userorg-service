@@ -19,8 +19,11 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import play.libs.Files;
+import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
+
 
 /**
  * Class to provide common functionality to ulk upload controllers.
@@ -42,22 +45,22 @@ public class BaseBulkUploadController extends BaseController {
    *     instance.
    */
   protected org.sunbird.common.request.Request createAndInitBulkRequest(
-      String operation, String objectType, Boolean validateFileZize) throws IOException {
+          String operation, String objectType, Boolean validateFileZize, Http.Request httpRequest) throws IOException {
     ProjectLogger.log("API call for operation : " + operation);
     org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
-    MultipartFormData body = request().body().asMultipartFormData();
-    Map<String, String[]> formUrlEncodeddata = request().body().asFormUrlEncoded();
-    JsonNode requestData = request().body().asJson();
+    MultipartFormData body = httpRequest.body().asMultipartFormData();
+    Map<String, String[]> formUrlEncodeddata = httpRequest.body().asFormUrlEncoded();
+    JsonNode requestData = httpRequest.body().asJson();
     if (body != null) {
       Map<String, String[]> data = body.asFormUrlEncoded();
       for (Entry<String, String[]> entry : data.entrySet()) {
         map.put(entry.getKey(), entry.getValue()[0]);
       }
-      List<FilePart> filePart = body.getFiles();
+      List<FilePart<Files.TemporaryFile>> filePart = body.getFiles();
       if (filePart != null && !filePart.isEmpty()) {
-        InputStream is = new FileInputStream(filePart.get(0).getFile());
+        InputStream is = new FileInputStream(filePart.get(0).getRef().path().toFile());
         byteArray = IOUtils.toByteArray(is);
       }
     } else if (null != formUrlEncodeddata) {
@@ -73,7 +76,7 @@ public class BaseBulkUploadController extends BaseController {
       reqObj =
           (org.sunbird.common.request.Request)
               mapper.RequestMapper.mapRequest(
-                  request().body().asJson(), org.sunbird.common.request.Request.class);
+                  httpRequest.body().asJson(), org.sunbird.common.request.Request.class);
       InputStream is =
           new ByteArrayInputStream(
               ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
@@ -93,7 +96,7 @@ public class BaseBulkUploadController extends BaseController {
     reqObj.setRequestId(ExecutionContext.getRequestId());
     reqObj.setEnv(getEnvironment());
     map.put(JsonKey.OBJECT_TYPE, objectType);
-    map.put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+    map.put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
     map.put(JsonKey.FILE, byteArray);
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, map);
