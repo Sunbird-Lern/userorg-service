@@ -4,19 +4,21 @@ import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserProfileRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class UserProfileController extends BaseController {
 
-  public Promise<Result> getProfileSupportedSocialMediaTypes() {
-    return handleRequest(ActorOperations.GET_MEDIA_TYPES.getValue(), null, null, null, null, false);
+  public CompletionStage<Result> getProfileSupportedSocialMediaTypes(Http.Request httpRequest) {
+    return handleRequest(ActorOperations.GET_MEDIA_TYPES.getValue(), null, null, null, null, false, httpRequest);
   }
 
-  public Promise<Result> setProfileVisibility() {
+  public CompletionStage<Result> setProfileVisibility(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.PROFILE_VISIBILITY.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         (req) -> {
           Request request = (Request) req;
           new UserProfileRequestValidator().validateProfileVisibility(request);
@@ -24,7 +26,8 @@ public class UserProfileController extends BaseController {
         },
         null,
         null,
-        true);
+        true,
+            httpRequest);
   }
 
 }

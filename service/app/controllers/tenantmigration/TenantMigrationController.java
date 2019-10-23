@@ -6,8 +6,10 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserTenantMigrationRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 /** @author Amit Kumar This controller will handle all the request related for user migration.
  * @author anmolgupta
@@ -19,22 +21,23 @@ public class TenantMigrationController extends BaseController {
    *
    * @return Result
    */
-  public Promise<Result> userTenantMigrate() {
-      return handleRequest(
-              ActorOperations.USER_TENANT_MIGRATE.getValue(),
-              request().body().asJson(),
-              req -> {
-                  Request request = (Request) req;
-                  new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
-                  return null;
-              },
-              null,
-              null,
-              true);
+  public CompletionStage<Result> userTenantMigrate(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.USER_TENANT_MIGRATE.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+            httpRequest);
   }
 
-    public Promise<Result> tenantReject(String userId) {
-      String tokenUserId=ctx().flash().get(JsonKey.USER_ID);
+    public CompletionStage<Result> tenantReject(String userId, Http.Request httpRequest) {
+      String tokenUserId= httpRequest.flash().get(JsonKey.USER_ID);
         return handleRequest(
                 ActorOperations.REJECT_MIGRATION.getValue(),
                 null,
@@ -43,6 +46,6 @@ public class TenantMigrationController extends BaseController {
                     return null;
                 },
                 userId,
-                JsonKey.USER_ID, false);
+                JsonKey.USER_ID, false, httpRequest);
     }
-    }
+}

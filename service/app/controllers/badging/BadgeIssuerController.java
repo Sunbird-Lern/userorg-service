@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.badge.BadgeOperations;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -20,7 +22,8 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import play.libs.F.Promise;
+import play.libs.Files;
+import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
@@ -31,20 +34,20 @@ public class BadgeIssuerController extends BaseController {
   /**
    * This method will add badges to user profile.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> createBadgeIssuer() {
+  public CompletionStage<Result> createBadgeIssuer(Http.Request httpRequest) {
     try {
       Request reqObj = new Request();
       Map<String, Object> map = new HashMap<>();
-      MultipartFormData body = request().body().asMultipartFormData();
-      JsonNode requestData = request().body().asJson();
+      MultipartFormData body = httpRequest.body().asMultipartFormData();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("call to create badge issuer api." + requestData, LoggerEnum.DEBUG.name());
       if (body != null) {
         map = readFormData(body, map);
       } else if (null != requestData) {
         reqObj =
-            (Request) mapper.RequestMapper.mapRequest(request().body().asJson(), Request.class);
+            (Request) mapper.RequestMapper.mapRequest(httpRequest.body().asJson(), Request.class);
         map.putAll(reqObj.getRequest());
       } else {
         ProjectCommonException e =
@@ -52,7 +55,7 @@ public class BadgeIssuerController extends BaseController {
                 ResponseCode.invalidData.getErrorCode(),
                 ResponseCode.invalidData.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
-        return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
       reqObj.getRequest().putAll(map);
       new BadgeIssuerRequestValidator().validateCreateBadgeIssuer(reqObj);
@@ -61,20 +64,20 @@ public class BadgeIssuerController extends BaseController {
               reqObj,
               ExecutionContext.getRequestId(),
               BadgeOperations.createBadgeIssuer.name(),
-              ctx().flash().get(JsonKey.USER_ID),
+              httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will add badges to user profile.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> getBadgeIssuer(String issuerId) {
+  public CompletionStage<Result> getBadgeIssuer(String issuerId, Http.Request httpRequest) {
     try {
       Request reqObj = new Request();
       reqObj =
@@ -82,22 +85,22 @@ public class BadgeIssuerController extends BaseController {
               reqObj,
               ExecutionContext.getRequestId(),
               BadgeOperations.getBadgeIssuer.name(),
-              ctx().flash().get(JsonKey.USER_ID),
+              httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
       new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will add badges to user profile.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> getAllIssuer() {
+  public CompletionStage<Result> getAllIssuer(Http.Request httpRequest) {
     try {
       Request reqObj = new Request();
       reqObj =
@@ -105,20 +108,20 @@ public class BadgeIssuerController extends BaseController {
               reqObj,
               ExecutionContext.getRequestId(),
               BadgeOperations.getAllIssuer.name(),
-              ctx().flash().get(JsonKey.USER_ID),
+              httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will add badges to user profile.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> deleteBadgeIssuer(String issuerId) {
+  public CompletionStage<Result> deleteBadgeIssuer(String issuerId, Http.Request httpRequest) {
     try {
       Request reqObj = new Request();
       reqObj =
@@ -126,13 +129,13 @@ public class BadgeIssuerController extends BaseController {
               reqObj,
               ExecutionContext.getRequestId(),
               BadgeOperations.deleteIssuer.name(),
-              ctx().flash().get(JsonKey.USER_ID),
+              httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
       new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -150,9 +153,9 @@ public class BadgeIssuerController extends BaseController {
     for (Entry<String, String[]> entry : data.entrySet()) {
       map.put(entry.getKey(), entry.getValue()[0]);
     }
-    List<FilePart> filePart = body.getFiles();
+    List<FilePart<Files.TemporaryFile>> filePart = body.getFiles();
     if (filePart != null && !filePart.isEmpty()) {
-      File f = filePart.get(0).getFile();
+      File f = filePart.get(0).getRef().path().toFile();
       InputStream is = new FileInputStream(f);
       byte[] byteArray = IOUtils.toByteArray(is);
       map.put(JsonKey.FILE_NAME, filePart.get(0).getFilename());

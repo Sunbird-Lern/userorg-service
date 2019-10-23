@@ -1,20 +1,32 @@
 package controllers.organisationmanagement;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.BaseApplicationTest;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.responsecode.ResponseCode;
+import play.libs.Json;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.test.Helpers;
 
-import controllers.BaseControllerTest;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.responsecode.ResponseCode;
-import play.mvc.Result;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Ignore
-public class OrganisationControllerTest extends BaseControllerTest {
+public class OrganisationControllerTest extends BaseApplicationTest {
 
   private static String orgName = "someOrgName";
   private static String orgId = "someOrgOId";
@@ -166,5 +178,57 @@ public class OrganisationControllerTest extends BaseControllerTest {
     requestMap.put(JsonKey.REQUEST, innerMap);
 
     return requestMap;
+  }
+
+  public Result performTest(String url, String method, Map map) {
+    String data = mapToJson(map);
+    Http.RequestBuilder req;
+    if (StringUtils.isNotBlank(data)) {
+      JsonNode json = Json.parse(data);
+      req = new Http.RequestBuilder().bodyJson(json).uri(url).method(method);
+    } else {
+      req = new Http.RequestBuilder().uri(url).method(method);
+    }
+    //req.headers(new Http.Headers(headerMap));
+    Result result = Helpers.route(application, req);
+    return result;
+  }
+
+  public String mapToJson(Map map) {
+    ObjectMapper mapperObj = new ObjectMapper();
+    String jsonResp = "";
+
+    if (map != null) {
+      try {
+        jsonResp = mapperObj.writeValueAsString(map);
+      } catch (IOException e) {
+        ProjectLogger.log(e.getMessage(), e);
+      }
+    }
+    return jsonResp;
+  }
+
+  public String getResponseCode(Result result) {
+    String responseStr = Helpers.contentAsString(result);
+    ObjectMapper mapper = new ObjectMapper();
+
+    try {
+      Response response = mapper.readValue(responseStr, Response.class);
+
+      if (response != null) {
+        ResponseParams params = response.getParams();
+        return params.getStatus();
+      }
+    } catch (Exception e) {
+      ProjectLogger.log(
+              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+                      + e.getMessage(),
+              LoggerEnum.ERROR.name());
+    }
+    return "";
+  }
+
+  public int getResponseStatus(Result result) {
+    return result.status();
   }
 }
