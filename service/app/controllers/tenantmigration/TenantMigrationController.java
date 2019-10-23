@@ -1,7 +1,6 @@
 package controllers.tenantmigration;
 
 import controllers.BaseController;
-import controllers.usermanagement.validator.MigrationRejectRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -9,9 +8,7 @@ import org.sunbird.common.request.UserTenantMigrationRequestValidator;
 import play.libs.F.Promise;
 import play.mvc.Result;
 
-/** @author Amit Kumar This controller will handle all the request related for user migration.
- * @author anmolgupta
- * */
+/** @author Amit Kumar This controller will handle all the request related for user migration. */
 public class TenantMigrationController extends BaseController {
 
   /**
@@ -20,29 +17,27 @@ public class TenantMigrationController extends BaseController {
    * @return Result
    */
   public Promise<Result> userTenantMigrate() {
-      return handleRequest(
-              ActorOperations.USER_TENANT_MIGRATE.getValue(),
-              request().body().asJson(),
-              req -> {
-                  Request request = (Request) req;
-                  new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
-                  return null;
-              },
-              null,
-              null,
-              true);
+    return handleRequest(
+        ActorOperations.USER_TENANT_MIGRATE.getValue(),
+        request().body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserTenantMigrationRequestValidator().validateUserTenantMigrateRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true);
   }
-
     public Promise<Result> tenantReject(String userId) {
-      String tokenUserId=ctx().flash().get(JsonKey.USER_ID);
         return handleRequest(
                 ActorOperations.REJECT_MIGRATION.getValue(),
                 null,
-                request -> {
-                    MigrationRejectRequestValidator.getInstance(tokenUserId,userId).validate();
-                    return null;
-                },
+            null,
                 userId,
-                JsonKey.USER_ID, false);
+                JsonKey.USER_ID,
+                false);
     }
     }
+
+
