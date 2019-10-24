@@ -12,26 +12,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class UserSelfMigrationReqValidator extends BaseRequestValidator {
+public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
 
     private Request request;
-    private String tokenUserid;
+    private String callerId;
     private static List<String> mandatoryParamsList= new ArrayList<>(Arrays.asList(JsonKey.USER_ID,JsonKey.USER_EXT_ID));
 
-    private UserSelfMigrationReqValidator(Request request,String tokenUserId) {
+    private ShadowUserMigrateReqValidator(Request request,String tokenUserId) {
         this.request = request;
-        this.tokenUserid=tokenUserId;
+        this.callerId=tokenUserId;
     }
 
-    public static  UserSelfMigrationReqValidator getInstance(Request request,String tokenUserId){
-        return new UserSelfMigrationReqValidator(request,tokenUserId);
+    public static  ShadowUserMigrateReqValidator getInstance(Request request,String callerId){
+        return new ShadowUserMigrateReqValidator(request,callerId);
     }
     public void validate(){
         checkMandatoryFieldsPresent(request.getRequest(),mandatoryParamsList);
         String userId=(String)request.getRequest().get(JsonKey.USER_ID);
-        if(!StringUtils.equalsIgnoreCase(userId,tokenUserid)){
+        if(!StringUtils.equalsIgnoreCase(userId,callerId)){
             throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID), ResponseCode.CLIENT_ERROR.getResponseCode());
-
         }
     }
 }

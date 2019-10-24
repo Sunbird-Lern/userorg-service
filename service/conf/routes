@@ -181,4 +181,4 @@ PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagem
 POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl()
 PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate()
 PUT   /v1/user/migrate/reject/:userId  @controllers.tenantmigration.TenantMigrationController.tenantReject(userId:String)
-POST /v1/user/migrate            @controllers.tenantmigration.TenantMigrationController.userSelfMigrate()
+POST /v1/user/migrate            @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate()
