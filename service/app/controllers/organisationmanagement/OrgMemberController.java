@@ -4,30 +4,32 @@ import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.orgvalidator.OrgMemberRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class OrgMemberController extends BaseController {
 
-  public Promise<Result> addMemberToOrganisation() {
+  public CompletionStage<Result> addMemberToOrganisation(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.ADD_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new OrgMemberRequestValidator().validateAddMemberRequest((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(request()), httpRequest);
   }
 
-  public Promise<Result> removeMemberFromOrganisation() {
+  public CompletionStage<Result> removeMemberFromOrganisation(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new OrgMemberRequestValidator().validateCommon((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(request()), httpRequest);
   }
 }

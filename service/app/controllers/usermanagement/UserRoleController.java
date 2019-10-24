@@ -5,26 +5,29 @@ import controllers.usermanagement.validator.UserRoleRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class UserRoleController extends BaseController {
 
-  public Promise<Result> getRoles() {
-    return handleRequest(ActorOperations.GET_ROLES.getValue());
+  public CompletionStage<Result> getRoles(Http.Request httpRequest) {
+    return handleRequest(ActorOperations.GET_ROLES.getValue(), httpRequest);
   }
 
-  public Promise<Result> assignRoles() {
-     final boolean isPrivate = request().path().contains(JsonKey.PRIVATE)?true:false;
+  public CompletionStage<Result> assignRoles(Http.Request httpRequest) {
+     final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE)?true:false;
 
     return handleRequest(
         ActorOperations.ASSIGN_ROLES.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         (request) -> {
           Request req = (Request) request;
           req.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRoleRequestValidator().validateAssignRolesRequest(req);
           return null;
-        });
+        },
+            httpRequest);
   }
 }

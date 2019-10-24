@@ -1,28 +1,46 @@
 package controllers.usermanagement;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static play.test.Helpers.route;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseControllerTest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @Ignore
-public class UserProfileControllerTest extends BaseControllerTest {
+public class UserProfileControllerTest extends BaseApplicationTest {
 
   private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";
+  private static Map<String, String[]> headerMap;
+
+  @Before
+  public void before() {
+    setup(DummyActor.class);
+    headerMap = new HashMap<String, String[]>();
+    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
+    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap.put(
+            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
+  }
 
   @Test
   public void testProfileVisibilitySuccess() {
@@ -31,8 +49,8 @@ public class UserProfileControllerTest extends BaseControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/user/profile/visibility").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains("success"));
     assertEquals(200, result.status());
@@ -45,8 +63,8 @@ public class UserProfileControllerTest extends BaseControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/user/profile/visibility").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     String response = Helpers.contentAsString(result);
     assertTrue(response.contains(ResponseCode.invalidParameterValue.getErrorCode()));
     assertEquals(400, result.status());
@@ -67,5 +85,19 @@ public class UserProfileControllerTest extends BaseControllerTest {
     innerMap.put(JsonKey.PUBLIC, publicFields);
     requestMap.put(JsonKey.REQUEST, innerMap);
     return mapToJson(requestMap);
+  }
+
+  public String mapToJson(Map map) {
+    ObjectMapper mapperObj = new ObjectMapper();
+    String jsonResp = "";
+
+    if (map != null) {
+      try {
+        jsonResp = mapperObj.writeValueAsString(map);
+      } catch (IOException e) {
+        ProjectLogger.log(e.getMessage(), e);
+      }
+    }
+    return jsonResp;
   }
 }

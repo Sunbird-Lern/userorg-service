@@ -6,49 +6,52 @@ import controllers.skills.validator.UserSkillRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class UserSkillController extends BaseController {
 
-  public Promise<Result> addSkill() {
+  public CompletionStage<Result> addSkill(Http.Request httpRequest) {
     try {
-      JsonNode bodyJson = request().body().asJson();
-      Request reqObj = createAndInitRequest(ActorOperations.ADD_SKILL.getValue(), bodyJson);
-      reqObj.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      JsonNode bodyJson = httpRequest.body().asJson();
+      Request reqObj = createAndInitRequest(ActorOperations.ADD_SKILL.getValue(), bodyJson, httpRequest);
+      reqObj.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-  public Promise<Result> updateSkill() {
+  public CompletionStage<Result> updateSkill(Http.Request httpRequest) {
     try {
-      JsonNode bodyJson = request().body().asJson();
-      Request reqObj = createAndInitRequest(ActorOperations.UPDATE_SKILL.getValue(), bodyJson);
+      JsonNode bodyJson = httpRequest.body().asJson();
+      Request reqObj = createAndInitRequest(ActorOperations.UPDATE_SKILL.getValue(), bodyJson, httpRequest);
       new UserSkillRequestValidator().validateUpdateSkillRequest(reqObj);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-  public Promise<Result> getSkill() {
+  public CompletionStage<Result> getSkill(Http.Request httpRequest) {
     try {
-      JsonNode bodyJson = request().body().asJson();
-      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILL.getValue(), bodyJson);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      JsonNode bodyJson = httpRequest.body().asJson();
+      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILL.getValue(), bodyJson, httpRequest);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-  public Promise<Result> getSkillsList() {
+  public CompletionStage<Result> getSkillsList(Http.Request httpRequest) {
     try {
-      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILLS_LIST.getValue());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      Request reqObj = createAndInitRequest(ActorOperations.GET_SKILLS_LIST.getValue(), httpRequest);
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

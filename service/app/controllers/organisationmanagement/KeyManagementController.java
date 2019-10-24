@@ -4,8 +4,10 @@ import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.orgvalidator.KeyManagementValidator;
-import play.libs.F;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 
 /**
@@ -18,14 +20,15 @@ public class KeyManagementController extends BaseController {
      * this action method will validate and save the enc and signIn keys into organisation db.
      * @return Result
      */
-    public F.Promise<Result> assignKeys() {
+    public CompletionStage<Result> assignKeys(Http.Request httpRequest) {
         return handleRequest(
                 ActorOperations.ASSIGN_KEYS.getValue(),
-                request().body().asJson(),
+                httpRequest.body().asJson(),
                 orgRequest -> {
                     KeyManagementValidator.getInstance((Request) orgRequest).validate();
                     return null;
                 },
-                null, null, true);
+                null, null, true,
+                httpRequest);
     }
 }
