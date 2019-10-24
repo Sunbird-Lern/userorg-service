@@ -22,7 +22,7 @@ public class ApplicationStart {
 
   @Inject
   public ApplicationStart(ApplicationLifecycle applicationLifecycle, Environment environment) {
-    System.out.println("ApplicationStart:ApplicationStart: Start");
+    ProjectLogger.log("ApplicationStart:ApplicationStart: Start", LoggerEnum.DEBUG.name());
     setEnvironment(environment);
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
@@ -32,7 +32,7 @@ public class ApplicationStart {
              () -> {
                return CompletableFuture.completedFuture(null);            }
      );
-    System.out.println("ApplicationStart:ApplicationStart: End");
+    ProjectLogger.log("ApplicationStart:ApplicationStart: End", LoggerEnum.DEBUG.name());
   }
 
   private void setEnvironment(Environment environment) {

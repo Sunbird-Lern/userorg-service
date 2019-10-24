@@ -14,7 +14,6 @@ GET   /v1/user/get/:idType/:id          @controllers.usermanagement.UserControll
 POST  /v1/user/search					 @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
 POST  /private/user/v1/search            @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
 GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserController.getUserById(externalId:String, request: play.mvc.Http.Request)
-GET   /v1/user/mock/read/:externalId @controllers.usermanagement.UserController.getUserByIdMock(externalId:String)
 
 GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes(request: play.mvc.Http.Request)
 POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility(request: play.mvc.Http.Request)
