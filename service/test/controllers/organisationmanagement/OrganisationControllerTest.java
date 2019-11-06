@@ -18,7 +18,6 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -149,7 +148,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.IS_ROOT_ORG, isRootOrg);
     innerMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
 
-    if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
+    if (status != null) innerMap.put(JsonKey.STATUS, new Integer(status));
 
     requestMap.put(JsonKey.REQUEST, innerMap);
 
@@ -161,7 +160,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
-    if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
+    if (status != null) innerMap.put(JsonKey.STATUS, new Integer(status));
 
     requestMap.put(JsonKey.REQUEST, innerMap);
 
@@ -173,7 +172,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.FILTERS, filterMap);
-    if (status != null) innerMap.put(JsonKey.STATUS, new BigInteger(status));
+    if (status != null) innerMap.put(JsonKey.STATUS, new Integer(status));
 
     requestMap.put(JsonKey.REQUEST, innerMap);
 
