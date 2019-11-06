@@ -5,8 +5,11 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.validator.systemsettings.SystemSettingsRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class SystemSettingsController extends BaseController {
 
@@ -14,35 +17,35 @@ public class SystemSettingsController extends BaseController {
       new SystemSettingsRequestValidator();
 
   @SuppressWarnings("unchecked")
-  public Promise<Result> getSystemSetting(String field) {
+  public CompletionStage<Result> getSystemSetting(String field, Http.Request httpRequest) {
     try {
-      return handleRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), field, JsonKey.FIELD);
+      return handleRequest(ActorOperations.GET_SYSTEM_SETTING.getValue(), field, JsonKey.FIELD, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   @SuppressWarnings("unchecked")
-  public Promise<Result> setSystemSetting() {
+  public CompletionStage<Result> setSystemSetting(Http.Request httpRequest) {
     try {
       return handleRequest(
           ActorOperations.SET_SYSTEM_SETTING.getValue(),
-          request().body().asJson(),
+          httpRequest.body().asJson(),
           (request) -> {
             systemSettingsRequestValidator.validateSetSystemSetting((Request) request);
             return null;
-          });
+          }, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   @SuppressWarnings("unchecked")
-  public Promise<Result> getAllSystemSettings() {
+  public CompletionStage<Result> getAllSystemSettings(Http.Request httpRequest) {
     try {
-      return handleRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
+      return handleRequest(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue(), httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

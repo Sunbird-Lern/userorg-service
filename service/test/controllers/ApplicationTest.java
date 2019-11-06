@@ -47,8 +47,8 @@ public class ApplicationTest {
   @Test
   public void testCreateSuccessResponseSuccess() {
     Response response = new Response();
-    response = BaseController.createSuccessResponse(null, response);
-    assertEquals(ResponseCode.OK, response.getResponseCode());
+    Result result = BaseController.createSuccessResponse(null, response);
+    assertEquals(ResponseCode.OK.getResponseCode(), result.status());
   }
 
   @Test

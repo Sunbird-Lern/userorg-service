@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
@@ -17,7 +19,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
 
 /** @author Manzarul */
@@ -35,43 +37,43 @@ public class HealthController extends BaseController {
   /**
    * This method will do the complete health check
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> getHealth() {
+  public CompletionStage<Result> getHealth(Http.Request httpRequest) {
     try {
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will do the health check for play service.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> getLearnerServiceHealth(String val) {
+  public CompletionStage<Result> getLearnerServiceHealth(String val, Http.Request httpRequest) {
     ProjectLogger.log("Call to get play service health api = " + val, LoggerEnum.INFO.name());
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
     if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
       if (ActorOperations.EKSTEP.name().equalsIgnoreCase(val)) {
-        return getEkStepHealtCheck(request());
+        return getEkStepHealtCheck(httpRequest);
       } else {
         try {
           Request reqObj = new Request();
           reqObj.setOperation(val);
           reqObj.setRequestId(ExecutionContext.getRequestId());
-          reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+          reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
           reqObj.setEnv(getEnvironment());
-          return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+          return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
         } catch (Exception e) {
-          return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+          return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
         }
       }
     } else {
@@ -82,13 +84,13 @@ public class HealthController extends BaseController {
       Response response = new Response();
       response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
       response.setId("learner.service.health.api");
-      response.setVer(getApiVersion(request().path()));
+      response.setVer(getApiVersion(httpRequest.path()));
       response.setTs(ExecutionContext.getRequestId());
-      return Promise.<Result>pure(ok(play.libs.Json.toJson(response)));
+      return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
     }
   }
 
-  public Promise<Result> getEkStepHealtCheck(play.mvc.Http.Request request) {
+  public CompletionStage<Result> getEkStepHealtCheck(play.mvc.Http.Request request) {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
     // check EKStep Util.
@@ -125,8 +127,8 @@ public class HealthController extends BaseController {
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
     response.setId("Ekstep.service.health.api");
-    response.setVer(getApiVersion(request().path()));
+    response.setVer(getApiVersion(request.path()));
     response.setTs(ExecutionContext.getRequestId());
-    return Promise.<Result>pure(ok(play.libs.Json.toJson(response)));
+    return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
 }
