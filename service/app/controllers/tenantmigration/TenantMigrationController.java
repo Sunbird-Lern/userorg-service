@@ -1,5 +1,6 @@
 package controllers.tenantmigration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.usermanagement.validator.MigrationRejectRequestValidator;
 import controllers.usermanagement.validator.ShadowUserMigrateReqValidator;
@@ -31,8 +32,10 @@ public class TenantMigrationController extends BaseController {
             httpRequest);
   }
 
-    public CompletionStage<Result> tenantReject(String userId, Http.Request httpRequest) {
-        String tokenUserId=ctx().flash().get(JsonKey.USER_ID);
+    public CompletionStage<Result> tenantReject(Http.Request httpRequest) {
+        String tokenUserId=httpRequest.flash().get(JsonKey.USER_ID);
+        JsonNode jsonNode=httpRequest.body().asJson();
+        String userId=jsonNode.get(JsonKey.USER_ID).textValue();
         return handleRequest(
                 ActorOperations.REJECT_MIGRATION.getValue(),
                 null,
@@ -46,7 +49,7 @@ public class TenantMigrationController extends BaseController {
 
 
     public CompletionStage<Result> shadowUserMigrate(Http.Request httpRequest) {
-        String callerId=ctx().flash().get(JsonKey.USER_ID);
+        String callerId=httpRequest.flash().get(JsonKey.USER_ID);
         return handleRequest(
                 ActorOperations.MIGRATE_USER.getValue(),
                 request().body().asJson(),

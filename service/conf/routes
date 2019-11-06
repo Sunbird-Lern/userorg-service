@@ -167,7 +167,7 @@ DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(ma
 
 #Tenant Migration
 PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
-PUT   /v1/user/migrate/reject/:userId  @controllers.tenantmigration.TenantMigrationController.tenantReject(userId:String, request: play.mvc.Http.Request)
+PATCH  /v1/user/migrate/reject                @controllers.tenantmigration.TenantMigrationController.tenantReject(request: play.mvc.Http.Request)
 
 #Freeup API
 POST /private/user/v1/identifier/freeup        @controllers.usermanagement.IdentifierFreeUpController.freeUpIdentifier(request: play.mvc.Http.Request)
@@ -176,7 +176,6 @@ POST /private/user/v1/identifier/freeup        @controllers.usermanagement.Ident
 POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword(request: play.mvc.Http.Request)
 
 #user certificate validate API
-PUT   /v1/user/migrate/reject/:userId  @controllers.tenantmigration.TenantMigrationController.tenantReject(userId:String,request: play.mvc.Http.Request)
 POST /v1/user/migrate            @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate(request: play.mvc.Http.Request)
 POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate(request: play.mvc.Http.Request)
 POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate(request: play.mvc.Http.Request)
