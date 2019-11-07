@@ -3,9 +3,13 @@ package controllers.organisationmanagement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
@@ -24,13 +28,18 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class OrganisationControllerTest extends BaseApplicationTest {
 
   private static String orgName = "someOrgName";
   private static String orgId = "someOrgOId";
   private static String rootOrgId = "someRootOrgId";
   private static String status = "1";
+
+
+  @Before
+  public void before() {
+    setup(DummyActor.class);}
 
   @Test
   public void testCreateOrgSuccess() {

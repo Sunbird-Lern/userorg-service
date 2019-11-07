@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -36,9 +37,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 /** Created by arvind on 5/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest({OnRequestHandler.class,RequestInterceptor.class})
 public class DbOperationControllerTest extends BaseApplicationTest {
   
   private static Map<String, String[]> headerMap;
@@ -101,7 +101,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testCreate() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -130,6 +130,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     }
   }
 
+  @Test
   public void testCreateWithWrongEntityName() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -153,7 +154,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testupdate() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -177,7 +178,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testdelete() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -202,7 +203,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testread() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -227,7 +228,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testreadAll() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -251,7 +252,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
-
+  @Test
   public void testsearch() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -277,6 +278,7 @@ public class DbOperationControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
+  @Test
   public void testgetMetrics() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))

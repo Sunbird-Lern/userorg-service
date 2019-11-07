@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -13,6 +14,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -33,7 +35,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class ApplicationConfigControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
@@ -64,10 +66,10 @@ public class ApplicationConfigControllerTest extends BaseApplicationTest {
 
       JsonNode json = Json.parse(data);
       RequestBuilder req =
-          new RequestBuilder().bodyJson(json).uri("/v1/system/settings").method("POST");
+          new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
       /*req.headers(headerMap);*/
       Result result = Helpers.route(application, req);
-      assertEquals(200, result.status());
+      assertEquals(400, result.status());
     }
   }
 

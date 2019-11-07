@@ -2,6 +2,7 @@ package controllers.healthmanager;
 
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -11,6 +12,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
@@ -29,13 +31,13 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class HealthControllerTest extends BaseApplicationTest {
   
   private static Map<String, String[]> headerMap;
 
   @Before
-  public void before() {
+  public void before() throws Exception {
     setup(DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
@@ -51,39 +53,6 @@ public class HealthControllerTest extends BaseApplicationTest {
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     RequestBuilder req = new RequestBuilder().uri("/v1/health").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetLearnerServiceHealth() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/ekstep/health").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetLearnerServiceHealth01() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/learner/health").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetLearnerServiceHealth02() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/actor/health").method("GET");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
     assertEquals(200, result.status());

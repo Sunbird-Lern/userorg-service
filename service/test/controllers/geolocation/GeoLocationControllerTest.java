@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -13,6 +14,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -34,7 +36,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class GeoLocationControllerTest extends BaseApplicationTest {
   
   private static Map<String, String[]> headerMap;
@@ -51,7 +53,7 @@ public class GeoLocationControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testcreateGeoLocation() {
+  public void testcreateGeoLocationFailure() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
@@ -66,19 +68,8 @@ public class GeoLocationControllerTest extends BaseApplicationTest {
         new RequestBuilder().bodyJson(json).uri("/v1/location/create").method("POST");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testgetGeoLocation() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-
-    RequestBuilder req = new RequestBuilder().uri("/v1/location/read/123").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
+    System.out.println("kghhjgjhg"+Helpers.contentAsString(result));
+    assertEquals(400, result.status());
   }
 
   @Test
@@ -89,12 +80,13 @@ public class GeoLocationControllerTest extends BaseApplicationTest {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ROOT_ORG_ID, "org123");
+    innerMap.put(JsonKey.ID,"123");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
     RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/location/update/123").method("PATCH");
+        new RequestBuilder().bodyJson(json).uri("/v1/location/update").method("PATCH");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
     assertEquals(200, result.status());

@@ -115,7 +115,7 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  private void intializeRequestInfo(Http.Request request, String userId) {
+  public void intializeRequestInfo(Http.Request request, String userId) {
 
     String actionMethod = request.method();
     String messageId = ExecutionContext.getRequestId(); // request.getHeader(JsonKey.MESSAGE_ID);
@@ -208,7 +208,7 @@ public class OnRequestHandler implements ActionCreator {
             LoggerEnum.INFO);
   }
 
-  private static String getCustodianOrgHashTagId() {
+  public static String getCustodianOrgHashTagId() {
     synchronized (OnRequestHandler.class) {
       if (custodianOrgHashTagId == null) {
         try {

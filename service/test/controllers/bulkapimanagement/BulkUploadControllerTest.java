@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
@@ -33,7 +35,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class BulkUploadControllerTest extends BaseApplicationTest {
 
   @Before
@@ -86,28 +88,6 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     Result result = Helpers.route(application, req);
     Assert.assertEquals( 200, result.status());
   }
-
-
-  @Test
-  public void testUserDataEncryption() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/user/data/encrypt").method("GET");
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testUserDataDecryption() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    RequestBuilder req = new RequestBuilder().uri("/v1/user/data/decrypt").method("GET");
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
-  }
-
   private static String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";

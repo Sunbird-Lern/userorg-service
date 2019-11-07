@@ -3,6 +3,7 @@ package controllers.skills;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -30,9 +31,8 @@ import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
+@PrepareForTest({RequestInterceptor.class, OnRequestHandler.class})
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
-@Ignore
 public class UserSkillControllerTest extends BaseApplicationTest {
   
   private static Map<String, String[]> headerMap;
@@ -77,26 +77,15 @@ public class UserSkillControllerTest extends BaseApplicationTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.USER_ID, "{userId} uuiuhcf784508 8y8c79-fhh");
     innerMap.put(JsonKey.SKILLS, Arrays.asList("C", "C++"));
-
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
-
     JsonNode json = Json.parse(data);
     Http.RequestBuilder req =
         new Http.RequestBuilder().bodyJson(json).uri("/v1/user/skill/update").method("POST");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
+    assertEquals(400, result.status());
   }
-
-  /*@Test
-  public void testGetAllSkills() {
-    setup();
-    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/skills").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
-    assertEquals(200, result.status());
-  }*/
 
   @Test
   public void testGetSkill() {

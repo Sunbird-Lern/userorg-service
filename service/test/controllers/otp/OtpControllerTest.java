@@ -4,9 +4,13 @@ import akka.http.javadsl.model.HttpMethods;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
@@ -25,7 +29,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class OtpControllerTest extends BaseApplicationTest {
 
   private static final String VALID_EMAIL = "someEmail@someDomain.com";
@@ -37,6 +41,9 @@ public class OtpControllerTest extends BaseApplicationTest {
   private static final String INVALID_OTP = "anyOtp";
   private static final String GENERATE_OTP_URL = "/v1/otp/generate";
   private static final String VERIFY_OTP_URL = "/v1/otp/verify";
+  @Before
+  public void before() {
+    setup(DummyActor.class);}
 
   @Test
   public void testGenerateOtpFailureWithoutPhoneKey() {
@@ -89,7 +96,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.invalidValue.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -157,7 +164,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             VERIFY_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.invalidValue.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
