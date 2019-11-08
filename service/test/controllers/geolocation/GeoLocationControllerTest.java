@@ -68,7 +68,6 @@ public class GeoLocationControllerTest extends BaseApplicationTest {
         new RequestBuilder().bodyJson(json).uri("/v1/location/create").method("POST");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
-    System.out.println("kghhjgjhg"+Helpers.contentAsString(result));
     assertEquals(400, result.status());
   }
 

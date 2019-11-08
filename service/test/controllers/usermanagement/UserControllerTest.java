@@ -65,7 +65,6 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true));
-    System.out.println("hghgghhh"+Helpers.contentAsString(result));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(true);
   }

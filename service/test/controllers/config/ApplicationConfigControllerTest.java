@@ -46,6 +46,7 @@ public class ApplicationConfigControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  @Ignore
   public void testupdateSystemSettings() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
