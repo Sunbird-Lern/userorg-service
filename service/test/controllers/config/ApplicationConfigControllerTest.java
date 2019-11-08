@@ -46,8 +46,7 @@ public class ApplicationConfigControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  @Ignore
-  public void testupdateSystemSettings() {
+  public void testupdateSystemSettingsFailure() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
