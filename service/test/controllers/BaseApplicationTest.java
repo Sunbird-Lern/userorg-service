@@ -43,7 +43,6 @@ public abstract class BaseApplicationTest {
         BaseController.setActorRef(subject);
         PowerMockito.mockStatic(RequestInterceptor.class);
         PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
-        PowerMockito.doNothing().when(OnRequestHandler.class, "intializeRequestInfo");
         PowerMockito.mockStatic(OnRequestHandler.class);
         PowerMockito.when(OnRequestHandler.getCustodianOrgHashTagId()).thenReturn("12345678990");
         }catch (Exception e){
