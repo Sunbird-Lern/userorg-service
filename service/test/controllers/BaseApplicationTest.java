@@ -44,7 +44,7 @@ public abstract class BaseApplicationTest {
         PowerMockito.mockStatic(RequestInterceptor.class);
         PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
         PowerMockito.mockStatic(OnRequestHandler.class);
-        PowerMockito.when(OnRequestHandler.getCustodianOrgHashTagId()).thenReturn("12345678990");
+        PowerMockito.doReturn("12345678990").when(OnRequestHandler.class,"getCustodianOrgHashTagId");
         }catch (Exception e){
             e.printStackTrace();
         }

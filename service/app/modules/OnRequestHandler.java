@@ -208,7 +208,7 @@ public class OnRequestHandler implements ActionCreator {
             LoggerEnum.INFO);
   }
 
-  public static String getCustodianOrgHashTagId() {
+  private static String getCustodianOrgHashTagId() {
     synchronized (OnRequestHandler.class) {
       if (custodianOrgHashTagId == null) {
         try {
