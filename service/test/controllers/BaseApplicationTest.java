@@ -4,6 +4,7 @@ package controllers;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import modules.OnRequestHandler;
 import modules.StartModule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -27,7 +28,8 @@ public abstract class BaseApplicationTest {
     private ActorSystem system;
     private Props props;
 
-    public <T> void setup(Class<T> actorClass) {
+    public <T> void setup(Class<T> actorClass){
+        try {
         application =
                 new GuiceApplicationBuilder()
                         .in(new File("path/to/app"))
@@ -41,6 +43,11 @@ public abstract class BaseApplicationTest {
         BaseController.setActorRef(subject);
         PowerMockito.mockStatic(RequestInterceptor.class);
         PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
+        PowerMockito.mockStatic(OnRequestHandler.class);
+        PowerMockito.doReturn("12345678990").when(OnRequestHandler.class,"getCustodianOrgHashTagId");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

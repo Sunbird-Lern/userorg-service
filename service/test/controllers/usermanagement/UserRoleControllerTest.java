@@ -3,9 +3,12 @@ package controllers.usermanagement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
@@ -26,25 +29,30 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class UserRoleControllerTest extends BaseApplicationTest {
 
   private static String role = "someRole";
   private static String userId = "someUserId";
   private static String orgId = "someOrgId";
 
+  @Before
+  public void before()throws Exception {
+    setup(DummyActor.class);
+
+  }
+
   @Test
   public void testAssignRolesSuccess() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
+   // setup(DummyActor.class);
+    Result result = performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testAssignRolesFailueWithoutOrgId() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
+    Result result = performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -108,7 +116,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    //req.headers(new Http.Headers(headerMap));
+//    req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }

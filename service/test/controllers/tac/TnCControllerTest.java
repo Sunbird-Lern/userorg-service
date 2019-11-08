@@ -3,14 +3,19 @@ package controllers.tac;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http;
@@ -18,18 +23,26 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class TnCControllerTest extends BaseApplicationTest {
 
   public static final String url = "/v1/user/tnc/accept";
   public static final String post = "POST";
   public static final String version = "someVersion";
+
+
+  @Before
+  public void before() {
+    setup(DummyActor.class);
+  }
+
 
   @Test
   public void testTnCAcceptFailure() {

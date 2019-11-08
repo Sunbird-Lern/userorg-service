@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -18,6 +20,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
@@ -35,7 +38,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Before
@@ -120,24 +123,7 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void getAssertionWithInvalidTest() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(BadgingJsonKey.BADGE_CLASS_ID, "badgeid");
-    innerMap.put(BadgingJsonKey.ASSERTION_ID, "assertionId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/read").method("POST");
-    Result result = Helpers.route(application, req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
+  @Ignore
   public void getAssertionListTest() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))

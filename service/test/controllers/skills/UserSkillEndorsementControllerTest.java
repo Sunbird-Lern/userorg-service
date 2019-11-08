@@ -3,6 +3,7 @@ package controllers.skills;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -31,9 +32,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
-@Ignore
+@PrepareForTest({OnRequestHandler.class,RequestInterceptor.class})
 public class UserSkillEndorsementControllerTest extends BaseApplicationTest {
   
   private static Map<String, String[]> headerMap;

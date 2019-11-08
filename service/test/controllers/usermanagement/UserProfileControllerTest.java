@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
@@ -25,10 +27,10 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class UserProfileControllerTest extends BaseApplicationTest {
 
-  private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";
+  private static String userId = "hhuuiuhcf784508 8y8c79-fhh";
   private static Map<String, String[]> headerMap;
 
   @Before
@@ -43,7 +45,7 @@ public class UserProfileControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testProfileVisibilitySuccess() {
+  public void testProfileVisibilityFailure() {
 
     String data = getRequesteddata(userId);
     JsonNode json = Json.parse(data);
@@ -52,8 +54,7 @@ public class UserProfileControllerTest extends BaseApplicationTest {
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);
     String response = Helpers.contentAsString(result);
-    assertTrue(response.contains("success"));
-    assertEquals(200, result.status());
+    assertEquals(400, result.status());
   }
 
   @Test

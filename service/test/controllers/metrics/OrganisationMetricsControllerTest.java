@@ -2,6 +2,7 @@ package controllers.metrics;
 
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -11,6 +12,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
@@ -29,6 +31,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
+@PrepareForTest(OnRequestHandler.class)
 @Ignore
 public class OrganisationMetricsControllerTest extends BaseApplicationTest {
   
@@ -46,7 +49,6 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  @Ignore
   public void testcourseProgress() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -59,7 +61,6 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  @Ignore
   public void testorgConsumption() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -72,7 +73,6 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  @Ignore
   public void testorgCreationReport() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -85,7 +85,6 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  @Ignore
   public void testorgConsumptionReport() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))

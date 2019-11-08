@@ -2,12 +2,16 @@ package controllers.notesmanagement;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import play.libs.Json;
@@ -26,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class NotesControllerTest extends BaseApplicationTest {
 
   private static String USER_ID = "{userId} uuiuhcf784508 8y8c79-fhh";
@@ -35,13 +39,16 @@ public class NotesControllerTest extends BaseApplicationTest {
   private static String NOTE = "someUserId";
   private static String TITLE = "someUserId";
   private static String NOTE_ID = "noteId";
-  private static List<String> TAGS = Arrays.asList("SOME TAG");
+
+  @Before
+  public void before() {
+    setup(DummyActor.class);
+  }
 
   @Test
+  @Ignore
   public void testCreateNoteSuccess() {
-
     Map<String, Object> requestMap = new HashMap<>();
-
     requestMap.put(
         JsonKey.REQUEST, getCreateNoteRequest(USER_ID, COURSE_ID, CONTENT_ID, NOTE, TITLE));
     String data = mapToJson(requestMap);

@@ -9,6 +9,8 @@ import controllers.DummyActor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -18,6 +20,7 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -35,7 +38,7 @@ import util.RequestInterceptor;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
+@PrepareForTest(OnRequestHandler.class)
 public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Before

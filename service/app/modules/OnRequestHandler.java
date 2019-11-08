@@ -115,7 +115,7 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  private void intializeRequestInfo(Http.Request request, String userId) {
+  public void intializeRequestInfo(Http.Request request, String userId) {
 
     String actionMethod = request.method();
     String messageId = ExecutionContext.getRequestId(); // request.getHeader(JsonKey.MESSAGE_ID);
@@ -219,7 +219,6 @@ public class OnRequestHandler implements ActionCreator {
           SystemSetting systemSetting =
                   sysSettingClient.getSystemSettingByField(
                           sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
-
           // Get hash tag ID of custodian org
           OrganisationClient orgClient = new OrganisationClientImpl();
           ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
