@@ -15,7 +15,8 @@ jobs:
           paths: ~/.m2
       - run:
          name: Analyze on SonarCloud
-         command: mvn verify sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io
+         command: mvn verify sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/service/target/site/jacoco/jacoco.xml 
+
 
 workflows:
   version: 2.1
