@@ -13,7 +13,10 @@ jobs:
       - save_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
           paths: ~/.m2
-      
+      - run:
+         name: Analyze on SonarCloud
+         command: mvn verify sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io
+
 workflows:
   version: 2.1
   workflow:
