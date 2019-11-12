@@ -8,7 +8,7 @@ jobs:
       - run: git submodule update --init --recursive --remote
       - restore_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
-      - run: mvn clean install -DskipTests=true
+      - run: mvn clean install
       - run: cd service && mvn play2:dist
       - save_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
