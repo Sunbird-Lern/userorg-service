@@ -14,8 +14,6 @@ import org.sunbird.common.request.Request;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
-
 @PrepareForTest(OnRequestHandler.class)
 public class NoteRequestValidatorTest extends BaseApplicationTest {
 
