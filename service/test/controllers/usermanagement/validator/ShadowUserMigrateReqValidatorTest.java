@@ -1,7 +1,6 @@
 package controllers.usermanagement.validator;
 
 import org.junit.*;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 
@@ -20,12 +19,7 @@ public class ShadowUserMigrateReqValidatorTest {
 
     }
 
-    @After
-    public void tearDown() throws Exception {
-        request=null;
-    }
-
-    @Test(expected= ProjectCommonException.class)
+    @Test
     public void testMigrateReqWithoutMandatoryParamExternalId() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_ID,"abc");
@@ -33,10 +27,15 @@ public class ShadowUserMigrateReqValidatorTest {
         reqMap.put(JsonKey.CHANNEL,"TN");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
-        shadowUserMigrateReqValidator.validate();
+        try {
+            shadowUserMigrateReqValidator.validate();
+        }
+        catch (Exception e){
+            Assert.assertEquals("Data type of userExtId should be String.",e.getMessage());
+        }
     }
 
-    @Test(expected = ProjectCommonException.class)
+    @Test
     public void testMigrateReqWithoutMandatoryParamAction() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_ID,"abc");
@@ -44,9 +43,13 @@ public class ShadowUserMigrateReqValidatorTest {
         reqMap.put(JsonKey.CHANNEL,"TN");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
-        shadowUserMigrateReqValidator.validate();
-    }
-    @Test(expected = ProjectCommonException.class)
+        try {
+            shadowUserMigrateReqValidator.validate();
+        }
+        catch (Exception e){
+            Assert.assertEquals("Data type of action should be String.",e.getMessage());
+        }    }
+    @Test
     public void testMigrateReqWithoutMandatoryParamUserId() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
@@ -54,9 +57,14 @@ public class ShadowUserMigrateReqValidatorTest {
         reqMap.put(JsonKey.ACTION,"accept");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
-        shadowUserMigrateReqValidator.validate();
-    }
-    @Test(expected = ProjectCommonException.class)
+        try {
+            shadowUserMigrateReqValidator.validate();
+        }
+        catch (Exception e){
+            Assert.assertEquals("Data type of userId should be String.",e.getMessage());
+        }    }
+
+    @Test
     public void testMigrateReqWithInvalidValueAction() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_ID,"abc");
@@ -65,9 +73,13 @@ public class ShadowUserMigrateReqValidatorTest {
         reqMap.put(JsonKey.ACTION,"action_incorrect_value");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
-        shadowUserMigrateReqValidator.validate();
-    }
-    @Test(expected = ProjectCommonException.class)
+        try {
+            shadowUserMigrateReqValidator.validate();
+        }
+        catch (Exception e){
+            Assert.assertEquals("Invalid value action_incorrect_value for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
+        }    }
+    @Test
     public void testMigrateReqWithDiffCallerId() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
@@ -76,8 +88,12 @@ public class ShadowUserMigrateReqValidatorTest {
         reqMap.put(JsonKey.ACTION,"accept");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abcD");
-        shadowUserMigrateReqValidator.validate();
-    }
+        try {
+            shadowUserMigrateReqValidator.validate();
+        }
+        catch (Exception e){
+            Assert.assertEquals("Invalid value abc for parameter userId. Please provide a valid value.",e.getMessage());
+        }    }
     @Test()
     public void testMigrateReqSuccess() {
         Map<String,Object> reqMap=new HashMap<>();
