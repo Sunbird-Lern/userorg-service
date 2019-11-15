@@ -7,7 +7,6 @@ import controllers.DummyActor;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
@@ -51,7 +50,50 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
+  
+  
+  @Test
+  public void testCreateSubOrgWithLicenseSuccess() {
+	 Map<String,Object> reqMap = createOrUpdateOrganisationRequest(orgName, null, false, null, null);
+	 ((Map<String,Object>)reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+  
+  
+  @Test
+  public void testCreateRootOrgWithLicenseSuccess() {
+	 Map<String,Object> reqMap = createOrUpdateOrganisationRequest(orgName, null, true, null, null);
+	 ((Map<String,Object>)reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
+	 ((Map<String,Object>)reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
 
+  @Test
+  public void testCreateRootOrgWithLicenseEmptyFailure() {
+	 Map<String,Object> reqMap = createOrUpdateOrganisationRequest(orgName, null, true, null, null);
+	 ((Map<String,Object>)reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
+	 ((Map<String,Object>)reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "");
+    Result result =
+        performTest(
+            "/v1/org/create",
+            "POST",
+            reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+  
   @Test
   public void testCreateOrgFailureWithoutOrgName() {
     Result result =
