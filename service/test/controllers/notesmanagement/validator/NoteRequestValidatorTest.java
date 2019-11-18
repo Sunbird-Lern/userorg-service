@@ -3,7 +3,6 @@ package controllers.notesmanagement.validator;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import modules.OnRequestHandler;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -33,10 +32,6 @@ public class NoteRequestValidatorTest extends BaseApplicationTest {
         headerMap.put(JsonKey.MESSAGE_ID, Arrays.asList("Some message ID"));
         headerMap.put(HeaderParam.X_APP_ID.getName(), Arrays.asList("Some app Id"));
         noteRequestValidator=new NoteRequestValidator();
-    }
-    @After
-    public void tearDown() throws Exception {
-        headerMap.clear();
     }
 
     @Test(expected = ProjectCommonException.class)

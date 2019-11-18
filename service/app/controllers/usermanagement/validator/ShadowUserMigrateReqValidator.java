@@ -3,6 +3,7 @@ package controllers.usermanagement.validator;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -21,7 +22,7 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
 
     private Request request;
     private String callerId;
-    private static final List<String> allowedActions=new ArrayList<>(Arrays.asList("accept","reject"));
+    private static final List<String> allowedActions=getEnumsAsString();
     private static List<String> mandatoryParamsList= new ArrayList<>(Arrays.asList(JsonKey.USER_ID,JsonKey.USER_EXT_ID,JsonKey.CHANNEL,JsonKey.ACTION));
 
     private ShadowUserMigrateReqValidator(Request request,String tokenUserId) {
@@ -47,4 +48,15 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
             throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), action, JsonKey.ACTION+" supported actions are:"+allowedActions), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
     }
+
+
+    private static List<String> getEnumsAsString(){
+        List<ProjectUtil.MigrateAction> enums=Arrays.asList(ProjectUtil.MigrateAction.values());
+        List<String>actions=new ArrayList<>();
+        enums.forEach(e->{
+        actions.add(e.getValue());
+        });
+        return actions;
+    }
+
 }
