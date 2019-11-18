@@ -106,6 +106,7 @@ public class ShadowUserMigrateReqValidatorTest {
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abcD");
         try {
             shadowUserMigrateReqValidator.validate();
+            Assert.assertTrue(false);
         }
         catch (Exception e){
             Assert.assertEquals("Invalid value abc for parameter userId. Please provide a valid value.",e.getMessage());
