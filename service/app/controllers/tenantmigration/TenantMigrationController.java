@@ -1,8 +1,6 @@
 package controllers.tenantmigration;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
-import controllers.usermanagement.validator.MigrationRejectRequestValidator;
 import controllers.usermanagement.validator.ShadowUserMigrateReqValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -31,22 +29,6 @@ public class TenantMigrationController extends BaseController {
         true,
             httpRequest);
   }
-
-    public CompletionStage<Result> tenantReject(Http.Request httpRequest) {
-        String tokenUserId=httpRequest.flash().get(JsonKey.USER_ID);
-        JsonNode jsonNode=httpRequest.body().asJson();
-        String userId=jsonNode.get(JsonKey.USER_ID).textValue();
-        return handleRequest(
-                ActorOperations.REJECT_MIGRATION.getValue(),
-                null,
-                request -> {
-                    MigrationRejectRequestValidator.getInstance(tokenUserId,userId).validate();
-                    return null;
-                },
-                userId,
-                JsonKey.USER_ID, false,httpRequest);
-    }
-
 
     public CompletionStage<Result> shadowUserMigrate(Http.Request httpRequest) {
         String callerId=httpRequest.flash().get(JsonKey.USER_ID);
