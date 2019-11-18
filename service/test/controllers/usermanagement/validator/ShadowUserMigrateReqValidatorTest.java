@@ -47,7 +47,7 @@ public class ShadowUserMigrateReqValidatorTest {
             Assert.assertTrue(true);
         }
         catch (Exception e){
-
+            Assert.assertTrue(false);
         }
     }
 
@@ -55,6 +55,7 @@ public class ShadowUserMigrateReqValidatorTest {
     public void testMigrateReqWithoutMandatoryParamAction() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_ID,"abc");
+        reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
         reqMap.put(JsonKey.CHANNEL,"TN");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
@@ -69,6 +70,7 @@ public class ShadowUserMigrateReqValidatorTest {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.CHANNEL,"TN");
         reqMap.put(JsonKey.ACTION,"reject");
+        reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
         try {

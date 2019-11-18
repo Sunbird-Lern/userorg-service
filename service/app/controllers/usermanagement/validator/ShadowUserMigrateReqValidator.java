@@ -55,7 +55,6 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
         }
     }
 
-
     private static List<String> getEnumsAsString(){
         List<ProjectUtil.MigrateAction> enums=Arrays.asList(ProjectUtil.MigrateAction.values());
         List<String>actions=new ArrayList<>();
