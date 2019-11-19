@@ -63,7 +63,7 @@ public class ShadowUserMigrateReqValidatorTest {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Invalid value null for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
+            Assert.assertEquals("Invalid value supplied for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
         }    }
     @Test
     public void testMigrateReqWithoutMandatoryParamUserId() {
@@ -93,7 +93,7 @@ public class ShadowUserMigrateReqValidatorTest {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Invalid value action_incorrect_value for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
+            Assert.assertEquals("Invalid value supplied for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
         }    }
     @Test
     public void testMigrateReqWithDiffCallerId() {

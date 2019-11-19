@@ -47,7 +47,7 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
 
     private void validateAction(String action){
         if(!allowedActions.contains(action)){
-            throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), action, JsonKey.ACTION+" supported actions are:"+allowedActions), ResponseCode.CLIENT_ERROR.getResponseCode());
+            throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), "supplied", JsonKey.ACTION+" supported actions are:"+allowedActions), ResponseCode.CLIENT_ERROR.getResponseCode());
         }
     }
 
