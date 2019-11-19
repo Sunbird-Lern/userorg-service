@@ -51,7 +51,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     @Test
     public void testMigrationUserFailure() {
         Result result = TestUtil.performTest("/v1/user/migrate", "POST", getFailureMigrationReq(JsonKey.CHANNEL),application);
-        assertEquals(ResponseCode.dataTypeError.getErrorCode(),TestUtil.getResponseCode(result));
+        assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(),TestUtil.getResponseCode(result));
     }
     @Test
     public void tesPrivatetMigrationUserSuccess() {

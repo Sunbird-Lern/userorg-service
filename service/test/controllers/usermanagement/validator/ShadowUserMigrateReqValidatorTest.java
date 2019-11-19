@@ -20,7 +20,7 @@ public class ShadowUserMigrateReqValidatorTest {
     }
 
     @Test
-    public void testMigrateReqWithoutMandatoryParamExternalId() {
+    public void testMigrateReqWithoutParamExternalIdWhenActionIsAccept() {
         Map<String,Object> reqMap=new HashMap<>();
         reqMap.put(JsonKey.USER_ID,"abc");
         reqMap.put(JsonKey.ACTION,"accept");
@@ -31,7 +31,23 @@ public class ShadowUserMigrateReqValidatorTest {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Data type of userExtId should be String.",e.getMessage());
+            Assert.assertEquals("Mandatory parameter userExtId is missing.",e.getMessage());
+        }
+    }
+    @Test
+    public void testMigrateReqWithoutParamExternalIdWhenActionIsReject() {
+        Map<String,Object> reqMap=new HashMap<>();
+        reqMap.put(JsonKey.USER_ID,"abc");
+        reqMap.put(JsonKey.ACTION,"reject");
+        reqMap.put(JsonKey.CHANNEL,"TN");
+        request.setRequest(reqMap);
+        shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
+        try {
+            shadowUserMigrateReqValidator.validate();
+            Assert.assertTrue(true);
+        }
+        catch (Exception e){
+            Assert.assertTrue(false);
         }
     }
 
@@ -47,21 +63,21 @@ public class ShadowUserMigrateReqValidatorTest {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Data type of action should be String.",e.getMessage());
+            Assert.assertEquals("Invalid value supplied for parameter action.Supported values are [accept, reject]",e.getMessage());
         }    }
     @Test
     public void testMigrateReqWithoutMandatoryParamUserId() {
         Map<String,Object> reqMap=new HashMap<>();
-        reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
         reqMap.put(JsonKey.CHANNEL,"TN");
-        reqMap.put(JsonKey.ACTION,"accept");
+        reqMap.put(JsonKey.ACTION,"reject");
+        reqMap.put(JsonKey.USER_EXT_ID,"abc_ext_id");
         request.setRequest(reqMap);
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abc");
         try {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Data type of userId should be String.",e.getMessage());
+            Assert.assertEquals("Mandatory parameter userId is missing.",e.getMessage());
         }    }
 
     @Test
@@ -77,7 +93,7 @@ public class ShadowUserMigrateReqValidatorTest {
             shadowUserMigrateReqValidator.validate();
         }
         catch (Exception e){
-            Assert.assertEquals("Invalid value action_incorrect_value for parameter action supported actions are:[accept, reject]. Please provide a valid value.",e.getMessage());
+            Assert.assertEquals("Invalid value supplied for parameter action.Supported values are [accept, reject]",e.getMessage());
         }    }
     @Test
     public void testMigrateReqWithDiffCallerId() {
@@ -90,6 +106,7 @@ public class ShadowUserMigrateReqValidatorTest {
         shadowUserMigrateReqValidator=ShadowUserMigrateReqValidator.getInstance(request,"abcD");
         try {
             shadowUserMigrateReqValidator.validate();
+            Assert.assertTrue(false);
         }
         catch (Exception e){
             Assert.assertEquals("Invalid value abc for parameter userId. Please provide a valid value.",e.getMessage());
