@@ -62,6 +62,6 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
 
     private boolean isActionAccept() {
         String action = (String) request.getRequest().get(JsonKey.ACTION);
-        return StringUtils.equalsIgnoreCase(action, ProjectUtil.MigrateAction.ACCEPT.getValue()) ? true : false;
+        return StringUtils.equalsIgnoreCase(action, ProjectUtil.MigrateAction.ACCEPT.getValue());
     }
 }
