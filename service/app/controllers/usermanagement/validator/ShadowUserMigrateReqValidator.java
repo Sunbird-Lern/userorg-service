@@ -38,11 +38,7 @@ public class ShadowUserMigrateReqValidator extends BaseRequestValidator {
 
     public void validate(){
         validateAction((String)request.getRequest().get(JsonKey.ACTION));
-        if (isActionAccept()) {
-            checkMandatoryFieldsPresent(request.getRequest(), acceptMandatoryParamsList);
-        } else {
-            checkMandatoryFieldsPresent(request.getRequest(), rejectMandatoryParamsList);
-        }
+        checkMandatoryFieldsPresent(request.getRequest(), isActionAccept() ? acceptMandatoryParamsList : rejectMandatoryParamsList);
         String userId=(String)request.getRequest().get(JsonKey.USER_ID);
         if(!StringUtils.equalsIgnoreCase(userId,callerId)){
             throw new ProjectCommonException(ResponseCode.invalidParameterValue.getErrorCode(), MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID), ResponseCode.CLIENT_ERROR.getResponseCode());
