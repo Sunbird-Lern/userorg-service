@@ -69,7 +69,7 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testCreateWithInvalidPasswordLength() {
+  public void testCreateUserWithInvalidPassLength() {
     Result result =
         performTest(
             "/v1/user/create",
@@ -80,7 +80,7 @@ public class UserControllerTest extends BaseApplicationTest {
   }
   
   @Test
-  public void testCreateWithOutUpperCase() {
+  public void testCreateUserWithOutUpperCasePass() {
     Result result =
         performTest(
             "/v1/user/create",
@@ -91,7 +91,7 @@ public class UserControllerTest extends BaseApplicationTest {
   }
   
   @Test
-  public void testCreateWithOutSpecialChar() {
+  public void testCreateUserWithOutSpecialCharPass() {
     Result result =
         performTest(
             "/v1/user/create",
@@ -102,7 +102,7 @@ public class UserControllerTest extends BaseApplicationTest {
   }
   
   @Test
-  public void testCreateUserWithCorrectPassword() {
+  public void testCreateUserWithCorrectPass() {
     Result result =
         performTest(
             "/v1/user/create",
