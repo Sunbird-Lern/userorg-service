@@ -181,3 +181,4 @@ POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateControll
 POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl(request: play.mvc.Http.Request)
 PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate(request: play.mvc.Http.Request)
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
+GET   /v1/user/feed/:userId       @controllers.feed.FeedController.feed(userId:String,request: play.mvc.Http.Request)
