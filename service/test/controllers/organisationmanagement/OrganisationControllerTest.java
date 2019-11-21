@@ -1,13 +1,18 @@
 package controllers.organisationmanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
@@ -21,13 +26,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @PrepareForTest(OnRequestHandler.class)
 public class OrganisationControllerTest extends BaseApplicationTest {
 
@@ -36,10 +34,10 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   private static String rootOrgId = "someRootOrgId";
   private static String status = "1";
 
-
   @Before
   public void before() {
-    setup(DummyActor.class);}
+    setup(DummyActor.class);
+  }
 
   @Test
   public void testCreateOrgSuccess() {
@@ -50,6 +48,36 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             createOrUpdateOrganisationRequest(orgName, null, false, null, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testCreateSubOrgWithLicenseSuccess() {
+    Map<String, Object> reqMap =
+        createOrUpdateOrganisationRequest(orgName, null, false, null, null);
+    ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
+    Result result = performTest("/v1/org/create", "POST", reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testCreateRootOrgWithLicenseSuccess() {
+    Map<String, Object> reqMap = createOrUpdateOrganisationRequest(orgName, null, true, null, null);
+    ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
+    ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
+    Result result = performTest("/v1/org/create", "POST", reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testCreateRootOrgWithLicenseEmptyFailure() {
+    Map<String, Object> reqMap = createOrUpdateOrganisationRequest(orgName, null, true, null, null);
+    ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
+    ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "");
+    Result result = performTest("/v1/org/create", "POST", reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
@@ -197,7 +225,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    //req.headers(new Http.Headers(headerMap));
+    // req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }
@@ -229,9 +257,9 @@ public class OrganisationControllerTest extends BaseApplicationTest {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-                      + e.getMessage(),
-              LoggerEnum.ERROR.name());
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

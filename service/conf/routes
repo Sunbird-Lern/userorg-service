@@ -167,7 +167,6 @@ DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(ma
 
 #Tenant Migration
 PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
-PATCH  /v1/user/migrate/reject                @controllers.tenantmigration.TenantMigrationController.tenantReject(request: play.mvc.Http.Request)
 
 #Freeup API
 POST /private/user/v1/identifier/freeup        @controllers.usermanagement.IdentifierFreeUpController.freeUpIdentifier(request: play.mvc.Http.Request)
@@ -184,4 +183,4 @@ PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateContro
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
 
 #User Feed API
-GET   /v1/user/feed/:userId      @controllers.usermanagement.UserFeedController.getUserFeedById(userId:String, request: play.mvc.Http.Request)
+GET   /v1/user/feed/:userId       @controllers.feed.FeedController.feed(userId:String,request: play.mvc.Http.Request)
