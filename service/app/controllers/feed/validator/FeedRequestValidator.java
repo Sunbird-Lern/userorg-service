@@ -1,4 +1,4 @@
-package controllers.usermanagement.validator;
+package controllers.feed.validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;

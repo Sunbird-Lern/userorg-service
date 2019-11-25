@@ -1,8 +1,7 @@
 package controllers.feed;
 
 import controllers.BaseController;
-import controllers.usermanagement.validator.FeedRequestValidator;
-import java.util.*;
+import controllers.feed.validator.FeedRequestValidator;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
