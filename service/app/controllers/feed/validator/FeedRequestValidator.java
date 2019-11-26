@@ -5,9 +5,10 @@ import org.sunbird.common.exception.ProjectCommonException;
 
 /** This call will validate the Feed API request */
 public class FeedRequestValidator {
-  public static void userIdValidation(String accessTokenUserId, String requestUserId) {
+  public static boolean userIdValidation(String accessTokenUserId, String requestUserId) {
     if (!StringUtils.endsWithIgnoreCase(accessTokenUserId, requestUserId)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
+    return true;
   }
 }

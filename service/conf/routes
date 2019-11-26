@@ -183,4 +183,4 @@ PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateContro
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
 
 #User Feed API
-GET   /v1/user/feed/:userId       @controllers.feed.FeedController.feed(userId:String,request: play.mvc.Http.Request)
+GET   /v1/user/feed/:userId       @controllers.feed.FeedController.getUserFeed(userId:String,request: play.mvc.Http.Request)

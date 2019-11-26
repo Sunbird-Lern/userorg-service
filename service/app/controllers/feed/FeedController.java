@@ -10,7 +10,7 @@ import play.mvc.Result;
 
 public class FeedController extends BaseController {
 
-  public CompletionStage<Result> feed(String userId, Http.Request httpRequest) {
+  public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
     String callerId = httpRequest.flash().get(JsonKey.USER_ID);
 
     return handleRequest(

@@ -1,25 +1,26 @@
 package controllers.feed;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import controllers.feed.validator.FeedRequestValidator;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.powermock.modules.junit4.PowerMockRunner;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 
-@PrepareForTest(OnRequestHandler.class)
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore("javax.management.*")
+@PrepareForTest({OnRequestHandler.class, FeedRequestValidator.class})
 public class FeedControllerTest extends BaseApplicationTest {
 
   @Before
@@ -28,39 +29,23 @@ public class FeedControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testGetUserFeed() {
-    Result result = performTest("/v1/user/feed/1234567890", "GET");
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
-    assertTrue(getResponseStatus(result) == 200);
-  }
-
-  public Result performTest(String url, String method) {
-    Http.RequestBuilder req = new Http.RequestBuilder().uri(url).method(method);
+  public void testGetUserFeedUnAuthorized() {
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().uri("/v1/user/feed/1234567890").method("GET");
     Result result = Helpers.route(application, req);
-    return result;
+    assertEquals(401, result.status());
   }
 
-  public String getResponseCode(Result result) {
-    String responseStr = Helpers.contentAsString(result);
-    ObjectMapper mapper = new ObjectMapper();
-
-    try {
-      Response response = mapper.readValue(responseStr, Response.class);
-
-      if (response != null) {
-        ResponseParams params = response.getParams();
-        return params.getStatus();
-      }
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-              + e.getMessage(),
-          LoggerEnum.ERROR.name());
-    }
-    return "";
-  }
-
-  public int getResponseStatus(Result result) {
-    return result.status();
+  @Test
+  public void testGetUserFeed() {
+    PowerMockito.mockStatic(FeedRequestValidator.class);
+    PowerMockito.when(
+            FeedRequestValidator.userIdValidation(Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(true)
+        .thenReturn(false);
+    Http.RequestBuilder req =
+        new Http.RequestBuilder().uri("/v1/user/feed/1234567890").method("GET");
+    Result result = Helpers.route(application, req);
+    assertEquals(200, result.status());
   }
 }
