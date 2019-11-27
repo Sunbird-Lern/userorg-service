@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -28,10 +27,11 @@ public class TestUtil {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    req.header("Content-Type","application/json");
+    req.header("Content-Type", "application/json");
     Result result = Helpers.route(application, req);
     return result;
   }
+
   public static String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";
@@ -45,7 +45,8 @@ public class TestUtil {
     }
     return jsonResp;
   }
-  public  static String getResponseCode(Result result) {
+
+  public static String getResponseCode(Result result) {
     String responseStr = Helpers.contentAsString(result);
     ObjectMapper mapper = new ObjectMapper();
 
@@ -58,9 +59,9 @@ public class TestUtil {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-                      + e.getMessage(),
-              LoggerEnum.ERROR.name());
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }
