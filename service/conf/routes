@@ -162,9 +162,6 @@ POST  /v1/system/settings/set                 @controllers.systemsettings.System
 POST /v1/otp/generate @controllers.otp.OtpController.generateOTP(request: play.mvc.Http.Request)
 POST /v1/otp/verify   @controllers.otp.OtpController.verifyOTP(request: play.mvc.Http.Request)
 
-# Cache APIs
-DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(mapName:String, request: play.mvc.Http.Request)
-
 #Tenant Migration
 PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
 
