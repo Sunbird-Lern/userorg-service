@@ -44,7 +44,7 @@ POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberControl
 POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType(request: play.mvc.Http.Request)
 PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType(request: play.mvc.Http.Request)
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType(request: play.mvc.Http.Request)
-
+GET    /v1/user/existence/:key/:value         @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch(request: play.mvc.Http.Request)
