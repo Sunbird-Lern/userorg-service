@@ -11,8 +11,20 @@ The code in this repository is licensed under MIT License unless otherwise noted
 3. clone sunbird-lms-service repo : https://github.com/project-sunbird/sunbird-lms-service
 4. install cassandra version-3.11.5
 5. install Elasticsearch-6.3.0
-6. run cassandra.cql form here : https://github.com/project-sunbird/sunbird-lms-mw/blob/master/service/src/main/resources/cassandra.cql
-7. run cassandra migration job from here: https://github.com/project-sunbird/sunbird-utils/tree/master/sunbird-cassandra-migration/cassandra-migration
+6. run cassandra.cql form here : https://github.com/project-sunbird/sunbird-lms-mw/blob/master/service/src/main/resources/cassandra.cql (During run there might be some error , developer can ignore that)
+7. run cassandra migration job from here: https://github.com/project-sunbird/sunbird-utils/tree/master/sunbird-cassandra-migration/cassandra-migration 
+   -- Env required to run cassandra migration job:
+     "sunbird_cassandra_port" : cassandra port number
+	   "sunbird_cassandra_host"; : list of host comma separatd Example "127.0.0.1,127.0.0.2" or "127.0.0.1" in case on only one host 
+      "sunbird_cassandra_username"; : optional if it has userName
+	    "sunbird_cassandra_password"; : optioan if it has password
+	    "sunbird_cassandra_keyspace"; : provide the keyspace name against which you want to run migration.
+	 // key space should be created before runing job.
+  
+     // run maven with command :
+      mvn clean install -DskipTests
+      mvn exec:java
+  Note: if any cassandra migration failed it will show the file number and error mesage (either fix that or manually go to cassandra_migration_version table and make success column value from false to True)    
 8. create elasticsearch index and mapping from here: https://github.com/project-sunbird/sunbird-utils/tree/master/sunbird-es-utils/src/main/resources  (for more details use: https://project-sunbird.atlassian.net/wiki/spaces/SBDES/pages/1030094992/Elasticsearch+mapping+update+job+steps)
 9. Set custodian org details inside system settings : http://docs.sunbird.org/latest/developer-docs/server-configurations/system_settings/
 10. compile sunbird-util
