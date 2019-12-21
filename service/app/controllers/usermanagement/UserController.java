@@ -163,4 +163,26 @@ public class UserController extends BaseController {
         false, 
             httpRequest);
   }
+
+
+
+
+    public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(JsonKey.KEY, key);
+        map.put(JsonKey.VALUE, value);
+        return handleRequest(
+                "checkUserExistence",
+                null,
+                req -> {
+                    Request request = (Request) req;
+                    request.setRequest(map);
+                    new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+                    return null;
+                },
+                null,
+                null,
+                false,
+                httpRequest);
+    }
 }
