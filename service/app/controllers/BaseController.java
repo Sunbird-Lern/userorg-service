@@ -596,9 +596,9 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      return PatternsCS.ask((ActorRef) actorRef, request, timeout).thenApply(function);
+      return PatternsCS.ask((ActorRef) actorRef, request, timeout).thenApplyAsync(function);
     } else {
-      return PatternsCS.ask((ActorSelection) actorRef, request, timeout).thenApply(function);
+      return PatternsCS.ask((ActorSelection) actorRef, request, timeout).thenApplyAsync(function);
     }
   }
 
