@@ -101,6 +101,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
     apiHeaderIgnoreMap.put("/v1/user/existence/email",var);
     apiHeaderIgnoreMap.put("/v1/user/existence/phone",var);
+    apiHeaderIgnoreMap.put("/v1/role/read",var);
 
   }
 
