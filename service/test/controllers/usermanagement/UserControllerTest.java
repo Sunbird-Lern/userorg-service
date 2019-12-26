@@ -68,6 +68,27 @@ public class UserControllerTest extends BaseApplicationTest {
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
+  @Test
+  public void testCreateUserV3Success() {
+
+    Result result =
+            performTest(
+                    "/v3/user/create",
+                    "POST",
+                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testCreateUserV3WithInvalidPassLength() {
+    Result result =
+            performTest(
+                    "/v3/user/create",
+                    "POST",
+                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab@1214"));
+    assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
 
   @Test
   public void testCreateUserWithInvalidPassLength() {
@@ -109,6 +130,16 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab3#$2148"));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testCreateUserV3WithCorrectPass() {
+    Result result =
+            performTest(
+                    "/v3/user/create",
+                    "POST",
+                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab3#$2148"));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
   

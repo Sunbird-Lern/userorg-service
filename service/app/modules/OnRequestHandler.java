@@ -237,7 +237,7 @@ public class OnRequestHandler implements ActionCreator {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;
