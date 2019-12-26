@@ -36,6 +36,7 @@ public class RequestInterceptor {
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
+    apiHeaderIgnoreMap.put("/v3/user/create", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/service/health", var);
     apiHeaderIgnoreMap.put("/health", var);
@@ -98,6 +99,10 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
     apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
+    apiHeaderIgnoreMap.put("/v1/user/existence/email",var);
+    apiHeaderIgnoreMap.put("/v1/user/existence/phone",var);
+    apiHeaderIgnoreMap.put("/v1/role/read",var);
+
   }
 
   /**

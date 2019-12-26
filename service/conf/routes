@@ -5,6 +5,7 @@
 # User management APIs
 POST	/v1/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v2/user/create				            @controllers.usermanagement.UserController.createUserV2(request: play.mvc.Http.Request)
+POST    /v3/user/create                         @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 PATCH	/v1/user/update					          @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
 PATCH	/private/user/v1/update					          @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
 GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserById(uid:String, request: play.mvc.Http.Request)
@@ -44,7 +45,7 @@ POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberControl
 POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType(request: play.mvc.Http.Request)
 PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType(request: play.mvc.Http.Request)
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType(request: play.mvc.Http.Request)
-
+GET    /v1/user/exists/:key/:value         @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 
 #search
 POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch(request: play.mvc.Http.Request)
