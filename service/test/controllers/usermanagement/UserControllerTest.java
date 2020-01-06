@@ -73,7 +73,7 @@ public class UserControllerTest extends BaseApplicationTest {
 
     Result result =
             performTest(
-                    "/v3/user/create",
+                    "/v1/user/signup",
                     "POST",
                     (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
@@ -83,7 +83,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testCreateUserV3WithInvalidPassLength() {
     Result result =
             performTest(
-                    "/v3/user/create",
+                    "/v1/user/signup",
                     "POST",
                     (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab@1214"));
     assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
@@ -137,7 +137,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testCreateUserV3WithCorrectPass() {
     Result result =
             performTest(
-                    "/v3/user/create",
+                    "/v1/user/signup",
                     "POST",
                     (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab3#$2148"));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
