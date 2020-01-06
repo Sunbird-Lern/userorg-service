@@ -515,7 +515,7 @@ public class BaseController extends Controller {
               ResponseCode.internalError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
-
+    try {
     Map<String, Object> requestInfo = OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
     org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
     Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
@@ -535,7 +535,9 @@ public class BaseController extends Controller {
             params,
             (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
     lmaxWriter.submitMessage(reqForTelemetry);
-
+    } catch (Exception ex) {
+		ex.printStackTrace();
+	}
     // cleaning request info ...
     return Results.status(
         exception.getResponseCode(),
@@ -596,9 +598,9 @@ public class BaseController extends Controller {
         };
 
     if (actorRef instanceof ActorRef) {
-      return PatternsCS.ask((ActorRef) actorRef, request, timeout).thenApply(function);
+      return PatternsCS.ask((ActorRef) actorRef, request, timeout).thenApplyAsync(function);
     } else {
-      return PatternsCS.ask((ActorSelection) actorRef, request, timeout).thenApply(function);
+      return PatternsCS.ask((ActorSelection) actorRef, request, timeout).thenApplyAsync(function);
     }
   }
 
@@ -741,11 +743,12 @@ public class BaseController extends Controller {
 
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> requestInfo = OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
+    if(requestInfo != null) {
     Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
+    map.put(JsonKey.CONTEXT, contextInfo);
+    }
     Map<String, Object> params = new HashMap<>();
     params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
-
-    map.put(JsonKey.CONTEXT, contextInfo);
     map.put(JsonKey.PARAMS, params);
     return map;
   }
