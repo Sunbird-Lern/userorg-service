@@ -671,10 +671,9 @@ public class BaseController extends Controller {
     String path = requestPath;
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
-    final String ver3 = "/" + JsonKey.VERSION_3;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
+    if (path.startsWith(ver) || path.startsWith(ver2)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
