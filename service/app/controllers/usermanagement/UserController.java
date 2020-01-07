@@ -11,10 +11,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
-import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.mvc.Results;
 
 public class UserController extends BaseController {
 
@@ -33,22 +31,33 @@ public class UserController extends BaseController {
             httpRequest);
   }
 
-  public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
-    return handleRequest(
-        ActorOperations.CREATE_USER.getValue(),
-            httpRequest.body().asJson(),
-        req -> {
-          Request request = (Request) req;
-          new UserRequestValidator().validateCreateUserV2Request(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-          return null;
-        },
-        null,
-        null,
-        true,
-            httpRequest);
-  }
+	public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
+		
+		  return handleRequest( ActorOperations.CREATE_USER.getValue(),
+		  httpRequest.body().asJson(), req -> { Request request = (Request) req; new
+		  UserRequestValidator().validateCreateUserV2Request(request);
+		  request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2); return null; },
+		  null, null, true, httpRequest);
+		 }
 
+  
+  public CompletionStage<Result> createUserV3(Http.Request httpRequest) {
+	    return handleRequest(
+	        ActorOperations.CREATE_USER_V3.getValue(),
+	            httpRequest.body().asJson(),
+	        req -> {
+	          Request request = (Request) req;
+	          new UserRequestValidator().validateUserCreateV3(request);
+	          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+	          return null;
+	        },
+	        null,
+	        null,
+	        true,
+	            httpRequest);
+	  }
+  
+  
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
     final boolean isPrivate;
     if (httpRequest.path().contains(JsonKey.PRIVATE)) {
@@ -163,4 +172,26 @@ public class UserController extends BaseController {
         false, 
             httpRequest);
   }
+
+
+
+
+    public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(JsonKey.KEY, key);
+        map.put(JsonKey.VALUE, value);
+        return handleRequest(
+                "checkUserExistence",
+                null,
+                req -> {
+                    Request request = (Request) req;
+                    request.setRequest(map);
+                    new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+                    return null;
+                },
+                null,
+                null,
+                false,
+                httpRequest);
+    }
 }
