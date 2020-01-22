@@ -36,7 +36,7 @@ node('build-slave') {
                 sh('git submodule update --init --recursive --remote')
                 sh 'git log -1'
                 sh 'cat service/conf/routes | grep v2'
-                sh 'mvn clean install -DskipTests=true '
+                sh 'mvn clean install -U -DskipTests=true '
 
             }
             stage('Unit Tests') {	
