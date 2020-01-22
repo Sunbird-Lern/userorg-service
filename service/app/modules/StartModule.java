@@ -8,7 +8,6 @@ public class StartModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    System.out.println("StartModule:configure: Start");
     ProjectLogger.log("StartModule:configure: Start", LoggerEnum.INFO.name());
     try {
       bind(ApplicationStart.class).asEagerSingleton();
