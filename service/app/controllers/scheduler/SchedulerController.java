@@ -10,7 +10,7 @@ import java.util.concurrent.CompletionStage;
 public class SchedulerController extends BaseController {
  public CompletionStage<Result> startScheduler(Http.Request httpRequest) {
   return handleRequest(
-          ActorOperations.START_SCHEDULAR.getValue(),
+          ActorOperations.ONDEMAND_START_SCHEDULER.getValue(),
           httpRequest.body().asJson(),
           null,
           null,
