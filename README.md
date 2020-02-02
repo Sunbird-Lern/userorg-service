@@ -11,7 +11,7 @@ The code in this repository is licensed under MIT License unless otherwise noted
 3. clone sunbird-lms-service repo : https://github.com/project-sunbird/sunbird-lms-service
 4. install cassandra version-3.11.5
 5. install Elasticsearch-6.3.x
-6. run cassandra.cql form here : https://github.com/project-sunbird/sunbird-lms-mw/blob/master/service/src/main/resources/cassandra.cql (During run there might be some error , developer can ignore that)
+6. run cassandra.cql from here : https://github.com/project-sunbird/sunbird-lms-mw/blob/master/service/src/main/resources/cassandra.cql (During run there might be some error for duplicate query, this can be ignore.)
 7. run cassandra migration job from here: https://github.com/project-sunbird/sunbird-utils/tree/master/sunbird-cassandra-migration/cassandra-migration 
    -- Env required to run cassandra migration job:
      "sunbird_cassandra_port" : cassandra port number
