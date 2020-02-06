@@ -671,16 +671,18 @@ public class BaseController extends Controller {
     String path = requestPath;
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
+    final String ver3 = "/" + JsonKey.VERSION_3;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
-    if (path.startsWith(ver) || path.startsWith(ver2)) {
+    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
-      } else if (requestUrl.contains(ver2)) {
+      } else if (requestUrl.contains(ver2) ) {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
+      } else if (requestUrl.contains(ver3) ) {
+        requestUrl = requestUrl.replaceFirst(ver3, "api");
       }
-
       String[] list = requestUrl.split("/");
       for (String str : list) {
         if (str.matches("[A-Za-z]+")) {
