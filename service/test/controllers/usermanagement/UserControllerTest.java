@@ -78,6 +78,17 @@ public class UserControllerTest extends BaseApplicationTest {
                     (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
+  
+  @Test
+  public void testCreateUserV3SyncSuccess() {
+    
+    Result result =
+      performTest(
+        "/v3/user/create",
+        "POST",
+        (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
 
   @Test
   public void testCreateUserV3WithInvalidPassLength() {

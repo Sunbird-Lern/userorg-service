@@ -39,6 +39,26 @@ public class UserController extends BaseController {
 		  request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2); return null; },
 		  null, null, true, httpRequest);
 		 }
+  
+  
+  public CompletionStage<Result> createUserV3Sync(Http.Request httpRequest) {
+  
+    return handleRequest(
+      ActorOperations.CREATE_USER.getValue(),
+      httpRequest.body().asJson(),
+      req -> {
+        Request request = (Request) req;
+        request.getRequest().put("sync", true);
+        new UserRequestValidator().validateCreateUserV2Request(request);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+        return null;
+      },
+      null,
+      null,
+      true,
+      httpRequest
+    );
+  }
 
   
   public CompletionStage<Result> createUserV3(Http.Request httpRequest) {
