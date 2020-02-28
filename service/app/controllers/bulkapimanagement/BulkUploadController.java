@@ -19,30 +19,19 @@ public class BulkUploadController extends BaseBulkUploadController {
   public CompletionStage<Result> userBulkUpload(Http.Request httpRequest) {
     try {
       Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true, httpRequest);
+              createAndInitBulkRequest(
+                      BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true, httpRequest);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-  public Promise<Result> userBulkMigrate() {
+  public CompletionStage<Result> userBulkMigrate(Http.Request httpRequest) {
     try {
       Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
-    } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
-    }
-  }
-
-  public Promise<Result> orgBulkUpload() {
-    try {
-      Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true, httpRequest);
+              createAndInitBulkRequest(
+                      BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true, httpRequest);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -52,8 +41,8 @@ public class BulkUploadController extends BaseBulkUploadController {
   public CompletionStage<Result> orgBulkUpload(Http.Request httpRequest) {
     try {
       Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true, httpRequest);
+              createAndInitBulkRequest(
+                      BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true, httpRequest);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -64,11 +53,11 @@ public class BulkUploadController extends BaseBulkUploadController {
   public CompletionStage<Result> locationBulkUpload(Http.Request httpRequest) {
     try {
       Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION, true, httpRequest);
+              createAndInitBulkRequest(
+                      BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION, true, httpRequest);
       baseRequestValidator.checkMandatoryFieldsPresent(
-          (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
-          GeoLocationJsonKey.LOCATION_TYPE);
+              (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
+              GeoLocationJsonKey.LOCATION_TYPE);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -77,23 +66,23 @@ public class BulkUploadController extends BaseBulkUploadController {
 
   public CompletionStage<Result> getUploadStatus(String processId, Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.GET_BULK_OP_STATUS.getValue(),
-        null,
-        null,
-        processId,
-        JsonKey.PROCESS_ID,
-        false,
+            ActorOperations.GET_BULK_OP_STATUS.getValue(),
+            null,
+            null,
+            processId,
+            JsonKey.PROCESS_ID,
+            false,
             httpRequest);
   }
 
   public CompletionStage<Result> getStatusDownloadLink(String processId, Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.GET_BULK_UPLOAD_STATUS_DOWNLOAD_LINK.getValue(),
-        null,
-        null,
-        processId,
-        JsonKey.PROCESS_ID,
-        false,
+            ActorOperations.GET_BULK_UPLOAD_STATUS_DOWNLOAD_LINK.getValue(),
+            null,
+            null,
+            processId,
+            JsonKey.PROCESS_ID,
+            false,
             httpRequest);
   }
 }
