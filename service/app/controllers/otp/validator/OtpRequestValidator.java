@@ -22,35 +22,35 @@ public class OtpRequestValidator extends BaseRequestValidator {
     validateTemplateId(otpRequest);
   }
 
- private void validateTemplateId(Request otpRequest) {
-   String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
-   if(StringUtils.isNotBlank(templateId) && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)) {
-    throw new ProjectCommonException(
-            ResponseCode.invalidIdentifier.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-   }
- }
+  private void validateTemplateId(Request otpRequest) {
+    String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
+    if(StringUtils.isNotBlank(templateId) && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)) {
+      throw new ProjectCommonException(
+              ResponseCode.invalidIdentifier.getErrorCode(),
+              ProjectUtil.formatMessage(
+                      ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
 
- public void validateVerifyOtpRequest(Request otpRequest) {
+  public void validateVerifyOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, true);
   }
 
   private void commonValidation(Request otpRequest, boolean isOtpMandatory) {
     validateParam(
-        (String) otpRequest.getRequest().get(JsonKey.KEY),
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.KEY);
+            (String) otpRequest.getRequest().get(JsonKey.KEY),
+            ResponseCode.mandatoryParamsMissing,
+            JsonKey.KEY);
     validateParam(
-        (String) otpRequest.getRequest().get(JsonKey.TYPE),
-        ResponseCode.mandatoryParamsMissing,
-        JsonKey.TYPE);
+            (String) otpRequest.getRequest().get(JsonKey.TYPE),
+            ResponseCode.mandatoryParamsMissing,
+            JsonKey.TYPE);
     if (isOtpMandatory) {
       validateParam(
-          (String) otpRequest.getRequest().get(JsonKey.OTP),
-          ResponseCode.mandatoryParamsMissing,
-          JsonKey.OTP);
+              (String) otpRequest.getRequest().get(JsonKey.OTP),
+              ResponseCode.mandatoryParamsMissing,
+              JsonKey.OTP);
     }
     validateTypeAndKey(otpRequest);
   }
@@ -72,22 +72,22 @@ public class OtpRequestValidator extends BaseRequestValidator {
 
   private void validateType(String type) {
     List<String> allowedTypes =
-        new ArrayList<String>(
-            Arrays.asList(
-                JsonKey.EMAIL, JsonKey.PHONE, JsonKey.PREV_USED_EMAIL, JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE));
+            new ArrayList<String>(
+                    Arrays.asList(
+                            JsonKey.EMAIL, JsonKey.PHONE, JsonKey.PREV_USED_EMAIL, JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE));
     if (!allowedTypes.contains(type)) {
       ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidValue,
-          ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              JsonKey.TYPE,
-              type,
-              String.join(
-                  StringFormatter.COMMA,
-                  JsonKey.EMAIL,
-                  JsonKey.PHONE,
-                  JsonKey.PREV_USED_EMAIL,
-                  JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
+              ResponseCode.invalidValue,
+              ProjectUtil.formatMessage(
+                      ResponseCode.invalidValue.getErrorMessage(),
+                      JsonKey.TYPE,
+                      type,
+                      String.join(
+                              StringFormatter.COMMA,
+                              JsonKey.EMAIL,
+                              JsonKey.PHONE,
+                              JsonKey.PREV_USED_EMAIL,
+                              JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
     }
   }
 }

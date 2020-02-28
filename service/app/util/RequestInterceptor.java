@@ -117,14 +117,14 @@ public class RequestInterceptor {
     String clientId = JsonKey.UNAUTHORIZED;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     Optional<String> authClientToken =
-        request.header(HeaderParam.X_Authenticated_Client_Token.getName());
+            request.header(HeaderParam.X_Authenticated_Client_Token.getName());
     Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
         clientId =
-            AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
+                AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
         if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
           request.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
         }
@@ -143,8 +143,8 @@ public class RequestInterceptor {
           clientAccessTokenId = null;
         }
         return StringUtils.isNotBlank(clientAccessTokenId)
-            ? clientAccessTokenId
-            : JsonKey.ANONYMOUS;
+                ? clientAccessTokenId
+                : JsonKey.ANONYMOUS;
       }
       return JsonKey.ANONYMOUS;
     }

@@ -105,8 +105,18 @@
 
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
+<<<<<<< HEAD
 			<artifactId>akka-slf4j_${scala.major.version}</artifactId>
 			<version>${learner.akka.version}</version>
+=======
+			<artifactId>akka-slf4j_2.11</artifactId>
+			<version>2.5.16</version>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe.akka</groupId>
+			<artifactId>akka-remote_2.11</artifactId>
+			<version>2.5.16</version>
+>>>>>>> upstream/master
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
