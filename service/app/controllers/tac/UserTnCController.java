@@ -4,18 +4,21 @@ import controllers.BaseController;
 import controllers.tac.validator.UserTnCRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class UserTnCController extends BaseController {
 
-  public Promise<Result> acceptTnC() {
+  public CompletionStage<Result> acceptTnC(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.USER_TNC_ACCEPT.getValue(),
-        request().body().asJson(),
+            httpRequest.body().asJson(),
         (request) -> {
           new UserTnCRequestValidator().validateTnCRequest((Request) request);
           return null;
-        });
+        },
+            httpRequest);
   }
 }

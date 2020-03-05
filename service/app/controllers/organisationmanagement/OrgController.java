@@ -6,63 +6,73 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.orgvalidator.OrgRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class OrgController extends BaseController {
 
-  public Promise<Result> createOrg() {
-    return handleRequest(ActorOperations.CREATE_ORG.getValue(), request().body().asJson(), orgRequest -> {
+  public CompletionStage<Result> createOrg(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_ORG.getValue(),
+        httpRequest.body().asJson(),
+        orgRequest -> {
           new OrgRequestValidator().validateCreateOrgRequest((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(httpRequest),
+            httpRequest);
   }
 
-  public Promise<Result> updateOrg() {
+  public CompletionStage<Result> updateOrg(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.UPDATE_ORG.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgRequest((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(httpRequest),
+            httpRequest);
   }
 
-  public Promise<Result> updateOrgStatus() {
+  public CompletionStage<Result> updateOrgStatus(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.UPDATE_ORG_STATUS.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgStatusRequest((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(httpRequest),
+            httpRequest);
   }
 
-  public Promise<Result> getOrgDetails() {
+  public CompletionStage<Result> getOrgDetails(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.GET_ORG_DETAILS.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateOrgReference((Request) orgRequest);
           return null;
         },
-        getAllRequestHeaders(request()));
+        getAllRequestHeaders(httpRequest),
+            httpRequest);
   }
 
-  public Promise<Result> search() {
+  public CompletionStage<Result> search(Http.Request httpRequest) {
     return handleSearchRequest(
         ActorOperations.COMPOSITE_SEARCH.getValue(),
-        request().body().asJson(),
+        httpRequest.body().asJson(),
         orgRequest -> {
           new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
           return null;
         },
         null,
         null,
-        getAllRequestHeaders(request()),
-        EsType.organisation.getTypeName());
+        getAllRequestHeaders(httpRequest),
+        EsType.organisation.getTypeName(),
+            httpRequest);
   }
 }

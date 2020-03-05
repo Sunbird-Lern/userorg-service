@@ -1,58 +1,73 @@
 package controllers.systemsettings;
 
-import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
-import static play.test.Helpers.route;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.BaseControllerTest;
-import java.util.HashMap;
-import java.util.Map;
+import com.gargoylesoftware.htmlunit.OnbeforeunloadHandler;
+import controllers.BaseApplicationTest;
+import controllers.DummyActor;
+import modules.OnRequestHandler;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import util.RequestInterceptor;
+import play.test.Helpers;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static controllers.TestUtil.mapToJson;
+import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
-public class SystemSettingsControllerTest extends BaseControllerTest {
+@PrepareForTest(OnRequestHandler.class)
+public class SystemSettingsControllerTest extends BaseApplicationTest {
+
+  private static Map<String, String[]> headerMap;
+
+  @Before
+  public void before() {
+    setup(DummyActor.class);
+    headerMap = new HashMap<String, String[]>();
+    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
+    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap.put(
+            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
+  }
 
   @Test
   public void testGetSystemSettingSuccess() {
-    RequestBuilder req =
-        new RequestBuilder().uri("/v1/system/setting/get/isRootOrgInitialised").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
+    RequestBuilder req = new RequestBuilder().uri("/v1/system/settings/get/isRootOrgInitialised").method("GET");
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testGetAllSystemSettingsSuccess() {
     RequestBuilder req = new RequestBuilder().uri("/v1/system/settings/list").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testSetSystemSettingSuccess() {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", "org123");
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(200, result.status());
   }
 
@@ -60,9 +75,9 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
   public void testSetSystemSettingFailureWithoutId() {
     JsonNode json = createSetSystemSettingRequest(null, "defaultRootOrgId", "org123");
     RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+        new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(400, result.status());
   }
 
@@ -70,9 +85,9 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
   public void testSetSystemSettingFailureWithoutField() {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", null, "org123");
     RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+        new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
     assertEquals(400, result.status());
   }
 
@@ -80,9 +95,10 @@ public class SystemSettingsControllerTest extends BaseControllerTest {
   public void testSetSystemSettingFailureWithoutValue() {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", null);
     RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/system/setting/set").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+        new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
+    //req.headers(headerMap);
+    Result result = Helpers.route(application,req);
+
     assertEquals(400, result.status());
   }
 

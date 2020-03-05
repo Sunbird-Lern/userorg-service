@@ -8,128 +8,131 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class DbOperationController extends BaseController {
 
   /**
    * This method will allow create Data in DB.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> create() {
+  public CompletionStage<Result> create(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: create called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will allow update Data in DB.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> update() {
+  public CompletionStage<Result> update(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: update called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will allow to delete Data in DB.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> delete() {
+  public CompletionStage<Result> delete(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: delete called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DELETE_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will allow to read Data from DB/ES.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> read() {
+  public CompletionStage<Result> read(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: read called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will allow to read all Data from DB/ES.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> readAll() {
+  public CompletionStage<Result> readAll(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: readAll called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_ALL_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
   /**
    * This method will allow to search Data from ES.
    *
-   * @return Promise<Result>
+   * @return CompletionStage<Result>
    */
-  public Promise<Result> search() {
+  public CompletionStage<Result> search(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: search called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_DATA.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -138,18 +141,18 @@ public class DbOperationController extends BaseController {
    *
    * @return ES Response
    */
-  public Promise<Result> getMetrics() {
+  public CompletionStage<Result> getMetrics(Http.Request httpRequest) {
     try {
-      JsonNode requestData = request().body().asJson();
+      JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("DbOperationController: getMetrics called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.GET_METRICS.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, request());
+      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }
