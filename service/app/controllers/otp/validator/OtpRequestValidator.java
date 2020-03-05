@@ -1,6 +1,10 @@
 package controllers.otp.validator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -39,22 +43,37 @@ public class OtpRequestValidator extends BaseRequestValidator {
 
   private void validateTypeAndKey(Request otpRequest) {
     Map<String, Object> requestMap = otpRequest.getRequest();
-
+    String userId = (String) requestMap.get(JsonKey.USER_ID);
     String type = (String) requestMap.get(JsonKey.TYPE);
     String key = (String) requestMap.get(JsonKey.KEY);
+    validateType(type);
+    if (StringUtils.isBlank(userId)) {
+      if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
+        validateEmail(key);
+      } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
+        validatePhone(key);
+      }
+    }
+  }
 
-    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
-      validateEmail(key);
-    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
-      validatePhone(key);
-    } else {
+  private void validateType(String type) {
+    List<String> allowedTypes =
+        new ArrayList<String>(
+            Arrays.asList(
+                JsonKey.EMAIL, JsonKey.PHONE, JsonKey.PREV_USED_EMAIL, JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE));
+    if (!allowedTypes.contains(type)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
           ProjectUtil.formatMessage(
               ResponseCode.invalidValue.getErrorMessage(),
               JsonKey.TYPE,
               type,
-              String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE)));
+              String.join(
+                  StringFormatter.COMMA,
+                  JsonKey.EMAIL,
+                  JsonKey.PHONE,
+                  JsonKey.PREV_USED_EMAIL,
+                  JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
     }
   }
 }

@@ -37,6 +37,7 @@ PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginControlle
 
 POST  /v1/user/tnc/accept         @controllers.tac.UserTnCController.acceptTnC()
 GET   /v1/user/type/list						    @controllers.usermanagement.UserTypeController.getUserTypes()
+PATCH /private/user/v1/account/merge @controllers.usermanagement.UserMergeController.mergeUser()
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg()
@@ -73,6 +74,7 @@ GET /threaddump									@controllers.ThreadDumpController.threaddump()
 
 # Bulk upload APIs
 POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
+POST /v2/bulk/user/upload                   @controllers.bulkapimanagement.BulkUploadController.userBulkMigrate()
 POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload()
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload()
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload()
@@ -110,6 +112,7 @@ POST /v1/data/sync                          @controllers.search.SearchController
 
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail()
+POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail()
 
 # Badging APIs
 POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer()
@@ -199,3 +202,16 @@ DELETE /v1/cache/clear/:mapName @controllers.cache.CacheController.clearCache(ma
 
 #Tenant Migration
 PATCH /private/user/v1/migrate  				@controllers.tenantmigration.TenantMigrationController.userTenantMigrate()
+
+#Freeup API
+POST /private/user/v1/identifier/freeup        @controllers.usermanagement.IdentifierFreeUpController.freeUpIdentifier()
+
+#reset password API
+POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPasswordController.resetPassword()
+
+#user certificate validate API
+POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate()
+POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate()
+PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys()
+POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl()
+PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate()
