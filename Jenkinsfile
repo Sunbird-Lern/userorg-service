@@ -19,12 +19,12 @@ node('build-slave') {
                 checkout scm
                 commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 branch_name = sh(script: 'git name-rev --name-only HEAD | rev | cut -d "/" -f1| rev', returnStdout: true).trim()
-                build_tag = branch_name + "_" + commit_hash
+                build_tag = branch_name + "_" + commit_hash + "_" + env.BUILD_NUMBER
                 println(ANSI_BOLD + ANSI_YELLOW + "github_release_tag not specified, using the latest commit hash: " + commit_hash + ANSI_NORMAL)
             } else {
                 def scmVars = checkout scm
                 checkout scm: [$class: 'GitSCM', branches: [[name: "refs/tags/$params.github_release_tag"]], userRemoteConfigs: [[url: scmVars.GIT_URL]]]
-                build_tag = params.github_release_tag
+                build_tag = params.github_release_tag + "_" + env.BUILD_NUMBER
                 println(ANSI_BOLD + ANSI_YELLOW + "github_release_tag specified, building from tag: " + params.github_release_tag + ANSI_NORMAL)
             }
             echo "build_tag: " + build_tag
@@ -36,14 +36,12 @@ node('build-slave') {
                 sh('git submodule update --init --recursive --remote')
                 sh 'git log -1'
                 sh 'cat service/conf/routes | grep v2'
-                sh 'mvn clean install -DskipTests=true '
+                sh 'mvn clean install -U -DskipTests=true '
 
             }
-
-            stage('Unit Tests') {
-                sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
+            stage('Unit Tests') {	
+                sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"	
             }
-
             stage('Package') {
                 dir('service') {
                     sh 'mvn play2:dist'

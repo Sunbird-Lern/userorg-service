@@ -2,13 +2,13 @@ package util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
-import play.mvc.Http.Request;
 
 /**
  * Request interceptor responsible to authenticated HTTP requests
@@ -17,7 +17,7 @@ import play.mvc.Http.Request;
  */
 public class RequestInterceptor {
 
-  protected static List<String> restrictedUriList = null;
+  public static List<String> restrictedUriList = null;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
 
   private RequestInterceptor() {}
@@ -30,15 +30,16 @@ public class RequestInterceptor {
     restrictedUriList.add("/v1/note/search");
     restrictedUriList.add("/v1/note/read");
     restrictedUriList.add("/v1/note/delete");
-    restrictedUriList.add("/v1/content/state/update");
+    restrictedUriList.add("/v1/user/feed");
 
     // ---------------------------
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
+    apiHeaderIgnoreMap.put("/v3/user/create", var);
+    apiHeaderIgnoreMap.put("/v1/user/signup", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/service/health", var);
-    apiHeaderIgnoreMap.put("/v1/page/assemble", var);
     apiHeaderIgnoreMap.put("/health", var);
     apiHeaderIgnoreMap.put("/v1/notification/email", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
@@ -75,9 +76,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/issuer/badge/delete", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
-    apiHeaderIgnoreMap.put("/v1/content/link", var);
-    apiHeaderIgnoreMap.put("/v1/content/unlink", var);
-    apiHeaderIgnoreMap.put("/v1/content/link/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
     apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
     // making org read as public access
@@ -95,7 +93,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/get/loginid", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
-    apiHeaderIgnoreMap.put("/v1/course/batch/search", var);
     apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
     apiHeaderIgnoreMap.put("/v1/cache/clear", var);
     apiHeaderIgnoreMap.put("/private/user/v1/search", var);
@@ -103,36 +100,41 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
     apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/email",var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/phone",var);
+    apiHeaderIgnoreMap.put("/v1/role/read",var);
+
   }
 
   /**
    * Authenticates given HTTP request context
    *
-   * @param ctx HTTP play request context
+   * @param request HTTP play request
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned
    */
-  public static String verifyRequestData(Http.Context ctx) {
-    Request request = ctx.request();
+  public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
-    String accessToken = request.getHeader(HeaderParam.X_Authenticated_User_Token.getName());
-    String authClientToken = request.getHeader(HeaderParam.X_Authenticated_Client_Token.getName());
-    String authClientId = request.getHeader(HeaderParam.X_Authenticated_Client_Id.getName());
+    Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
+    Optional<String> authClientToken =
+        request.header(HeaderParam.X_Authenticated_Client_Token.getName());
+    Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
-      if (StringUtils.isNotBlank(accessToken)) {
-        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken);
-      } else if (StringUtils.isNotBlank(authClientToken) && StringUtils.isNotBlank(authClientId)) {
-        clientId = AuthenticationHelper.verifyClientAccessToken(authClientId, authClientToken);
+      if (accessToken.isPresent()) {
+        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+      } else if (authClientToken.isPresent() && authClientId.isPresent()) {
+        clientId =
+            AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
         if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
-          ctx.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
+          request.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
         }
       }
       return clientId;
     } else {
-      if (StringUtils.isNotBlank(accessToken)) {
+      if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
         try {
-          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken);
+          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
           if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }

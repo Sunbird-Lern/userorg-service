@@ -1,5 +1,6 @@
 package controllers.otp.validator;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,14 +13,27 @@ import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.responsecode.ResponseMessage;
 
 public class OtpRequestValidator extends BaseRequestValidator {
 
   public void validateGenerateOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, false);
+    validateTemplateId(otpRequest);
   }
 
-  public void validateVerifyOtpRequest(Request otpRequest) {
+ private void validateTemplateId(Request otpRequest) {
+   String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
+   if(StringUtils.isNotBlank(templateId) && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)) {
+    throw new ProjectCommonException(
+            ResponseCode.invalidIdentifier.getErrorCode(),
+            ProjectUtil.formatMessage(
+                    ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
+            ResponseCode.SERVER_ERROR.getResponseCode());
+   }
+ }
+
+ public void validateVerifyOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, true);
   }
 

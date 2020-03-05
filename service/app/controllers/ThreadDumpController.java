@@ -1,18 +1,21 @@
 package controllers;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 import org.sunbird.actor.router.BackgroundRequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /** @author Mahesh Kumar Gangula */
 public class ThreadDumpController extends BaseController {
 
-  public Promise<Result> threaddump() {
+  public CompletionStage<Result> threaddump(Http.Request httpRequest) {
     final StringBuilder dump = new StringBuilder();
     final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
     final ThreadInfo[] threadInfos =
@@ -39,8 +42,8 @@ public class ThreadDumpController extends BaseController {
     request.setEnv(getEnvironment());
     if ("off".equalsIgnoreCase(BackgroundRequestRouter.getMode())) {
       actorResponseHandler(
-          SunbirdMWService.getBackgroundRequestRouter(), request, timeout, null, request());
+          SunbirdMWService.getBackgroundRequestRouter(), request, timeout, null, httpRequest);
     }
-    return Promise.promise(() -> ok("successful"));
+    return CompletableFuture.supplyAsync(() -> ok("successful"));
   }
 }

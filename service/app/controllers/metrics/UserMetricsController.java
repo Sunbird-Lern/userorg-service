@@ -3,15 +3,17 @@ package controllers.metrics;
 import controllers.BaseController;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
 
 public class UserMetricsController extends BaseController {
 
-  public Promise<Result> userCreation(String userId) {
+  public CompletionStage<Result> userCreation(String userId, Http.Request httpRequest) {
     try {
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
@@ -20,13 +22,13 @@ public class UserMetricsController extends BaseController {
       request.setOperation(ActorOperations.USER_CREATION_METRICS.getValue());
       request.setRequest(map);
       request.setRequestId(ExecutionContext.getRequestId());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-  public Promise<Result> userConsumption(String userId) {
+  public CompletionStage<Result> userConsumption(String userId, Http.Request httpRequest) {
     try {
       Map<String, Object> map = new HashMap<>();
       Request request = new Request();
@@ -35,9 +37,9 @@ public class UserMetricsController extends BaseController {
       request.setOperation(ActorOperations.USER_CONSUMPTION_METRICS.getValue());
       request.setRequest(map);
       request.setRequestId(ExecutionContext.getRequestId());
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

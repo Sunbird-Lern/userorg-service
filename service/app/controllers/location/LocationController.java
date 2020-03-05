@@ -3,11 +3,13 @@ package controllers.location;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
 import org.sunbird.validator.location.BaseLocationRequestValidator;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Result;
 
 /**
@@ -29,16 +31,16 @@ public class LocationController extends BaseController {
    *
    * @return Return a promise for create location API result
    */
-  public Promise<Result> createLocation() {
+  public CompletionStage<Result> createLocation(Http.Request httpRequest) {
 
     try {
-      JsonNode jsonNode = request().body().asJson();
+      JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode);
+          createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
       validator.validateCreateLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -53,16 +55,16 @@ public class LocationController extends BaseController {
    *
    * @return Return a promise for update location API result
    */
-  public Promise<Result> updateLocation() {
+  public CompletionStage<Result> updateLocation(Http.Request httpRequest) {
 
     try {
-      JsonNode jsonNode = request().body().asJson();
+      JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode);
+          createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
       validator.validateUpdateLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -74,15 +76,15 @@ public class LocationController extends BaseController {
    * @param locationId Id of location to
    * @return Return a promise for update location API result.
    */
-  public Promise<Result> deleteLocation(String locationId) {
+  public CompletionStage<Result> deleteLocation(String locationId, Http.Request httpRequest) {
     try {
-      Request request = createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue());
+      Request request = createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), httpRequest);
       validator.validateDeleteLocationRequest(locationId);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.LOCATION_ID, locationId);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
@@ -95,15 +97,15 @@ public class LocationController extends BaseController {
    *
    * @return Return a promise for update location API result.
    */
-  public Promise<Result> searchLocation() {
+  public CompletionStage<Result> searchLocation(Http.Request httpRequest) {
     try {
-      JsonNode jsonNode = request().body().asJson();
+      JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode);
+          createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
       validator.validateSearchLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, request());
+      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return Promise.<Result>pure(createCommonExceptionResponse(e, request()));
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 }

@@ -1,22 +1,17 @@
 package controllers.badging;
 
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static play.test.Helpers.route;
-
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.BaseController;
+import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.BeforeClass;
+
+import modules.OnRequestHandler;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.Ignore;
@@ -30,41 +25,25 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
-import play.test.FakeApplication;
 import play.test.Helpers;
 import util.RequestInterceptor;
+
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 /** Created by arvind on 5/3/18. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RequestInterceptor.class)
 @PowerMockIgnore("javax.management.*")
-@Ignore
-public class BadgeAssertionControllerTest {
+@PrepareForTest(OnRequestHandler.class)
+public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
-  private static FakeApplication app;
-  private static Map<String, String[]> headerMap;
-  private static ActorSystem system;
-  private static final Props props = Props.create(DummyActor.class);
-
-  @BeforeClass
-  public static void startApp() {
-    app = Helpers.fakeApplication();
-    Helpers.start(app);
-    headerMap = new HashMap<String, String[]>();
-    headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
-    headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
-    headerMap.put(
-        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
-    headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
-
-    system = ActorSystem.create("system");
-    ActorRef subject = system.actorOf(props);
-    BaseController.setActorRef(subject);
+  @Before
+  public void before() {
+    setup(DummyActor.class);
   }
 
   @Test
@@ -85,8 +64,7 @@ public class BadgeAssertionControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -107,8 +85,7 @@ public class BadgeAssertionControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -129,8 +106,7 @@ public class BadgeAssertionControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/create").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -142,31 +118,12 @@ public class BadgeAssertionControllerTest {
     Map<String, Object> requestMap = new HashMap<>();
     RequestBuilder req =
         new RequestBuilder().uri("/v1/issuer/badge/assertion/read/assertionId").method("GET");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void getAssertionWithInvalidTest() {
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(BadgingJsonKey.BADGE_CLASS_ID, "badgeid");
-    innerMap.put(BadgingJsonKey.ASSERTION_ID, "assertionId");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/read").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
-    assertEquals(400, result.status());
-  }
-
-  @Test
+  @Ignore
   public void getAssertionListTest() {
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
@@ -182,8 +139,7 @@ public class BadgeAssertionControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -204,8 +160,7 @@ public class BadgeAssertionControllerTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/issuer/badge/assertion/search").method("POST");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -228,8 +183,7 @@ public class BadgeAssertionControllerTest {
             .bodyJson(json)
             .uri("/v1/issuer/badge/assertion/delete")
             .method("DELETE");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -251,8 +205,7 @@ public class BadgeAssertionControllerTest {
             .bodyJson(json)
             .uri("/v1/issuer/badge/assertion/delete")
             .method("DELETE");
-    req.headers(headerMap);
-    Result result = route(req);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
