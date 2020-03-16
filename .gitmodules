@@ -1,4 +1,4 @@
 [submodule "actors/sunbird-lms-mw"]
 	path = actors/sunbird-lms-mw
-	url = https://github.com/project-sunbird/sunbird-lms-mw.git
-	branch = master
+	url = https://github.com/Hari-stackroute/sunbird-lms-mw.git
+	branch = SC-1698
