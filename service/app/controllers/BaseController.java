@@ -13,12 +13,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import modules.ApplicationStart;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.ActorOperations;
@@ -38,10 +42,6 @@ import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
 import util.AuthenticationHelper;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
 
 /**
  * This controller we can use for writing some common method.
@@ -65,7 +65,7 @@ public class BaseController extends Controller {
   }
 
   private org.sunbird.common.request.Request initRequest(
-          org.sunbird.common.request.Request request, String operation, Request httpRequest) {
+      org.sunbird.common.request.Request request, String operation, Request httpRequest) {
     request.setOperation(operation);
     request.setRequestId(ExecutionContext.getRequestId());
     request.setEnv(getEnvironment());
@@ -84,7 +84,7 @@ public class BaseController extends Controller {
    *     instance.
    */
   protected org.sunbird.common.request.Request createAndInitRequest(
-          String operation, JsonNode requestBodyJson, Request httpRequest) {
+      String operation, JsonNode requestBodyJson, Request httpRequest) {
     org.sunbird.common.request.Request request =
         (org.sunbird.common.request.Request)
             mapper.RequestMapper.mapRequest(
@@ -100,7 +100,8 @@ public class BaseController extends Controller {
    * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
    *     instance.
    */
-  protected org.sunbird.common.request.Request createAndInitRequest(String operation, Request httpRequest) {
+  protected org.sunbird.common.request.Request createAndInitRequest(
+      String operation, Request httpRequest) {
     org.sunbird.common.request.Request request = new org.sunbird.common.request.Request();
     return initRequest(request, operation, httpRequest);
   }
@@ -109,7 +110,8 @@ public class BaseController extends Controller {
     return handleRequest(operation, null, null, null, null, false, httpRequest);
   }
 
-  protected CompletionStage<Result> handleRequest(String operation, JsonNode requestBodyJson, Request httpRequest) {
+  protected CompletionStage<Result> handleRequest(
+      String operation, JsonNode requestBodyJson, Request httpRequest) {
     return handleRequest(operation, requestBodyJson, null, null, null, true, httpRequest);
   }
 
@@ -119,41 +121,56 @@ public class BaseController extends Controller {
   }
 
   protected CompletionStage<Result> handleRequest(
-          String operation, JsonNode requestBodyJson, Function requestValidatorFn, Request httpRequest) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, true, httpRequest);
+      String operation,
+      JsonNode requestBodyJson,
+      Function requestValidatorFn,
+      Request httpRequest) {
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, null, null, true, httpRequest);
   }
 
-  protected CompletionStage<Result> handleRequest(String operation, String pathId, String pathVariable, Request httpRequest) {
+  protected CompletionStage<Result> handleRequest(
+      String operation, String pathId, String pathVariable, Request httpRequest) {
     return handleRequest(operation, null, null, pathId, pathVariable, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-      String operation, String pathId, String pathVariable, boolean isJsonBodyRequired, Request httpRequest) {
-    return handleRequest(operation, null, null, pathId, pathVariable, isJsonBodyRequired, httpRequest);
+      String operation,
+      String pathId,
+      String pathVariable,
+      boolean isJsonBodyRequired,
+      Request httpRequest) {
+    return handleRequest(
+        operation, null, null, pathId, pathVariable, isJsonBodyRequired, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-          String operation,
-          JsonNode requestBodyJson,
-          Function requestValidatorFn,
-          Map<String, String> headers, Request httpRequest) {
-    return handleRequest(operation, requestBodyJson, requestValidatorFn, null, null, headers, true, httpRequest);
+      String operation,
+      JsonNode requestBodyJson,
+      Function requestValidatorFn,
+      Map<String, String> headers,
+      Request httpRequest) {
+    return handleRequest(
+        operation, requestBodyJson, requestValidatorFn, null, null, headers, true, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-          String operation,
-          Function requestValidatorFn,
-          String pathId,
-          String pathVariable, Request httpRequest) {
-    return handleRequest(operation, null, requestValidatorFn, pathId, pathVariable, false, httpRequest);
+      String operation,
+      Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Request httpRequest) {
+    return handleRequest(
+        operation, null, requestValidatorFn, pathId, pathVariable, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-          String operation,
-          JsonNode requestBodyJson,
-          Function requestValidatorFn,
-          String pathId,
-          String pathVariable, Request httpRequest) {
+      String operation,
+      JsonNode requestBodyJson,
+      Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Request httpRequest) {
     return handleRequest(
         operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, true, httpRequest);
   }
@@ -174,17 +191,18 @@ public class BaseController extends Controller {
         pathVariable,
         null,
         isJsonBodyRequired,
-            httpRequest);
+        httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-          String operation,
-          JsonNode requestBodyJson,
-          Function requestValidatorFn,
-          String pathId,
-          String pathVariable,
-          Map<String, String> headers,
-          boolean isJsonBodyRequired, Request httpRequest) {
+      String operation,
+      JsonNode requestBodyJson,
+      Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers,
+      boolean isJsonBodyRequired,
+      Request httpRequest) {
     try {
       org.sunbird.common.request.Request request = null;
       if (!isJsonBodyRequired) {
@@ -209,13 +227,14 @@ public class BaseController extends Controller {
   }
 
   protected CompletionStage<Result> handleSearchRequest(
-          String operation,
-          JsonNode requestBodyJson,
-          Function requestValidatorFn,
-          String pathId,
-          String pathVariable,
-          Map<String, String> headers,
-          String esObjectType, Request httpRequest) {
+      String operation,
+      JsonNode requestBodyJson,
+      Function requestValidatorFn,
+      String pathId,
+      String pathVariable,
+      Map<String, String> headers,
+      String esObjectType,
+      Request httpRequest) {
     try {
       org.sunbird.common.request.Request request = null;
       if (null != requestBodyJson) {
@@ -327,7 +346,7 @@ public class BaseController extends Controller {
     }
 
     return Results.ok(Json.toJson(response))
-            .withHeader(HeaderParam.X_Response_Length.getName(), value);
+        .withHeader(HeaderParam.X_Response_Length.getName(), value);
   }
 
   /**
@@ -423,32 +442,33 @@ public class BaseController extends Controller {
         params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
         removeFields(params, JsonKey.START_TIME);
         params.put(
-                JsonKey.STATUS, String.valueOf(((Response) response).getResponseCode().getResponseCode()));
+            JsonKey.STATUS,
+            String.valueOf(((Response) response).getResponseCode().getResponseCode()));
         params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
         req.setRequest(
-                generateTelemetryRequestForController(
-                        TelemetryEvents.LOG.getName(),
-                        params,
-                        (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
+            generateTelemetryRequestForController(
+                TelemetryEvents.LOG.getName(),
+                params,
+                (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
         // if any request is coming form /v1/telemetry/save then don't generate the telemetry log
         // for it.
         lmaxWriter.submitMessage(req);
       } catch (Exception ex) {
         ProjectLogger.log(
-                "BaseController:createCommonResponse Exception in writing telemetry for request "
-                        + requestId,
-                ex);
+            "BaseController:createCommonResponse Exception in writing telemetry for request "
+                + requestId,
+            ex);
       } finally {
         // remove request info from map
         OnRequestHandler.requestInfo.remove(requestId);
         ProjectLogger.log(
-                "BaseController:createCommonResponse removed details for messageId=" + requestId,
-                LoggerEnum.INFO);
+            "BaseController:createCommonResponse removed details for messageId=" + requestId,
+            LoggerEnum.INFO);
       }
     } else {
       ProjectLogger.log(
-              "BaseController:createCommonResponse request details not found requestId=" + requestId,
-              LoggerEnum.ERROR);
+          "BaseController:createCommonResponse request details not found requestId=" + requestId,
+          LoggerEnum.ERROR);
     }
     Response courseResponse = (Response) response;
     if (!StringUtils.isBlank(key)) {
@@ -465,8 +485,8 @@ public class BaseController extends Controller {
    */
   public Result createFileDownloadResponse(File file) {
     return Results.ok(file)
-            .withHeader("Content-Type", "application/x-download")
-            .withHeader("Content-disposition", "attachment; filename=" + file.getName());
+        .withHeader("Content-Type", "application/x-download")
+        .withHeader("Content-disposition", "attachment; filename=" + file.getName());
   }
 
   private void removeFields(Map<String, Object> params, String... properties) {
@@ -515,33 +535,38 @@ public class BaseController extends Controller {
               ResponseCode.internalError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
-    try {
-    Map<String, Object> requestInfo = OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
-    org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
-    Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
-    params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-    params.put(JsonKey.MESSAGE, "");
-    params.put(JsonKey.METHOD, request.method());
-    // calculate  the total time consume
-    long startTime = (Long) params.get(JsonKey.START_TIME);
-    params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
-    removeFields(params, JsonKey.START_TIME);
-    params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
-    params.put(JsonKey.LOG_LEVEL, "error");
-    params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
-    reqForTelemetry.setRequest(
-        generateTelemetryRequestForController(
-            TelemetryEvents.ERROR.getName(),
-            params,
-            (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
-    lmaxWriter.submitMessage(reqForTelemetry);
-    } catch (Exception ex) {
-		ex.printStackTrace();
-	}
+    generateExceptionTelemetry(request, exception);
     // cleaning request info ...
     return Results.status(
         exception.getResponseCode(),
         Json.toJson(BaseController.createResponseOnException(req, exception)));
+  }
+
+  private void generateExceptionTelemetry(Request request, ProjectCommonException exception) {
+    try {
+      Map<String, Object> requestInfo =
+          OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
+      org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
+      Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
+      params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
+      params.put(JsonKey.MESSAGE, "");
+      params.put(JsonKey.METHOD, request.method());
+      // calculate  the total time consume
+      long startTime = (Long) params.get(JsonKey.START_TIME);
+      params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
+      removeFields(params, JsonKey.START_TIME);
+      params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
+      params.put(JsonKey.LOG_LEVEL, "error");
+      params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
+      reqForTelemetry.setRequest(
+          generateTelemetryRequestForController(
+              TelemetryEvents.ERROR.getName(),
+              params,
+              (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
+      lmaxWriter.submitMessage(reqForTelemetry);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   private long calculateApiTimeTaken(Long startTime) {
@@ -570,30 +595,30 @@ public class BaseController extends Controller {
       String responseKey,
       Request httpReq) {
 
-    String operation = request.getOperation();
-
-    // set header to request object , setting actor type and channel headers value
-    // ...
     setChannelAndActorInfo(httpReq, request);
-
     Function<Object, Result> function =
-        new Function<Object, Result>() {
-          @Override
-          public Result apply(Object result) {
-            if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
-              setGlobalHealthFlag(result);
-            }
+        result -> {
+          if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
+            setGlobalHealthFlag(result);
+          }
 
-            if (result instanceof Response) {
-              Response response = (Response) result;
+          if (result instanceof Response) {
+            Response response = (Response) result;
+            if (ResponseCode.OK.getResponseCode()
+                == (response.getResponseCode().getResponseCode())) {
               return createCommonResponse(response, responseKey, httpReq);
-            } else if (result instanceof ProjectCommonException) {
-              return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
-            } else if (result instanceof File) {
-              return createFileDownloadResponse((File) result);
+            } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
+                == (response.getResponseCode().getResponseCode())) {
+              return createClientErrorResponse(httpReq, (ClientErrorResponse) response);
             } else {
               return createCommonExceptionResponse(new Exception(), httpReq);
             }
+          } else if (result instanceof ProjectCommonException) {
+            return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
+          } else if (result instanceof File) {
+            return createFileDownloadResponse((File) result);
+          } else {
+            return createCommonExceptionResponse(new Exception(), httpReq);
           }
         };
 
@@ -602,6 +627,15 @@ public class BaseController extends Controller {
     } else {
       return PatternsCS.ask((ActorSelection) actorRef, request, timeout).thenApplyAsync(function);
     }
+  }
+
+  private Result createClientErrorResponse(Request httpReq, ClientErrorResponse response) {
+    ClientErrorResponse errorResponse = response;
+    generateExceptionTelemetry(httpReq, errorResponse.getException());
+    Response responseObj =
+        BaseController.createResponseOnException(httpReq, errorResponse.getException());
+    responseObj.getResult().putAll(errorResponse.getResult());
+    return Results.status(errorResponse.getException().getResponseCode(), Json.toJson(responseObj));
   }
 
   /**
@@ -678,9 +712,9 @@ public class BaseController extends Controller {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
-      } else if (requestUrl.contains(ver2) ) {
+      } else if (requestUrl.contains(ver2)) {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
-      } else if (requestUrl.contains(ver3) ) {
+      } else if (requestUrl.contains(ver3)) {
         requestUrl = requestUrl.replaceFirst(ver3, "api");
       }
       String[] list = requestUrl.split("/");
@@ -744,10 +778,11 @@ public class BaseController extends Controller {
   private static Map<String, Object> genarateTelemetryInfoForError(Request request) {
 
     Map<String, Object> map = new HashMap<>();
-    Map<String, Object> requestInfo = OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
-    if(requestInfo != null) {
-    Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
-    map.put(JsonKey.CONTEXT, contextInfo);
+    Map<String, Object> requestInfo =
+        OnRequestHandler.requestInfo.get(request.flash().get(JsonKey.REQUEST_ID));
+    if (requestInfo != null) {
+      Map<String, Object> contextInfo = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
+      map.put(JsonKey.CONTEXT, contextInfo);
     }
     Map<String, Object> params = new HashMap<>();
     params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
@@ -755,10 +790,11 @@ public class BaseController extends Controller {
     return map;
   }
 
-  public void setChannelAndActorInfo(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
+  public void setChannelAndActorInfo(
+      Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
 
     reqObj.getContext().put(JsonKey.CHANNEL, httpReq.flash().get(JsonKey.CHANNEL));
-    reqObj.getContext().put(JsonKey.ACTOR_ID,httpReq.flash().get(JsonKey.ACTOR_ID));
+    reqObj.getContext().put(JsonKey.ACTOR_ID, httpReq.flash().get(JsonKey.ACTOR_ID));
     reqObj.getContext().put(JsonKey.ACTOR_TYPE, httpReq.flash().get(JsonKey.ACTOR_TYPE));
     reqObj.getContext().put(JsonKey.APP_ID, httpReq.flash().get(JsonKey.APP_ID));
     reqObj.getContext().put(JsonKey.DEVICE_ID, httpReq.flash().get(JsonKey.DEVICE_ID));
@@ -766,12 +802,12 @@ public class BaseController extends Controller {
         .getContext()
         .put(
             JsonKey.SIGNUP_TYPE,
-                httpReq.flash().get(JsonKey.SIGNUP_TYPE)); // adding signup type in request context
+            httpReq.flash().get(JsonKey.SIGNUP_TYPE)); // adding signup type in request context
     reqObj
         .getContext()
         .put(
             JsonKey.REQUEST_SOURCE,
-                httpReq.flash().get(JsonKey.REQUEST_SOURCE)); // ADDING Source under params in context
+            httpReq.flash().get(JsonKey.REQUEST_SOURCE)); // ADDING Source under params in context
     httpReq.flash().remove(JsonKey.APP_ID);
   }
 
@@ -825,7 +861,8 @@ public class BaseController extends Controller {
       OnRequestHandler.isServiceHealthy = false;
     }
     ProjectLogger.log(
-        "BaseController:setGlobalHealthFlag: isServiceHealthy = " + OnRequestHandler.isServiceHealthy,
+        "BaseController:setGlobalHealthFlag: isServiceHealthy = "
+            + OnRequestHandler.isServiceHealthy,
         LoggerEnum.INFO.name());
   }
 
