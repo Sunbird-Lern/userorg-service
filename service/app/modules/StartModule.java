@@ -11,6 +11,7 @@ public class StartModule extends AbstractModule {
     System.out.println("StartModule:configure: Start");
     ProjectLogger.log("StartModule:configure: Start", LoggerEnum.INFO.name());
     try {
+      bind(SignalHandler.class).asEagerSingleton();
       bind(ApplicationStart.class).asEagerSingleton();
     } catch (Exception | Error e) {
       e.printStackTrace();

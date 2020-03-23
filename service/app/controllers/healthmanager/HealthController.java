@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import modules.SignalHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.HttpUtil;
@@ -19,12 +22,14 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Result;
 
 /** @author Manzarul */
 public class HealthController extends BaseController {
   private static List<String> list = new ArrayList<>();
+  @Inject SignalHandler signalHandler;
 
   static {
     list.add("service");
@@ -41,6 +46,7 @@ public class HealthController extends BaseController {
    */
   public CompletionStage<Result> getHealth(Http.Request httpRequest) {
     try {
+      handleSigTerm();
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -66,6 +72,7 @@ public class HealthController extends BaseController {
         return getEkStepHealtCheck(httpRequest);
       } else {
         try {
+          handleSigTerm();
           Request reqObj = new Request();
           reqObj.setOperation(val);
           reqObj.setRequestId(ExecutionContext.getRequestId());
@@ -77,16 +84,35 @@ public class HealthController extends BaseController {
         }
       }
     } else {
-      responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
-      finalResponseMap.put(JsonKey.CHECKS, responseList);
-      finalResponseMap.put(JsonKey.NAME, "Learner service health");
-      finalResponseMap.put(JsonKey.Healthy, true);
-      Response response = new Response();
-      response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
-      response.setId("learner.service.health.api");
-      response.setVer(getApiVersion(httpRequest.path()));
-      response.setTs(ExecutionContext.getRequestId());
-      return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
+      try {
+        handleSigTerm();
+        responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
+        finalResponseMap.put(JsonKey.CHECKS, responseList);
+        finalResponseMap.put(JsonKey.NAME, "Learner service health");
+        finalResponseMap.put(JsonKey.Healthy, true);
+        Response response = new Response();
+        response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
+        response.setId("learner.service.health.api");
+        response.setVer(getApiVersion(httpRequest.path()));
+        response.setTs(ExecutionContext.getRequestId());
+        return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
+      } catch (Exception e) {
+        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      }
+    }
+  }
+
+  private void handleSigTerm() {
+    if (signalHandler.isShuttingDown()) {
+      ProjectLogger.log(
+          "SIGTERM is "
+              + signalHandler.isShuttingDown()
+              + ", So play server will not allow any new request.",
+          LoggerEnum.INFO.name());
+      throw new ProjectCommonException(
+          ResponseCode.serviceUnAvailable.getErrorCode(),
+          ResponseCode.serviceUnAvailable.getErrorMessage(),
+          ResponseCode.SERVICE_UNAVAILABLE.getResponseCode());
     }
   }
 
