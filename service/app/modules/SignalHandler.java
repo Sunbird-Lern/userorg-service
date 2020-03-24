@@ -7,6 +7,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
 import play.api.Application;
 import play.api.Play;
 import scala.concurrent.duration.Duration;
@@ -16,7 +17,8 @@ import sun.misc.Signal;
 @Singleton
 public class SignalHandler {
 
-  private static final FiniteDuration STOP_DELAY = Duration.create(40, TimeUnit.SECONDS);
+  private static long stopDelay = Long.parseLong(ProjectUtil.getConfigValue("sigterm_stop_delay"));
+  private static final FiniteDuration STOP_DELAY = Duration.create(stopDelay, TimeUnit.SECONDS);
 
   private volatile boolean isShuttingDown = false;
 
