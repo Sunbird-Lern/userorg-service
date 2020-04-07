@@ -1,0 +1,66 @@
+node('build-slave') {
+    try {
+        String ANSI_GREEN = "\u001B[32m"
+        String ANSI_NORMAL = "\u001B[0m"
+        String ANSI_BOLD = "\u001B[1m"
+        String ANSI_RED = "\u001B[31m"
+        String ANSI_YELLOW = "\u001B[33m"
+
+        ansiColor('xterm') {
+            stage('Checkout') {
+                tag_name = env.JOB_NAME.split("/")[-1]
+                if (!tag_name.contains(env.public_repo_branch)) {
+                    println("Error.. Tag does not contain " + env.public_repo_branch)
+                    error("Oh ho! Tag is not a release candidate.. Skipping build")
+                 }
+                if (!env.hub_org) {
+                    println(ANSI_BOLD + ANSI_RED + "Uh Oh! Please set a Jenkins environment variable named hub_org with value as registery/sunbidrded" + ANSI_NORMAL)
+                    error 'Please resolve the errors and rerun..'
+                } else
+                    println(ANSI_BOLD + ANSI_GREEN + "Found environment variable named hub_org with value as: " + hub_org + ANSI_NORMAL)
+            }
+            cleanWs()
+            def scmVars = checkout scm
+            checkout scm: [$class: 'GitSCM', branches: [[name: "refs/tags/$tag_name"]], userRemoteConfigs: [[url: scmVars.GIT_URL]]]
+            build_tag = tag_name + "_" + env.BUILD_NUMBER
+            commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            artifact_version = tag_name + "_" + commit_hash
+            echo "build_tag: " + build_tag
+
+            stage('Build') {
+                env.NODE_ENV = "build"
+                print "Environment will be : ${env.NODE_ENV}"
+                sh('git submodule update --init')
+                sh('git submodule update --init --recursive --remote')
+                sh 'git log -1'
+                sh 'cat service/conf/routes | grep v2'
+                sh 'mvn clean install -U -DskipTests=true '
+
+            }
+            stage('Unit Tests') {	
+                sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"	
+            }
+            stage('Package') {
+                dir('service') {
+                    sh 'mvn play2:dist'
+                }
+                sh('chmod 777 ./build.sh')
+                sh("./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
+            }
+            stage('ArchiveArtifacts') {
+                archiveArtifacts "metadata.json"
+                currentBuild.description = "${build_tag}"
+            }
+        }
+        currentBuild.result = "SUCCESS"    
+        slack_notify(currentBuild.result, tag_name)
+        email_notify()  
+        auto_build_deploy()
+    }
+    catch (err) {
+        currentBuild.result = "FAILURE"
+        slack_notify(currentBuild.result, tag_name)
+        email_notify()
+        throw err
+    }
+}
