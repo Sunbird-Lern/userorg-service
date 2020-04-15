@@ -1,3 +1,4 @@
+@Library('deploy-conf') _ 
 node('build-slave') {
     try {
         String ANSI_GREEN = "\u001B[32m"
@@ -27,7 +28,7 @@ node('build-slave') {
             artifact_version = tag_name + "_" + commit_hash
             echo "build_tag: " + build_tag
 
-            stage('Build') {
+        //    stage Build
                 env.NODE_ENV = "build"
                 print "Environment will be : ${env.NODE_ENV}"
                 sh('git submodule update --init')
@@ -36,21 +37,20 @@ node('build-slave') {
                 sh 'cat service/conf/routes | grep v2'
                 sh 'mvn clean install -U -DskipTests=true '
 
-            }
-            stage('Unit Tests') {	
+            
+        //    stage Unit Tests
                 sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"	
-            }
-            stage('Package') {
+            
+       //     stage Package
                 dir('service') {
                     sh 'mvn play2:dist'
                 }
                 sh('chmod 777 ./build.sh')
                 sh("./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
-            }
-            stage('ArchiveArtifacts') {
+            
+      //      stage ArchiveArtifacts 
                 archiveArtifacts "metadata.json"
                 currentBuild.description = "${build_tag}"
-            }
         }
         currentBuild.result = "SUCCESS"    
         slack_notify(currentBuild.result, tag_name)
