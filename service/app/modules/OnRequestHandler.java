@@ -203,7 +203,7 @@ public class OnRequestHandler implements ActionCreator {
     requestInfo.put(messageId, map);
     ProjectLogger.log(
         "OnRequestHandler:intializeRequestInfo added details for requestId=" + messageId,
-        LoggerEnum.INFO);
+        LoggerEnum.INFO.name());
   }
 
   private static String getCustodianOrgHashTagId() {

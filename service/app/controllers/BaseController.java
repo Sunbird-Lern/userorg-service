@@ -66,7 +66,8 @@ public class BaseController extends Controller {
   private org.sunbird.common.request.Request initRequest(
       org.sunbird.common.request.Request request, String operation, Request httpRequest) {
     request.setOperation(operation);
-    request.setRequestId(ExecutionContext.getRequestId());
+    request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+    request.getParams().setMsgid(httpRequest.flash().get(JsonKey.REQUEST_ID));
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
     request = transformUserId(request);
@@ -220,7 +221,7 @@ public class BaseController extends Controller {
               + request.getRequestId()
               + " for operation="
               + operation,
-          LoggerEnum.INFO);
+          LoggerEnum.INFO.name());
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log(
