@@ -219,10 +219,9 @@ public class BaseController extends Controller {
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
       ProjectLogger.log(
-          "BaseController:handleRequest requestId="
-              + request.getRequestId()
-              + " for operation="
-              + operation,
+        "BaseController:handleRequest for operation="
+          + operation+" requestId="
+          + request.getRequestId(),
           LoggerEnum.INFO.name());
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
