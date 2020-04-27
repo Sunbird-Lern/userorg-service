@@ -600,7 +600,6 @@ public class BaseController extends Controller {
       Timeout timeout,
       String responseKey,
       Request httpReq) {
-    
     setChannelAndActorInfo(httpReq, request);
     Function<Object, Result> function =
         result -> {
