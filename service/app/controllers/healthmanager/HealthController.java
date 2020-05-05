@@ -157,4 +157,5 @@ public class HealthController extends BaseController {
     response.setTs(ExecutionContext.getRequestId());
     return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
+  
 }
