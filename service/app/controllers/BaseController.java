@@ -217,9 +217,10 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
       ProjectLogger.log(
-        "BaseController:handleRequest for operation="
-          + operation+" requestId="
-          + request.getRequestId(),
+          "BaseController:handleRequest for operation="
+              + operation
+              + " requestId="
+              + request.getRequestId(),
           LoggerEnum.INFO.name());
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -264,6 +265,7 @@ public class BaseController extends Controller {
       ProjectLogger.log(
           "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
           e);
+
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
