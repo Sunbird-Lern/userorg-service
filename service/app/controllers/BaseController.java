@@ -20,6 +20,8 @@ import java.util.function.Function;
 import modules.ApplicationStart;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
@@ -34,6 +36,7 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
+import org.sunbird.telemetry.util.TelemetryGenerator;
 import org.sunbird.telemetry.util.TelemetryLmaxWriter;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -54,6 +57,7 @@ public class BaseController extends Controller {
   private static final String version = "v1";
   private static Object actorRef = null;
   private TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
+  Logger telemetryEventLogger = LoggerFactory.getLogger("TelemetryEventLogger");
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
 
   static {
@@ -462,6 +466,10 @@ public class BaseController extends Controller {
                 (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
         // if any request is coming form /v1/telemetry/save then don't generate the telemetry log
         // for it.
+        String telemetry =
+            TelemetryGenerator.log((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT), params);
+        this.telemetryEventLogger.info(
+            "SearchTelemetryGenerator:generateSearchTelemetryEvent: Telemetry = " + telemetry);
         // lmaxWriter.submitMessage(req);
       } catch (Exception ex) {
         ProjectLogger.log(
