@@ -462,7 +462,7 @@ public class BaseController extends Controller {
                 (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
         // if any request is coming form /v1/telemetry/save then don't generate the telemetry log
         // for it.
-        lmaxWriter.submitMessage(req);
+        // lmaxWriter.submitMessage(req);
       } catch (Exception ex) {
         ProjectLogger.log(
             "BaseController:createCommonResponse Exception in writing telemetry for request "
