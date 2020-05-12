@@ -470,7 +470,7 @@ public class BaseController extends Controller {
             TelemetryGenerator.log((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT), params);
         this.telemetryEventLogger.info(
             "SearchTelemetryGenerator:generateSearchTelemetryEvent: Telemetry = " + telemetry);
-        // lmaxWriter.submitMessage(req);
+        lmaxWriter.submitMessage(req);
       } catch (Exception ex) {
         ProjectLogger.log(
             "BaseController:createCommonResponse Exception in writing telemetry for request "
