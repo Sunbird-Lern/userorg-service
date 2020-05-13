@@ -30,7 +30,7 @@
             <pattern>%msg</pattern>
         </encoder>
 
-        <topic>local.telemetry.raw</topic>
+        <topic>${ENV_NAME}.telemetry.raw</topic>
         <!-- ensure that every message sent by the executing host is partitioned to the same partition strategy -->
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
         <!-- block the logging application thread if the kafka appender cannot keep up with sending the log messages -->
@@ -39,7 +39,7 @@
         <!-- each <producerConfig> translates to regular kafka-client config (format: key=value) -->
         <!-- producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs -->
         <!-- bootstrap.servers is the only mandatory producerConfig -->
-        <producerConfig>bootstrap.servers=localhost:9092</producerConfig>
+        <producerConfig>bootstrap.servers=${SUNBIRD_KAFKA_URL}</producerConfig>
         <!-- don't wait for a broker to ack the reception of a batch.  -->
         <producerConfig>acks=0</producerConfig>
         <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
