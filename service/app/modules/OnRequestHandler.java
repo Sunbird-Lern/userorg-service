@@ -1,9 +1,13 @@
 package modules;
 
-
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.sunbird.actor.router.RequestRouter;
@@ -18,7 +22,6 @@ import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import play.http.ActionCreator;
 import play.libs.Json;
 import play.mvc.Action;
@@ -27,25 +30,19 @@ import play.mvc.Result;
 import play.mvc.Results;
 import util.RequestInterceptor;
 
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class OnRequestHandler implements ActionCreator {
 
   private static String custodianOrgHashTagId;
   public static boolean isServiceHealthy = true;
   private final List<String> USER_UNAUTH_STATES =
-          Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+      Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
   public static Map<String, Map<String, Object>> requestInfo = new ConcurrentHashMap<>();
 
   @Override
   public Action createAction(Http.Request request, Method method) {
     Optional<String> optionalMessageId = request.header(JsonKey.MESSAGE_ID);
     String messageId;
-    if(optionalMessageId.isPresent()) {
+    if (optionalMessageId.isPresent()) {
       messageId = optionalMessageId.get();
     } else {
       UUID uuid = UUID.randomUUID();
@@ -58,7 +55,7 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
-        //ctx.response().setHeader("Access-Control-Allow-Origin", "*");
+        // ctx.response().setHeader("Access-Control-Allow-Origin", "*");
 
         // Unauthorized, Anonymous, UserID
         String message = RequestInterceptor.verifyRequestData(request);
@@ -76,7 +73,7 @@ public class OnRequestHandler implements ActionCreator {
           result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
-                  onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
+              onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
         } else {
           result = delegate.call(request);
         }
@@ -87,12 +84,12 @@ public class OnRequestHandler implements ActionCreator {
 
   public CompletionStage<Result> checkForServiceHealth(Http.Request request) {
     if (Boolean.parseBoolean((ProjectUtil.getConfigValue(JsonKey.SUNBIRD_HEALTH_CHECK_ENABLE)))
-            && !request.path().endsWith(JsonKey.HEALTH)) {
+        && !request.path().endsWith(JsonKey.HEALTH)) {
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
         Response resp = BaseController.createFailureResponse(request, headerCode, headerCode);
         return CompletableFuture.completedFuture(
-                Results.status(ResponseCode.SERVICE_UNAVAILABLE.getResponseCode(), Json.toJson(resp)));
+            Results.status(ResponseCode.SERVICE_UNAVAILABLE.getResponseCode(), Json.toJson(resp)));
       }
     }
     return null;
@@ -107,7 +104,7 @@ public class OnRequestHandler implements ActionCreator {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> onDataValidationError(
-          Http.Request request, String errorMessage, int responseCode) {
+      Http.Request request, String errorMessage, int responseCode) {
     ProjectLogger.log("Data error found--" + errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
@@ -126,7 +123,7 @@ public class OnRequestHandler implements ActionCreator {
     String source = "";
     if (request.body() != null && request.body().asJson() != null) {
       JsonNode requestNode =
-              request.body().asJson().get("params"); // extracting signup type from request
+          request.body().asJson().get("params"); // extracting signup type from request
       if (requestNode != null && requestNode.get(JsonKey.SIGNUP_TYPE) != null) {
         signType = requestNode.get(JsonKey.SIGNUP_TYPE).asText();
       }
@@ -146,9 +143,9 @@ public class OnRequestHandler implements ActionCreator {
     } else {
       String custodianOrgHashTagid = getCustodianOrgHashTagId();
       channel =
-              (StringUtils.isNotEmpty(custodianOrgHashTagid))
-                      ? custodianOrgHashTagid
-                      : JsonKey.DEFAULT_ROOT_ORG_ID;
+          (StringUtils.isNotEmpty(custodianOrgHashTagid))
+              ? custodianOrgHashTagid
+              : JsonKey.DEFAULT_ROOT_ORG_ID;
     }
     reqContext.put(JsonKey.CHANNEL, channel);
     request.flash().put(JsonKey.CHANNEL, channel);
@@ -187,7 +184,6 @@ public class OnRequestHandler implements ActionCreator {
     }
     context.setRequestContext(reqContext);
     Map<String, Object> map = new ConcurrentHashMap<>();
-    map.put(JsonKey.CONTEXT, TelemetryUtil.getTelemetryContext());
     Map<String, Object> additionalInfo = new HashMap<>();
     additionalInfo.put(JsonKey.URL, url);
     additionalInfo.put(JsonKey.METHOD, methodName);
@@ -204,8 +200,8 @@ public class OnRequestHandler implements ActionCreator {
     }
     requestInfo.put(messageId, map);
     ProjectLogger.log(
-            "OnRequestHandler:intializeRequestInfo added details for messageId=" + messageId,
-            LoggerEnum.INFO);
+        "OnRequestHandler:intializeRequestInfo added details for messageId=" + messageId,
+        LoggerEnum.INFO);
   }
 
   private static String getCustodianOrgHashTagId() {
@@ -215,15 +211,15 @@ public class OnRequestHandler implements ActionCreator {
           // Get custodian org ID
           SystemSettingClient sysSettingClient = SystemSettingClientImpl.getInstance();
           ActorRef sysSettingActorRef =
-                  RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
+              RequestRouter.getActor(ActorOperations.GET_SYSTEM_SETTING.getValue());
           SystemSetting systemSetting =
-                  sysSettingClient.getSystemSettingByField(
-                          sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
+              sysSettingClient.getSystemSettingByField(
+                  sysSettingActorRef, JsonKey.CUSTODIAN_ORG_ID);
           // Get hash tag ID of custodian org
           OrganisationClient orgClient = new OrganisationClientImpl();
           ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
           custodianOrgHashTagId =
-                  orgClient.getOrgById(orgActorRef, systemSetting.getValue()).getHashTagId();
+              orgClient.getOrgById(orgActorRef, systemSetting.getValue()).getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
           else throw e;
@@ -253,7 +249,7 @@ public class OnRequestHandler implements ActionCreator {
       env = JsonKey.BADGES;
     } else if (uri.startsWith("/v1/issuer")) {
       env = BadgingJsonKey.BADGES;
-    }  else if (uri.startsWith("/v1/role")) {
+    } else if (uri.startsWith("/v1/role")) {
       env = JsonKey.ROLE;
     } else if (uri.startsWith("/v1/note")) {
       env = JsonKey.NOTE;
@@ -268,5 +264,4 @@ public class OnRequestHandler implements ActionCreator {
     }
     return env;
   }
-
 }
