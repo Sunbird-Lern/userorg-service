@@ -18,9 +18,9 @@ public class UserTnCRequestValidator extends BaseRequestValidator {
         ResponseCode.mandatoryParamsMissing,
         JsonKey.VERSION);
 
-    //When managedProfile terms and conditions accepted, pick userId from request
-    String requestUserId = (String) request.getRequest().get(JsonKey.USER_ID);
-    if (StringUtils.isNotBlank(requestUserId) && !ProjectUtil.validateUUID(requestUserId)){
+    //if managedUserId's terms and conditions are accepted, validate userId from request
+    String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
+    if (StringUtils.isNotBlank(managedUserId) && !ProjectUtil.validateUUID(managedUserId)){
       throw new ProjectCommonException(
               ResponseCode.invalidPropertyError.getErrorCode(),
               MessageFormat.format(ResponseCode.invalidPropertyError.getErrorMessage(), JsonKey.USER_ID),
