@@ -1,6 +1,7 @@
 package controllers.notificationservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +17,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 public class EmailServiceController extends BaseController {
+  
+  private ObjectMapper omapper = new ObjectMapper();
 
   /**
    * This method will add a new course entry into cassandra DB.
@@ -36,8 +39,19 @@ public class EmailServiceController extends BaseController {
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+  
+      JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
+      return handleRequest(
+        ActorOperations.EMAIL_SERVICE.getValue(),
+        reqObjJson,
+        req -> {
+          // We have validated earlier.
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
