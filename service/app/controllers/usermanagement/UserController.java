@@ -83,8 +83,8 @@ public class UserController extends BaseController {
       httpRequest.body().asJson(),
       req -> {
         Request request = (Request) req;
-        new UserRequestValidator().validateUserCreateV3(request);
-        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+        new UserRequestValidator().validateUserSignUpV2(request);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
         return null;
       },
       null,
