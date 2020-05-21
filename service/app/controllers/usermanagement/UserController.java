@@ -77,6 +77,21 @@ public class UserController extends BaseController {
 	            httpRequest);
 	  }
   
+  public CompletionStage<Result> signUpUserV2(Http.Request httpRequest) {
+    return handleRequest(
+      ActorOperations.CREATE_USER_V3.getValue(),
+      httpRequest.body().asJson(),
+      req -> {
+        Request request = (Request) req;
+        new UserRequestValidator().validateUserCreateV3(request);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+        return null;
+      },
+      null,
+      null,
+      true,
+      httpRequest);
+  }
   
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
     final boolean isPrivate;
