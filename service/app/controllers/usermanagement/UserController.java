@@ -77,14 +77,14 @@ public class UserController extends BaseController {
 	            httpRequest);
 	  }
   
-  public CompletionStage<Result> signUpUserV2(Http.Request httpRequest) {
+  public CompletionStage<Result> createUserV4(Http.Request httpRequest) {
     return handleRequest(
       ActorOperations.CREATE_USER_V3.getValue(),
       httpRequest.body().asJson(),
       req -> {
         Request request = (Request) req;
-        new UserRequestValidator().validateUserSignUpV2(request);
-        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+        new UserRequestValidator().validateUserCreateV4(request);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
         return null;
       },
       null,
