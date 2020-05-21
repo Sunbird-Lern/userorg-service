@@ -84,7 +84,7 @@ public class UserController extends BaseController {
       req -> {
         Request request = (Request) req;
         new UserRequestValidator().validateUserCreateV4(request);
-        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
         return null;
       },
       null,
