@@ -77,6 +77,7 @@ public class UserController extends BaseController {
 	            httpRequest);
 	  }
   
+  
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
     final boolean isPrivate;
     if (httpRequest.path().contains(JsonKey.PRIVATE)) {
