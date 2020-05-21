@@ -1017,7 +1017,6 @@ public final class JsonKey {
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
-  public static final String VERSION_4 = "v4";
   public static final String LEARNING_SERVICE_BASE_URL = "learning_service_base_url";
   public static final String CREATOR_DETAILS_FIELDS = "sunbird_user_search_cretordetails_fields";
   public static final String USER_SEARCH_BASE_URL = "sunbird_user_service_api_base_url";

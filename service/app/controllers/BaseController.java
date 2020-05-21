@@ -719,7 +719,6 @@ public class BaseController extends Controller {
     final String ver = "/" + version;
     final String ver2 = "/" + JsonKey.VERSION_2;
     final String ver3 = "/" + JsonKey.VERSION_3;
-    final String ver4 = "/" + JsonKey.VERSION_4;
     path = path.trim();
     StringBuilder builder = new StringBuilder("");
     if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
@@ -730,8 +729,6 @@ public class BaseController extends Controller {
         requestUrl = requestUrl.replaceFirst(ver2, "api");
       } else if (requestUrl.contains(ver3)) {
         requestUrl = requestUrl.replaceFirst(ver3, "api");
-      } else if (requestUrl.contains(ver4)) {
-        requestUrl = requestUrl.replaceFirst(ver4, "api");
       }
       String[] list = requestUrl.split("/");
       for (String str : list) {
