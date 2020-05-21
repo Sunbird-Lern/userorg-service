@@ -858,6 +858,8 @@ public enum ResponseCode {
   missingData(ResponseMessage.Key.MISSING_CODE, ResponseMessage.Message.MISSING_MESSAGE),
   managedByNotAllowed(
       ResponseMessage.Key.MANAGED_BY_NOT_ALLOWED, ResponseMessage.Message.MANAGED_BY_NOT_ALLOWED),
+  managedByEmailPhoneUpdateError(
+    ResponseMessage.Key.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR, ResponseMessage.Message.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

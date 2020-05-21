@@ -471,6 +471,7 @@ public interface ResponseMessage {
     String SERVICE_UNAVAILABLE = "SERVICE UNAVAILABLE";
     String MISSING_MESSAGE = "Required fields for create course are missing. {0}";
     String MANAGED_BY_NOT_ALLOWED = "managedBy cannot be updated.";
+    String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "ManagedBy User phone/email cannot be updated.";
   }
 
   interface Key {
@@ -868,5 +869,6 @@ public interface ResponseMessage {
     String SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE";
     String MISSING_CODE = "ERR_COURSE_CREATE_FIELDS_MISSING";
     String MANAGED_BY_NOT_ALLOWED = "MANAGED_BY_NOT_ALLOWED";
+    String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR";
   }
 }

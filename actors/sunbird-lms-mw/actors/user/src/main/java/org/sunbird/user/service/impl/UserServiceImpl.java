@@ -98,11 +98,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void validateUserId(Request request) {
+  public void validateUserId(Request request, String managedById) {
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
     String userId = userExtIdentityDao.getUserId(request);
 
-    if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctxtUserId))) {
+    if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
+        || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
