@@ -1,100 +1,159 @@
-<?xml version="1.0"?>
-<project
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <groupId>org.sunbird</groupId>
+    <artifactId>learning-service</artifactId>
+    <name>learning-service</name>
+    <packaging>play2</packaging>
+    <version>1.0-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.sunbird</groupId>
-        <artifactId>sunbird-lms-mw</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-    <artifactId>mw-service</artifactId>
-    <name>Middleware Service</name>
+    <repositories>
+        <repository>
+            <id>scalaz-bintray</id>
+            <name>Scalaz Bintray - releases</name>
+            <url>https://dl.bintray.com/scalaz/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>typesafe-releases-plugins</id>
+            <url>https://repo.typesafe.com/typesafe/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <play2.version>2.7.2</play2.version>
+        <play2.plugin.version>1.0.0-rc5</play2.plugin.version>
+        <sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
+        <scala.major.version>2.11</scala.major.version>
+        <scala.version>2.11.8</scala.version>
+        <learner.akka.version>2.5.19</learner.akka.version>
     </properties>
+
     <dependencies>
+        <!-- Don't move this dependency below play dependency otherwise it will
+            be overriden by play jackson jar, which uses older version -->
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>actor-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <!-- Add actor here itself to avoid netty jar conflict. -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-guice_${scala.major.version}</artifactId>
+            <version>${play2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>organization</artifactId>
+            <artifactId>mw-service</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>user</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play_${scala.major.version}</artifactId>
+            <version>${play2.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>joda-time</groupId>
+                    <artifactId>joda-time</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>badge</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-specs2_${scala.major.version}</artifactId>
+            <version>${play2.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.gson</groupId>
+                    <artifactId>gson</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>location</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>filters-helpers_${scala.major.version}</artifactId>
+            <version>${play2.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>systemsettings</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-akka-http-server_${scala.major.version}</artifactId>
+            <version>${play2.version}</version>
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+        <sourceDirectory>${basedir}/app</sourceDirectory>
+        <testSourceDirectory>${basedir}/test</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>${basedir}/conf</directory>
+            </resource>
+        </resources>
         <plugins>
-            <!-- to create executable jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>reference.conf</resource>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.sunbird.middleware.Application</mainClass>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>com.google.code.play2-maven-plugin</groupId>
+                <artifactId>play2-maven-plugin</artifactId>
+                <version>${play2.plugin.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
+                <artifactId>sbt-compiler-maven-plugin</artifactId>
+                <version>${sbt-compiler.plugin.version}</version>
+                <configuration>
+                    <scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Spec.java</include>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>0.8.4</version>
                 <configuration>
                     <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+                    <excludes>
+                        <exclude>**/common/**</exclude>
+                        <exclude>**/router/**</exclude>
+                        <exclude>**/Reverse*/**</exclude>
+                        <exclude>**/routes.*</exclude>
+                        <exclude>**/routes$javascript.**</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -110,40 +169,19 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>default-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20</version>
-                <configuration>
-                    <!-- <skipTests>true</skipTests> -->
-                    <includes>
-                        <include>**/*Spec.java</include>
-                        <include>**/*Test.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-            <!-- to run application -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <configuration>
-                    <mainClass>org.sunbird.middleware.Application</mainClass>
-                </configuration>
-            </plugin>
         </plugins>
-        <finalName>actor-service</finalName>
     </build>
 </project>
