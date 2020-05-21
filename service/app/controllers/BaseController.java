@@ -557,7 +557,7 @@ public class BaseController extends Controller {
       Timeout timeout,
       String responseKey,
       Request httpReq) {
-    setChannelAndActorInfo(httpReq, request);
+    setContextData(httpReq, request);
     Function<Object, Result> function =
         result -> {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
@@ -755,8 +755,7 @@ public class BaseController extends Controller {
     return Collections.emptyMap();
   }
 
-  public void setChannelAndActorInfo(
-      Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
+  public void setContextData(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
     try {
       String reqContext = httpReq.flash().get(JsonKey.CONTEXT);
       Map<String, Object> requestInfo =
