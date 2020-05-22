@@ -17,7 +17,6 @@ import org.apache.commons.io.IOUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Files;
@@ -84,7 +83,7 @@ public class FileStorageController extends BaseController {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);

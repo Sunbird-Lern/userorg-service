@@ -27,7 +27,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
@@ -296,30 +295,21 @@ public class BaseController extends Controller {
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
-    response.setParams(createResponseParamObj(code));
+    response.setParams(createResponseParamObj(code, null, request.flash().get(JsonKey.REQUEST_ID)));
     return response;
   }
 
-  public static ResponseParams createResponseParamObj(ResponseCode code, String customMessage) {
+  public static ResponseParams createResponseParamObj(
+      ResponseCode code, String customMessage, String requestId) {
     ResponseParams params = new ResponseParams();
     if (code.getResponseCode() != 200) {
       params.setErr(code.getErrorCode());
       params.setErrmsg(
           StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
     }
-    params.setMsgid(ExecutionContext.getRequestId());
+    params.setMsgid(requestId);
     params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     return params;
-  }
-
-  /**
-   * This method will create response parameter
-   *
-   * @param code ResponseCode
-   * @return ResponseParams
-   */
-  public static ResponseParams createResponseParamObj(ResponseCode code) {
-    return createResponseParamObj(code, null);
   }
 
   /**
@@ -340,7 +330,7 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
-    response.setParams(createResponseParamObj(code));
+    response.setParams(createResponseParamObj(code, null, request.flash().get(JsonKey.REQUEST_ID)));
     String value = null;
     try {
       if (response.getResult() != null) {
@@ -391,7 +381,9 @@ public class BaseController extends Controller {
     if (code == null) {
       code = ResponseCode.SERVER_ERROR;
     }
-    response.setParams(createResponseParamObj(code, exception.getMessage()));
+    response.setParams(
+        createResponseParamObj(
+            code, exception.getMessage(), request.flash().get(JsonKey.REQUEST_ID)));
     if (response.getParams() != null) {
       response.getParams().setStatus(response.getParams().getStatus());
       if (exception.getCode() != null) {
@@ -419,7 +411,7 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
     ResponseCode code = ResponseCode.getResponse(exception.getCode());
-    response.setParams(createResponseParamObj(code, exception.getMessage()));
+    response.setParams(createResponseParamObj(code, exception.getMessage(), null));
     return response;
   }
 
@@ -500,8 +492,7 @@ public class BaseController extends Controller {
     generateExceptionTelemetry(request, exception);
     // cleaning request info ...
     return Results.status(
-        exception.getResponseCode(),
-        Json.toJson(BaseController.createResponseOnException(req, exception)));
+        exception.getResponseCode(), Json.toJson(createResponseOnException(req, exception)));
   }
 
   private void generateExceptionTelemetry(Request request, ProjectCommonException exception) {
@@ -533,7 +524,6 @@ public class BaseController extends Controller {
   }
 
   private long calculateApiTimeTaken(Long startTime) {
-
     Long timeConsumed = null;
     if (null != startTime) {
       timeConsumed = System.currentTimeMillis() - startTime;
@@ -603,8 +593,7 @@ public class BaseController extends Controller {
   private Result createClientErrorResponse(Request httpReq, ClientErrorResponse response) {
     ClientErrorResponse errorResponse = response;
     generateExceptionTelemetry(httpReq, errorResponse.getException());
-    Response responseObj =
-        BaseController.createResponseOnException(httpReq, errorResponse.getException());
+    Response responseObj = createResponseOnException(httpReq, errorResponse.getException());
     responseObj.getResult().putAll(errorResponse.getResult());
     return Results.status(errorResponse.getException().getResponseCode(), Json.toJson(responseObj));
   }
@@ -760,6 +749,7 @@ public class BaseController extends Controller {
       String reqContext = httpReq.flash().get(JsonKey.CONTEXT);
       Map<String, Object> requestInfo =
           objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+      reqObj.setRequestId(httpReq.flash().get(JsonKey.REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
     } catch (Exception ex) {
