@@ -37,13 +37,6 @@ public class ApplicationTest {
     assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
   }
 
-  @Test
-  public void testCreateSuccessResponseSuccess() {
-    Response response = new Response();
-    Result result = BaseController.createSuccessResponse(null, response);
-    assertEquals(ResponseCode.OK.getResponseCode(), result.status());
-  }
-
   @Test(expected = RuntimeException.class)
   public void testCreateCommonExceptionResponseSuccess() {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
