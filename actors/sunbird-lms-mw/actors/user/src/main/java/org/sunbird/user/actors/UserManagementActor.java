@@ -161,6 +161,8 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
+    String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    userMap.put(JsonKey.CREATED_BY, userId);
     processUserRequestV4(userMap, signupType, source);
   }
 
@@ -761,14 +763,20 @@ public class UserManagementActor extends BaseActor {
         ProjectUtil.formatMessage(
           ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.MANAGED_BY),
         ResponseCode.CLIENT_ERROR.getResponseCode());
-    } else {
-      String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-      String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-      userMap.put(JsonKey.CHANNEL, channel);
-      Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
-      validateUserFrameworkData(userMap, managedByInfo);
     }
+    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
+    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    userMap.put(JsonKey.CHANNEL, channel);
+    Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
+    // If user account isManagedUser(passed in request) should be same as context user_id
+    if (!(StringUtils.isNotBlank(managedBy) && managedBy.equalsIgnoreCase((String) userMap.get(JsonKey.CREATED_BY)))){
+      ProjectCommonException.throwClientErrorException(
+        ResponseCode.invalidParameterValue,
+        MessageFormat.format(
+          ResponseCode.invalidParameterValue.getErrorMessage(), managedBy, JsonKey.USER_ID));
+    }
+    validateUserFrameworkData(userMap, managedByInfo);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
