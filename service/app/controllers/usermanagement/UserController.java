@@ -79,7 +79,7 @@ public class UserController extends BaseController {
   
   public CompletionStage<Result> createUserV4(Http.Request httpRequest) {
     return handleRequest(
-      ActorOperations.CREATE_USER_V3.getValue(),
+      ActorOperations.CREATE_USER_V4.getValue(),
       httpRequest.body().asJson(),
       req -> {
         Request request = (Request) req;
