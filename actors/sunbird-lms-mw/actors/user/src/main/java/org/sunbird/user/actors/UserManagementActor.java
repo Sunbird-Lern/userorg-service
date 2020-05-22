@@ -108,14 +108,14 @@ public class UserManagementActor extends BaseActor {
         createUserV3(request);
         break;
       case "createUserV4":  //managedUser creation
-        createUserV3(request);
+        createUserV4(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
     }
   }
   /**
-   * This method will create user/managedBy-user in user in cassandra and update to ES as well at same time.
+   * This method will create user in user in cassandra and update to ES as well at same time.
    *
    * @param actorMessage
    */
@@ -136,13 +136,34 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    if (actorMessage.getOperation().equals(ActorOperations.CREATE_USER_V4)) {
-      String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      userMap.put(JsonKey.CREATED_BY, userId);
-      processUserRequestV4(userMap, signupType, source);
-    } else {
-      processUserRequestV3(userMap, signupType, source);
-    }
+    processUserRequestV3(userMap, signupType, source);
+  }
+  
+  /**
+   * This method will create managed user in user in cassandra and update to ES as well at same time.
+   * Email and phone is not provided, name and managedBy is mandatory. BMGS or Location is optional
+   * @param actorMessage
+   */
+  private void createUserV4(Request actorMessage) {
+    ProjectLogger.log("UserManagementActor:createUserV4 method called.", LoggerEnum.INFO.name());
+    actorMessage.toLower();
+    Map<String, Object> userMap = actorMessage.getRequest();
+    String signupType =
+      (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
+        ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
+        : "";
+    String source =
+      (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
+        ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
+        : "";
+    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
+    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    userMap.put(JsonKey.CHANNEL, channel);
+    userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
+    String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    userMap.put(JsonKey.CREATED_BY, userId);
+    processUserRequestV4(userMap, signupType, source);
   }
 
   private void cacheFrameworkFieldsConfig() {
