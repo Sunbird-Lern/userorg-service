@@ -108,14 +108,14 @@ public class UserManagementActor extends BaseActor {
         createUserV3(request);
         break;
       case "createUserV4":  //managedUser creation
-        createUserV4(request);
+        createUserV3(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
     }
   }
   /**
-   * This method will create user in user in cassandra and update to ES as well at same time.
+   * This method will create user/managedBy-user in user in cassandra and update to ES as well at same time.
    *
    * @param actorMessage
    */
@@ -136,34 +136,13 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    processUserRequestV3(userMap, signupType, source);
-  }
-  
-  /**
-   * This method will create managed user in user in cassandra and update to ES as well at same time.
-   * Email and phone is not provided, name and managedBy is mandatory. BMGS or Location is optional
-   * @param actorMessage
-   */
-  private void createUserV4(Request actorMessage) {
-    ProjectLogger.log("UserManagementActor:createUserV4 method called.", LoggerEnum.INFO.name());
-    actorMessage.toLower();
-    Map<String, Object> userMap = actorMessage.getRequest();
-    String signupType =
-      (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-        ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-        : "";
-    String source =
-      (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-        ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-        : "";
-    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    userMap.put(JsonKey.CHANNEL, channel);
-    userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-    userMap.put(JsonKey.CREATED_BY, userId);
-    processUserRequestV4(userMap, signupType, source);
+    if (actorMessage.getOperation().equals(ActorOperations.CREATE_USER_V4)) {
+      String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+      userMap.put(JsonKey.CREATED_BY, userId);
+      processUserRequestV4(userMap, signupType, source);
+    } else {
+      processUserRequestV3(userMap, signupType, source);
+    }
   }
 
   private void cacheFrameworkFieldsConfig() {
@@ -683,10 +662,14 @@ public class UserManagementActor extends BaseActor {
     }
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
+    saveUserV3(userMap, signupType, source);
+  }
+  
+  private void saveUserV3(Map userMap, String signupType, String source) {
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     Response response =
-        cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+      cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -700,58 +683,57 @@ public class UserManagementActor extends BaseActor {
       sender().tell(response, self());
     } else {
       Future<Boolean> kcFuture =
-          Futures.future(
-              new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() {
-                  try {
-                    Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
-                    updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
-                    updatePasswordMap.put(JsonKey.PASSWORD, password);
-                    ProjectLogger.log(
-                        "Update password value passed "
-                            + password
-                            + " --"
-                            + (String) userMap.get(JsonKey.ID),
-                        LoggerEnum.INFO.name());
-                    return UserUtil.updatePassword(updatePasswordMap);
-                  } catch (Exception e) {
-                    ProjectLogger.log(
-                        "Error occured during update pasword : " + e.getMessage(),
-                        LoggerEnum.ERROR.name());
-                    return false;
-                  }
-                }
-              },
-              getContext().dispatcher());
+        Futures.future(
+          new Callable<Boolean>() {
+          
+            @Override
+            public Boolean call() {
+              try {
+                Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
+                updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
+                updatePasswordMap.put(JsonKey.PASSWORD, password);
+                ProjectLogger.log(
+                  "Update password value passed "
+                    + password
+                    + " --"
+                    + (String) userMap.get(JsonKey.ID),
+                  LoggerEnum.INFO.name());
+                return UserUtil.updatePassword(updatePasswordMap);
+              } catch (Exception e) {
+                ProjectLogger.log(
+                  "Error occured during update pasword : " + e.getMessage(),
+                  LoggerEnum.ERROR.name());
+                return false;
+              }
+            }
+          },
+          getContext().dispatcher());
       Future<Response> future =
-          saveUserToES(esResponse)
-              .zip(kcFuture)
-              .map(
-                  new Mapper<Tuple2<String, Boolean>, Response>() {
-
-                    @Override
-                    public Response apply(Tuple2<String, Boolean> parameter) {
-                      boolean updatePassResponse = parameter._2;
-                      ProjectLogger.log(
-                          "UserManagementActor:processUserRequest: Response from update password call "
-                              + updatePassResponse,
-                          LoggerEnum.INFO.name());
-                      if (!updatePassResponse) {
-                        response.put(
-                            JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
-                      }
-                      return response;
-                    }
-                  },
-                  getContext().dispatcher());
+        saveUserToES(esResponse)
+          .zip(kcFuture)
+          .map(
+            new Mapper<Tuple2<String, Boolean>, Response>() {
+            
+              @Override
+              public Response apply(Tuple2<String, Boolean> parameter) {
+                boolean updatePassResponse = parameter._2;
+                ProjectLogger.log(
+                  "UserManagementActor:processUserRequest: Response from update password call "
+                    + updatePassResponse,
+                  LoggerEnum.INFO.name());
+                if (!updatePassResponse) {
+                  response.put(
+                    JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
+                }
+                return response;
+              }
+            },
+            getContext().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
-
-    processTelemetry(userMap, signupType, source, userId);
-  }
   
+    processTelemetry(userMap, signupType, source, (String) userMap.get(JsonKey.ID));
+  }
   private void processUserRequestV4(Map<String, Object> userMap, String signupType, String source) {
     UserUtil.setUserDefaultValueForV3(userMap);
     UserUtil.toLower(userMap);
@@ -790,70 +772,7 @@ public class UserManagementActor extends BaseActor {
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
-    final String password = (String) userMap.get(JsonKey.PASSWORD);
-    userMap.remove(JsonKey.PASSWORD);
-    Response response =
-      cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
-    response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-    Map<String, Object> esResponse = new HashMap<>();
-    if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
-      Map<String, Object> orgMap = saveUserOrgInfo(userMap);
-      esResponse = Util.getUserDetails(userMap, orgMap);
-    } else {
-      ProjectLogger.log("UserManagementActor:processUserRequestV4: User creation failure");
-    }
-    if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      saveUserToKafka(esResponse);
-      sender().tell(response, self());
-    } else {
-      Future<Boolean> kcFuture =
-        Futures.future(
-          new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-              try {
-                Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
-                updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
-                updatePasswordMap.put(JsonKey.PASSWORD, password);
-                ProjectLogger.log(
-                  "Update password value passed "
-                    + password
-                    + " --"
-                    + (String) userMap.get(JsonKey.ID),
-                  LoggerEnum.INFO.name());
-                return UserUtil.updatePassword(updatePasswordMap);
-              } catch (Exception e) {
-                ProjectLogger.log(
-                  "Error occured during update pasword : " + e.getMessage(),
-                  LoggerEnum.ERROR.name());
-                return false;
-              }
-            }
-          },
-          getContext().dispatcher());
-      Future<Response> future =
-        saveUserToES(esResponse)
-          .zip(kcFuture)
-          .map(
-            new Mapper<Tuple2<String, Boolean>, Response>() {
-              @Override
-              public Response apply(Tuple2<String, Boolean> parameter) {
-                boolean updatePassResponse = parameter._2;
-                ProjectLogger.log(
-                  "UserManagementActor:processUserRequest: Response from update password call "
-                    + updatePassResponse,
-                  LoggerEnum.INFO.name());
-                if (!updatePassResponse) {
-                  response.put(
-                    JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
-                }
-                return response;
-              }
-            },
-            getContext().dispatcher());
-      Patterns.pipe(future, getContext().dispatcher()).to(sender());
-    }
-    processTelemetry(userMap, signupType, source, userId);
+    saveUserV3(userMap, signupType, source);
   }
 
   private void processTelemetry(
