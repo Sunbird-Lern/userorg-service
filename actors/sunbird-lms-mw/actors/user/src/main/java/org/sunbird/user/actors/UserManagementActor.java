@@ -98,13 +98,13 @@ public class UserManagementActor extends BaseActor {
     }
     String operation = request.getOperation();
     switch (operation) {
-      case "createUser":
+      case "createUser":    //create User [v1,v2,v3]
         createUser(request);
         break;
       case "updateUser":
         updateUser(request);
         break;
-      case "createUserV3":
+      case "createUserV3":   //signup [/v1/user/signup]
         createUserV3(request);
         break;
       case "createUserV4":  //managedUser creation
@@ -121,24 +121,8 @@ public class UserManagementActor extends BaseActor {
    */
   private void createUserV3(Request actorMessage) {
     ProjectLogger.log("UserManagementActor:createUserV3 method called.", LoggerEnum.INFO.name());
-    actorMessage.toLower();
-    Map<String, Object> userMap = actorMessage.getRequest();
-    String signupType =
-        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
-    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    userMap.put(JsonKey.CHANNEL, channel);
-    userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    processUserRequestV3(userMap, signupType, source);
+    createUserV34(actorMessage, false);
   }
-  
   /**
    * This method will create managed user in user in cassandra and update to ES as well at same time.
    * Email and phone is not provided, name and managedBy is mandatory. BMGS or Location is optional
@@ -146,6 +130,10 @@ public class UserManagementActor extends BaseActor {
    */
   private void createUserV4(Request actorMessage) {
     ProjectLogger.log("UserManagementActor:createUserV4 method called.", LoggerEnum.INFO.name());
+    createUserV34(actorMessage, true);
+  }
+  
+  private void createUserV34(Request actorMessage, boolean isV4) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String signupType =
@@ -156,14 +144,26 @@ public class UserManagementActor extends BaseActor {
       (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
         ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
         : "";
+  
+    String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
     String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-    userMap.put(JsonKey.CREATED_BY, userId);
-    processUserRequestV4(userMap, signupType, source);
+    
+    if (isV4) {
+      ProjectLogger.log(
+        "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY),
+        LoggerEnum.INFO);
+      String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+      userMap.put(JsonKey.CREATED_BY, userId);
+      // If user account isManagedUser(passed in request) should be same as context user_id
+      if (!(StringUtils.isNotBlank(managedBy))) {
+        userService.validateUserId(actorMessage, managedBy);
+      }
+    }
+    processUserRequestV3_V4(userMap, signupType, source, managedBy);
   }
 
   private void cacheFrameworkFieldsConfig() {
@@ -193,7 +193,7 @@ public class UserManagementActor extends BaseActor {
       if (StringUtils.isNotBlank(callerId)) {
         userService.validateUploader(actorMessage);
       } else {
-        userService.validateUserId(actorMessage);
+        userService.validateUserId(actorMessage, null);
       }
     }
     Map<String, Object> userMap = actorMessage.getRequest();
@@ -516,14 +516,6 @@ public class UserManagementActor extends BaseActor {
         return;
       }
     }
-    String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
-    if (StringUtils.isNotEmpty(managedBy)) {
-      String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-      String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-      userMap.put(JsonKey.CHANNEL, channel);
-      isCustodianOrg = true;
-    }
     validateUserType(userMap, isCustodianOrg);
     if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
       String orgExternalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
@@ -684,6 +676,118 @@ public class UserManagementActor extends BaseActor {
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     saveUserV3(userMap, signupType, source);
+  }
+  
+  private void processUserRequestV3_V4(Map<String, Object> userMap, String signupType, String source, String managedBy) {
+    UserUtil.setUserDefaultValueForV3(userMap);
+    UserUtil.toLower(userMap);
+    if (StringUtils.isEmpty(managedBy)) {
+      UserUtil.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE));
+      UserUtil.checkEmailUniqueness((String) userMap.get(JsonKey.EMAIL));
+    } else {
+      String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
+      String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+      userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+      userMap.put(JsonKey.CHANNEL, channel);
+      Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
+      convertValidatedLocationCodesToIDs(userMap);
+      validateUserFrameworkData(userMap, managedByInfo);
+    }
+    String userId = ProjectUtil.generateUniqueId();
+    userMap.put(JsonKey.ID, userId);
+    userMap.put(JsonKey.USER_ID, userId);
+    try {
+      UserUtility.encryptUserData(userMap);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    UserUtil.addMaskEmailAndMaskPhone(userMap);
+    userMap.put(JsonKey.IS_DELETED, false);
+    Map<String, Boolean> userFlagsMap = new HashMap<>();
+    userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
+    if (StringUtils.isEmpty(managedBy)) {
+      userFlagsMap.put(
+        JsonKey.EMAIL_VERIFIED,
+        (Boolean)
+          (userMap.get(JsonKey.EMAIL_VERIFIED) != null
+            ? userMap.get(JsonKey.EMAIL_VERIFIED)
+            : false));
+      userFlagsMap.put(
+        JsonKey.PHONE_VERIFIED,
+        (Boolean)
+          (userMap.get(JsonKey.PHONE_VERIFIED) != null
+            ? userMap.get(JsonKey.PHONE_VERIFIED)
+            : false));
+    }
+    int userFlagValue = userFlagsToNum(userFlagsMap);
+    userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
+    final String password = (String) userMap.get(JsonKey.PASSWORD);
+    userMap.remove(JsonKey.PASSWORD);
+    Response response =
+      cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+    response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+    Map<String, Object> esResponse = new HashMap<>();
+    if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
+      Map<String, Object> orgMap = saveUserOrgInfo(userMap);
+      esResponse = Util.getUserDetails(userMap, orgMap);
+    } else {
+      ProjectLogger.log("UserManagementActor:processUserRequest: User creation failure");
+    }
+    if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
+      saveUserToKafka(esResponse);
+      sender().tell(response, self());
+    } else {
+      Future<Boolean> kcFuture =
+        Futures.future(
+          new Callable<Boolean>() {
+            
+            @Override
+            public Boolean call() {
+              try {
+                Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
+                updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
+                updatePasswordMap.put(JsonKey.PASSWORD, password);
+                ProjectLogger.log(
+                  "Update password value passed "
+                    + password
+                    + " --"
+                    + (String) userMap.get(JsonKey.ID),
+                  LoggerEnum.INFO.name());
+                return UserUtil.updatePassword(updatePasswordMap);
+              } catch (Exception e) {
+                ProjectLogger.log(
+                  "Error occured during update pasword : " + e.getMessage(),
+                  LoggerEnum.ERROR.name());
+                return false;
+              }
+            }
+          },
+          getContext().dispatcher());
+      Future<Response> future =
+        saveUserToES(esResponse)
+          .zip(kcFuture)
+          .map(
+            new Mapper<Tuple2<String, Boolean>, Response>() {
+              
+              @Override
+              public Response apply(Tuple2<String, Boolean> parameter) {
+                boolean updatePassResponse = parameter._2;
+                ProjectLogger.log(
+                  "UserManagementActor:processUserRequest: Response from update password call "
+                    + updatePassResponse,
+                  LoggerEnum.INFO.name());
+                if (!updatePassResponse) {
+                  response.put(
+                    JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
+                }
+                return response;
+              }
+            },
+            getContext().dispatcher());
+      Patterns.pipe(future, getContext().dispatcher()).to(sender());
+    }
+    
+    processTelemetry(userMap, signupType, source, userId);
   }
   
   private void saveUserV3(Map userMap, String signupType, String source) {
@@ -853,16 +957,6 @@ public class UserManagementActor extends BaseActor {
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE);
     convertValidatedLocationCodesToIDs(userMap);
 
-    String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
-    String managedByEmail = null;
-    String managedByPhone = null;
-    if (StringUtils.isNotEmpty(managedBy)) {
-      Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
-
-      managedByEmail = (String) managedByInfo.get(JsonKey.ENC_EMAIL);
-      managedByPhone = (String) managedByInfo.get(JsonKey.ENC_PHONE);
-    }
-
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -939,10 +1033,6 @@ public class UserManagementActor extends BaseActor {
     }
     requestMap.put(JsonKey.PASSWORD, userMap.get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank(callerId)) {
-      if (StringUtils.isNotEmpty(managedBy)) {
-        requestMap.put(JsonKey.EMAIL, managedByEmail);
-        requestMap.put(JsonKey.PHONE, managedByPhone);
-      }
       sendEmailAndSms(requestMap);
     }
     Map<String, Object> targetObject = null;
