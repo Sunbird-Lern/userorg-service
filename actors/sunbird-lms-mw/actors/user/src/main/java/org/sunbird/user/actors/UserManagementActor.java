@@ -1011,10 +1011,6 @@ public class UserManagementActor extends BaseActor {
     tellToAnother(EmailAndSmsRequest);
   }
 
-  private void sendResetPasswordLink(Map<String, Object> userMap) {
-    // need to add functionality for reset-passwordlink
-  }
-
   private Future<String> saveUserToES(Map<String, Object> completeUserMap) {
 
     return esUtil.save(
