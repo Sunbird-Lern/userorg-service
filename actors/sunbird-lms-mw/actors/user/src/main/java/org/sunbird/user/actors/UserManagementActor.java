@@ -215,8 +215,6 @@ public class UserManagementActor extends BaseActor {
         || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.
       managedByEmailPhoneUpdateError);
-      /*requestMap.put(JsonKey.MANAGED_BY, null);
-      resetPasswordLink = true;*/
     }
     Response response =
         cassandraOperation.updateRecord(
@@ -240,10 +238,6 @@ public class UserManagementActor extends BaseActor {
         JsonKey.ERRORS,
         ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
     sender().tell(response, self());
-    // Managed-users should get ResetPassword Link
-    if (resetPasswordLink) {
-      sendResetPasswordLink(requestMap);
-    }
     if (null != resp) {
       Map<String, Object> completeUserDetails = new HashMap<>(userDbRecord);
       completeUserDetails.putAll(requestMap);
@@ -954,16 +948,6 @@ public class UserManagementActor extends BaseActor {
     } else {
       userBooleanMap.put(
           JsonKey.STATE_VALIDATED, (boolean) userDbRecord.get(JsonKey.STATE_VALIDATED));
-    }
-    // adding in release-3.0.0
-    // checks if any user is managedBy other user and updates email/phone value corresponding flag
-    // emailverified/phoneverified is updated
-    if (StringUtils.isNotEmpty((String) userDbRecord.get(JsonKey.MANAGED_BY))) {
-      if (userMap.containsKey("JsonKey.EMAIL")) {
-        emailVerified = true;
-      } else if (userMap.containsKey("JsonKey.PHONE")) {
-        phoneVerified = true;
-      }
     }
     userBooleanMap.put(JsonKey.EMAIL_VERIFIED, emailVerified);
     userBooleanMap.put(JsonKey.PHONE_VERIFIED, phoneVerified);
