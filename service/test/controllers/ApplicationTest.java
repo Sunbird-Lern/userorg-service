@@ -3,13 +3,11 @@ package controllers;
 import static org.junit.Assert.assertEquals;
 
 import modules.OnRequestHandler;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
@@ -25,14 +23,6 @@ public class ApplicationTest {
     String apiPath = "/v1/learner/getenrolledcoures";
     String version = BaseController.getApiVersion(apiPath);
     assertEquals("v1", version);
-  }
-
-  @Test
-  public void testCreateResponseParamObjSuccess() {
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
-    code.setResponseCode(ResponseCode.OK.getResponseCode());
-    ResponseParams params = BaseController.createResponseParamObj(code);
-    assertEquals(ResponseCode.success.name(), params.getStatus());
   }
 
   @Test
@@ -52,14 +42,6 @@ public class ApplicationTest {
     Response response = new Response();
     Result result = BaseController.createSuccessResponse(null, response);
     assertEquals(ResponseCode.OK.getResponseCode(), result.status());
-  }
-
-  @Test
-  public void testCreateResponseParamObjFailure() {
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
-    code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
-    ResponseParams params = BaseController.createResponseParamObj(code);
-    assertEquals(ResponseCode.authTokenRequired.name(), params.getStatus());
   }
 
   @Test(expected = RuntimeException.class)

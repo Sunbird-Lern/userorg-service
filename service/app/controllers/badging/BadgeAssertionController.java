@@ -4,19 +4,17 @@ package controllers.badging;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.badging.validator.BadgeAssertionValidator;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.BadgingActorOperations;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * This controller will handle all api related to badge assertions. issue badge, revoke badge,get
@@ -43,7 +41,7 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -69,7 +67,7 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgingActorOperations.GET_BADGE_ASSERTION.getValue(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -93,7 +91,7 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgingActorOperations.GET_BADGE_ASSERTION_LIST.getValue(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -118,7 +116,7 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgingActorOperations.REVOKE_BADGE.getValue(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
