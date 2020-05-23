@@ -181,6 +181,7 @@ public class UserManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
     Map<String, Object> targetObject = null;
+    boolean resetPasswordLink = false;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     actorMessage.toLower();
     Util.getUserProfileConfig(systemSettingActorRef);
@@ -189,17 +190,18 @@ public class UserManagementActor extends BaseActor {
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
-    if (!isPrivate) {
-      if (StringUtils.isNotBlank(callerId)) {
-        userService.validateUploader(actorMessage);
-      } else {
-        userService.validateUserId(actorMessage, null);
-      }
-    }
     Map<String, Object> userMap = actorMessage.getRequest();
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    if (!isPrivate) {
+      if (StringUtils.isNotBlank(callerId)) {
+        userService.validateUploader(actorMessage);
+      } else {
+        userService.validateUserId(actorMessage, managedById);
+      }
+    }
     validateUserFrameworkData(userMap, userDbRecord);
     validateUserTypeForUpdate(userMap);
     User user = mapper.convertValue(userMap, User.class);
@@ -236,6 +238,13 @@ public class UserManagementActor extends BaseActor {
     Map<String, Boolean> userBooleanMap = updatedUserFlagsMap(userMap, userDbRecord);
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
+    //As of now disallowing updating manageble user's phone/email, will le allowed in next release
+    if (StringUtils.isNotEmpty(managedById)
+            && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
+        || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.
+      managedByEmailPhoneUpdateError);
+    }
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap);
