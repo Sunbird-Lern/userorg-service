@@ -12,7 +12,7 @@ public interface UserService {
 
   User getUserById(String userId);
 
-  void validateUserId(Request request);
+  void validateUserId(Request request, String managedById);
 
   void validateUploader(Request request);
 

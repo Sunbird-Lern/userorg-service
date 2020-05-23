@@ -18,12 +18,8 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.Slug;
-import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
@@ -98,11 +94,14 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void validateUserId(Request request) {
+  public void validateUserId(Request request, String managedById) {
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
     String userId = userExtIdentityDao.getUserId(request);
-
-    if ((!StringUtils.isBlank(userId)) && (!userId.equals(ctxtUserId))) {
+    ProjectLogger.log(
+      "validateUserId :: ctxtUserId: " + ctxtUserId + "userId: " + userId,
+      LoggerEnum.INFO);
+    if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
+        || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
