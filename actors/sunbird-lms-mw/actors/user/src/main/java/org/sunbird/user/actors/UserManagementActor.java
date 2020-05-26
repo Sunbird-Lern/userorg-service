@@ -162,6 +162,8 @@ public class UserManagementActor extends BaseActor {
       if (!(StringUtils.isNotBlank(managedBy))) {
         userService.validateUserId(actorMessage, managedBy);
       }
+      //If managedUser limit is set, validate total number of managed users against it
+      UserUtil.validateManagedUserLimit(managedBy);
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy);
   }
