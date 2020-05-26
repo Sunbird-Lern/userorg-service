@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
     String userId = userExtIdentityDao.getUserId(request);
     ProjectLogger.log(
-      "validateUserId :: ctxtUserId: " + ctxtUserId + "userId: " + userId,
+      "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
     if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
         || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
