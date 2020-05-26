@@ -242,8 +242,10 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotEmpty(managedById)
             && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
         || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.
-      managedByEmailPhoneUpdateError);
+      /*ProjectCommonException.throwClientErrorException(ResponseCode.
+      managedByEmailPhoneUpdateError);*/
+      requestMap.put(JsonKey.MANAGED_BY, null);
+      resetPasswordLink = true;
     }
     Response response =
         cassandraOperation.updateRecord(
@@ -267,6 +269,10 @@ public class UserManagementActor extends BaseActor {
         JsonKey.ERRORS,
         ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
     sender().tell(response, self());
+    // Managed-users should get ResetPassword Link
+    if (resetPasswordLink) {
+      sendResetPasswordLink(requestMap);
+    }
     if (null != resp) {
       Map<String, Object> completeUserDetails = new HashMap<>(userDbRecord);
       completeUserDetails.putAll(requestMap);
@@ -1015,6 +1021,13 @@ public class UserManagementActor extends BaseActor {
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
+    tellToAnother(EmailAndSmsRequest);
+  }
+
+  private void sendResetPasswordLink(Map<String, Object> userMap) {
+    Request EmailAndSmsRequest = new Request();
+    EmailAndSmsRequest.getRequest().putAll(userMap);
+    EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);
   }
 
