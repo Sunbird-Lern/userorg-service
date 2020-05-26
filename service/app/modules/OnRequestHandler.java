@@ -126,7 +126,6 @@ public class OnRequestHandler implements ActionCreator {
       Map<String, Object> reqContext = new WeakHashMap<>();
       reqContext.put(JsonKey.SIGNUP_TYPE, signType);
       reqContext.put(JsonKey.REQUEST_SOURCE, source);
-      // set env and channel to the
       Optional<String> optionalChannel = request.header(HeaderParam.CHANNEL_ID.getName());
       String channel;
       if (optionalChannel.isPresent()) {
