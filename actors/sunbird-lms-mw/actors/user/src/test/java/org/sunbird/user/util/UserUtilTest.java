@@ -138,8 +138,6 @@ public class UserUtilTest {
 
   @Test(expected = ProjectCommonException.class)
   public void testValidateManagedUserLimit() {
-    Map<String, Object> userMap = new HashMap<String, Object>();
-    userMap.put(JsonKey.FIRST_NAME, "Test User");
     UserUtil.validateManagedUserLimit("102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
 
   }
