@@ -143,12 +143,9 @@ public class OnRequestHandler implements ActionCreator {
       reqContext.put(JsonKey.REQUEST_ID, requestId);
       reqContext.putAll(DataCacheHandler.getTelemetryPdata());
       Optional<String> optionalAppId = request.header(HeaderParam.X_APP_ID.getName());
-      // check if in request header X-app-id is coming then that need to
-      // be pass in search telemetry.
       if (optionalAppId.isPresent()) {
         reqContext.put(JsonKey.APP_ID, optionalAppId.get());
       }
-      // checking device id in headers
       Optional<String> optionalDeviceId = request.header(HeaderParam.X_Device_ID.getName());
       if (optionalDeviceId.isPresent()) {
         reqContext.put(JsonKey.DEVICE_ID, optionalDeviceId.get());
