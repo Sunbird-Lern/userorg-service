@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
       "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
     if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
-        || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
+        || (StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
