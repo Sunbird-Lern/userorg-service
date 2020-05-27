@@ -1,5 +1,6 @@
 package org.sunbird.user.util;
 
+import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -8,7 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import akka.dispatch.Futures;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,9 +28,11 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.user.User;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, DataCacheHandler.class,
@@ -140,17 +146,5 @@ public class UserUtilTest {
     assertNotNull(userMap.get(JsonKey.STATUS));
     assertNotNull(userMap.get(JsonKey.ROLES));
   }
-
-  /*@Test
-  public void testValidateManagedByUser() {
-    Map<String, Object> managedByInfo = UserUtil.validateManagedByUser("102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
-    assertNotNull(managedByInfo);
-  }
-
-  @Test(expected = ProjectCommonException.class)
-  public void testValidateManagedUserLimit() {
-    UserUtil.validateManagedUserLimit("102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
-
-  }*/
 
 }

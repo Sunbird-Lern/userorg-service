@@ -18,6 +18,9 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.User;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
 
 public class UserManagementActorTest extends UserManagementActorTestBase {
@@ -366,6 +369,26 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         testScenario(
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithManagedUserLimit() {
+    Map<String, Object> reqMap = getUserOrgUpdateRequest(true);
+    getUpdateRequestWithDefaultFlags(reqMap);
+
+    Map<String, Object> req = getExternalIdMap();
+    req.put(JsonKey.MANAGED_BY, "ManagedBy");
+    List managedUserList = new ArrayList<User>();
+    while(managedUserList.size()<=30){
+      managedUserList.add(new User());
+    }
+    when(Util.searchUser(req)).thenReturn(managedUserList);
+    boolean result =
+            testScenario(
+                    getRequest(
+                            false, false, false, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4),
+                    ResponseCode.CLIENT_ERROR);
     assertTrue(result);
   }
 }
