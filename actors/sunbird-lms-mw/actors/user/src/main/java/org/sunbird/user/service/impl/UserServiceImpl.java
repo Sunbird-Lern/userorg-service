@@ -100,14 +100,20 @@ public class UserServiceImpl implements UserService {
     ProjectLogger.log(
       "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
-    if ((StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById)) ||
-      ((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))) {
+    if(StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById)) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
-          ResponseCode.unAuthorized.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
+        ResponseCode.unAuthorized.getErrorCode(),
+        ResponseCode.unAuthorized.getErrorMessage(),
+        ResponseCode.UNAUTHORIZED.getResponseCode());
+    } else if ((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId)) {
+      throw new ProjectCommonException(
+        ResponseCode.unAuthorized.getErrorCode(),
+        ResponseCode.unAuthorized.getErrorMessage(),
+        ResponseCode.UNAUTHORIZED.getResponseCode());
     }
   }
+  
+  
 
   @Override
   public void syncUserProfile(
