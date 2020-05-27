@@ -14,7 +14,9 @@ import akka.dispatch.Futures;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -151,8 +153,9 @@ public class UserUtilTest {
     assertNotNull(userMap.get(JsonKey.ROLES));
   }
 
-  @Test (expected = ProjectCommonException.class)
+  @Test
   public void testValidateManagedUserLimit() {
+
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
     List managedUserList = new ArrayList<User>();
@@ -160,7 +163,12 @@ public class UserUtilTest {
       managedUserList.add(new User());
     }
     when(Util.searchUser(req)).thenReturn(managedUserList);
-    UserUtil.validateManagedUserLimit("ManagedBy");
+    try {
+      UserUtil.validateManagedUserLimit("ManagedBy");
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());
+    }
 
   }
 }
