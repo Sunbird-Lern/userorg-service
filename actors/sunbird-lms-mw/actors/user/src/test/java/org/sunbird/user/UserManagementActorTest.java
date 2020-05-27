@@ -376,20 +376,11 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testCreateUserFailureWithManagedUserLimit() {
     Map<String, Object> reqMap = getUserOrgUpdateRequest(true);
     getUpdateRequestWithDefaultFlags(reqMap);
-
-    Map<String, Object> req = getExternalIdMap();
-    req.put(JsonKey.MANAGED_BY, "ManagedBy");
-    List managedUserList = new ArrayList<User>();
-    while(managedUserList.size()<=31){
-      managedUserList.add(new User());
-    }
-    System.out.println("managedUserList " + managedUserList.size());
-    when(Util.searchUser(req)).thenReturn(managedUserList);
     boolean result =
             testScenario(
                     getRequest(
                             false, false, false, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4),
-                    ResponseCode.CLIENT_ERROR);
+                    null);
     assertTrue(result);
   }
 }

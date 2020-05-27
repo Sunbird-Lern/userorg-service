@@ -31,13 +31,15 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, DataCacheHandler.class,
         EsClientFactory.class,
-        ElasticSearchRestHighImpl.class})
+        ElasticSearchRestHighImpl.class,
+        Util.class})
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
   private static Response response;
@@ -69,6 +71,8 @@ public class UserUtilTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+
+    PowerMockito.mockStatic(Util.class);
   }
 
   @Test
@@ -147,4 +151,16 @@ public class UserUtilTest {
     assertNotNull(userMap.get(JsonKey.ROLES));
   }
 
+  @Test (expected = ProjectCommonException.class)
+  public void testValidateManagedUserLimit() {
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.MANAGED_BY, "ManagedBy");
+    List managedUserList = new ArrayList<User>();
+    while(managedUserList.size()<=31){
+      managedUserList.add(new User());
+    }
+    when(Util.searchUser(req)).thenReturn(managedUserList);
+    UserUtil.validateManagedUserLimit("ManagedBy");
+
+  }
 }
