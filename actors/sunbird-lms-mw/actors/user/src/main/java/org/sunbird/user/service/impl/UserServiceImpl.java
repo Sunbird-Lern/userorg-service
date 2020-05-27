@@ -100,13 +100,6 @@ public class UserServiceImpl implements UserService {
     ProjectLogger.log(
       "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
-    if((StringUtils.isNotEmpty(managedById) || !StringUtils.isBlank(userId))
-      && (!userId.equals(ctxtUserId)) || !ctxtUserId.equals(managedById)) {
-        throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
-          ResponseCode.unAuthorized.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
-    }
     if((!StringUtils.isNotEmpty(managedById) && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) ||
       !ctxtUserId.equals(managedById)) {
       throw new ProjectCommonException(
