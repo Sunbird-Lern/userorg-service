@@ -380,9 +380,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Map<String, Object> req = getExternalIdMap();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
     List managedUserList = new ArrayList<User>();
-    while(managedUserList.size()<=30){
+    while(managedUserList.size()<=31){
       managedUserList.add(new User());
     }
+    System.out.println("managedUserList " + managedUserList.size());
     when(Util.searchUser(req)).thenReturn(managedUserList);
     boolean result =
             testScenario(
