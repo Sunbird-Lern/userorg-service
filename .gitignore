@@ -18,3 +18,7 @@ RUNNING_PID
 /.target/
 /bin/
 /logs
+**/.DS_Store
+**/dependency-reduced-pom.xml
+**/.iml
+

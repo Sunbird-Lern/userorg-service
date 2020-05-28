@@ -1,6 +1,5 @@
 package controllers.otp.validator;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,18 +21,19 @@ public class OtpRequestValidator extends BaseRequestValidator {
     validateTemplateId(otpRequest);
   }
 
- private void validateTemplateId(Request otpRequest) {
-   String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
-   if(StringUtils.isNotBlank(templateId) && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)) {
-    throw new ProjectCommonException(
-            ResponseCode.invalidIdentifier.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-   }
- }
+  private void validateTemplateId(Request otpRequest) {
+    String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
+    if (StringUtils.isNotBlank(templateId)
+        && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidIdentifier.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
 
- public void validateVerifyOtpRequest(Request otpRequest) {
+  public void validateVerifyOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, true);
   }
 
@@ -74,7 +74,12 @@ public class OtpRequestValidator extends BaseRequestValidator {
     List<String> allowedTypes =
         new ArrayList<String>(
             Arrays.asList(
-                JsonKey.EMAIL, JsonKey.PHONE, JsonKey.PREV_USED_EMAIL, JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE));
+                JsonKey.EMAIL,
+                JsonKey.PHONE,
+                JsonKey.PREV_USED_EMAIL,
+                JsonKey.PREV_USED_PHONE,
+                JsonKey.RECOVERY_EMAIL,
+                JsonKey.RECOVERY_PHONE));
     if (!allowedTypes.contains(type)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
@@ -87,7 +92,9 @@ public class OtpRequestValidator extends BaseRequestValidator {
                   JsonKey.EMAIL,
                   JsonKey.PHONE,
                   JsonKey.PREV_USED_EMAIL,
-                  JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
+                  JsonKey.PREV_USED_PHONE,
+                  JsonKey.RECOVERY_EMAIL,
+                  JsonKey.RECOVERY_PHONE)));
     }
   }
 }
