@@ -90,4 +90,5 @@ public class RateLimitServiceImpl implements RateLimitService {
   private List<Map<String, Object>> getRatesByKey(String key) {
     return rateLimitDao.getRateLimits(key);
   }
+
 }

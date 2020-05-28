@@ -2,11 +2,12 @@ package controllers.otp;
 
 import controllers.BaseController;
 import controllers.otp.validator.OtpRequestValidator;
-import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletionStage;
 
 public class OtpController extends BaseController {
 
@@ -19,7 +20,7 @@ public class OtpController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-        httpRequest);
+            httpRequest);
   }
 
   public CompletionStage<Result> verifyOTP(Http.Request httpRequest) {
@@ -31,6 +32,6 @@ public class OtpController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-        httpRequest);
+            httpRequest);
   }
 }

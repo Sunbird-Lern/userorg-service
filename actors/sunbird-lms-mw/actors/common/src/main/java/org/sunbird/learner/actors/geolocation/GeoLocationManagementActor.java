@@ -1,11 +1,5 @@
 package org.sunbird.learner.actors.geolocation;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
@@ -13,18 +7,16 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.TelemetryEnvKey;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.fcm.Notification;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /** Class for providing Geo Location for Organisation Created by arvind on 31/10/17. */
 @ActorConfig(
@@ -39,15 +31,13 @@ import org.sunbird.telemetry.util.TelemetryUtil;
   asyncTasks = {}
 )
 public class GeoLocationManagementActor extends BaseActor {
-
   private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
   private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    ExecutionContext.setRequestId(request.getRequestId());
     Util.initializeContext(request, TelemetryEnvKey.GEO_LOCATION);
     if (request.getOperation().equalsIgnoreCase(ActorOperations.CREATE_GEO_LOCATION.getValue())) {
       createGeoLocation(request);
@@ -80,7 +70,6 @@ public class GeoLocationManagementActor extends BaseActor {
     List<Map<String, Object>> result = new ArrayList<>();
     List<String> dbIdList = new ArrayList<>();
     Map<String, Object> responseMap = null;
-
     Response response =
         cassandraOperation.getRecordsByProperty(
             geoLocationDbInfo.getKeySpace(),
@@ -166,7 +155,6 @@ public class GeoLocationManagementActor extends BaseActor {
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
     cassandraOperation.deleteRecord(
         geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId);
     finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -175,7 +163,7 @@ public class GeoLocationManagementActor extends BaseActor {
     targetObject =
         TelemetryUtil.generateTargetObject(locationId, JsonKey.LOCATION, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(
-        actorMessage.getRequest(), targetObject, correlatedObject);
+        actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /**
@@ -203,7 +191,6 @@ public class GeoLocationManagementActor extends BaseActor {
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
     Response response1 =
         cassandraOperation.getRecordById(
             geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId);
@@ -238,7 +225,7 @@ public class GeoLocationManagementActor extends BaseActor {
     targetObject =
         TelemetryUtil.generateTargetObject(locationId, JsonKey.LOCATION, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
-        actorMessage.getRequest(), targetObject, correlatedObject);
+        actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /**
@@ -259,9 +246,7 @@ public class GeoLocationManagementActor extends BaseActor {
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
     if (type.equalsIgnoreCase(JsonKey.ORGANISATION)) {
-
       Response response1 =
           cassandraOperation.getRecordsByProperty(
               geoLocationDbInfo.getKeySpace(),
@@ -298,9 +283,7 @@ public class GeoLocationManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void createGeoLocation(Request actorMessage) {
-
     ProjectLogger.log("GeoLocationManagementActor-createGeoLocation called");
-
     // object of telemetry event...
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
@@ -372,7 +355,7 @@ public class GeoLocationManagementActor extends BaseActor {
       TelemetryUtil.generateCorrelatedObject(id, JsonKey.LOCATION, null, correlatedObject);
       TelemetryUtil.generateCorrelatedObject(rootOrgId, JsonKey.ROOT_ORG, null, correlatedObject);
       TelemetryUtil.telemetryProcessingCall(
-          actorMessage.getRequest(), targetObject, correlatedObject);
+          actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
     }
     finalResponse.getResult().put(JsonKey.RESPONSE, responseList);
     sender().tell(finalResponse, self());

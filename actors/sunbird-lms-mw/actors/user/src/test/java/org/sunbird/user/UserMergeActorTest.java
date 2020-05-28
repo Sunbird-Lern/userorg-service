@@ -41,12 +41,11 @@ import org.sunbird.user.actors.UserMergeActor;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  SSOServiceFactory.class,
-  DataCacheHandler.class,
-  BaseActor.class,
+        SSOServiceFactory.class,
+        DataCacheHandler.class,
+        BaseActor.class,
   UserServiceImpl.class,
   UserDaoImpl.class,
   ServiceFactory.class,
@@ -95,12 +94,10 @@ public class UserMergeActorTest {
 
   @Test
   public void testMergeUserIsAlreadyDeleted() {
-    when(userService.getUserById(Mockito.anyString()))
-        .thenReturn(getUserDetails(true))
-        .thenReturn(getUserDetails(true));
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUserDetails(true)).thenReturn(getUserDetails(true));
     when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(Mockito.anyString(),Mockito.anyString())).thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result =
         testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.invalidIdentifier);
@@ -109,19 +106,17 @@ public class UserMergeActorTest {
 
   @Test
   public void testValidMergeUser() throws Exception {
-    when(userService.getUserById(Mockito.anyString()))
-        .thenReturn(getUserDetails(false))
-        .thenReturn(getUserDetails(false));
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUserDetails(false)).thenReturn(getUserDetails(false));
     when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(Mockito.anyString(),Mockito.anyString())).thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
     assertTrue(result);
   }
 
   private Map<String, String> configSettingsMap() {
-    Map<String, String> configMap = new HashMap<>();
+    Map<String, String> configMap =  new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "anyOrgId");
     return configMap;
   }
@@ -134,7 +129,7 @@ public class UserMergeActorTest {
 
   private User getUserDetails(boolean b) {
     User user = new User();
-    if (userCounter == 0) {
+    if(userCounter == 0) {
       user.setIsDeleted(b);
       user.setRootOrgId("anyOrgId");
     } else {
@@ -172,7 +167,7 @@ public class UserMergeActorTest {
     reqMap.put(JsonKey.TO_ACCOUNT_ID, "anyUserId");
     header.put(JsonKey.X_AUTHENTICATED_USER_TOKEN, authToken);
     header.put(JsonKey.X_SOURCE_USER_TOKEN, authToken);
-    contextMap.put("header", header);
+    contextMap.put("header",header);
     reqObj.setRequest(reqMap);
     reqObj.setContext(contextMap);
     reqObj.setOperation(actorOperation.getValue());

@@ -3,18 +3,6 @@ package org.sunbird.learner.actors.bulkupload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -35,18 +23,20 @@ import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.learner.util.Util;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.util.*;
+
 /**
  * Actor contains the common functionality for bulk upload.
  *
  * @author arvind.
  */
 public abstract class BaseBulkUploadActor extends BaseActor {
-
-  protected BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
-  protected BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
-  protected Integer DEFAULT_BATCH_SIZE = 10;
-  protected Integer CASSANDRA_BATCH_SIZE = getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
-  protected ObjectMapper mapper = new ObjectMapper();
 
   public void validateBulkUploadFields(
       String[] csvHeaderLine, String[] allowedFields, Boolean allFieldsMandatory) {
@@ -169,6 +159,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       }
     } catch (Exception ex) {
       ProjectLogger.log("Exception occurred while processing csv file : ", ex);
+      BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
       BulkUploadProcess bulkUploadProcess =
           getBulkUploadProcessForFailedStatus(processId, BulkProcessStatus.FAILED.getValue(), ex);
       bulkUploadDao.update(bulkUploadProcess);
@@ -224,6 +215,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   }
 
   protected Integer getBatchSize(String key) {
+    Integer DEFAULT_BATCH_SIZE = 10;
     Integer batchSize = DEFAULT_BATCH_SIZE;
     try {
       batchSize = Integer.parseInt(ProjectUtil.getConfigValue(key));
@@ -254,6 +246,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     String[] csvColumns = null;
     Map<String, Object> record = new HashMap<>();
     List<BulkUploadProcessTask> records = new ArrayList<>();
+    ObjectMapper mapper = new ObjectMapper();
     try {
       csvReader = getCsvReader(fileByteArray, ',', '"', 0);
       while ((csvLine = csvReader.readNext()) != null) {
@@ -263,7 +256,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
         if (sequence == 0) {
           csvColumns = trimColumnAttributes(csvLine);
         } else {
-          for (int j = 0; j < csvColumns.length && j < csvLine.length; j++) {
+          for (int j = 0; j < csvColumns.length &&  j < csvLine.length; j++) {
             String value = (csvLine[j].trim().length() == 0 ? null : csvLine[j].trim());
             String coulumn = toLowerCase ? csvColumns[j].toLowerCase() : csvColumns[j];
             if (csvColumnMap != null && csvColumnMap.get(coulumn) != null) {
@@ -281,7 +274,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
           tasks.setCreatedOn(new Timestamp(System.currentTimeMillis()));
           records.add(tasks);
           count++;
-          if (count >= CASSANDRA_BATCH_SIZE) {
+          if (count >= getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE)) {
             performBatchInsert(records);
             records.clear();
             count = 0;
@@ -296,6 +289,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
         records.clear();
       }
     } catch (Exception ex) {
+      BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
       BulkUploadProcess bulkUploadProcess =
           getBulkUploadProcessForFailedStatus(processId, BulkProcessStatus.FAILED.getValue(), ex);
       bulkUploadDao.update(bulkUploadProcess);
@@ -308,6 +302,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   }
 
   protected void performBatchInsert(List<BulkUploadProcessTask> records) {
+    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
     try {
       bulkUploadProcessTaskDao.insertBatchRecord(records);
     } catch (Exception ex) {
@@ -327,6 +322,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   }
 
   protected void performBatchUpdate(List<BulkUploadProcessTask> records) {
+    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
     try {
       bulkUploadProcessTaskDao.updateBatchRecord(records);
     } catch (Exception ex) {
@@ -433,6 +429,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     Response response = new Response();
     response.getResult().put(JsonKey.PROCESS_ID, processId);
     BulkUploadProcess bulkUploadProcess = getBulkUploadProcess(processId, objectType, createdBy, 0);
+    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
     Response res = bulkUploadDao.create(bulkUploadProcess);
     if (((String) res.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       sender().tell(response, self());
@@ -456,7 +453,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       throws IOException {
     ProjectLogger.log(
         "BaseBulkUploadActor: processBulkUpload called with operation = " + operation);
-
+    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
     bulkUploadProcess.setTaskCount(recordCount);
     bulkUploadDao.update(bulkUploadProcess);
 

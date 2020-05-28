@@ -106,16 +106,13 @@ public class HttpUtilTest extends BaseHttpTest {
   public void testGetHeaderWithInput() throws Exception {
     PowerMockito.mockStatic(KeycloakRequiredActionLinkUtil.class);
     when(KeycloakRequiredActionLinkUtil.getAdminAccessToken()).thenReturn("testAuthToken");
-    Map<String, String> input =
-        new HashMap<String, String>() {
-          {
-            put("x-channel-id", "test-channel");
-            put("x-device-id", "test-device");
-          }
-        };
+    Map<String, String> input = new HashMap<String, String>(){{
+      put("x-channel-id", "test-channel");
+      put("x-device-id", "test-device");
+    }};
     Map<String, String> headers = HttpUtil.getHeader(input);
     assertTrue(!headers.isEmpty());
-    assertTrue(headers.size() == 4);
+    assertTrue(headers.size()==4);
     assertTrue(headers.containsKey("x-authenticated-user-token"));
     assertTrue(headers.containsKey("Content-Type"));
     assertTrue(headers.containsKey("x-channel-id"));
@@ -128,7 +125,7 @@ public class HttpUtilTest extends BaseHttpTest {
     when(KeycloakRequiredActionLinkUtil.getAdminAccessToken()).thenReturn("testAuthToken");
     Map<String, String> headers = HttpUtil.getHeader(null);
     assertTrue(!headers.isEmpty());
-    assertTrue(headers.size() == 2);
+    assertTrue(headers.size()==2);
     assertTrue(headers.containsKey("x-authenticated-user-token"));
     assertTrue(headers.containsKey("Content-Type"));
   }

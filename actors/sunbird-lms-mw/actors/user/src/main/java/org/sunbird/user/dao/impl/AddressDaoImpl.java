@@ -24,29 +24,27 @@ public class AddressDaoImpl implements AddressDao {
 
   @Override
   public void createAddress(Map<String, Object> address) {
-    getCassandraOperation()
-        .insertRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
+    getCassandraOperation().insertRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
   }
 
   @Override
   public void updateAddress(Map<String, Object> address) {
-    getCassandraOperation()
-        .updateRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
+    getCassandraOperation().updateRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
   }
 
   @Override
   public void deleteAddress(String addressId) {
-    getCassandraOperation()
-        .deleteRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId);
+    getCassandraOperation().deleteRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId);
   }
 
   @Override
   public Response upsertAddress(Map<String, Object> address) {
-    return getCassandraOperation()
-        .upsertRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
+    return getCassandraOperation().upsertRecord(
+        addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
   }
 
-  private CassandraOperation getCassandraOperation() {
+  private CassandraOperation getCassandraOperation()
+  {
     return ServiceFactory.getInstance();
   }
 }

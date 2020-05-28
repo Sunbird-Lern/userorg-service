@@ -18,7 +18,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.FeedUtil;
 import org.sunbird.helper.ServiceFactory;
@@ -90,7 +89,7 @@ public class ShadowUserProcessor {
     if (!((String) esUser.get(JsonKey.FIRST_NAME)).equalsIgnoreCase(shadowUser.getName())
         || ((int) esUser.get(JsonKey.STATUS)) != shadowUser.getUserStatus()) {
       updateUserInUserTable(flagsValue, shadowUser.getUserId(), rootOrgId, shadowUser);
-      if (shadowUser.getUserStatus() == ProjectUtil.Status.INACTIVE.getValue()) {
+      if(shadowUser.getUserStatus()==ProjectUtil.Status.INACTIVE.getValue()){
         deactivateUserFromKC(userId);
       }
     }
@@ -103,23 +102,15 @@ public class ShadowUserProcessor {
     updateUserInShadowDb(userId, shadowUser, ClaimStatus.CLAIMED.getValue(), null);
   }
 
-  private void deactivateUserFromKC(String userId) {
-    Map<String, Object> userMap = new HashMap<>();
-    userMap.put(JsonKey.USER_ID, userId);
+  private void deactivateUserFromKC(String userId){
+    Map<String,Object>userMap=new HashMap<>();
+    userMap.put(JsonKey.USER_ID,userId);
     try {
-      ProjectLogger.log(
-          "ShadowUserProcessor:processClaimedUse:request Got to deactivate user account from KC:"
-              + userMap,
-          LoggerEnum.INFO.name());
+      ProjectLogger.log("ShadowUserProcessor:processClaimedUse:request Got to deactivate user account from KC:" + userMap, LoggerEnum.INFO.name());
       String status = keyCloakService.deactivateUser(userMap);
-      ProjectLogger.log(
-          "ShadowUserProcessor:processClaimedUse:deactivate user account from KC:" + status,
-          LoggerEnum.INFO.name());
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "ShadowUserProcessor:processClaimedUse:Error occurred while deactivate user account from KC:"
-              + userId,
-          LoggerEnum.ERROR.name());
+      ProjectLogger.log("ShadowUserProcessor:processClaimedUse:deactivate user account from KC:" + status, LoggerEnum.INFO.name());
+    }catch (Exception e){
+      ProjectLogger.log("ShadowUserProcessor:processClaimedUse:Error occurred while deactivate user account from KC:" + userId, LoggerEnum.ERROR.name());
     }
   }
 
@@ -260,8 +251,8 @@ public class ShadowUserProcessor {
   }
 
   private void generateTelemetry(String userId, String rootOrgId, ShadowUser shadowUser) {
-    ExecutionContext.getCurrent()
-        .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
+   // ExecutionContext.getCurrent()
+    //    .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
     ProjectLogger.log(
         "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString(),
         LoggerEnum.INFO.name());
@@ -269,14 +260,14 @@ public class ShadowUserProcessor {
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", rootOrgId);
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    //ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
     TelemetryUtil.generateCorrelatedObject(
         shadowUser.getProcessId(), JsonKey.PROCESS_ID, null, correlatedObject);
     targetObject =
         TelemetryUtil.generateTargetObject(
             userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
-    TelemetryUtil.telemetryProcessingCall(
-        mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
+    //TelemetryUtil.telemetryProcessingCall(
+    //    mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
   }
 
   /**
@@ -675,4 +666,7 @@ public class ShadowUserProcessor {
     }
     return filterShadowUser;
   }
+
+
+
 }

@@ -1,10 +1,6 @@
 package org.sunbird.actor.background;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,16 +11,17 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** @author Amit Kumar */
 @ActorConfig(
@@ -79,7 +76,6 @@ public class ChannelRegistrationActor extends BaseActor {
     map.put(JsonKey.ID, JsonKey.CHANNEL_REG_STATUS_ID);
     map.put(JsonKey.FIELD, JsonKey.CHANNEL_REG_STATUS);
     map.put(JsonKey.VALUE, String.valueOf(bool));
-
     Response response = cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map);
     ProjectLogger.log(
         "Upsert operation result for channel reg status =  "

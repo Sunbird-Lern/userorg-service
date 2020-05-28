@@ -1,20 +1,20 @@
 package org.sunbird.user.actors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
@@ -27,7 +27,6 @@ public class UserFeedActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     if (ActorOperations.GET_USER_FEED_BY_ID.getValue().equalsIgnoreCase(operation)) {
       ProjectLogger.log(

@@ -44,7 +44,6 @@ public class RequestRouter extends BaseRouter {
 
   @Override
   public void route(Request request) throws Throwable {
-    org.sunbird.common.request.ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     ActorRef ref = routingMap.get(getKey(self().path().name(), operation));
     if (null != ref) {

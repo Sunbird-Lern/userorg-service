@@ -10,7 +10,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
@@ -165,10 +164,7 @@ public class ProjectLogger {
     Map<String, Object> eks = new HashMap<String, Object>();
     eks.put(JsonKey.LEVEL, logLevel);
     eks.put(JsonKey.MESSAGE, message);
-    String msgId = ExecutionContext.getRequestId();
-    if (null != msgId) {
-      eks.put(JsonKey.REQUEST_MESSAGE_ID, msgId);
-    }
+
     if (null != data) {
       eks.put(JsonKey.DATA, data);
     }

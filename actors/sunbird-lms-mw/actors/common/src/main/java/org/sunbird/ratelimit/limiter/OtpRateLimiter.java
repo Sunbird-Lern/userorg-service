@@ -3,7 +3,9 @@ package org.sunbird.ratelimit.limiter;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.ProjectUtil;
 
-/** Defines various rate limits for OTP functionality with rate and corresponding TTL. */
+/**
+ * Defines various rate limits for OTP functionality with rate and corresponding TTL.
+ */
 public enum OtpRateLimiter implements RateLimiter {
   MINUTE("sunbird_otp_minute_rate_limit", 60),
   HOUR("sunbird_otp_hour_rate_limit", 3600),
@@ -32,4 +34,5 @@ public enum OtpRateLimiter implements RateLimiter {
   public int getTTL() {
     return ttl;
   }
+
 }

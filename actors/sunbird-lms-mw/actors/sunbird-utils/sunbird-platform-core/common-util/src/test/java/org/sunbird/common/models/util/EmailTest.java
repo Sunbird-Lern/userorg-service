@@ -1,7 +1,6 @@
 /** */
 package org.sunbird.common.models.util;
 
-import javax.mail.PasswordAuthentication;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -9,6 +8,8 @@ import org.junit.Test;
 import org.jvnet.mock_javamail.Mailbox;
 import org.sunbird.common.models.util.mail.GMailAuthenticator;
 import org.sunbird.common.models.util.mail.SendMail;
+
+import javax.mail.PasswordAuthentication;
 
 /** @author Manzarul */
 public class EmailTest {
@@ -33,6 +34,7 @@ public class EmailTest {
     PasswordAuthentication authentication = authenticator.getPasswordAuthentication();
     Assert.assertEquals("test", authentication.getPassword());
   }
+
 
   @Test
   public void initialiseFromPropertyTest() {

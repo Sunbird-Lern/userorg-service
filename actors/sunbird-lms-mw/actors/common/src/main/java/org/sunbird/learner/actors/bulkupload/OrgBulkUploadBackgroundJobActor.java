@@ -5,12 +5,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.location.LocationClient;
@@ -19,14 +14,7 @@ import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
@@ -35,11 +23,19 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @ActorConfig(
   tasks = {},
   asyncTasks = {"orgBulkUploadBackground"}
 )
 public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
+
   private OrganisationClient orgClient = new OrganisationClientImpl();
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
 
@@ -47,7 +43,6 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);
-    ExecutionContext.setRequestId(request.getRequestId());
     if (operation.equalsIgnoreCase("orgBulkUploadBackground")) {
       Map<String, String> outputColumns =
           systemSettingClient.getSystemSettingByFieldAndKey(
@@ -104,6 +99,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       ActorRef locationActor) {
     ProjectLogger.log("OrgBulkUploadBackgroundJobActor: processOrg called", LoggerEnum.INFO);
     String data = task.getData();
+    ObjectMapper mapper = new ObjectMapper();
     try {
       Map<String, Object> orgMap = mapper.readValue(data, Map.class);
       Object mandatoryColumnsObject =
@@ -155,6 +151,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       ActorRef locationActor,
       List<String> locationCodes)
       throws IOException, JsonParseException, JsonMappingException {
+    ObjectMapper mapper = new ObjectMapper();
     if (ProjectUtil.BulkProcessStatus.COMPLETED.getValue() == task.getStatus()) {
       List<String> locationNames = new ArrayList<>();
       for (String locationCode : locationCodes) {
@@ -195,6 +192,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   private void callCreateOrg(
       Organisation org, BulkUploadProcessTask task, List<String> locationCodes)
       throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     String orgId;
@@ -228,6 +226,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   private void callUpdateOrg(
       Organisation org, BulkUploadProcessTask task, List<String> locationCodes)
       throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     try {

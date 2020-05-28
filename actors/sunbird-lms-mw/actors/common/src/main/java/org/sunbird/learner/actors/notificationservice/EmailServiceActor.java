@@ -1,12 +1,5 @@
 package org.sunbird.learner.actors.notificationservice;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,6 +31,9 @@ import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import scala.concurrent.Future;
 
+import java.text.MessageFormat;
+import java.util.*;
+
 @ActorConfig(
   tasks = {"emailService"},
   asyncTasks = {"emailService"}
@@ -46,14 +42,12 @@ public class EmailServiceActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
+            org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+                    null);
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
+            org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+                    null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private static final String NOTIFICATION_MODE = "sms";
-
   @Override
   public void onReceive(Request request) throws Throwable {
     if (request.getOperation().equalsIgnoreCase(BackgroundOperations.emailService.name())) {
@@ -78,9 +72,8 @@ public class EmailServiceActor extends BaseActor {
     if (CollectionUtils.isEmpty(userIds)) {
       userIds = new ArrayList<>();
     }
-
     if (request.get(JsonKey.MODE) != null
-        && NOTIFICATION_MODE.equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
+        && "sms".equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
       List<String> phones = (List<String>) request.get(JsonKey.RECIPIENT_PHONES);
       if (CollectionUtils.isNotEmpty(phones)) {
         Iterator<String> itr = phones.iterator();
@@ -312,7 +305,7 @@ public class EmailServiceActor extends BaseActor {
       Map<String, Object> esResult = Collections.emptyMap();
       try {
         Future<Map<String, Object>> esResultF =
-            esService.search(
+                esService.search(
                 ElasticSearchHelper.createSearchDTO(recipientSearchQuery),
                 EsType.user.getTypeName());
         esResult = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);

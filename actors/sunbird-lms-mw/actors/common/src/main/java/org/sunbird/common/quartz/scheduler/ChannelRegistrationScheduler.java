@@ -22,21 +22,15 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 public class ChannelRegistrationScheduler extends BaseJob {
 
   @Override
-  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+  public void execute(JobExecutionContext ctx) {
     ProjectLogger.log(
         "ChannelRegistrationScheduler:execute: Running channel registration Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
             + ctx.getJobDetail().toString(),
         LoggerEnum.INFO.name());
-
-    Util.initializeContextForSchedulerJob(
-        JsonKey.SYSTEM, ctx.getFireInstanceId(), JsonKey.SCHEDULER_JOB);
-    Map<String, Object> logInfo =
-        genarateLogInfo(JsonKey.SYSTEM, ctx.getJobDetail().getDescription());
     Request request = new Request();
     request.setOperation(BackgroundOperations.registerChannel.name());
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.getRecordById(
             JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.CHANNEL_REG_STATUS_ID);
@@ -59,18 +53,5 @@ public class ChannelRegistrationScheduler extends BaseJob {
               + "entry for CHANNEL_REG_STATUS_ID (003) is null.");
       tellToBGRouter(request);
     }
-    TelemetryUtil.telemetryProcessingCall(logInfo, null, null, TelemetryEvents.LOG.getName());
-  }
-
-  private Map<String, Object> genarateLogInfo(String logType, String message) {
-
-    Map<String, Object> info = new HashMap<>();
-    info.put(JsonKey.LOG_TYPE, logType);
-    long startTime = System.currentTimeMillis();
-    info.put(JsonKey.START_TIME, startTime);
-    info.put(JsonKey.MESSAGE, message);
-    info.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
-
-    return info;
   }
 }

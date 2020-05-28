@@ -12,8 +12,8 @@ import org.sunbird.common.services.ProfileCompletenessService;
 import org.sunbird.common.services.impl.ProfileCompletenessFactory;
 
 /**
- * This test class have the assumption that each profile attribute have the same weighted. for more
- * details look at profilecompleteness.properties.
+ * This test class have the assumption that each profile attribute have the same weighted.
+ * for more details look at profilecompleteness.properties.
  *
  * @author Manzarul
  */
@@ -56,9 +56,7 @@ public class ProfileCompletenessTest {
     requestMap.put(JsonKey.JOB_PROFILE, jobList);
     Map<String, Object> response = service.computeProfile(requestMap);
     int val = (int) response.get(JsonKey.COMPLETENESS);
-    if (val > 100) {
-      val = 100;
-    }
+    if(val>100) {val =100;}
     Assert.assertEquals(100, val);
   }
 

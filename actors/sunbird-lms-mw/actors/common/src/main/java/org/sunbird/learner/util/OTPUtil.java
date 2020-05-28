@@ -134,7 +134,7 @@ public final class OTPUtil {
     }
     String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
     String emailSubject = null;
-    if (SendOTPActor.RESET_PASSWORD.equalsIgnoreCase(otpType)) {
+    if ("resetPassword".equalsIgnoreCase(otpType)) {
       emailSubject = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
     } else {
       // default fallback for all other otpType

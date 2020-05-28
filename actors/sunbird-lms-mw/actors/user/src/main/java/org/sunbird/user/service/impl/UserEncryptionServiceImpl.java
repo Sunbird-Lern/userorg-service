@@ -98,4 +98,5 @@ public class UserEncryptionServiceImpl implements UserEncryptionService {
     }
     return decryptedFields;
   }
+
 }

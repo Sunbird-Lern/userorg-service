@@ -33,7 +33,6 @@ public class BackgroundServiceActorTest {
   @BeforeClass
   public static void setUp() {
 
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
     system = ActorSystem.create("system");
 
     Map<String, Object> locnMap = new HashMap<String, Object>();
@@ -49,7 +48,7 @@ public class BackgroundServiceActorTest {
     locnMap.put(JsonKey.ID, locnId);
     locnMap.put(JsonKey.USER_COUNT, 0);
     cassandraOperation.updateRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
     List<Object> locnIdList = new ArrayList<>();
     locnIdList.add(locnId);
 

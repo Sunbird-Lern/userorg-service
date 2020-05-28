@@ -1,3 +1,4 @@
+/*
 package org.sunbird.cassandra;
 
 import static org.junit.Assert.assertEquals;
@@ -39,3 +40,4 @@ public class CassandraTest {
     connectionManager.registerShutDownHook();
   }
 }
+*/

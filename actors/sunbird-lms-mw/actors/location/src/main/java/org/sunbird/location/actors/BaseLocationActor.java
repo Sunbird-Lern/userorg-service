@@ -13,14 +13,14 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.telemetry.util.TelemetryLmaxWriter;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.telemetry.util.TelemetryWriter;
 
 /** @author Amit Kumar */
 public abstract class BaseLocationActor extends BaseActor {
 
   public void generateTelemetryForLocation(
-      String targetObjId, Map<String, Object> data, String operation) {
+      String targetObjId, Map<String, Object> data, String operation, Map<String,Object> context) {
     // object of telemetry event...
     try {
       Map<String, Object> targetObject = null;
@@ -35,16 +35,15 @@ public abstract class BaseLocationActor extends BaseActor {
             null,
             correlatedObject);
       }
-      TelemetryUtil.telemetryProcessingCall(data, targetObject, correlatedObject);
+      TelemetryUtil.telemetryProcessingCall(data, targetObject, correlatedObject,context);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }
   }
 
   public void generateSearchTelemetryEvent(
-      SearchDTO searchDto, String[] types, Map<String, Object> result) {
+      SearchDTO searchDto, String[] types, Map<String, Object> result, Map<String, Object> context) {
     try {
-      Map<String, Object> telemetryContext = TelemetryUtil.getTelemetryContext();
       Map<String, Object> params = new HashMap<>();
       params.put(JsonKey.QUERY, searchDto.getQuery());
       params.put(JsonKey.FILTERS, searchDto.getAdditionalProperties().get(JsonKey.FILTERS));
@@ -54,8 +53,8 @@ public abstract class BaseLocationActor extends BaseActor {
       params.put(JsonKey.TYPE, String.join(",", types));
 
       Request request = new Request();
-      request.setRequest(telemetryRequestForSearch(telemetryContext, params));
-      TelemetryLmaxWriter.getInstance().submitMessage(request);
+      request.setRequest(telemetryRequestForSearch(context, params));
+      TelemetryWriter.write(request);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }

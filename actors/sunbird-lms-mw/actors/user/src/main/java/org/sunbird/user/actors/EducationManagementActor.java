@@ -216,7 +216,7 @@ public class EducationManagementActor extends BaseActor {
     educationDetailsMap.put(JsonKey.CREATED_BY, createdBy);
     educationDetailsMap.put(JsonKey.USER_ID, requestMap.get(JsonKey.ID));
     getEducationDao().createEducation(educationDetailsMap);
-    if (null != addrResponse) {
+    if(null!=addrResponse) {
       educationDetailsMap.put(JsonKey.ADDRESS, addrResponse.get(JsonKey.ADDRESS));
     }
     return educationDetailsMap;
@@ -273,11 +273,10 @@ public class EducationManagementActor extends BaseActor {
     return addrResponse;
   }
 
-  private EducationDao getEducationDao() {
+  private EducationDao getEducationDao(){
     return EducationDaoImpl.getInstance();
   }
-
-  private AddressDao getAddressDao() {
+  private AddressDao getAddressDao(){
     return AddressDaoImpl.getInstance();
   }
 }

@@ -1,6 +1,5 @@
 package org.sunbird.learner.actors;
 
-import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -11,17 +10,15 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
 import scala.concurrent.Future;
+
+import java.util.*;
 
 /**
  * This class will handle all the background job.
@@ -45,14 +42,6 @@ import scala.concurrent.Future;
   }
 )
 public class BackgroundJobManager extends BaseActor {
-
-  private static Map<String, String> headerMap = new HashMap<>();
-  private static Util.DbInfo dbInfo = null;
-
-  static {
-    headerMap.put("content-type", "application/json");
-    headerMap.put("accept", "application/json");
-  }
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
@@ -328,7 +317,6 @@ public class BackgroundJobManager extends BaseActor {
      * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
      * service.computeProfile(data); data.putAll(responsemap); }
      */
-
     Future<String> responseF = esService.save(type, identifier, data);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     ProjectLogger.log(

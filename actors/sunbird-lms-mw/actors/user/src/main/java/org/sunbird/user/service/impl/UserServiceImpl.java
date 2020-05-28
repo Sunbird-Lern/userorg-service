@@ -265,11 +265,11 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(channel)) {
           SystemSettingClient client = SystemSettingClientImpl.getInstance();
           SystemSetting custodianOrgChannelSetting =
-              client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL);
-          if (custodianOrgChannelSetting != null
-              && StringUtils.isNotBlank(custodianOrgChannelSetting.getValue())) {
-            configSettingMap.put(
-                custodianOrgChannelSetting.getId(), custodianOrgChannelSetting.getValue());
+                  client.getSystemSettingByField(
+                          actorRef,
+                          JsonKey.CUSTODIAN_ORG_CHANNEL);
+          if (custodianOrgChannelSetting != null &&  StringUtils.isNotBlank(custodianOrgChannelSetting.getValue())) {
+            configSettingMap.put(custodianOrgChannelSetting.getId(), custodianOrgChannelSetting.getValue());
             channel = custodianOrgChannelSetting.getValue();
           }
         }

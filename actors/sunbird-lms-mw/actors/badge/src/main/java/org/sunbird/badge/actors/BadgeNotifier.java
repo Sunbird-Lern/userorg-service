@@ -1,7 +1,5 @@
 package org.sunbird.badge.actors;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -12,10 +10,12 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.Util;
+
+import java.util.Arrays;
+import java.util.List;
 
 /** @author Mahesh Kumar Gangula */
 @ActorConfig(
@@ -24,16 +24,11 @@ import org.sunbird.learner.util.Util;
 )
 public class BadgeNotifier extends BaseActor {
 
-  private static final String INVALID_BADGE_NOTIFICATION_REQUEST =
-      "INVALID_BADGE_NOTIFICATION_REQUEST";
-  private static final List<String> asyncTasks =
-      Arrays.asList("assignBadgeMessage", "revokeBadgeMessage");
-
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
-
+    List<String> asyncTasks =
+              Arrays.asList("assignBadgeMessage", "revokeBadgeMessage");
     String operation = request.getOperation();
     String objectType = (String) request.getRequest().get(JsonKey.OBJECT_TYPE);
     ProjectLogger.log(
@@ -52,6 +47,8 @@ public class BadgeNotifier extends BaseActor {
   private Response processBadge(String operation, String objectType, Request request)
       throws Exception {
     Response response;
+    String INVALID_BADGE_NOTIFICATION_REQUEST =
+              "INVALID_BADGE_NOTIFICATION_REQUEST";
     if (StringUtils.isBlank(objectType)) {
       response = invalidObjectType(INVALID_BADGE_NOTIFICATION_REQUEST, objectType);
     } else {

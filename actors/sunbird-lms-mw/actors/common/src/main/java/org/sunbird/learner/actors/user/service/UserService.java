@@ -22,7 +22,10 @@ public class UserService {
   public void checkKeyUniqueness(String key, String value, boolean isEncrypted) {
     if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
       ProjectLogger.log(
-          "UserService:checkKeyUniqueness: Key or value is null. key = " + key + " value= " + value,
+          "UserService:checkKeyUniqueness: Key or value is null. key = "
+              + key
+              + " value= "
+              + value,
           LoggerEnum.ERROR.name());
       return;
     }
@@ -38,9 +41,7 @@ public class UserService {
       }
     }
 
-    Response result =
-        getCassandraOperation()
-            .getRecordsByIndexedProperty(userDb.getKeySpace(), userDb.getTableName(), key, val);
+    Response result = getCassandraOperation().getRecordsByIndexedProperty(userDb.getKeySpace(), userDb.getTableName(), key, val);
 
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -56,12 +57,12 @@ public class UserService {
     }
   }
 
-  private CassandraOperation getCassandraOperation() {
+  private CassandraOperation getCassandraOperation(){
     return ServiceFactory.getInstance();
   }
 
-  private EncryptionService getEncryptionService() {
-    return org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-        .getEncryptionServiceInstance(null);
+  private EncryptionService getEncryptionService(){
+    return org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
   }
+
 }

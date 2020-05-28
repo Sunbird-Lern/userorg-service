@@ -1,18 +1,9 @@
 package org.sunbird.user;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -34,8 +25,22 @@ import org.sunbird.models.user.User;
 import org.sunbird.user.actors.CertificateActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UserServiceImpl.class, ServiceFactory.class})
+@PrepareForTest({
+        UserServiceImpl.class,
+        ServiceFactory.class
+
+})
 @PowerMockIgnore({"javax.management.*"})
 public class CertificateActorTest {
   public static CassandraOperationImpl cassandraOperationImpl;
@@ -51,35 +56,34 @@ public class CertificateActorTest {
     userServiceImpl = mock(UserServiceImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(UserServiceImpl.getInstance()).thenReturn(userServiceImpl);
+
+
   }
 
   @Test
   public void testAddCertificate() {
-    when(userServiceImpl.getUserById(Mockito.anyString()))
-        .thenReturn(getUserDetails(new User(), false));
+    when(userServiceImpl.getUserById(Mockito.anyString())).thenReturn(getUserDetails(new User(),false));
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getRecordsById(true));
+            .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-        .thenReturn(getRecordsById(true));
-    boolean result = testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, null), null);
+            .thenReturn(getRecordsById(true));
+    boolean result = testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE,null), null);
     assertTrue(result);
   }
 
   @Ignore
   @Test
   public void testAddReIssueCertificate() {
-    when(userServiceImpl.getUserById(Mockito.anyString()))
-        .thenReturn(getUserDetails(new User(), false));
+    when(userServiceImpl.getUserById(Mockito.anyString())).thenReturn(getUserDetails(new User(),false));
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getRecordsById(true));
+            .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-        .thenReturn(getRecordsById(true));
-    boolean result =
-        testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, "anyOldId"), null);
+            .thenReturn(getRecordsById(true));
+    boolean result = testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, "anyOldId"), null);
     assertTrue(result);
   }
 
@@ -87,9 +91,8 @@ public class CertificateActorTest {
   public void testValidateCertificate() {
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getValidRecordDetails(false, true));
-    boolean result =
-        testScenario(getValidateCertRequest(ActorOperations.VALIDATE_CERTIFICATE), null);
+            .thenReturn(getValidRecordDetails(false,true));
+    boolean result = testScenario(getValidateCertRequest(ActorOperations.VALIDATE_CERTIFICATE), null);
     assertTrue(result);
   }
 
@@ -97,11 +100,8 @@ public class CertificateActorTest {
   public void testInValidateCertificateAccessCode() {
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getValidRecordDetails(false, false));
-    boolean result =
-        testScenario(
-            getValidateCertRequest(ActorOperations.VALIDATE_CERTIFICATE),
-            ResponseCode.invalidParameter);
+            .thenReturn(getValidRecordDetails(false,false));
+    boolean result = testScenario(getValidateCertRequest(ActorOperations.VALIDATE_CERTIFICATE), ResponseCode.invalidParameter);
     assertTrue(result);
   }
 
@@ -110,9 +110,8 @@ public class CertificateActorTest {
   public void testMergeCertificate() {
     when(cassandraOperationImpl.getRecordsByProperty(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(getRecordsById(false));
-    boolean result =
-        testScenario(getMergeCertRequest(ActorOperations.MERGE_USER_CERTIFICATE), null);
+            .thenReturn(getRecordsById(false));
+    boolean result = testScenario(getMergeCertRequest(ActorOperations.MERGE_USER_CERTIFICATE), null);
     assertTrue(result);
   }
 
@@ -136,9 +135,9 @@ public class CertificateActorTest {
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+              probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+              || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
 
@@ -149,8 +148,8 @@ public class CertificateActorTest {
     reqMap.put(JsonKey.ACCESS_CODE, "anyAccessCode");
     reqMap.put(JsonKey.JSON_DATA, "anyJsonDate");
     reqMap.put(JsonKey.PDF_URL, "anyPdfUrl");
-    if (oldId != null) {
-      reqMap.put(JsonKey.OLD_ID, oldId);
+    if(oldId!=null) {
+      reqMap.put(JsonKey.OLD_ID,oldId);
     }
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
@@ -168,7 +167,8 @@ public class CertificateActorTest {
   }
 
   private User getUserDetails(User user, boolean b) {
-    if (user != null) user.setIsDeleted(b);
+   if(user != null)
+    user.setIsDeleted(b);
     user.setRootOrgId("AnyRootOrgId");
     return user;
   }
@@ -191,20 +191,25 @@ public class CertificateActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> recordStore = new HashMap<>();
-    recordStore.put(JsonKey.PDF, "anyPDF");
-    recordStore.put(JsonKey.JSON_DATA, "{\n" + "  \"jsonData\":\"jsonData\"\n" + "}");
-    recordStore.put(JsonKey.COURSE_ID, "anyCourseId");
-    recordStore.put(JsonKey.BATCH_ID, "anyBatchId");
+    recordStore.put(JsonKey.PDF,"anyPDF");
+    recordStore.put(JsonKey.JSON_DATA,"{\n" +
+            "  \"jsonData\":\"jsonData\"\n" +
+            "}");
+    recordStore.put(JsonKey.COURSE_ID,"anyCourseId");
+    recordStore.put(JsonKey.BATCH_ID,"anyBatchId");
     map.put(JsonKey.ID, "certId");
     map.put(JsonKey.IS_DELETED, exists);
-    if (accessCode) {
+    if(accessCode) {
       map.put("accesscode", "anyAccessCode");
     } else {
       map.put("accesscode", "anyNonAccessCode");
     }
-    map.put(JsonKey.STORE, recordStore);
+    map.put(JsonKey.STORE,recordStore);
     list.add(map);
     res.put(JsonKey.RESPONSE, list);
     return res;
   }
+
+
+
 }

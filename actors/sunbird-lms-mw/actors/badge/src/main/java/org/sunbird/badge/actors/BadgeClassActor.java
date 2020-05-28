@@ -2,14 +2,12 @@ package org.sunbird.badge.actors;
 
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.badge.service.BadgingService;
 import org.sunbird.badge.service.impl.BadgingFactory;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
@@ -23,15 +21,6 @@ import org.sunbird.learner.util.Util;
   asyncTasks = {}
 )
 public class BadgeClassActor extends BaseActor {
-  private BadgingService badgingService;
-
-  public BadgeClassActor() {
-    this.badgingService = BadgingFactory.getInstance();
-  }
-
-  public BadgeClassActor(BadgingService badgingService) {
-    this.badgingService = badgingService;
-  }
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -39,7 +28,6 @@ public class BadgeClassActor extends BaseActor {
     String operation = request.getOperation();
 
     Util.initializeContext(request, TelemetryEnvKey.BADGE_CLASS);
-    ExecutionContext.setRequestId(request.getRequestId());
 
     switch (operation) {
       case "createBadgeClass":
@@ -75,7 +63,7 @@ public class BadgeClassActor extends BaseActor {
     ProjectLogger.log("createBadgeClass called");
 
     try {
-      Response response = badgingService.createBadgeClass(actorMessage);
+      Response response = BadgingFactory.getInstance().createBadgeClass(actorMessage);
 
       sender().tell(response, self());
     } catch (ProjectCommonException e) {
@@ -96,7 +84,7 @@ public class BadgeClassActor extends BaseActor {
 
     try {
       Response response =
-          badgingService.getBadgeClassDetails(
+              BadgingFactory.getInstance().getBadgeClassDetails(
               (String) actorMessage.getRequest().get(BadgingJsonKey.BADGE_ID));
 
       sender().tell(response, self());
@@ -120,7 +108,7 @@ public class BadgeClassActor extends BaseActor {
     ProjectLogger.log("searchBadgeClass called");
 
     try {
-      Response response = badgingService.searchBadgeClass(actorMessage);
+      Response response = BadgingFactory.getInstance().searchBadgeClass(actorMessage);
 
       sender().tell(response, self());
     } catch (ProjectCommonException e) {
@@ -140,7 +128,7 @@ public class BadgeClassActor extends BaseActor {
     ProjectLogger.log("deleteBadgeClass called");
 
     try {
-      Response response = badgingService.removeBadgeClass(actorMessage);
+      Response response = BadgingFactory.getInstance().removeBadgeClass(actorMessage);
 
       sender().tell(response, self());
     } catch (ProjectCommonException e) {

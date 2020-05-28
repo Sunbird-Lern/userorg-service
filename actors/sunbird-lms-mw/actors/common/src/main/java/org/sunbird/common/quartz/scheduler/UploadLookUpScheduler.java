@@ -40,12 +40,7 @@ public class UploadLookUpScheduler extends BaseJob {
             + " triggered by: "
             + ctx.getJobDetail().toString(),
         LoggerEnum.INFO.name());
-    Util.initializeContextForSchedulerJob(
-        JsonKey.SYSTEM, ctx.getFireInstanceId(), JsonKey.SCHEDULER_JOB);
-    Map<String, Object> logInfo =
-        genarateLogInfo(JsonKey.SYSTEM, ctx.getJobDetail().getDescription());
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     List<Map<String, Object>> result = null;
     // get List of process with status as New
     Response res =
@@ -100,7 +95,6 @@ public class UploadLookUpScheduler extends BaseJob {
         process(result);
       }
     }
-    TelemetryUtil.telemetryProcessingCall(logInfo, null, null, TelemetryEvents.LOG.getName());
   }
 
   private void process(List<Map<String, Object>> result) {

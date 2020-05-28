@@ -9,7 +9,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
@@ -20,23 +19,12 @@ import org.sunbird.learner.util.Util;
 )
 public class BadgeIssuerActor extends BaseActor {
 
-  private BadgingService badgingService;
-
-  public BadgeIssuerActor() {
-    this.badgingService = BadgingFactory.getInstance();
-  }
-
-  public BadgeIssuerActor(BadgingService badgingService) {
-    this.badgingService = badgingService;
-  }
-
   @Override
   public void onReceive(Request request) throws Throwable {
     ProjectLogger.log("BadgeIssuerActor  onReceive called", LoggerEnum.INFO.name());
     String operation = request.getOperation();
 
     Util.initializeContext(request, TelemetryEnvKey.BADGE);
-    ExecutionContext.setRequestId(request.getRequestId());
 
     switch (operation) {
       case "createBadgeIssuer":
@@ -62,22 +50,22 @@ public class BadgeIssuerActor extends BaseActor {
    * @param actorMessage
    */
   private void createBadgeIssuer(Request actorMessage) throws IOException {
-    Response response = badgingService.createIssuer(actorMessage);
+    Response response = BadgingFactory.getInstance().createIssuer(actorMessage);
     sender().tell(response, self());
   }
 
   private void getBadgeIssuer(Request actorMessage) throws IOException {
-    Response response = badgingService.getIssuerDetails(actorMessage);
+    Response response = BadgingFactory.getInstance().getIssuerDetails(actorMessage);
     sender().tell(response, self());
   }
 
   private void getAllIssuer(Request actorMessage) throws IOException {
-    Response response = badgingService.getIssuerList(actorMessage);
+    Response response = BadgingFactory.getInstance().getIssuerList(actorMessage);
     sender().tell(response, self());
   }
 
   private void deleteIssuer(Request request) throws IOException {
-    Response response = badgingService.deleteIssuer(request);
+    Response response = BadgingFactory.getInstance().deleteIssuer(request);
     sender().tell(response, self());
   }
 }

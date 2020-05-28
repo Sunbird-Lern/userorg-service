@@ -19,8 +19,6 @@ import org.sunbird.user.util.UserActorOperations;
 )
 public class UserOnboardingNotificationActor extends BaseActor {
 
-  private SSOManager ssoManager = SSOServiceFactory.getInstance();
-
   @Override
   public void onReceive(Request request) throws Throwable {
     if (UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
@@ -48,7 +46,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
     if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.PHONE))) {
       Util.sendSMS(requestMap);
     }
-
+    SSOManager ssoManager = SSOServiceFactory.getInstance();
     if (StringUtils.isBlank((String) requestMap.get(JsonKey.PASSWORD))) {
       ssoManager.setRequiredAction(
           (String) requestMap.get(JsonKey.USER_ID), KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD);

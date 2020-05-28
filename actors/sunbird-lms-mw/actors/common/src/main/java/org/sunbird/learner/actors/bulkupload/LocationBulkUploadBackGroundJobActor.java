@@ -2,52 +2,39 @@ package org.sunbird.learner.actors.bulkupload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.BulkProcessStatus;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
-import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+
 @ActorConfig(
-  tasks = {},
-  asyncTasks = {"locationBulkUploadBackground"}
-)
+    tasks = {},
+    asyncTasks = {"locationBulkUploadBackground"})
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private LocationClient locationClient = new LocationClientImpl();
-  BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
-  ObjectMapper mapper = new ObjectMapper();
-  InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
-  BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {
 
     String operation = request.getOperation();
     Util.initializeContext(request, TelemetryEnvKey.GEO_LOCATION);
-    ExecutionContext.setRequestId(request.getRequestId());
 
     switch (operation) {
       case "locationBulkUploadBackground":
@@ -71,7 +58,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   }
 
   private void processLocation(BulkUploadProcessTask task) {
-
+    ObjectMapper mapper = new ObjectMapper();
     ProjectLogger.log(
         "LocationBulkUploadBackGroundJobActor: processLocation called", LoggerEnum.INFO);
     String data = task.getData();
@@ -143,7 +130,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
           JsonKey.UPDATE);
       return;
     }
-
+    ObjectMapper mapper = new ObjectMapper();
     try {
       locationClient.updateLocation(
           getActorRef(LocationActorOperation.UPDATE_LOCATION.getValue()),
@@ -171,7 +158,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
 
     Request request = new Request();
     request.getRequest().putAll(row);
-
+    ObjectMapper mapper = new ObjectMapper();
     String locationId = "";
     try {
       locationId =
@@ -218,4 +205,5 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   public void preProcessResult(Map<String, Object> result) {
     // Do nothing
   }
+
 }
