@@ -2,6 +2,7 @@ package org.sunbird.learner.actors.search;
 
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,8 +26,6 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Future;
-
-import java.util.*;
 
 /**
  * This class will handle search operation for all different type of index and types
@@ -54,70 +53,72 @@ public class SearchHandlerActor extends BaseActor {
       String filterObjectType = "";
       if (objectType != null && objectType instanceof List) {
         List<String> types = (List) objectType;
-          filterObjectType = types.get(0);
+        filterObjectType = types.get(0);
       }
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
       if (EsType.organisation.getTypeName().equalsIgnoreCase(filterObjectType)) {
         SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
         handleOrgSearchAsyncRequest(
-            EsType.organisation.getTypeName(),
-            searchDto,request.getContext());
+            EsType.organisation.getTypeName(), searchDto, request.getContext());
       } else if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
-          handleUserSearch(request, searchQueryMap, filterObjectType);
+        handleUserSearch(request, searchQueryMap, filterObjectType);
       }
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
   }
 
-    private void handleUserSearch(Request request, Map<String, Object> searchQueryMap, String filterObjectType) throws Exception {
-        UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
-        extractOrFilter(searchQueryMap);
-        SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-        searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
-        Future<Map<String, Object>> resultF = esService.search(searchDto, filterObjectType);
-        Map<String, Object>  result = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-        Response response = new Response();
-        // this fuzzy search Logic
-        if (((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).size() != 0
-            && isFuzzySearchRequired(searchQueryMap)) {
-          List<Map<String, Object>> responseList =
-              getResponseOnFuzzyRequest(
-                  getFuzzyFilterMap(searchQueryMap),
-                  (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
-          if (responseList.size() != 0) {
-            result.replace(JsonKey.COUNT, responseList.size());
-            result.replace(JsonKey.CONTENT, responseList);
-          } else {
-            throw new ProjectCommonException(
-                ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
-                String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
-                ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
-          }
-        }
-        // Decrypt the data
-        if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
-          List<Map<String, Object>> userMapList =
-              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-          for (Map<String, Object> userMap : userMapList) {
-            UserUtility.decryptUserDataFrmES(userMap);
-            userMap.remove(JsonKey.ENC_EMAIL);
-            userMap.remove(JsonKey.ENC_PHONE);
-          }
-          String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-          updateUserDetailsWithOrgName(requestedFields, userMapList);
-        }
-        if (result == null) {
-            result = new HashMap<>();
-        }
-        response.put(JsonKey.RESPONSE, result);
-        sender().tell(response, self());
-        // create search telemetry event here ...
-        generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
+  private void handleUserSearch(
+      Request request, Map<String, Object> searchQueryMap, String filterObjectType)
+      throws Exception {
+    UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
+    extractOrFilter(searchQueryMap);
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
+    Future<Map<String, Object>> resultF = esService.search(searchDto, filterObjectType);
+    Map<String, Object> result =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    Response response = new Response();
+    // this fuzzy search Logic
+    if (((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).size() != 0
+        && isFuzzySearchRequired(searchQueryMap)) {
+      List<Map<String, Object>> responseList =
+          getResponseOnFuzzyRequest(
+              getFuzzyFilterMap(searchQueryMap),
+              (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
+      if (responseList.size() != 0) {
+        result.replace(JsonKey.COUNT, responseList.size());
+        result.replace(JsonKey.CONTENT, responseList);
+      } else {
+        throw new ProjectCommonException(
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+            String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
+      }
     }
+    // Decrypt the data
+    if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
+      List<Map<String, Object>> userMapList =
+          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      for (Map<String, Object> userMap : userMapList) {
+        UserUtility.decryptUserDataFrmES(userMap);
+        userMap.remove(JsonKey.ENC_EMAIL);
+        userMap.remove(JsonKey.ENC_PHONE);
+      }
+      String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
+      updateUserDetailsWithOrgName(requestedFields, userMapList);
+    }
+    if (result == null) {
+      result = new HashMap<>();
+    }
+    response.put(JsonKey.RESPONSE, result);
+    sender().tell(response, self());
+    // create search telemetry event here ...
+    generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
+  }
 
-    private void handleOrgSearchAsyncRequest(
-      String indexType, SearchDTO searchDto, Map<String,Object> context) {
+  private void handleOrgSearchAsyncRequest(
+      String indexType, SearchDTO searchDto, Map<String, Object> context) {
     Future<Map<String, Object>> futureResponse = esService.search(searchDto, indexType);
     Future<Response> response =
         futureResponse.map(
@@ -134,12 +135,11 @@ public class SearchHandlerActor extends BaseActor {
             },
             getContext().dispatcher());
     Patterns.pipe(response, getContext().dispatcher()).to(sender());
-    ProjectLogger.log("SearchHandlerActor:handleOrgSearchAsyncRequest: Telemetry disabled for search org api.",LoggerEnum.INFO.name());
     Request telemetryReq = new Request();
-    telemetryReq.getRequest().put("context",context);
-    telemetryReq.getRequest().put("searchFResponse",response);
-    telemetryReq.getRequest().put("indexType",indexType);
-    telemetryReq.getRequest().put("searchDto",searchDto);
+    telemetryReq.getRequest().put("context", context);
+    telemetryReq.getRequest().put("searchFResponse", response);
+    telemetryReq.getRequest().put("indexType", indexType);
+    telemetryReq.getRequest().put("searchDto", searchDto);
     telemetryReq.setOperation("generateSearchTelemetry");
     tellToAnother(telemetryReq);
   }
@@ -269,7 +269,8 @@ public class SearchHandlerActor extends BaseActor {
   private List<Map<String, Object>> generateTopnResult(Map<String, Object> result) {
 
     List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    Integer topN = Integer.parseInt(PropertiesCache.getInstance().getProperty(JsonKey.SEARCH_TOP_N));
+    Integer topN =
+        Integer.parseInt(PropertiesCache.getInstance().getProperty(JsonKey.SEARCH_TOP_N));
 
     List<Map<String, Object>> list = new ArrayList<>();
     if (topN < userMapList.size()) {
