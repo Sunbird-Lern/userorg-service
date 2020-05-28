@@ -2,35 +2,32 @@ package org.sunbird.learner.actors.bulkupload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.BulkUploadJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
+import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
+import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
+import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
+import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.learner.actors.bulkupload.model.StorageDetails;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.function.Function;
 
 public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadActor {
 
@@ -40,6 +37,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       Map<String, Object> row,
       String action)
       throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
     row.put(JsonKey.OPERATION, action);
     task.setSuccessResult(mapper.writeValueAsString(row));
     task.setStatus(status.getValue());
@@ -52,6 +50,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       Map<String, Object> row,
       String action)
       throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
     row.put(JsonKey.OPERATION, action);
     if (ProjectUtil.BulkProcessStatus.COMPLETED.getValue() == status.getValue()) {
       task.setSuccessResult(mapper.writeValueAsString(row));
@@ -65,6 +64,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
 
   public void handleBulkUploadBackground(Request request, Function function) {
     String processId = (String) request.get(JsonKey.PROCESS_ID);
+    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
     String logMessagePrefix =
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:handleBulkUploadBackground:{0}: ", processId);
@@ -102,6 +102,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       Function function,
       Map<String, String> outputColumnMap,
       String[] outputColumnsOrder) {
+    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
     String logMessagePrefix =
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:processBulkUpload:{0}: ", bulkUploadProcess.getId());
@@ -110,7 +111,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
     List<Map<String, Object>> successList = new LinkedList<>();
     List<Map<String, Object>> failureList = new LinkedList<>();
     while (sequence < taskCount) {
-      Integer nextSequence = sequence + CASSANDRA_BATCH_SIZE;
+      Integer nextSequence = sequence + getBatchSize(JsonKey.CASSANDRA_WRITE_BATCH_SIZE);
       Map<String, Object> queryMap = new HashMap<>();
       queryMap.put(JsonKey.PROCESS_ID, bulkUploadProcess.getId());
       Map<String, Object> sequenceRange = new HashMap<>();
@@ -134,6 +135,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       function.apply(tasks);
 
       try {
+        ObjectMapper mapper = new ObjectMapper();
         for (BulkUploadProcessTask task : tasks) {
 
           if (task.getStatus().equals(ProjectUtil.BulkProcessStatus.FAILED.getValue())) {
@@ -187,6 +189,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
           LoggerEnum.INFO,
           e);
     }
+    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
     bulkUploadDao.update(bulkUploadProcess);
   }
 

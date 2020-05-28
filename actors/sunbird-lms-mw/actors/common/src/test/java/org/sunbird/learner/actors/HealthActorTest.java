@@ -1,8 +1,5 @@
 package org.sunbird.learner.actors;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -32,18 +29,11 @@ import org.sunbird.learner.actors.health.HealthActor;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Promise;
 
+import static akka.testkit.JavaTestKit.duration;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  CassandraOperationImpl.class,
-  ServiceFactory.class,
-  CassandraOperation.class,
-  CassandraUtil.class,
-  Util.class,
-  EsClientFactory.class,
-  ElasticSearchService.class,
-  ElasticSearchHelper.class,
-  ElasticSearchRestHighImpl.class
-})
+@PrepareForTest({CassandraOperationImpl.class,ServiceFactory.class,CassandraOperation.class, CassandraUtil.class,Util.class, EsClientFactory.class, ElasticSearchService.class, ElasticSearchHelper.class, ElasticSearchRestHighImpl.class})
 @PowerMockIgnore({"javax.management.*"})
 public class HealthActorTest {
 
@@ -57,6 +47,7 @@ public class HealthActorTest {
   public static void setUp() {
     system = ActorSystem.create("system");
     PowerMockito.mockStatic(ServiceFactory.class);
+
   }
 
   @Test
@@ -84,7 +75,7 @@ public class HealthActorTest {
 
   @Test
   public void getESHealthCheck() {
-    ElasticSearchService elasticSearchService = PowerMockito.mock(ElasticSearchService.class);
+    ElasticSearchService elasticSearchService=PowerMockito.mock(ElasticSearchService.class);
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -102,10 +93,9 @@ public class HealthActorTest {
   @Test
   @PrepareForTest(ServiceFactory.class)
   public void getCASSANDRAHealthCheck() {
-    cassandraOperation = PowerMockito.mock(CassandraOperation.class);
+    cassandraOperation=PowerMockito.mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName()))
-        .thenReturn(new Response());
+    when(cassandraOperation.getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName())).thenReturn(new Response());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();

@@ -455,7 +455,6 @@ public class User implements Serializable {
   public void setFlagsValue(int flagsValue) {
     this.flagsValue = flagsValue;
   }
-
   public String getRecoveryEmail() {
     return recoveryEmail;
   }
@@ -471,4 +470,5 @@ public class User implements Serializable {
   public void setRecoveryPhone(String recoveryPhone) {
     this.recoveryPhone = recoveryPhone;
   }
+
 }

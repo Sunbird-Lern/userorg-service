@@ -2,10 +2,6 @@ package org.sunbird.user.actors;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.stream.IntStream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -22,16 +18,9 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
-import org.sunbird.common.models.util.TelemetryEnvKey;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.feed.IFeedService;
@@ -44,12 +33,16 @@ import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.MigrationUtils;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
+
+import java.sql.Timestamp;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * This class contains method and business logic to migrate user from custodian org to some other
@@ -62,15 +55,11 @@ import scala.concurrent.Future;
   asyncTasks = {}
 )
 public class TenantMigrationActor extends BaseActor {
-  public static final String MIGRATE = "migrate";
-  private UserService userService = UserServiceImpl.getInstance();
-  private OrgExternalService orgExternalService = new OrgExternalService();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
+          InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
@@ -78,17 +67,17 @@ public class TenantMigrationActor extends BaseActor {
   private static final int MAX_MIGRATION_ATTEMPT = 2;
   public static final int USER_EXTERNAL_ID_MISMATCH = -1;
   private IFeedService feedService = FeedFactory.getInstance();
-  DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          "");
-  DataMaskingService maskingService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance("");
+  private DecryptionService decryptionService =
+          org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+                  "");
+  private DataMaskingService maskingService =
+          org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance("");
+
 
   @Override
   public void onReceive(Request request) throws Throwable {
     ProjectLogger.log("TenantMigrationActor:onReceive called.", LoggerEnum.INFO.name());
     Util.initializeContext(request, StringUtils.capitalize(JsonKey.CONSUMER));
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     if (systemSettingActorRef == null) {
       systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
@@ -112,14 +101,12 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> userDetails =
-        userService.esGetPublicUserProfileById((String) request.getRequest().get(JsonKey.USER_ID));
+            UserServiceImpl.getInstance().esGetPublicUserProfileById((String) request.getRequest().get(JsonKey.USER_ID));
     validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     validateChannelAndGetRootOrgId(request);
-    // Add rollup for telemetry event
-    ExecutionContext context = ExecutionContext.getCurrent();
     Map<String, String> rollup = new HashMap<>();
     rollup.put("l1", (String) request.getRequest().get(JsonKey.ROOT_ORG_ID));
-    context.getRequestContext().put(JsonKey.ROLLUP, rollup);
+    request.getContext().put(JsonKey.ROLLUP, rollup);
     String orgId = validateOrgExternalIdOrOrgIdAndGetOrgId(request.getRequest());
     request.getRequest().put(JsonKey.ORG_ID, orgId);
     int userFlagValue = UserFlagEnum.STATE_VALIDATED.getUserFlagValue();
@@ -129,6 +116,7 @@ public class TenantMigrationActor extends BaseActor {
     request.getRequest().put(JsonKey.FLAGS_VALUE, userFlagValue);
     Map<String, Object> userUpdateRequest = createUserUpdateRequest(request);
     // Update user channel and rootOrgId
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userUpdateRequest);
@@ -176,8 +164,8 @@ public class TenantMigrationActor extends BaseActor {
     }
     targetObject =
         TelemetryUtil.generateTargetObject(
-            (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, MIGRATE, null);
-    TelemetryUtil.telemetryProcessingCall(reqMap, targetObject, correlatedObject);
+            (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, "migrate", null);
+    TelemetryUtil.telemetryProcessingCall(reqMap, targetObject, correlatedObject, request.getContext());
   }
 
   private void notify(Map<String, Object> userDetail) {
@@ -272,6 +260,7 @@ public class TenantMigrationActor extends BaseActor {
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
+          OrgExternalService orgExternalService = new OrgExternalService();
         orgId =
             orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                 (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
@@ -293,7 +282,7 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void validateUserCustodianOrgId(String rootOrgId) {
-    String custodianOrgId = userService.getCustodianOrgId(systemSettingActorRef);
+    String custodianOrgId = UserServiceImpl.getInstance().getCustodianOrgId(systemSettingActorRef);
     if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.parameterMismatch,
@@ -321,6 +310,7 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.USER_ID, request.getRequest().get(JsonKey.USER_ID));
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
+      ObjectMapper mapper = new ObjectMapper();
       User user = mapper.convertValue(userExtIdsReq, User.class);
       UserUtil.validateExternalIds(user, JsonKey.CREATE);
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -394,6 +384,7 @@ public class TenantMigrationActor extends BaseActor {
     ProjectLogger.log(
         "TenantMigrationActor:deleteOldUserOrgMapping: delete old user org association started.",
         LoggerEnum.INFO.name());
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     for (Map<String, Object> userOrg : userOrgList) {
       cassandraOperation.deleteRecord(
           usrOrgDbInfo.getKeySpace(),
@@ -406,7 +397,7 @@ public class TenantMigrationActor extends BaseActor {
     String rootOrgId = "";
     String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
     if (StringUtils.isNotBlank(channel)) {
-      rootOrgId = userService.getRootOrgIdFromChannel(channel);
+      rootOrgId = UserServiceImpl.getInstance().getRootOrgIdFromChannel(channel);
       request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     }
   }
@@ -524,7 +515,7 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private boolean isIndexValid(int index) {
-    return (index != USER_EXTERNAL_ID_MISMATCH);
+      return (index != USER_EXTERNAL_ID_MISMATCH);
   }
 
   /**

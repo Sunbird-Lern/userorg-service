@@ -31,7 +31,6 @@ public class DbOperationActorTest {
   public static void setUp() {
     SunbirdMWService.init();
     system = ActorSystem.create("system");
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
   }
 
   @Test

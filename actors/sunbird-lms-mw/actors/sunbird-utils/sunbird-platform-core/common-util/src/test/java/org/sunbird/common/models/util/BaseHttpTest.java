@@ -32,8 +32,7 @@ import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
   HttpUtil.class,
   HttpClients.class,
   KeyCloakConnectionProvider.class,
-  KeyCloakServiceImpl.class,
-  KeycloakRequiredActionLinkUtil.class
+  KeyCloakServiceImpl.class, KeycloakRequiredActionLinkUtil.class
 })
 public abstract class BaseHttpTest {
 

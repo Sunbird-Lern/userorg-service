@@ -45,7 +45,6 @@ public interface DataMaskingService {
 
   /**
    * Mask an OTP
-   *
    * @param otp
    * @return Depending on the length - 6, 4, masks 1 character
    */

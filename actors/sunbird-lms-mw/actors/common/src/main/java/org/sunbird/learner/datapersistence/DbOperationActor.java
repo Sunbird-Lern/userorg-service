@@ -1,11 +1,6 @@
 package org.sunbird.learner.datapersistence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -16,17 +11,23 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-import org.sunbird.telemetry.util.TelemetryLmaxWriter;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Future;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ActorConfig(
   tasks = {
@@ -42,38 +43,12 @@ import scala.concurrent.Future;
 )
 public class DbOperationActor extends BaseActor {
 
-  private String topn = PropertiesCache.getInstance().getProperty(JsonKey.SEARCH_TOP_N);
-  private static final String REQUIRED_FIELDS = "requiredFields";
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static CassandraConnectionManager manager =
-      CassandraConnectionMngrFactory.getObject(
-          PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));
-  private static final String PAYLOAD = "payload";
-  private static final String ENTITY_NAME = "entityName";
-  private static final String INDEXED = "indexed";
-  private static final String ES_INDEX_NAME = "sunbirdplugin";
-  private static List<String> tableList = null;
-  private static final String RAW_QUERY = "rawQuery";
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-
-  public static void createtableList() {
-    try {
-      tableList = manager.getTableList(JsonKey.SUNBIRD_PLUGIN);
-    } catch (Exception e) {
-      ProjectLogger.log("Error occurred" + e.getMessage(), e);
-    }
-  }
 
   @Override
   public void onReceive(Request actorMessage) throws Throwable {
-
     Util.initializeContext(actorMessage, TelemetryEnvKey.OBJECT_STORE);
-    // set request id to thread local...
-    ExecutionContext.setRequestId(actorMessage.getRequestId());
-    if (null == tableList) {
-      createtableList();
-    }
-
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_DATA.getValue())) {
       create(actorMessage);
     } else if (actorMessage
@@ -106,6 +81,8 @@ public class DbOperationActor extends BaseActor {
 
   private void getMetrics(Request actorMessage) {
     try {
+      String ES_INDEX_NAME = "sunbirdplugin";
+      String RAW_QUERY = "rawQuery";
       validateTableName(actorMessage);
       Map<String, Object> rawQueryMap =
           (Map<String, Object>) actorMessage.getRequest().get(RAW_QUERY);
@@ -123,7 +100,10 @@ public class DbOperationActor extends BaseActor {
   private void search(Request reqObj) {
     SearchDTO searchDto = null;
     try {
+      String ENTITY_NAME = "entityName";
+      String ES_INDEX_NAME = "sunbirdplugin";
       Response response = new Response();
+      String REQUIRED_FIELDS = "requiredFields";
       List<String> requiredFields = null;
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))) {
         String esType = (String) reqObj.getRequest().get(ENTITY_NAME);
@@ -172,7 +152,7 @@ public class DbOperationActor extends BaseActor {
       generateSearchTelemetryEvent(
           searchDto,
           new String[] {ES_INDEX_NAME},
-          (Map<String, Object>) response.get(JsonKey.RESPONSE));
+          (Map<String, Object>) response.get(JsonKey.RESPONSE),reqObj.getContext());
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -183,6 +163,7 @@ public class DbOperationActor extends BaseActor {
     try {
       Response response = null;
       validateTableName(reqObj);
+      String ENTITY_NAME = "entityName";
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))) {
         response =
             cassandraOperation.getAllRecords(
@@ -202,6 +183,7 @@ public class DbOperationActor extends BaseActor {
 
   private void read(Request reqObj) {
     try {
+      String ENTITY_NAME = "entityName";
       Response response = null;
       validateTableName(reqObj);
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))) {
@@ -226,6 +208,9 @@ public class DbOperationActor extends BaseActor {
   private void delete(Request reqObj) {
     try {
       validateTableName(reqObj);
+      String ENTITY_NAME = "entityName";
+      String ES_INDEX_NAME = "sunbirdplugin";
+      String INDEXED = "indexed";
       Response response =
           cassandraOperation.deleteRecord(
               JsonKey.SUNBIRD_PLUGIN,
@@ -239,7 +224,7 @@ public class DbOperationActor extends BaseActor {
             (String) reqObj.getRequest().get(JsonKey.ID));
       }
       sender().tell(response, self());
-      generateTelemetryObjectStore(reqObj, JsonKey.DELETE);
+      generateTelemetryObjectStore(reqObj);
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -248,11 +233,15 @@ public class DbOperationActor extends BaseActor {
 
   private void update(Request reqObj) {
     try {
+      String PAYLOAD = "payload";
+      String INDEXED = "indexed";
+      String ES_INDEX_NAME = "sunbirdplugin";
       validateTableName(reqObj);
       Map<String, Object> payload = (Map<String, Object>) reqObj.getRequest().get(PAYLOAD);
       validateRequestData(payload);
       Response response = null;
       boolean esResult = false;
+      String ENTITY_NAME = "entityName";
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))
           && ((boolean) reqObj.getRequest().get(INDEXED))) {
         esResult =
@@ -284,7 +273,6 @@ public class DbOperationActor extends BaseActor {
       } else {
         Future<Map<String, Object>> dataF =
             esService.getDataByIdentifier(ES_INDEX_NAME, (String) payload.get(JsonKey.ID));
-
         Map<String, Object> data =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(dataF);
         if (data.isEmpty() || ((boolean) reqObj.getRequest().get(INDEXED))) {
@@ -299,7 +287,7 @@ public class DbOperationActor extends BaseActor {
         }
       }
       sender().tell(response, self());
-      generateTelemetryObjectStore(reqObj, JsonKey.UPDATE);
+      generateTelemetryObjectStore(reqObj);
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -308,6 +296,10 @@ public class DbOperationActor extends BaseActor {
 
   private void create(Request reqObj) {
     try {
+      String PAYLOAD = "payload";
+      String ENTITY_NAME = "entityName";
+      String INDEXED = "indexed";
+      String ES_INDEX_NAME = "sunbirdplugin";
       validateTableName(reqObj);
       Map<String, Object> payload = (Map<String, Object>) reqObj.getRequest().get(PAYLOAD);
       validateRequestData(payload);
@@ -338,7 +330,7 @@ public class DbOperationActor extends BaseActor {
         }
       }
       sender().tell(response, self());
-      generateTelemetryObjectStore(reqObj, JsonKey.CREATE);
+      generateTelemetryObjectStore(reqObj);
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -354,7 +346,8 @@ public class DbOperationActor extends BaseActor {
   }
 
   private void validateTableName(Request reqObj) {
-    if (!tableList.contains(reqObj.getRequest().get(ENTITY_NAME))) {
+    String ENTITY_NAME = "entityName";
+    if (!DataCacheHandler.getSunbirdPluginTableList().contains(reqObj.getRequest().get(ENTITY_NAME))) {
       throw new ProjectCommonException(
           ResponseCode.tableOrDocNameError.getErrorCode(),
           ResponseCode.tableOrDocNameError.getErrorMessage(),
@@ -420,7 +413,6 @@ public class DbOperationActor extends BaseActor {
    * @param indexName
    * @param typeName
    * @param identifier
-   * @param data
    * @return
    */
   private boolean deleteDataFromElastic(String indexName, String typeName, String identifier) {
@@ -439,10 +431,8 @@ public class DbOperationActor extends BaseActor {
   }
 
   private void generateSearchTelemetryEvent(
-      SearchDTO searchDto, String[] types, Map<String, Object> result) {
-
-    Map<String, Object> telemetryContext = TelemetryUtil.getTelemetryContext();
-    Map<String, Object> params = new HashMap<>();
+      SearchDTO searchDto, String[] types, Map<String, Object> result, Map<String,Object> context) {
+      Map<String, Object> params = new HashMap<>();
     params.put(JsonKey.QUERY, searchDto.getQuery());
     params.put(JsonKey.FILTERS, searchDto.getAdditionalProperties().get(JsonKey.FILTERS));
     params.put(JsonKey.SORT, searchDto.getSortBy());
@@ -451,13 +441,13 @@ public class DbOperationActor extends BaseActor {
     params.put(JsonKey.TYPE, String.join(",", types));
 
     Request request = new Request();
-    request.setRequest(telemetryRequestForSearch(telemetryContext, params));
-    TelemetryLmaxWriter.getInstance().submitMessage(request);
+    request.setRequest(telemetryRequestForSearch(context, params));
+    TelemetryWriter.write(request);
   }
 
   private List<Map<String, Object>> generateTopNResult(Map<String, Object> result) {
     List<Map<String, Object>> dataMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    Integer topN = Integer.parseInt(topn);
+    Integer topN = Integer.parseInt(PropertiesCache.getInstance().getProperty(JsonKey.SEARCH_TOP_N));
     int count = Math.min(topN, dataMapList.size());
     List<Map<String, Object>> list = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -477,7 +467,9 @@ public class DbOperationActor extends BaseActor {
     return map;
   }
 
-  private static void generateTelemetryObjectStore(Request reqObj, String opKey) {
+  private static void generateTelemetryObjectStore(Request reqObj) {
+    String PAYLOAD = "payload";
+    String ENTITY_NAME = "entityName";
     Map<String, Object> targetObject =
         TelemetryUtil.generateTargetObject(
             (String) ((Map<String, Object>) reqObj.getRequest().get(PAYLOAD)).get(JsonKey.ID),
@@ -485,6 +477,6 @@ public class DbOperationActor extends BaseActor {
             JsonKey.CREATE,
             null);
     TelemetryUtil.telemetryProcessingCall(
-        (Map<String, Object>) reqObj.getRequest().get(PAYLOAD), targetObject, new ArrayList<>());
+        (Map<String, Object>) reqObj.getRequest().get(PAYLOAD), targetObject, new ArrayList<>(),reqObj.getContext());
   }
 }

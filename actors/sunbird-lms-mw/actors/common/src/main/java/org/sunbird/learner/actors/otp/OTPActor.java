@@ -1,7 +1,5 @@
 package org.sunbird.learner.actors.otp;
 
-import java.text.MessageFormat;
-import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -11,7 +9,6 @@ import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.otp.service.OTPService;
@@ -21,6 +18,9 @@ import org.sunbird.ratelimit.limiter.OtpRateLimiter;
 import org.sunbird.ratelimit.limiter.RateLimiter;
 import org.sunbird.ratelimit.service.RateLimitService;
 import org.sunbird.ratelimit.service.RateLimitServiceImpl;
+
+import java.text.MessageFormat;
+import java.util.Map;
 
 @ActorConfig(
   tasks = {"generateOTP", "verifyOTP"},
@@ -38,7 +38,6 @@ public class OTPActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     if (ActorOperations.GENERATE_OTP.getValue().equals(request.getOperation())) {
       generateOTP(request);
     } else if (ActorOperations.VERIFY_OTP.getValue().equals(request.getOperation())) {
@@ -49,7 +48,7 @@ public class OTPActor extends BaseActor {
   }
 
   private String maskOTP(String otp) {
-    return logMaskService.maskOTP(otp);
+      return logMaskService.maskOTP(otp);
   }
 
   private String maskId(String id, String type) {
@@ -65,13 +64,11 @@ public class OTPActor extends BaseActor {
     ProjectLogger.log("OTPActor:generateOTP method call start.", LoggerEnum.INFO.name());
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = getKey(type, request);
-
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
       key = OTPUtil.getEmailPhoneByUserId(userId, type);
       type = getType(type);
     }
-
     rateLimitService.throttleByKey(
         key, new RateLimiter[] {OtpRateLimiter.HOUR, OtpRateLimiter.DAY});
 
@@ -90,11 +87,11 @@ public class OTPActor extends BaseActor {
     } else {
       otp = (String) details.get(JsonKey.OTP);
       ProjectLogger.log(
-          "OTPActor:generateOTP: Re-issuing otp Key = "
-              + maskId(key, type)
-              + " OTP = "
-              + maskOTP(otp),
-          LoggerEnum.INFO.name());
+              "OTPActor:generateOTP: Re-issuing otp Key = "
+                      + maskId(key, type)
+                      + " OTP = "
+                      + maskOTP(otp),
+              LoggerEnum.INFO.name());
     }
 
     Response response = new Response();
@@ -148,8 +145,7 @@ public class OTPActor extends BaseActor {
     if (StringUtils.isBlank(otpInDB) || StringUtils.isBlank(otpInRequest)) {
       ProjectLogger.log(
           "OTPActor:verifyOTP: Mismatch for Key = "
-              + maskId(key, type)
-              + " otpInRequest = "
+              + maskId(key, type) + " otpInRequest = "
               + maskOTP(otpInRequest)
               + " otpInDB = "
               + maskOTP(otpInDB),
@@ -159,7 +155,8 @@ public class OTPActor extends BaseActor {
 
     if (otpInRequest.equals(otpInDB)) {
       ProjectLogger.log(
-          "OTPActor:verifyOTP: Verified successfully Key = " + maskId(key, type),
+          "OTPActor:verifyOTP: Verified successfully Key = "
+              + maskId(key, type),
           LoggerEnum.INFO.name());
       otpService.deleteOtp(type, key);
       Response response = new Response();
@@ -169,10 +166,10 @@ public class OTPActor extends BaseActor {
       ProjectLogger.log(
           "OTPActor:verifyOTP: Incorrect OTP Key = "
               + maskId(key, type)
-              + " otpInRequest = "
-              + maskOTP(otpInRequest)
-              + " otpInDB = "
-              + maskOTP(otpInDB),
+                  + " otpInRequest = "
+                  + maskOTP(otpInRequest)
+                  + " otpInDB = "
+                  + maskOTP(otpInDB),
           LoggerEnum.INFO.name());
       handleMismatchOtp(type, key, otpDetails);
     }
@@ -205,7 +202,7 @@ public class OTPActor extends BaseActor {
     response
         .getResult()
         .put(
-            MAX_ALLOWED_ATTEMPT,
+                MAX_ALLOWED_ATTEMPT,
             Integer.parseInt(ProjectUtil.getConfigValue(SUNBIRD_OTP_ALLOWED_ATTEMPT)));
     response.getResult().put(REMAINING_ATTEMPT, remainingCount);
     sender().tell(response, self());

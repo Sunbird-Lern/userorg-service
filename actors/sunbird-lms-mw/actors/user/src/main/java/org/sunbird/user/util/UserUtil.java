@@ -33,6 +33,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
 import org.sunbird.common.services.impl.ProfileCompletenessFactory;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.SocialMediaType;
@@ -258,10 +259,10 @@ public class UserUtil {
           ProjectLogger.log("Exception occurred while encrypting email:", e);
         }
         Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email);
+                cassandraOperation.getRecordsByIndexedProperty(
+                        userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email);
         List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+                (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
           if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
             ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
@@ -276,7 +277,7 @@ public class UserUtil {
     }
   }
 
-  public static void validateUserPhoneEmailAndWebPages(User user, String operationType) {
+  public static void  validateUserPhoneEmailAndWebPages(User user, String operationType) {
     checkPhoneUniqueness(user, operationType);
     checkEmailUniqueness(user, operationType);
     if (CollectionUtils.isNotEmpty(user.getWebPages())) {

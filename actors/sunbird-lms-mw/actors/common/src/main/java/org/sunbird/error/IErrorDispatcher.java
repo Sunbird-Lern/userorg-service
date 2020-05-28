@@ -1,5 +1,6 @@
 package org.sunbird.error;
 
+
 /**
  * this is an interface class for the error dispatcher
  *
@@ -7,6 +8,9 @@ package org.sunbird.error;
  */
 public interface IErrorDispatcher {
 
-  /** this method will prepare the error and will throw ProjectCommonException. */
-  void dispatchError();
+
+    /**
+     * this method will prepare the error and will throw ProjectCommonException.
+     */
+    void dispatchError();
 }

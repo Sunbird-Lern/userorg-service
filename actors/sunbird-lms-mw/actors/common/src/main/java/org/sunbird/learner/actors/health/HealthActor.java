@@ -1,10 +1,6 @@
 /** */
 package org.sunbird.learner.actors.health;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -15,12 +11,16 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** @author Manzarul */
 @ActorConfig(
@@ -29,8 +29,6 @@ import scala.concurrent.Future;
 )
 public class HealthActor extends BaseActor {
 
-  private Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
-
   @Override
   public void onReceive(Request message) throws Throwable {
     if (message instanceof Request) {
@@ -38,8 +36,6 @@ public class HealthActor extends BaseActor {
         ProjectLogger.log("AssessmentItemActor onReceive called");
         Request actorMessage = message;
         Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
-        // set request id fto thread loacl...
-        ExecutionContext.setRequestId(actorMessage.getRequestId());
         if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.HEALTH_CHECK.getValue())) {
           checkAllComponentHealth();
         } else if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.ACTOR.getValue())) {
@@ -113,8 +109,8 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
+      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
+      getCassandraOperation().getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));
@@ -154,8 +150,8 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
+      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
+      getCassandraOperation().getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));
@@ -212,12 +208,9 @@ public class HealthActor extends BaseActor {
     response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
     sender().tell(response, self());
   }
-
   public CassandraOperation getCassandraOperation() {
     return ServiceFactory.getInstance();
   }
+  public ElasticSearchService getEsConnection(){return EsClientFactory.getInstance(JsonKey.REST);}
 
-  public ElasticSearchService getEsConnection() {
-    return EsClientFactory.getInstance(JsonKey.REST);
-  }
 }

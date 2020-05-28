@@ -598,7 +598,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       SearchSourceBuilder searchSourceBuilder, List<Map<String, String>> facets) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
-        "ElasticSearchUtilRest:addAggregations: method started at ==" + startTime,
+        "ElasticSearchRestHighImpl:addAggregations: method started at ==" + startTime,
         LoggerEnum.PERF_LOG.name());
     Map<String, String> map = facets.get(0);
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -617,7 +617,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       }
     }
     ProjectLogger.log(
-        "ElasticSearchUtilRest:addAggregations: method end =="
+        "ElasticSearchRestHighImpl:addAggregations: method end =="
             + " ,Total time elapsed = "
             + calculateEndTime(startTime),
         LoggerEnum.PERF_LOG.name());
@@ -639,7 +639,10 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     long startTime = System.currentTimeMillis();
     Promise<Boolean> promise = Futures.promise();
     ProjectLogger.log(
-        "ElasticSearchUtil:upsert: method started at ==" + startTime + " for INdex " + index,
+        "ElasticSearchRestHighImpl:upsert: method started at =="
+            + startTime
+            + " for INdex "
+            + index,
         LoggerEnum.PERF_LOG.name());
     if (!StringUtils.isBlank(index)
         && !StringUtils.isBlank(identifier)
@@ -656,7 +659,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             public void onResponse(UpdateResponse updateResponse) {
               promise.success(true);
               ProjectLogger.log(
-                  "ElasticSearchUtilRest:upsert:  Response for index : "
+                  "ElasticSearchRestHighImpl:upsert:  Response for index : "
                       + updateResponse.getResult()
                       + ","
                       + index
@@ -664,7 +667,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                       + identifier,
                   LoggerEnum.INFO.name());
               ProjectLogger.log(
-                  "ElasticSearchUtilRest:upsert: method end =="
+                  "ElasticSearchRestHighImpl:upsert: method end =="
                       + " for Index "
                       + index
                       + " ,Total time elapsed = "
@@ -726,7 +729,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                     },
                     val -> val)));
     ProjectLogger.log(
-        "ElasticSearchUtil:getEsResultByListOfIds: method ended for index " + index,
+        "ElasticSearchRestHighImpl:getEsResultByListOfIds: method ended for index " + index,
         LoggerEnum.INFO.name());
 
     return promise.future();

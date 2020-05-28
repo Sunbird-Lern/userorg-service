@@ -33,7 +33,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
@@ -47,9 +46,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   protected CassandraConnectionManager connectionManager;
 
   public CassandraOperationImpl() {
-    PropertiesCache propertiesCache = PropertiesCache.getInstance();
-    String cassandraMode = propertiesCache.getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE);
-    connectionManager = CassandraConnectionMngrFactory.getObject(cassandraMode);
+    connectionManager = CassandraConnectionMngrFactory.getInstance();
   }
 
   @Override

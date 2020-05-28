@@ -1,17 +1,9 @@
 package org.sunbird.systemsettings.actors;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +15,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchTcpImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
@@ -34,9 +26,14 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.util.*;
+
+import static akka.testkit.JavaTestKit.duration;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  ElasticSearchTcpImpl.class,
+  ElasticSearchRestHighImpl.class,
   CassandraOperationImpl.class,
   ServiceFactory.class,
   EsClientFactory.class
@@ -53,7 +50,7 @@ public class SystemSettingsActorTest {
   private static String ROOT_ORG_ID = "defaultRootOrgId";
   private static String FIELD = "someField";
   private static String VALUE = "someValue";
-  private ElasticSearchTcpImpl esUtil;
+  private ElasticSearchRestHighImpl esUtil;
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
 
@@ -68,7 +65,7 @@ public class SystemSettingsActorTest {
     subject = system.actorOf(props);
     actorMessage = new Request();
     PowerMockito.mockStatic(EsClientFactory.class);
-    esUtil = PowerMockito.mock(ElasticSearchTcpImpl.class);
+    esUtil = PowerMockito.mock(ElasticSearchRestHighImpl.class);
     Response resp = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(getOrgData());

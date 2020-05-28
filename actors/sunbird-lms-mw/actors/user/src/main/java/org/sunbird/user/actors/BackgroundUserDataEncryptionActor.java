@@ -1,9 +1,5 @@
 package org.sunbird.user.actors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -22,17 +18,17 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.user.service.UserEncryptionService;
 import org.sunbird.user.service.impl.UserEncryptionServiceImpl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /** Background encrytion and decryption of user sensitive data. */
 @ActorConfig(
   tasks = {},
   asyncTasks = {"backgroundEncryption", "backgroundDecryption"}
 )
 public class BackgroundUserDataEncryptionActor extends BaseActor {
-
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private UserEncryptionService userEncryptionService = UserEncryptionServiceImpl.getInstance();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  private Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -64,10 +60,11 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     List<String> userIdsListToSync = new ArrayList<>();
     if (CollectionUtils.isEmpty(userDetails)) {
       ProjectLogger.log(
-          "BackgroundUserDataEncryptionActor:encryptData: Empty user details.", LoggerEnum.INFO);
+          "BackgroundUserDataEncryptionActor:encryptData: Empty user details.",
+          LoggerEnum.INFO);
       return;
     }
-
+    UserEncryptionService userEncryptionService = UserEncryptionServiceImpl.getInstance();
     for (Map<String, Object> userMap : userDetails) {
       List<String> fieldsToEncrypt = userEncryptionService.getDecryptedFields(userMap);
       if (CollectionUtils.isNotEmpty(fieldsToEncrypt)) {
@@ -93,9 +90,11 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     List<String> userIdsListToSync = new ArrayList<>();
     if (CollectionUtils.isEmpty(userDetails)) {
       ProjectLogger.log(
-          "BackgroundUserDataEncryptionActor:decryptData: Empty user details.", LoggerEnum.INFO);
+          "BackgroundUserDataEncryptionActor:decryptData: Empty user details.",
+          LoggerEnum.INFO);
       return;
     }
+    UserEncryptionService userEncryptionService = UserEncryptionServiceImpl.getInstance();
     for (Map<String, Object> userMap : userDetails) {
       List<String> fieldsToDecrypt = userEncryptionService.getEncryptedFields(userMap);
       if (CollectionUtils.isNotEmpty(fieldsToDecrypt)) {
@@ -120,6 +119,7 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private List<Map<String, Object>> getUserDetails(Request request) {
     List<String> userIds = (List<String>) request.getRequest().get(JsonKey.USER_IDs);
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
             JsonKey.SUNBIRD, JsonKey.USER, null, userIds);
@@ -134,6 +134,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
       Map<String, Object> userMap, List<String> fieldsToEncrypt) {
     try {
       UserUtility.encryptSpecificUserData(userMap, fieldsToEncrypt);
+      CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+      Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
       cassandraOperation.updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
       ProjectLogger.log(
           "BackgroundUserDataEncryptionActor:encryptUserDataAndUpdateDB: Updating user data for userId = "
@@ -163,6 +165,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
       Map<String, Object> userMap, List<String> fieldsToDecrypt) {
     try {
       UserUtility.decryptSpecificUserData(userMap, fieldsToDecrypt);
+      CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+      Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
       cassandraOperation.updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
       ProjectLogger.log(
           "BackgroundUserDataEncryptionActor:decryptUserDataAndUpdateDB: Updating user data for userId = "
@@ -190,6 +194,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private List<Map<String, Object>> getAddressList(String userId) {
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
     Response response =
         cassandraOperation.getRecordsByProperty(
             addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, userId);
@@ -197,6 +203,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
   }
 
   private void updateAddressList(List<Map<String, Object>> addressList) {
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
     for (Map<String, Object> address : addressList) {
       cassandraOperation.updateRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
     }
@@ -213,4 +221,5 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
 
     tellToAnother(backgroundSyncRequest);
   }
+
 }

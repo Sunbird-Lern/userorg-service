@@ -2,9 +2,6 @@ package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.actor.router.ActorConfig;
@@ -14,7 +11,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.OneWayHashing;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -31,9 +27,18 @@ import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Target;
 import org.sunbird.telemetry.dto.Telemetry;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @ActorConfig(
   tasks = {"mergeUser"},
@@ -42,7 +47,6 @@ import org.sunbird.user.util.KafkaConfigConstants;
 public class UserMergeActor extends UserBaseActor {
   String topic = null;
   Producer<String, String> producer = null;
-  private ObjectMapper objectMapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
@@ -92,7 +96,8 @@ public class UserMergeActor extends UserBaseActor {
     if (!mergee.getIsDeleted()) {
       prepareMergeeAccountData(mergee, mergeeDBMap);
       userRequest.put(JsonKey.USER_MERGEE_ACCOUNT, mergeeDBMap);
-      Response mergeeResponse = getUserDao().updateUser(mergeeDBMap);
+      UserDao userDao = UserDaoImpl.getInstance();
+      Response mergeeResponse = userDao.updateUser(mergeeDBMap);
       String mergeeResponseStr = (String) mergeeResponse.get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "UserMergeActor: updateUserMergeDetails: mergeeResponseStr = " + mergeeResponseStr,
@@ -122,7 +127,7 @@ public class UserMergeActor extends UserBaseActor {
               });
 
       // create telemetry event for merge
-      triggerUserMergeTelemetry(telemetryMap, merger);
+      triggerUserMergeTelemetry(telemetryMap, merger, userRequest.getContext());
 
     } else {
       ProjectLogger.log(
@@ -176,6 +181,7 @@ public class UserMergeActor extends UserBaseActor {
   private void mergeCertCourseDetails(User mergee, User merger) throws IOException {
     String content = null;
     Telemetry userCertMergeRequest = createAccountMergeTopicData(mergee, merger);
+    ObjectMapper objectMapper = new ObjectMapper();
     content = objectMapper.writeValueAsString(userCertMergeRequest);
     ProjectLogger.log(
         "UserMergeActor:mergeCertCourseDetails: Kafka producer topic::" + content,
@@ -217,14 +223,14 @@ public class UserMergeActor extends UserBaseActor {
     return mergeUserEvent;
   }
 
-  private void triggerUserMergeTelemetry(Map telemetryMap, User merger) {
+  private void triggerUserMergeTelemetry(Map telemetryMap, User merger, Map<String,Object> context) {
     ProjectLogger.log(
         "UserMergeActor:triggerUserMergeTelemetry: generating telemetry event for merge");
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", merger.getRootOrgId());
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    context.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
@@ -243,7 +249,7 @@ public class UserMergeActor extends UserBaseActor {
         correlatedObject);
     telemetryMap.remove(JsonKey.ID);
     telemetryMap.remove(JsonKey.USER_ID);
-    TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
   }
 
   private void mergeUserDetailsToEs(Request userRequest) {

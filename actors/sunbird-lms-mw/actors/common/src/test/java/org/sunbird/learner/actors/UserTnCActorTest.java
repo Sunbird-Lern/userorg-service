@@ -117,10 +117,9 @@ public class UserTnCActorTest {
     recipientSearchQuery.put(JsonKey.IS_DELETED, true);
     promise_recipientSearchQuery.trySuccess(recipientSearchQuery);
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(promise_recipientSearchQuery.future());
+            .thenReturn(promise_recipientSearchQuery.future());
     ProjectCommonException response =
-        setRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("10 second"), ProjectCommonException.class);
+            setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), response.getCode());
     Assert.assertEquals("User account has been blocked .", response.getMessage());
   }

@@ -23,20 +23,15 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 public class UpdateUserCountScheduler extends BaseJob {
 
   @Override
-  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+  public void execute(JobExecutionContext ctx) {
     ProjectLogger.log(
         "UpdateUserCountScheduler:execute: Triggered Update user count Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
             + ctx.getJobDetail().toString(),
         LoggerEnum.INFO.name());
-    Util.initializeContextForSchedulerJob(
-        JsonKey.SYSTEM, ctx.getFireInstanceId(), JsonKey.SCHEDULER_JOB);
-    Map<String, Object> logInfo =
-        genarateLogInfo(JsonKey.SYSTEM, ctx.getJobDetail().getDescription());
     List<Object> locIdList = new ArrayList<>();
     Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.getAllRecords(
             geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName());
@@ -55,18 +50,5 @@ public class UpdateUserCountScheduler extends BaseJob {
     ProjectLogger.log(
         "UpdateUserCountScheduler:execute: calling BackgroundService actor from scheduler");
     tellToBGRouter(request);
-    TelemetryUtil.telemetryProcessingCall(logInfo, null, null, TelemetryEvents.LOG.getName());
-  }
-
-  private Map<String, Object> genarateLogInfo(String logType, String message) {
-
-    Map<String, Object> info = new HashMap<>();
-    info.put(JsonKey.LOG_TYPE, logType);
-    long startTime = System.currentTimeMillis();
-    info.put(JsonKey.START_TIME, startTime);
-    info.put(JsonKey.MESSAGE, message);
-    info.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
-
-    return info;
   }
 }

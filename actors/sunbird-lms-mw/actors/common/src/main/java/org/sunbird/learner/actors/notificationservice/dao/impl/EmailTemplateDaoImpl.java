@@ -36,8 +36,8 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
       idList.add(templateName);
     }
     Response response =
-        getCassandraOperation()
-            .getRecordsByPrimaryKeys(JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME);
+        getCassandraOperation().getRecordsByPrimaryKeys(
+            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME);
     List<Map<String, Object>> emailTemplateList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> map = Collections.emptyMap();
@@ -47,7 +47,8 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
     return (String) map.get(TEMPLATE);
   }
 
-  private CassandraOperation getCassandraOperation() {
+  private CassandraOperation getCassandraOperation(){
     return ServiceFactory.getInstance();
   }
+
 }

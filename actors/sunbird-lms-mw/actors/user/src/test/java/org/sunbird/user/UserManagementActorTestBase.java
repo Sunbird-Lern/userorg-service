@@ -8,6 +8,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import scala.concurrent.Future;
 import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,11 +125,11 @@ public abstract class UserManagementActorTestBase {
     promise.success(getEsResponseMap());
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(promise.future());
-    Map<String, Object> map = new HashMap<>();
+    Map<String,Object>map=new HashMap<>();
     Promise<String> esPromise = Futures.promise();
     esPromise.success("success");
     when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-        .thenReturn(esPromise.future());
+      .thenReturn(esPromise.future());
     PowerMockito.mockStatic(Util.class);
     Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 

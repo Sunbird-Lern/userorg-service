@@ -3,6 +3,7 @@ package org.sunbird.models.certificate;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -11,102 +12,93 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Certificate implements Serializable {
 
-  private String id;
-  private String accessCode;
-  private Timestamp createdAt;
-  private Timestamp updatedAt;
-  private String userId;
-  private Map<String, String> store;
-  private String otherLink;
-  private String oldId;
+    private String id;
+    private String accessCode;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
+    private String userId;
+    private Map<String,String>store;
+    private String otherLink;
+    private String oldId;
 
-  public String getId() {
-    return id;
-  }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public String getAccessCode() {
-    return accessCode;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  public void setAccessCode(String accessCode) {
-    this.accessCode = accessCode;
-  }
+    public String getAccessCode() {
+        return accessCode;
+    }
 
-  public Timestamp getCreatedAt() {
-    return createdAt;
-  }
+    public void setAccessCode(String accessCode) {
+        this.accessCode = accessCode;
+    }
 
-  public void setCreatedAt(Timestamp createdAt) {
-    this.createdAt = createdAt;
-  }
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
 
-  public Timestamp getUpTimesatmdAt() {
-    return updatedAt;
-  }
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 
-  public void setUpTimesatmdAt(Timestamp upTimesatmdAt) {
-    this.updatedAt = upTimesatmdAt;
-  }
+    public Timestamp getUpTimesatmdAt() {
+        return updatedAt;
+    }
 
-  public String getUserId() {
-    return userId;
-  }
+    public void setUpTimesatmdAt(Timestamp upTimesatmdAt) {
+        this.updatedAt = upTimesatmdAt;
+    }
 
-  public void setUserId(String userId) {
-    this.userId = userId;
-  }
+    public String getUserId() {
+        return userId;
+    }
 
-  @JsonProperty("store")
-  public Map<String, String> getStoreMap() {
-    return store;
-  }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-  @JsonProperty("store")
-  public void setStore(Map<String, String> store) {
-    this.store = store;
-  }
+    @JsonProperty("store")
+    public Map<String, String> getStoreMap() {
+        return store;
+    }
 
-  public String getOtherLink() {
-    return otherLink;
-  }
 
-  public void setOtherLink(String otherLink) {
-    this.otherLink = otherLink;
-  }
+    @JsonProperty("store")
+    public void setStore(Map<String, String> store) {
+        this.store = store;
+    }
 
-  @Override
-  public String toString() {
-    return "Certificate{"
-        + "id='"
-        + id
-        + '\''
-        + ", accessCode='"
-        + accessCode
-        + '\''
-        + ", createdAt="
-        + createdAt
-        + ", updatedAt="
-        + updatedAt
-        + ", userId='"
-        + userId
-        + '\''
-        + ", store="
-        + store
-        + ", otherLink='"
-        + otherLink
-        + '\''
-        + '}';
-  }
+    public String getOtherLink() {
+        return otherLink;
+    }
 
-  public String getOldId() {
-    return oldId;
-  }
+    public void setOtherLink(String otherLink) {
+        this.otherLink = otherLink;
+    }
 
-  public void setOldId(String oldId) {
-    this.oldId = oldId;
-  }
+    @Override
+    public String toString() {
+        return "Certificate{" +
+                "id='" + id + '\'' +
+                ", accessCode='" + accessCode + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", userId='" + userId + '\'' +
+                ", store=" + store +
+                ", otherLink='" + otherLink + '\'' +
+                '}';
+    }
+
+    public String getOldId() {
+        return oldId;
+    }
+
+    public void setOldId(String oldId) {
+        this.oldId = oldId;
+    }
 }

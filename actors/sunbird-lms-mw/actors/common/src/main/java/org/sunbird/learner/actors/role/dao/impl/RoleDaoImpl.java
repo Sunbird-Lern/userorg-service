@@ -36,6 +36,7 @@ public class RoleDaoImpl implements RoleDao {
     return roleList;
   }
 
+
   public CassandraOperation getCassandraOperation() {
     return ServiceFactory.getInstance();
   }

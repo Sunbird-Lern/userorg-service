@@ -13,14 +13,7 @@ import modules.SignalHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
@@ -49,7 +42,7 @@ public class HealthController extends BaseController {
       handleSigTerm();
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -75,7 +68,7 @@ public class HealthController extends BaseController {
           handleSigTerm();
           Request reqObj = new Request();
           reqObj.setOperation(val);
-          reqObj.setRequestId(ExecutionContext.getRequestId());
+          reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
           reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
           reqObj.setEnv(getEnvironment());
           return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -94,7 +87,7 @@ public class HealthController extends BaseController {
         response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
         response.setId("learner.service.health.api");
         response.setVer(getApiVersion(httpRequest.path()));
-        response.setTs(ExecutionContext.getRequestId());
+        response.setTs(httpRequest.flash().get(JsonKey.REQUEST_ID));
         return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
       } catch (Exception e) {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -154,8 +147,7 @@ public class HealthController extends BaseController {
     response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
     response.setId("Ekstep.service.health.api");
     response.setVer(getApiVersion(request.path()));
-    response.setTs(ExecutionContext.getRequestId());
+    response.setTs(request.flash().get(JsonKey.REQUEST_ID));
     return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
-  
 }

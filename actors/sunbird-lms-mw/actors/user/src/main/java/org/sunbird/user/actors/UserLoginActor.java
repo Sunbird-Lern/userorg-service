@@ -6,9 +6,10 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
+import org.sunbird.services.sso.SSOManager;
+import org.sunbird.services.sso.SSOServiceFactory;
 
 @ActorConfig(
   tasks = {"userCurrentLogin"},
@@ -19,7 +20,6 @@ public class UserLoginActor extends UserBaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
 
     if (operation.equalsIgnoreCase("userCurrentLogin")) {
@@ -40,7 +40,8 @@ public class UserLoginActor extends UserBaseActor {
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(response, self());
     if (Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
-      boolean loginTimeResponse = getSSOManager().addUserLoginTime(userId);
+      SSOManager ssoManager = SSOServiceFactory.getInstance();
+      boolean loginTimeResponse = ssoManager.addUserLoginTime(userId);
       ProjectLogger.log(
           "UserLoginActor:updateUserLoginTime: keycloak response = " + loginTimeResponse);
     }

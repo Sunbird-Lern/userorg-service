@@ -1,9 +1,6 @@
 package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +11,6 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -27,6 +23,10 @@ import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @ActorConfig(
   tasks = {"getRoles", "assignRoles"},
   asyncTasks = {}
@@ -38,7 +38,6 @@ public class UserRoleActor extends UserBaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
 
     switch (operation) {
@@ -106,7 +105,7 @@ public class UserRoleActor extends UserBaseActor {
     } else {
       ProjectLogger.log("UserRoleActor: No ES call to save user roles");
     }
-    generateTelemetryEvent(requestMap, userId, "userLevel");
+    generateTelemetryEvent(requestMap, userId, "userLevel", actorMessage.getContext());
   }
 
   private boolean initializeHashTagIdFromOrg(Map<String, Object> requestMap) {

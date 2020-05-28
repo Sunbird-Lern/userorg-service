@@ -20,8 +20,8 @@ public class OrgExternalService {
     dbRequestMap.put(JsonKey.EXTERNAL_ID, externalId.toLowerCase());
     dbRequestMap.put(JsonKey.PROVIDER, provider.toLowerCase());
     Response response =
-        getCassandraOperation()
-            .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap);
+        getCassandraOperation().getRecordsByCompositeKey(
+            KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap);
     List<Map<String, Object>> orgList =
         (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(orgList)) {
@@ -33,7 +33,7 @@ public class OrgExternalService {
     return null;
   }
 
-  private CassandraOperation getCassandraOperation() {
+  private CassandraOperation getCassandraOperation(){
     return ServiceFactory.getInstance();
   }
 }

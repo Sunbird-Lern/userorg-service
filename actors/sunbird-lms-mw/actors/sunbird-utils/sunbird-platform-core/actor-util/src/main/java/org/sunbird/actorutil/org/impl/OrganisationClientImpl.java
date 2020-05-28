@@ -29,9 +29,8 @@ import org.sunbird.models.organisation.Organisation;
 import scala.concurrent.Future;
 
 public class OrganisationClientImpl implements OrganisationClient {
-
+  
   public static OrganisationClient organisationClient = null;
-
   public static OrganisationClient getInstance() {
     if (organisationClient == null) {
       synchronized (OrganisationClientImpl.class) {

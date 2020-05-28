@@ -159,7 +159,7 @@ public class JobProfileManagementActor extends BaseActor {
     jobProfileMap.put(JsonKey.UPDATED_BY, createdBy);
     jobProfileMap.remove(JsonKey.USER_ID);
     getJobProfileDao().upsertJobProfile(jobProfileMap);
-    if (null != addrResponse) {
+    if(null!=addrResponse) {
       jobProfileMap.put(JsonKey.ADDRESS, addrResponse.get(JsonKey.ADDRESS));
     }
     return jobProfileMap;
@@ -210,7 +210,7 @@ public class JobProfileManagementActor extends BaseActor {
     jobProfileMap.put(JsonKey.CREATED_BY, createdBy);
     jobProfileMap.put(JsonKey.USER_ID, requestMap.get(JsonKey.ID));
     getJobProfileDao().createJobProfile(jobProfileMap);
-    if (null != addrResponse) {
+    if(null!=addrResponse) {
       jobProfileMap.put(JsonKey.ADDRESS, addrResponse.get(JsonKey.ADDRESS));
     }
     return jobProfileMap;
@@ -240,11 +240,12 @@ public class JobProfileManagementActor extends BaseActor {
     return addrResponse;
   }
 
-  private JobProfileDao getJobProfileDao() {
+  private JobProfileDao getJobProfileDao(){
     return JobProfileDaoImpl.getInstance();
   }
 
-  private AddressDao getAddressDao() {
+  private AddressDao getAddressDao(){
     return AddressDaoImpl.getInstance();
+
   }
 }

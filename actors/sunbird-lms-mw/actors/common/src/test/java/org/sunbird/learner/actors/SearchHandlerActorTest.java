@@ -1,18 +1,10 @@
 package org.sunbird.learner.actors;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -34,8 +26,21 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.search.SearchHandlerActor;
 import scala.concurrent.Promise;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static akka.testkit.JavaTestKit.duration;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class})
+@PrepareForTest({
+  ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class
+})
 @PowerMockIgnore({"javax.management.*"})
 public class SearchHandlerActorTest {
 
@@ -147,6 +152,7 @@ public class SearchHandlerActorTest {
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
+
   @Test
   public void testInvalidOperation() {
     TestKit probe = new TestKit(system);
@@ -156,8 +162,7 @@ public class SearchHandlerActorTest {
     reqObj.setOperation("INVALID_OPERATION");
 
     subject.tell(reqObj, probe.getRef());
-    ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exc = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exc);
   }
 }

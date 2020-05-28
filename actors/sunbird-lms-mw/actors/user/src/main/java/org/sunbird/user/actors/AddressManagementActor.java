@@ -1,8 +1,5 @@
 package org.sunbird.user.actors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,16 +15,15 @@ import org.sunbird.common.request.Request;
 import org.sunbird.user.dao.AddressDao;
 import org.sunbird.user.dao.impl.AddressDaoImpl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @ActorConfig(
   tasks = {"insertUserAddress", "updateUserAddress"},
   asyncTasks = {"insertUserAddress", "updateUserAddress"}
 )
 public class AddressManagementActor extends BaseActor {
-
-  private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
-  private AddressDao addressDao = AddressDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -54,6 +50,9 @@ public class AddressManagementActor extends BaseActor {
     Response response = new Response();
     List<String> errMsgs = new ArrayList<>();
     List<Map<String, Object>> responseAddressList = new ArrayList<>();
+    EncryptionService encryptionService =
+              org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+                      null);
     try {
       String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID));
       String encCreatedById =
@@ -98,10 +97,14 @@ public class AddressManagementActor extends BaseActor {
     Response response = new Response();
     List<String> errMsgs = new ArrayList<>();
     List<Map<String, Object>> responseAddressList = new ArrayList<>();
+    EncryptionService encryptionService =
+              org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+                      null);
     try {
       String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID));
       String encCreatedById =
           encryptionService.encryptData((String) requestMap.get(JsonKey.CREATED_BY));
+      AddressDao addressDao = AddressDaoImpl.getInstance();
       for (int i = 0; i < addressList.size(); i++) {
         try {
           Map<String, Object> address = addressList.get(i);
@@ -149,6 +152,7 @@ public class AddressManagementActor extends BaseActor {
 
   private Map<String, Object> createAddress(
       String encUserId, String encCreatedById, Map<String, Object> address) {
+    AddressDao addressDao = AddressDaoImpl.getInstance();
     address.put(JsonKey.CREATED_BY, encCreatedById);
     address.put(JsonKey.USER_ID, encUserId);
     address.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));

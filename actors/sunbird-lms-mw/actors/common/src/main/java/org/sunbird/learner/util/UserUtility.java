@@ -24,11 +24,11 @@ public final class UserUtility {
   private static List<String> userKeyToEncrypt;
   private static List<String> addressKeyToEncrypt;
   private static List<String> userKeyToDecrypt;
-  private static List<String> userKeysToMasked;
+  private static List<String>userKeysToMasked;
   private static DecryptionService decryptionService;
   private static DataMaskingService maskingService;
-  private static List<String> phoneMaskedAttributes;
-  private static List<String> emailMaskedAttributes;
+  private static List<String>phoneMaskedAttributes;
+  private static List<String>emailMaskedAttributes;
 
   static {
     init();
@@ -187,38 +187,29 @@ public final class UserUtility {
     return StringUtils.EMPTY;
   }
 
-  private static void init() {
+  private static void init(){
     decryptionService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-            .getDecryptionServiceInstance(null);
+            org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+                    null);
     maskingService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
-            null);
+            org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
+                    null);
     String userKey = PropertiesCache.getInstance().getProperty("userkey.encryption");
     userKeyToEncrypt = new ArrayList<>(Arrays.asList(userKey.split(",")));
-    ProjectLogger.log(
-        "UserUtility:init:user encrypt  attributes got".concat(userKey + ""),
-        LoggerEnum.INFO.name());
+    ProjectLogger.log("UserUtility:init:user encrypt  attributes got".concat(userKey+""), LoggerEnum.INFO.name());
     String addressKey = PropertiesCache.getInstance().getProperty("addresskey.encryption");
-    ProjectLogger.log(
-        "UserUtility:init:user address encrypt  attributes got".concat(addressKey + ""),
-        LoggerEnum.INFO.name());
+    ProjectLogger.log("UserUtility:init:user address encrypt  attributes got".concat(addressKey+""), LoggerEnum.INFO.name());
     addressKeyToEncrypt = new ArrayList<>(Arrays.asList(addressKey.split(",")));
     String userKeyDecrypt = PropertiesCache.getInstance().getProperty("userkey.decryption");
-    String userKeyToMasked = PropertiesCache.getInstance().getProperty("userkey.masked");
+    String userKeyToMasked=PropertiesCache.getInstance().getProperty("userkey.masked");
     userKeyToDecrypt = new ArrayList<>(Arrays.asList(userKeyDecrypt.split(",")));
-    userKeysToMasked = new ArrayList<>(Arrays.asList(userKeyToMasked.split(",")));
-    String emailTypeAttributeKey =
-        PropertiesCache.getInstance().getProperty("userkey.emailtypeattributes");
-    String phoneTypeAttributeKey =
-        PropertiesCache.getInstance().getProperty("userkey.phonetypeattributes");
-    emailMaskedAttributes = new ArrayList<>(Arrays.asList(emailTypeAttributeKey.split(",")));
-    ProjectLogger.log(
-        "UserUtility:init:email masked attributes got".concat(emailTypeAttributeKey + ""),
-        LoggerEnum.INFO.name());
-    phoneMaskedAttributes = new ArrayList<>(Arrays.asList(phoneTypeAttributeKey.split(",")));
-    ProjectLogger.log(
-        "UserUtility:init:phone masked attributes got".concat(phoneTypeAttributeKey + ""),
-        LoggerEnum.INFO.name());
+    userKeysToMasked=new ArrayList<>(Arrays.asList(userKeyToMasked.split(",")));
+    String emailTypeAttributeKey=PropertiesCache.getInstance().getProperty("userkey.emailtypeattributes");
+    String phoneTypeAttributeKey=PropertiesCache.getInstance().getProperty("userkey.phonetypeattributes");
+    emailMaskedAttributes=new ArrayList<>(Arrays.asList(emailTypeAttributeKey.split(",")));
+    ProjectLogger.log("UserUtility:init:email masked attributes got".concat(emailTypeAttributeKey+""), LoggerEnum.INFO.name());
+    phoneMaskedAttributes=new ArrayList<>(Arrays.asList(phoneTypeAttributeKey.split(",")));
+    ProjectLogger.log("UserUtility:init:phone masked attributes got".concat(phoneTypeAttributeKey+""),LoggerEnum.INFO.name());
+
   }
 }

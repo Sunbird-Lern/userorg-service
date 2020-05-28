@@ -1,10 +1,5 @@
 package org.sunbird.learner.actors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -17,15 +12,15 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.SearchTelemetryUtil;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import scala.concurrent.Future;
+
+import java.util.*;
 
 /** This class provides API's to create, update, get and delete user note */
 @ActorConfig(
@@ -34,7 +29,6 @@ import scala.concurrent.Future;
 )
 public class NotesManagementActor extends BaseActor {
 
-  private Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -42,8 +36,6 @@ public class NotesManagementActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    // set request id fto thread loacl...
-    ExecutionContext.setRequestId(request.getRequestId());
     switch (request.getOperation()) {
       case "createNote":
         createNote(request);
@@ -77,7 +69,6 @@ public class NotesManagementActor extends BaseActor {
     // object of telemetry event...
     Map<String, Object> targetObject = new HashMap<>();
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
-
     try {
       Map<String, Object> req = actorMessage.getRequest();
       if (!validUser((String) req.get(JsonKey.USER_ID))) {
@@ -99,6 +90,7 @@ public class NotesManagementActor extends BaseActor {
         req.put(JsonKey.UPDATED_BY, updatedBy);
       }
       req.put(JsonKey.IS_DELETED, false);
+      Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.insertRecord(
               userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
@@ -118,7 +110,7 @@ public class NotesManagementActor extends BaseActor {
       TelemetryUtil.addTargetObjectRollUp(rollup, targetObject);
 
       TelemetryUtil.telemetryProcessingCall(
-          actorMessage.getRequest(), targetObject, correlatedObject);
+          actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
 
       Request request = new Request();
       request.setOperation(ActorOperations.INSERT_USER_NOTES_ES.getValue());
@@ -143,7 +135,6 @@ public class NotesManagementActor extends BaseActor {
     // object of telemetry event...
     Map<String, Object> targetObject = new HashMap<>();
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
-
     try {
       String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
@@ -172,7 +163,7 @@ public class NotesManagementActor extends BaseActor {
       req.put(JsonKey.ID, noteId);
       req.put(JsonKey.UPDATED_BY, userId);
       req.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
-
+      Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
               userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
@@ -188,7 +179,7 @@ public class NotesManagementActor extends BaseActor {
       TelemetryUtil.addTargetObjectRollUp(rollup, targetObject);
 
       TelemetryUtil.telemetryProcessingCall(
-          actorMessage.getRequest(), targetObject, correlatedObject);
+          actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
 
       Request request = new Request();
       request.getRequest().put(JsonKey.NOTE, req);
@@ -304,8 +295,6 @@ public class NotesManagementActor extends BaseActor {
       result = new HashMap<>();
     }
     String[] types = {EsType.usernotes.getTypeName()};
-    SearchTelemetryUtil.generateSearchTelemetryEvent(
-        searchDto, types, result); // generating search for telemetry
     return result;
   }
 
@@ -342,6 +331,7 @@ public class NotesManagementActor extends BaseActor {
       req.put(JsonKey.IS_DELETED, true);
       req.put(JsonKey.UPDATED_BY, userId);
       req.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+      Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
               userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
@@ -353,7 +343,7 @@ public class NotesManagementActor extends BaseActor {
       TelemetryUtil.generateCorrelatedObject(userId, JsonKey.USER, null, correlatedObject);
 
       TelemetryUtil.telemetryProcessingCall(
-          actorMessage.getRequest(), targetObject, correlatedObject);
+          actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
 
       Request request = new Request();
       request.getRequest().put(JsonKey.NOTE, req);

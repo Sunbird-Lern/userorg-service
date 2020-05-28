@@ -30,10 +30,7 @@ import org.sunbird.user.util.UserActorOperations;
 )
 public class UserExternalIdManagementActor extends BaseActor {
 
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static DecryptionService service =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
+  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -90,8 +87,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     sender().tell(response, self());
   }
 
-  @SuppressWarnings("unchecked")
-  public static void updateUserExtId(
+  public void updateUserExtId(
       Map<String, Object> requestMap, List<Map<String, Object>> responseExternalIdList) {
     List<Map<String, String>> dbResExternalIds = getUserExternalIds(requestMap);
     List<Map<String, String>> externalIds =
@@ -145,7 +141,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     }
   }
 
-  private static Optional<Map<String, String>> checkExternalID(
+  private Optional<Map<String, String>> checkExternalID(
       List<Map<String, String>> dbResExternalIds, Map<String, String> extIdMap) {
     Optional<Map<String, String>> extMap =
         dbResExternalIds
@@ -164,8 +160,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     return extMap;
   }
 
-  @SuppressWarnings("unchecked")
-  private static List<Map<String, String>> getUserExternalIds(Map<String, Object> requestMap) {
+  private List<Map<String, String>> getUserExternalIds(Map<String, Object> requestMap) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
@@ -179,7 +174,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     return dbResExternalIds;
   }
 
-  private static void deleteUserExternalId(Map<String, String> map) {
+  private void deleteUserExternalId(Map<String, String> map) {
     map.remove(JsonKey.LAST_UPDATED_BY);
     map.remove(JsonKey.CREATED_BY);
     map.remove(JsonKey.LAST_UPDATED_ON);
@@ -191,7 +186,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map);
   }
 
-  private static void throwExternalIDNotFoundException(
+  private void throwExternalIDNotFoundException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
         ResponseCode.externalIdNotFound.getErrorCode(),
@@ -200,7 +195,7 @@ public class UserExternalIdManagementActor extends BaseActor {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  private static Map<String, Object> upsertUserExternalIdentityData(
+  private Map<String, Object> upsertUserExternalIdentityData(
       Map<String, String> extIdsMap, Map<String, Object> requestMap, String operation) {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.EXTERNAL_ID, extIdsMap.get(JsonKey.ID));

@@ -6,15 +6,6 @@ import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,15 +23,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -69,12 +52,17 @@ import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
+import java.sql.Timestamp;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.Callable;
+
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3"},
   asyncTasks = {}
 )
 public class UserManagementActor extends BaseActor {
-  private ObjectMapper mapper = new ObjectMapper();
+
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private UserService userService = UserServiceImpl.getInstance();
@@ -84,14 +72,13 @@ public class UserManagementActor extends BaseActor {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
+          InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     cacheFrameworkFieldsConfig();
     if (systemSettingActorRef == null) {
       systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
@@ -133,7 +120,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    processUserRequestV3(userMap, signupType, source);
+    processUserRequestV3(userMap, signupType, source, actorMessage.getContext());
   }
 
   private void cacheFrameworkFieldsConfig() {
@@ -150,8 +137,7 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
@@ -161,17 +147,17 @@ public class UserManagementActor extends BaseActor {
     }
     if (!isPrivate) {
       if (StringUtils.isNotBlank(callerId)) {
-        userService.validateUploader(actorMessage);
+          userService.validateUploader(actorMessage);
       } else {
-        userService.validateUserId(actorMessage);
+          userService.validateUserId(actorMessage);
       }
     }
     Map<String, Object> userMap = actorMessage.getRequest();
-    userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
     validateUserFrameworkData(userMap, userDbRecord);
     validateUserTypeForUpdate(userMap);
+    ObjectMapper mapper = new ObjectMapper();
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.UPDATE);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -233,10 +219,12 @@ public class UserManagementActor extends BaseActor {
       completeUserDetails.putAll(requestMap);
       saveUserDetailsToEs(completeUserDetails);
     }
+    Map<String, Object> targetObject = null;
+    List<Map<String, Object>> correlatedObject = new ArrayList<>();
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject,actorMessage.getContext());
   }
 
   @SuppressWarnings("unchecked")
@@ -320,6 +308,7 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> org, Map<String, Object> orgDbMap, Request actorMessage) {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    ObjectMapper mapper = new ObjectMapper();
     if (MapUtils.isNotEmpty(org)) {
       UserOrg userOrg = mapper.convertValue(org, UserOrg.class);
       String orgId = (String) org.get(JsonKey.ORGANISATION_ID);
@@ -347,6 +336,7 @@ public class UserManagementActor extends BaseActor {
     Set<String> ids = orgDbMap.keySet();
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     ids.remove(rootOrgId);
+    ObjectMapper mapper = new ObjectMapper();
     for (String id : ids) {
       UserOrg userOrg = mapper.convertValue(orgDbMap.get(id), UserOrg.class);
       userOrg.setDeleted(true);
@@ -398,7 +388,6 @@ public class UserManagementActor extends BaseActor {
       } else {
         frameworkIdList = (List<String>) framework.get(JsonKey.ID);
       }
-
       userRequestMap.put(JsonKey.FRAMEWORK, framework);
       List<String> frameworkFields =
           DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
@@ -439,21 +428,12 @@ public class UserManagementActor extends BaseActor {
    * @param actorMessage Request
    */
   private void createUser(Request actorMessage) {
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    String signupType =
-        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
-    if (StringUtils.isNotBlank(version)
-        && (JsonKey.VERSION_2.equalsIgnoreCase(version)
-            || JsonKey.VERSION_3.equalsIgnoreCase(version))) {
+    if (StringUtils.isNotBlank(version) && (JsonKey.VERSION_2.equalsIgnoreCase(version) || JsonKey.VERSION_3.equalsIgnoreCase(version))) {
       userRequestValidator.validateCreateUserV2Request(actorMessage);
       if (StringUtils.isNotBlank(callerId)) {
         userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
@@ -523,7 +503,7 @@ public class UserManagementActor extends BaseActor {
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
     }
-    processUserRequest(userMap, callerId, signupType, source);
+    processUserRequest(userMap, callerId, actorMessage.getContext());
   }
 
   private void validateUserType(Map<String, Object> userMap, boolean isCustodianOrg) {
@@ -558,7 +538,6 @@ public class UserManagementActor extends BaseActor {
   private void validateChannelAndOrganisationId(Map<String, Object> userMap) {
     String organisationId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
-
     String subOrgRootOrgId = "";
     if (StringUtils.isNotBlank(organisationId)) {
       Organisation organisation = organisationClient.esGetOrgById(organisationId);
@@ -602,7 +581,7 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.parameterMismatch.getErrorMessage(), StringFormatter.joinByComma(param)));
   }
 
-  private void processUserRequestV3(Map<String, Object> userMap, String signupType, String source) {
+  private void processUserRequestV3(Map<String, Object> userMap, String signupType, String source, Map<String, Object> context) {
     UserUtil.setUserDefaultValueForV3(userMap);
     UserUtil.toLower(userMap);
     UserUtil.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE));
@@ -700,16 +679,16 @@ public class UserManagementActor extends BaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
 
-    processTelemetry(userMap, signupType, source, userId);
+    processTelemetry(userMap, signupType, source, userId,context);
   }
 
   private void processTelemetry(
-      Map<String, Object> userMap, String signupType, String source, String userId) {
+          Map<String, Object> userMap, String signupType, String source, String userId, Map<String, Object> context) {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    context.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
@@ -727,7 +706,7 @@ public class UserManagementActor extends BaseActor {
       ProjectLogger.log("UserManagementActor:processUserRequest: No source found");
     }
 
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject,context);
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap) {
@@ -751,9 +730,10 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void processUserRequest(
-      Map<String, Object> userMap, String callerId, String signupType, String source) {
+      Map<String, Object> userMap, String callerId, Map<String,Object> reqContext) {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId);
+    ObjectMapper mapper = new ObjectMapper();
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -809,27 +789,25 @@ public class UserManagementActor extends BaseActor {
     response.put(
         JsonKey.ERRORS,
         ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
-
+  
     Response syncResponse = new Response();
     syncResponse.putAll(response.getResult());
-
-    if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
-      Map<String, Object> userDetails =
-          Util.getUserDetails(userId, getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()));
+    
+    if(null != resp && userMap.containsKey("sync") && (boolean)userMap.get("sync")) {
+        Map<String, Object> userDetails =
+                Util.getUserDetails(userId, getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()));
       Future<Response> future =
-          saveUserToES(userDetails)
-              .map(
-                  new Mapper<String, Response>() {
-                    @Override
-                    public Response apply(String parameter) {
-                      return syncResponse;
-                    }
-                  },
-                  context().dispatcher());
+        saveUserToES(userDetails).map(new Mapper<String, Response>() {
+          @Override
+          public Response apply(String parameter) {
+            return syncResponse;
+          }
+        },context().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
-    } else {
+    }
+    else {
       sender().tell(response, self());
-      if (null != resp) {
+      if(null != resp) {
         saveUserDetailsToEs(esResponse);
       }
     }
@@ -841,25 +819,28 @@ public class UserManagementActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    reqContext.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
     TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
+      String signupType =
+              reqContext.get(JsonKey.SIGNUP_TYPE) != null
+                      ? (String) reqContext.get(JsonKey.SIGNUP_TYPE)
+                      : "";
+      String source =
+              reqContext.get(JsonKey.REQUEST_SOURCE) != null
+                      ? (String) reqContext.get(JsonKey.REQUEST_SOURCE)
+                      : "";
     if (StringUtils.isNotBlank(signupType)) {
       TelemetryUtil.generateCorrelatedObject(
           signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No signupType found");
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No source found");
     }
-
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject,reqContext);
   }
 
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
@@ -932,7 +913,7 @@ public class UserManagementActor extends BaseActor {
 
   private String getCustodianRootOrgId() {
     String custodianChannel =
-        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef);
+            userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef);
     return userService.getRootOrgIdFromChannel(custodianChannel);
   }
 
@@ -968,7 +949,6 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap) {
-
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
@@ -976,7 +956,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void saveUserToKafka(Map<String, Object> completeUserMap) {
-
+    ObjectMapper mapper = new ObjectMapper();
     try {
       String event = mapper.writeValueAsString(completeUserMap);
       // user_events

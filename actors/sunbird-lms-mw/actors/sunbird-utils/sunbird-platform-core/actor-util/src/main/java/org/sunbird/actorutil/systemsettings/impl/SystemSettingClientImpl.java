@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
@@ -23,7 +24,6 @@ public class SystemSettingClientImpl implements SystemSettingClient {
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private static SystemSettingClient systemSettingClient = null;
-
   public static SystemSettingClient getInstance() {
     if (null == systemSettingClient) {
       systemSettingClient = new SystemSettingClientImpl();
@@ -33,9 +33,7 @@ public class SystemSettingClientImpl implements SystemSettingClient {
 
   @Override
   public SystemSetting getSystemSettingByField(ActorRef actorRef, String field) {
-    ProjectLogger.log(
-        "SystemSettingClientImpl:getSystemSettingByField: field is " + field,
-        LoggerEnum.INFO.name());
+    ProjectLogger.log("SystemSettingClientImpl:getSystemSettingByField: field is " + field, LoggerEnum.INFO.name());
     SystemSetting systemSetting = getSystemSetting(actorRef, JsonKey.FIELD, field);
     return systemSetting;
   }
@@ -53,7 +51,7 @@ public class SystemSettingClientImpl implements SystemSettingClient {
         for (int i = 0; i < numKeys - 1; i++) {
           valueMap = objectMapper.convertValue(valueMap.get(keys[i]), Map.class);
         }
-        return (T) objectMapper.convertValue(valueMap.get(keys[numKeys - 1]), typeReference);
+        return (T)objectMapper.convertValue(valueMap.get(keys[numKeys - 1]), typeReference);
       } catch (Exception e) {
         ProjectLogger.log(
             "SystemSettingClientImpl:getSystemSettingByFieldAndKey: Exception occurred with error message = "

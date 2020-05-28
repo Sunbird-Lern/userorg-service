@@ -5,10 +5,11 @@ import org.junit.Test;
 
 public class ElasticSearchSettingsTest {
 
-  @Test
-  public void testcreateSettingsForIndex() {
+	@Test
+	public void testcreateSettingsForIndex() {
 
-    String settings = ElasticSearchSettings.createSettingsForIndex();
-    Assert.assertNotNull(settings);
-  }
+		String settings = ElasticSearchSettings.createSettingsForIndex();
+		Assert.assertNotNull(settings);
+	}
+
 }
