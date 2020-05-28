@@ -158,12 +158,14 @@ public class UserManagementActor extends BaseActor {
         LoggerEnum.INFO);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       userMap.put(JsonKey.CREATED_BY, userId);
-      // If user account isManagedUser(passed in request) should be same as context user_id
+
       if (!(StringUtils.isNotBlank(managedBy))) {
+        // If user account isManagedUser (managedBy passed in request) should be same as context user_id
         userService.validateUserId(actorMessage, managedBy);
+
+        //If managedUser limit is set, validate total number of managed users against it
+        UserUtil.validateManagedUserLimit(managedBy);
       }
-      //If managedUser limit is set, validate total number of managed users against it
-      UserUtil.validateManagedUserLimit(managedBy);
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy);
   }
