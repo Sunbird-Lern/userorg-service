@@ -14,8 +14,14 @@ import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
-  tasks = {},
-  asyncTasks = {"processOnBoardingMailAndSms"}
+  tasks = {
+    "processOnBoardingMailAndSms",
+    "processPasswordResetMailAndSms"
+  },
+  asyncTasks = {
+    "processOnBoardingMailAndSms",
+    "processPasswordResetMailAndSms"
+  }
 )
 public class UserOnboardingNotificationActor extends BaseActor {
 
