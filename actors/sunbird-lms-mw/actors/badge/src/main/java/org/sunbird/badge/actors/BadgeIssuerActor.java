@@ -19,6 +19,16 @@ import org.sunbird.learner.util.Util;
 )
 public class BadgeIssuerActor extends BaseActor {
 
+  private BadgingService badgingService;
+
+  public BadgeIssuerActor() {
+    this.badgingService = BadgingFactory.getInstance();
+  }
+
+  public BadgeIssuerActor(BadgingService badgingService) {
+    this.badgingService = badgingService;
+  }
+
   @Override
   public void onReceive(Request request) throws Throwable {
     ProjectLogger.log("BadgeIssuerActor  onReceive called", LoggerEnum.INFO.name());
@@ -50,22 +60,22 @@ public class BadgeIssuerActor extends BaseActor {
    * @param actorMessage
    */
   private void createBadgeIssuer(Request actorMessage) throws IOException {
-    Response response = BadgingFactory.getInstance().createIssuer(actorMessage);
+    Response response = badgingService.createIssuer(actorMessage);
     sender().tell(response, self());
   }
 
   private void getBadgeIssuer(Request actorMessage) throws IOException {
-    Response response = BadgingFactory.getInstance().getIssuerDetails(actorMessage);
+    Response response = badgingService.getIssuerDetails(actorMessage);
     sender().tell(response, self());
   }
 
   private void getAllIssuer(Request actorMessage) throws IOException {
-    Response response = BadgingFactory.getInstance().getIssuerList(actorMessage);
+    Response response = badgingService.getIssuerList(actorMessage);
     sender().tell(response, self());
   }
 
   private void deleteIssuer(Request request) throws IOException {
-    Response response = BadgingFactory.getInstance().deleteIssuer(request);
+    Response response = badgingService.deleteIssuer(request);
     sender().tell(response, self());
   }
 }
