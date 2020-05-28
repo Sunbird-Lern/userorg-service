@@ -113,7 +113,6 @@ public class SearchHandlerActor extends BaseActor {
     }
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
-    // create search telemetry event here ...
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
