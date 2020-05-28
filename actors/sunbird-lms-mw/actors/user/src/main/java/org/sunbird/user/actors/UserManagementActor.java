@@ -242,8 +242,6 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotEmpty(managedById)
             && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
         || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
-      /*ProjectCommonException.throwClientErrorException(ResponseCode.
-      managedByEmailPhoneUpdateError);*/
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }

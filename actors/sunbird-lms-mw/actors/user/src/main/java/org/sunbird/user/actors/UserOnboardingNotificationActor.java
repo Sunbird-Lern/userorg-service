@@ -14,10 +14,7 @@ import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
-  tasks = {
-    "processOnBoardingMailAndSms",
-    "processPasswordResetMailAndSms"
-  },
+  tasks = {},
   asyncTasks = {
     "processOnBoardingMailAndSms",
     "processPasswordResetMailAndSms"
