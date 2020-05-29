@@ -55,7 +55,6 @@ public class SearchHandlerActor extends BaseActor {
         List<String> types = (List) objectType;
         filterObjectType = types.get(0);
       }
-
       if (EsType.organisation.getTypeName().equalsIgnoreCase(filterObjectType)) {
         SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
         handleOrgSearchAsyncRequest(
