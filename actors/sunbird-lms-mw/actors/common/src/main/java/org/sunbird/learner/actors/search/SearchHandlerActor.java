@@ -49,13 +49,13 @@ public class SearchHandlerActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.COMPOSITE_SEARCH.getValue())) {
       Map<String, Object> searchQueryMap = request.getRequest();
       Object objectType =
-          ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).get(JsonKey.OBJECT_TYPE);
+          ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
       String filterObjectType = "";
       if (objectType != null && objectType instanceof List) {
         List<String> types = (List) objectType;
         filterObjectType = types.get(0);
       }
-      ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
+
       if (EsType.organisation.getTypeName().equalsIgnoreCase(filterObjectType)) {
         SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
         handleOrgSearchAsyncRequest(
