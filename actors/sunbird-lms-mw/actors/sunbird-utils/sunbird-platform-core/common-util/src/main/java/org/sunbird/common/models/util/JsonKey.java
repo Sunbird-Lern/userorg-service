@@ -1025,6 +1025,8 @@ public final class JsonKey {
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
   public static final String OTP_PHONE_WARD_LOGIN_TEMPLATE = "verifyPhoneOtpTemplateWard";
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
+  public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
+  public static final String MANAGED_USER_LIMIT = "managed_user_limit";
 
   private JsonKey() {}
 }

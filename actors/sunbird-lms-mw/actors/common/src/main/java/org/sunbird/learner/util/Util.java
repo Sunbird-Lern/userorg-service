@@ -1110,7 +1110,7 @@ public final class Util {
    * @param searchQueryMap Query filters as Map.
    * @return List<User> List of User object.
    */
-  private static List<User> searchUser(Map<String, Object> searchQueryMap) {
+  public static List<User> searchUser(Map<String, Object> searchQueryMap) {
     List<User> userList = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
