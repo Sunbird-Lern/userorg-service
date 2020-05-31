@@ -643,7 +643,20 @@ public class UserUtil {
       validateUserExternalIds(user);
     }
   }
-
+  public static void validateExternalIds(User user, String operationType, boolean isCustodianOrg) {
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
+      List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
+      user.setExternalIds(list);
+    }
+    //If operation is update and user is custodian org, ignore uniqueness check
+    if (!(JsonKey.UPDATE.equalsIgnoreCase(operationType) && isCustodianOrg)) {
+      checkExternalIdUniqueness(user, operationType);
+    }
+    if (JsonKey.UPDATE.equalsIgnoreCase(operationType)
+            && CollectionUtils.isNotEmpty(user.getExternalIds())) {
+      validateUserExternalIds(user);
+    }
+  }
   public static void checkEmailSameOrDiff(
       Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
     if (StringUtils.isNotBlank((String) userRequestMap.get(JsonKey.EMAIL))) {
