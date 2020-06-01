@@ -29,6 +29,7 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserFrameworkSuccess() {
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     Request reqObj = getRequest(null, null);
     boolean res = testScenario(reqObj, null);
     assertTrue(res);
