@@ -211,7 +211,7 @@ public class UserManagementActor extends BaseActor {
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     User user = mapper.convertValue(userMap, User.class);
-    UserUtil.validateExternalIds(user, JsonKey.UPDATE, isCustodianOrgUser);
+    UserUtil.validateExternalIds(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
     // not allowing user to update the status,provider,userName
