@@ -631,19 +631,28 @@ public class UserUtil {
     } while (StringUtils.isBlank(userName));
     return decService.decryptData(userName);
   }
-
+  //validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
     checkExternalIdUniqueness(user, operationType);
-    if (JsonKey.UPDATE.equalsIgnoreCase(operationType)
-        && CollectionUtils.isNotEmpty(user.getExternalIds())) {
+  }
+  //validateExternalIds For UPDATE USER
+  public static void validateExternalIdsForUpdateUser(User user, boolean isCustodianOrg) {
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
+      List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
+      user.setExternalIds(list);
+    }
+    //If operation is update and user is custodian org, ignore uniqueness check
+    if (!isCustodianOrg) {
+      checkExternalIdUniqueness(user, JsonKey.UPDATE);
+    }
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user);
     }
   }
-
   public static void checkEmailSameOrDiff(
       Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
     if (StringUtils.isNotBlank((String) userRequestMap.get(JsonKey.EMAIL))) {
