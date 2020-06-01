@@ -1,14 +1,18 @@
 package org.sunbird.feed;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.feed.impl.FeedFactory;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.Feed;
 import org.sunbird.models.user.FeedAction;
 import org.sunbird.models.user.FeedStatus;
@@ -16,7 +20,9 @@ import org.sunbird.models.user.FeedStatus;
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
   private static IFeedService feedService = FeedFactory.getInstance();
-
+  private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private static Map<String, Object> orgIdMap = new HashMap<>();
+  
   public static Response saveFeed(ShadowUser shadowUser, List<String> userIds) {
     return saveFeed(shadowUser, userIds.get(0));
   }
@@ -44,6 +50,9 @@ public class FeedUtil {
       List<String> channelList = (List<String>) data.get(JsonKey.PROSPECT_CHANNELS);
       if (!channelList.contains(shadowUser.getChannel())) {
         channelList.add(shadowUser.getChannel());
+        List<Map<String, String>> orgList =
+          (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
+        orgList.addAll(getOrgDetails(shadowUser.getChannel()));
       }
       response = feedService.update(feedList.get(index));
     }
@@ -60,9 +69,28 @@ public class FeedUtil {
     List<String> channelList = new ArrayList<>();
     channelList.add(shadowUser.getChannel());
     prospectsChannel.put(JsonKey.PROSPECT_CHANNELS, channelList);
+    prospectsChannel.put(JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel()));
     feed.setData(prospectsChannel);
     feed.setUserId(userId);
     return feed;
+  }
+  
+  private static List<Map<String, String>> getOrgDetails(String channel) {
+    Map<String, Object> filters = new HashMap<>();
+    List<Map<String, String>> orgList = new CopyOnWriteArrayList<>();
+    Map<String, String> orgMap = new HashMap<>();
+    filters.put(JsonKey.CHANNEL, channel);
+    filters.put(JsonKey.IS_ROOT_ORG, true);
+    if (!orgIdMap.isEmpty() && orgIdMap.containsKey(channel)) {
+      orgMap = (Map<String, String>) orgIdMap.get(channel);
+    } else {
+      Organisation org = organisationClient.esSearchOrgByFilter(filters).get(0);
+      orgMap.put("id", org.getRootOrgId());
+      orgMap.put("name", org.getChannel());
+      orgIdMap.put(channel, orgMap);
+    }
+    orgList.add(orgMap);
+    return orgList;
   }
 
   private static int getIndexOfMatchingFeed(List<Feed> feedList) {

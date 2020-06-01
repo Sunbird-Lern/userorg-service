@@ -451,6 +451,8 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void processShadowUserMigrate(Request request) throws Exception {
+    ProjectLogger.log(
+      "TenantMigrationActor:processShadowUserMigrate called.", LoggerEnum.INFO.name());
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     String extUserId = (String) request.getRequest().get(JsonKey.USER_EXT_ID);
     String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
@@ -464,15 +466,25 @@ public class TenantMigrationActor extends BaseActor {
       rejectMigration(userId);
       deleteUserFeed(feedId);
     } else if (StringUtils.equalsIgnoreCase(action, JsonKey.ACCEPT)) {
+      ProjectLogger.log(
+        "TenantMigrationActor: processShadowUserMigrate: shadow-user accepted and the extUserId : "
+          + extUserId,
+        LoggerEnum.INFO.name());
       List<ShadowUser> shadowUserList = getShadowUsers(channel, userId);
       checkUserId(shadowUserList);
       int index = getIndexOfShadowUser(shadowUserList, extUserId);
       if (!isIndexValid(index)) {
+        ProjectLogger.log(
+          "TenantMigrationActor: processShadowUserMigrate: user entered invalid externalId ",
+          LoggerEnum.INFO.name());
         if (getRemainingAttempt(shadowUserList) <= 0) {
           deleteUserFeed(feedId);
         }
         response = modifyAttemptCount(response, shadowUserList, extUserId);
       } else {
+        ProjectLogger.log(
+          "TenantMigrationActor: processShadowUserMigrate: user entered valid externalId ",
+          LoggerEnum.INFO.name());
         selfMigrate(request, userId, extUserId, shadowUserList.get(index));
         increaseAttemptCount(shadowUserList.get(index), false);
         shadowUserList.remove(index);
