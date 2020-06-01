@@ -1013,6 +1013,7 @@ public final class JsonKey {
   public static final String NESTED_EXISTS = "nested_exists";
   public static final String NESTED_NOT_EXISTS = "nested_not_exists";
   public static final String PROSPECT_CHANNELS = "prospectChannels";
+  public static final String PROSPECT_CHANNELS_IDS = "prospectChannelsIds";
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
