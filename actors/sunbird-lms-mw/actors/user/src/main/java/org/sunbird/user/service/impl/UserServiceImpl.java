@@ -98,16 +98,19 @@ public class UserServiceImpl implements UserService {
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
     String userId = userExtIdentityDao.getUserId(request);
     ProjectLogger.log(
-      "validateUserId :: ctxtUserId: " + ctxtUserId + "userId: " + userId,
+      "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
-    if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
-        || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
+    //LIUA token is validated when LIUA is updating own account details or LIUA token is validated when updating MUA details
+    if((StringUtils.isEmpty(managedById) && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) ||
+      (StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById))) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
-          ResponseCode.unAuthorized.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
+        ResponseCode.unAuthorized.getErrorCode(),
+        ResponseCode.unAuthorized.getErrorMessage(),
+        ResponseCode.UNAUTHORIZED.getResponseCode());
     }
   }
+  
+  
 
   @Override
   public void syncUserProfile(

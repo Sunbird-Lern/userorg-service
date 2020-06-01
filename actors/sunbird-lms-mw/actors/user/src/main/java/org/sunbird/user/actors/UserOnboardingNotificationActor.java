@@ -15,7 +15,10 @@ import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
   tasks = {},
-  asyncTasks = {"processOnBoardingMailAndSms"}
+  asyncTasks = {
+    "processOnBoardingMailAndSms",
+    "processPasswordResetMailAndSms"
+  }
 )
 public class UserOnboardingNotificationActor extends BaseActor {
 
@@ -25,7 +28,10 @@ public class UserOnboardingNotificationActor extends BaseActor {
   public void onReceive(Request request) throws Throwable {
     if (UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
         .getValue()
-        .equalsIgnoreCase(request.getOperation())) {
+        .equalsIgnoreCase(request.getOperation()) ||
+      UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS
+      .getValue()
+      .equalsIgnoreCase(request.getOperation())) {
       sendEmailAndSms(request);
     } else {
       onReceiveUnsupportedOperation("ProcessOnBoardingMailAndSmsActor");
@@ -39,10 +45,19 @@ public class UserOnboardingNotificationActor extends BaseActor {
     requestMap.put(JsonKey.USERNAME, requestMap.get(JsonKey.USERNAME));
     requestMap.put(JsonKey.REDIRECT_URI, Util.getSunbirdWebUrlPerTenent(requestMap));
     Util.getUserRequiredActionLink(requestMap);
-    // user created successfully send the onboarding mail
-    Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
-    if (null != welcomeMailReqObj) {
-      tellToAnother(welcomeMailReqObj);
+    if (request.getOperation().equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
+      .getValue())) {
+      // user created successfully send the onboarding mail
+      Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
+      if (null != welcomeMailReqObj) {
+        tellToAnother(welcomeMailReqObj);
+      }
+    } else if (request.getOperation().equals(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS
+      .getValue())) {
+      Request resetMailReqObj = Util.sendResetPassMail(requestMap);
+      if (null != resetMailReqObj) {
+        tellToAnother(resetMailReqObj);
+      }
     }
 
     if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.PHONE))) {
