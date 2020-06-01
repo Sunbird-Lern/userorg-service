@@ -157,6 +157,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     when(interServiceCommunication.getResponse(
             Mockito.any(ActorRef.class), Mockito.any(Request.class)))
         .thenReturn(null);
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     boolean result =
         testScenario(
             getRequest(
@@ -167,6 +168,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccess() {
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -183,6 +185,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             Mockito.any(ActorRef.class), Mockito.any(Request.class)))
         .thenReturn(getEsResponseForLocation())
         .thenReturn(getEsResponse());
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     boolean result =
         testScenario(
             getRequest(
@@ -193,6 +196,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccessWithoutUserCallerId() {
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
