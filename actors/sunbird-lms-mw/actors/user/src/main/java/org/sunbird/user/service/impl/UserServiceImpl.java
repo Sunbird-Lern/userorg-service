@@ -95,8 +95,11 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void validateUserId(Request request, String managedById) {
+    String userId = null;
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
-    String userId = userExtIdentityDao.getUserId(request);
+    if (!request.getOperation().equals(ActorOperations.CREATE_USER_V4)) {
+      userId = userExtIdentityDao.getUserId(request);
+    }
     ProjectLogger.log(
       "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
       LoggerEnum.INFO);
