@@ -640,7 +640,7 @@ public class UserUtil {
     checkExternalIdUniqueness(user, operationType);
   }
   //validateExternalIds For UPDATE USER
-  public static void validateExternalIds(User user, boolean isCustodianOrg) {
+  public static void validateExternalIdsForUpdateUser(User user, boolean isCustodianOrg) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
