@@ -232,11 +232,14 @@ public class UserUtil {
     Map<String, Object> user = null;
     String userId = getUserIdFromExternalId(userMap);
     if (!StringUtils.isEmpty(userId)) {
-      Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
-      user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
+      user = getUserFromES(userId);
     }
     return user;
+  }
+  public static Map<String, Object> getUserFromES(String userId) {
+    Future<Map<String, Object>> userF =
+            esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+    return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
   }
 
   public static String getUserIdFromExternalId(Map<String, Object> userMap) {

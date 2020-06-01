@@ -11,13 +11,11 @@ import play.mvc.Result;
 public class FeedController extends BaseController {
 
   public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
-    String callerId = httpRequest.flash().get(JsonKey.USER_ID);
-
     return handleRequest(
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),
         null,
         req -> {
-          FeedRequestValidator.userIdValidation(callerId, userId);
+          FeedRequestValidator.userIdValidation(userId);
           return null;
         },
         userId,

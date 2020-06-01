@@ -1,20 +1,28 @@
 package org.sunbird.user.actors;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.user.util.UserUtil;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
@@ -23,6 +31,7 @@ import org.sunbird.learner.util.Util;
 )
 public class UserFeedActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -32,14 +41,21 @@ public class UserFeedActor extends BaseActor {
     if (ActorOperations.GET_USER_FEED_BY_ID.getValue().equalsIgnoreCase(operation)) {
       ProjectLogger.log(
           "UserFeedActor:onReceive getUserFeed method called", LoggerEnum.INFO.name());
-      String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-      getUserFeed(userId);
+      getUserFeed(request);
     } else {
       onReceiveUnsupportedOperation("UserFeedActor");
     }
   }
 
-  private void getUserFeed(String userId) {
+  private void getUserFeed(Request request) {
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+
+    Map<String, Object> userDbRecord = UserUtil.getUserFromES(userId);
+    String managedBy = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+
+    // If user account isManagedUser (managedBy passed in request) should be same as context user_id
+    userService.validateUserId(request, managedBy);
+
     IFeedService feedService = FeedFactory.getInstance();
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.USER_ID, userId);
