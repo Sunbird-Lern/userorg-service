@@ -623,8 +623,13 @@ public class BaseController extends Controller {
               return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
             } else if (result instanceof File) {
               return createFileDownloadResponse((File) result);
-            } else {
-              return createCommonExceptionResponse(new Exception(), httpReq);
+            }  else {
+              if(StringUtils.isNotEmpty((String)response.getResult().get(JsonKey.MESSAGE)) &&
+                response.getResponseCode().getResponseCode() == 0) {
+                return createCommonResponse(response, responseKey, httpReq);
+              } else {
+                return createCommonExceptionResponse((Exception) result, httpReq);
+              }
             }
           } else if (result instanceof ProjectCommonException) {
             return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
