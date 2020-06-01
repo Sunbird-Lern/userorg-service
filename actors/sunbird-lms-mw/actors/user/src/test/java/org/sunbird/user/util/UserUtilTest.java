@@ -1,5 +1,6 @@
 package org.sunbird.user.util;
 
+import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -8,28 +9,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import akka.dispatch.Futures;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, DataCacheHandler.class})
+@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, DataCacheHandler.class,
+        EsClientFactory.class,
+        ElasticSearchRestHighImpl.class,
+        Util.class})
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
+  private static ElasticSearchService esService;
 
   @Before
   public void beforeEachTest() {
@@ -52,6 +69,12 @@ public class UserUtilTest {
             JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400"))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+
+    PowerMockito.mockStatic(EsClientFactory.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+
+    PowerMockito.mockStatic(Util.class);
   }
 
   @Test
@@ -128,5 +151,24 @@ public class UserUtilTest {
     assertNotNull(userMap.get(JsonKey.USERNAME));
     assertNotNull(userMap.get(JsonKey.STATUS));
     assertNotNull(userMap.get(JsonKey.ROLES));
+  }
+
+  @Test
+  public void testValidateManagedUserLimit() {
+
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.MANAGED_BY, "ManagedBy");
+    List managedUserList = new ArrayList<User>();
+    while(managedUserList.size()<=31){
+      managedUserList.add(new User());
+    }
+    when(Util.searchUser(req)).thenReturn(managedUserList);
+    try {
+      UserUtil.validateManagedUserLimit("ManagedBy");
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());
+    }
+
   }
 }

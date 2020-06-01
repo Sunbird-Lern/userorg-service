@@ -457,6 +457,8 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testValidateCountryCode() {
     boolean isValid = ProjectUtil.validateCountryCode("+91");
     assertTrue(isValid);
+    isValid = ProjectUtil.validateCountryCode("9a");
+    assertFalse(isValid);
   }
 
   @Test

@@ -158,9 +158,13 @@ public class UserManagementActor extends BaseActor {
         LoggerEnum.INFO);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       userMap.put(JsonKey.CREATED_BY, userId);
-      // If user account isManagedUser(passed in request) should be same as context user_id
+
       if (!(StringUtils.isNotBlank(managedBy))) {
+        // If user account isManagedUser (managedBy passed in request) should be same as context user_id
         userService.validateUserId(actorMessage, managedBy);
+
+        //If managedUser limit is set, validate total number of managed users against it
+        UserUtil.validateManagedUserLimit(managedBy);
       }
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy);
@@ -203,9 +207,11 @@ public class UserManagementActor extends BaseActor {
       }
     }
     validateUserFrameworkData(userMap, userDbRecord);
-    validateUserTypeForUpdate(userMap);
+    //Check if the user is Custodian Org user
+    boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
+    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     User user = mapper.convertValue(userMap, User.class);
-    UserUtil.validateExternalIds(user, JsonKey.UPDATE);
+    UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
     // not allowing user to update the status,provider,userName
@@ -400,27 +406,33 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg);
     }
   }
+  //Check if the user is Custodian Org user
+  private boolean isCustodianOrgUser(Map<String, Object> userMap){
+    boolean isCustodianOrgUser = false;
+    String custodianRootOrgId = null;
+    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID));
+    try {
+      custodianRootOrgId = getCustodianRootOrgId();
+    } catch (Exception ex) {
+      ProjectLogger.log(
+              "UserManagementActor: isCustodianOrgUser :"
+                      + " Exception Occured while fetching Custodian Org ",
+              LoggerEnum.INFO);
+    }
+    if (StringUtils.isNotBlank(custodianRootOrgId)
+            && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
+      isCustodianOrgUser = true;
+    }
+    return isCustodianOrgUser;
+  }
 
-  private void validateUserTypeForUpdate(Map<String, Object> userMap) {
+  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
       String userType = (String) userMap.get(JsonKey.USER_TYPE);
-      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId = null;
-        User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID));
-        try {
-          custodianRootOrgId = getCustodianRootOrgId();
-        } catch (Exception ex) {
-          ProjectLogger.log(
-              "UserManagementActor: validateUserTypeForUpdate :"
-                  + " Exception Occured while fetching Custodian Org ",
-              LoggerEnum.INFO);
-        }
-        if (StringUtils.isNotBlank(custodianRootOrgId)
-            && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
+      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.errorTeacherCannotBelongToCustodianOrg,
               ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-        }
       } else {
         userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
       }
