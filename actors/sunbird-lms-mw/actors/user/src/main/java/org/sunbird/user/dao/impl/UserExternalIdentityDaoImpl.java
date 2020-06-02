@@ -37,10 +37,8 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
       String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-
-      if(StringUtils.isNotEmpty(extId) && StringUtils.isNotEmpty(provider) && StringUtils.isNotEmpty(idType)) {
-        userId = getUserIdByExternalId(extId, provider, idType);
-      }
+      
+      userId = getUserIdByExternalId(extId, provider, idType);
     }
 
     return userId;
