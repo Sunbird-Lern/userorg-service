@@ -163,11 +163,6 @@
 			<version>1.16</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
-			<version>3.2.0</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -229,6 +224,10 @@
 				<exclusion>
 							            <groupId>com.fasterxml.jackson.module</groupId>
 							            <artifactId>jackson-module-scala_2.11</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>

@@ -18,18 +18,11 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.FileUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.ReportTrackingStatus;
-import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.models.util.azure.CloudService;
 import org.sunbird.common.models.util.azure.CloudServiceFactory;
 import org.sunbird.common.models.util.mail.SendMail;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -52,7 +45,6 @@ public class MetricsBackGroundJobActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     ProjectLogger.log("Operation name is ==" + operation);
     if (operation.equalsIgnoreCase(ActorOperations.PROCESS_DATA.getValue())) {

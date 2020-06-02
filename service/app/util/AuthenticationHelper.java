@@ -4,17 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
-import org.sunbird.middleware.Application;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 
@@ -25,9 +22,6 @@ import org.sunbird.services.sso.SSOServiceFactory;
  * @author Manzarul
  */
 public class AuthenticationHelper {
-  static {
-    Application.checkCassandraConnection();
-  }
 
   private static boolean ssoEnabled =
       ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY) != null)
@@ -94,39 +88,5 @@ public class AuthenticationHelper {
       ProjectLogger.log("Validating client token failed due to : ", e);
     }
     return validClientId;
-  }
-
-  /**
-   * This method will save the user access token in side data base.
-   *
-   * @param token String
-   * @param userId String
-   * @return boolean
-   */
-  public static boolean saveUserAccessToken(String token, String userId) {
-
-    return false;
-  }
-
-  /**
-   * This method will invalidate the user access token.
-   *
-   * @param token String
-   * @return boolean
-   */
-  public static boolean invalidateToken(String token) {
-
-    return false;
-  }
-
-  public static String getEncryptedData(String value) {
-    try {
-      return encryptionService.encryptData(value);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
   }
 }

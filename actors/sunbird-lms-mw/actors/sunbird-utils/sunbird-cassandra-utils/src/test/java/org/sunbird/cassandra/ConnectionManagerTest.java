@@ -1,3 +1,4 @@
+/*
 package org.sunbird.cassandra;
 
 import static org.junit.Assert.assertEquals;
@@ -11,6 +12,7 @@ import com.datastax.driver.core.Session;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -27,80 +29,83 @@ import org.sunbird.helper.CassandraConnectionManagerImpl;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-/** @author kirti. Junit test cases */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  Cluster.class,
-  Metadata.class,
-  Cluster.Builder.class,
-  CassandraUtil.class,
-  CassandraConnectionMngrFactory.class,
-})
-@PowerMockIgnore("javax.management.*")
-public class ConnectionManagerTest {
+*/
+/** @author kirti. Junit test cases *//*
 
-  private static PropertiesCache cach = PropertiesCache.getInstance();
-  private static String host = cach.getProperty("contactPoint");
-  private static String port = cach.getProperty("port");
-  private static String cassandraKeySpace = cach.getProperty("keyspace");
-  private static final Cluster.Builder builder = PowerMockito.mock(Cluster.Builder.class);
-  private static Cluster cluster;
-  private static Metadata metadata;
-  private static Session session = PowerMockito.mock(Session.class);
+                                      @RunWith(PowerMockRunner.class)
+                                      @PrepareForTest({
+                                        Cluster.class,
+                                        Metadata.class,
+                                        Cluster.Builder.class,
+                                        CassandraUtil.class,
+                                        CassandraConnectionMngrFactory.class,
+                                      })
+                                      @PowerMockIgnore("javax.management.*")
+                                      public class ConnectionManagerTest {
 
-  private static CassandraConnectionManagerImpl connectionManager =
-      (CassandraConnectionManagerImpl)
-          CassandraConnectionMngrFactory.getObject(
-              cach.getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));
+                                        private static PropertiesCache cach = PropertiesCache.getInstance();
+                                        private static String host = cach.getProperty("contactPoint");
+                                        private static String port = cach.getProperty("port");
+                                        private static String cassandraKeySpace = cach.getProperty("keyspace");
+                                        private static final Cluster.Builder builder = PowerMockito.mock(Cluster.Builder.class);
+                                        private static Cluster cluster;
+                                        private static Metadata metadata;
+                                        private static Session session = PowerMockito.mock(Session.class);
 
-  @BeforeClass
-  public static void init() {
+                                        private static CassandraConnectionManagerImpl connectionManager =
+                                            (CassandraConnectionManagerImpl)
+                                                CassandraConnectionMngrFactory.getObject(
+                                                    cach.getProperty(JsonKey.SUNBIRD_CASSANDRA_MODE));
 
-    PowerMockito.mockStatic(Cluster.class);
-    cluster = PowerMockito.mock(Cluster.class);
-    when(cluster.connect(Mockito.anyString())).thenReturn(session);
-    metadata = PowerMockito.mock(Metadata.class);
-    when(cluster.getMetadata()).thenReturn(metadata);
-    when(Cluster.builder()).thenReturn(builder);
-    when(builder.addContactPoint(Mockito.anyString())).thenReturn(builder);
-    when(builder.withPort(Mockito.anyInt())).thenReturn(builder);
-    when(builder.withProtocolVersion(Mockito.any())).thenReturn(builder);
-    when(builder.withRetryPolicy(Mockito.any())).thenReturn(builder);
-    when(builder.withTimestampGenerator(Mockito.any())).thenReturn(builder);
-    when(builder.withPoolingOptions(Mockito.any())).thenReturn(builder);
-    when(builder.build()).thenReturn(cluster);
-    connectionManager.createConnection(host, port, "cassandra", "password", cassandraKeySpace);
-  }
+                                        @BeforeClass
+                                        public static void init() {
 
-  @Before
-  public void setUp() {
+                                          PowerMockito.mockStatic(Cluster.class);
+                                          cluster = PowerMockito.mock(Cluster.class);
+                                          when(cluster.connect(Mockito.anyString())).thenReturn(session);
+                                          metadata = PowerMockito.mock(Metadata.class);
+                                          when(cluster.getMetadata()).thenReturn(metadata);
+                                          when(Cluster.builder()).thenReturn(builder);
+                                          when(builder.addContactPoint(Mockito.anyString())).thenReturn(builder);
+                                          when(builder.withPort(Mockito.anyInt())).thenReturn(builder);
+                                          when(builder.withProtocolVersion(Mockito.any())).thenReturn(builder);
+                                          when(builder.withRetryPolicy(Mockito.any())).thenReturn(builder);
+                                          when(builder.withTimestampGenerator(Mockito.any())).thenReturn(builder);
+                                          when(builder.withPoolingOptions(Mockito.any())).thenReturn(builder);
+                                          when(builder.build()).thenReturn(cluster);
+                                          connectionManager.createConnection(host, port, "cassandra", "password", cassandraKeySpace);
+                                        }
 
-    reset(session);
-    when(cluster.connect(Mockito.anyString())).thenReturn(session);
-  }
+                                        @Before
+                                        public void setUp() {
 
-  @Test
-  public void testCreateConnectionSuccessWithoutUsernameAndPassword() throws Exception {
+                                          reset(session);
+                                          when(cluster.connect(Mockito.anyString())).thenReturn(session);
+                                        }
 
-    boolean bool = connectionManager.createConnection(host, port, null, null, cassandraKeySpace);
-    assertEquals(true, bool);
-  }
+                                        @Test
+                                        public void testCreateConnectionSuccessWithoutUsernameAndPassword() throws Exception {
 
-  @Test
-  public void testCreateConnectionSuccessWithUserNameAndPassword() throws Exception {
+                                          boolean bool = connectionManager.createConnection(host, port, null, null, cassandraKeySpace);
+                                          assertEquals(true, bool);
+                                        }
 
-    Boolean bool =
-        connectionManager.createConnection(host, port, "cassandra", "password", cassandraKeySpace);
-    assertEquals(true, bool);
-  }
+                                        @Test
+                                        public void testCreateConnectionSuccessWithUserNameAndPassword() throws Exception {
 
-  @Test
-  public void testCreateConnectionFailure() {
+                                          Boolean bool =
+                                              connectionManager.createConnection(host, port, "cassandra", "password", cassandraKeySpace);
+                                          assertEquals(true, bool);
+                                        }
 
-    try {
-      connectionManager.createConnection("127.0.0.1", "9042", "cassandra", "pass", "eySpace");
-    } catch (Exception ex) {
-    }
-    assertTrue(500 == ResponseCode.SERVER_ERROR.getResponseCode());
-  }
-}
+                                        @Test
+                                        public void testCreateConnectionFailure() {
+
+                                          try {
+                                            connectionManager.createConnection("127.0.0.1", "9042", "cassandra", "pass", "eySpace");
+                                          } catch (Exception ex) {
+                                          }
+                                          assertTrue(500 == ResponseCode.SERVER_ERROR.getResponseCode());
+                                        }
+                                      }
+                                      */

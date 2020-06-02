@@ -88,65 +88,6 @@ public final class RequestValidator {
               ERROR_CODE);
         }
       }
-      List<Map<String, Object>> assessmentData =
-          (List<Map<String, Object>>) contentRequestDto.getRequest().get(JsonKey.ASSESSMENT_EVENTS);
-      if (!CollectionUtils.isEmpty(assessmentData)) {
-        for (Map<String, Object> map : assessmentData) {
-          if (!map.containsKey(JsonKey.ASSESSMENT_TS)) {
-            throw new ProjectCommonException(
-                ResponseCode.assessmentAttemptDateRequired.getErrorCode(),
-                ResponseCode.assessmentAttemptDateRequired.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.COURSE_ID)
-              || StringUtils.isBlank((String) map.get(JsonKey.COURSE_ID))) {
-            throw new ProjectCommonException(
-                ResponseCode.courseIdRequired.getErrorCode(),
-                ResponseCode.courseIdRequiredError.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.CONTENT_ID)
-              || StringUtils.isBlank((String) map.get(JsonKey.CONTENT_ID))) {
-            throw new ProjectCommonException(
-                ResponseCode.contentIdRequired.getErrorCode(),
-                ResponseCode.contentIdRequiredError.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.BATCH_ID)
-              || StringUtils.isBlank((String) map.get(JsonKey.BATCH_ID))) {
-            throw new ProjectCommonException(
-                ResponseCode.courseBatchIdRequired.getErrorCode(),
-                ResponseCode.courseBatchIdRequired.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.USER_ID)
-              || StringUtils.isBlank((String) map.get(JsonKey.USER_ID))) {
-            throw new ProjectCommonException(
-                ResponseCode.userIdRequired.getErrorCode(),
-                ResponseCode.userIdRequired.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.ATTEMPT_ID)
-              || StringUtils.isBlank((String) map.get(JsonKey.ATTEMPT_ID))) {
-            throw new ProjectCommonException(
-                ResponseCode.attemptIdRequired.getErrorCode(),
-                ResponseCode.attemptIdRequired.getErrorMessage(),
-                ERROR_CODE);
-          }
-
-          if (!map.containsKey(JsonKey.EVENTS)) {
-            throw new ProjectCommonException(
-                ResponseCode.eventsRequired.getErrorCode(),
-                ResponseCode.eventsRequired.getErrorMessage(),
-                ERROR_CODE);
-          }
-        }
-      }
     }
     List<Map<String, Object>> assessmentData =
         (List<Map<String, Object>>) contentRequestDto.getRequest().get(JsonKey.ASSESSMENT_EVENTS);

@@ -28,8 +28,4 @@ public class ServiceFactory {
     }
     return operation;
   }
-
-  public CassandraOperation readResolve() {
-    return getInstance();
-  }
 }

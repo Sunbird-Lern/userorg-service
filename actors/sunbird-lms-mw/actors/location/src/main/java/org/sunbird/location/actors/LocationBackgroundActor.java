@@ -19,6 +19,7 @@ import org.sunbird.common.request.Request;
   asyncTasks = {"upsertLocationDataToES", "deleteLocationDataFromES"}
 )
 public class LocationBackgroundActor extends BaseLocationActor {
+
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override

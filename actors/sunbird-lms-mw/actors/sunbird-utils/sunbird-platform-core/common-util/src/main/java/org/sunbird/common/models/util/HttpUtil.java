@@ -37,11 +37,8 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.sunbird.common.models.response.HttpUtilResponse;
-import org.sunbird.common.request.ExecutionContext;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
-import org.sunbird.telemetry.util.TelemetryEvents;
 
 /**
  * This utility method will handle external http call
@@ -49,8 +46,6 @@ import org.sunbird.telemetry.util.TelemetryEvents;
  * @author Manzarul
  */
 public class HttpUtil {
-
-  //    private static TelemetryLmaxWriter lmaxWriter = TelemetryLmaxWriter.getInstance();
 
   private HttpUtil() {}
 
@@ -65,12 +60,10 @@ public class HttpUtil {
   public static String sendGetRequest(String requestURL, Map<String, String> headers)
       throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = getRequest(requestURL, headers, startTime);
     String str = getResponse(httpURLConnection);
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil sendGetRequest method end at =="
             + stopTime
@@ -94,7 +87,6 @@ public class HttpUtil {
   public static HttpUtilResponse doGetRequest(String requestURL, Map<String, String> headers)
       throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = getRequest(requestURL, headers, startTime);
     HttpUtilResponse response = null;
     String body = "";
@@ -106,7 +98,6 @@ public class HttpUtil {
     response = new HttpUtilResponse(body, httpURLConnection.getResponseCode());
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil doGetRequest method end at =="
             + stopTime
@@ -159,12 +150,10 @@ public class HttpUtil {
       String requestURL, Map<String, String> params, Map<String, String> headers)
       throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = postRequest(requestURL, params, headers, startTime);
     String str = getResponse(httpURLConnection);
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil sendPostRequest method end at =="
             + stopTime
@@ -189,7 +178,6 @@ public class HttpUtil {
       String requestURL, Map<String, String> params, Map<String, String> headers)
       throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = postRequest(requestURL, params, headers, startTime);
     HttpUtilResponse response = null;
     String body = "";
@@ -201,7 +189,6 @@ public class HttpUtil {
     response = new HttpUtilResponse(body, httpURLConnection.getResponseCode());
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil doPostRequest method end at =="
             + stopTime
@@ -277,12 +264,10 @@ public class HttpUtil {
   public static String sendPostRequest(
       String requestURL, String params, Map<String, String> headers) throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = postRequest(requestURL, params, headers, startTime);
     String str = getResponse(httpURLConnection);
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil sendPostRequest method end at =="
             + stopTime
@@ -345,7 +330,6 @@ public class HttpUtil {
   public static HttpUtilResponse doPostRequest(
       String requestURL, String params, Map<String, String> headers) throws IOException {
     long startTime = System.currentTimeMillis();
-    Map<String, Object> logInfo = genarateLogInfo(JsonKey.API_CALL, "API CALL : " + requestURL);
     HttpURLConnection httpURLConnection = postRequest(requestURL, params, headers, startTime);
     HttpUtilResponse response = null;
     String body = "";
@@ -357,7 +341,6 @@ public class HttpUtil {
     response = new HttpUtilResponse(body, httpURLConnection.getResponseCode());
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil doPostRequest method end at =="
             + stopTime
@@ -462,7 +445,6 @@ public class HttpUtil {
     }
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    telemetryProcessingCall(logInfo);
     ProjectLogger.log(
         "HttpUtil sendPatchRequest method end at =="
             + stopTime
@@ -511,30 +493,6 @@ public class HttpUtil {
     info.put(JsonKey.MESSAGE, message);
     info.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
     return info;
-  }
-
-  public static void telemetryProcessingCall(Map<String, Object> request) {
-
-    Map<String, Object> logInfo = request;
-    long endTime = System.currentTimeMillis();
-    logInfo.put(JsonKey.END_TIME, endTime);
-    Request req = new Request();
-    req.setRequest(generateTelemetryRequest(TelemetryEvents.LOG.getName(), logInfo));
-    //        lmaxWriter.submitMessage(req);
-
-  }
-
-  private static Map<String, Object> generateTelemetryRequest(
-      String eventType, Map<String, Object> params) {
-
-    Map<String, Object> context = new HashMap<>();
-    context.putAll(ExecutionContext.getCurrent().getRequestContext());
-    context.putAll(ExecutionContext.getCurrent().getGlobalContext());
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.TELEMETRY_EVENT_TYPE, eventType);
-    map.put(JsonKey.CONTEXT, context);
-    map.put(JsonKey.PARAMS, params);
-    return map;
   }
 
   /**
@@ -657,7 +615,7 @@ public class HttpUtil {
         ProjectLogger.log("Exception occurred while reading body" + ex);
       }
       response = new HttpUtilResponse(body, httpResponse.getStatusLine().getStatusCode());
-      telemetryProcessingCall(logInfo);
+      // telemetryProcessingCall(logInfo);
       return response;
     } catch (Exception ex) {
       ProjectLogger.log("Exception occurred while calling postFormData method.", ex);
@@ -717,7 +675,7 @@ public class HttpUtil {
         ProjectLogger.log("Exception occurred while reading body" + ex);
       }
       response = new HttpUtilResponse(body, httpResponse.getStatusLine().getStatusCode());
-      telemetryProcessingCall(logInfo);
+      // telemetryProcessingCall(logInfo);
       return response;
     } catch (Exception ex) {
       ProjectLogger.log("Exception occurred while calling sendDeleteRequest method.", ex);
@@ -771,7 +729,7 @@ public class HttpUtil {
         ProjectLogger.log("Exception occurred while reading body" + ex);
       }
       response = new HttpUtilResponse(body, httpResponse.getStatusLine().getStatusCode());
-      telemetryProcessingCall(logInfo);
+      // telemetryProcessingCall(logInfo);
       return response;
     } catch (Exception ex) {
       ProjectLogger.log("Exception occurred while calling sendDeleteRequest method.", ex);
@@ -858,7 +816,7 @@ public class HttpUtil {
         ProjectLogger.log("Exception occurred while reading body" + ex);
       }
       response = new HttpUtilResponse(body, httpResponse.getStatusLine().getStatusCode());
-      telemetryProcessingCall(logInfo);
+      // telemetryProcessingCall(logInfo);
       return response;
     } catch (Exception ex) {
       ProjectLogger.log("Exception occurred while calling sendDeleteRequest method.", ex);

@@ -631,7 +631,7 @@ public class UserUtil {
     } while (StringUtils.isBlank(userName));
     return decService.decryptData(userName);
   }
-  //validateExternalIds For CREATE USER and MIGRATE USER
+  // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
@@ -639,13 +639,13 @@ public class UserUtil {
     }
     checkExternalIdUniqueness(user, operationType);
   }
-  //validateExternalIds For UPDATE USER
+  // validateExternalIds For UPDATE USER
   public static void validateExternalIdsForUpdateUser(User user, boolean isCustodianOrg) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
-    //If operation is update and user is custodian org, ignore uniqueness check
+    // If operation is update and user is custodian org, ignore uniqueness check
     if (!isCustodianOrg) {
       checkExternalIdUniqueness(user, JsonKey.UPDATE);
     }
@@ -653,6 +653,7 @@ public class UserUtil {
       validateUserExternalIds(user);
     }
   }
+
   public static void checkEmailSameOrDiff(
       Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
     if (StringUtils.isNotBlank((String) userRequestMap.get(JsonKey.EMAIL))) {
@@ -788,20 +789,23 @@ public class UserUtil {
     return managedByInfo;
   }
 
-  public static void validateManagedUserLimit(String managedBy ){
-    if(Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
+  public static void validateManagedUserLimit(String managedBy) {
+    if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
       Map<String, Object> searchQueryMap = new HashMap<>();
       searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
       List<User> managedUserList = Util.searchUser(searchQueryMap);
-      if (CollectionUtils.isNotEmpty(managedUserList) && managedUserList.size() >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
+      if (CollectionUtils.isNotEmpty(managedUserList)
+          && managedUserList.size()
+              >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
         throw new ProjectCommonException(
-                ResponseCode.managedUserLimitExceeded.getErrorCode(),
-                ResponseCode.managedUserLimitExceeded.getErrorMessage(),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.managedUserLimitExceeded.getErrorCode(),
+            ResponseCode.managedUserLimitExceeded.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
   }
 }
+
 @FunctionalInterface
 interface ConvertValuesToLowerCase {
   Map<String, String> convertToLowerCase(Map<String, String> map);

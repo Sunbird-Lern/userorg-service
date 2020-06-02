@@ -1,12 +1,7 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
@@ -18,11 +13,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -52,7 +43,6 @@ public class EsSyncBackgroundActor extends BaseActor {
 
   private void sync(Request message) {
     ProjectLogger.log("EsSyncBackgroundActor: sync called", LoggerEnum.INFO);
-
     long startTime = System.currentTimeMillis();
     Map<String, Object> req = message.getRequest();
     Map<String, Object> responseMap = new HashMap<>();
@@ -144,7 +134,6 @@ public class EsSyncBackgroundActor extends BaseActor {
         result.add(getOrgDetails(itr.next()));
       }
     }
-
     esService.bulkInsert(getType(objectType), result);
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;

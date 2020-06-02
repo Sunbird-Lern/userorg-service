@@ -60,7 +60,6 @@ public class TenantPreferenceManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private void getTenantPreference(Request actorMessage) {
-
     String orgId = (String) actorMessage.getRequest().get(JsonKey.ROOT_ORG_ID);
     ProjectLogger.log(
         "TenantPreferenceManagementActor-getTenantPreference called for org: " + orgId);
@@ -104,7 +103,6 @@ public class TenantPreferenceManagementActor extends BaseActor {
     List<Map<String, Object>> reqList =
         (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.TENANT_PREFERENCE);
     List<Map<String, Object>> preferencesList = getPreferencesFromDB(orgId);
-
     for (Map<String, Object> map : reqList) {
       Map<String, Object> preferenceObj = null;
       String key = (String) map.get(JsonKey.KEY);
@@ -127,7 +125,6 @@ public class TenantPreferenceManagementActor extends BaseActor {
                   orgId,
                   key,
                   "Preference setting not found for key: " + key + " for the org: " + orgId));
-
         // if preference is found
         if (null != preferenceObj) {
           preferenceObj.put(JsonKey.KEY, key);
@@ -180,7 +177,6 @@ public class TenantPreferenceManagementActor extends BaseActor {
           break;
         }
       }
-
       // create the preference if not already exists
       if (!skip) {
         Map<String, Object> dbMap = new HashMap<String, Object>();

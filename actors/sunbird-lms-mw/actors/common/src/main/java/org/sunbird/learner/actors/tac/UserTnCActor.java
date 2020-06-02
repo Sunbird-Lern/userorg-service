@@ -3,11 +3,7 @@ package org.sunbird.learner.actors.tac;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -19,12 +15,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -37,6 +28,7 @@ import scala.concurrent.Future;
   asyncTasks = {}
 )
 public class UserTnCActor extends BaseActor {
+
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
@@ -44,8 +36,6 @@ public class UserTnCActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
-    ExecutionContext.setRequestId(request.getRequestId());
-
     if (operation.equalsIgnoreCase(ActorOperations.USER_TNC_ACCEPT.getValue())) {
       acceptTNC(request);
     } else {
@@ -54,17 +44,10 @@ public class UserTnCActor extends BaseActor {
   }
 
   private void acceptTNC(Request request) {
+    Util.initializeContext(request, JsonKey.USER);
     String acceptedTnC = (String) request.getRequest().get(JsonKey.VERSION);
     Map<String, Object> userMap = new HashMap();
     String userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
-
-    // if managedUserId's terms and conditions are accepted, get userId from request
-    String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
-    boolean isManagedUser = false;
-    if (StringUtils.isNotBlank(managedUserId)) {
-      userId = managedUserId;
-      isManagedUser = true;
-    }
     SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
     String latestTnC =
         systemSettingClient.getSystemSettingByFieldAndKey(
@@ -88,16 +71,6 @@ public class UserTnCActor extends BaseActor {
           ResponseCode.userNotFound.getErrorCode(),
           ResponseCode.userNotFound.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-
-    // If user account isManagedUser(passed in request) and managedBy is empty, not a valid scenario
-    if (isManagedUser
-        && ProjectUtil.isNotNull(result)
-        && ProjectUtil.isNull(result.containsKey(JsonKey.MANAGED_BY))) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidParameterValue,
-          MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID));
     }
 
     // Check whether user account is locked or not
@@ -124,7 +97,7 @@ public class UserTnCActor extends BaseActor {
         syncUserDetails(userMap);
       }
       sender().tell(response, self());
-      generateTelemetry(userMap, acceptedTnC, lastAcceptedVersion);
+      generateTelemetry(userMap, lastAcceptedVersion, request.getContext());
     } else {
       response.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
       sender().tell(response, self());
@@ -132,7 +105,7 @@ public class UserTnCActor extends BaseActor {
   }
 
   private void generateTelemetry(
-      Map<String, Object> userMap, String acceptedTnCVersion, String lastAcceptedVersion) {
+      Map<String, Object> userMap, String lastAcceptedVersion, Map<String, Object> context) {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     targetObject =
@@ -141,7 +114,7 @@ public class UserTnCActor extends BaseActor {
             JsonKey.USER,
             JsonKey.UPDATE,
             lastAcceptedVersion);
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
     ProjectLogger.log(
         "UserTnCActor:syncUserDetails: Telemetry generation call ended ", LoggerEnum.INFO.name());
   }

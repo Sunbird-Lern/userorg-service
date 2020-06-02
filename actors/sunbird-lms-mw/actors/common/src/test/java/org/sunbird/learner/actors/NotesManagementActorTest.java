@@ -110,6 +110,7 @@ public class NotesManagementActorTest {
 
   @Test
   public void testUpdateNoteFailure() {
+    beforeEachTest();
     Request req = new Request();
     req.getContext().put(JsonKey.USER_ID, userId);
     req.getContext().put(JsonKey.NOTE_ID, noteId);
