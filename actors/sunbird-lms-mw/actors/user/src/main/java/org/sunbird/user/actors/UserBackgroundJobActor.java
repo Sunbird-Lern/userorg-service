@@ -35,7 +35,6 @@ import scala.concurrent.Future;
 )
 public class UserBackgroundJobActor extends BaseActor {
 
-  private static ObjectMapper mapper = new ObjectMapper();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
@@ -117,6 +116,7 @@ public class UserBackgroundJobActor extends BaseActor {
   private void saveUserDataToES(Map<String, Object> userDetails) {
     ProjectLogger.log("Updating saveUserDataToES");
     userDetails.remove(JsonKey.PASSWORD);
+    ObjectMapper mapper = new ObjectMapper();
     User user = mapper.convertValue(userDetails, User.class);
     userDetails = mapper.convertValue(user, Map.class);
     upsertDataToElastic(

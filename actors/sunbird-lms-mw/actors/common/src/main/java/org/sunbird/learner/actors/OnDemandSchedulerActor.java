@@ -10,7 +10,10 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.quartz.scheduler.OnDemandSchedulerManager;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -21,7 +24,7 @@ import org.sunbird.common.responsecode.ResponseCode;
   asyncTasks = {}
 )
 public class OnDemandSchedulerActor extends BaseActor {
-  static final String TYPE = "type";
+  private static final String TYPE = "type";
 
   @Override
   public void onReceive(Request actorMessage) throws Throwable {

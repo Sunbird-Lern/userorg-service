@@ -10,7 +10,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
@@ -25,7 +24,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("create geo location" + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
@@ -42,7 +41,7 @@ public class GeoLocationController extends BaseController {
       String type = httpRequest.getQueryString(JsonKey.TYPE);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_GEO_LOCATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
@@ -61,7 +60,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("update geo location" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
@@ -78,7 +77,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("delete geo location");
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.DELETE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
@@ -97,7 +96,7 @@ public class GeoLocationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendNotification(reqObj);
       reqObj.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
@@ -115,7 +114,7 @@ public class GeoLocationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetUserCount(reqObj);
       reqObj.setOperation(ActorOperations.GET_USER_COUNT.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));

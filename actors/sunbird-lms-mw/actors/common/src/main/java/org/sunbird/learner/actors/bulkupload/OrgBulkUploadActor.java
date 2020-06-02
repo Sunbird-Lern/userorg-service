@@ -15,10 +15,12 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
+import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
 
@@ -27,32 +29,13 @@ import scala.concurrent.Future;
   asyncTasks = {}
 )
 public class OrgBulkUploadActor extends BaseBulkUploadActor {
+
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private String[] bulkOrgAllowedFields = {
-    JsonKey.ORGANISATION_ID,
-    JsonKey.ORGANISATION_NAME,
-    JsonKey.EXTERNAL_ID,
-    JsonKey.DESCRIPTION,
-    JsonKey.LOCATION_CODE,
-    JsonKey.STATUS,
-    JsonKey.CHANNEL,
-    JsonKey.IS_ROOT_ORG,
-    JsonKey.PROVIDER,
-    JsonKey.HOME_URL,
-    JsonKey.ORG_CODE,
-    JsonKey.ORG_TYPE,
-    JsonKey.PREFERRED_LANGUAGE,
-    JsonKey.THEME,
-    JsonKey.CONTACT_DETAILS,
-    JsonKey.LOC_ID,
-    JsonKey.HASHTAGID,
-  };
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
 
     if (operation.equalsIgnoreCase("orgBulkUpload")) {
@@ -104,7 +87,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
           mandatoryColumns,
           supportedColumnsLowerCaseMap);
     } else {
-      validateFileHeaderFields(req, bulkOrgAllowedFields, false, false);
+      validateFileHeaderFields(req, DataCacheHandler.bulkOrgAllowedFields, false, false);
     }
     BulkUploadProcess bulkUploadProcess =
         handleUpload(JsonKey.ORGANISATION, (String) req.get(JsonKey.CREATED_BY));
@@ -137,6 +120,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
     if (!additionalInfo.containsKey(JsonKey.CHANNEL)) {
       bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
       bulkUploadProcess.setFailureResult(ResponseCode.errorNoRootOrgAssociated.getErrorMessage());
+      BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
       bulkUploadDao.update(bulkUploadProcess);
       ProjectCommonException.throwClientErrorException(
           ResponseCode.errorNoRootOrgAssociated,
@@ -150,7 +134,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
         processId,
         bulkUploadProcess,
         BulkUploadActorOperation.ORG_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
-        bulkOrgAllowedFields);
+        DataCacheHandler.bulkOrgAllowedFields);
   }
 
   Map<String, Object> getUser(String userId) {

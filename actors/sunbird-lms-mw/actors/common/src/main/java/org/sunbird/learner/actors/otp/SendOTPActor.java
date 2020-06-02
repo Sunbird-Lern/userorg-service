@@ -18,6 +18,7 @@ import org.sunbird.learner.util.OTPUtil;
   asyncTasks = {"sendOTP"}
 )
 public class SendOTPActor extends BaseActor {
+
   public static final String RESET_PASSWORD = "resetPassword";
 
   @Override

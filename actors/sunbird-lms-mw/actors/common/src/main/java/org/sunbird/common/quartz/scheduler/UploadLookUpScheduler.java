@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -19,10 +18,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.telemetry.util.TelemetryEvents;
-import org.sunbird.telemetry.util.TelemetryUtil;
 
 /**
  * This class will lookup into bulk process table. if process type is new or in progress (more than
@@ -40,12 +36,7 @@ public class UploadLookUpScheduler extends BaseJob {
             + " triggered by: "
             + ctx.getJobDetail().toString(),
         LoggerEnum.INFO.name());
-    Util.initializeContextForSchedulerJob(
-        JsonKey.SYSTEM, ctx.getFireInstanceId(), JsonKey.SCHEDULER_JOB);
-    Map<String, Object> logInfo =
-        genarateLogInfo(JsonKey.SYSTEM, ctx.getJobDetail().getDescription());
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     List<Map<String, Object>> result = null;
     // get List of process with status as New
     Response res =
@@ -100,7 +91,6 @@ public class UploadLookUpScheduler extends BaseJob {
         process(result);
       }
     }
-    TelemetryUtil.telemetryProcessingCall(logInfo, null, null, TelemetryEvents.LOG.getName());
   }
 
   private void process(List<Map<String, Object>> result) {

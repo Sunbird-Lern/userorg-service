@@ -1,7 +1,6 @@
 package org.sunbird.common.factory;
 
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.ElasticSearchTcpImpl;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -9,7 +8,6 @@ import org.sunbird.common.models.util.ProjectLogger;
 
 public class EsClientFactory {
 
-  private static ElasticSearchService tcpClient = null;
   private static ElasticSearchService restClient = null;
 
   /**
@@ -19,9 +17,7 @@ public class EsClientFactory {
    * @return ElasticSearchService with the respected type impl
    */
   public static ElasticSearchService getInstance(String type) {
-    if (JsonKey.TCP.equals(type)) {
-      return getTcpClient();
-    } else if (JsonKey.REST.equals(type)) {
+    if (JsonKey.REST.equals(type)) {
       return getRestClient();
     } else {
       ProjectLogger.log(
@@ -30,16 +26,13 @@ public class EsClientFactory {
     return null;
   }
 
-  private static ElasticSearchService getTcpClient() {
-    if (tcpClient == null) {
-      tcpClient = new ElasticSearchTcpImpl();
-    }
-    return tcpClient;
-  }
-
   private static ElasticSearchService getRestClient() {
     if (restClient == null) {
-      restClient = new ElasticSearchRestHighImpl();
+      synchronized (EsClientFactory.class) {
+        if (restClient == null) {
+          restClient = new ElasticSearchRestHighImpl();
+        }
+      }
     }
     return restClient;
   }

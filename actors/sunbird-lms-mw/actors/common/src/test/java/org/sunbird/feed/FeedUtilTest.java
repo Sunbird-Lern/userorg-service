@@ -70,7 +70,7 @@ public class FeedUtilTest {
         .thenReturn(getFeedList(false));
     when(feedService.insert(Mockito.any())).thenReturn(new Response());
     when(feedService.update(Mockito.any())).thenReturn(new Response());
-  
+
     // whenNew(OrganisationClientImpl.class).withNoArguments().thenReturn(organisationClient);
     when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
     when(organisationClient.esSearchOrgByFilter(Mockito.anyMap())).thenReturn(getFeedOrgs());
@@ -136,7 +136,7 @@ public class FeedUtilTest {
     user.setChannel("SI");
     return user.build();
   }
-  
+
   private List<Organisation> getFeedOrgs() {
     Organisation org = new Organisation();
     org.setChannel("dummyChannel");

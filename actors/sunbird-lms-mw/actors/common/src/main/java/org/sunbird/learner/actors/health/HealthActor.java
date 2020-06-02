@@ -15,7 +15,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -29,8 +28,6 @@ import scala.concurrent.Future;
 )
 public class HealthActor extends BaseActor {
 
-  private Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
-
   @Override
   public void onReceive(Request message) throws Throwable {
     if (message instanceof Request) {
@@ -38,8 +35,6 @@ public class HealthActor extends BaseActor {
         ProjectLogger.log("AssessmentItemActor onReceive called");
         Request actorMessage = message;
         Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
-        // set request id fto thread loacl...
-        ExecutionContext.setRequestId(actorMessage.getRequestId());
         if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.HEALTH_CHECK.getValue())) {
           checkAllComponentHealth();
         } else if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.ACTOR.getValue())) {
@@ -113,6 +108,7 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
+      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
       getCassandraOperation()
           .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
@@ -154,6 +150,7 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
+      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
       getCassandraOperation()
           .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));

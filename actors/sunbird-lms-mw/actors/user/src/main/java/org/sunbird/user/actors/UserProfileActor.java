@@ -12,12 +12,15 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.SocialMediaType;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
+import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.impl.UserDaoImpl;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
 
 @ActorConfig(
   tasks = {"profileVisibility", "getMediaTypes"},
@@ -28,7 +31,6 @@ public class UserProfileActor extends UserBaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     switch (operation) {
       case "getMediaTypes":
@@ -58,21 +60,21 @@ public class UserProfileActor extends UserBaseActor {
 
     validateFields(privateList, JsonKey.PUBLIC_FIELDS);
     validateFields(publicList, JsonKey.PRIVATE_FIELDS);
-
-    Map<String, Object> esPublicUserProfile = getUserService().esGetPublicUserProfileById(userId);
-    Map<String, Object> esPrivateUserProfile = getUserService().esGetPrivateUserProfileById(userId);
+    UserService userService = UserServiceImpl.getInstance();
+    Map<String, Object> esPublicUserProfile = userService.esGetPublicUserProfileById(userId);
+    Map<String, Object> esPrivateUserProfile = userService.esGetPrivateUserProfileById(userId);
 
     updateUserProfile(publicList, privateList, esPublicUserProfile, esPrivateUserProfile);
 
     updateProfileVisibility(userId, publicList, privateList, esPublicUserProfile);
 
-    getUserService().syncUserProfile(userId, esPublicUserProfile, esPrivateUserProfile);
+    userService.syncUserProfile(userId, esPublicUserProfile, esPrivateUserProfile);
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(response, self());
 
-    generateTelemetryEvent(null, userId, "profileVisibility");
+    generateTelemetryEvent(null, userId, "profileVisibility", actorMessage.getContext());
   }
 
   private void validateFields(List<String> values, String listType) {
@@ -199,8 +201,8 @@ public class UserProfileActor extends UserBaseActor {
     User user = new User();
     user.setId(userId);
     user.setProfileVisibility(privateFieldMap);
-
-    Response response = getUserDao().updateUser(user);
+    UserDao userDao = UserDaoImpl.getInstance();
+    Response response = userDao.updateUser(user);
 
     String responseStr = (String) response.get(JsonKey.RESPONSE);
     ProjectLogger.log("UserProfileActor:saveUserProfileVisibility: responseStr = " + responseStr);

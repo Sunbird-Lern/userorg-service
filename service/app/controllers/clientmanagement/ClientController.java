@@ -10,7 +10,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
@@ -35,7 +34,7 @@ public class ClientController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateRegisterClient(reqObj);
       reqObj.setOperation(ActorOperations.REGISTER_CLIENT.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -53,12 +52,14 @@ public class ClientController extends BaseController {
     try {
       JsonNode requestData = httpRequest.body().asJson();
       ProjectLogger.log("Update client key: " + requestData, LoggerEnum.INFO.name());
-      Optional<String> masterKey = httpRequest.getHeaders().get(HeaderParam.X_Authenticated_Client_Token.getName());
-      Optional<String> clientId = httpRequest.getHeaders().get(HeaderParam.X_Authenticated_Client_Id.getName());
+      Optional<String> masterKey =
+          httpRequest.getHeaders().get(HeaderParam.X_Authenticated_Client_Token.getName());
+      Optional<String> clientId =
+          httpRequest.getHeaders().get(HeaderParam.X_Authenticated_Client_Id.getName());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateClientKey(clientId.get(), masterKey.get());
       reqObj.setOperation(ActorOperations.UPDATE_CLIENT_KEY.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = (HashMap<String, Object>) reqObj.getRequest();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
@@ -84,7 +85,7 @@ public class ClientController extends BaseController {
       RequestValidator.validateGetClientKey(clientId, type);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_CLIENT_KEY.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_ID, clientId);

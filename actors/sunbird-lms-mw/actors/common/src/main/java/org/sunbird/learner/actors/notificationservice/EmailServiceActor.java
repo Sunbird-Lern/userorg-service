@@ -1,12 +1,7 @@
 package org.sunbird.learner.actors.notificationservice;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +47,6 @@ public class EmailServiceActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private static final String NOTIFICATION_MODE = "sms";
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -78,9 +72,8 @@ public class EmailServiceActor extends BaseActor {
     if (CollectionUtils.isEmpty(userIds)) {
       userIds = new ArrayList<>();
     }
-
     if (request.get(JsonKey.MODE) != null
-        && NOTIFICATION_MODE.equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
+        && "sms".equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
       List<String> phones = (List<String>) request.get(JsonKey.RECIPIENT_PHONES);
       if (CollectionUtils.isNotEmpty(phones)) {
         Iterator<String> itr = phones.iterator();

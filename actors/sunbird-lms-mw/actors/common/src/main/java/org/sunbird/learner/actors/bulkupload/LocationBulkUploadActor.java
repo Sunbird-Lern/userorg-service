@@ -8,7 +8,6 @@ import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.Util;
@@ -34,7 +33,6 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.GEO_LOCATION);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
 
     switch (operation) {

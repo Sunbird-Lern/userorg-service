@@ -3,13 +3,11 @@ package controllers;
 import static org.junit.Assert.assertEquals;
 
 import modules.OnRequestHandler;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
@@ -28,14 +26,6 @@ public class ApplicationTest {
   }
 
   @Test
-  public void testCreateResponseParamObjSuccess() {
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
-    code.setResponseCode(ResponseCode.OK.getResponseCode());
-    ResponseParams params = BaseController.createResponseParamObj(code);
-    assertEquals(ResponseCode.success.name(), params.getStatus());
-  }
-
-  @Test
   public void testCreateResponseOnExceptionSuccess() {
     ProjectCommonException exception =
         new ProjectCommonException(
@@ -45,21 +35,6 @@ public class ApplicationTest {
     Response response =
         BaseController.createResponseOnException("v1/user/create", "POST", exception);
     assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
-  }
-
-  @Test
-  public void testCreateSuccessResponseSuccess() {
-    Response response = new Response();
-    Result result = BaseController.createSuccessResponse(null, response);
-    assertEquals(ResponseCode.OK.getResponseCode(), result.status());
-  }
-
-  @Test
-  public void testCreateResponseParamObjFailure() {
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
-    code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
-    ResponseParams params = BaseController.createResponseParamObj(code);
-    assertEquals(ResponseCode.authTokenRequired.name(), params.getStatus());
   }
 
   @Test(expected = RuntimeException.class)
