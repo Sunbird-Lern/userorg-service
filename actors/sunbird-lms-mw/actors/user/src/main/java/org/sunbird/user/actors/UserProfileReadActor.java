@@ -193,9 +193,11 @@ public class UserProfileReadActor extends BaseActor {
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     ProjectLogger.log(
-        "requested By and requested user id == " + requestedById + "  " + (String) userId);
+        "requested By and requested user id == " + requestedById + "  " + (String) userId +
+      " showMaskedData= "+showMaskedData, LoggerEnum.INFO);
     try {
-      if (!(userId).equalsIgnoreCase(requestedById) && !showMaskedData) {
+      if (!((userId).equalsIgnoreCase(requestedById) || requestedById.equalsIgnoreCase((String)result.get(JsonKey.MANAGED_BY)))
+        && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {
         // These values are set to ensure backward compatibility post introduction of global
