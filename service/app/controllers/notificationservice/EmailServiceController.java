@@ -17,7 +17,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 public class EmailServiceController extends BaseController {
-  
+
   private ObjectMapper omapper = new ObjectMapper();
 
   /**
@@ -39,19 +39,50 @@ public class EmailServiceController extends BaseController {
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
-  
+
       JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
       return handleRequest(
-        ActorOperations.EMAIL_SERVICE.getValue(),
-        reqObjJson,
-        req -> {
-          // We have validated earlier.
-          return null;
-        },
-        null,
-        null,
-        true,
-        httpRequest);
+          ActorOperations.EMAIL_SERVICE.getValue(),
+          reqObjJson,
+          req -> {
+            // We have validated earlier.
+            return null;
+          },
+          null,
+          null,
+          true,
+          httpRequest);
+    } catch (Exception e) {
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+    }
+  }
+
+  public CompletionStage<Result> sendNotification(Http.Request httpRequest) {
+
+    try {
+      JsonNode requestData = httpRequest.body().asJson();
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateSendMail(reqObj);
+      reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
+      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+
+      JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
+      return handleRequest(
+          ActorOperations.V2_NOTIFICATION.getValue(),
+          reqObjJson,
+          req -> {
+            // We have validated earlier.
+            return null;
+          },
+          null,
+          null,
+          true,
+          httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }

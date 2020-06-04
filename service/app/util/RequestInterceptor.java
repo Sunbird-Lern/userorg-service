@@ -42,6 +42,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/service/health", var);
     apiHeaderIgnoreMap.put("/health", var);
     apiHeaderIgnoreMap.put("/v1/notification/email", var);
+    apiHeaderIgnoreMap.put("/v2/notification", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
     apiHeaderIgnoreMap.put("/v1/user/data/encrypt", var);
     apiHeaderIgnoreMap.put("/v1/user/data/decrypt", var);
@@ -100,10 +101,9 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
     apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
-    apiHeaderIgnoreMap.put("/v1/user/exists/email",var);
-    apiHeaderIgnoreMap.put("/v1/user/exists/phone",var);
-    apiHeaderIgnoreMap.put("/v1/role/read",var);
-
+    apiHeaderIgnoreMap.put("/v1/user/exists/email", var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/phone", var);
+    apiHeaderIgnoreMap.put("/v1/role/read", var);
   }
 
   /**
