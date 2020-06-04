@@ -197,7 +197,7 @@ public class UserProfileReadActor extends BaseActor {
         "requested By and requested user id == " + requestedById + "  " + (String) userId + " managedBy= "+ managedBy +
       " showMaskedData= "+showMaskedData, LoggerEnum.INFO);
     try {
-      if (!((userId).equalsIgnoreCase(requestedById) || requestedById.equalsIgnoreCase((String)result.get(JsonKey.MANAGED_BY)))
+      if (!((userId).equalsIgnoreCase(requestedById) || requestedById.equalsIgnoreCase(managedBy))
         && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {
