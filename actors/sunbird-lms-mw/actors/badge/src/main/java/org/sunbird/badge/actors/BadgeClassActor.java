@@ -9,7 +9,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
@@ -23,6 +22,7 @@ import org.sunbird.learner.util.Util;
   asyncTasks = {}
 )
 public class BadgeClassActor extends BaseActor {
+
   private BadgingService badgingService;
 
   public BadgeClassActor() {
@@ -39,7 +39,6 @@ public class BadgeClassActor extends BaseActor {
     String operation = request.getOperation();
 
     Util.initializeContext(request, TelemetryEnvKey.BADGE_CLASS);
-    ExecutionContext.setRequestId(request.getRequestId());
 
     switch (operation) {
       case "createBadgeClass":

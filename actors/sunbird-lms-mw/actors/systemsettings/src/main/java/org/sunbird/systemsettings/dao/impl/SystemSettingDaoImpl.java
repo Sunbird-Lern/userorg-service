@@ -18,7 +18,6 @@ import org.sunbird.systemsettings.dao.SystemSettingDao;
 
 public class SystemSettingDaoImpl implements SystemSettingDao {
   private CassandraOperation cassandraOperation;
-  private ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
 
@@ -28,6 +27,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
 
   @Override
   public Response write(SystemSetting systemSetting) {
+    ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map = mapper.convertValue(systemSetting, Map.class);
     Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map);
     response.put(JsonKey.ID, map.get(JsonKey.ID));
@@ -60,6 +60,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
     Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     List<SystemSetting> systemSettings = new ArrayList<>();
+    ObjectMapper mapper = new ObjectMapper();
     list.forEach(
         map -> {
           SystemSetting systemSetting = mapper.convertValue(map, SystemSetting.class);
@@ -70,6 +71,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
 
   private SystemSetting getSystemSetting(List<Map<String, Object>> list) {
     try {
+      ObjectMapper mapper = new ObjectMapper();
       String jsonString = mapper.writeValueAsString((list.get(0)));
       return mapper.readValue(jsonString, SystemSetting.class);
     } catch (IOException e) {

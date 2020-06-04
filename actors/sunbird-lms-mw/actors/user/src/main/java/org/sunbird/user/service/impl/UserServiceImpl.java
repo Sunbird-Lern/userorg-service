@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
     }
     return user;
   }
-  
+
   // This function is called during createUserV4 and update of users.
   @Override
   public void validateUserId(Request request, String managedById) {
@@ -106,15 +106,22 @@ public class UserServiceImpl implements UserService {
       userId = userExtIdentityDao.getUserId(request);
     }
     ProjectLogger.log(
-      "validateUserId :: ctxtUserId : " + ctxtUserId + " userId: " + userId + " managedById: "+managedById,
-      LoggerEnum.INFO);
-    //LIUA token is validated when LIUA is updating own account details or LIUA token is validated when updating MUA details
-    if((StringUtils.isEmpty(managedById) && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
-      || (StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById))) // CREATE {
-      throw new ProjectCommonException(
-        ResponseCode.unAuthorized.getErrorCode(),
-        ResponseCode.unAuthorized.getErrorMessage(),
-        ResponseCode.UNAUTHORIZED.getResponseCode());
+        "validateUserId :: ctxtUserId : "
+            + ctxtUserId
+            + " userId: "
+            + userId
+            + " managedById: "
+            + managedById,
+        LoggerEnum.INFO);
+    // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
+    // when updating MUA details
+    if ((StringUtils.isEmpty(managedById)
+            && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
+        || (StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById))) // CREATE {
+    throw new ProjectCommonException(
+          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized.getErrorMessage(),
+          ResponseCode.UNAUTHORIZED.getResponseCode());
   }
 
   @Override

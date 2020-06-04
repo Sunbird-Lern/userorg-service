@@ -22,7 +22,7 @@ public class FeedUtil {
   private static IFeedService feedService = FeedFactory.getInstance();
   private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
-  
+
   public static Response saveFeed(ShadowUser shadowUser, List<String> userIds) {
     return saveFeed(shadowUser, userIds.get(0));
   }
@@ -51,7 +51,7 @@ public class FeedUtil {
       if (!channelList.contains(shadowUser.getChannel())) {
         channelList.add(shadowUser.getChannel());
         List<Map<String, String>> orgList =
-          (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
+            (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
         orgList.addAll(getOrgDetails(shadowUser.getChannel()));
       }
       response = feedService.update(feedList.get(index));
@@ -74,7 +74,7 @@ public class FeedUtil {
     feed.setUserId(userId);
     return feed;
   }
-  
+
   private static List<Map<String, String>> getOrgDetails(String channel) {
     Map<String, Object> filters = new HashMap<>();
     List<Map<String, String>> orgList = new CopyOnWriteArrayList<>();

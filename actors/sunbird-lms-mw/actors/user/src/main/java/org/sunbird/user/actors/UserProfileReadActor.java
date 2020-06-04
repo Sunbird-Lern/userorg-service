@@ -29,7 +29,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
@@ -68,13 +67,11 @@ public class UserProfileReadActor extends BaseActor {
   private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
   private ActorRef systemSettingActorRef = null;
   private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
-  private ElasticSearchService esUtil = getESInstance();
-  private static ObjectMapper mapper = new ObjectMapper();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     if (systemSettingActorRef == null) {
       systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
     }
@@ -433,7 +430,6 @@ public class UserProfileReadActor extends BaseActor {
         SearchDTO searchDTO = new SearchDTO();
         searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
         searchDTO.setFields(orgfields);
-
         Future<Map<String, Object>> esresultF =
             esUtil.search(searchDTO, EsType.organisation.getTypeName());
         Map<String, Object> esresult =
@@ -546,7 +542,6 @@ public class UserProfileReadActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private Map<String, Map<String, Object>> getEsResultByListOfIds(
       List<String> orgIds, List<String> fields, EsType typeToSearch) {
-
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.ID, orgIds);
 
@@ -636,7 +631,6 @@ public class UserProfileReadActor extends BaseActor {
         sender().tell(exception, self());
         return;
       }
-
       SearchDTO searchDto = new SearchDTO();
       Map<String, Object> filter = new HashMap<>();
       filter.put(JsonKey.LOGIN_ID, loginId);
@@ -784,6 +778,7 @@ public class UserProfileReadActor extends BaseActor {
     Map<String, Object> tncConfigMap = null;
     try {
       String tncValue = DataCacheHandler.getConfigSettings().get(JsonKey.TNC_CONFIG);
+      ObjectMapper mapper = new ObjectMapper();
       tncConfigMap = mapper.readValue(tncValue, Map.class);
 
     } catch (Exception e) {
@@ -896,10 +891,6 @@ public class UserProfileReadActor extends BaseActor {
             getContext().dispatcher());
 
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
-  }
-
-  private ElasticSearchService getESInstance() {
-    return EsClientFactory.getInstance(JsonKey.REST);
   }
 
   private void getKey(Request actorMessage) {

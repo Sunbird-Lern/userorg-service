@@ -1,16 +1,21 @@
 /** */
 package org.sunbird.learner.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.helper.CassandraConnectionManager;
+import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
 
@@ -22,6 +27,7 @@ import org.sunbird.learner.actors.role.service.RoleService;
 public class DataCacheHandler implements Runnable {
 
   private static Map<String, Object> roleMap = new ConcurrentHashMap<>();
+  private static Map<String, Object> telemetryPdata = new ConcurrentHashMap<>(3);
   private static Map<String, String> orgTypeMap = new ConcurrentHashMap<>();
   private static Map<String, String> configSettings = new ConcurrentHashMap<>();
   private static Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap =
@@ -31,6 +37,49 @@ public class DataCacheHandler implements Runnable {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
   private static Response roleCacheResponse;
+  private static List<String> sunbirdPluginTableList = null;
+  private static Map<String, Integer> orderMap;
+  public static String[] bulkUserAllowedFields = {
+    JsonKey.FIRST_NAME,
+    JsonKey.LAST_NAME,
+    JsonKey.PHONE,
+    JsonKey.COUNTRY_CODE,
+    JsonKey.EMAIL,
+    JsonKey.USERNAME,
+    JsonKey.PHONE_VERIFIED,
+    JsonKey.EMAIL_VERIFIED,
+    JsonKey.ROLES,
+    JsonKey.POSITION,
+    JsonKey.GRADE,
+    JsonKey.LOCATION,
+    JsonKey.DOB,
+    JsonKey.GENDER,
+    JsonKey.LANGUAGE,
+    JsonKey.PROFILE_SUMMARY,
+    JsonKey.SUBJECT,
+    JsonKey.WEB_PAGES,
+    JsonKey.EXTERNAL_ID_PROVIDER,
+    JsonKey.EXTERNAL_ID,
+    JsonKey.EXTERNAL_ID_TYPE,
+    JsonKey.EXTERNAL_IDS
+  };
+  public static String[] bulkOrgAllowedFields = {
+    JsonKey.ORGANISATION_NAME,
+    JsonKey.CHANNEL,
+    JsonKey.IS_ROOT_ORG,
+    JsonKey.PROVIDER,
+    JsonKey.EXTERNAL_ID,
+    JsonKey.DESCRIPTION,
+    JsonKey.HOME_URL,
+    JsonKey.ORG_CODE,
+    JsonKey.ORG_TYPE,
+    JsonKey.PREFERRED_LANGUAGE,
+    JsonKey.THEME,
+    JsonKey.CONTACT_DETAILS,
+    JsonKey.LOC_ID,
+    JsonKey.HASHTAGID,
+    JsonKey.LOCATION_CODE
+  };
 
   @Override
   public void run() {
@@ -39,7 +88,41 @@ public class DataCacheHandler implements Runnable {
     orgTypeCache(orgTypeMap);
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
+    cacheTelemetryPdata(telemetryPdata);
+    createSunbirdPluginTableList();
+    initLocationOrderMap();
     ProjectLogger.log("DataCacheHandler:run: Cache refresh completed.", LoggerEnum.INFO.name());
+  }
+
+  private void initLocationOrderMap() {
+    if (orderMap == null) {
+      orderMap = new HashMap<>();
+      List<String> subTypeList =
+          Arrays.asList(ProjectUtil.getConfigValue("sunbird_valid_location_types").split(";"));
+      for (String str : subTypeList) {
+        List<String> typeList =
+            (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+                .collect(Collectors.toList()));
+        for (int i = 0; i < typeList.size(); i++) {
+          orderMap.put(typeList.get(i), i);
+        }
+      }
+    }
+  }
+
+  public void createSunbirdPluginTableList() {
+    try {
+      CassandraConnectionManager manager = CassandraConnectionMngrFactory.getInstance();
+      sunbirdPluginTableList = manager.getTableList(JsonKey.SUNBIRD_PLUGIN);
+    } catch (Exception e) {
+      ProjectLogger.log("Error occurred" + e.getMessage(), e);
+    }
+  }
+
+  private void cacheTelemetryPdata(Map<String, Object> telemetryPdata) {
+    telemetryPdata.put("telemetry_pdata_id", ProjectUtil.getConfigValue("telemetry_pdata_id"));
+    telemetryPdata.put("telemetry_pdata_pid", ProjectUtil.getConfigValue("telemetry_pdata_pid"));
+    telemetryPdata.put("telemetry_pdata_ver", ProjectUtil.getConfigValue("telemetry_pdata_ver"));
   }
 
   private void cacheRoleForRead() {
@@ -48,6 +131,10 @@ public class DataCacheHandler implements Runnable {
 
   public static Response getRoleResponse() {
     return roleCacheResponse;
+  }
+
+  public static Map<String, Object> getTelemetryPdata() {
+    return telemetryPdata;
   }
 
   public static void setRoleResponse(Response response) {
@@ -177,5 +264,13 @@ public class DataCacheHandler implements Runnable {
 
   public static void updateHashtagIdFrameworkIdMap(String hashtagId, List<String> frameworkIds) {
     DataCacheHandler.hashtagIdFrameworkIdMap.put(hashtagId, frameworkIds);
+  }
+
+  public static List<String> getSunbirdPluginTableList() {
+    return sunbirdPluginTableList;
+  }
+
+  public static Map<String, Integer> getLocationOrderMap() {
+    return orderMap;
   }
 }

@@ -22,7 +22,6 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.otp.SendOTPActor;
 import org.sunbird.learner.actors.otp.service.OTPService;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
@@ -70,9 +69,6 @@ public final class OTPUtil {
     String sms = null;
     if (StringUtils.isBlank(template)) {
       sms = OTPService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate);
-    } else if (StringUtils.isNotBlank(template)
-        && StringUtils.equals(template, JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
-      sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_WARD_LOGIN_TEMPLATE, smsTemplate);
     } else {
       sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate);
     }
@@ -137,7 +133,7 @@ public final class OTPUtil {
     }
     String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
     String emailSubject = null;
-    if (SendOTPActor.RESET_PASSWORD.equalsIgnoreCase(otpType)) {
+    if ("resetPassword".equalsIgnoreCase(otpType)) {
       emailSubject = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
     } else {
       // default fallback for all other otpType
@@ -149,11 +145,6 @@ public final class OTPUtil {
     emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
     if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP);
-    } else if (StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))
-        && StringUtils.equals(
-            (String) emailTemplateMap.get(JsonKey.TEMPLATE_ID),
-            JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
-      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_WARD_LOGIN_TEMPLATE);
     } else {
       // send otp to email while reseting password from portal
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_RESET_PASSWORD_TEMPLATE);

@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import filters.AccessLogFilter;
 import java.io.File;
 import modules.OnRequestHandler;
 import modules.StartModule;
@@ -17,6 +18,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.telemetry.util.TelemetryWriter;
 import play.Application;
 import play.Mode;
 import play.inject.guice.GuiceApplicationBuilder;
@@ -27,7 +29,7 @@ import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@PrepareForTest({RequestInterceptor.class})
+@PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, AccessLogFilter.class})
 public abstract class BaseApplicationTest {
   protected Application application;
   private ActorSystem system;
@@ -46,7 +48,9 @@ public abstract class BaseApplicationTest {
       props = Props.create(actorClass);
       ActorRef subject = system.actorOf(props);
       BaseController.setActorRef(subject);
+      AccessLogFilter filter = PowerMockito.mock(AccessLogFilter.class);
       PowerMockito.mockStatic(RequestInterceptor.class);
+      PowerMockito.mockStatic(TelemetryWriter.class);
       PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
       PowerMockito.mockStatic(OnRequestHandler.class);
       PowerMockito.doReturn("12345678990").when(OnRequestHandler.class, "getCustodianOrgHashTagId");

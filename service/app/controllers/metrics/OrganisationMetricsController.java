@@ -8,7 +8,6 @@ import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -27,7 +26,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CREATION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       ProjectLogger.log("Return from Org Metrics Creation Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -47,7 +46,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       ProjectLogger.log("Return from Org Metrics Consumption Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -69,7 +68,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CREATION_METRICS_REPORT.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       ProjectLogger.log("Return from Org Creation Report Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -91,7 +90,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS_REPORT.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       ProjectLogger.log("Return from Org Consumption Report Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {

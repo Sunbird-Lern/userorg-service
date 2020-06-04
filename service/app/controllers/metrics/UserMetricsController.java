@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -21,7 +21,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.USER_CREATION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -36,7 +36,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.USER_CONSUMPTION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(ExecutionContext.getRequestId());
+      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

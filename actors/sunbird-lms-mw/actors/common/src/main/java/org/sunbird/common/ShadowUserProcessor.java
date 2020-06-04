@@ -18,7 +18,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.FeedUtil;
 import org.sunbird.helper.ServiceFactory;
@@ -260,8 +259,8 @@ public class ShadowUserProcessor {
   }
 
   private void generateTelemetry(String userId, String rootOrgId, ShadowUser shadowUser) {
-    ExecutionContext.getCurrent()
-        .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
+    // ExecutionContext.getCurrent()
+    //    .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
     ProjectLogger.log(
         "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString(),
         LoggerEnum.INFO.name());
@@ -269,14 +268,14 @@ public class ShadowUserProcessor {
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", rootOrgId);
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    // ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
     TelemetryUtil.generateCorrelatedObject(
         shadowUser.getProcessId(), JsonKey.PROCESS_ID, null, correlatedObject);
     targetObject =
         TelemetryUtil.generateTargetObject(
             userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
-    TelemetryUtil.telemetryProcessingCall(
-        mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
+    // TelemetryUtil.telemetryProcessingCall(
+    //    mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
   }
 
   /**

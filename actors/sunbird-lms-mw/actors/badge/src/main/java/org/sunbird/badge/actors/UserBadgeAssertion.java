@@ -12,10 +12,8 @@ import org.sunbird.badge.BadgeOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -29,14 +27,9 @@ import scala.concurrent.Future;
 )
 public class UserBadgeAssertion extends BaseActor {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private DbInfo dbInfo = Util.dbInfoMap.get(BadgingJsonKey.USER_BADGE_ASSERTION_DB);
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-
   @Override
-  public void onReceive(Request request) throws Throwable {
+  public void onReceive(Request request) {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     if (BadgeOperations.assignBadgeToUser.name().equalsIgnoreCase(operation)) {
       addBadgeData(request);
@@ -47,7 +40,9 @@ public class UserBadgeAssertion extends BaseActor {
 
   private void revokeBadgeData(Request request) {
     // request came to revoke the badge from user
+    DbInfo dbInfo = Util.dbInfoMap.get(BadgingJsonKey.USER_BADGE_ASSERTION_DB);
     Map<String, Object> badge = getBadgeAssertion(request);
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     cassandraOperation.deleteRecord(
         dbInfo.getKeySpace(),
         dbInfo.getTableName(),
@@ -58,7 +53,9 @@ public class UserBadgeAssertion extends BaseActor {
 
   private void addBadgeData(Request request) {
     // request came to assign the badge from user
+    DbInfo dbInfo = Util.dbInfoMap.get(BadgingJsonKey.USER_BADGE_ASSERTION_DB);
     Map<String, Object> badge = getBadgeAssertion(request);
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), badge);
     updateUserBadgeDataToES(badge);
     tellToSender(request, badge);
@@ -67,8 +64,9 @@ public class UserBadgeAssertion extends BaseActor {
   @SuppressWarnings("unchecked")
   private void updateUserBadgeDataToES(Map<String, Object> map) {
     Future<Map<String, Object>> resultF =
-        esUtil.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(), (String) map.get(JsonKey.USER_ID));
+        EsClientFactory.getInstance(JsonKey.REST)
+            .getDataByIdentifier(
+                ProjectUtil.EsType.user.getTypeName(), (String) map.get(JsonKey.USER_ID));
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (MapUtils.isEmpty(result)) {
@@ -112,7 +110,8 @@ public class UserBadgeAssertion extends BaseActor {
   private boolean updateDataToElastic(
       String indexName, String typeName, String identifier, Map<String, Object> data) {
 
-    Future<Boolean> responseF = esUtil.update(typeName, identifier, data);
+    Future<Boolean> responseF =
+        EsClientFactory.getInstance(JsonKey.REST).update(typeName, identifier, data);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (!response) {
       ProjectLogger.log(
@@ -137,10 +136,10 @@ public class UserBadgeAssertion extends BaseActor {
     Response reponse = new Response();
     reponse.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(reponse, self());
-    sendTelemetry(request.getRequest(), badge);
+    sendTelemetry(request, badge);
   }
 
-  private void sendTelemetry(Map<String, Object> map, Map<String, Object> badge) {
+  private void sendTelemetry(Request request, Map<String, Object> badge) {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject;
     String userId = (String) badge.get(JsonKey.USER_ID);
@@ -151,6 +150,7 @@ public class UserBadgeAssertion extends BaseActor {
         null,
         correlatedObject);
     TelemetryUtil.generateCorrelatedObject(userId, JsonKey.USER, null, correlatedObject);
-    TelemetryUtil.telemetryProcessingCall(map, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(
+        request.getRequest(), targetObject, correlatedObject, request.getContext());
   }
 }

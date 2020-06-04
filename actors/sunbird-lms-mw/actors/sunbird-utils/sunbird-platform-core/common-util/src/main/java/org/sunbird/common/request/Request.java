@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
@@ -22,12 +22,13 @@ public class Request implements Serializable {
   private static final int WAIT_TIME_VALUE = 30;
 
   protected Map<String, Object> context;
+
   private String id;
   private String ver;
   private String ts;
   private RequestParams params;
 
-  private Map<String, Object> request = new HashMap<>();
+  private Map<String, Object> request = new WeakHashMap<>();
 
   private String managerName;
   private String operation;
@@ -37,31 +38,8 @@ public class Request implements Serializable {
   private Integer timeout; // in seconds
 
   public Request() {
+    this.context = new WeakHashMap<>();
     this.params = new RequestParams();
-    this.params.setMsgid(requestId);
-    init();
-  }
-
-  private void init() {
-    // Set the context here.
-    Map<String, Object> currContext = ExecutionContext.getCurrent().getContextValues();
-    context = currContext == null ? new HashMap<>() : new HashMap<>(currContext);
-    if (ExecutionContext.getCurrent()
-        .getGlobalContext()
-        .containsKey(HeaderParam.CURRENT_INVOCATION_PATH.getParamName())) {
-      context.put(
-          HeaderParam.REQUEST_PATH.getParamName(),
-          ExecutionContext.getCurrent()
-              .getGlobalContext()
-              .get(HeaderParam.CURRENT_INVOCATION_PATH.getParamName()));
-    }
-
-    // set request_id
-    requestId =
-        (String)
-            ExecutionContext.getCurrent()
-                .getGlobalContext()
-                .get(HeaderParam.REQUEST_ID.getParamName());
   }
 
   public void toLower() {
@@ -76,20 +54,7 @@ public class Request implements Serializable {
             });
   }
 
-  public Request(Request request) {
-    this.params = request.getParams();
-    if (null == this.params) this.params = new RequestParams();
-    else if (!StringUtils.isBlank(this.params.getMsgid())) {
-      ExecutionContext.setRequestId(this.params.getMsgid());
-      this.requestId = this.params.getMsgid();
-    }
-    if (StringUtils.isBlank(this.params.getMsgid()) && !StringUtils.isBlank(requestId))
-      this.params.setMsgid(requestId);
-    this.context.putAll(request.getContext());
-  }
-
   public String getRequestId() {
-    if (null != this.params) return this.params.getMsgid();
     return requestId;
   }
 
@@ -136,12 +101,6 @@ public class Request implements Serializable {
 
   public void setOperation(String operation) {
     this.operation = operation;
-  }
-
-  public void copyRequestValueObjects(Map<String, Object> map) {
-    if (null != map && map.size() > 0) {
-      this.request.putAll(map);
-    }
   }
 
   @Override
