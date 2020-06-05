@@ -795,6 +795,9 @@ public class UserProfileReadActor extends BaseActor {
         userSearchMap.put(JsonKey.TNC_LATEST_VERSION, tncLatestVersion);
         String tncUserAcceptedVersion = (String) userSearchMap.get(JsonKey.TNC_ACCEPTED_VERSION);
         String tncUserAcceptedOn = (String) userSearchMap.get(JsonKey.TNC_ACCEPTED_ON);
+        ProjectLogger.log(
+          "UserTnCActor:updateTnc: tc accepted version= " +tncUserAcceptedVersion+ " accepted on= "+tncUserAcceptedOn
+            , LoggerEnum.INFO.name());
         if (StringUtils.isEmpty(tncUserAcceptedVersion)
             || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
             || StringUtils.isEmpty(tncUserAcceptedOn)) {

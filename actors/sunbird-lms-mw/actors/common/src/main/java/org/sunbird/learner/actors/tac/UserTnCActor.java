@@ -90,6 +90,9 @@ public class UserTnCActor extends BaseActor {
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
           JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
+      ProjectLogger.log(
+        "UserTnCActor:acceptTNC: tc accepted version= " +acceptedTnC+ " accepted on= "+userMap.get(JsonKey.TNC_ACCEPTED_ON)+
+        " for userId:" +userId, LoggerEnum.INFO.name());
       response =
           cassandraOperation.updateRecord(
               usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
