@@ -48,6 +48,14 @@ public class UserTnCActor extends BaseActor {
     String acceptedTnC = (String) request.getRequest().get(JsonKey.VERSION);
     Map<String, Object> userMap = new HashMap();
     String userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
+
+    // if managedUserId's terms and conditions are accepted, get userId from request
+    String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
+    boolean isManagedUser = false;
+    if (StringUtils.isNotBlank(managedUserId)) {
+      userId = managedUserId;
+      isManagedUser = true;
+    }
     SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
     String latestTnC =
         systemSettingClient.getSystemSettingByFieldAndKey(
@@ -73,6 +81,16 @@ public class UserTnCActor extends BaseActor {
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
 
+    // If user account isManagedUser(passed in request) and managedBy is empty, not a valid scenario
+    if (isManagedUser
+        && ProjectUtil.isNotNull(result)
+        && ProjectUtil.isNull(result.containsKey(JsonKey.MANAGED_BY))) {
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.invalidParameterValue,
+          MessageFormat.format(
+              ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID));
+    }
+
     // Check whether user account is locked or not
     if (ProjectUtil.isNotNull(result)
         && result.containsKey(JsonKey.IS_DELETED)
@@ -86,6 +104,9 @@ public class UserTnCActor extends BaseActor {
     if (StringUtils.isEmpty(lastAcceptedVersion)
         || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)
         || StringUtils.isEmpty((String) result.get(JsonKey.TNC_ACCEPTED_ON))) {
+      ProjectLogger.log(
+        "UserTnCActor:acceptTNC: tc accepted version= " +acceptedTnC+ " accepted on= "+userMap.get(JsonKey.TNC_ACCEPTED_ON)+
+          " for userId:" +userId, LoggerEnum.INFO.name());
       userMap.put(JsonKey.ID, userId);
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
