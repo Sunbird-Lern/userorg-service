@@ -39,6 +39,9 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.actors.UserFeedActor;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -51,7 +54,9 @@ import scala.concurrent.Promise;
   ElasticSearchService.class,
   IFeedService.class,
   FeedServiceImpl.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  UserUtil.class,
+  UserServiceImpl.class, UserService.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({"javax.management.*"})
@@ -64,6 +69,7 @@ public class UserFeedActorTest {
   private static Map<String, Object> userFeed = new HashMap<>();
   private static ElasticSearchService esUtil;
   private static EsClientFactory esFactory;
+  public static UserServiceImpl userService;
 
   @Before
   public void setUp() throws Exception {
@@ -90,17 +96,34 @@ public class UserFeedActorTest {
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     PowerMockito.when(esService.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
         .thenReturn(promise.future());
+
+    PowerMockito.mockStatic(UserUtil.class);
+
+    PowerMockito.mockStatic(UserServiceImpl.class);
+    userService = mock(UserServiceImpl.class);
+    when(UserServiceImpl.getInstance()).thenReturn(userService);
   }
 
   @Test
-  public void getUserFeedTest() {
+  public void getUserFeedTest() throws Exception {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
+
+    when(UserUtil.getUserFromES(Mockito.anyString())).thenReturn(getEsResponse());
+    PowerMockito.doNothing().when(userService, "validateUserId", Mockito.anyObject(),Mockito.anyString());
+
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.GET_USER_FEED_BY_ID.getValue());
     reqObj.put(JsonKey.USER_ID, "123-456-789");
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  public static Map<String, Object> getEsResponse() {
+
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.MANAGED_BY, "123-456-789");
+    return map;
   }
 }

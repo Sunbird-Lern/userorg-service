@@ -8,11 +8,11 @@ public class FeedRequestValidatorTest {
 
   @Test
   public void userIdValidationTestSuccess() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-789", "123-456-789"));
+    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-789"));
   }
 
   @Test(expected = ProjectCommonException.class)
   public void userIdValidationTestFailure() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-7890", "123-456-789"));
+    Assert.assertTrue(FeedRequestValidator.userIdValidation(null));
   }
 }

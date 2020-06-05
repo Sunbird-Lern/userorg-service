@@ -17,7 +17,7 @@ public class FeedController extends BaseController {
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),
         null,
         req -> {
-          FeedRequestValidator.userIdValidation(callerId, userId);
+          FeedRequestValidator.userIdValidation(userId);
           return null;
         },
         userId,
