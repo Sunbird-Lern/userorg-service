@@ -29,11 +29,11 @@ public class FeedControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testGetUserFeedUnAuthorized() {
+  public void testGetUserFeedInvalidUserId() {
     Http.RequestBuilder req =
         new Http.RequestBuilder().uri("/v1/user/feed/1234567890").method("GET");
     Result result = Helpers.route(application, req);
-    assertEquals(401, result.status());
+    assertEquals(400, result.status());
   }
 
   @Test
