@@ -31,7 +31,7 @@ public class FeedControllerTest extends BaseApplicationTest {
   @Test
   public void testGetUserFeedInvalidUserId() {
     Http.RequestBuilder req =
-        new Http.RequestBuilder().uri("/v1/user/feed/1234567890").method("GET");
+        new Http.RequestBuilder().uri("/v1/user/feed/1234!56?7890").method("GET");
     Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
