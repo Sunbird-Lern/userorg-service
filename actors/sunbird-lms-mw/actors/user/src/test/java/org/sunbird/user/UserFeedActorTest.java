@@ -115,6 +115,7 @@ public class UserFeedActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.GET_USER_FEED_BY_ID.getValue());
     reqObj.put(JsonKey.USER_ID, "123-456-789");
+    reqObj.getContext().put(JsonKey.REQUESTED_BY, "123-456-789");
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);

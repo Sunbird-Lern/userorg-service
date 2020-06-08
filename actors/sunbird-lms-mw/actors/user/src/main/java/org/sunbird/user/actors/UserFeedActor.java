@@ -3,12 +3,16 @@ package org.sunbird.user.actors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
@@ -42,13 +46,25 @@ public class UserFeedActor extends BaseActor {
 
   private void getUserFeed(Request request) {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-
+    String contextUserId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
     Map<String, Object> userDbRecord = UserUtil.getUserFromES(userId);
-    String managedBy = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    if (userDbRecord == null || userDbRecord.size() == 0) {
+      throw new ProjectCommonException(
+              ResponseCode.userNotFound.getErrorCode(),
+              ResponseCode.userNotFound.getErrorMessage(),
+              ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
 
     // If user account isManagedUser (managedBy passed in request) should be same as context user_id
-    userService.validateUserId(request, managedBy);
-
+    if ((StringUtils.isEmpty(managedById)
+            && (!StringUtils.isBlank(userId) && !userId.equals(contextUserId)))
+            || (StringUtils.isNotEmpty(managedById) && !contextUserId.equals(managedById))) {
+      throw new ProjectCommonException(
+              ResponseCode.unAuthorized.getErrorCode(),
+              ResponseCode.unAuthorized.getErrorMessage(),
+              ResponseCode.UNAUTHORIZED.getResponseCode());
+    }
     IFeedService feedService = FeedFactory.getInstance();
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.USER_ID, userId);
