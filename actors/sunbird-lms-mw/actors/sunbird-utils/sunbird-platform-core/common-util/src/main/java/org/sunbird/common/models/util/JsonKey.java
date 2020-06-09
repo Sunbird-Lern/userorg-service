@@ -1028,6 +1028,14 @@ public final class JsonKey {
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
-
+  public static final String SUB = "sub";
+  public static final String EKSTEP_SIGNING_SIGN_PAYLOAD = "ekstep.signing.sign.payload";
+  public static final String TS = "ts";
+  public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
+  public static final String MSGID= "msgid";
+  public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
+  public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
+  public static final String MANAGED_TOKEN = "managedToken";
+  public static final String WITH_TOKENS = "withTokens";
   private JsonKey() {}
 }

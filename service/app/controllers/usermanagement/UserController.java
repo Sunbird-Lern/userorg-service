@@ -229,4 +229,24 @@ public class UserController extends BaseController {
                 false,
                 httpRequest);
     }
+
+    public CompletionStage<Result> getManagedUsers(String luaUuid, Http.Request httpRequest) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(JsonKey.ID, luaUuid);
+        String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+        map.put(JsonKey.WITH_TOKENS, withTokens);
+        return handleRequest(
+                ActorOperations.GET_MANAGED_USERS.getValue(),
+                null,
+                req -> {
+                    Request request = (Request) req;
+                    request.setRequest(map);
+                    new UserRequestValidator().validateUserId(luaUuid);
+                    return null;
+                },
+                null,
+                null,
+                false,
+                httpRequest);
+    }
 }

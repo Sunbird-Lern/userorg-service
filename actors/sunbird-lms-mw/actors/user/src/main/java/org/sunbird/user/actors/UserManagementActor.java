@@ -4,17 +4,27 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -22,26 +32,27 @@ import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.actorutil.user.UserClient;
+import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.learner.util.*;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserType;
@@ -57,7 +68,7 @@ import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4"},
+  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {}
 )
 public class UserManagementActor extends BaseActor {
@@ -74,6 +85,7 @@ public class UserManagementActor extends BaseActor {
       InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private UserClient userClient = new UserClientImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -95,6 +107,9 @@ public class UserManagementActor extends BaseActor {
         break;
       case "createUserV4": // managedUser creation
         createUserV4(request);
+        break;
+      case "getManagedUsers": // managedUser search
+        getManagedUsers(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
@@ -1217,4 +1232,24 @@ public class UserManagementActor extends BaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
   }
+  private void getManagedUsers(Request request) {
+    String uuid = (String)request.get(JsonKey.ID);
+    boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
+
+    Map<String, Object> searchResult = userClient.searchUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),uuid);
+
+    List<Map<String, Object>> respList = (List) searchResult.get(JsonKey.CONTENT);
+
+    if(withTokens && CollectionUtils.isNotEmpty(respList)) {
+      //Fetch and append encrypted token for each managedUser in respList
+      userService.fetchAndAppendEncryptedToken(uuid, respList);
+    }
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put(JsonKey.CONTENT, respList);
+    responseMap.put(JsonKey.COUNT, respList.size());
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, responseMap);
+    sender().tell(response, self());
+  }
+
 }

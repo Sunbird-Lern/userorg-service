@@ -15,11 +15,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
@@ -115,5 +111,37 @@ public class UserClientImpl implements UserClient {
     }
 
     return userId;
+  }
+
+  public Map<String, Object> searchUser(ActorRef actorRef, String uuid) {
+    ProjectLogger.log("UserServiceImpl: searchUser called", LoggerEnum.DEBUG);
+    InterServiceCommunication interServiceCommunication =
+            InterServiceCommunicationFactory.getInstance();
+
+    Map<String, Object> filters = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    List<String> objectType = new ArrayList<String>();
+    objectType.add("user");
+    filters.put(JsonKey.OBJECT_TYPE, objectType);
+    filters.put(JsonKey.MANAGED_BY, uuid);
+    searchRequestMap.put(JsonKey.FILTERS, filters);
+    Request request = new Request();
+    request.setOperation(LocationActorOperation.SEARCH_LOCATION.getValue());
+    request.getRequest().putAll(searchRequestMap);
+    request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+
+    Object obj = interServiceCommunication.getResponse(actorRef, request);
+
+    if (obj instanceof Response) {
+      Response responseObj = (Response) obj;
+      return (Map<String, Object>)responseObj.getResult().get(JsonKey.RESPONSE);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
   }
 }

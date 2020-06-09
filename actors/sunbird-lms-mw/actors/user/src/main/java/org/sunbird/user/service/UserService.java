@@ -40,4 +40,6 @@ public interface UserService {
   boolean checkUsernameUniqueness(String username, boolean isEncrypted);
 
   String getCustodianOrgId(ActorRef actorRef);
+
+  void fetchAndAppendEncryptedToken(String parentId, List<Map<String, Object>> respList);
 }

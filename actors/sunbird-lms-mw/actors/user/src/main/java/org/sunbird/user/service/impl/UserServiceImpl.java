@@ -7,9 +7,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.sunbird.actorutil.InterServiceCommunication;
+import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -27,6 +34,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.systemsetting.SystemSetting;
@@ -452,5 +460,47 @@ public class UserServiceImpl implements UserService {
               ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
     }
     return custodianOrgId;
+  }
+
+  public void fetchAndAppendEncryptedToken(String parentId, List<Map<String, Object>> respList){
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      //create JSONObject with list of managedUserId and parentId
+      JSONObject managedUsers = createManagedUserList(parentId,respList);
+      Map<String, Object> encryptedTokenList = AdminUtilHandler.fetchEncryptedToken(AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+      ArrayList<Map<String, Object>> data =  (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
+
+      for (Object object : data) {
+        Map<String, Object> tempMap = (Map<String, Object>) object;
+        respList.stream().filter(o -> o.get(JsonKey.ID).equals(tempMap.get(JsonKey.SUB))).forEach(
+                o -> {
+                  o.put(JsonKey.MANAGED_TOKEN, tempMap.get(JsonKey.TOKEN));
+                }
+        );
+      }
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+              ResponseCode.unableToParseData.getErrorCode(),
+              ResponseCode.unableToParseData.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
+
+  private JSONObject createManagedUserList(String parentId, List<Map<String, Object>> respList){
+    JSONArray contentArray = new JSONArray();
+    JSONObject jobj = null;
+    for (Map<String, Object> userMap : respList) {
+      if (BooleanUtils.isTrue((Boolean) userMap.get(JsonKey.IS_DELETED))) {
+        respList.remove(userMap);
+      } else {
+        //create request data
+        jobj = new JSONObject();
+        jobj.put(JsonKey.PARENT_ID,parentId);
+        jobj.put(JsonKey.SUB,(String)userMap.get(JsonKey.ID));
+        contentArray.put(jobj);
+      }
+    }
+    JSONObject jData = new JSONObject().put(JsonKey.DATA,contentArray);
+    return jData;
   }
 }

@@ -1106,4 +1106,15 @@ public class UserRequestValidator extends BaseRequestValidator {
       validatePhone((String) userRequest.get(JsonKey.RECOVERY_PHONE));
     }
   }
+
+  /**
+   * This method will validate uuid.
+   *
+   * @param uuid String
+   */
+  public void validateUserId(String uuid) {
+    if (StringUtils.isNotEmpty(uuid) && !ProjectUtil.validateUUID(uuid)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestParameter);
+    }
+  }
 }
