@@ -22,6 +22,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
@@ -44,7 +45,8 @@ import org.sunbird.ratelimit.service.RateLimitServiceImpl;
   RateLimitService.class,
   RateLimitDaoImpl.class,
   RateLimitDao.class,
-  RateLimitServiceImpl.class
+  RateLimitServiceImpl.class,
+  SunbirdMWService.class
 })
 @PowerMockIgnore("javax.management.*")
 public class OTPActorTest {
@@ -76,6 +78,8 @@ public class OTPActorTest {
     when(ServiceFactory.getInstance()).thenReturn(mockCassandraOperation);
     probe = new TestKit(system);
     subject = system.actorOf(props);
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
   }
 
   @Test

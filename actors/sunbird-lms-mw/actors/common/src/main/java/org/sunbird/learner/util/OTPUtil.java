@@ -94,8 +94,6 @@ public final class OTPUtil {
     boolean response = smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms);
 
     ProjectLogger.log(
-        "OTPUtil:sendOTPViaSMS: Response from SMS provider: " + response, LoggerEnum.INFO.name());
-    ProjectLogger.log(
         "OTPUtil:sendOTPViaSMS: OTP sent successfully to phone :"
             + otpMap.get(JsonKey.PHONE)
             + "is "
