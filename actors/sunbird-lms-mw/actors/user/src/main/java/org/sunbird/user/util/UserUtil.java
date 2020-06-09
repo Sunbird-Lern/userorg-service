@@ -338,7 +338,7 @@ public class UserUtil {
           externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
           externalIdReq.put(JsonKey.EXTERNAL_ID, externalId.get(JsonKey.ID));
           Response response =
-              cassandraOperation.getRecordsByCompositeKey(
+              cassandraOperation.getRecordsByProperties(
                   JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
           List<Map<String, Object>> externalIdsRecord =
               (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
