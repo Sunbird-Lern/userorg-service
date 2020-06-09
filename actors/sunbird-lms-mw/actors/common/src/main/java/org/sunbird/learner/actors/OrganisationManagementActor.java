@@ -1349,7 +1349,7 @@ public class OrganisationManagementActor extends BaseActor {
           JsonKey.EXTERNAL_ID, Util.encryptData((String) data.get(JsonKey.USER_EXTERNAL_ID)));
 
       result =
-          cassandraOperation.getRecordsByCompositeKey(
+          cassandraOperation.getRecordsByProperties(
               JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap);
       fromExtId = true;
     } else {

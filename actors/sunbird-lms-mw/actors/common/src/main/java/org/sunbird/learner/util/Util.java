@@ -689,7 +689,7 @@ public final class Util {
           externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
           externalIdReq.put(JsonKey.EXTERNAL_ID, encryptData(externalId.get(JsonKey.ID)));
           Response response =
-              cassandraOperation.getRecordsByCompositeKey(
+              cassandraOperation.getRecordsByProperties(
                   KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
           List<Map<String, Object>> externalIdsRecord =
               (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
@@ -934,7 +934,7 @@ public final class Util {
     map.remove(JsonKey.CREATED_BY);
     map.remove(JsonKey.LAST_UPDATED_ON);
     map.remove(JsonKey.CREATED_ON);
-    map.remove(JsonKey.USER_ID);
+    map.remove(JsonKey.EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
