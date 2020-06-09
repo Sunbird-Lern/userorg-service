@@ -197,7 +197,7 @@ public class OrgManagementActorTest {
 
   @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserExtId() {
-    when(cassandraOperation.getRecordsByCompositeKey(
+    when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(getRecordsByProperty(true));
 
