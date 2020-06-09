@@ -70,6 +70,7 @@ public class OTPActor extends BaseActor {
     if (StringUtils.isNotBlank(userId)) {
       key = OTPUtil.getEmailPhoneByUserId(userId, type);
       type = getType(type);
+      ProjectLogger.log("OTPActor:OTPUtil.getEmailPhoneByUserId: called for userId = "+userId+" ,key = "+maskId(key,type),LoggerEnum.INFO.name());
     }
 
     rateLimitService.throttleByKey(
