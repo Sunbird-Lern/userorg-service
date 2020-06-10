@@ -13,6 +13,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.adminutil.AdminUtilRequestPayload;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.validator.user.UserBulkMigrationRequestValidator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({HttpUtil.class})
+@PrepareForTest({HttpUtil.class, AdminUtilHandlerTest.class})
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
 public class AdminUtilHandlerTest {
 
@@ -40,7 +41,7 @@ public class AdminUtilHandlerTest {
         reqData.add(new AdminUtilRequestData("parentId", "childId1"));
         reqData.add(new AdminUtilRequestData("parentId", "childId2"));
         AdminUtilRequestPayload payload = AdminUtilHandler.prepareAdminUtilPayload(reqData);
-        assertEquals(payload.getRequest().getData().size(), 2);
+        assertEquals(2,payload.getRequest().getData().size());
     }
 
     @Test

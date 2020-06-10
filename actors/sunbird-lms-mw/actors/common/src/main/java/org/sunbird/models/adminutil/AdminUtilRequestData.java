@@ -1,14 +1,9 @@
 package org.sunbird.models.adminutil;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AdminUtilRequestData implements Serializable
 {

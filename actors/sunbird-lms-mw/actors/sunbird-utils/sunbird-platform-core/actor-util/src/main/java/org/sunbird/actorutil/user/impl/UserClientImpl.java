@@ -115,8 +115,6 @@ public class UserClientImpl implements UserClient {
 
   public Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid) {
     ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
-    InterServiceCommunication interServiceCommunication =
-            InterServiceCommunicationFactory.getInstance();
 
     Map<String, Object> filters = new HashMap<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
