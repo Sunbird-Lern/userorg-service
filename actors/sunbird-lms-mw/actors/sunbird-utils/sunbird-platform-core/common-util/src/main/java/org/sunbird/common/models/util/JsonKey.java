@@ -1028,6 +1028,9 @@ public final class JsonKey {
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
+  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
+  public static final String ACCESS_TOKEN_PUBLICKEY_KEYPREFIX = "accesstoken.publickey.keyprefix";
+  public static final String ACCESS_TOKEN_PUBLICKEY_KEYCOUNT = "accesstoken.publickey.keycount";
 
   private JsonKey() {}
 }
