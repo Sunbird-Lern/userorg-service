@@ -1,13 +1,19 @@
 package controllers.usermanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.*;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -22,13 +28,8 @@ import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class UserControllerTest extends BaseApplicationTest {
 
   private static String userId = "someUserId";
@@ -43,9 +44,10 @@ public class UserControllerTest extends BaseApplicationTest {
   private static String language = "any-language";
   private static String role = "user";
   private static final String UPDATE_URL = "/v1/user/update";
-  public static final String USER_EXISTS_API ="/v1/user/exists/";
+  public static final String USER_EXISTS_API = "/v1/user/exists/";
 
   public static Map<String, List<String>> headerMap;
+
   @Before
   public void before() {
     setup(DummyActor.class);
@@ -53,7 +55,7 @@ public class UserControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));
     headerMap.put(HeaderParam.X_Device_ID.getName(), Arrays.asList("Some device ID"));
     headerMap.put(
-            HeaderParam.X_Authenticated_Userid.getName(), Arrays.asList("Some authenticated user ID"));
+        HeaderParam.X_Authenticated_Userid.getName(), Arrays.asList("Some authenticated user ID"));
     headerMap.put(JsonKey.MESSAGE_ID, Arrays.asList("Some message ID"));
     headerMap.put(HeaderParam.X_APP_ID.getName(), Arrays.asList("Some app Id"));
   }
@@ -65,38 +67,39 @@ public class UserControllerTest extends BaseApplicationTest {
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
+
   @Test
   public void testCreateUserV3Success() {
 
     Result result =
-            performTest(
-                    "/v1/user/signup",
-                    "POST",
-                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
+        performTest(
+            "/v1/user/signup",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
-  
+
   @Test
   public void testCreateUserV3SyncSuccess() {
-    
+
     Result result =
-      performTest(
-        "/v3/user/create",
-        "POST",
-        (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,""));
+        performTest(
+            "/v3/user/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 
   @Test
   public void testCreateUserV3WithInvalidPassLength() {
     Result result =
-            performTest(
-                    "/v1/user/signup",
-                    "POST",
-                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab@1214"));
+        performTest(
+            "/v1/user/signup",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
     assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -107,59 +110,59 @@ public class UserControllerTest extends BaseApplicationTest {
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab@1214"));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
     assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
-  
+
   @Test
   public void testCreateUserWithOutUpperCasePass() {
     Result result =
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"ab@12148"));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab@12148"));
     assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
-  
+
   @Test
   public void testCreateUserWithOutSpecialCharPass() {
     Result result =
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"ab312148"));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab312148"));
     assertEquals(getResponseCode(result), ResponseCode.passwordValidation.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
-  
+
   @Test
   public void testCreateUserWithCorrectPass() {
     Result result =
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab3#$2148"));
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 
   @Test
   public void testCreateUserV3WithCorrectPass() {
     Result result =
-            performTest(
-                    "/v1/user/signup",
-                    "POST",
-                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true,"Ab3#$2148"));
+        performTest(
+            "/v1/user/signup",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
-  
+
   @Test
   public void testCreateUserFailureWithoutContentType() {
-    String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false,null);
+    String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false, null);
     RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(getResponseCode(result), ResponseCode.contentTypeRequiredError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -170,7 +173,7 @@ public class UserControllerTest extends BaseApplicationTest {
         performTest(
             "/v1/user/create",
             "POST",
-            (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true,null));
+            (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true, null));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -181,7 +184,7 @@ public class UserControllerTest extends BaseApplicationTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true,null));
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -192,7 +195,7 @@ public class UserControllerTest extends BaseApplicationTest {
         performTest(
             "/v1/user/update",
             "PATCH",
-            (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true,null));
+            (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true, null));
     assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -232,23 +235,19 @@ public class UserControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
+
   @Test
   public void testUpdateUserFrameworkSuccess() {
     Result result =
-        performTest(
-            UPDATE_URL,
-            "PATCH",
-            (Map) updateUserFrameworkRequest(userId, "NCF",true));
+        performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", true));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
+
   @Test
   public void testUpdateUserFrameworkFailure() {
     Result result =
-        performTest(
-            UPDATE_URL,
-            "PATCH",
-            (Map) updateUserFrameworkRequest(userId, "NCF",false));
+        performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", false));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -259,16 +258,19 @@ public class UserControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
+
   @Test
   public void testUserExistsWithInValidEmail() {
     Result result = performTest(USER_EXISTS_API.concat("email/demogmail.com"), "GET", null);
     assertTrue(getResponseStatus(result) == 400);
   }
+
   @Test
   public void testUserExistsWithValidPhone() {
     Result result = performTest(USER_EXISTS_API.concat("phone/9876543210"), "GET", null);
     assertTrue(getResponseStatus(result) == 200);
   }
+
   @Test
   public void testUserExistsWithInValidPhone() {
     Result result = performTest(USER_EXISTS_API.concat("phone/98765432103"), "GET", null);
@@ -306,12 +308,9 @@ public class UserControllerTest extends BaseApplicationTest {
     frameworkMap.put("board", board);
     return frameworkMap;
   }
-  
-  
-  
 
   private Object createOrUpdateUserRequest(
-      String userName, String phoneNumber, String userId, boolean isContentType,String password) {
+      String userName, String phoneNumber, String userId, boolean isContentType, String password) {
     Map<String, Object> requestMap = new HashMap<>();
 
     Map<String, Object> innerMap = new HashMap<>();
@@ -328,8 +327,8 @@ public class UserControllerTest extends BaseApplicationTest {
     }
     innerMap.put(JsonKey.FIRST_NAME, firstName);
     innerMap.put(JsonKey.LAST_NAME, lastName);
-    if(StringUtils.isNotBlank(password)) {
-    	innerMap.put(JsonKey.PASSWORD, password);
+    if (StringUtils.isNotBlank(password)) {
+      innerMap.put(JsonKey.PASSWORD, password);
     }
 
     List<String> roles = new ArrayList<>();
@@ -381,7 +380,7 @@ public class UserControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    //req.headers(new Http.Headers(headerMap));
+    // req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }
@@ -413,9 +412,9 @@ public class UserControllerTest extends BaseApplicationTest {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-                      + e.getMessage(),
-              LoggerEnum.ERROR.name());
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

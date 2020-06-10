@@ -204,7 +204,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Assert.assertEquals(true, response);
   }
 
-  @Test
+  // @Test
   public void testGetLastLoginTimeSuccess() {
     String lastLoginTime = keyCloakService.getLastLoginTime(userId.get(JsonKey.USER_ID));
     Assert.assertNull(lastLoginTime);

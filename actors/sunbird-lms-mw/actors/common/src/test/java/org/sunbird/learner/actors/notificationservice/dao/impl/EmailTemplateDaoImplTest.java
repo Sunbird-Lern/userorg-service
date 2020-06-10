@@ -30,7 +30,12 @@ import org.sunbird.learner.actors.notificationservice.dao.EmailTemplateDao;
   CassandraOperation.class,
   CassandraUtil.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class EmailTemplateDaoImplTest {
   private CassandraOperation cassandraOperation;
   private static final String EMAIL_TEMPLATE = "email_template";

@@ -36,7 +36,12 @@ import org.sunbird.user.util.UserActorOperations;
   ServiceFactory.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class AddressManagementActorTest {
 
   private static final ActorSystem system = ActorSystem.create("system");

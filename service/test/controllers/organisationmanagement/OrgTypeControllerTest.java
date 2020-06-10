@@ -1,14 +1,20 @@
 package controllers.organisationmanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -21,23 +27,17 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class OrgTypeControllerTest extends BaseApplicationTest {
 
   private static String orgTypeName = "org-type-name";
   private static String id = "id";
 
-
   @Before
   public void before() {
-    setup(DummyActor.class);}
+    setup(DummyActor.class);
+  }
 
   @Test
   public void testCreateOrgTypeSuccess() {
@@ -125,7 +125,7 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    //req.headers(new Http.Headers(headerMap));
+    // req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }
@@ -157,9 +157,9 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-                      + e.getMessage(),
-              LoggerEnum.ERROR.name());
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

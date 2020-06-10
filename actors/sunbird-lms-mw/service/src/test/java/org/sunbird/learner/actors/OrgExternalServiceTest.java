@@ -17,7 +17,12 @@ import org.sunbird.learner.organisation.external.identity.service.OrgExternalSer
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class})
-@PowerMockIgnore({"javax.management.*", "javax.crypto.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OrgExternalServiceTest {
   private static CassandraOperationImpl cassandraOperation;
   private OrgExternalService orgExternalService = new OrgExternalService();

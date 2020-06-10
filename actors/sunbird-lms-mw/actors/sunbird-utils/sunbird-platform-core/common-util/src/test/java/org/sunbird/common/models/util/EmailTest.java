@@ -7,10 +7,17 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.jvnet.mock_javamail.Mailbox;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.common.models.util.mail.GMailAuthenticator;
 import org.sunbird.common.models.util.mail.SendMail;
 
 /** @author Manzarul */
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class EmailTest {
 
   private static GMailAuthenticator authenticator = null;

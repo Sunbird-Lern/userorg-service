@@ -36,7 +36,12 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserServiceImpl.class, ServiceFactory.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class CertificateActorTest {
   public static CassandraOperationImpl cassandraOperationImpl;
   public static UserServiceImpl userServiceImpl;

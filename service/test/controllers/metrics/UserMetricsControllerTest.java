@@ -1,13 +1,17 @@
 package controllers.metrics;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -23,16 +27,10 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** Created by arvind on 4/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class UserMetricsControllerTest extends BaseApplicationTest {
 
@@ -47,7 +45,7 @@ public class UserMetricsControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
     headerMap.put(
-            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
@@ -58,8 +56,8 @@ public class UserMetricsControllerTest extends BaseApplicationTest {
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/user/userId").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -70,8 +68,8 @@ public class UserMetricsControllerTest extends BaseApplicationTest {
         .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/consumption/user/userId").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 }

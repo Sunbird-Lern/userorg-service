@@ -37,7 +37,12 @@ import org.sunbird.user.dao.impl.EducationDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, EducationDaoImpl.class, AddressDaoImpl.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class EducationManagementActorTest {
 
   private static final ActorSystem system = ActorSystem.create("system");

@@ -63,7 +63,12 @@ import scala.concurrent.Promise;
   LocationClientImpl.class,
   DataCacheHandler.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserProfileReadActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

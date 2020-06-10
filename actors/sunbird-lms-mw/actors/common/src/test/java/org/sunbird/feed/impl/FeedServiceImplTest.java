@@ -41,7 +41,12 @@ import scala.concurrent.Promise;
   ElasticSearchService.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class FeedServiceImplTest {
   private ElasticSearchService esUtil;
   private static CassandraOperation cassandraOperation = null;

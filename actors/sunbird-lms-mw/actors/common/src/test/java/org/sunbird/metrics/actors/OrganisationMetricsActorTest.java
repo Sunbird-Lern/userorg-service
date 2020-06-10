@@ -60,7 +60,12 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OrganisationMetricsActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

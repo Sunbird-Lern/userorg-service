@@ -10,6 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -20,6 +21,12 @@ import org.sunbird.telemetry.util.TelemetryGenerator;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TelemetryGenerator.class})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class TelemetryGeneratorTest {
 
   private static Map<String, Object> context;

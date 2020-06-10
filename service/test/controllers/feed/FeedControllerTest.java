@@ -19,7 +19,7 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest({OnRequestHandler.class, FeedRequestValidator.class})
 public class FeedControllerTest extends BaseApplicationTest {
 

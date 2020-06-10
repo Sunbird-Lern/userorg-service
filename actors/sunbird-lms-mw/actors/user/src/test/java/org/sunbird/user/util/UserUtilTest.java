@@ -1,6 +1,5 @@
 package org.sunbird.user.util;
 
-import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -9,14 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import akka.dispatch.Futures;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -35,14 +29,22 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, DataCacheHandler.class,
-        EsClientFactory.class,
-        ElasticSearchRestHighImpl.class,
-        Util.class})
-@PowerMockIgnore({"javax.management.*"})
+@PrepareForTest({
+  ServiceFactory.class,
+  CassandraOperationImpl.class,
+  DataCacheHandler.class,
+  EsClientFactory.class,
+  ElasticSearchRestHighImpl.class,
+  Util.class
+})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
@@ -159,7 +161,7 @@ public class UserUtilTest {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
     List managedUserList = new ArrayList<User>();
-    while(managedUserList.size()<=31){
+    while (managedUserList.size() <= 31) {
       managedUserList.add(new User());
     }
     when(Util.searchUser(req)).thenReturn(managedUserList);
@@ -169,6 +171,5 @@ public class UserUtilTest {
       assertEquals(e.getResponseCode(), 400);
       assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());
     }
-
   }
 }

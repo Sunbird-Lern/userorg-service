@@ -1,9 +1,15 @@
 package controllers.clientmanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -24,20 +30,12 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** Created by arvind on 6/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class ClientControllerTest extends BaseApplicationTest {
-
 
   @Before
   public void before() {

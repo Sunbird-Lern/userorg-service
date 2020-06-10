@@ -49,7 +49,12 @@ import scala.concurrent.duration.FiniteDuration;
   ElasticSearchHelper.class,
   ElasticSearchRestHighImpl.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserSkillManagementActorTest {
 
   private static ActorSystem system;

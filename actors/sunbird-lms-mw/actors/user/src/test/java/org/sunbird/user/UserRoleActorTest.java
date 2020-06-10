@@ -62,7 +62,12 @@ import scala.concurrent.duration.Duration;
   UserOrgDaoImpl.class,
   DecryptionService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserRoleActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

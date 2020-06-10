@@ -36,7 +36,12 @@ import org.sunbird.user.dao.impl.JobProfileDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AddressDaoImpl.class, ServiceFactory.class, JobProfileDaoImpl.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class JobProfileManagementActorTest {
   private AddressDao addressDao;
   private JobProfileDao jobProfileDao;

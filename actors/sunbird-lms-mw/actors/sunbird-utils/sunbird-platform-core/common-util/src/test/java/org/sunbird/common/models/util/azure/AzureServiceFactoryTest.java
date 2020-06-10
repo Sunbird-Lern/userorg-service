@@ -40,7 +40,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "com.microsoft.azure.storage.*"
+  "com.microsoft.azure.storage.*",
+  "jdk.internal.reflect.*"
 })
 public class AzureServiceFactoryTest {
 

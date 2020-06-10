@@ -61,7 +61,12 @@ import org.sunbird.user.util.MigrationUtils;
   ShadowUser.class,
   FeedUtil.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class TenantMigrationActorTest extends UserManagementActorTestBase {
   Props props = Props.create(TenantMigrationActor.class);
   ActorSystem system = ActorSystem.create("system");

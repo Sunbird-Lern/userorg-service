@@ -1,17 +1,17 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import modules.OnRequestHandler;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -20,6 +20,7 @@ import play.libs.Json;
 import play.mvc.Http;
 
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class ContextRequestTest extends BaseApplicationTest {
 
   private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";

@@ -30,7 +30,12 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpUtil.class, TelemetryUtil.class})
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BadgrServiceImplBadgeClassTest {
   private BadgingService badgrServiceImpl;
 

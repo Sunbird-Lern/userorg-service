@@ -31,7 +31,12 @@ import org.sunbird.user.dao.impl.UserDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserDao.class, UserDaoImpl.class, Util.class, UserUtility.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class ResetPasswordActorTest {
 
   private UserDao userDao;

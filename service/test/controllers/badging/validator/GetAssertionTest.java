@@ -24,7 +24,7 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Manzarul
  */
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class GetAssertionTest {
 
   @Test

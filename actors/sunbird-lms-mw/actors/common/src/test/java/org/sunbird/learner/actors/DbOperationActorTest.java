@@ -10,8 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.*;
-import org.junit.runners.MethodSorters;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -20,7 +28,14 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.datapersistence.DbOperationActor;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({SunbirdMWService.class})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 @Ignore
 public class DbOperationActorTest {
   private static ActorSystem system;
@@ -28,7 +43,8 @@ public class DbOperationActorTest {
 
   @BeforeClass
   public static void setUp() {
-    SunbirdMWService.init();
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     system = ActorSystem.create("system");
   }
 

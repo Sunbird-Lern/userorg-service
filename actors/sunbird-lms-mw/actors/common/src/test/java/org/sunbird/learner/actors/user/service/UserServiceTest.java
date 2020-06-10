@@ -32,7 +32,12 @@ import org.sunbird.learner.util.Util;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   EncryptionService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserServiceTest {
 
   private CassandraOperation cassandraOperation;

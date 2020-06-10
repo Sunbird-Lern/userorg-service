@@ -48,7 +48,12 @@ import org.sunbird.learner.util.Util;
   DecryptionService.class,
   DataCacheHandler.class,
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class TenantPreferenceManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

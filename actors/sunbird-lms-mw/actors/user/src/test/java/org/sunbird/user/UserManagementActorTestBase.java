@@ -62,7 +62,12 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   SunbirdMWService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");

@@ -49,7 +49,12 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   SunbirdMWService.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.crypto.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserTnCActorTest {
   private static ActorSystem system;
 

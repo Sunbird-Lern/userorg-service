@@ -124,7 +124,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
     for (int i = 0; i < ITERATIONS; i++) {
       valueToEnc = encryption_key + eValue;
       byte[] encValue = c.doFinal(valueToEnc.getBytes(StandardCharsets.UTF_8));
-      eValue = new sun.misc.BASE64Encoder().encode(encValue);
+      eValue = java.util.Base64.getEncoder().encodeToString(encValue);
     }
     return eValue;
   }

@@ -28,7 +28,7 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, AccessLogFilter.class})
 public abstract class BaseApplicationTest {
   protected Application application;

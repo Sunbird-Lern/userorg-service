@@ -34,7 +34,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 /** @author arvind */
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 @PrepareForTest({BadgeAssertionValidator.class, BadgingFactory.class})
 public class BadgeAssertionActorTest {
 

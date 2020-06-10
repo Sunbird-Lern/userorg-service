@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -30,7 +30,12 @@ import org.sunbird.common.responsecode.ResponseCode;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpUtil.class})
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BadgeClassValidatorTest {
   private static final String READ_ROOT_ORG_TRUE_RESPONSE =
       "{\"id\":\"api.org.read\",\"ver\":\"v1\",\"ts\":\"2018-03-22 13:38:07:948+0000\",\"params\":{\"resmsgid\":null,\"msgid\":\"78070b77-a82d-4670-882e-1ed83af890bd\",\"err\":null,\"status\":\"success\",\"errmsg\":null},\"responseCode\":\"OK\",\"result\":{\"response\":{\"dateTime\":null,\"preferredLanguage\":\"English\",\"approvedBy\":null,\"channel\":\"ROOT_ORG\",\"description\":\"Sunbird\",\"updatedDate\":\"2017-08-24 06:02:10:846+0000\",\"addressId\":null,\"orgType\":null,\"provider\":null,\"orgCode\":\"sunbird\",\"theme\":null,\"id\":\"ORG_001\",\"communityId\":null,\"isApproved\":null,\"slug\":\"sunbird\",\"identifier\":\"ORG_001\",\"thumbnail\":null,\"orgName\":\"Sunbird\",\"updatedBy\":\"user1\",\"externalId\":null,\"isRootOrg\":true,\"rootOrgId\":null,\"approvedDate\":null,\"imgUrl\":null,\"homeUrl\":null,\"isDefault\":null,\"contactDetail\":\"[{\\\"phone\\\":\\\"213124234234\\\",\\\"email\\\":\\\"test@test.com\\\"},{\\\"phone\\\":\\\"+91213124234234\\\",\\\"email\\\":\\\"test1@test.com\\\"}]\",\"createdDate\":null,\"createdBy\":null,\"parentOrgId\":null,\"hashTagId\":\"b00bc992ef25f1a9a8d63291e20efc8d\",\"noOfMembers\":1,\"status\":null}}}";

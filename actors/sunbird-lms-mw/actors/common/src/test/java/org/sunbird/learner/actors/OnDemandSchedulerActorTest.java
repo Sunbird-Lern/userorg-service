@@ -32,7 +32,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({OnDemandSchedulerManager.class, SchedulerManager.class})
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OnDemandSchedulerActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static final Props props = Props.create(OnDemandSchedulerActor.class);

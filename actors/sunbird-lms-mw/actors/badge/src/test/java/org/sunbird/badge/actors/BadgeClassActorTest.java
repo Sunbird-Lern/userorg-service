@@ -23,7 +23,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BadgeClassActorTest {
   private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("100 second");
 

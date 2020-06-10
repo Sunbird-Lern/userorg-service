@@ -33,8 +33,10 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.common.models.util.mail.SendMail;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -53,9 +55,17 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   EmailTemplateDaoImpl.class,
   EsClientFactory.class,
-  ElasticSearchHelper.class
+  ElasticSearchHelper.class,
+  SendMail.class,
+  PropertiesCache.class,
+  ProjectUtil.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class EmailServiceActorTest {
 
   private static final Props props = Props.create(EmailServiceActor.class);
@@ -68,10 +78,13 @@ public class EmailServiceActorTest {
 
   @BeforeClass
   public static void setUp() {
-
+    PowerMockito.mockStatic(ProjectUtil.class);
+    PowerMockito.mockStatic(SendMail.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
     cassandraOperation = mock(CassandraOperationImpl.class);
     defaultDecryptionService = mock(DefaultDecryptionServiceImpl.class);
     defaultEncryptionServivce = mock(DefaultEncryptionServivceImpl.class);
@@ -156,7 +169,7 @@ public class EmailServiceActorTest {
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
     reqObj.setOperation(BackgroundOperations.emailService.name());
-
+    PowerMockito.when(ProjectUtil.isEmailvalid("aaa@gmail.com")).thenReturn(true);
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> pageMap = new HashMap<String, Object>();
     List<String> emailIdList = new ArrayList<>();

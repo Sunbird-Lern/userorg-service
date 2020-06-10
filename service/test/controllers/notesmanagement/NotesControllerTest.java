@@ -1,8 +1,13 @@
 package controllers.notesmanagement;
 
+import static controllers.TestUtil.mapToJson;
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -19,17 +24,9 @@ import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
-
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class NotesControllerTest extends BaseApplicationTest {
 
@@ -54,8 +51,8 @@ public class NotesControllerTest extends BaseApplicationTest {
     String data = mapToJson(requestMap);
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -67,16 +64,16 @@ public class NotesControllerTest extends BaseApplicationTest {
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/create").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
   @Test
   public void testGetNoteSuccess() {
     RequestBuilder req = new RequestBuilder().uri("/v1/note/read/" + NOTE_ID).method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -90,8 +87,8 @@ public class NotesControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/note/update/" + NOTE_ID).method("PATCH");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -106,8 +103,8 @@ public class NotesControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/note/delete/123").method("DELETE");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -123,8 +120,8 @@ public class NotesControllerTest extends BaseApplicationTest {
 
     JsonNode json = Json.parse(data);
     RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/note/search").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 

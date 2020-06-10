@@ -2,6 +2,7 @@ package controllers.badging;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
@@ -9,11 +10,9 @@ import controllers.DummyActor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -37,7 +36,7 @@ import util.RequestInterceptor;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class BadgeIssuerControllerTest extends BaseApplicationTest {
 

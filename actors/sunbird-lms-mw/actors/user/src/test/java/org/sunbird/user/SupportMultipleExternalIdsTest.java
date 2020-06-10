@@ -42,7 +42,8 @@ import org.sunbird.models.user.User;
   "javax.net.ssl.*",
   "javax.security.*",
   "javax.crypto.*",
-  "javax.script.*"
+  "javax.script.*",
+  "jdk.internal.reflect.*"
 })
 public class SupportMultipleExternalIdsTest {
 

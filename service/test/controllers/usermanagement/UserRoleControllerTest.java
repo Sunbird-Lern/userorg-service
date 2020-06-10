@@ -1,13 +1,22 @@
 package controllers.usermanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -20,16 +29,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class UserRoleControllerTest extends BaseApplicationTest {
 
   private static String role = "someRole";
@@ -37,22 +38,23 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   private static String orgId = "someOrgId";
 
   @Before
-  public void before()throws Exception {
+  public void before() throws Exception {
     setup(DummyActor.class);
-
   }
 
   @Test
   public void testAssignRolesSuccess() {
-   // setup(DummyActor.class);
-    Result result = performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
+    // setup(DummyActor.class);
+    Result result =
+        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testAssignRolesFailueWithoutOrgId() {
-    Result result = performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
+    Result result =
+        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
@@ -116,7 +118,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-//    req.headers(new Http.Headers(headerMap));
+    //    req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }
@@ -148,9 +150,9 @@ public class UserRoleControllerTest extends BaseApplicationTest {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-                      + e.getMessage(),
-              LoggerEnum.ERROR.name());
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

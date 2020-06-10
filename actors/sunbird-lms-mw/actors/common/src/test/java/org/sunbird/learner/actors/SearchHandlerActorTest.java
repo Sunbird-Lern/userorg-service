@@ -36,7 +36,12 @@ import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;

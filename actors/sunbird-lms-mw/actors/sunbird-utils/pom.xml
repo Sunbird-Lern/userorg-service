@@ -6,6 +6,12 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Sunbird Utils</name>
+  <properties>
+    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <modules>
     <module>sunbird-cassandra-utils</module>
     <module>sunbird-es-utils</module>

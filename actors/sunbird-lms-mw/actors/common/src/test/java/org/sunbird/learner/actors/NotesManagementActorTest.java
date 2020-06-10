@@ -43,7 +43,12 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   EsClientFactory.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.crypto.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class NotesManagementActorTest {
 
   private static String userId = "userId-example";

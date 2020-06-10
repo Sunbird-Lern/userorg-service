@@ -33,7 +33,12 @@ import org.sunbird.learner.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, Util.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class ClientManagementActorTest {
 
   private static ActorSystem system = ActorSystem.create("system");

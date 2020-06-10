@@ -47,7 +47,12 @@ import org.sunbird.models.user.Feed;
   OrganisationClientImpl.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class FeedUtilTest {
   private ElasticSearchService esUtil;
   private CassandraOperation cassandraOperation = null;

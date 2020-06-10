@@ -46,7 +46,12 @@ import org.sunbird.ratelimit.service.RateLimitServiceImpl;
   RateLimitDao.class,
   RateLimitServiceImpl.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OTPActorTest {
 
   private TestKit probe;

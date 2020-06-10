@@ -1,13 +1,21 @@
 package controllers.scheduler;
 
+import static org.junit.Assert.*;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -18,18 +26,12 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
-
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class SchedulerControllerTest extends BaseApplicationTest {
 
   public static Map<String, List<String>> headerMap;
+
   @Before
   public void before() {
     setup(DummyActor.class);
@@ -37,19 +39,16 @@ public class SchedulerControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));
     headerMap.put(HeaderParam.X_Device_ID.getName(), Arrays.asList("Some device ID"));
     headerMap.put(
-      HeaderParam.X_Authenticated_Userid.getName(), Arrays.asList("Some authenticated user ID"));
+        HeaderParam.X_Authenticated_Userid.getName(), Arrays.asList("Some authenticated user ID"));
     headerMap.put(JsonKey.MESSAGE_ID, Arrays.asList("Some message ID"));
     headerMap.put(HeaderParam.X_APP_ID.getName(), Arrays.asList("Some app Id"));
   }
 
   @Test
   public void testStartScheduler() {
-      System.out.println("applied");
+    System.out.println("applied");
     Result result =
-      performTest(
-        "/private/user/v1/scheduler",
-        "POST",
-        (Map) createOnDemandSchedulerRequest());
+        performTest("/private/user/v1/scheduler", "POST", (Map) createOnDemandSchedulerRequest());
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 

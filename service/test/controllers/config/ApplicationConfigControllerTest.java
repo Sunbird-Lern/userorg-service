@@ -1,13 +1,17 @@
 package controllers.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -25,16 +29,10 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** Created by arvind on 6/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class ApplicationConfigControllerTest extends BaseApplicationTest {
 

@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -18,6 +19,12 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 
 @PrepareForTest({DataCacheHandler.class, ContentStoreUtil.class})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserFrameworkTest extends UserManagementActorTestBase {
 
   @Before

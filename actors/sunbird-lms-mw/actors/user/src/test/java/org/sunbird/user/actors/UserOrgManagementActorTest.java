@@ -28,7 +28,12 @@ import org.sunbird.learner.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Util.class, UserUtility.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserOrgManagementActorTest {
   Props props = Props.create(UserOrgManagementActor.class);
   ActorSystem system = ActorSystem.create("UserOrgManagementActor");

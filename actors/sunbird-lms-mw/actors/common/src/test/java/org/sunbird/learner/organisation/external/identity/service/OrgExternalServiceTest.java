@@ -29,7 +29,12 @@ import org.sunbird.learner.util.Util;
   CassandraOperation.class,
   CassandraUtil.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OrgExternalServiceTest {
 
   private CassandraOperation cassandraOperation;
@@ -38,10 +43,10 @@ public class OrgExternalServiceTest {
 
   @Before
   public void setUp() {
-    orgExternalService = new OrgExternalService();
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    orgExternalService = new OrgExternalService();
   }
 
   @Test

@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.badge.BadgeOperations;
 import org.sunbird.badge.service.impl.BadgrServiceImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -29,6 +30,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 import scala.concurrent.duration.FiniteDuration;
 
 /** Created by arvind on 15/3/18. */
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BadgeIssuerActorTest {
 
   private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("100 second");

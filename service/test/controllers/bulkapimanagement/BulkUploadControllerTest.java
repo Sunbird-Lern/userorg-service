@@ -1,9 +1,16 @@
 package controllers.bulkapimanagement;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -23,18 +30,10 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** Created by arvind on 4/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class BulkUploadControllerTest extends BaseApplicationTest {
 
@@ -81,13 +80,11 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
 
   @Test
   public void testGetUploadStatus() {
-    Http.RequestBuilder req =
-            new Http.RequestBuilder()
-                    .uri("/v1/upload/status/pid")
-                    .method("GET");
+    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/upload/status/pid").method("GET");
     Result result = Helpers.route(application, req);
-    Assert.assertEquals( 200, result.status());
+    Assert.assertEquals(200, result.status());
   }
+
   private static String mapToJson(Map map) {
     ObjectMapper mapperObj = new ObjectMapper();
     String jsonResp = "";

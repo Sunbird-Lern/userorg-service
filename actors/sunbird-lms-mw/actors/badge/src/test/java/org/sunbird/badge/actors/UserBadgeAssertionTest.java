@@ -45,7 +45,12 @@ import scala.concurrent.duration.FiniteDuration;
   ElasticSearchHelper.class,
   ElasticSearchRestHighImpl.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserBadgeAssertionTest {
 
   @SuppressWarnings("deprecation")

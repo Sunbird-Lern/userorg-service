@@ -17,7 +17,12 @@ import org.sunbird.common.responsecode.ResponseCode;
  *
  * @author Manzarul
  */
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BadgeAssertionTest {
 
   @Test

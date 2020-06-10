@@ -1,5 +1,7 @@
 package util;
 
+import static org.junit.Assert.assertEquals;
+
 import controllers.BaseApplicationTest;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -7,17 +9,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import static org.junit.Assert.assertEquals;
-
 @Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(System.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class FilterTest extends BaseApplicationTest {
 
   @Before
@@ -28,10 +30,10 @@ public class FilterTest extends BaseApplicationTest {
   @Test
   public void testApiResponseWithGzipDisabledSuccess() {
     mockSystemSetting(false);
-    //headerMap.put("Accept-Encoding", new String[] {"gzip"});
+    // headerMap.put("Accept-Encoding", new String[] {"gzip"});
     RequestBuilder req = new RequestBuilder().uri("/v1/user/type/list").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals("application/json", result.contentType());
   }
 
@@ -39,8 +41,8 @@ public class FilterTest extends BaseApplicationTest {
   public void testApiResponseWithGzipDisabledSuccessForGzippedResponse() {
     mockSystemSetting(false);
     RequestBuilder req = new RequestBuilder().uri("/v1/user/type/list").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals("application/json", result.contentType());
   }
 
@@ -48,8 +50,8 @@ public class FilterTest extends BaseApplicationTest {
   public void testApiResponseFailureGzipEnabledAndRequestedGzipResponse() {
     mockSystemSetting(true);
     RequestBuilder req = new RequestBuilder().uri("/v1/user/type/list").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals("application/json", result.contentType());
   }
 

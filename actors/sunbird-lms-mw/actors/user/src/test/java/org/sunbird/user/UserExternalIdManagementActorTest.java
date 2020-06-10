@@ -45,7 +45,12 @@ import org.sunbird.user.util.UserActorOperations;
   Util.class,
   EsClientFactory.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserExternalIdManagementActorTest {
 
   private static final Props props = Props.create(UserExternalIdManagementActor.class);

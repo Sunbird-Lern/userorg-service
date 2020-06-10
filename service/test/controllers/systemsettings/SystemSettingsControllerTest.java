@@ -1,13 +1,16 @@
 package controllers.systemsettings;
 
+import static controllers.TestUtil.mapToJson;
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.gargoylesoftware.htmlunit.OnbeforeunloadHandler;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -21,15 +24,9 @@ import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static controllers.TestUtil.mapToJson;
-import static org.junit.Assert.assertEquals;
-
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class SystemSettingsControllerTest extends BaseApplicationTest {
 
@@ -42,32 +39,34 @@ public class SystemSettingsControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
     headerMap.put(
-            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
   @Test
   public void testGetSystemSettingSuccess() {
-    RequestBuilder req = new RequestBuilder().uri("/v1/system/settings/get/isRootOrgInitialised").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    RequestBuilder req =
+        new RequestBuilder().uri("/v1/system/settings/get/isRootOrgInitialised").method("GET");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testGetAllSystemSettingsSuccess() {
     RequestBuilder req = new RequestBuilder().uri("/v1/system/settings/list").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testSetSystemSettingSuccess() {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", "org123");
-    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -76,8 +75,8 @@ public class SystemSettingsControllerTest extends BaseApplicationTest {
     JsonNode json = createSetSystemSettingRequest(null, "defaultRootOrgId", "org123");
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -86,8 +85,8 @@ public class SystemSettingsControllerTest extends BaseApplicationTest {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", null, "org123");
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -96,8 +95,8 @@ public class SystemSettingsControllerTest extends BaseApplicationTest {
     JsonNode json = createSetSystemSettingRequest("defaultRootOrgId", "defaultRootOrgId", null);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri("/v1/system/settings/set").method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
 
     assertEquals(400, result.status());
   }

@@ -20,7 +20,12 @@ import org.sunbird.common.models.util.HttpUtil;
 /** @author manzarul */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 @PrepareForTest({
   ConnectionManager.class,
   AcknowledgedResponse.class,

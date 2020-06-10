@@ -10,6 +10,7 @@ import modules.OnRequestHandler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
@@ -17,6 +18,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class IdentifierFreeUpControllerTest extends BaseApplicationTest {
 
   public static Map<String, List<String>> headerMap;

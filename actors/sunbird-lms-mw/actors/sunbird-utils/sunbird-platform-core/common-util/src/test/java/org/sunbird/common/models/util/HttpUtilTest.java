@@ -18,8 +18,15 @@ import org.apache.http.message.BasicStatusLine;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class HttpUtilTest extends BaseHttpTest {
   public static final String JSON_STRING_DATA = "asdasasfasfsdfdsfdsfgsd";
 

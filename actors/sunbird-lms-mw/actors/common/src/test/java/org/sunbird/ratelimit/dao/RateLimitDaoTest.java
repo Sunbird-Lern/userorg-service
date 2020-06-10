@@ -28,7 +28,12 @@ import org.sunbird.ratelimit.limiter.OtpRateLimiter;
 import org.sunbird.ratelimit.limiter.RateLimit;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class RateLimitDaoTest {
 
   private static final String KEY = "9999888898";

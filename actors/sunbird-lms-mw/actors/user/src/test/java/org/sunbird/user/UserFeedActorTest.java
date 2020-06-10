@@ -54,7 +54,12 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UserFeedActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserFeedActor.class);

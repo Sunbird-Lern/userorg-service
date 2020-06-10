@@ -21,7 +21,12 @@ import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
 import scala.Option;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 @PrepareForTest({StorageServiceFactory.class, CloudStorageUtil.class})
 public class CloudStorageUtilTest {
 

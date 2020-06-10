@@ -7,7 +7,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class ExcelFileUtilTest {
 
   @Test
