@@ -63,7 +63,12 @@ public class OnRequestHandler implements ActionCreator {
               break;
             }
           }
-          result = delegate.call(request);
+          if(!RequestInterceptor.verifyAuthForToken(request)) {
+            result =
+              onDataValidationError(request, JsonKey.UNAUTHORIZED, ResponseCode.UNAUTHORIZED.getResponseCode());
+          } else {
+            result = delegate.call(request);
+          }
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
               onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());

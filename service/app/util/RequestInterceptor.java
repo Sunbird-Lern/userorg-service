@@ -192,4 +192,16 @@ public class RequestInterceptor {
     }
     return builder.toString();
   }
+  
+  public static boolean verifyAuthForToken(Http.Request request) {
+    boolean authForToken = true;
+    Optional<String> managedAccessToken =
+      request.header(HeaderParam.X_Authenticated_For.getName());
+    String requestedByUserID = request.flash().getOptional(JsonKey.USER_ID).get();
+    String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+    if (managedAccessToken.isPresent()) {
+      authForToken = AuthenticationHelper.verifyAuthForToken(managedAccessToken.get(), requestedByUserID, requestedForUserID);
+    }
+    return authForToken;
+  }
 }
