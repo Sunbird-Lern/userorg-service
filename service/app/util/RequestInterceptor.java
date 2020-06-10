@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
@@ -199,6 +200,8 @@ public class RequestInterceptor {
       request.header(HeaderParam.X_Authenticated_For.getName());
     String requestedByUserID = request.flash().getOptional(JsonKey.USER_ID).get();
     String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+    ProjectLogger.log("RequestInterceptor: verifyAuthForToken: requestedByUserID: "+requestedByUserID+
+      "requestedForUserID: "+ requestedForUserID, LoggerEnum.INFO);
     if (managedAccessToken.isPresent()) {
       authForToken = AuthenticationHelper.verifyAuthForToken(managedAccessToken.get(), requestedByUserID, requestedForUserID);
     }
