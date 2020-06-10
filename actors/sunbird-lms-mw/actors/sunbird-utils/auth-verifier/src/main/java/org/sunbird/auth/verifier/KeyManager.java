@@ -19,7 +19,7 @@ public class KeyManager {
     private static Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
 
     public static void init() throws Exception {
-        ProjectLogger.log("KeyManager:init: Start", LoggerEnum.DEBUG.name());
+        ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
         String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
         String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
         int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
