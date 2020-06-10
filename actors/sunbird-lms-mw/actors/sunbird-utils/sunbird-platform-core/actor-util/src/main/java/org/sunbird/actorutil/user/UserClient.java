@@ -34,6 +34,6 @@ public interface UserClient {
    * @param actorRef Actor reference
    * @param uuid User id
    */
-  Map<String, Object> searchUser(ActorRef actorRef, String uuid);
+  Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid);
 
 }

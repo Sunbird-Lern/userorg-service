@@ -1,50 +1,49 @@
 package org.sunbird.learner.util;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.MapUtils;
-import org.json.JSONObject;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.models.adminutil.AdminUtilParams;
+import org.sunbird.models.adminutil.AdminUtilRequestPayload;
+import org.sunbird.models.adminutil.AdminUtilRequestData;
+import org.sunbird.models.adminutil.AdminUtilRequest;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AdminUtilHandler {
-    public static JSONObject prepareAdminUtilPayload(JSONObject jData){
-        JSONObject jReqObject = new JSONObject();
-        jReqObject.put(JsonKey.ID, JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD);
-        jReqObject.put(JsonKey.VER, JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD_VER);
-        jReqObject.put(JsonKey.TS, Calendar.getInstance().getTime().getTime());
-        JSONObject jsonObjectParams = new JSONObject();
-        jsonObjectParams.put(JsonKey.DEVICE_ID,"");
-        jsonObjectParams.put(JsonKey.KEY,"");
-        jsonObjectParams.put(JsonKey.MSGID,"");
-        jReqObject.put(JsonKey.PARAMS, jsonObjectParams);
-        jReqObject.put(JsonKey.REQUEST, jData);
-        return jReqObject;
+    public static AdminUtilRequestPayload prepareAdminUtilPayload(List<AdminUtilRequestData> reqData){
+        AdminUtilRequestPayload adminUtilsReq = new AdminUtilRequestPayload();
+        adminUtilsReq.setId(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD);
+        adminUtilsReq.setVer(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD_VER);
+        adminUtilsReq.setTs(Calendar.getInstance().getTime().getTime());
+        adminUtilsReq.setParams(new AdminUtilParams());
+        adminUtilsReq.setRequest(new AdminUtilRequest(reqData));
+        return adminUtilsReq;
     }
 
-    public static Map<String, Object> fetchEncryptedToken(JSONObject jsonRequestObj){
+    public static Map<String, Object> fetchEncryptedToken(AdminUtilRequestPayload reqObject){
         Map<String, Object> data = null;
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            String body = jsonRequestObj.toString();
+
+            String body = mapper.writeValueAsString(reqObject);
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
-
             String response = HttpUtil.sendPostRequest(
                             ProjectUtil.getConfigValue(JsonKey.ADMINUTIL_BASE_URL) +
                                     ProjectUtil.getConfigValue(JsonKey.ADMINUTIL_SIGN_ENDPOINT),
                             body,
                             headers);
-            ObjectMapper mapper = new ObjectMapper();
             data = mapper.readValue(response, Map.class);
             if (MapUtils.isNotEmpty(data)) {
                 data = (Map<String, Object>) data.get(JsonKey.RESULT);

@@ -41,5 +41,7 @@ public interface UserService {
 
   String getCustodianOrgId(ActorRef actorRef);
 
-  void fetchAndAppendEncryptedToken(String parentId, List<Map<String, Object>> respList);
+  Map<String, Object> fetchEncryptedToken(String parentId, List<Map<String, Object>> respList);
+
+  void appendEncryptedToken(Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList);
 }

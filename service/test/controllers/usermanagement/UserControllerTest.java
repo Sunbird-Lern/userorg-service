@@ -423,4 +423,14 @@ public class UserControllerTest extends BaseApplicationTest {
   public int getResponseStatus(Result result) {
     return result.status();
   }
+
+  @Test
+  public void testGetManagedUsersSuccess() {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
+    map.put(JsonKey.WITH_TOKENS, true);
+    Result result = performTest("/v1/user/managed", "GET", map);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
 }

@@ -14,6 +14,8 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -1233,20 +1235,33 @@ public class UserManagementActor extends BaseActor {
     }
   }
   private void getManagedUsers(Request request) {
+    //LUA uuid/ManagedBy Id
     String uuid = (String)request.get(JsonKey.ID);
     boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
 
-    Map<String, Object> searchResult = userClient.searchUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),uuid);
+    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),uuid);
+    List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
-    List<Map<String, Object>> respList = (List) searchResult.get(JsonKey.CONTENT);
-
-    if(withTokens && CollectionUtils.isNotEmpty(respList)) {
-      //Fetch and append encrypted token for each managedUser in respList
-      userService.fetchAndAppendEncryptedToken(uuid, respList);
+    List<Map<String, Object>> activeUserList = null;
+    if(CollectionUtils.isNotEmpty(userList)) {
+      activeUserList = userList.stream()
+              .filter(o -> !BooleanUtils.isTrue((Boolean) o.get(JsonKey.IS_DELETED)))
+              .collect(Collectors.toList());
+    }
+    if(withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
+        //Fetch encrypted token from admin utils
+        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(uuid, activeUserList);
+        //encrypted token for each managedUser in respList
+        userService.appendEncryptedToken(encryptedTokenList, activeUserList);
     }
     Map<String, Object> responseMap = new HashMap<>();
-    responseMap.put(JsonKey.CONTENT, respList);
-    responseMap.put(JsonKey.COUNT, respList.size());
+    if(CollectionUtils.isNotEmpty(activeUserList)) {
+      responseMap.put(JsonKey.CONTENT, activeUserList);
+      responseMap.put(JsonKey.COUNT, activeUserList.size());
+    }else{
+      responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
+      responseMap.put(JsonKey.COUNT, 0);
+    }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());

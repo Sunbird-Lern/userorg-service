@@ -113,8 +113,8 @@ public class UserClientImpl implements UserClient {
     return userId;
   }
 
-  public Map<String, Object> searchUser(ActorRef actorRef, String uuid) {
-    ProjectLogger.log("UserServiceImpl: searchUser called", LoggerEnum.DEBUG);
+  public Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid) {
+    ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
     InterServiceCommunication interServiceCommunication =
             InterServiceCommunicationFactory.getInstance();
 
@@ -126,7 +126,6 @@ public class UserClientImpl implements UserClient {
     filters.put(JsonKey.MANAGED_BY, uuid);
     searchRequestMap.put(JsonKey.FILTERS, filters);
     Request request = new Request();
-    request.setOperation(LocationActorOperation.SEARCH_LOCATION.getValue());
     request.getRequest().putAll(searchRequestMap);
     request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
 
