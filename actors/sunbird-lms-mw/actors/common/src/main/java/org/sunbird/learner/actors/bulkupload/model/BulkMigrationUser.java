@@ -32,7 +32,7 @@ public class BulkMigrationUser {
   private Timestamp createdOn;
   private Timestamp lastUpdatedOn;
   private String storageDetails;
-  private Map<String, Object> telemetryContext;
+  private Map<String, String> telemetryContext;
 
   public BulkMigrationUser(BulkMigrationUserBuilder builder) {
     this.id = builder.id;
@@ -125,7 +125,7 @@ public class BulkMigrationUser {
     return storageDetails;
   }
 
-  public Map<String, Object> getTelemetryContext() {
+  public Map<String, String> getTelemetryContext() {
     return telemetryContext;
   }
 
@@ -150,9 +150,9 @@ public class BulkMigrationUser {
     private Timestamp createdOn;
     private Timestamp lastUpdatedOn;
     private String storageDetails;
-    private Map<String, Object> telemetryContext;
+    private Map<String, String> telemetryContext;
 
-    public BulkMigrationUserBuilder setTelemetryContext(Map<String, Object> telemetryContext) {
+    public BulkMigrationUserBuilder setTelemetryContext(Map<String, String> telemetryContext) {
       this.telemetryContext = telemetryContext;
       return this;
     }
