@@ -121,6 +121,13 @@ public class UserClientImpl implements UserClient {
     return userId;
   }
 
+  /**
+   * Get managed user list for LUA uuid (JsonKey.ID)
+   * @param actorRef
+   * @param uuid
+   *
+   * @return Map<String, Object>
+   */
   public Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid) {
     ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
 

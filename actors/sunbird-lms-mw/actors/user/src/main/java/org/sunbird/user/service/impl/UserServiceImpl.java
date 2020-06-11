@@ -464,12 +464,21 @@ public class UserServiceImpl implements UserService {
     return custodianOrgId;
   }
 
+  /**
+   * Fetch encrypted token list from admin utils
+   * @param parentId
+   * @param respList
+   * @return encryptedTokenList
+   */
   public Map<String, Object> fetchEncryptedToken(String parentId, List<Map<String, Object>> respList){
     Map<String, Object> encryptedTokenList = null;
     try {
       //create AdminUtilRequestData list of managedUserId and parentId
-      List<AdminUtilRequestData> managedUsers = createManagedUserList(parentId,respList);
+      List<AdminUtilRequestData> managedUsers = createManagedUserList(parentId, respList);
+      //Fetch encrypted token list from admin utils
       encryptedTokenList = AdminUtilHandler.fetchEncryptedToken(AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+    } catch (ProjectCommonException pe){
+      throw pe;
     } catch (Exception e) {
       throw new ProjectCommonException(
               ResponseCode.unableToParseData.getErrorCode(),
@@ -479,8 +488,12 @@ public class UserServiceImpl implements UserService {
     return encryptedTokenList;
   }
 
+  /**
+   * Append encrypted token to the user list
+   * @param encryptedTokenList
+   * @param respList
+   */
   public void appendEncryptedToken(Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList){
-    try {
       ArrayList<Map<String, Object>> data =  (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
       for (Object object : data) {
         Map<String, Object> tempMap = (Map<String, Object>) object;
@@ -490,14 +503,14 @@ public class UserServiceImpl implements UserService {
                 }
         );
       }
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-              ResponseCode.unableToParseData.getErrorCode(),
-              ResponseCode.unableToParseData.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-    }
   }
 
+  /**
+   * Create managed user user list with parentId(managedBY) and childId(managedUser) in admin util request format
+   * @param parentId
+   * @param respList
+   * @return reqData List<AdminUtilRequestData>
+   */
   private List<AdminUtilRequestData> createManagedUserList(String parentId, List<Map<String, Object>> respList){
     List<AdminUtilRequestData> reqData = respList.stream()
             .map(p -> new AdminUtilRequestData(parentId, (String)p.get(JsonKey.ID)))
