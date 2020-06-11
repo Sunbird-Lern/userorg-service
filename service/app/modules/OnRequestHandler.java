@@ -32,8 +32,6 @@ public class OnRequestHandler implements ActionCreator {
   private ObjectMapper mapper = new ObjectMapper();
   private static String custodianOrgHashTagId;
   public static boolean isServiceHealthy = true;
-  private final List<String> USER_UNAUTH_STATES =
-      Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
 
   @Override
   public Action createAction(Http.Request request, Method method) {
@@ -51,10 +49,11 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
+        //From 3.0.0 checking user access-token and managed-by from the request header
         String message = RequestInterceptor.verifyRequestData(request);
         // call method to set all the required params for the telemetry event(log)...
         initializeRequestInfo(request, message, requestId);
-        if (!USER_UNAUTH_STATES.contains(message)) {
+        if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request.flash().put(JsonKey.USER_ID, message);
           request.flash().put(JsonKey.IS_AUTH_REQ, "false");
           for (String uri : RequestInterceptor.restrictedUriList) {
@@ -63,12 +62,7 @@ public class OnRequestHandler implements ActionCreator {
               break;
             }
           }
-          if(!RequestInterceptor.verifyAuthForToken(request)) {
-            result =
-              onDataValidationError(request, JsonKey.UNAUTHORIZED, ResponseCode.UNAUTHORIZED.getResponseCode());
-          } else {
             result = delegate.call(request);
-          }
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
               onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
@@ -154,7 +148,7 @@ public class OnRequestHandler implements ActionCreator {
       if (optionalDeviceId.isPresent()) {
         reqContext.put(JsonKey.DEVICE_ID, optionalDeviceId.get());
       }
-      if (!USER_UNAUTH_STATES.contains(userId)) {
+      if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);
         reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
       } else {

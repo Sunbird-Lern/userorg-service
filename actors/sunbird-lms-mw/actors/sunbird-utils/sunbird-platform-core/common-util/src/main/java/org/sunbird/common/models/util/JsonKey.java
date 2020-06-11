@@ -1,5 +1,8 @@
 package org.sunbird.common.models.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * This class will contains all the key related to request and response.
  *
@@ -1031,6 +1034,11 @@ public final class JsonKey {
   public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
   public static final String ACCESS_TOKEN_PUBLICKEY_KEYPREFIX = "accesstoken.publickey.keyprefix";
   public static final String ACCESS_TOKEN_PUBLICKEY_KEYCOUNT = "accesstoken.publickey.keycount";
+  public static final String SHA_256_WITH_RSA = "SHA256withRSA";
+  public static final String SUB = "sub";
+  public static final String DOT_SEPARATOR = ".";
+  public static final List<String> USER_UNAUTH_STATES =
+    Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
 
   private JsonKey() {}
 }

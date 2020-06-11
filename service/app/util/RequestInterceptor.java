@@ -9,6 +9,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 
 /**
@@ -113,6 +114,7 @@ public class RequestInterceptor {
    * @param request HTTP play request
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned
+   *  release-3.0.0 on-wards validating managedBy token.
    */
   public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
@@ -123,6 +125,9 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+        if (!JsonKey.USER_UNAUTH_STATES.contains(clientId) && !verifyAuthForToken(request, clientId)) {
+          clientId = JsonKey.UNAUTHORIZED;
+        }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
         clientId =
             AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
@@ -194,11 +199,16 @@ public class RequestInterceptor {
     return builder.toString();
   }
   
-  public static boolean verifyAuthForToken(Http.Request request) {
+  /** Return true if managedby token is present and valid wrto request data
+   * @param request
+   * @param userId
+   * @return
+   */
+  public static boolean verifyAuthForToken(Http.Request request, String userId) {
     boolean authForToken = true;
     Optional<String> managedAccessToken =
       request.header(HeaderParam.X_Authenticated_For.getName());
-    String requestedByUserID = request.flash().getOptional(JsonKey.USER_ID).get();
+    String requestedByUserID = userId;
     String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
     ProjectLogger.log("RequestInterceptor: verifyAuthForToken: requestedByUserID: "+requestedByUserID+
       "requestedForUserID: "+ requestedForUserID, LoggerEnum.INFO);
