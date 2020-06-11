@@ -190,6 +190,7 @@ public class UserController extends BaseController {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     final String provider = httpRequest.getQueryString(JsonKey.PROVIDER);
     final String idType = httpRequest.getQueryString(JsonKey.ID_TYPE);
+    final String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
     userId = ProjectUtil.getLmsUserId(userId);
     return handleRequest(
         operation,
@@ -200,6 +201,7 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
+          request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
           return null;
         },
         userId,
