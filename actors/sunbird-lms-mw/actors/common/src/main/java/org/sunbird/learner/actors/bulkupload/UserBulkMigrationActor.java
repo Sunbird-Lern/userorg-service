@@ -166,7 +166,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
         LoggerEnum.INFO.name());
     contextMap.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.SYSTEM));
     contextMap.put(JsonKey.ACTOR_ID, ProjectUtil.getUniqueIdFromTimestamp(0));
-    Iterables.removeIf(contextMap.values(), value -> StringUtils.isBlank(value));
     return contextMap;
   }
 
