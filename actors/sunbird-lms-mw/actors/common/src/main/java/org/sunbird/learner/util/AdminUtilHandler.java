@@ -46,7 +46,7 @@ public class AdminUtilHandler {
             String body = mapper.writeValueAsString(reqObject);
             ProjectLogger.log(
                     "AdminUtilHandler :: fetchEncryptedToken: request payload" + body,
-                    LoggerEnum.INFO);
+                    LoggerEnum.DEBUG);
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
 
@@ -57,7 +57,7 @@ public class AdminUtilHandler {
                             headers);
             ProjectLogger.log(
                     "AdminUtilHandler :: fetchEncryptedToken: response payload" + response,
-                    LoggerEnum.INFO);
+                    LoggerEnum.DEBUG);
             data = mapper.readValue(response, Map.class);
             if (MapUtils.isNotEmpty(data)) {
                 data = (Map<String, Object>) data.get(JsonKey.RESULT);
