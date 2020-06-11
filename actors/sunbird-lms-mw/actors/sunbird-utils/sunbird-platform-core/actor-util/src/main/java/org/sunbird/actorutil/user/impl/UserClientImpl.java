@@ -1,11 +1,17 @@
 package org.sunbird.actorutil.user.impl;
 
 import akka.actor.ActorRef;
+
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
@@ -19,7 +25,9 @@ import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class UserClientImpl implements UserClient {
 
@@ -127,7 +135,20 @@ public class UserClientImpl implements UserClient {
     request.getRequest().putAll(searchRequestMap);
     request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
 
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
+    Object obj = null;
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      obj = Await.result(Patterns.ask(actorRef, request, t), t.duration());
+    }catch (Exception e) {
+      ProjectLogger.log(
+              "getFuture: Exception occured with error message = "
+                      + e.getMessage(),
+              e);
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
 
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
@@ -141,4 +162,5 @@ public class UserClientImpl implements UserClient {
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
+
 }
