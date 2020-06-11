@@ -7,9 +7,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.sunbird.actorutil.InterServiceCommunication;
+import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -27,8 +35,10 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
@@ -452,5 +462,47 @@ public class UserServiceImpl implements UserService {
               ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
     }
     return custodianOrgId;
+  }
+
+  public Map<String, Object> fetchEncryptedToken(String parentId, List<Map<String, Object>> respList){
+    Map<String, Object> encryptedTokenList = null;
+    try {
+      //create AdminUtilRequestData list of managedUserId and parentId
+      List<AdminUtilRequestData> managedUsers = createManagedUserList(parentId,respList);
+      encryptedTokenList = AdminUtilHandler.fetchEncryptedToken(AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+              ResponseCode.unableToParseData.getErrorCode(),
+              ResponseCode.unableToParseData.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return encryptedTokenList;
+  }
+
+  public void appendEncryptedToken(Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList){
+    try {
+      ArrayList<Map<String, Object>> data =  (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
+      for (Object object : data) {
+        Map<String, Object> tempMap = (Map<String, Object>) object;
+        respList.stream().filter(o -> o.get(JsonKey.ID).equals(tempMap.get(JsonKey.SUB))).forEach(
+                o -> {
+                  o.put(JsonKey.MANAGED_TOKEN, tempMap.get(JsonKey.TOKEN));
+                }
+        );
+      }
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+              ResponseCode.unableToParseData.getErrorCode(),
+              ResponseCode.unableToParseData.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
+
+  private List<AdminUtilRequestData> createManagedUserList(String parentId, List<Map<String, Object>> respList){
+    List<AdminUtilRequestData> reqData = respList.stream()
+            .map(p -> new AdminUtilRequestData(parentId, (String)p.get(JsonKey.ID)))
+            .collect(Collectors.toList());
+    reqData.forEach(System.out::println);
+    return reqData;
   }
 }

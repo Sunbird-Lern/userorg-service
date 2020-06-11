@@ -1,11 +1,17 @@
 package org.sunbird.actorutil.user.impl;
 
 import akka.actor.ActorRef;
+
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
@@ -15,15 +21,13 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class UserClientImpl implements UserClient {
 
@@ -116,4 +120,47 @@ public class UserClientImpl implements UserClient {
 
     return userId;
   }
+
+  public Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid) {
+    ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
+
+    Map<String, Object> filters = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    List<String> objectType = new ArrayList<String>();
+    objectType.add("user");
+    filters.put(JsonKey.OBJECT_TYPE, objectType);
+    filters.put(JsonKey.MANAGED_BY, uuid);
+    searchRequestMap.put(JsonKey.FILTERS, filters);
+    Request request = new Request();
+    request.getRequest().putAll(searchRequestMap);
+    request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+
+    Object obj = null;
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      obj = Await.result(Patterns.ask(actorRef, request, t), t.duration());
+    }catch (Exception e) {
+      ProjectLogger.log(
+              "getFuture: Exception occured with error message = "
+                      + e.getMessage(),
+              e);
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+
+    if (obj instanceof Response) {
+      Response responseObj = (Response) obj;
+      return (Map<String, Object>)responseObj.getResult().get(JsonKey.RESPONSE);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
+
 }

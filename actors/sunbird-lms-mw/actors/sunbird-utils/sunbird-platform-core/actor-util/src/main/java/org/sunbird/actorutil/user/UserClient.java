@@ -27,4 +27,13 @@ public interface UserClient {
 
   /** Verify email uniqueness across all users in the system. */
   void esVerifyEmailUniqueness();
+
+  /**
+   * Search user details.
+   *
+   * @param actorRef Actor reference
+   * @param uuid User id
+   */
+  Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid);
+
 }
