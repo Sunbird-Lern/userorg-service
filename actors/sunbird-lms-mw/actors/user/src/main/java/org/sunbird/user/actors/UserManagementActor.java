@@ -1234,6 +1234,13 @@ public class UserManagementActor extends BaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
   }
+
+  /**
+   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user
+   * from admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
+   *
+   * @param request Request
+   */
   private void getManagedUsers(Request request) {
     //LUA uuid/ManagedBy Id
     String uuid = (String)request.get(JsonKey.ID);
