@@ -1244,9 +1244,10 @@ public class UserManagementActor extends BaseActor {
   private void getManagedUsers(Request request) {
     //LUA uuid/ManagedBy Id
     String uuid = (String)request.get(JsonKey.ID);
+
     boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
 
-    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),uuid);
+    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;

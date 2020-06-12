@@ -237,6 +237,8 @@ public class UserController extends BaseController {
         map.put(JsonKey.ID, luaUuid);
         String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
         map.put(JsonKey.WITH_TOKENS, withTokens);
+        map.put(JsonKey.SORTBY, httpRequest.getQueryString(JsonKey.SORTBY));    //createdDate
+        map.put(JsonKey.ORDER, httpRequest.getQueryString(JsonKey.ORDER));  //desc
         return handleRequest(
                 ActorOperations.GET_MANAGED_USERS.getValue(),
                 null,

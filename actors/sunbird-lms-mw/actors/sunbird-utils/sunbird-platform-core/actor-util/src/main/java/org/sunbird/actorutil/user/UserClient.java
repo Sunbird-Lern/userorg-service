@@ -1,6 +1,8 @@
 package org.sunbird.actorutil.user;
 
 import akka.actor.ActorRef;
+import org.sunbird.common.request.Request;
+
 import java.util.Map;
 
 public interface UserClient {
@@ -32,8 +34,8 @@ public interface UserClient {
    * Search user details.
    *
    * @param actorRef Actor reference
-   * @param uuid User id
+   * @param req Search req
    */
-  Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid);
+  Map<String, Object> searchManagedUser(ActorRef actorRef, Request req);
 
 }
