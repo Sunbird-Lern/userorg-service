@@ -770,6 +770,7 @@ public final class JsonKey {
   public static final String CALLER_ID = "callerId";
   public static final String USER_TYPE = "userType";
   public static final String MANAGED_BY = "managedBy";
+  public static final String MANAGED_FOR = "managedFor";
 
   public static final String COURSE_BATCH_URL = "courseBatchUrl";
   public static final String SUNBIRD_COURSE_BATCH_NOTIFICATION_SIGNATURE =

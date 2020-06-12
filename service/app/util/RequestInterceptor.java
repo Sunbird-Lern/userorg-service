@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 
 /**
@@ -125,8 +124,18 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
-        if (!JsonKey.USER_UNAUTH_STATES.contains(clientId) && !verifyAuthForToken(request, clientId)) {
-          clientId = JsonKey.UNAUTHORIZED;
+        if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
+          Optional<String> managedAccessToken =
+            request.header(HeaderParam.X_Authenticated_For.getName());
+          String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+          if (managedAccessToken.isPresent()) {
+            String managedFor = ManagedTokenValidator.verify(managedAccessToken.get(), clientId, requestedForUserID);
+            if(!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
+              request.flash().put(JsonKey.MANAGED_FOR, managedFor);
+            } else {
+              clientId = JsonKey.UNAUTHORIZED;
+            }
+          }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
         clientId =
@@ -197,24 +206,5 @@ public class RequestInterceptor {
       }
     }
     return builder.toString();
-  }
-  
-  /** Return true if managedby token is present and valid wrto request data
-   * @param request
-   * @param userId
-   * @return
-   */
-  public static boolean verifyAuthForToken(Http.Request request, String userId) {
-    boolean authForToken = true;
-    Optional<String> managedAccessToken =
-      request.header(HeaderParam.X_Authenticated_For.getName());
-    String requestedByUserID = userId;
-    String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
-    ProjectLogger.log("RequestInterceptor: verifyAuthForToken: requestedByUserID: "+requestedByUserID+
-      "requestedForUserID: "+ requestedForUserID, LoggerEnum.INFO);
-    if (managedAccessToken.isPresent()) {
-      authForToken = AuthenticationHelper.verifyAuthForToken(managedAccessToken.get(), requestedByUserID, requestedForUserID);
-    }
-    return authForToken;
   }
 }
