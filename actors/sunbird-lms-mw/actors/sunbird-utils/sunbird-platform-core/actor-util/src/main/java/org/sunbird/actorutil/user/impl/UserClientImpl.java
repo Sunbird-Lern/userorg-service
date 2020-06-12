@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.user.UserClient;
@@ -124,20 +125,28 @@ public class UserClientImpl implements UserClient {
   /**
    * Get managed user list for LUA uuid (JsonKey.ID)
    * @param actorRef
-   * @param uuid
+   * @param req
    *
    * @return Map<String, Object>
    */
-  public Map<String, Object> searchManagedUser(ActorRef actorRef, String uuid) {
+  public Map<String, Object> searchManagedUser(ActorRef actorRef, Request req) {
     ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
 
-    Map<String, Object> filters = new HashMap<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.MANAGED_BY, (String)req.get(JsonKey.ID));
     List<String> objectType = new ArrayList<String>();
     objectType.add("user");
     filters.put(JsonKey.OBJECT_TYPE, objectType);
-    filters.put(JsonKey.MANAGED_BY, uuid);
     searchRequestMap.put(JsonKey.FILTERS, filters);
+
+    String order = (String) req.get(JsonKey.ORDER);
+    if(StringUtils.isNotEmpty((String)req.get(JsonKey.SORTBY))) {
+      Map<String, Object> sortby = new HashMap<>();
+      sortby.put((String) req.get(JsonKey.SORTBY), StringUtils.isEmpty(order)?"asc":order);
+      searchRequestMap.put(JsonKey.SORT_BY, sortby);
+    }
+
     Request request = new Request();
     request.getRequest().putAll(searchRequestMap);
     request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
