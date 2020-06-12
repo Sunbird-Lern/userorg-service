@@ -140,10 +140,11 @@ public class UserClientImpl implements UserClient {
     filters.put(JsonKey.OBJECT_TYPE, objectType);
     searchRequestMap.put(JsonKey.FILTERS, filters);
 
-    String order = (String) req.get(JsonKey.ORDER);
-    if(StringUtils.isNotEmpty((String)req.get(JsonKey.SORTBY))) {
+    String sortByField = (String) req.get(JsonKey.SORTBY);
+    if(StringUtils.isNotEmpty(sortByField)) {
+      String order = (String) req.get(JsonKey.ORDER);
       Map<String, Object> sortby = new HashMap<>();
-      sortby.put((String) req.get(JsonKey.SORTBY), StringUtils.isEmpty(order)?"asc":order);
+      sortby.put(sortByField, StringUtils.isEmpty(order)?"asc":order);
       searchRequestMap.put(JsonKey.SORT_BY, sortby);
     }
 
