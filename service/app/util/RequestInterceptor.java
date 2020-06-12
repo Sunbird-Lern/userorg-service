@@ -127,8 +127,8 @@ public class RequestInterceptor {
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           Optional<String> managedAccessToken =
             request.header(HeaderParam.X_Authenticated_For.getName());
-          String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
           if (managedAccessToken.isPresent()) {
+            String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
             String managedFor = ManagedTokenValidator.verify(managedAccessToken.get(), clientId, requestedForUserID);
             if(!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
               request.flash().put(JsonKey.MANAGED_FOR, managedFor);
