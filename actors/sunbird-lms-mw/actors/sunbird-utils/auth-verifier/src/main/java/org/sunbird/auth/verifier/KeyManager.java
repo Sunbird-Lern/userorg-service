@@ -18,16 +18,25 @@ public class KeyManager {
 
     private static Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
 
-    public static void init() throws Exception {
-        ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
-        String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
-        String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
-        int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
-        ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+keyCount, LoggerEnum.INFO.name());
-        for(int i = 0; i < keyCount; i++) {
-            String keyId = keyPrefix + i;
-            keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
+    public static void init() {
+        try {
+            ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
+            String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
+            String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
+            int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
+            ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+keyCount, LoggerEnum.INFO.name());
+            for(int i = 0; i < keyCount; i++) {
+                String keyId = keyPrefix + i;
+                keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
+            }
+        } catch (Exception e) {
+            ProjectLogger.log("KeyManager:init: basePath: "+propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH)+
+              " keyPrefix: "+propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX)+
+              " keys count: "+Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT)), LoggerEnum.INFO.name());
+            ProjectLogger.log("KeyManager:init: exception in loading publickeys ", LoggerEnum.ERROR.name());
+            e.printStackTrace();
         }
+        
     }
 
     public static KeyData getPublicKey(String keyId) {

@@ -31,12 +31,7 @@ public class ApplicationStart {
         () -> {
           return CompletableFuture.completedFuture(null);
         });
-    try {
-      KeyManager.init();
-    } catch (Exception e) {
-      ProjectLogger.log("ApplicationStart:ApplicationStart: error in loading public keys ", LoggerEnum.INFO.name());
-      e.printStackTrace();
-    }
+    KeyManager.init();
     ProjectLogger.log("ApplicationStart:ApplicationStart: End", LoggerEnum.DEBUG.name());
   }
 
