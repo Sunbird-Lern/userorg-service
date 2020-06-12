@@ -23,7 +23,7 @@ public class KeyManager {
         String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
         String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
         int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
-        ProjectLogger.log("KeyManager:init: keys count: "+keyCount, LoggerEnum.INFO.name());
+        ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+keyCount, LoggerEnum.INFO.name());
         for(int i = 0; i < keyCount; i++) {
             String keyId = keyPrefix + i;
             keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
