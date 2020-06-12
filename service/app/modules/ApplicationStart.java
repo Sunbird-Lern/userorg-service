@@ -20,7 +20,7 @@ public class ApplicationStart {
   public static String ssoPublicKey = "";
 
   @Inject
-  public ApplicationStart(ApplicationLifecycle applicationLifecycle, Environment environment) {
+  public ApplicationStart(ApplicationLifecycle applicationLifecycle, Environment environment) throws Exception {
     ProjectLogger.log("ApplicationStart:ApplicationStart: Start", LoggerEnum.DEBUG.name());
     setEnvironment(environment);
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
@@ -31,11 +31,7 @@ public class ApplicationStart {
         () -> {
           return CompletableFuture.completedFuture(null);
         });
-    try {
-      KeyManager.init();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    KeyManager.init();
     ProjectLogger.log("ApplicationStart:ApplicationStart: End", LoggerEnum.DEBUG.name());
   }
 
