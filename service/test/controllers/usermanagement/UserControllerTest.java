@@ -423,4 +423,11 @@ public class UserControllerTest extends BaseApplicationTest {
   public int getResponseStatus(Result result) {
     return result.status();
   }
+
+  @Test
+  public void testGetManagedUsersSuccess() {
+    Result result = performTest("/v1/user/managed/102fcbd2-8ec1-4870-b9e1-5dc01f2acc75?withTokens=false", "GET", null);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
 }

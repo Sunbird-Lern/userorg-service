@@ -167,7 +167,6 @@ public class OnRequestHandler implements ActionCreator {
       Map<String, Object> additionalInfo = new WeakHashMap<>();
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
-      additionalInfo.put(JsonKey.START_TIME, startTime);
       map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
       request.flash().put(JsonKey.REQUEST_ID, requestId);
       request.flash().put(JsonKey.CONTEXT, mapper.writeValueAsString(map));

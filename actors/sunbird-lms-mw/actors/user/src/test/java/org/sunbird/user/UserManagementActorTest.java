@@ -10,14 +10,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import akka.pattern.Patterns;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import scala.concurrent.Await;
 import scala.concurrent.Promise;
 
 public class UserManagementActorTest extends UserManagementActorTestBase {
@@ -383,5 +388,34 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
                 false, false, false, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4),
             null);
     assertTrue(result);
+  }
+
+  @Test
+  @Ignore
+  public void testGetManagedUsers() throws Exception{
+    HashMap<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.ID, "102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
+    reqMap.put(JsonKey.WITH_TOKENS, "true");
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("anyString", new Object());
+
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, map);
+
+    when(Await.result(Patterns.ask(Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.anyLong()), Mockito.anyObject()))
+            .thenReturn(response)
+            .thenReturn(map);
+    boolean result =
+            testScenario(
+                    getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS),
+                    null);
+    assertTrue(result);
+  }
+
+  private Map<String, Object> getSearchResults(){
+    Map<String, Object> searchRequestMap = new HashMap<>();
+
+    return searchRequestMap;
   }
 }

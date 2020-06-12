@@ -42,6 +42,8 @@ import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Await;
@@ -68,6 +70,7 @@ public class UserProfileReadActor extends BaseActor {
   private ActorRef systemSettingActorRef = null;
   private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -113,6 +116,7 @@ public class UserProfileReadActor extends BaseActor {
     String userId;
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
+    boolean withTokens = Boolean.valueOf((String)actorMessage.getContext().get(JsonKey.WITH_TOKENS));
     boolean showMaskedData = false;
     if (!StringUtils.isEmpty(provider)) {
       if (StringUtils.isEmpty(idType)) {
@@ -243,6 +247,17 @@ public class UserProfileReadActor extends BaseActor {
       result.remove(JsonKey.ENC_PHONE);
       // String username = ssoManager.getUsernameById(userId);
       //  result.put(JsonKey.USERNAME, username);
+
+      if(withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
+        List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+        userList.add(result);
+        //Fetch encrypted token from admin utils
+        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(managedBy, userList);
+        //encrypted token for each managedUser in respList
+        userService.appendEncryptedToken(encryptedTokenList, userList);
+        result = userList.get(0);
+      }
+
       response.put(JsonKey.RESPONSE, result);
     } else {
       result = new HashMap<>();
