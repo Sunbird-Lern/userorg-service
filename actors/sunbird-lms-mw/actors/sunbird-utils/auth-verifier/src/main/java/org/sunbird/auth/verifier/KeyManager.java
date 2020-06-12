@@ -1,5 +1,6 @@
 package org.sunbird.auth.verifier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -22,8 +23,19 @@ public class KeyManager {
         try {
             ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
             String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
+            if(StringUtils.isEmpty(basePath)) {
+                basePath = "/keys/";
+            }
             String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
-            int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
+            if(StringUtils.isEmpty(keyPrefix)) {
+                keyPrefix = "accessv1_key_public";
+            }
+            String count = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT);
+            int keyCount = 0;
+            if(StringUtils.isEmpty(count)) {
+               keyCount = 10;
+            }
+            //int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
             ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+keyCount, LoggerEnum.INFO.name());
             for(int i = 0; i < keyCount; i++) {
                 String keyId = keyPrefix + i;
