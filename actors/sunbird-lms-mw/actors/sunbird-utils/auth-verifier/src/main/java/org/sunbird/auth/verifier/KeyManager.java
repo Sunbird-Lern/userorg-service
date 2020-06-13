@@ -20,11 +20,14 @@ public class KeyManager {
     private static Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
 
     public static void init() {
+        String basePath = null;
+        String keyPrefix = null;
+        String count = null;
         try {
             ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
-            String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
-            String keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
-            String count = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT);
+            basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
+            keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
+            count = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT);
             //int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
             ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+count, LoggerEnum.INFO.name());
             basePath = "/keys/";
@@ -35,9 +38,9 @@ public class KeyManager {
                 keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
             }
         } catch (Exception e) {
-            ProjectLogger.log("KeyManager:init: basePath: "+propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH)+
-              " keyPrefix: "+propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX)+
-              " keys count: "+Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT)), LoggerEnum.INFO.name());
+            ProjectLogger.log("KeyManager:init: basePath: "+basePath+
+              " keyPrefix: "+keyPrefix+
+              " keys count: "+count, LoggerEnum.INFO.name());
             ProjectLogger.log("KeyManager:init: exception in loading publickeys ", LoggerEnum.ERROR.name());
             e.printStackTrace();
         }
