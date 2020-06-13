@@ -126,9 +126,12 @@ public class UserServiceImpl implements UserService {
         LoggerEnum.INFO);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
-    if ((StringUtils.isEmpty(managedById)
+    if ((StringUtils.isNotEmpty(managedForId) && managedForId.equals(userId))
+        || (StringUtils.isEmpty(managedById)
             && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
-        || (StringUtils.isNotEmpty(managedById) && !(userId.equals(managedForId) || ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
+        || (StringUtils.isNotEmpty(managedById) && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
+      
+      
     throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
