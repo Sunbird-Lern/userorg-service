@@ -33,7 +33,7 @@ public class KeyManager {
             basePath = "/keys/";
             keyPrefix = "accessv1_key_public";
             int keyCount = 10;
-            for(int i = 0; i < keyCount; i++) {
+            for(int i = 1; i <= keyCount; i++) {
                 String keyId = keyPrefix + i;
                 keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
             }
