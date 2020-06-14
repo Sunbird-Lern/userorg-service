@@ -30,18 +30,19 @@ public class ManagedTokenValidator {
             String keyId = headerData.get("kid").toString();
             ProjectLogger.log("ManagedTokenValidator:verify: keyId: "+keyId,
               LoggerEnum.INFO.name());
-            isValid = CryptoUtil.verifyRSASign(payLoad, decodeFromBase64(signature), KeyManager.getPublicKey(keyId).getPublicKey(), JsonKey.SHA_256_WITH_RSA);
             Map<String, String> dataMap = mapper.readValue(new String(decodeFromBase64(body)) , Map.class);
             String parentId = dataMap.get(JsonKey.PARENT_ID);
             String sub = dataMap.get(JsonKey.SUB);
             ProjectLogger.log("ManagedTokenValidator: parent uuid: " + parentId +
               " managedBy uuid: " + sub + " requestedByUserID: "+ requestedByUserId + " requestedForUserId: "+ requestedForUserId, LoggerEnum.INFO.name());
+            isValid = CryptoUtil.verifyRSASign(payLoad, decodeFromBase64(signature), KeyManager.getPublicKey(keyId).getPublicKey(), JsonKey.SHA_256_WITH_RSA);
             isValid &=  parentId.equalsIgnoreCase(requestedByUserId) && sub.equalsIgnoreCase(requestedForUserId);
             if(isValid) {
                 managedFor = sub;
             }
         } catch (Exception ex) {
             ProjectLogger.log("Exception in ManagedTokenValidator: verify ",LoggerEnum.ERROR);
+            ex.printStackTrace();
         }
         
         return managedFor;
