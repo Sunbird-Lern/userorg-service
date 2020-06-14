@@ -1,9 +1,14 @@
 package util;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
@@ -128,7 +133,14 @@ public class RequestInterceptor {
           Optional<String> managedAccessToken =
             request.header(HeaderParam.X_Authenticated_For.getName());
           if (managedAccessToken.isPresent()) {
-            String requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+            String requestedForUserID = null;
+            if(StringUtils.isNotEmpty(request.body().asText())) {
+              requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+            } else {
+              Path path = Paths.get(request.uri());
+              String uuidSegment = path.getFileName().toString();
+              requestedForUserID = UUID.fromString(uuidSegment).toString();
+            }
             String managedFor = ManagedTokenValidator.verify(managedAccessToken.get(), clientId, requestedForUserID);
             if(!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
               request.flash().put(JsonKey.MANAGED_FOR, managedFor);
