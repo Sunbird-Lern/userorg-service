@@ -193,12 +193,14 @@ public class UserProfileReadActor extends BaseActor {
     // user data id is not same.
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
+    String managedForId =
+      (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String)result.get(JsonKey.MANAGED_BY);
     ProjectLogger.log(
         "requested By and requested user id == " + requestedById + "  " + (String) userId + " managedBy= "+ managedBy +
       " showMaskedData= "+showMaskedData, LoggerEnum.INFO);
     try {
-      if (!((userId).equalsIgnoreCase(requestedById) || requestedById.equalsIgnoreCase(managedBy))
+      if (!((userId).equalsIgnoreCase(requestedById) || managedForId.equalsIgnoreCase(userId))
         && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {

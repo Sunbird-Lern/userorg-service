@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.auth.verifier.KeyManager;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -30,6 +31,7 @@ public class ApplicationStart {
         () -> {
           return CompletableFuture.completedFuture(null);
         });
+    KeyManager.init();
     ProjectLogger.log("ApplicationStart:ApplicationStart: End", LoggerEnum.DEBUG.name());
   }
 

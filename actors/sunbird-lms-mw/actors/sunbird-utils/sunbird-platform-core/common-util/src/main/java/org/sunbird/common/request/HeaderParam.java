@@ -25,6 +25,7 @@ public enum HeaderParam {
   ts("ts"),
   Content_Type("content-type"),
   X_Authenticated_User_Token("x-authenticated-user-token"),
+  X_Authenticated_For("x-authenticated-for"),
   X_Authenticated_Client_Token("x-authenticated-client-token"),
   X_Authenticated_Client_Id("x-authenticated-client-id"),
   X_APP_ID("x-app-id"),

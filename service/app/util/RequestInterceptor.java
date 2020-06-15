@@ -1,10 +1,16 @@
 package util;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
@@ -112,6 +118,7 @@ public class RequestInterceptor {
    * @param request HTTP play request
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned
+   *  release-3.0.0 on-wards validating managedBy token.
    */
   public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
@@ -122,6 +129,26 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+        if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
+          Optional<String> managedAccessToken =
+            request.header(HeaderParam.X_Authenticated_For.getName());
+          if (managedAccessToken.isPresent()) {
+            String requestedForUserID = null;
+            if(StringUtils.isNotEmpty(request.body().asText())) {
+              requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
+            } else {
+              Path path = Paths.get(request.uri());
+              String uuidSegment = path.getFileName().toString();
+              requestedForUserID = UUID.fromString(uuidSegment).toString();
+            }
+            String managedFor = ManagedTokenValidator.verify(managedAccessToken.get(), clientId, requestedForUserID);
+            if(!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
+              request.flash().put(JsonKey.MANAGED_FOR, managedFor);
+            } else {
+              clientId = JsonKey.UNAUTHORIZED;
+            }
+          }
+        }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
         clientId =
             AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());

@@ -108,6 +108,7 @@ public class UserServiceImpl implements UserService {
   public void validateUserId(Request request, String managedById) {
     String userId = null;
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
+    String managedForId = (String) request.getContext().get(JsonKey.MANAGED_FOR);
     if (StringUtils.isEmpty(ctxtUserId)) {
       // In case of create, pick the ctxUserId from a different header
       // TODO: Unify and rely on one header for the context user identification
@@ -125,9 +126,12 @@ public class UserServiceImpl implements UserService {
         LoggerEnum.INFO);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
-    if ((StringUtils.isEmpty(managedById)
+    if ((StringUtils.isNotEmpty(managedForId) && managedForId.equals(userId))
+        || (StringUtils.isEmpty(managedById)
             && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
-        || (StringUtils.isNotEmpty(managedById) && !ctxtUserId.equals(managedById))) // CREATE {
+        || (StringUtils.isNotEmpty(managedById) && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
+      
+      
     throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
