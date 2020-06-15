@@ -22,25 +22,17 @@ public class KeyManager {
     public static void init() {
         String basePath = null;
         String keyPrefix = null;
-        String count = null;
         try {
             ProjectLogger.log("KeyManager:init: Start", LoggerEnum.INFO.name());
             basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);
             keyPrefix = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYPREFIX);
-            count = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT);
-            //int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
-            ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+count, LoggerEnum.INFO.name());
-            basePath = "/keys/";
-            keyPrefix = "accessv1_key_public";
-            int keyCount = 10;
+            int keyCount = Integer.parseInt(propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_KEYCOUNT));
+            ProjectLogger.log("KeyManager:init: basePath: "+basePath+ " keyPrefix: "+keyPrefix+ " keys count: "+keyCount, LoggerEnum.INFO.name());
             for(int i = 1; i <= keyCount; i++) {
                 String keyId = keyPrefix + i;
                 keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyId)));
             }
         } catch (Exception e) {
-            ProjectLogger.log("KeyManager:init: basePath: "+basePath+
-              " keyPrefix: "+keyPrefix+
-              " keys count: "+count, LoggerEnum.INFO.name());
             ProjectLogger.log("KeyManager:init: exception in loading publickeys ", LoggerEnum.ERROR.name());
             e.printStackTrace();
         }
