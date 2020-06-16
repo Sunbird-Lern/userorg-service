@@ -227,7 +227,6 @@ public class UserProfileReadActor extends BaseActor {
     } catch (Exception e) {
       ProjectLogger.log(
         "Error in UserProfileReadActor: getUserProfileData: error message "+e.getMessage(), LoggerEnum.INFO);
-      e.printStackTrace();
       ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
