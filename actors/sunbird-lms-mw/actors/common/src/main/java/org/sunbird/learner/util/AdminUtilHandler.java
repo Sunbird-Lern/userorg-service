@@ -63,11 +63,15 @@ public class AdminUtilHandler {
                 data = (Map<String, Object>) data.get(JsonKey.RESULT);
             }
         } catch (IOException e) {
+            ProjectLogger.log(
+              "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(), e, null, LoggerEnum.ERROR.name());
             throw new ProjectCommonException(
                     ResponseCode.unableToConnectToAdminUtil.getErrorCode(),
                     ResponseCode.unableToConnectToAdminUtil.getErrorMessage(),
                     ResponseCode.SERVER_ERROR.getResponseCode());
         } catch (Exception e) {
+            ProjectLogger.log(
+              "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(), e, null, LoggerEnum.ERROR.name());
             throw new ProjectCommonException(
                     ResponseCode.unableToParseData.getErrorCode(),
                     ResponseCode.unableToParseData.getErrorMessage(),
