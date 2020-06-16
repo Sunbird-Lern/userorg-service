@@ -137,8 +137,14 @@ public class RequestInterceptor {
             if(StringUtils.isNotEmpty(request.body().asText())) {
               requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
             } else {
+              String uuidSegment = null;
               Path path = Paths.get(request.uri());
-              String uuidSegment = path.getFileName().toString();
+              if(request.queryString().isEmpty()) {
+                uuidSegment = path.getFileName().toString();
+              } else {
+                String[] queryPath = path.getFileName().toString().split("\\?");
+                uuidSegment = queryPath[0];
+              }
               requestedForUserID = UUID.fromString(uuidSegment).toString();
             }
             String managedFor = ManagedTokenValidator.verify(managedAccessToken.get(), clientId, requestedForUserID);

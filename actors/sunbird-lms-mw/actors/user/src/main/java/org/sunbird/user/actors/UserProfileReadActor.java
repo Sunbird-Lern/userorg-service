@@ -197,10 +197,10 @@ public class UserProfileReadActor extends BaseActor {
       (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String)result.get(JsonKey.MANAGED_BY);
     ProjectLogger.log(
-        "requested By and requested user id == " + requestedById + "  " + (String) userId + " managedBy= "+ managedBy +
+        "requested By and requested user id == " + requestedById + "  " + (String) userId + " managedForId= "+ managedForId +
       " showMaskedData= "+showMaskedData, LoggerEnum.INFO);
     try {
-      if (!((userId).equalsIgnoreCase(requestedById) || managedForId.equalsIgnoreCase(userId))
+      if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
         && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {
@@ -225,6 +225,8 @@ public class UserProfileReadActor extends BaseActor {
         result.putAll(privateResult);
       }
     } catch (Exception e) {
+      ProjectLogger.log(
+        "Error in UserProfileReadActor: getUserProfileData: error message "+e.getMessage(), LoggerEnum.INFO);
       ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
