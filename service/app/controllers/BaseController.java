@@ -67,10 +67,10 @@ public class BaseController extends Controller {
     request.setEnv(getEnvironment());
     request.getContext().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
     String muid = httpRequest.flash().get(JsonKey.MANAGED_FOR);
-    if(StringUtils.isNotEmpty(muid)) {
-      request.getContext().put(JsonKey.MANAGED_FOR, muid);
-      request.getContext().put(JsonKey.MANAGED_TOKEN, httpRequest.header(HeaderParam.X_Authenticated_For.getName()));
-    }
+    request.getContext().put(JsonKey.MANAGED_FOR, muid);
+    Optional<String> manageToken = httpRequest.header(HeaderParam.X_Authenticated_For.getName());
+    request.getContext().put(JsonKey.MANAGED_TOKEN, manageToken.get());
+
     request = transformUserId(request);
     return request;
   }
