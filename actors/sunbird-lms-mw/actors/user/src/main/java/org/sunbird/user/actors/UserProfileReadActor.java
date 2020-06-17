@@ -117,6 +117,7 @@ public class UserProfileReadActor extends BaseActor {
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
     boolean withTokens = Boolean.valueOf((String)actorMessage.getContext().get(JsonKey.WITH_TOKENS));
+    String managedToken = (String) actorMessage.getContext().get(JsonKey.MANAGED_TOKEN);
     boolean showMaskedData = false;
     if (!StringUtils.isEmpty(provider)) {
       if (StringUtils.isEmpty(idType)) {
@@ -251,13 +252,19 @@ public class UserProfileReadActor extends BaseActor {
       //  result.put(JsonKey.USERNAME, username);
 
       if(withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
-        List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-        userList.add(result);
-        //Fetch encrypted token from admin utils
-        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(managedBy, userList);
-        //encrypted token for each managedUser in respList
-        userService.appendEncryptedToken(encryptedTokenList, userList);
-        result = userList.get(0);
+        if(StringUtils.isEmpty(managedToken)) {
+          ProjectLogger.log("UserProfileReadActor: getUserProfileData: calling token generation for: "+userId,
+            LoggerEnum.INFO.name());
+          List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+          userList.add(result);
+          //Fetch encrypted token from admin utils
+          Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(managedBy, userList);
+          //encrypted token for each managedUser in respList
+          userService.appendEncryptedToken(encryptedTokenList, userList);
+          result = userList.get(0);
+        } else {
+          result.put(JsonKey.MANAGED_TOKEN, managedToken);
+        }
       }
 
       response.put(JsonKey.RESPONSE, result);
