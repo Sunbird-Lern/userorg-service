@@ -69,7 +69,7 @@ public class BaseController extends Controller {
     String muid = httpRequest.flash().get(JsonKey.MANAGED_FOR);
     if(StringUtils.isNotEmpty(muid)) {
       request.getContext().put(JsonKey.MANAGED_FOR, muid);
-      request.getContext().put(JsonKey.MANAGED_TOKEN, httpRequest.flash().get(HeaderParam.X_Authenticated_For.getName()));
+      request.getContext().put(JsonKey.MANAGED_TOKEN, httpRequest.header(HeaderParam.X_Authenticated_For.getName()));
     }
     request = transformUserId(request);
     return request;
