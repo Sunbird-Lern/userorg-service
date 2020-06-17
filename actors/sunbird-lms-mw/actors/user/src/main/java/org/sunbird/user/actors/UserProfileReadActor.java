@@ -116,7 +116,9 @@ public class UserProfileReadActor extends BaseActor {
     String userId;
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
-    boolean withTokens = Boolean.valueOf((String)actorMessage.getContext().get(JsonKey.WITH_TOKENS));
+    boolean withTokens =
+        Boolean.valueOf((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
+    String managedToken = (String) actorMessage.getContext().get(JsonKey.MANAGED_TOKEN);
     boolean showMaskedData = false;
     if (!StringUtils.isEmpty(provider)) {
       if (StringUtils.isEmpty(idType)) {
@@ -193,19 +195,30 @@ public class UserProfileReadActor extends BaseActor {
     // user data id is not same.
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
-    String managedForId =
-      (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
-    String managedBy = (String)result.get(JsonKey.MANAGED_BY);
+    String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
+    String managedBy = (String) result.get(JsonKey.MANAGED_BY);
     ProjectLogger.log(
-        "requested By and requested user id == " + requestedById + "  " + (String) userId + " managedForId= "+ managedForId +
-      " showMaskedData= "+showMaskedData, LoggerEnum.INFO);
+        "requested By and requested user id == "
+            + requestedById
+            + "  "
+            + (String) userId
+            + " managedForId= "
+            + managedForId
+            + " managedBy "
+            + managedBy
+            + " showMaskedData= "
+            + showMaskedData,
+        LoggerEnum.INFO);
+    if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
+      ProjectCommonException.throwUnauthorizedErrorException();
+    }
     try {
       if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
-        && !showMaskedData) {
+          && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {
         ProjectLogger.log(
-          "Response with externalIds and complete profile details", LoggerEnum.INFO);
+            "Response with externalIds and complete profile details", LoggerEnum.INFO);
         // These values are set to ensure backward compatibility post introduction of global
         // settings in user profile visibility
         setCompleteProfileVisibilityMap(result);
@@ -226,7 +239,8 @@ public class UserProfileReadActor extends BaseActor {
       }
     } catch (Exception e) {
       ProjectLogger.log(
-        "Error in UserProfileReadActor: getUserProfileData: error message "+e.getMessage(), LoggerEnum.INFO);
+          "Error in UserProfileReadActor: getUserProfileData: error message " + e.getMessage(),
+          LoggerEnum.INFO);
       ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
@@ -250,14 +264,22 @@ public class UserProfileReadActor extends BaseActor {
       // String username = ssoManager.getUsernameById(userId);
       //  result.put(JsonKey.USERNAME, username);
 
-      if(withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
-        List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-        userList.add(result);
-        //Fetch encrypted token from admin utils
-        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(managedBy, userList);
-        //encrypted token for each managedUser in respList
-        userService.appendEncryptedToken(encryptedTokenList, userList);
-        result = userList.get(0);
+      if (withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
+        if (StringUtils.isEmpty(managedToken)) {
+          ProjectLogger.log(
+              "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId,
+              LoggerEnum.INFO.name());
+          List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+          userList.add(result);
+          // Fetch encrypted token from admin utils
+          Map<String, Object> encryptedTokenList =
+              userService.fetchEncryptedToken(managedBy, userList);
+          // encrypted token for each managedUser in respList
+          userService.appendEncryptedToken(encryptedTokenList, userList);
+          result = userList.get(0);
+        } else {
+          result.put(JsonKey.MANAGED_TOKEN, managedToken);
+        }
       }
 
       response.put(JsonKey.RESPONSE, result);

@@ -132,7 +132,7 @@ public class RequestInterceptor {
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           Optional<String> managedAccessToken =
             request.header(HeaderParam.X_Authenticated_For.getName());
-          if (managedAccessToken.isPresent()) {
+          if (managedAccessToken.isPresent() && StringUtils.isNotEmpty(managedAccessToken.get())) {
             String requestedForUserID = null;
             if(StringUtils.isNotEmpty(request.body().asText())) {
               requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
