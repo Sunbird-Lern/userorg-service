@@ -126,7 +126,11 @@ public class RequestInterceptor {
         String[] queryPath = path.getFileName().toString().split("\\?");
         uuidSegment = queryPath[0];
       }
-      requestedForUserID = UUID.fromString(uuidSegment).toString();
+      try {
+        requestedForUserID = UUID.fromString(uuidSegment).toString();
+      } catch (IllegalArgumentException iae) {
+        ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
+      }
     }
     return requestedForUserID;
   }
@@ -151,8 +155,7 @@ public class RequestInterceptor {
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
-          ProjectLogger.log("");
-          if (StringUtils.isNotEmpty(requestedForUserID) && !clientId.equals(requestedForUserID)) {
+          if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
             // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
             Optional<String> forTokenHeader =
                 request.header(HeaderParam.X_Authenticated_For.getName());
