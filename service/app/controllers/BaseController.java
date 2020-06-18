@@ -69,7 +69,8 @@ public class BaseController extends Controller {
     String muid = httpRequest.flash().get(JsonKey.MANAGED_FOR);
     request.getContext().put(JsonKey.MANAGED_FOR, muid);
     Optional<String> manageToken = httpRequest.header(HeaderParam.X_Authenticated_For.getName());
-    request.getContext().put(JsonKey.MANAGED_TOKEN, manageToken.get());
+    String managedToken = manageToken.isPresent() ? manageToken.get() : "";
+    request.getContext().put(JsonKey.MANAGED_TOKEN, managedToken);
 
     request = transformUserId(request);
     return request;
