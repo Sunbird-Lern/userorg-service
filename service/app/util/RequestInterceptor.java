@@ -125,7 +125,7 @@ public class RequestInterceptor {
       try {
         requestedForUserID = UUID.fromString(uuidSegment).toString();
       } catch (IllegalArgumentException iae) {
-        ProjectLogger.log("Perhaps this is a general search like API.");
+        ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
       }
     }
     return requestedForUserID;
