@@ -8,16 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -126,12 +119,11 @@ public class UserServiceImpl implements UserService {
         LoggerEnum.INFO);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
-    if ((StringUtils.isNotEmpty(managedForId) && managedForId.equals(userId))
+    if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
         || (StringUtils.isEmpty(managedById)
             && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
-        || (StringUtils.isNotEmpty(managedById) && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
-      
-      
+        || (StringUtils.isNotEmpty(managedById)
+            && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
     throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
@@ -470,54 +462,68 @@ public class UserServiceImpl implements UserService {
 
   /**
    * Fetch encrypted token list from admin utils
+   *
    * @param parentId
    * @param respList
    * @return encryptedTokenList
    */
-  public Map<String, Object> fetchEncryptedToken(String parentId, List<Map<String, Object>> respList){
+  public Map<String, Object> fetchEncryptedToken(
+      String parentId, List<Map<String, Object>> respList) {
     Map<String, Object> encryptedTokenList = null;
     try {
-      //create AdminUtilRequestData list of managedUserId and parentId
+      // create AdminUtilRequestData list of managedUserId and parentId
       List<AdminUtilRequestData> managedUsers = createManagedUserList(parentId, respList);
-      //Fetch encrypted token list from admin utils
-      encryptedTokenList = AdminUtilHandler.fetchEncryptedToken(AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
-    } catch (ProjectCommonException pe){
+      // Fetch encrypted token list from admin utils
+      encryptedTokenList =
+          AdminUtilHandler.fetchEncryptedToken(
+              AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+    } catch (ProjectCommonException pe) {
       throw pe;
     } catch (Exception e) {
       throw new ProjectCommonException(
-              ResponseCode.unableToParseData.getErrorCode(),
-              ResponseCode.unableToParseData.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.unableToParseData.getErrorCode(),
+          ResponseCode.unableToParseData.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return encryptedTokenList;
   }
 
   /**
    * Append encrypted token to the user list
+   *
    * @param encryptedTokenList
    * @param respList
    */
-  public void appendEncryptedToken(Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList){
-      ArrayList<Map<String, Object>> data =  (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
-      for (Object object : data) {
-        Map<String, Object> tempMap = (Map<String, Object>) object;
-        respList.stream().filter(o -> o.get(JsonKey.ID).equals(tempMap.get(JsonKey.SUB))).forEach(
-                o -> {
-                  o.put(JsonKey.MANAGED_TOKEN, tempMap.get(JsonKey.TOKEN));
-                }
-        );
-      }
+  public void appendEncryptedToken(
+      Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList) {
+    ArrayList<Map<String, Object>> data =
+        (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
+    for (Object object : data) {
+      Map<String, Object> tempMap = (Map<String, Object>) object;
+      respList
+          .stream()
+          .filter(o -> o.get(JsonKey.ID).equals(tempMap.get(JsonKey.SUB)))
+          .forEach(
+              o -> {
+                o.put(JsonKey.MANAGED_TOKEN, tempMap.get(JsonKey.TOKEN));
+              });
+    }
   }
 
   /**
-   * Create managed user user list with parentId(managedBY) and childId(managedUser) in admin util request format
+   * Create managed user user list with parentId(managedBY) and childId(managedUser) in admin util
+   * request format
+   *
    * @param parentId
    * @param respList
    * @return reqData List<AdminUtilRequestData>
    */
-  private List<AdminUtilRequestData> createManagedUserList(String parentId, List<Map<String, Object>> respList){
-    List<AdminUtilRequestData> reqData = respList.stream()
-            .map(p -> new AdminUtilRequestData(parentId, (String)p.get(JsonKey.ID)))
+  private List<AdminUtilRequestData> createManagedUserList(
+      String parentId, List<Map<String, Object>> respList) {
+    List<AdminUtilRequestData> reqData =
+        respList
+            .stream()
+            .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
             .collect(Collectors.toList());
     reqData.forEach(System.out::println);
     return reqData;

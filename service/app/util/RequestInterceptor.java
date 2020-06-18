@@ -1,5 +1,6 @@
 package util;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -111,9 +112,12 @@ public class RequestInterceptor {
 
   private static String getUserRequestedFor(Http.Request request) {
     String requestedForUserID = null;
-    if (StringUtils.isNotEmpty(request.body().asText())) {
-      requestedForUserID = String.valueOf(request.body().asJson().get(JsonKey.USER_ID));
-    } else {
+    JsonNode jsonBody = request.body().asJson();
+    if (!(jsonBody == null)) { // for search and update and create_mui api's
+      if (!(jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID) == null)) {
+        requestedForUserID = jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID).asText();
+      }
+    } else { // for read-api
       String uuidSegment = null;
       Path path = Paths.get(request.uri());
       if (request.queryString().isEmpty()) {
