@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
@@ -156,7 +157,8 @@ public class RequestInterceptor {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
           ProjectLogger.log(
-              "requestedForUserID and clientId: " + requestedForUserID + " " + clientId);
+              "requestedForUserID and clientId: " + requestedForUserID + " " + clientId,
+              LoggerEnum.INFO.name());
           if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
             // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
             Optional<String> forTokenHeader =
