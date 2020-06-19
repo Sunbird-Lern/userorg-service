@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
@@ -144,6 +145,7 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
+    request.flash().put(JsonKey.MANAGED_FOR, null);
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -170,7 +172,7 @@ public class RequestInterceptor {
               }
             }
           } else {
-            ProjectLogger.log("Ignoring x-authenticated-for token...");
+            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {

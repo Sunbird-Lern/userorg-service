@@ -115,7 +115,9 @@ public class UserServiceImpl implements UserService {
             + " userId: "
             + userId
             + " managedById: "
-            + managedById,
+            + managedById
+            + " managedForId: "
+            + managedForId,
         LoggerEnum.INFO);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
