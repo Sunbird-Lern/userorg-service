@@ -145,6 +145,7 @@ public class RequestInterceptor {
    */
   public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
+    request.flash().put(JsonKey.MANAGED_FOR, null);
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -174,10 +175,7 @@ public class RequestInterceptor {
               }
             }
           } else {
-            request.flash().put(JsonKey.MANAGED_FOR, null);
-            ProjectLogger.log(
-                "Ignoring x-authenticated-for token... and setting manage-for",
-                LoggerEnum.INFO.name());
+            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
