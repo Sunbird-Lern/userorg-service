@@ -174,7 +174,7 @@ public class RequestInterceptor {
               }
             }
           } else {
-            ProjectLogger.log("Ignoring x-authenticated-for token...");
+            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
