@@ -174,7 +174,10 @@ public class RequestInterceptor {
               }
             }
           } else {
-            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
+            request.flash().put(JsonKey.MANAGED_FOR, null);
+            ProjectLogger.log(
+                "Ignoring x-authenticated-for token... and setting manage-for",
+                LoggerEnum.INFO.name());
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
