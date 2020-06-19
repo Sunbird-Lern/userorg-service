@@ -155,6 +155,8 @@ public class RequestInterceptor {
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
+          ProjectLogger.log(
+              "requestedForUserID and clientId: " + requestedForUserID + " " + clientId);
           if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
             // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
             Optional<String> forTokenHeader =
