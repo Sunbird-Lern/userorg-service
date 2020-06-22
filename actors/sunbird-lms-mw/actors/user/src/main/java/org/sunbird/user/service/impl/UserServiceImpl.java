@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +28,10 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
@@ -93,20 +96,40 @@ public class UserServiceImpl implements UserService {
     return user;
   }
 
+  // This function is called during createUserV4 and update of users.
   @Override
   public void validateUserId(Request request, String managedById) {
+    String userId = null;
     String ctxtUserId = (String) request.getContext().get(JsonKey.USER_ID);
-    String userId = userExtIdentityDao.getUserId(request);
+    String managedForId = (String) request.getContext().get(JsonKey.MANAGED_FOR);
+    if (StringUtils.isEmpty(ctxtUserId)) {
+      // In case of create, pick the ctxUserId from a different header
+      // TODO: Unify and rely on one header for the context user identification
+      ctxtUserId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
+    } else {
+      userId = userExtIdentityDao.getUserId(request);
+    }
     ProjectLogger.log(
-      "validateUserId :: ctxtUserId: " + ctxtUserId + "userId: " + userId,
-      LoggerEnum.INFO);
-    if (((!StringUtils.isBlank(userId)) && !userId.equals(ctxtUserId))
-        || (StringUtils.isNotEmpty(managedById) && ctxtUserId.equals(managedById))) {
-      throw new ProjectCommonException(
+        "validateUserId :: ctxtUserId : "
+            + ctxtUserId
+            + " userId: "
+            + userId
+            + " managedById: "
+            + managedById
+            + " managedForId: "
+            + managedForId,
+        LoggerEnum.INFO);
+    // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
+    // when updating MUA details
+    if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
+        || (StringUtils.isEmpty(managedById)
+            && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
+        || (StringUtils.isNotEmpty(managedById)
+            && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
+    throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
-    }
   }
 
   @Override
@@ -437,5 +460,74 @@ public class UserServiceImpl implements UserService {
               ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
     }
     return custodianOrgId;
+  }
+
+  /**
+   * Fetch encrypted token list from admin utils
+   *
+   * @param parentId
+   * @param respList
+   * @return encryptedTokenList
+   */
+  public Map<String, Object> fetchEncryptedToken(
+      String parentId, List<Map<String, Object>> respList) {
+    Map<String, Object> encryptedTokenList = null;
+    try {
+      // create AdminUtilRequestData list of managedUserId and parentId
+      List<AdminUtilRequestData> managedUsers = createManagedUserList(parentId, respList);
+      // Fetch encrypted token list from admin utils
+      encryptedTokenList =
+          AdminUtilHandler.fetchEncryptedToken(
+              AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+    } catch (ProjectCommonException pe) {
+      throw pe;
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+          ResponseCode.unableToParseData.getErrorCode(),
+          ResponseCode.unableToParseData.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return encryptedTokenList;
+  }
+
+  /**
+   * Append encrypted token to the user list
+   *
+   * @param encryptedTokenList
+   * @param respList
+   */
+  public void appendEncryptedToken(
+      Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList) {
+    ArrayList<Map<String, Object>> data =
+        (ArrayList<Map<String, Object>>) encryptedTokenList.get(JsonKey.DATA);
+    for (Object object : data) {
+      Map<String, Object> tempMap = (Map<String, Object>) object;
+      respList
+          .stream()
+          .filter(o -> o.get(JsonKey.ID).equals(tempMap.get(JsonKey.SUB)))
+          .forEach(
+              o -> {
+                o.put(JsonKey.MANAGED_TOKEN, tempMap.get(JsonKey.TOKEN));
+              });
+    }
+  }
+
+  /**
+   * Create managed user user list with parentId(managedBY) and childId(managedUser) in admin util
+   * request format
+   *
+   * @param parentId
+   * @param respList
+   * @return reqData List<AdminUtilRequestData>
+   */
+  private List<AdminUtilRequestData> createManagedUserList(
+      String parentId, List<Map<String, Object>> respList) {
+    List<AdminUtilRequestData> reqData =
+        respList
+            .stream()
+            .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
+            .collect(Collectors.toList());
+    reqData.forEach(System.out::println);
+    return reqData;
   }
 }

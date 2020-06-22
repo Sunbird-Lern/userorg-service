@@ -78,13 +78,6 @@ public class BadgrServiceImplBadgeClassTest {
     PowerMockito.mockStatic(HttpUtil.class);
 
     PowerMockito.mockStatic(TelemetryUtil.class);
-    PowerMockito.doNothing()
-        .when(
-            TelemetryUtil.class,
-            "telemetryProcessingCall",
-            Mockito.anyMap(),
-            Mockito.anyMap(),
-            Mockito.anyList());
 
     mockBadgeClassExtensionService = PowerMockito.mock(BadgeClassExtensionServiceImpl.class);
 

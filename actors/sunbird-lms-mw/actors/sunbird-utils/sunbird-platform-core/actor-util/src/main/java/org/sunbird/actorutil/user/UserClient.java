@@ -1,6 +1,8 @@
 package org.sunbird.actorutil.user;
 
 import akka.actor.ActorRef;
+import org.sunbird.common.request.Request;
+
 import java.util.Map;
 
 public interface UserClient {
@@ -27,4 +29,13 @@ public interface UserClient {
 
   /** Verify email uniqueness across all users in the system. */
   void esVerifyEmailUniqueness();
+
+  /**
+   * Search user details.
+   *
+   * @param actorRef Actor reference
+   * @param req Search req
+   */
+  Map<String, Object> searchManagedUser(ActorRef actorRef, Request req);
+
 }

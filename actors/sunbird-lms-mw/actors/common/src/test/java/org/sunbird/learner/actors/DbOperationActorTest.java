@@ -19,7 +19,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.datapersistence.DbOperationActor;
-import org.sunbird.learner.util.Util;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Ignore
@@ -31,7 +30,6 @@ public class DbOperationActorTest {
   public static void setUp() {
     SunbirdMWService.init();
     system = ActorSystem.create("system");
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD_PLUGIN);
   }
 
   @Test

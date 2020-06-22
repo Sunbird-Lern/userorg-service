@@ -52,7 +52,6 @@ public class EmailServiceActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private static final String NOTIFICATION_MODE = "sms";
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -67,12 +66,6 @@ public class EmailServiceActor extends BaseActor {
   private void sendMail(Request actorMessage) {
     Map<String, Object> request =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.EMAIL_REQUEST);
-    List<String> emails = (List<String>) request.get(JsonKey.RECIPIENT_EMAILS);
-    if (CollectionUtils.isNotEmpty(emails)) {
-      checkEmailValidity(emails);
-    } else {
-      emails = new ArrayList<>();
-    }
 
     List<String> userIds = (List<String>) request.get(JsonKey.RECIPIENT_USERIDS);
     if (CollectionUtils.isEmpty(userIds)) {
@@ -80,7 +73,8 @@ public class EmailServiceActor extends BaseActor {
     }
 
     if (request.get(JsonKey.MODE) != null
-        && NOTIFICATION_MODE.equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
+        && "sms".equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
+      // Sending sms
       List<String> phones = (List<String>) request.get(JsonKey.RECIPIENT_PHONES);
       if (CollectionUtils.isNotEmpty(phones)) {
         Iterator<String> itr = phones.iterator();
@@ -95,55 +89,69 @@ public class EmailServiceActor extends BaseActor {
         }
       }
       sendSMS(phones, userIds, (String) request.get(JsonKey.BODY));
-      return;
-    }
+    } else {
+      // Sending email
+      List<String> emails = (List<String>) request.get(JsonKey.RECIPIENT_EMAILS);
+      if (CollectionUtils.isNotEmpty(emails)) {
+        checkEmailValidity(emails);
+      } else {
+        emails = new ArrayList<>();
+      }
+      // Fetch public user emails from Elastic Search based on recipient search query given in
+      // request.
+      getUserEmailsFromSearchQuery(request, emails, userIds);
 
-    // Fetch public user emails from Elastic Search based on recipient search query given in
-    // request.
-    getUserEmailsFromSearchQuery(request, emails, userIds);
+      validateUserIds(userIds, emails);
+      validateRecipientsLimit(emails);
 
-    validateUserIds(userIds, emails);
-    validateRecipientsLimit(emails);
+      Map<String, Object> user = null;
+      if (CollectionUtils.isNotEmpty(emails)) {
+        user = getUserInfo(emails.get(0));
+      }
 
-    Map<String, Object> user = null;
-    if (CollectionUtils.isNotEmpty(emails)) {
-      user = getUserInfo(emails.get(0));
-    }
+      String name = "";
+      if (emails.size() == 1) {
+        name = StringUtils.capitalize((String) user.get(JsonKey.FIRST_NAME));
+        if (StringUtils.isBlank(name) && (String) request.get(JsonKey.FIRST_NAME) != null) {
+          name = StringUtils.capitalize((String) request.get(JsonKey.FIRST_NAME));
+        }
+      }
 
-    String name = "";
-    if (emails.size() == 1) {
-      name = StringUtils.capitalize((String) user.get(JsonKey.FIRST_NAME));
-      if (StringUtils.isBlank(name) && (String) request.get(JsonKey.FIRST_NAME) != null) {
-        name = StringUtils.capitalize((String) request.get(JsonKey.FIRST_NAME));
+      // fetch orgname inorder to set in the Template context
+      String orgName = getOrgName(request, (String) user.get(JsonKey.USER_ID));
+
+      request.put(JsonKey.NAME, name);
+      if (orgName != null) {
+        request.put(JsonKey.ORG_NAME, orgName);
+      }
+
+      String template = getEmailTemplateFile((String) request.get(JsonKey.EMAIL_TEMPLATE_TYPE));
+
+      if (1 == emails.size()) {
+        ProjectLogger.log(
+            "EmailServiceActor:sendMail: Sending email to = " + emails + " emails",
+            LoggerEnum.INFO.name());
+      } else {
+        ProjectLogger.log(
+            "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails",
+            LoggerEnum.INFO.name());
+      }
+
+      try {
+        SendMail.sendMailWithBody(
+            emails.toArray(new String[emails.size()]),
+            (String) request.get(JsonKey.SUBJECT),
+            ProjectUtil.getContext(request),
+            template);
+      } catch (Exception e) {
+        ProjectLogger.log(
+            "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
       }
     }
-
-    // fetch orgname inorder to set in the Template context
-    String orgName = getOrgName(request, (String) user.get(JsonKey.USER_ID));
-
-    request.put(JsonKey.NAME, name);
-    if (orgName != null) {
-      request.put(JsonKey.ORG_NAME, orgName);
-    }
-
-    String template = getEmailTemplateFile((String) request.get(JsonKey.EMAIL_TEMPLATE_TYPE));
 
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());
-    ProjectLogger.log(
-        "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails",
-        LoggerEnum.INFO.name());
-    try {
-      SendMail.sendMailWithBody(
-          emails.toArray(new String[emails.size()]),
-          (String) request.get(JsonKey.SUBJECT),
-          ProjectUtil.getContext(request),
-          template);
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
-    }
   }
 
   /**
@@ -177,9 +185,7 @@ public class EmailServiceActor extends BaseActor {
     }
 
     validateRecipientsLimit(phones);
-    Response res = new Response();
-    res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    sender().tell(res, self());
+
     ProjectLogger.log(
         "EmailServiceActor:sendSMS: Sending sendSMS to = " + phones.size() + " phones",
         LoggerEnum.INFO.name());

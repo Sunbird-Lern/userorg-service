@@ -28,6 +28,8 @@ import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.impl.InterServiceCommunicationImpl;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.actorutil.user.UserClient;
+import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -60,7 +62,8 @@ import scala.concurrent.Promise;
   LocationClientImpl.class,
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
-  SunbirdMWService.class
+  SunbirdMWService.class,
+  UserClientImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public abstract class UserManagementActorTestBase {
@@ -69,10 +72,11 @@ public abstract class UserManagementActorTestBase {
   public static final Props props = Props.create(UserManagementActor.class);
   public static Map<String, Object> reqMap;
   static InterServiceCommunication interServiceCommunication =
-      mock(InterServiceCommunicationImpl.class);;
+      mock(InterServiceCommunicationImpl.class);
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
+  public static UserClient userClient;
 
   @Before
   public void beforeEachTest() {
@@ -111,6 +115,9 @@ public abstract class UserManagementActorTestBase {
             Mockito.anyString(),
             Mockito.anyObject()))
         .thenReturn(new HashMap<>());
+
+    PowerMockito.mockStatic(UserClientImpl.class);
+    userClient = mock(UserClientImpl.class);
 
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);

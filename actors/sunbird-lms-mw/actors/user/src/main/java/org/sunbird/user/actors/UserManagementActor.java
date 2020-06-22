@@ -4,22 +4,29 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.codehaus.jackson.annotate.JsonMethod;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -27,34 +34,27 @@ import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.actorutil.user.UserClient;
+import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.ExecutionContext;
+import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.learner.util.*;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserType;
@@ -70,11 +70,10 @@ import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4"},
+  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {}
 )
 public class UserManagementActor extends BaseActor {
-  private ObjectMapper mapper = new ObjectMapper();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private UserService userService = UserServiceImpl.getInstance();
@@ -83,32 +82,36 @@ public class UserManagementActor extends BaseActor {
   private OrgExternalService orgExternalService = new OrgExternalService();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+  private ObjectMapper mapper = new ObjectMapper();
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private UserClient userClient = new UserClientImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     cacheFrameworkFieldsConfig();
     if (systemSettingActorRef == null) {
       systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
     }
     String operation = request.getOperation();
     switch (operation) {
-      case "createUser":    //create User [v1,v2,v3]
+      case "createUser": // create User [v1,v2,v3]
         createUser(request);
         break;
       case "updateUser":
         updateUser(request);
         break;
-      case "createUserV3":   //signup [/v1/user/signup]
+      case "createUserV3": // signup [/v1/user/signup]
         createUserV3(request);
         break;
-      case "createUserV4":  //managedUser creation
+      case "createUserV4": // managedUser creation
         createUserV4(request);
+        break;
+      case "getManagedUsers": // managedUser search
+        getManagedUsers(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
@@ -124,46 +127,50 @@ public class UserManagementActor extends BaseActor {
     createUserV3_V4(actorMessage, false);
   }
   /**
-   * This method will create managed user in user in cassandra and update to ES as well at same time.
-   * Email and phone is not provided, name and managedBy is mandatory. BMGS or Location is optional
+   * This method will create managed user in user in cassandra and update to ES as well at same
+   * time. Email and phone is not provided, name and managedBy is mandatory. BMGS or Location is
+   * optional
+   *
    * @param actorMessage
    */
   private void createUserV4(Request actorMessage) {
     ProjectLogger.log("UserManagementActor:createUserV4 method called.", LoggerEnum.INFO.name());
     createUserV3_V4(actorMessage, true);
   }
-  
+
   private void createUserV3_V4(Request actorMessage, boolean isV4) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String signupType =
-      (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-        ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-        : "";
+        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
+            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
+            : "";
     String source =
-      (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-        ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-        : "";
-  
+        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
+            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
+            : "";
+
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
     String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
     userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    
+
     if (isV4) {
       ProjectLogger.log(
-        "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY),
-        LoggerEnum.INFO);
+          "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY),
+          LoggerEnum.INFO);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       userMap.put(JsonKey.CREATED_BY, userId);
-      // If user account isManagedUser(passed in request) should be same as context user_id
-      if (!(StringUtils.isNotBlank(managedBy))) {
-        userService.validateUserId(actorMessage, managedBy);
-      }
+      // If user account isManagedUser (managedBy passed in request) should be same as context
+      // user_id
+      userService.validateUserId(actorMessage, managedBy);
+
+      // If managedUser limit is set, validate total number of managed users against it
+      UserUtil.validateManagedUserLimit(managedBy);
     }
-    processUserRequestV3_V4(userMap, signupType, source, managedBy);
+    processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage.getContext());
   }
 
   private void cacheFrameworkFieldsConfig() {
@@ -180,9 +187,7 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
-    Map<String, Object> targetObject = null;
-    boolean resetPasswordLink = false;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
@@ -203,9 +208,11 @@ public class UserManagementActor extends BaseActor {
       }
     }
     validateUserFrameworkData(userMap, userDbRecord);
-    validateUserTypeForUpdate(userMap);
+    // Check if the user is Custodian Org user
+    boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
+    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     User user = mapper.convertValue(userMap, User.class);
-    UserUtil.validateExternalIds(user, JsonKey.UPDATE);
+    UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
     // not allowing user to update the status,provider,userName
@@ -238,12 +245,13 @@ public class UserManagementActor extends BaseActor {
     Map<String, Boolean> userBooleanMap = updatedUserFlagsMap(userMap, userDbRecord);
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
-    //As of now disallowing updating manageble user's phone/email, will le allowed in next release
+    // As of now disallowing updating manageble user's phone/email, will le allowed in next release
+    boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
             && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
         || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.
-      managedByEmailPhoneUpdateError);
+      requestMap.put(JsonKey.MANAGED_BY, null);
+      resetPasswordLink = true;
     }
     Response response =
         cassandraOperation.updateRecord(
@@ -267,15 +275,22 @@ public class UserManagementActor extends BaseActor {
         JsonKey.ERRORS,
         ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
     sender().tell(response, self());
+    // Managed-users should get ResetPassword Link
+    if (resetPasswordLink) {
+      sendResetPasswordLink(requestMap);
+    }
     if (null != resp) {
       Map<String, Object> completeUserDetails = new HashMap<>(userDbRecord);
       completeUserDetails.putAll(requestMap);
       saveUserDetailsToEs(completeUserDetails);
     }
+    Map<String, Object> targetObject = null;
+    List<Map<String, Object>> correlatedObject = new ArrayList<>();
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(
+        userMap, targetObject, correlatedObject, actorMessage.getContext());
   }
 
   @SuppressWarnings("unchecked")
@@ -386,6 +401,7 @@ public class UserManagementActor extends BaseActor {
     Set<String> ids = orgDbMap.keySet();
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     ids.remove(rootOrgId);
+    ObjectMapper mapper = new ObjectMapper();
     for (String id : ids) {
       UserOrg userOrg = mapper.convertValue(orgDbMap.get(id), UserOrg.class);
       userOrg.setDeleted(true);
@@ -396,27 +412,33 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg);
     }
   }
+  // Check if the user is Custodian Org user
+  private boolean isCustodianOrgUser(Map<String, Object> userMap) {
+    boolean isCustodianOrgUser = false;
+    String custodianRootOrgId = null;
+    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID));
+    try {
+      custodianRootOrgId = getCustodianRootOrgId();
+    } catch (Exception ex) {
+      ProjectLogger.log(
+          "UserManagementActor: isCustodianOrgUser :"
+              + " Exception Occured while fetching Custodian Org ",
+          LoggerEnum.INFO);
+    }
+    if (StringUtils.isNotBlank(custodianRootOrgId)
+        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
+      isCustodianOrgUser = true;
+    }
+    return isCustodianOrgUser;
+  }
 
-  private void validateUserTypeForUpdate(Map<String, Object> userMap) {
+  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
       String userType = (String) userMap.get(JsonKey.USER_TYPE);
-      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId = null;
-        User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID));
-        try {
-          custodianRootOrgId = getCustodianRootOrgId();
-        } catch (Exception ex) {
-          ProjectLogger.log(
-              "UserManagementActor: validateUserTypeForUpdate :"
-                  + " Exception Occured while fetching Custodian Org ",
-              LoggerEnum.INFO);
-        }
-        if (StringUtils.isNotBlank(custodianRootOrgId)
-            && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-        }
+      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
+            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
       } else {
         userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
       }
@@ -437,7 +459,6 @@ public class UserManagementActor extends BaseActor {
       } else {
         frameworkIdList = (List<String>) framework.get(JsonKey.ID);
       }
-
       userRequestMap.put(JsonKey.FRAMEWORK, framework);
       List<String> frameworkFields =
           DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
@@ -478,18 +499,11 @@ public class UserManagementActor extends BaseActor {
    * @param actorMessage Request
    */
   private void createUser(Request actorMessage) {
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    String signupType =
-        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
     if (StringUtils.isNotBlank(version)
         && (JsonKey.VERSION_2.equalsIgnoreCase(version)
             || JsonKey.VERSION_3.equalsIgnoreCase(version))) {
@@ -562,7 +576,7 @@ public class UserManagementActor extends BaseActor {
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
     }
-    processUserRequest(userMap, callerId, signupType, source);
+    processUserRequest(userMap, callerId, actorMessage.getContext());
   }
 
   private void validateUserType(Map<String, Object> userMap, boolean isCustodianOrg) {
@@ -597,7 +611,6 @@ public class UserManagementActor extends BaseActor {
   private void validateChannelAndOrganisationId(Map<String, Object> userMap) {
     String organisationId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
-
     String subOrgRootOrgId = "";
     if (StringUtils.isNotBlank(organisationId)) {
       Organisation organisation = organisationClient.esGetOrgById(organisationId);
@@ -640,8 +653,13 @@ public class UserManagementActor extends BaseActor {
         MessageFormat.format(
             ResponseCode.parameterMismatch.getErrorMessage(), StringFormatter.joinByComma(param)));
   }
-  
-  private void processUserRequestV3_V4(Map<String, Object> userMap, String signupType, String source, String managedBy) {
+
+  private void processUserRequestV3_V4(
+      Map<String, Object> userMap,
+      String signupType,
+      String source,
+      String managedBy,
+      Map<String, Object> context) {
     UserUtil.setUserDefaultValueForV3(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
@@ -670,24 +688,24 @@ public class UserManagementActor extends BaseActor {
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
     if (StringUtils.isEmpty(managedBy)) {
       userFlagsMap.put(
-        JsonKey.EMAIL_VERIFIED,
-        (Boolean)
-          (userMap.get(JsonKey.EMAIL_VERIFIED) != null
-            ? userMap.get(JsonKey.EMAIL_VERIFIED)
-            : false));
+          JsonKey.EMAIL_VERIFIED,
+          (Boolean)
+              (userMap.get(JsonKey.EMAIL_VERIFIED) != null
+                  ? userMap.get(JsonKey.EMAIL_VERIFIED)
+                  : false));
       userFlagsMap.put(
-        JsonKey.PHONE_VERIFIED,
-        (Boolean)
-          (userMap.get(JsonKey.PHONE_VERIFIED) != null
-            ? userMap.get(JsonKey.PHONE_VERIFIED)
-            : false));
+          JsonKey.PHONE_VERIFIED,
+          (Boolean)
+              (userMap.get(JsonKey.PHONE_VERIFIED) != null
+                  ? userMap.get(JsonKey.PHONE_VERIFIED)
+                  : false));
     }
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     Response response =
-      cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+        cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -701,65 +719,69 @@ public class UserManagementActor extends BaseActor {
       sender().tell(response, self());
     } else {
       Future<Boolean> kcFuture =
-        Futures.future(
-          new Callable<Boolean>() {
-            
-            @Override
-            public Boolean call() {
-              try {
-                Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
-                updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
-                updatePasswordMap.put(JsonKey.PASSWORD, password);
-                ProjectLogger.log(
-                  "Update password value passed "
-                    + password
-                    + " --"
-                    + (String) userMap.get(JsonKey.ID),
-                  LoggerEnum.INFO.name());
-                return UserUtil.updatePassword(updatePasswordMap);
-              } catch (Exception e) {
-                ProjectLogger.log(
-                  "Error occured during update pasword : " + e.getMessage(),
-                  LoggerEnum.ERROR.name());
-                return false;
-              }
-            }
-          },
-          getContext().dispatcher());
-      Future<Response> future =
-        saveUserToES(esResponse)
-          .zip(kcFuture)
-          .map(
-            new Mapper<Tuple2<String, Boolean>, Response>() {
-              
-              @Override
-              public Response apply(Tuple2<String, Boolean> parameter) {
-                boolean updatePassResponse = parameter._2;
-                ProjectLogger.log(
-                  "UserManagementActor:processUserRequest: Response from update password call "
-                    + updatePassResponse,
-                  LoggerEnum.INFO.name());
-                if (!updatePassResponse) {
-                  response.put(
-                    JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
+          Futures.future(
+              new Callable<Boolean>() {
+
+                @Override
+                public Boolean call() {
+                  try {
+                    Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
+                    updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
+                    updatePasswordMap.put(JsonKey.PASSWORD, password);
+                    ProjectLogger.log(
+                        "Update password value passed "
+                            + password
+                            + " --"
+                            + (String) userMap.get(JsonKey.ID),
+                        LoggerEnum.INFO.name());
+                    return UserUtil.updatePassword(updatePasswordMap);
+                  } catch (Exception e) {
+                    ProjectLogger.log(
+                        "Error occured during update pasword : " + e.getMessage(),
+                        LoggerEnum.ERROR.name());
+                    return false;
+                  }
                 }
-                return response;
-              }
-            },
-            getContext().dispatcher());
+              },
+              getContext().dispatcher());
+      Future<Response> future =
+          saveUserToES(esResponse)
+              .zip(kcFuture)
+              .map(
+                  new Mapper<Tuple2<String, Boolean>, Response>() {
+
+                    @Override
+                    public Response apply(Tuple2<String, Boolean> parameter) {
+                      boolean updatePassResponse = parameter._2;
+                      ProjectLogger.log(
+                          "UserManagementActor:processUserRequest: Response from update password call "
+                              + updatePassResponse,
+                          LoggerEnum.INFO.name());
+                      if (!updatePassResponse) {
+                        response.put(
+                            JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
+                      }
+                      return response;
+                    }
+                  },
+                  getContext().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
-    
-    processTelemetry(userMap, signupType, source, userId);
+
+    processTelemetry(userMap, signupType, source, userId, context);
   }
 
   private void processTelemetry(
-      Map<String, Object> userMap, String signupType, String source, String userId) {
+      Map<String, Object> userMap,
+      String signupType,
+      String source,
+      String userId,
+      Map<String, Object> context) {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    context.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
@@ -777,7 +799,7 @@ public class UserManagementActor extends BaseActor {
       ProjectLogger.log("UserManagementActor:processUserRequest: No source found");
     }
 
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap) {
@@ -801,9 +823,10 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void processUserRequest(
-      Map<String, Object> userMap, String callerId, String signupType, String source) {
+      Map<String, Object> userMap, String callerId, Map<String, Object> reqContext) {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId);
+    ObjectMapper mapper = new ObjectMapper();
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -852,7 +875,6 @@ public class UserManagementActor extends BaseActor {
     } else {
       ProjectLogger.log("UserManagementActor:processUserRequest: User creation failure");
     }
-
     // Enable this when you want to send full response of user attributes
     Map<String, Object> esResponse = new HashMap<>();
     esResponse.putAll((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE));
@@ -892,25 +914,28 @@ public class UserManagementActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
+    reqContext.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
     TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
+    String signupType =
+        reqContext.get(JsonKey.SIGNUP_TYPE) != null
+            ? (String) reqContext.get(JsonKey.SIGNUP_TYPE)
+            : "";
+    String source =
+        reqContext.get(JsonKey.REQUEST_SOURCE) != null
+            ? (String) reqContext.get(JsonKey.REQUEST_SOURCE)
+            : "";
     if (StringUtils.isNotBlank(signupType)) {
       TelemetryUtil.generateCorrelatedObject(
           signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No signupType found");
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No source found");
     }
-
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject);
+    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, reqContext);
   }
 
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
@@ -1018,6 +1043,14 @@ public class UserManagementActor extends BaseActor {
     tellToAnother(EmailAndSmsRequest);
   }
 
+  private void sendResetPasswordLink(Map<String, Object> userMap) {
+    Request EmailAndSmsRequest = new Request();
+    EmailAndSmsRequest.getRequest().putAll(userMap);
+    EmailAndSmsRequest.setOperation(
+        UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
+    tellToAnother(EmailAndSmsRequest);
+  }
+
   private Future<String> saveUserToES(Map<String, Object> completeUserMap) {
 
     return esUtil.save(
@@ -1027,7 +1060,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void saveUserToKafka(Map<String, Object> completeUserMap) {
-
+    ObjectMapper mapper = new ObjectMapper();
     try {
       String event = mapper.writeValueAsString(completeUserMap);
       // user_events
@@ -1201,4 +1234,45 @@ public class UserManagementActor extends BaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
   }
+
+  /**
+   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user
+   * from admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
+   *
+   * @param request Request
+   */
+  private void getManagedUsers(Request request) {
+    //LUA uuid/ManagedBy Id
+    String uuid = (String)request.get(JsonKey.ID);
+
+    boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
+
+    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
+    List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
+
+    List<Map<String, Object>> activeUserList = null;
+    if(CollectionUtils.isNotEmpty(userList)) {
+      activeUserList = userList.stream()
+              .filter(o -> !BooleanUtils.isTrue((Boolean) o.get(JsonKey.IS_DELETED)))
+              .collect(Collectors.toList());
+    }
+    if(withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
+        //Fetch encrypted token from admin utils
+        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(uuid, activeUserList);
+        //encrypted token for each managedUser in respList
+        userService.appendEncryptedToken(encryptedTokenList, activeUserList);
+    }
+    Map<String, Object> responseMap = new HashMap<>();
+    if(CollectionUtils.isNotEmpty(activeUserList)) {
+      responseMap.put(JsonKey.CONTENT, activeUserList);
+      responseMap.put(JsonKey.COUNT, activeUserList.size());
+    }else{
+      responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
+      responseMap.put(JsonKey.COUNT, 0);
+    }
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, responseMap);
+    sender().tell(response, self());
+  }
+
 }

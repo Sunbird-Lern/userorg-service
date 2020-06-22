@@ -33,7 +33,6 @@ public class BackgroundServiceActorTest {
   @BeforeClass
   public static void setUp() {
 
-    Util.checkCassandraDbConnections(JsonKey.SUNBIRD);
     system = ActorSystem.create("system");
 
     Map<String, Object> locnMap = new HashMap<String, Object>();

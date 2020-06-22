@@ -10,14 +10,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import akka.pattern.Patterns;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import scala.concurrent.Await;
 import scala.concurrent.Promise;
 
 public class UserManagementActorTest extends UserManagementActorTestBase {
@@ -154,6 +159,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     when(interServiceCommunication.getResponse(
             Mockito.any(ActorRef.class), Mockito.any(Request.class)))
         .thenReturn(null);
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     boolean result =
         testScenario(
             getRequest(
@@ -164,6 +170,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccess() {
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -180,6 +187,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             Mockito.any(ActorRef.class), Mockito.any(Request.class)))
         .thenReturn(getEsResponseForLocation())
         .thenReturn(getEsResponse());
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     boolean result =
         testScenario(
             getRequest(
@@ -190,6 +198,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccessWithoutUserCallerId() {
+    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -367,5 +376,46 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithManagedUserLimit() {
+    Map<String, Object> reqMap = getUserOrgUpdateRequest(true);
+    getUpdateRequestWithDefaultFlags(reqMap);
+    boolean result =
+        testScenario(
+            getRequest(
+                false, false, false, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4),
+            null);
+    assertTrue(result);
+  }
+
+  @Test
+  @Ignore
+  public void testGetManagedUsers() throws Exception{
+    HashMap<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.ID, "102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
+    reqMap.put(JsonKey.WITH_TOKENS, "true");
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("anyString", new Object());
+
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, map);
+
+    when(Await.result(Patterns.ask(Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.anyLong()), Mockito.anyObject()))
+            .thenReturn(response)
+            .thenReturn(map);
+    boolean result =
+            testScenario(
+                    getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS),
+                    null);
+    assertTrue(result);
+  }
+
+  private Map<String, Object> getSearchResults(){
+    Map<String, Object> searchRequestMap = new HashMap<>();
+
+    return searchRequestMap;
   }
 }

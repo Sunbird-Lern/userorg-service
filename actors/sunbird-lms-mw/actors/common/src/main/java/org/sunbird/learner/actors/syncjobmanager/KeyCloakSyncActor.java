@@ -120,7 +120,7 @@ public class KeyCloakSyncActor extends BaseActor {
         if (!(!StringUtils.isBlank(res) && res.equalsIgnoreCase(JsonKey.SUCCESS))) {
           if (null == userMap.get(JsonKey.EMAIL_VERIFIED)) {
             Map<String, Object> map = new HashMap<>();
-            if (SSOServiceFactory.getInstance().isEmailVerified(userId)) {
+            if (ssoManager.isEmailVerified(userId)) {
               map.put(JsonKey.EMAIL_VERIFIED, true);
               map.put(JsonKey.ID, userId);
             } else {

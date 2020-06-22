@@ -860,6 +860,11 @@ public enum ResponseCode {
       ResponseMessage.Key.MANAGED_BY_NOT_ALLOWED, ResponseMessage.Message.MANAGED_BY_NOT_ALLOWED),
   managedByEmailPhoneUpdateError(
     ResponseMessage.Key.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR, ResponseMessage.Message.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR),
+  managedUserLimitExceeded(
+          ResponseMessage.Key.MANAGED_USER_LIMIT_EXCEEDED, ResponseMessage.Message.MANAGED_USER_LIMIT_EXCEEDED),
+  unableToConnectToAdminUtil(
+          ResponseMessage.Key.UNABLE_TO_CONNECT_TO_ADMINUTIL,
+          ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

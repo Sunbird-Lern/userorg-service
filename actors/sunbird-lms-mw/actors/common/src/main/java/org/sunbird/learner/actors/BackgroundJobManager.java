@@ -46,14 +46,6 @@ import scala.concurrent.Future;
 )
 public class BackgroundJobManager extends BaseActor {
 
-  private static Map<String, String> headerMap = new HashMap<>();
-  private static Util.DbInfo dbInfo = null;
-
-  static {
-    headerMap.put("content-type", "application/json");
-    headerMap.put("accept", "application/json");
-  }
-
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -328,7 +320,6 @@ public class BackgroundJobManager extends BaseActor {
      * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
      * service.computeProfile(data); data.putAll(responsemap); }
      */
-
     Future<String> responseF = esService.save(type, identifier, data);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     ProjectLogger.log(

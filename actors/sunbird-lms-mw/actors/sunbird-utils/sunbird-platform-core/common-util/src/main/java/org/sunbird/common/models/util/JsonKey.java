@@ -1,5 +1,8 @@
 package org.sunbird.common.models.util;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * This class will contains all the key related to request and response.
  *
@@ -767,6 +770,7 @@ public final class JsonKey {
   public static final String CALLER_ID = "callerId";
   public static final String USER_TYPE = "userType";
   public static final String MANAGED_BY = "managedBy";
+  public static final String MANAGED_FOR = "managedFor";
 
   public static final String COURSE_BATCH_URL = "courseBatchUrl";
   public static final String SUNBIRD_COURSE_BATCH_NOTIFICATION_SIGNATURE =
@@ -1013,6 +1017,7 @@ public final class JsonKey {
   public static final String NESTED_EXISTS = "nested_exists";
   public static final String NESTED_NOT_EXISTS = "nested_not_exists";
   public static final String PROSPECT_CHANNELS = "prospectChannels";
+  public static final String PROSPECT_CHANNELS_IDS = "prospectChannelsIds";
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
@@ -1025,6 +1030,23 @@ public final class JsonKey {
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
   public static final String OTP_PHONE_WARD_LOGIN_TEMPLATE = "verifyPhoneOtpTemplateWard";
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
-
+  public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
+  public static final String MANAGED_USER_LIMIT = "managed_user_limit";
+  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
+  public static final String ACCESS_TOKEN_PUBLICKEY_KEYPREFIX = "accesstoken.publickey.keyprefix";
+  public static final String ACCESS_TOKEN_PUBLICKEY_KEYCOUNT = "accesstoken.publickey.keycount";
+  public static final String SHA_256_WITH_RSA = "SHA256withRSA";
+  public static final String SUB = "sub";
+  public static final String DOT_SEPARATOR = ".";
+  public static final List<String> USER_UNAUTH_STATES =
+    Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+  public static final String EKSTEP_SIGNING_SIGN_PAYLOAD = "ekstep.signing.sign.payload";
+  public static final String TS = "ts";
+  public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
+  public static final String MSGID= "msgid";
+  public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
+  public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
+  public static final String MANAGED_TOKEN = "managedToken";
+  public static final String WITH_TOKENS = "withTokens";
   private JsonKey() {}
 }

@@ -472,6 +472,8 @@ public interface ResponseMessage {
     String MISSING_MESSAGE = "Required fields for create course are missing. {0}";
     String MANAGED_BY_NOT_ALLOWED = "managedBy cannot be updated.";
     String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "ManagedBy User phone/email cannot be updated.";
+    String MANAGED_USER_LIMIT_EXCEEDED = "Managed user creation limit exceeded";
+    String UNABLE_TO_CONNECT_TO_ADMINUTIL = "Unable to connect to admin util service";
   }
 
   interface Key {
@@ -870,5 +872,7 @@ public interface ResponseMessage {
     String MISSING_CODE = "ERR_COURSE_CREATE_FIELDS_MISSING";
     String MANAGED_BY_NOT_ALLOWED = "MANAGED_BY_NOT_ALLOWED";
     String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR";
+    String MANAGED_USER_LIMIT_EXCEEDED = "MANAGED_USER_LIMIT_EXCEEDED";
+    String UNABLE_TO_CONNECT_TO_ADMINUTIL = "UNABLE_TO_CONNECT_TO_ADMINUTIL";
   }
 }

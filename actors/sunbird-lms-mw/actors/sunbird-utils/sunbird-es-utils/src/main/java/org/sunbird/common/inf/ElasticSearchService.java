@@ -119,7 +119,7 @@ public interface ElasticSearchService {
   default Response searchMetricsData(String index, String rawQuery) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
-        "ElasticSearchTcpImpl:searchMetricsData: "
+        "ElasticSearchService:searchMetricsData: "
             + "Metrics search method started at =="
             + startTime,
         LoggerEnum.PERF_LOG);
@@ -161,8 +161,8 @@ public interface ElasticSearchService {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseData);
     ProjectLogger.log(
-        "ElasticSearchTcpImpl:searchMetricsData: "
-            + "ElasticSearchUtil metrics search method end at == "
+        "ElasticSearchService:searchMetricsData: "
+            + "ElasticSearchService metrics search method end at == "
             + System.currentTimeMillis()
             + " ,Total time elapsed = "
             + ElasticSearchHelper.calculateEndTime(startTime),

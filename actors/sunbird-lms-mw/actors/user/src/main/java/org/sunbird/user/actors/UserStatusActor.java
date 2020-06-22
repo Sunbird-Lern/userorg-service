@@ -9,11 +9,14 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.Status;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
+import org.sunbird.services.sso.SSOManager;
+import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
@@ -22,12 +25,12 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   asyncTasks = {}
 )
 public class UserStatusActor extends UserBaseActor {
+
   private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     String operation = request.getOperation();
     switch (operation) {
       case "blockUser":
@@ -79,14 +82,15 @@ public class UserStatusActor extends UserBaseActor {
 
     ObjectMapper mapper = new ObjectMapper();
     User updatedUser = mapper.convertValue(userMapES, User.class);
-
+    SSOManager ssoManager = SSOServiceFactory.getInstance();
+    UserDao userDao = UserDaoImpl.getInstance();
     if (isBlocked) {
-      getSSOManager().deactivateUser(userMapES);
+      ssoManager.deactivateUser(userMapES);
     } else {
-      getSSOManager().activateUser(userMapES);
+      ssoManager.activateUser(userMapES);
     }
 
-    Response response = getUserDao().updateUser(updatedUser);
+    Response response = userDao.updateUser(updatedUser);
     sender().tell(response, self());
 
     // Update status in ES
@@ -107,7 +111,7 @@ public class UserStatusActor extends UserBaseActor {
       ProjectLogger.log(logMsgPrefix + "Update user data to ES is skipped.");
     }
 
-    generateTelemetryEvent(request.getRequest(), userId, operation);
+    generateTelemetryEvent(request.getRequest(), userId, operation, request.getContext());
   }
 
   private Map<String, Object> getUserMapES(String userId, String updatedBy, boolean isDeleted) {

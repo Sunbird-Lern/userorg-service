@@ -29,7 +29,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
@@ -43,6 +42,8 @@ import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Await;
@@ -68,13 +69,12 @@ public class UserProfileReadActor extends BaseActor {
   private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
   private ActorRef systemSettingActorRef = null;
   private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
-  private ElasticSearchService esUtil = getESInstance();
-  private static ObjectMapper mapper = new ObjectMapper();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     if (systemSettingActorRef == null) {
       systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
     }
@@ -116,6 +116,9 @@ public class UserProfileReadActor extends BaseActor {
     String userId;
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
+    boolean withTokens =
+        Boolean.valueOf((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
+    String managedToken = (String) actorMessage.getContext().get(JsonKey.MANAGED_TOKEN);
     boolean showMaskedData = false;
     if (!StringUtils.isEmpty(provider)) {
       if (StringUtils.isEmpty(idType)) {
@@ -192,12 +195,30 @@ public class UserProfileReadActor extends BaseActor {
     // user data id is not same.
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
+    String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
+    String managedBy = (String) result.get(JsonKey.MANAGED_BY);
     ProjectLogger.log(
-        "requested By and requested user id == " + requestedById + "  " + (String) userId);
+        "requested By and requested user id == "
+            + requestedById
+            + "  "
+            + (String) userId
+            + " managedForId= "
+            + managedForId
+            + " managedBy "
+            + managedBy
+            + " showMaskedData= "
+            + showMaskedData,
+        LoggerEnum.INFO);
+    if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
+      ProjectCommonException.throwUnauthorizedErrorException();
+    }
     try {
-      if (!(userId).equalsIgnoreCase(requestedById) && !showMaskedData) {
+      if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
+          && !showMaskedData) {
         result = removeUserPrivateField(result);
       } else {
+        ProjectLogger.log(
+            "Response with externalIds and complete profile details", LoggerEnum.INFO);
         // These values are set to ensure backward compatibility post introduction of global
         // settings in user profile visibility
         setCompleteProfileVisibilityMap(result);
@@ -217,6 +238,9 @@ public class UserProfileReadActor extends BaseActor {
         result.putAll(privateResult);
       }
     } catch (Exception e) {
+      ProjectLogger.log(
+          "Error in UserProfileReadActor: getUserProfileData: error message " + e.getMessage(),
+          LoggerEnum.INFO);
       ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
@@ -239,6 +263,25 @@ public class UserProfileReadActor extends BaseActor {
       result.remove(JsonKey.ENC_PHONE);
       // String username = ssoManager.getUsernameById(userId);
       //  result.put(JsonKey.USERNAME, username);
+
+      if (withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
+        if (StringUtils.isEmpty(managedToken)) {
+          ProjectLogger.log(
+              "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId,
+              LoggerEnum.INFO.name());
+          List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+          userList.add(result);
+          // Fetch encrypted token from admin utils
+          Map<String, Object> encryptedTokenList =
+              userService.fetchEncryptedToken(managedBy, userList);
+          // encrypted token for each managedUser in respList
+          userService.appendEncryptedToken(encryptedTokenList, userList);
+          result = userList.get(0);
+        } else {
+          result.put(JsonKey.MANAGED_TOKEN, managedToken);
+        }
+      }
+
       response.put(JsonKey.RESPONSE, result);
     } else {
       result = new HashMap<>();
@@ -428,7 +471,6 @@ public class UserProfileReadActor extends BaseActor {
         SearchDTO searchDTO = new SearchDTO();
         searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
         searchDTO.setFields(orgfields);
-
         Future<Map<String, Object>> esresultF =
             esUtil.search(searchDTO, EsType.organisation.getTypeName());
         Map<String, Object> esresult =
@@ -541,7 +583,6 @@ public class UserProfileReadActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private Map<String, Map<String, Object>> getEsResultByListOfIds(
       List<String> orgIds, List<String> fields, EsType typeToSearch) {
-
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.ID, orgIds);
 
@@ -631,7 +672,6 @@ public class UserProfileReadActor extends BaseActor {
         sender().tell(exception, self());
         return;
       }
-
       SearchDTO searchDto = new SearchDTO();
       Map<String, Object> filter = new HashMap<>();
       filter.put(JsonKey.LOGIN_ID, loginId);
@@ -779,6 +819,7 @@ public class UserProfileReadActor extends BaseActor {
     Map<String, Object> tncConfigMap = null;
     try {
       String tncValue = DataCacheHandler.getConfigSettings().get(JsonKey.TNC_CONFIG);
+      ObjectMapper mapper = new ObjectMapper();
       tncConfigMap = mapper.readValue(tncValue, Map.class);
 
     } catch (Exception e) {
@@ -891,10 +932,6 @@ public class UserProfileReadActor extends BaseActor {
             getContext().dispatcher());
 
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
-  }
-
-  private ElasticSearchService getESInstance() {
-    return EsClientFactory.getInstance(JsonKey.REST);
   }
 
   private void getKey(Request actorMessage) {

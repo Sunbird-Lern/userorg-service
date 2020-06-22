@@ -94,7 +94,7 @@ public class SupportMultipleExternalIdsTest {
     resMapList.add(externalIdResMap);
     response1.put(JsonKey.RESPONSE, resMapList);
     PowerMockito.when(
-            cassandraOperation.getRecordsByCompositeKey(
+            cassandraOperation.getRecordsByProperties(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(response1);
   }

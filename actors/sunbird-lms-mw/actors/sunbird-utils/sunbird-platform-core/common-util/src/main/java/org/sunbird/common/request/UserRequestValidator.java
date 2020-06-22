@@ -115,7 +115,7 @@ public class UserRequestValidator extends BaseRequestValidator {
   public void validateCreateUserV3Request(Request userRequest) {
     validateCreateUserRequest(userRequest);
   }
-  
+
   public void validateUserCreateV4(Request userRequest) {
     validateUserCreateV3(userRequest);
     validateLocationCodes(userRequest);
@@ -1104,6 +1104,17 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
     if (StringUtils.isNotBlank((String) userRequest.get(JsonKey.RECOVERY_PHONE))) {
       validatePhone((String) userRequest.get(JsonKey.RECOVERY_PHONE));
+    }
+  }
+
+  /**
+   * This method will validate uuid.
+   *
+   * @param uuid String
+   */
+  public void validateUserId(String uuid) {
+    if (StringUtils.isNotEmpty(uuid) && !ProjectUtil.validateUUID(uuid)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestParameter);
     }
   }
 }

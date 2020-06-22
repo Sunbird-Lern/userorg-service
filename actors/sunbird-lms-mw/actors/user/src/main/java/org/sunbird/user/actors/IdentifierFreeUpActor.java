@@ -34,9 +34,6 @@ import scala.concurrent.Future;
  */
 public class IdentifierFreeUpActor extends BaseActor {
 
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  public static final int FIRST_RECORD = 0;
-
   @Override
   public void onReceive(Request request) {
     String id = (String) request.get(JsonKey.ID);
@@ -45,6 +42,7 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private Map<String, Object> getUserById(String id) {
+    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
         getCassandraOperation()
             .getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id);
@@ -57,7 +55,7 @@ public class IdentifierFreeUpActor extends BaseActor {
           LoggerEnum.ERROR.name());
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
     }
-    return responseList.get(FIRST_RECORD);
+    return responseList.get(0);
   }
 
   private Response processUserAttribute(Map<String, Object> userDbMap, List<String> identifiers) {
@@ -115,6 +113,7 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private Response updateUser(Map<String, Object> userDbMap) {
+    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     return getCassandraOperation()
         .updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userDbMap);
   }

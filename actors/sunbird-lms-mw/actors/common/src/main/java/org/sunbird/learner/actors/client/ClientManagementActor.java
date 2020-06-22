@@ -11,7 +11,6 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -24,14 +23,11 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 )
 public class ClientManagementActor extends BaseActor {
 
-  private Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.MASTER_KEY);
-    // set request id fto thread loacl...
-    ExecutionContext.setRequestId(request.getRequestId());
 
     if (request.getOperation().equalsIgnoreCase(ActorOperations.REGISTER_CLIENT.getValue())) {
       registerClient(request);
@@ -92,6 +88,7 @@ public class ClientManagementActor extends BaseActor {
     req.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
     req.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     req.put(JsonKey.CHANNEL, channel);
+    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     Response result =
         cassandraOperation.insertRecord(
             clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req);
@@ -106,7 +103,7 @@ public class ClientManagementActor extends BaseActor {
 
     sender().tell(result, self());
     TelemetryUtil.telemetryProcessingCall(
-        actorMessage.getRequest(), targetObject, correlatedObject);
+        actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /**
@@ -183,6 +180,7 @@ public class ClientManagementActor extends BaseActor {
       req.put(JsonKey.CLIENT_NAME, clientName);
     }
     req.remove(JsonKey.CLIENT_ID);
+    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     Response result =
         cassandraOperation.updateRecord(
             clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req);
@@ -192,7 +190,7 @@ public class ClientManagementActor extends BaseActor {
     result.getResult().remove(JsonKey.RESPONSE);
     sender().tell(result, self());
     TelemetryUtil.telemetryProcessingCall(
-        actorMessage.getRequest(), targetObject, correlatedObject);
+        actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /**
@@ -245,6 +243,7 @@ public class ClientManagementActor extends BaseActor {
   private Response getDataFromCassandra(String propertyName, String propertyValue) {
     ProjectLogger.log("Get data from cassandra method call start");
     Response result = null;
+    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     if (StringUtils.equalsIgnoreCase(JsonKey.CLIENT_NAME, propertyName)) {
       result =
           cassandraOperation.getRecordsByProperty(

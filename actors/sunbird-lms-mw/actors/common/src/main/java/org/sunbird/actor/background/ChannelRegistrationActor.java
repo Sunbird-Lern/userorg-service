@@ -15,11 +15,7 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -79,7 +75,6 @@ public class ChannelRegistrationActor extends BaseActor {
     map.put(JsonKey.ID, JsonKey.CHANNEL_REG_STATUS_ID);
     map.put(JsonKey.FIELD, JsonKey.CHANNEL_REG_STATUS);
     map.put(JsonKey.VALUE, String.valueOf(bool));
-
     Response response = cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map);
     ProjectLogger.log(
         "Upsert operation result for channel reg status =  "

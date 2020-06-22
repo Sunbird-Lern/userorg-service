@@ -1,68 +1,40 @@
 package org.sunbird.common.quartz.scheduler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.MigrationUser;
 import org.sunbird.bean.ShadowUser;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ShadowUserProcessor;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
-import org.sunbird.learner.util.Util;
 
 public class ShadowUserMigrationScheduler extends BaseJob {
 
-  private Util.DbInfo bulkUploadDbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
-  private HashSet<String> verifiedChannelOrgExternalIdSet = new HashSet<>();
-  private ElasticSearchService elasticSearchService = EsClientFactory.getInstance(JsonKey.REST);
-  private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
-  private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
-
   @Override
-  public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-    ProjectLogger.log(
-        "ShadowUserMigrationScheduler:execute:checking scheduler workflow", LoggerEnum.INFO.name());
+  public void execute(JobExecutionContext jobExecutionContext) {
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:execute:Running Shadow User Upload Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
             + jobExecutionContext.getJobDetail().toString(),
         LoggerEnum.INFO.name());
-    Util.initializeContextForSchedulerJob(
-        JsonKey.SYSTEM, jobExecutionContext.getFireInstanceId(), JsonKey.SCHEDULER_JOB);
     startMigration();
   }
 
   public void startMigration() {
     List<String> unprocessedRecordIds = getUnprocessedRecordIds();
-    ProjectLogger.log(
-        "ShadowUserMigrationScheduler:startMigration:Got Bulk Upload Db migrations started",
-        LoggerEnum.INFO.name());
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:startMigration:Got Bulk Upload Db unprocessed and failed records size is:"
             + unprocessedRecordIds.size(),
@@ -71,9 +43,6 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     ShadowUserProcessor processorObject = new ShadowUserProcessor();
     processorObject.process();
     unprocessedRecordIds.clear();
-    ProjectLogger.log(
-        "ShadowUserMigrationScheduler:processRecords:Scheduler Job Ended for ShadowUser Migration",
-        LoggerEnum.INFO.name());
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:execute:Scheduler Job ended for shadow user migration",
         LoggerEnum.INFO.name());

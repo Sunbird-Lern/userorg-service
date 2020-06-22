@@ -338,7 +338,7 @@ public class UserUtil {
           externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
           externalIdReq.put(JsonKey.EXTERNAL_ID, externalId.get(JsonKey.ID));
           Response response =
-              cassandraOperation.getRecordsByCompositeKey(
+              cassandraOperation.getRecordsByProperties(
                   JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
           List<Map<String, Object>> externalIdsRecord =
               (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
@@ -631,15 +631,25 @@ public class UserUtil {
     } while (StringUtils.isBlank(userName));
     return decService.decryptData(userName);
   }
-
+  // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
     checkExternalIdUniqueness(user, operationType);
-    if (JsonKey.UPDATE.equalsIgnoreCase(operationType)
-        && CollectionUtils.isNotEmpty(user.getExternalIds())) {
+  }
+  // validateExternalIds For UPDATE USER
+  public static void validateExternalIdsForUpdateUser(User user, boolean isCustodianOrg) {
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
+      List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
+      user.setExternalIds(list);
+    }
+    // If operation is update and user is custodian org, ignore uniqueness check
+    if (!isCustodianOrg) {
+      checkExternalIdUniqueness(user, JsonKey.UPDATE);
+    }
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user);
     }
   }
@@ -777,6 +787,22 @@ public class UserUtil {
     }
     UserUtility.decryptUserDataFrmES(managedByInfo);
     return managedByInfo;
+  }
+
+  public static void validateManagedUserLimit(String managedBy) {
+    if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
+      Map<String, Object> searchQueryMap = new HashMap<>();
+      searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
+      List<User> managedUserList = Util.searchUser(searchQueryMap);
+      if (CollectionUtils.isNotEmpty(managedUserList)
+          && managedUserList.size()
+              >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
+        throw new ProjectCommonException(
+            ResponseCode.managedUserLimitExceeded.getErrorCode(),
+            ResponseCode.managedUserLimitExceeded.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+    }
   }
 }
 

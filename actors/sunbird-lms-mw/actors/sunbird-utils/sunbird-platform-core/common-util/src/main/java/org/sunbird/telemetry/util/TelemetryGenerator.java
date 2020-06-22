@@ -66,6 +66,7 @@ public class TelemetryGenerator {
 
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.AUDIT.getName(), actor, eventContext, edata, targetObject);
+    telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 
@@ -207,7 +208,6 @@ public class TelemetryGenerator {
 
     Context eventContext = getContext(context);
 
-    // assign request id into context cdata ...
     String reqId = (String) context.get(JsonKey.REQUEST_ID);
     if (!StringUtils.isBlank(reqId)) {
       Map<String, Object> map = new HashMap<>();
@@ -218,6 +218,7 @@ public class TelemetryGenerator {
     Map<String, Object> edata = generateSearchEdata(params);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.SEARCH.getName(), actor, eventContext, edata);
+    telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 
@@ -228,7 +229,6 @@ public class TelemetryGenerator {
     String query = (String) params.get(JsonKey.QUERY);
     Map filters = (Map) params.get(JsonKey.FILTERS);
     Map sort = (Map) params.get(JsonKey.SORT);
-    Long size = (Long) params.get(JsonKey.SIZE);
     List<Map> topn = (List<Map>) params.get(JsonKey.TOPN);
 
     edata.put(JsonKey.TYPE, StringUtils.capitalize(type));
@@ -238,7 +238,7 @@ public class TelemetryGenerator {
     edata.put(JsonKey.QUERY, query);
     edata.put(JsonKey.FILTERS, filters);
     edata.put(JsonKey.SORT, sort);
-    edata.put(JsonKey.SIZE, size);
+    edata.put(JsonKey.SIZE, params.get(JsonKey.SIZE));
     edata.put(JsonKey.TOPN, topn);
     return edata;
   }
@@ -272,6 +272,7 @@ public class TelemetryGenerator {
 
     Map<String, Object> edata = generateLogEdata(params);
     Telemetry telemetry = new Telemetry(TelemetryEvents.LOG.getName(), actor, eventContext, edata);
+    telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 
@@ -337,6 +338,7 @@ public class TelemetryGenerator {
     Map<String, Object> edata = generateErrorEdata(params);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
+    telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 

@@ -38,7 +38,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
 
-      return getUserIdByExternalId(extId, provider, idType);
+      userId = getUserIdByExternalId(extId, provider, idType);
     }
 
     return userId;
@@ -52,7 +52,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     externalIdReq.put(JsonKey.ID_TYPE, idType.toLowerCase());
     externalIdReq.put(JsonKey.EXTERNAL_ID, extId.toLowerCase());
     Response response =
-        cassandraOperation.getRecordsByCompositeKey(
+        cassandraOperation.getRecordsByProperties(
             usrDbInfo.getKeySpace(), JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
 
     List<Map<String, Object>> userRecordList =
