@@ -2,17 +2,15 @@ package controllers.datapersistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public class DbOperationController extends BaseController {
 
@@ -27,7 +25,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: create called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -47,7 +45,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: update called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -67,7 +65,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: delete called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DELETE_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -87,7 +85,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: read called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -107,7 +105,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: readAll called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_ALL_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -127,7 +125,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: search called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_DATA.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
@@ -147,7 +145,7 @@ public class DbOperationController extends BaseController {
       ProjectLogger.log("DbOperationController: getMetrics called", LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.GET_METRICS.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);

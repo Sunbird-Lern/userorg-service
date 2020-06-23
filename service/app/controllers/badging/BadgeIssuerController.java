@@ -19,7 +19,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Files;
@@ -62,7 +61,7 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgeOperations.createBadgeIssuer.name(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -83,7 +82,7 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgeOperations.getBadgeIssuer.name(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -106,7 +105,7 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgeOperations.getAllIssuer.name(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());
@@ -127,7 +126,7 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              ExecutionContext.getRequestId(),
+              httpRequest.flash().get(JsonKey.REQUEST_ID),
               BadgeOperations.deleteIssuer.name(),
               httpRequest.flash().get(JsonKey.USER_ID),
               getEnvironment());

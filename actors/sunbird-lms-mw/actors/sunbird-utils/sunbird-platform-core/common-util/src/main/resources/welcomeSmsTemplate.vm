@@ -1,0 +1,2 @@
+Welcome to $instanceName. Your user account has now been created. Click on the link below to #if ($setPasswordLink) set a password #else verify your email ID #end and start using your account:$newline
+$link

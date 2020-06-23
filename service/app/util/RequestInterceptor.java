@@ -1,11 +1,17 @@
 package util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
@@ -100,10 +106,34 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
     apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
-    apiHeaderIgnoreMap.put("/v1/user/exists/email",var);
-    apiHeaderIgnoreMap.put("/v1/user/exists/phone",var);
-    apiHeaderIgnoreMap.put("/v1/role/read",var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/email", var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/phone", var);
+    apiHeaderIgnoreMap.put("/v1/role/read", var);
+  }
 
+  private static String getUserRequestedFor(Http.Request request) {
+    String requestedForUserID = null;
+    JsonNode jsonBody = request.body().asJson();
+    if (!(jsonBody == null)) { // for search and update and create_mui api's
+      if (!(jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID) == null)) {
+        requestedForUserID = jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID).asText();
+      }
+    } else { // for read-api
+      String uuidSegment = null;
+      Path path = Paths.get(request.uri());
+      if (request.queryString().isEmpty()) {
+        uuidSegment = path.getFileName().toString();
+      } else {
+        String[] queryPath = path.getFileName().toString().split("\\?");
+        uuidSegment = queryPath[0];
+      }
+      try {
+        requestedForUserID = UUID.fromString(uuidSegment).toString();
+      } catch (IllegalArgumentException iae) {
+        ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
+      }
+    }
+    return requestedForUserID;
   }
 
   /**
@@ -111,18 +141,42 @@ public class RequestInterceptor {
    *
    * @param request HTTP play request
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
-   *     is returned
+   *     is returned release-3.0.0 on-wards validating managedBy token.
    */
   public static String verifyRequestData(Http.Request request) {
     String clientId = JsonKey.UNAUTHORIZED;
+    request.flash().put(JsonKey.MANAGED_FOR, null);
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
     Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
+      // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+        if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
+          // Now we have some valid token, next verify if the token is matching the request.
+          String requestedForUserID = getUserRequestedFor(request);
+          if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
+            // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
+            Optional<String> forTokenHeader =
+                request.header(HeaderParam.X_Authenticated_For.getName());
+            String managedAccessToken = forTokenHeader.isPresent() ? forTokenHeader.get() : "";
+            if (StringUtils.isNotEmpty(managedAccessToken)) {
+              String managedFor =
+                  ManagedTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
+              if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
+                request.flash().put(JsonKey.MANAGED_FOR, managedFor);
+              } else {
+                clientId = JsonKey.UNAUTHORIZED;
+              }
+            }
+          } else {
+            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
+          }
+        }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
+        // Client token is present
         clientId =
             AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
         if (!JsonKey.UNAUTHORIZED.equals(clientId)) {

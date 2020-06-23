@@ -77,6 +77,21 @@ public class UserController extends BaseController {
 	            httpRequest);
 	  }
   
+  public CompletionStage<Result> createUserV4(Http.Request httpRequest) {
+    return handleRequest(
+      ActorOperations.CREATE_USER_V4.getValue(),
+      httpRequest.body().asJson(),
+      req -> {
+        Request request = (Request) req;
+        new UserRequestValidator().validateUserCreateV4(request);
+        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
+        return null;
+      },
+      null,
+      null,
+      true,
+      httpRequest);
+  }
   
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
     final boolean isPrivate;
@@ -175,6 +190,7 @@ public class UserController extends BaseController {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     final String provider = httpRequest.getQueryString(JsonKey.PROVIDER);
     final String idType = httpRequest.getQueryString(JsonKey.ID_TYPE);
+    final String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
     userId = ProjectUtil.getLmsUserId(userId);
     return handleRequest(
         operation,
@@ -185,6 +201,7 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
+          request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
           return null;
         },
         userId,
@@ -207,6 +224,28 @@ public class UserController extends BaseController {
                     Request request = (Request) req;
                     request.setRequest(map);
                     new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+                    return null;
+                },
+                null,
+                null,
+                false,
+                httpRequest);
+    }
+
+    public CompletionStage<Result> getManagedUsers(String luaUuid, Http.Request httpRequest) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(JsonKey.ID, luaUuid);
+        String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+        map.put(JsonKey.WITH_TOKENS, withTokens);
+        map.put(JsonKey.SORTBY, httpRequest.getQueryString(JsonKey.SORTBY));    //createdDate
+        map.put(JsonKey.ORDER, httpRequest.getQueryString(JsonKey.ORDER));  //desc
+        return handleRequest(
+                ActorOperations.GET_MANAGED_USERS.getValue(),
+                null,
+                req -> {
+                    Request request = (Request) req;
+                    request.setRequest(map);
+                    new UserRequestValidator().validateUserId(luaUuid);
                     return null;
                 },
                 null,

@@ -1,6 +1,7 @@
 package controllers.notificationservice;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
@@ -9,13 +10,14 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 
 public class EmailServiceController extends BaseController {
+
+  private ObjectMapper omapper = new ObjectMapper();
 
   /**
    * This method will add a new course entry into cassandra DB.
@@ -30,14 +32,25 @@ public class EmailServiceController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
       reqObj.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
-      reqObj.setRequestId(ExecutionContext.getRequestId());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
       innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
       reqObj.setRequest(innerMap);
 
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+      JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
+      return handleRequest(
+          ActorOperations.EMAIL_SERVICE.getValue(),
+          reqObjJson,
+          req -> {
+            // We have validated earlier.
+            return null;
+          },
+          null,
+          null,
+          true,
+          httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
