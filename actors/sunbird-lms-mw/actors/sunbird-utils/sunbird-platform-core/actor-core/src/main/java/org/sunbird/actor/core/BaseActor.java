@@ -11,6 +11,7 @@ import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -28,11 +29,14 @@ public abstract class BaseActor extends UntypedAbstractActor {
     if (message instanceof Request) {
       Request request = (Request) message;
       String operation = request.getOperation();
-      ProjectLogger.log("BaseActor: onReceive called for operation: " + operation);
+      ProjectLogger.log(
+          "BaseActor: onReceive called for operation: " + operation, LoggerEnum.INFO.name());
       try {
         onReceive(request);
       } catch (Exception e) {
-        ProjectLogger.log("BaseActor: FAILED onReceive called for operation: " + operation);
+        ProjectLogger.log(
+            "BaseActor: FAILED onReceive called for operation: " + operation,
+            LoggerEnum.INFO.name());
         onReceiveException(operation, e);
       }
     }
