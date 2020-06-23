@@ -2,6 +2,7 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -292,6 +293,17 @@ public class UserUtil {
           ResponseCode.userDataEncryptionError.getErrorCode(),
           ResponseCode.userDataEncryptionError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
+
+  public static String getDecryptedData(String value) {
+    try {
+      return decService.decryptData(value);
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+              ResponseCode.userDataEncryptionError.getErrorCode(),
+              ResponseCode.userDataEncryptionError.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 
