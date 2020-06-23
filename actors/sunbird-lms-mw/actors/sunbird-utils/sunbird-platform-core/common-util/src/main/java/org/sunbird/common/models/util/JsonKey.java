@@ -1048,5 +1048,8 @@ public final class JsonKey {
   public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
   public static final String MANAGED_TOKEN = "managedToken";
   public static final String WITH_TOKENS = "withTokens";
+  public static final String EXTERNAL_IDENTITY_EMAIL="declared-email";
+  public static final String EXTERNAL_IDENTITY_PHONE="declared-phone";
+
   private JsonKey() {}
 }
