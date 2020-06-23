@@ -216,6 +216,7 @@ public class UserProfileReadActor extends BaseActor {
     try {
       if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
            && !showMaskedData) {
+
         result = removeUserPrivateField(result);
       } else {
         ProjectLogger.log(
