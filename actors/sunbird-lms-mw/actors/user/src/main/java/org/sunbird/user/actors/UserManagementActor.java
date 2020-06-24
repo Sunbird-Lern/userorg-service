@@ -1252,8 +1252,11 @@ public class UserManagementActor extends BaseActor {
   }
 
   /**
-   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from
-   * admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
+   * <<<<<<< HEAD Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac
+   * user from admin utils if the JsonKey.WITH_TOKENS value sent in query param is true ======= Get
+   * managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from admin
+   * utils if the JsonKey.WITH_TOKENS value sent in query param is true >>>>>>>
+   * upstream/release-3.1.0
    *
    * @param request Request
    */

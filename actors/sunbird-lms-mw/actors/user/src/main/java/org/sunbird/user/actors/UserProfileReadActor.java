@@ -212,9 +212,11 @@ public class UserProfileReadActor extends BaseActor {
     if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
+
     try {
       if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
           && !showMaskedData) {
+
         result = removeUserPrivateField(result);
       } else {
         ProjectLogger.log(
@@ -306,7 +308,16 @@ public class UserProfileReadActor extends BaseActor {
                   if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                    s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+
+                      String decrytpedOriginalExternalId =
+                          UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, decrytpedOriginalExternalId);
+
+                    } else {
+                      s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    }
                     s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
                     s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
 
