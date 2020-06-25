@@ -202,6 +202,7 @@ public class UserManagementActor extends BaseActor {
     encryptExternalDetails(userMap);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
+    userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
