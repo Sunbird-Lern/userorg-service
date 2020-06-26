@@ -215,7 +215,7 @@ public class UserProfileReadActor extends BaseActor {
 
     try {
       if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
-           && !showMaskedData) {
+          && !showMaskedData) {
 
         result = removeUserPrivateField(result);
       } else {
@@ -308,22 +308,21 @@ public class UserProfileReadActor extends BaseActor {
                   if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                    if(JsonKey.EXTERNAL_IDENTITY_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE)) ||
-                            JsonKey.EXTERNAL_IDENTITY_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))){
+                    if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
 
-                      String decrytpedOriginalExternalId = UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                      s.put(JsonKey.ID,decrytpedOriginalExternalId);
+                      String decrytpedOriginalExternalId =
+                          UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, decrytpedOriginalExternalId);
 
-                    }else {
-                        s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    } else {
+                      s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                     }
                     s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
                     s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-
                   } else {
                     s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
                   }
-
                   s.remove(JsonKey.EXTERNAL_ID);
                   s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
                   s.remove(JsonKey.ORIGINAL_ID_TYPE);

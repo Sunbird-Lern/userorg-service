@@ -4,29 +4,19 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -42,14 +32,12 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
@@ -211,6 +199,7 @@ public class UserManagementActor extends BaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
+    encryptExternalDetails(userMap);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -291,6 +280,34 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  /**
+   * This method will encrypt the declared-email and declared-phone in external-id-details
+   *
+   * @param userMap
+   */
+  private void encryptExternalDetails(Map<String, Object> userMap) {
+    List<Map<String, Object>> extList =
+        (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
+    if (!(extList == null || extList.isEmpty())) {
+      extList.forEach(
+          map -> {
+            try {
+              if (map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_EMAIL)
+                  || map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_PHONE)) {
+                map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+              }
+            } catch (Exception e) {
+              ProjectLogger.log(
+                  "Error in encrypting in the external id details", LoggerEnum.INFO.name());
+              throw new ProjectCommonException(
+                  ResponseCode.dataEncryptionError.getErrorCode(),
+                  ResponseCode.dataEncryptionError.getErrorMessage(),
+                  ResponseCode.dataEncryptionError.getResponseCode());
+            }
+          });
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -1236,37 +1253,42 @@ public class UserManagementActor extends BaseActor {
   }
 
   /**
-   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user
-   * from admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
+   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from
+   * admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
    *
    * @param request Request
    */
   private void getManagedUsers(Request request) {
-    //LUA uuid/ManagedBy Id
-    String uuid = (String)request.get(JsonKey.ID);
+    // LUA uuid/ManagedBy Id
+    String uuid = (String) request.get(JsonKey.ID);
 
-    boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
+    boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
 
-    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
+    Map<String, Object> searchResult =
+        userClient.searchManagedUser(
+            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;
-    if(CollectionUtils.isNotEmpty(userList)) {
-      activeUserList = userList.stream()
+    if (CollectionUtils.isNotEmpty(userList)) {
+      activeUserList =
+          userList
+              .stream()
               .filter(o -> !BooleanUtils.isTrue((Boolean) o.get(JsonKey.IS_DELETED)))
               .collect(Collectors.toList());
     }
-    if(withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
-        //Fetch encrypted token from admin utils
-        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(uuid, activeUserList);
-        //encrypted token for each managedUser in respList
-        userService.appendEncryptedToken(encryptedTokenList, activeUserList);
+    if (withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
+      // Fetch encrypted token from admin utils
+      Map<String, Object> encryptedTokenList =
+          userService.fetchEncryptedToken(uuid, activeUserList);
+      // encrypted token for each managedUser in respList
+      userService.appendEncryptedToken(encryptedTokenList, activeUserList);
     }
     Map<String, Object> responseMap = new HashMap<>();
-    if(CollectionUtils.isNotEmpty(activeUserList)) {
+    if (CollectionUtils.isNotEmpty(activeUserList)) {
       responseMap.put(JsonKey.CONTENT, activeUserList);
       responseMap.put(JsonKey.COUNT, activeUserList.size());
-    }else{
+    } else {
       responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
       responseMap.put(JsonKey.COUNT, 0);
     }
@@ -1274,5 +1296,4 @@ public class UserManagementActor extends BaseActor {
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
   }
-
 }
