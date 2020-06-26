@@ -290,7 +290,7 @@ public class UserManagementActor extends BaseActor {
   private void encryptExternalDetails(Map<String, Object> userMap) {
     List<Map<String, Object>> extList =
         (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
-    if (!extList.isEmpty()) {
+    if (!(extList == null || extList.isEmpty())) {
       extList.forEach(
           map -> {
             try {
