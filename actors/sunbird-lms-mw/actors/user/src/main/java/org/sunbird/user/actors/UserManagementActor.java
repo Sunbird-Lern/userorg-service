@@ -4,29 +4,19 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -42,14 +32,12 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
@@ -445,6 +433,16 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
+  private void ignoreOrAcceptFrameworkData(
+      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
+    try {
+      validateUserFrameworkData(userRequestMap, userDbRecord);
+    } catch (ProjectCommonException pce) {
+      // Could be that the framework id or value - is invalid, missing.
+      userRequestMap.remove(JsonKey.FRAMEWORK);
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private void validateUserFrameworkData(
       Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
@@ -672,7 +670,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.CHANNEL, channel);
       Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
       convertValidatedLocationCodesToIDs(userMap);
-      validateUserFrameworkData(userMap, managedByInfo);
+      ignoreOrAcceptFrameworkData(userMap, managedByInfo);
     }
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -1236,37 +1234,42 @@ public class UserManagementActor extends BaseActor {
   }
 
   /**
-   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user
-   * from admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
+   * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from
+   * admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
    *
    * @param request Request
    */
   private void getManagedUsers(Request request) {
-    //LUA uuid/ManagedBy Id
-    String uuid = (String)request.get(JsonKey.ID);
+    // LUA uuid/ManagedBy Id
+    String uuid = (String) request.get(JsonKey.ID);
 
-    boolean withTokens = Boolean.valueOf((String)request.get(JsonKey.WITH_TOKENS));
+    boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
 
-    Map<String, Object> searchResult = userClient.searchManagedUser(getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
+    Map<String, Object> searchResult =
+        userClient.searchManagedUser(
+            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;
-    if(CollectionUtils.isNotEmpty(userList)) {
-      activeUserList = userList.stream()
+    if (CollectionUtils.isNotEmpty(userList)) {
+      activeUserList =
+          userList
+              .stream()
               .filter(o -> !BooleanUtils.isTrue((Boolean) o.get(JsonKey.IS_DELETED)))
               .collect(Collectors.toList());
     }
-    if(withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
-        //Fetch encrypted token from admin utils
-        Map<String, Object> encryptedTokenList = userService.fetchEncryptedToken(uuid, activeUserList);
-        //encrypted token for each managedUser in respList
-        userService.appendEncryptedToken(encryptedTokenList, activeUserList);
+    if (withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
+      // Fetch encrypted token from admin utils
+      Map<String, Object> encryptedTokenList =
+          userService.fetchEncryptedToken(uuid, activeUserList);
+      // encrypted token for each managedUser in respList
+      userService.appendEncryptedToken(encryptedTokenList, activeUserList);
     }
     Map<String, Object> responseMap = new HashMap<>();
-    if(CollectionUtils.isNotEmpty(activeUserList)) {
+    if (CollectionUtils.isNotEmpty(activeUserList)) {
       responseMap.put(JsonKey.CONTENT, activeUserList);
       responseMap.put(JsonKey.COUNT, activeUserList.size());
-    }else{
+    } else {
       responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
       responseMap.put(JsonKey.COUNT, 0);
     }
@@ -1274,5 +1277,4 @@ public class UserManagementActor extends BaseActor {
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
   }
-
 }
