@@ -12,7 +12,6 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
