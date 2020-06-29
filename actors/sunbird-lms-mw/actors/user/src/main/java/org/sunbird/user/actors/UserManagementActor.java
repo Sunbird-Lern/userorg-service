@@ -199,6 +199,7 @@ public class UserManagementActor extends BaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
+    encryptExternalDetails(userMap);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -279,6 +280,34 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  /**
+   * This method will encrypt the declared-email and declared-phone in external-id-details
+   *
+   * @param userMap
+   */
+  private void encryptExternalDetails(Map<String, Object> userMap) {
+    List<Map<String, Object>> extList =
+        (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
+    if (!(extList == null || extList.isEmpty())) {
+      extList.forEach(
+          map -> {
+            try {
+              if (map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_EMAIL)
+                  || map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_PHONE)) {
+                map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+              }
+            } catch (Exception e) {
+              ProjectLogger.log(
+                  "Error in encrypting in the external id details", LoggerEnum.INFO.name());
+              throw new ProjectCommonException(
+                  ResponseCode.dataEncryptionError.getErrorCode(),
+                  ResponseCode.dataEncryptionError.getErrorMessage(),
+                  ResponseCode.dataEncryptionError.getResponseCode());
+            }
+          });
+    }
   }
 
   @SuppressWarnings("unchecked")
