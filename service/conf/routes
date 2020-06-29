@@ -88,6 +88,7 @@ GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.Or
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
 POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
+POST /v2/notification					    @controllers.notificationservice.EmailServiceController.sendNotification(request: play.mvc.Http.Request)
 
 # Badging APIs
 POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer(request: play.mvc.Http.Request)

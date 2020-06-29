@@ -48,6 +48,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/service/health", var);
     apiHeaderIgnoreMap.put("/health", var);
     apiHeaderIgnoreMap.put("/v1/notification/email", var);
+    apiHeaderIgnoreMap.put("/v2/notification", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
     apiHeaderIgnoreMap.put("/v1/user/data/encrypt", var);
     apiHeaderIgnoreMap.put("/v1/user/data/decrypt", var);

@@ -55,4 +55,35 @@ public class EmailServiceController extends BaseController {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
+
+  public CompletionStage<Result> sendNotification(Http.Request httpRequest) {
+
+    try {
+      JsonNode requestData = httpRequest.body().asJson();
+      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      RequestValidator.validateSendMail(reqObj);
+      reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
+      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setEnv(getEnvironment());
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
+      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      reqObj.setRequest(innerMap);
+
+      JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
+      return handleRequest(
+        ActorOperations.V2_NOTIFICATION.getValue(),
+        reqObjJson,
+        req -> {
+          // We have validated earlier.
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+    } catch (Exception e) {
+      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+    }
+  }
 }

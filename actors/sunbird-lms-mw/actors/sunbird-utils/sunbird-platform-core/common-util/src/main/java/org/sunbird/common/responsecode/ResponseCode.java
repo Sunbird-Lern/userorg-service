@@ -869,6 +869,9 @@ public enum ResponseCode {
       ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
   dataEncryptionError(
       ResponseMessage.Key.DATA_ENCRYPTION_ERROR, ResponseMessage.Message.DATA_ENCRYPTION_ERROR),
+  notificationNotSent(
+    ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
+    ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
