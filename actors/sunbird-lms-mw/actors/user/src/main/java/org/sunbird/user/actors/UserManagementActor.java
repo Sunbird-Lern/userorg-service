@@ -462,6 +462,16 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
+  private void ignoreOrAcceptFrameworkData(
+      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
+    try {
+      validateUserFrameworkData(userRequestMap, userDbRecord);
+    } catch (ProjectCommonException pce) {
+      // Could be that the framework id or value - is invalid, missing.
+      userRequestMap.remove(JsonKey.FRAMEWORK);
+    }
+  }
+
   @SuppressWarnings("unchecked")
   private void validateUserFrameworkData(
       Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
@@ -689,7 +699,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.CHANNEL, channel);
       Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
       convertValidatedLocationCodesToIDs(userMap);
-      validateUserFrameworkData(userMap, managedByInfo);
+      ignoreOrAcceptFrameworkData(userMap, managedByInfo);
     }
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
