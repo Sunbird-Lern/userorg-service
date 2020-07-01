@@ -663,6 +663,9 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user);
     }
+    if(CollectionUtils.isNotEmpty(user.getExternalIds())){
+      updateExternalIdsStatus(user.getExternalIds());
+    }
   }
 
   public static void checkEmailSameOrDiff(
@@ -681,6 +684,14 @@ public class UserUtil {
         }
       }
     }
+  }
+
+  private static void updateExternalIdsStatus(
+          List<Map<String, String>> externalIds) {
+    externalIds.forEach(
+            externalIdMap -> {
+              externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
+            });
   }
 
   private static Optional<Map<String, String>> checkExternalID(

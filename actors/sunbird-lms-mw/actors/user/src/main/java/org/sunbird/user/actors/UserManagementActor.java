@@ -27,6 +27,7 @@ import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.UserClient;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -55,6 +56,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
+import scala.annotation.meta.param;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -199,7 +201,8 @@ public class UserManagementActor extends BaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
-    encryptExternalDetails(userMap);
+
+    encryptExternalDetails(userMap,userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -287,17 +290,30 @@ public class UserManagementActor extends BaseActor {
    *
    * @param userMap
    */
-  private void encryptExternalDetails(Map<String, Object> userMap) {
+  private void encryptExternalDetails(Map<String, Object> userMap,Map<String,Object> userDbRecords) {
     List<Map<String, Object>> extList =
         (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
     if (!(extList == null || extList.isEmpty())) {
       extList.forEach(
           map -> {
             try {
-              if (map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_EMAIL)
-                  || map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_PHONE)) {
-                map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+              String idType = (String)map.get(JsonKey.ID_TYPE);
+              switch (idType){
+                case JsonKey.DECLARED_EMAIL:
+                case JsonKey.DECLARED_PHONE:
+                         if(UserUtility.isMasked((String)map.get(JsonKey.ID))){
+                               if(idType.equals(JsonKey.DECLARED_EMAIL)){
+                                 map.put(JsonKey.ID,  userDbRecords.get(JsonKey.EMAIL));
+                               }else{
+                                 map.put(JsonKey.ID,  userDbRecords.get(JsonKey.PHONE));
+                               }
+                         }else{
+                           map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+                         }
+                         break;
+                default:  //do nothing
               }
+
             } catch (Exception e) {
               ProjectLogger.log(
                   "Error in encrypting in the external id details", LoggerEnum.INFO.name());
@@ -674,7 +690,7 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void throwParameterMismatchException(String... param) {
+  private void throwParameterMismatchException(String...param) {
     ProjectCommonException.throwClientErrorException(
         ResponseCode.parameterMismatch,
         MessageFormat.format(

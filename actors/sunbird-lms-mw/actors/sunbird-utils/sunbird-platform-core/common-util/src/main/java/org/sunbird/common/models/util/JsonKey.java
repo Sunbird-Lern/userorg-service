@@ -522,6 +522,7 @@ public final class JsonKey {
   public static final String SUB_SECTIONS = "subSections";
   public static final String SUBJECT = "subject";
   public static final String SUBMIT_DATE = "submitDate";
+  public static final String SUBMITTED="submitted";
   public static final String SUBTYPE = "subtype";
   public static final String SUCCESS = "SUCCESS";
   public static final String SUCCESS_RESULT = "successResult";
