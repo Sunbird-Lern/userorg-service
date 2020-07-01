@@ -55,7 +55,6 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
-import scala.annotation.meta.param;
 import scala.concurrent.Future;
 
 @ActorConfig(
