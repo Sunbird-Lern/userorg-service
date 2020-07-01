@@ -8,6 +8,15 @@ import org.sunbird.common.models.util.JsonKey;
 public interface DataMaskingService {
 
   /**
+   * This method will check the string is a masked characters
+   * @param data String
+   * @return boolean
+   */
+
+  default boolean isMasked(String data){
+     return data.contains(JsonKey.REPLACE_WITH_ASTERISK);
+  }
+  /**
    * This method will allow to mask user phone number.
    *
    * @param phone String
