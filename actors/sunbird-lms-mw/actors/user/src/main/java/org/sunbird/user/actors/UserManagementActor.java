@@ -687,7 +687,7 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void throwParameterMismatchException(String...param) {
+  private void throwParameterMismatchException(String... param) {
     ProjectCommonException.throwClientErrorException(
         ResponseCode.parameterMismatch,
         MessageFormat.format(
