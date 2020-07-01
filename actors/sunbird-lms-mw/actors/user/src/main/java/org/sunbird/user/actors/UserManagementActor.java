@@ -199,7 +199,7 @@ public class UserManagementActor extends BaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
-    encryptExternalDetails(userMap,userDbRecord);
+    encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -287,28 +287,33 @@ public class UserManagementActor extends BaseActor {
    *
    * @param userMap
    */
-  private void encryptExternalDetails(Map<String, Object> userMap,Map<String,Object> userDbRecords) {
+  private void encryptExternalDetails(
+      Map<String, Object> userMap, Map<String, Object> userDbRecords) {
     List<Map<String, Object>> extList =
         (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
     if (!(extList == null || extList.isEmpty())) {
       extList.forEach(
           map -> {
             try {
-              String idType = (String)map.get(JsonKey.ID_TYPE);
-              switch (idType){
+              String idType = (String) map.get(JsonKey.ID_TYPE);
+              switch (idType) {
                 case JsonKey.DECLARED_EMAIL:
                 case JsonKey.DECLARED_PHONE:
-                         if(UserUtility.isMasked((String)map.get(JsonKey.ID))){
-                               if(idType.equals(JsonKey.DECLARED_EMAIL)){
-                                 map.put(JsonKey.ID,  userDbRecords.get(JsonKey.EMAIL));
-                               }else{
-                                 map.put(JsonKey.ID,  userDbRecords.get(JsonKey.PHONE));
-                               }
-                         }else{
-                           map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
-                         }
-                         break;
-                default:  //do nothing
+                  /* Check whether email and phone contains mask value, if mask then copy the
+                      encrypted value from user table
+                  * */
+                  if (UserUtility.isMasked((String) map.get(JsonKey.ID))) {
+                    if (idType.equals(JsonKey.DECLARED_EMAIL)) {
+                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.EMAIL));
+                    } else {
+                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.PHONE));
+                    }
+                  } else {
+                    // If not masked encrypt the plain text
+                    map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+                  }
+                  break;
+                default: // do nothing
               }
 
             } catch (Exception e) {
