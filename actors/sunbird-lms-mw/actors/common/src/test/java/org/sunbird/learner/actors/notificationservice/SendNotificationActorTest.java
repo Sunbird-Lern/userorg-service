@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors;
+package org.sunbird.learner.actors.notificationservice;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
