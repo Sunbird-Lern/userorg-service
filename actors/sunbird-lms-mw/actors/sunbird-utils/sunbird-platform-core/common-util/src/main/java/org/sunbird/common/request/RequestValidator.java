@@ -1,3 +1,4 @@
+
 package org.sunbird.common.request;
 
 import java.text.MessageFormat;
@@ -983,26 +984,4 @@ public final class RequestValidator {
         ERROR_CODE);
   }
 
-  public static void validateV2Notification(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.SUBJECT))) {
-      throw new ProjectCommonException(
-        ResponseCode.emailSubjectError.getErrorCode(),
-        ResponseCode.emailSubjectError.getErrorMessage(),
-        ERROR_CODE);
-    }
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.BODY))) {
-      throw new ProjectCommonException(
-        ResponseCode.emailBodyError.getErrorCode(),
-        ResponseCode.emailBodyError.getErrorMessage(),
-        ERROR_CODE);
-    }
-    if (CollectionUtils.isEmpty(
-      (List<String>) (request.getRequest().get(JsonKey.RECIPIENT_USERIDS)))) {
-      throw new ProjectCommonException(
-        ResponseCode.mandatoryParamsMissing.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.RECIPIENT_USERIDS),
-        ERROR_CODE);
-    }
-  }
 }
