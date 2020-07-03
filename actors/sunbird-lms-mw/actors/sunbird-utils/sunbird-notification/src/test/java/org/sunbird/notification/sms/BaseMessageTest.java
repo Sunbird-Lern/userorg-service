@@ -19,12 +19,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
 import org.sunbird.notification.utils.PropertiesCache;
+import org.sunbird.notification.utils.SMSFactory;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
-@PrepareForTest({HttpClients.class, PropertiesCache.class})
+@PrepareForTest({HttpClients.class, PropertiesCache.class, SMSFactory.class, Msg91SmsProviderFactory.class})
 public abstract class BaseMessageTest {
 
   @BeforeClass

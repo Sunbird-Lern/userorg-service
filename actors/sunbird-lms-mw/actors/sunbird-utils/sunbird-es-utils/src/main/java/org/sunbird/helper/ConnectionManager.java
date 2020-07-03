@@ -113,7 +113,9 @@ public class ConnectionManager {
     @Override
     public void run() {
       try {
-        restClient.close();
+        if (null != restClient) {
+          restClient.close();
+        }
       } catch (IOException e) {
         e.printStackTrace();
         ProjectLogger.log(
