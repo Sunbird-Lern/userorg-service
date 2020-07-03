@@ -2,10 +2,8 @@ package org.sunbird.learner.actors.notificationservice;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
@@ -87,7 +85,7 @@ public class SendNotificationActor extends BaseActor {
     Map<String, Object> templateMap = new HashMap<>(2);
     if (mode.equalsIgnoreCase(JsonKey.SMS)) {
       templateMap.put(JsonKey.DATA,requestMap.remove(JsonKey.BODY));
-      templateMap.put(JsonKey.PARAMS,Collections.EMPTY_MAP);
+      templateMap.put(JsonKey.PARAMS,Collections.emptyMap());
       notiReq.put("template",templateMap);
       notiReq.put(JsonKey.MODE,JsonKey.PHONE);
     } else {
@@ -148,7 +146,7 @@ public class SendNotificationActor extends BaseActor {
             key));
       }
     }
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
 }

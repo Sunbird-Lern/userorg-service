@@ -3,7 +3,6 @@ package org.sunbird.learner.actors.notificationservice;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -14,7 +13,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -23,15 +21,12 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.notificationservice.SendNotificationActor;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-import scala.concurrent.Promise;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,16 +108,6 @@ public class SendNotificationActorTest {
     map.put(JsonKey.EMAIL, "");
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
-    return response;
-  }
-
-  private static Map<String, Object> createGetSkillResponse() {
-    HashMap<String, Object> response = new HashMap<>();
-    List<Map<String, Object>> content = new ArrayList<>();
-    HashMap<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.EMAIL, "anyEmailId");
-    content.add(innerMap);
-    response.put(JsonKey.CONTENT, content);
     return response;
   }
 
