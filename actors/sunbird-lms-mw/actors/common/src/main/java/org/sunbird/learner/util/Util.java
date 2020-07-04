@@ -522,7 +522,7 @@ public final class Util {
           "Util:registerChannel: Channel registration request data = " + reqString,
           LoggerEnum.DEBUG.name());
       regStatus =
-          HttpUtil.sendPostRequest(
+        HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
               reqString,
@@ -580,7 +580,7 @@ public final class Util {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-          HttpUtil.sendPatchRequest(
+        HttpClientUtil.post(
               (ekStepBaseUrl
                       + PropertiesCache.getInstance()
                           .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))

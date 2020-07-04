@@ -125,7 +125,7 @@ public class HealthController extends BaseController {
       headers.put("Content-Type", "application/json");
       String ekStepBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       String response =
-          HttpUtil.sendPostRequest(
+        HttpClientUtil.post(
               ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               body,

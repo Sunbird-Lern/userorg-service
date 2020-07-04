@@ -11,7 +11,6 @@ import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
-import org.sunbird.common.request.ExecutionContext;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.otp.service.OTPService;
@@ -38,7 +37,6 @@ public class OTPActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    ExecutionContext.setRequestId(request.getRequestId());
     if (ActorOperations.GENERATE_OTP.getValue().equals(request.getOperation())) {
       generateOTP(request);
     } else if (ActorOperations.VERIFY_OTP.getValue().equals(request.getOperation())) {

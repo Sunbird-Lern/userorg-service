@@ -154,20 +154,13 @@
 		<dependency>
 			<groupId>com.googlecode.libphonenumber</groupId>
 			<artifactId>libphonenumber</artifactId>
-			<version>8.10.2</version>
+			<version>8.12.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.tika</groupId>
 			<artifactId>tika-core</artifactId>
 			<version>1.16</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
@@ -191,17 +184,11 @@
 			<!--<scope>test</scope> -->
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.4.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mashape.unirest</groupId>
-			<artifactId>unirest-java</artifactId>
-			<version>1.4.9</version>
-		</dependency>
+        <dependency>
+          <groupId>org.json</groupId>
+          <artifactId>json</artifactId>
+          <version>20200518</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>

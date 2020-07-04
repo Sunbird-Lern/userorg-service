@@ -192,23 +192,6 @@ public class ProjectUtil {
   }
 
   /** @author Amit Kumar */
-  public enum CourseMgmtStatus {
-    DRAFT("draft"),
-    LIVE("live"),
-    RETIRED("retired");
-
-    private String value;
-
-    CourseMgmtStatus(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return this.value;
-    }
-  }
-
-  /** @author Amit Kumar */
   public enum Source {
     WEB("web"),
     ANDROID("android"),
@@ -675,7 +658,7 @@ public class ProjectUtil {
       ProjectLogger.log("start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
       tagStatus =
-          HttpUtil.sendPostRequest(
+        HttpClientUtil.post(
               analyticsBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_TAG_API_URL)
                   + "/"
