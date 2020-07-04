@@ -199,7 +199,7 @@ public class UserManagementActor extends BaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap);
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
-    encryptExternalDetails(userMap);
+    encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -287,17 +287,35 @@ public class UserManagementActor extends BaseActor {
    *
    * @param userMap
    */
-  private void encryptExternalDetails(Map<String, Object> userMap) {
+  private void encryptExternalDetails(
+      Map<String, Object> userMap, Map<String, Object> userDbRecords) {
     List<Map<String, Object>> extList =
         (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
     if (!(extList == null || extList.isEmpty())) {
       extList.forEach(
           map -> {
             try {
-              if (map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_EMAIL)
-                  || map.get(JsonKey.ID_TYPE).equals(JsonKey.DECLARED_PHONE)) {
-                map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+              String idType = (String) map.get(JsonKey.ID_TYPE);
+              switch (idType) {
+                case JsonKey.DECLARED_EMAIL:
+                case JsonKey.DECLARED_PHONE:
+                  /* Check whether email and phone contains mask value, if mask then copy the
+                      encrypted value from user table
+                  * */
+                  if (UserUtility.isMasked((String) map.get(JsonKey.ID))) {
+                    if (idType.equals(JsonKey.DECLARED_EMAIL)) {
+                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.EMAIL));
+                    } else {
+                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.PHONE));
+                    }
+                  } else {
+                    // If not masked encrypt the plain text
+                    map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+                  }
+                  break;
+                default: // do nothing
               }
+
             } catch (Exception e) {
               ProjectLogger.log(
                   "Error in encrypting in the external id details", LoggerEnum.INFO.name());
@@ -459,6 +477,16 @@ public class UserManagementActor extends BaseActor {
       } else {
         userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
       }
+    }
+  }
+
+  private void ignoreOrAcceptFrameworkData(
+      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
+    try {
+      validateUserFrameworkData(userRequestMap, userDbRecord);
+    } catch (ProjectCommonException pce) {
+      // Could be that the framework id or value - is invalid, missing.
+      userRequestMap.remove(JsonKey.FRAMEWORK);
     }
   }
 
@@ -689,7 +717,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.CHANNEL, channel);
       Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
       convertValidatedLocationCodesToIDs(userMap);
-      validateUserFrameworkData(userMap, managedByInfo);
+      ignoreOrAcceptFrameworkData(userMap, managedByInfo);
     }
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
