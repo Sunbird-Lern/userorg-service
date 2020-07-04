@@ -580,7 +580,7 @@ public final class Util {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-        HttpClientUtil.post(
+        HttpClientUtil.patch(
               (ekStepBaseUrl
                       + PropertiesCache.getInstance()
                           .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
