@@ -46,9 +46,9 @@ public class Notification {
       object.put(JsonKey.TO, TOPIC_SUFFIX + topic);
       response = HttpClientUtil.post(FCM_URL, object.toString(), headerMap);
       ProjectLogger.log("FCM Notification response== for topic " + topic + response);
-      ObjectMapper mapper = new ObjectMapper();
-      Map<String, Object> responseMap = mapper.readValue(response, Map.class);
-      long val = (long) responseMap.get(JsonKey.MESSAGE_Id);
+      object1 = null;
+      object1 = new JSONObject(response);
+      long val = object1.getLong(JsonKey.MESSAGE_Id);
       response = val + "";
     } catch (Exception e) {
       response = JsonKey.FAILURE;
