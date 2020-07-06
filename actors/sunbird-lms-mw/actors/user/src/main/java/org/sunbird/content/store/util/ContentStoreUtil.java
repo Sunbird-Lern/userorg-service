@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 
 public class ContentStoreUtil {
 
@@ -40,7 +36,7 @@ public class ContentStoreUtil {
               + ProjectUtil.getConfigValue(urlPath)
               + "/"
               + id;
-      String response = HttpUtil.sendGetRequest(requestUrl, headers);
+      String response = HttpClientUtil.get(requestUrl, headers);
 
       resultMap = mapper.readValue(response, Map.class);
       if (!((String) resultMap.get(JsonKey.RESPONSE_CODE)).equalsIgnoreCase(JsonKey.OK)) {

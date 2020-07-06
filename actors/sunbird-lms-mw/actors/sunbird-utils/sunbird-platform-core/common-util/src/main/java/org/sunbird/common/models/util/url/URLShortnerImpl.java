@@ -5,11 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 
 /** @author Amit Kumar */
 public class URLShortnerImpl implements URLShortner {
@@ -34,12 +30,7 @@ public class URLShortnerImpl implements URLShortner {
             PropertiesCache.getInstance().getProperty("sunbird_url_shortner_access_token");
       }
       String requestURL = baseUrl + accessToken + "&longUrl=" + url;
-      String response = "";
-      try {
-        response = HttpUtil.sendGetRequest(requestURL, null);
-      } catch (IOException e) {
-        ProjectLogger.log("Exception occurred while sending request for URL shortening", e);
-      }
+      String response = HttpClientUtil.get(requestURL, null);
       ObjectMapper mapper = new ObjectMapper();
       Map<String, Object> map = null;
       if (!StringUtils.isBlank(response)) {

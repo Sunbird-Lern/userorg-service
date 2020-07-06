@@ -19,6 +19,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
@@ -45,7 +46,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
   DataCacheHandler.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
-  SunbirdMWService.class
+  SunbirdMWService.class,
+  HttpClientUtil.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class SendNotificationActorTest {
@@ -73,6 +75,7 @@ public class SendNotificationActorTest {
   public void beforeTest() {
 
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);

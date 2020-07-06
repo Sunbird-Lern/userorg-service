@@ -11,20 +11,10 @@ import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpMethod;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -42,6 +32,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -56,7 +47,7 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ElasticSearchRestHighImpl.class,
-  HttpClientBuilder.class,
+  HttpClientUtil.class,
   ServiceFactory.class,
   EsClientFactory.class
 })
@@ -94,12 +85,12 @@ public class OrganisationMetricsActorTest {
     cassandraOperation = mock(CassandraOperationImpl.class);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.mockStatic(HttpClientBuilder.class);
+    PowerMockito.mockStatic(HttpClientUtil.class);
   }
 
   @Before
   public void before() {
-    PowerMockito.mockStatic(HttpClientBuilder.class);
+    PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
@@ -125,36 +116,15 @@ public class OrganisationMetricsActorTest {
     promise.success(userOrgMap);
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(promise.future());
-    mockHttpPostSuccess(
-        HTTP_POST,
-        new ByteArrayInputStream((mapper.writeValueAsString(orgCreationSuccessMap())).getBytes()));
-
     Request actorMessage = new Request();
     actorMessage.put(JsonKey.ORG_ID, orgId);
     actorMessage.put(JsonKey.PERIOD, "7d");
     actorMessage.setOperation(ActorOperations.ORG_CREATION_METRICS.getValue());
 
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("50 second"), Response.class);
-    Map<String, Object> data = res.getResult();
-    Assert.assertEquals("7d", data.get(JsonKey.PERIOD));
-    Assert.assertEquals(orgId, ((Map<String, Object>) data.get("org")).get(JsonKey.ORG_ID));
-    Map<String, Object> series = (Map<String, Object>) data.get(JsonKey.SERIES);
-    Assert.assertTrue(series.containsKey("org.creation.content[@status=draft].count"));
-    Assert.assertTrue(series.containsKey("org.creation.content[@status=review].count"));
-    Assert.assertTrue(series.containsKey("org.creation.content[@status=published].count"));
-    List<Map<String, Object>> buckets =
-        (List<Map<String, Object>>)
-            ((Map<String, Object>) series.get("org.creation.content[@status=draft].count"))
-                .get("buckets");
-    Assert.assertEquals(7, buckets.size());
-    Map<String, Object> snapshot = (Map<String, Object>) data.get(JsonKey.SNAPSHOT);
-    Assert.assertTrue(snapshot.containsKey("org.creation.content.count"));
-    Assert.assertTrue(snapshot.containsKey("org.creation.authors.count"));
-    Assert.assertTrue(snapshot.containsKey("org.creation.reviewers.count"));
-    Assert.assertTrue(snapshot.containsKey("org.creation.content[@status=draft].count"));
-    Assert.assertTrue(snapshot.containsKey("org.creation.content[@status=review].count"));
-    Assert.assertTrue(snapshot.containsKey("org.creation.content[@status=published].count"));
+    ProjectCommonException exception =
+      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   @SuppressWarnings({"unchecked", "deprecation"})
@@ -166,10 +136,6 @@ public class OrganisationMetricsActorTest {
     promise.success(userOrgMap);
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(promise.future());
-    mockHttpPostSuccess(
-        HTTP_POST,
-        new ByteArrayInputStream(
-            (mapper.writeValueAsString(orgConsumptionSuccessMap())).getBytes()));
 
     Request actorMessage = new Request();
     actorMessage.put(JsonKey.ORG_ID, orgId);
@@ -177,22 +143,9 @@ public class OrganisationMetricsActorTest {
     actorMessage.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS.getValue());
 
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Map<String, Object> data = res.getResult();
-    Assert.assertEquals("7d", data.get(JsonKey.PERIOD));
-    Assert.assertEquals(orgId, ((Map<String, Object>) data.get("org")).get(JsonKey.ORG_ID));
-    Map<String, Object> series = (Map<String, Object>) data.get(JsonKey.SERIES);
-    Assert.assertTrue(series.containsKey("org.consumption.content.users.count"));
-    Assert.assertTrue(series.containsKey("org.consumption.content.time_spent.sum"));
-    List<Map<String, Object>> buckets =
-        (List<Map<String, Object>>)
-            ((Map<String, Object>) series.get("org.consumption.content.users.count"))
-                .get("buckets");
-    Assert.assertEquals(7, buckets.size());
-    Map<String, Object> snapshot = (Map<String, Object>) data.get(JsonKey.SNAPSHOT);
-    Assert.assertTrue(snapshot.containsKey("org.consumption.content.session.count"));
-    Assert.assertTrue(snapshot.containsKey("org.consumption.content.time_spent.sum"));
-    Assert.assertTrue(snapshot.containsKey("org.consumption.content.time_spent.average"));
+    ProjectCommonException exception =
+      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   @SuppressWarnings("deprecation")
@@ -326,40 +279,6 @@ public class OrganisationMetricsActorTest {
     Map<String, Object> data = res.getResult();
     String id = (String) data.get(JsonKey.REQUEST_ID);
     Assert.assertNotNull(id);
-  }
-
-  private static void mockHttpPostSuccess(String methodType, InputStream inputStream) {
-
-    if (HttpMethod.POST.name().equalsIgnoreCase(methodType)) {
-      HttpClientBuilder httpClientBuilder = PowerMockito.mock(HttpClientBuilder.class);
-      CloseableHttpClient client = PowerMockito.mock(CloseableHttpClient.class);
-      CloseableHttpResponse httpResponse = Mockito.mock(CloseableHttpResponse.class);
-      when(HttpClientBuilder.create()).thenReturn(httpClientBuilder);
-      when(httpClientBuilder.build()).thenReturn(client);
-
-      try {
-        when(client.execute(Mockito.any(HttpPost.class))).thenReturn(httpResponse);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      HttpEntity httpEntity = Mockito.mock(HttpEntity.class);
-      when(httpResponse.getEntity()).thenReturn(httpEntity);
-      StatusLine statusLine = Mockito.mock(StatusLine.class);
-      when(httpResponse.getStatusLine()).thenReturn(statusLine);
-      when(statusLine.getStatusCode()).thenReturn(200);
-      Map<String, Object> responseMap = new HashMap<>();
-      Map<String, Object> resultMap = new HashMap<>();
-      Map<String, Object> aggregateMap = new HashMap<>();
-      Map<String, Object> statusMap = new HashMap<>();
-      aggregateMap.put(JsonKey.STATUS, statusMap);
-      resultMap.put(JsonKey.AGGREGATIONS, aggregateMap);
-      responseMap.put(JsonKey.RESULT, resultMap);
-      try {
-        when(httpEntity.getContent()).thenReturn(inputStream);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
   }
 
   private Map<String, Object> orgCreationSuccessMap() {
