@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.common.models.util.*;
 
-public class CapthaHelper {
+public class CaptchaHelper {
 
   public static ObjectMapper mapper = new ObjectMapper();
 

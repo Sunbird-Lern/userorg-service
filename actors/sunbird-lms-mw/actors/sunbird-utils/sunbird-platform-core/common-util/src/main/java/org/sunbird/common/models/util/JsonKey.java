@@ -1053,6 +1053,7 @@ public final class JsonKey {
   public static final String DECLARED_PHONE = "declared-phone";
   public static final String CAPTCHA_SECRET = "captcha_secret";
   public static final String CAPTCHA_RESPONSE = "captchaResponse";
+  public static final String ENABLE_CAPTCHA = "enable_captcha";
 
   private JsonKey() {}
 }

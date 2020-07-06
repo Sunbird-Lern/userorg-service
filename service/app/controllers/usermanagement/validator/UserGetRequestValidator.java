@@ -22,8 +22,7 @@ public class UserGetRequestValidator extends BaseRequestValidator {
 
     if (!(key.equalsIgnoreCase(JsonKey.PHONE)
         || key.equalsIgnoreCase(JsonKey.EMAIL)
-        || key.equalsIgnoreCase(JsonKey.LOGIN_ID)
-        || key.equalsIgnoreCase(JsonKey.USERNAME))) {
+        || key.equalsIgnoreCase(JsonKey.LOGIN_ID))) {
 
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
@@ -31,12 +30,7 @@ public class UserGetRequestValidator extends BaseRequestValidator {
               ResponseCode.invalidValue.getErrorMessage(),
               JsonKey.KEY,
               key,
-              String.join(
-                  StringFormatter.COMMA,
-                  JsonKey.EMAIL,
-                  JsonKey.PHONE,
-                  JsonKey.LOGIN_ID,
-                  JsonKey.USERNAME)));
+              String.join(StringFormatter.COMMA, JsonKey.EMAIL, JsonKey.PHONE, JsonKey.LOGIN_ID)));
     }
 
     if (JsonKey.PHONE.equals(request.get(JsonKey.KEY))) {

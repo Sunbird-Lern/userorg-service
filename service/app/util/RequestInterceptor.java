@@ -10,12 +10,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.ManagedTokenValidator;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 
 /**
@@ -177,14 +175,6 @@ public class RequestInterceptor {
             }
           } else {
             ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
-          }
-          if (StringUtils.isNotEmpty(captcha)) {
-            if (!CapthaHelper.validate(captcha)) {
-              throw new ProjectCommonException(
-                  ResponseCode.invalidCaptcha.getErrorCode(),
-                  ResponseCode.invalidCaptcha.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-            }
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
