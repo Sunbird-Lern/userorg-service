@@ -1,20 +1,25 @@
 /** */
 package org.sunbird.common.models.util.fcm;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -27,7 +32,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.HttpUtil;
+import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 
 /**
@@ -39,17 +44,35 @@ import org.sunbird.common.models.util.JsonKey;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   HttpClients.class,
-  URL.class,
-  BufferedReader.class,
-  HttpUtil.class,
-  System.class,
-  Notification.class
+  CloseableHttpClient.class,
+  ConnectionKeepAliveStrategy.class,
+  PoolingHttpClientConnectionManager.class,
+  CloseableHttpResponse.class,
+  HttpGet.class,
+  HttpPost.class,
+  UrlEncodedFormEntity.class,
+  HttpPatch.class,
+  EntityUtils.class,
+  HttpClientUtil.class
 })
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
 public class FCMNotificationTest {
 
+  private CloseableHttpClient httpclient;
+
+  @Before
+  public void init() {
+    PowerMockito.mockStatic(HttpClients.class);
+    HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+    httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
+    PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
+    HttpClientUtil.getInstance();
+  }
+
   @Test
   public void testSendNotificationSuccessWithListAndStringData() {
+    PowerMockito.mockStatic(HttpClientUtil.class);
     Map<String, Object> map = new HashMap<>();
     map.put("title", "some title");
     map.put("summary", "some value");
@@ -63,16 +86,18 @@ public class FCMNotificationTest {
     map.put("map", innerMap);
 
     String val = Notification.sendNotification("nameOFTopic", map, Notification.FCM_URL);
-    Assert.assertNotEquals(JsonKey.FAILURE, val);
+    System.out.println("sdfdsfsd " + val);
+    Assert.assertEquals(JsonKey.FAILURE, val);
   }
 
   @Test
   public void testSendNotificationSuccessWithStringData() {
+    PowerMockito.mockStatic(HttpClientUtil.class);
     Map<String, Object> map = new HashMap<>();
     map.put("title", "some title");
     map.put("summary", "some value");
     String val = Notification.sendNotification("nameOFTopic", map, Notification.FCM_URL);
-    Assert.assertNotEquals(JsonKey.FAILURE, val);
+    Assert.assertEquals(JsonKey.FAILURE, val);
   }
 
   @Test
@@ -103,22 +128,23 @@ public class FCMNotificationTest {
   @Before
   public void addMockRules() {
     PowerMockito.mockStatic(System.class);
-    URL url = mock(URL.class);
-    HttpURLConnection connection = mock(HttpURLConnection.class);
-    OutputStream outStream = mock(OutputStream.class);
-    InputStream inStream = mock(InputStream.class);
-    BufferedReader reader = mock(BufferedReader.class);
     try {
       when(System.getenv(JsonKey.SUNBIRD_FCM_ACCOUNT_KEY)).thenReturn("FCM_KEY");
       when(System.getenv(AdditionalMatchers.not(Mockito.eq(JsonKey.SUNBIRD_FCM_ACCOUNT_KEY))))
           .thenCallRealMethod();
 
-      whenNew(URL.class).withAnyArguments().thenReturn(url);
-      when(url.openConnection()).thenReturn(connection);
-      when(connection.getOutputStream()).thenReturn(outStream);
-      when(connection.getInputStream()).thenReturn(inStream);
-      whenNew(BufferedReader.class).withAnyArguments().thenReturn(reader);
-      when(reader.readLine()).thenReturn("{\"" + JsonKey.MESSAGE_Id + "\": 123}", (String) null);
+      CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
+      StatusLine statusLine = PowerMockito.mock(StatusLine.class);
+      PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
+      PowerMockito.when(statusLine.getStatusCode()).thenReturn(200);
+      HttpEntity entity = PowerMockito.mock(HttpEntity.class);
+      PowerMockito.when(response.getEntity()).thenReturn(entity);
+      PowerMockito.mockStatic(EntityUtils.class);
+      byte[] bytes = "{JsonKey.MESSAGE_Id:123}".getBytes();
+      PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
+      PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
+      String res =
+          HttpClientUtil.post(Notification.FCM_URL, "{\"message\":\"success\"}", new HashMap<>());
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Mock rules addition failed " + e.getMessage());

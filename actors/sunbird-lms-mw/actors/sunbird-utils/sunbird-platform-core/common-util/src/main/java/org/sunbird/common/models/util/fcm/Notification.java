@@ -5,11 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 
 /** @author Manzarul */
 public class Notification {
@@ -46,7 +42,7 @@ public class Notification {
       JSONObject object = new JSONObject();
       object.put(JsonKey.DATA, object1);
       object.put(JsonKey.TO, TOPIC_SUFFIX + topic);
-      response = HttpUtil.sendPostRequest(FCM_URL, object.toString(), headerMap);
+      response = HttpClientUtil.post(FCM_URL, object.toString(), headerMap);
       ProjectLogger.log("FCM Notification response== for topic " + topic + response);
       object1 = null;
       object1 = new JSONObject(response);

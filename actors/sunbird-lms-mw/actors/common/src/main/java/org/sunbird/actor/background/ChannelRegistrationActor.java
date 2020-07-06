@@ -131,7 +131,7 @@ public class ChannelRegistrationActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       reqString = mapper.writeValueAsString(map);
       response =
-          HttpUtil.sendPostRequest(
+          HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_GET_CHANNEL_LIST)),
               reqString,

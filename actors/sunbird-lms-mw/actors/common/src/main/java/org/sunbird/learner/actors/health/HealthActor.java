@@ -182,7 +182,7 @@ public class HealthActor extends BaseActor {
       }
       String searchBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       String response =
-          HttpUtil.sendPostRequest(
+          HttpClientUtil.post(
               searchBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               body,

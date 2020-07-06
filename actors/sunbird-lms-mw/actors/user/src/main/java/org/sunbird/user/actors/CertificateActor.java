@@ -13,7 +13,6 @@ import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.HttpUtilResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
@@ -416,10 +415,10 @@ public class CertificateActor extends UserBaseActor {
 
       Map<String, String> headerMap = new HashMap<>();
       headerMap.put("Content-Type", "application/json");
-      HttpUtilResponse httpResponse = HttpUtil.doPostRequest(completeUrl, requestBody, headerMap);
-      if (httpResponse != null && httpResponse.getStatusCode() == 200) {
+      String httpResponse = HttpClientUtil.post(completeUrl, requestBody, headerMap);
+      if (StringUtils.isNotBlank(httpResponse)) {
         HashMap<String, Object> val =
-            (HashMap<String, Object>) objectMapper.readValue(httpResponse.getBody(), Map.class);
+            (HashMap<String, Object>) objectMapper.readValue(httpResponse, Map.class);
         HashMap<String, Object> resultMap = (HashMap<String, Object>) val.get(JsonKey.RESULT);
         Response response = new Response();
         response.put(JsonKey.SIGNED_URL, resultMap.get(JsonKey.SIGNED_URL));

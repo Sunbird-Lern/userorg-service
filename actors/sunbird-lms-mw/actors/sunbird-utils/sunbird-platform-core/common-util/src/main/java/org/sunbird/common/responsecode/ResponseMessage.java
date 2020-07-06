@@ -475,6 +475,7 @@ public interface ResponseMessage {
     String MANAGED_USER_LIMIT_EXCEEDED = "Managed user creation limit exceeded";
     String UNABLE_TO_CONNECT_TO_ADMINUTIL = "Unable to connect to admin util service";
     String DATA_ENCRYPTION_ERROR = "Error in encrypting the data";
+    String NO_EMAIL_PHONE_ASSOCIATED = "No {0} associated with the given user.";
   }
 
   interface Key {
@@ -876,5 +877,6 @@ public interface ResponseMessage {
     String MANAGED_USER_LIMIT_EXCEEDED = "MANAGED_USER_LIMIT_EXCEEDED";
     String UNABLE_TO_CONNECT_TO_ADMINUTIL = "UNABLE_TO_CONNECT_TO_ADMINUTIL";
     String DATA_ENCRYPTION_ERROR = "DATA_ENCRYPTION_ERROR";
+    String NO_EMAIL_PHONE_ASSOCIATED = "NO_EMAIL_PHONE_ASSOCIATED";
   }
 }

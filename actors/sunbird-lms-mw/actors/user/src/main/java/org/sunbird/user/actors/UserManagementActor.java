@@ -177,7 +177,7 @@ public class UserManagementActor extends BaseActor {
   private void updateUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
@@ -566,7 +566,7 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
     actorMessage.getRequest().putAll(userMap);
-    Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     boolean isCustodianOrg = false;
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));

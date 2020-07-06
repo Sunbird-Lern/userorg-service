@@ -10,12 +10,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 
 /**
  * This class will make the call to EkStep content search
@@ -49,7 +44,7 @@ public final class EkStepRequestUtil {
       }
       ProjectLogger.log("making call for content search ==" + params, LoggerEnum.INFO.name());
       String response =
-          HttpUtil.sendPostRequest(
+          HttpClientUtil.post(
               baseSearchUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               params,
