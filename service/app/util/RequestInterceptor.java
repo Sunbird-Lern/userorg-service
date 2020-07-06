@@ -10,10 +10,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.ManagedTokenValidator;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 
 /**
@@ -151,13 +153,12 @@ public class RequestInterceptor {
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
     Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
-    String captha = request.getQueryString("captchaResponse");
+    String captcha = request.getQueryString(JsonKey.CAPTCHA_RESPONSE);
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
         clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
-          CapthaHelper.capthaValidator(captha);
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
           if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
@@ -176,6 +177,14 @@ public class RequestInterceptor {
             }
           } else {
             ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
+          }
+          if (StringUtils.isNotEmpty(captcha)) {
+            if (!CapthaHelper.validate(captcha)) {
+              throw new ProjectCommonException(
+                  ResponseCode.invalidCaptcha.getErrorCode(),
+                  ResponseCode.invalidCaptcha.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
           }
         }
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {

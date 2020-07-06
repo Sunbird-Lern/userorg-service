@@ -872,6 +872,7 @@ public enum ResponseCode {
   notificationNotSent(
       ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
       ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
+  invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

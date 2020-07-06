@@ -1,72 +1,32 @@
-/*
 package util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.HttpPost;
-import org.sunbird.common.models.util.JsonKey;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.sunbird.common.models.util.*;
 
 public class CapthaHelper {
-  ObjectMapper mapper = new ObjectMapper();
 
-  public static boolean capthaValidator(String captcha) {
+  public static ObjectMapper mapper = new ObjectMapper();
 
-    HttpPost post = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
+  public static boolean validate(String captcha) {
+    boolean isCaptchaValid = false;
+    String captchaUrl = "https://www.google.com/recaptcha/api/siteverify";
     Map requestMap = new HashMap<String, String>();
-    requestMap.put("response", captcha);
-    requestMap.put("secret", secret);
-    requestMap.put("remoteip", context.getConnection().getRemoteAddr());
-    String json = mapper.writeValueAsString(requestMap);
+    requestMap.put(JsonKey.RESPONSE, captcha);
+    requestMap.put("secret", ProjectUtil.getConfigValue(JsonKey.CAPTCHA_SECRET));
+    // requestMap.put("remoteip", context.getConnection().getRemoteAddr());
 
-    Map<String,String> headers = new HashMap<>();
+    Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
     headers.put("Content-type", "application/json");
     try {
-      UrlEncodedFormEntity form = new UrlEncodedFormEntity(formparams, "UTF-8");
-      post.setEntity(form);
-      HttpResponse response = httpClient.execute(post);
-      InputStream content = response.getEntity().getContent();
-      try {
-        Map json = JsonSerialization.readValue(content, Map.class);
-        Object val = json.get("success");
-        success = Boolean.TRUE.equals(val);
-      } finally {
-        content.close();
-      }
+      String response = HttpClientUtil.postFormData(captchaUrl, requestMap, headers);
+      Map<String, Object> responseMap = mapper.readValue(response, Map.class);
+      isCaptchaValid = (boolean) responseMap.get("success");
     } catch (Exception e) {
-      ServicesLogger.LOGGER.recaptchaFailed(e);
+      ProjectLogger.log("exception in validating the captcha: ", captcha, LoggerEnum.ERROR.name());
     }
-    return success;
-
-
-    */
-/*HttpClient httpClient = context.getSession().getProvider(HttpClientProvider.class).getHttpClient();
-HttpPost post = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
-List<NameValuePair> formparams = new LinkedList<>();
-formparams.add(new BasicNameValuePair("secret", secret));
-formparams.add(new BasicNameValuePair("response", captcha));
-formparams.add(new BasicNameValuePair("remoteip", context.getConnection().getRemoteAddr()));
-try {
-  UrlEncodedFormEntity form = new UrlEncodedFormEntity(formparams, "UTF-8");
-  post.setEntity(form);
-  HttpResponse response = httpClient.execute(post);
-  InputStream content = response.getEntity().getContent();
-  try {
-    Map json = JsonSerialization.readValue(content, Map.class);
-    Object val = json.get("success");
-    success = Boolean.TRUE.equals(val);
-  } finally {
-    content.close();
+    return isCaptchaValid;
   }
-} catch (Exception e) {
-  ServicesLogger.LOGGER.recaptchaFailed(e);
 }
-return success;*//*
-
-
-                   }
-
-                 }
-                 */
