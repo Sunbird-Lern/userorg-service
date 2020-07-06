@@ -175,6 +175,7 @@ public enum ActorOperations {
   CREATE_USER_V3("createUserV3"),
   CREATE_USER_V4("createUserV4"),
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
+  V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers");
 
   private String value;

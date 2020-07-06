@@ -141,7 +141,9 @@ public class KeyCloakConnectionProvider {
   static class ResourceCleanUp extends Thread {
     public void run() {
       ProjectLogger.log("started resource cleanup.");
-      keycloak.close();
+      if (null != keycloak) {
+        keycloak.close();
+      }
       ProjectLogger.log("completed resource cleanup.");
     }
   }
