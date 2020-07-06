@@ -8,11 +8,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 @ActorConfig(
@@ -33,17 +35,17 @@ public class BackGroundNotificationActor extends BaseActor {
       String notification_service_base_url = System.getenv("notification_service_base_url");
       String NOTIFICATION_SERVICE_URL = notification_service_base_url+"/v1/notification/send";
       ProjectLogger.log("BackGroundNotificationActor:callNotificationService :: calling notification service URL :"+NOTIFICATION_SERVICE_URL,LoggerEnum.INFO.name());
-      CloseableHttpClient client = HttpClients.createDefault();
-      HttpPost httpPost = new HttpPost(NOTIFICATION_SERVICE_URL);
+
       String json = mapper.writeValueAsString(request);
       json = new String(json.getBytes(), StandardCharsets.UTF_8);
-      StringEntity entity = new StringEntity(json);
-      httpPost.setEntity(entity);
-      httpPost.setHeader("Accept", "application/json");
-      httpPost.setHeader("Content-type", "application/json");
-      httpPost.setHeader("requestId", reqObj.getRequestId());
-      HttpResponse response = client.execute(httpPost);
-      ProjectLogger.log("BackGroundNotificationActor:callNotificationService :: Response =" + response.getStatusLine().getStatusCode(), LoggerEnum.INFO.name());
+
+      Map<String,String> headers = new HashMap<>();
+      headers.put("Accept", "application/json");
+      headers.put("Content-type", "application/json");
+      headers.put("requestId", reqObj.getRequestId());
+
+      String response = HttpClientUtil.post(NOTIFICATION_SERVICE_URL,json,headers);
+      ProjectLogger.log("BackGroundNotificationActor:callNotificationService :: Response =" + response, LoggerEnum.INFO.name());
     } catch (Exception ex) {
       ProjectLogger.log("BackGroundNotificationActor:callNotificationService :: Error occurred",ex);
     }
