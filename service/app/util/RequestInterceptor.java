@@ -151,7 +151,6 @@ public class RequestInterceptor {
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
     Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
-    String captcha = request.getQueryString(JsonKey.CAPTCHA_RESPONSE);
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
