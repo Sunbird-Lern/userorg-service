@@ -55,7 +55,8 @@ import scala.concurrent.Future;
     "getUserProfile",
     "getUserProfileV2",
     "getUserByKey",
-    "checkUserExistence"
+    "checkUserExistence",
+    "checkUserExistenceV2"
   },
   asyncTasks = {}
 )
@@ -94,6 +95,9 @@ public class UserProfileReadActor extends BaseActor {
         break;
       case "checkUserExistence":
         checkUserExistence(request);
+        break;
+      case "checkUserExistenceV2":
+        checkUserExistenceV2(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserProfileReadActor");
@@ -905,24 +909,7 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void checkUserExistence(Request request) {
-    Map<String, Object> searchMap = new WeakHashMap<>();
-    String value = (String) request.get(JsonKey.VALUE);
-    String encryptedValue = null;
-    try {
-      encryptedValue = encryptionService.encryptData(StringUtils.lowerCase(value));
-    } catch (Exception var11) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-    searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
-    ProjectLogger.log(
-        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap,
-        LoggerEnum.INFO.name());
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
-    Future<Map<String, Object>> esFuture = esUtil.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esFuture = userSearchDetails(request);
     Future<Response> userResponse =
         esFuture.map(
             new Mapper<Map<String, Object>, Response>() {
@@ -941,6 +928,57 @@ public class UserProfileReadActor extends BaseActor {
             getContext().dispatcher());
 
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
+  }
+
+  private void checkUserExistenceV2(Request request) {
+    Future<Map<String, Object>> esFuture = userSearchDetails(request);
+    Future<Response> userResponse =
+        esFuture.map(
+            new Mapper<Map<String, Object>, Response>() {
+              @Override
+              public Response apply(Map<String, Object> responseMap) {
+                List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
+                long size = respList.size();
+                Response resp = new Response();
+                if (size <= 0) {
+                  resp.put(JsonKey.EXISTS, false);
+                } else {
+                  Map<String, Object> response = respList.get(0);
+                  resp.put(JsonKey.EXISTS, true);
+                  resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
+                  resp.put(
+                      JsonKey.NAME,
+                      (String) response.get(JsonKey.FIRST_NAME) + response.get(JsonKey.LAST_NAME));
+                  resp.put(JsonKey.MANAGED_BY, response.get(JsonKey.MANAGED_BY));
+                }
+                return resp;
+              }
+            },
+            getContext().dispatcher());
+
+    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
+  }
+
+  private Future<Map<String, Object>> userSearchDetails(Request request) {
+    Map<String, Object> searchMap = new WeakHashMap<>();
+    String value = (String) request.get(JsonKey.VALUE);
+    String encryptedValue = null;
+    try {
+      encryptedValue = encryptionService.encryptData(StringUtils.lowerCase(value));
+    } catch (Exception var11) {
+      throw new ProjectCommonException(
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
+    ProjectLogger.log(
+        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap,
+        LoggerEnum.INFO.name());
+    SearchDTO searchDTO = new SearchDTO();
+    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
+    Future<Map<String, Object>> esFuture = esUtil.search(searchDTO, EsType.user.getTypeName());
+    return esFuture;
   }
 
   private void getKey(Request actorMessage) {

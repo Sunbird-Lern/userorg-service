@@ -19,6 +19,7 @@ POST  /v1/user/search					 @controllers.usermanagement.UserController.searchUser
 POST  /private/user/v1/search            @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
 GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserController.getUserById(externalId:String, request: play.mvc.Http.Request)
 GET  /v1/user/managed/:lua_uuid           @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
+GET  /v2/user/exists/:key/:value        @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
 
 GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes(request: play.mvc.Http.Request)
 POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility(request: play.mvc.Http.Request)
