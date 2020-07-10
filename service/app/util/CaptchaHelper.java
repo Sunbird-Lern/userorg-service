@@ -7,7 +7,7 @@ import org.sunbird.common.models.util.*;
 
 public class CaptchaHelper {
 
-  public static ObjectMapper mapper = new ObjectMapper();
+  public static final ObjectMapper mapper = new ObjectMapper();
 
   public static boolean validate(String captcha) {
     boolean isCaptchaValid = false;
@@ -15,7 +15,6 @@ public class CaptchaHelper {
     Map requestMap = new HashMap<String, String>();
     requestMap.put(JsonKey.RESPONSE, captcha);
     requestMap.put("secret", ProjectUtil.getConfigValue(JsonKey.CAPTCHA_SECRET));
-    // requestMap.put("remoteip", context.getConnection().getRemoteAddr());
 
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
