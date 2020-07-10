@@ -199,14 +199,6 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  public void testUserExistsByKeyValue() {
-    reqMap = getUserProfileByKeyRequest(JsonKey.PHONE, VALID_PHONE);
-    setEsResponseForSearch(getUserResponseMap());
-    testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
-    // assertTrue(result);
-  }
-
-  @Test
   public void testCheckUserExistenceV2() {
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
     setEsSearchResponse(getUserExistsSearchResponseMap());
