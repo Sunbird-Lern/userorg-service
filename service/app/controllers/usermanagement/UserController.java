@@ -4,6 +4,8 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
+import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -11,15 +13,17 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.CaptchaHelper;
 
 public class UserController extends BaseController {
 
   public CompletionStage<Result> createUser(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.CREATE_USER.getValue(),
-            httpRequest.body().asJson(),
+        httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateCreateUserV1Request(request);
@@ -28,71 +32,76 @@ public class UserController extends BaseController {
         null,
         null,
         true,
-            httpRequest);
+        httpRequest);
   }
 
-	public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
-		
-		  return handleRequest( ActorOperations.CREATE_USER.getValue(),
-		  httpRequest.body().asJson(), req -> { Request request = (Request) req; new
-		  UserRequestValidator().validateCreateUserV2Request(request);
-		  request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2); return null; },
-		  null, null, true, httpRequest);
-		 }
-  
-  
-  public CompletionStage<Result> createUserV3Sync(Http.Request httpRequest) {
-  
+  public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
+
     return handleRequest(
-      ActorOperations.CREATE_USER.getValue(),
-      httpRequest.body().asJson(),
-      req -> {
-        Request request = (Request) req;
-        request.getRequest().put("sync", true);
-        new UserRequestValidator().validateCreateUserV2Request(request);
-        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
-        return null;
-      },
-      null,
-      null,
-      true,
-      httpRequest
-    );
+        ActorOperations.CREATE_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateCreateUserV2Request(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
   }
 
-  
+  public CompletionStage<Result> createUserV3Sync(Http.Request httpRequest) {
+
+    return handleRequest(
+        ActorOperations.CREATE_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateCreateUserV2Request(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> createUserV3(Http.Request httpRequest) {
-	    return handleRequest(
-	        ActorOperations.CREATE_USER_V3.getValue(),
-	            httpRequest.body().asJson(),
-	        req -> {
-	          Request request = (Request) req;
-	          new UserRequestValidator().validateUserCreateV3(request);
-	          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
-	          return null;
-	        },
-	        null,
-	        null,
-	        true,
-	            httpRequest);
-	  }
-  
+    return handleRequest(
+        ActorOperations.CREATE_USER_V3.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV3(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> createUserV4(Http.Request httpRequest) {
     return handleRequest(
-      ActorOperations.CREATE_USER_V4.getValue(),
-      httpRequest.body().asJson(),
-      req -> {
-        Request request = (Request) req;
-        new UserRequestValidator().validateUserCreateV4(request);
-        request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
-        return null;
-      },
-      null,
-      null,
-      true,
-      httpRequest);
+        ActorOperations.CREATE_USER_V4.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV4(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
   }
-  
+
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
     final boolean isPrivate;
     if (httpRequest.path().contains(JsonKey.PRIVATE)) {
@@ -108,14 +117,16 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.USER_ID, httpRequest.flash().get(JsonKey.USER_ID));
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRequestValidator().validateUpdateUserRequest(request);
-          request.getContext().put(JsonKey.IS_AUTH_REQ, httpRequest.flash().get(JsonKey.IS_AUTH_REQ));
+          request
+              .getContext()
+              .put(JsonKey.IS_AUTH_REQ, httpRequest.flash().get(JsonKey.IS_AUTH_REQ));
 
           return null;
         },
         null,
         null,
         true,
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> getUserById(String userId, Http.Request httpRequest) {
@@ -125,7 +136,9 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> getUserByIdV2(String userId, Http.Request httpRequest) {
     return handleGetUserProfile(
-        ActorOperations.GET_USER_PROFILE_V2.getValue(), ProjectUtil.getLmsUserId(userId), httpRequest);
+        ActorOperations.GET_USER_PROFILE_V2.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
   }
 
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
@@ -144,7 +157,7 @@ public class UserController extends BaseController {
         null,
         null,
         true,
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> getUserByKey(String idType, String id, Http.Request httpRequest) {
@@ -164,7 +177,7 @@ public class UserController extends BaseController {
         null,
         null,
         false,
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> searchUser(Http.Request httpRequest) {
@@ -182,10 +195,11 @@ public class UserController extends BaseController {
         null,
         getAllRequestHeaders(httpRequest),
         EsType.user.getTypeName(),
-            httpRequest);
+        httpRequest);
   }
 
-  private CompletionStage<Result> handleGetUserProfile(String operation, String userId, Http.Request httpRequest) {
+  private CompletionStage<Result> handleGetUserProfile(
+      String operation, String userId, Http.Request httpRequest) {
     final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     final String provider = httpRequest.getQueryString(JsonKey.PROVIDER);
@@ -206,51 +220,78 @@ public class UserController extends BaseController {
         },
         userId,
         JsonKey.USER_ID,
-        false, 
-            httpRequest);
+        false,
+        httpRequest);
   }
 
+  public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, key);
+    map.put(JsonKey.VALUE, value);
+    return handleRequest(
+        "checkUserExistence",
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.setRequest(map);
+          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+          return null;
+        },
+        null,
+        null,
+        false,
+        httpRequest);
+  }
 
+  public CompletionStage<Result> getManagedUsers(String luaUuid, Http.Request httpRequest) {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, luaUuid);
+    String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+    map.put(JsonKey.WITH_TOKENS, withTokens);
+    map.put(JsonKey.SORTBY, httpRequest.getQueryString(JsonKey.SORTBY)); // createdDate
+    map.put(JsonKey.ORDER, httpRequest.getQueryString(JsonKey.ORDER)); // desc
+    return handleRequest(
+        ActorOperations.GET_MANAGED_USERS.getValue(),
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.setRequest(map);
+          new UserRequestValidator().validateUserId(luaUuid);
+          return null;
+        },
+        null,
+        null,
+        false,
+        httpRequest);
+  }
 
-
-    public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(JsonKey.KEY, key);
-        map.put(JsonKey.VALUE, value);
-        return handleRequest(
-                "checkUserExistence",
-                null,
-                req -> {
-                    Request request = (Request) req;
-                    request.setRequest(map);
-                    new UserGetRequestValidator().validateGetUserByKeyRequest(request);
-                    return null;
-                },
-                null,
-                null,
-                false,
-                httpRequest);
+  public CompletionStage<Result> userExists(
+      String searchKey, String searchValue, Http.Request httpRequest) {
+    HashMap<String, Object> map = new HashMap<>();
+    String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
+        && StringUtils.isNotEmpty(captcha)) {
+      if (!CaptchaHelper.validate(captcha)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidCaptcha.getErrorCode(),
+            ResponseCode.invalidCaptcha.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
     }
-
-    public CompletionStage<Result> getManagedUsers(String luaUuid, Http.Request httpRequest) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(JsonKey.ID, luaUuid);
-        String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
-        map.put(JsonKey.WITH_TOKENS, withTokens);
-        map.put(JsonKey.SORTBY, httpRequest.getQueryString(JsonKey.SORTBY));    //createdDate
-        map.put(JsonKey.ORDER, httpRequest.getQueryString(JsonKey.ORDER));  //desc
-        return handleRequest(
-                ActorOperations.GET_MANAGED_USERS.getValue(),
-                null,
-                req -> {
-                    Request request = (Request) req;
-                    request.setRequest(map);
-                    new UserRequestValidator().validateUserId(luaUuid);
-                    return null;
-                },
-                null,
-                null,
-                false,
-                httpRequest);
-    }
+    map.put(JsonKey.KEY, searchKey);
+    map.put(JsonKey.VALUE, searchValue);
+    return handleRequest(
+        ActorOperations.CHECK_USER_EXISTENCEV2.getValue(),
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.setRequest(map);
+          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+          return null;
+        },
+        null,
+        null,
+        false,
+        httpRequest);
+  }
 }
