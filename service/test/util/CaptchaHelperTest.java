@@ -17,7 +17,7 @@ import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({HttpClientUtil.class, CaptchaHelper.class})
+@PrepareForTest({HttpClientUtil.class, CaptchaHelper.class, ProjectUtil.class})
 @PowerMockIgnore({"javax.management.*"})
 public class CaptchaHelperTest {
   private static HttpClientUtil httpClientUtil;
