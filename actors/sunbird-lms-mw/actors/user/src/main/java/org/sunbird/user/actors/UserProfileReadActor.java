@@ -946,10 +946,11 @@ public class UserProfileReadActor extends BaseActor {
                   Map<String, Object> response = respList.get(0);
                   resp.put(JsonKey.EXISTS, true);
                   resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
-                  resp.put(
-                      JsonKey.NAME,
-                      (String) response.get(JsonKey.FIRST_NAME) + response.get(JsonKey.LAST_NAME));
-                  resp.put(JsonKey.MANAGED_BY, response.get(JsonKey.MANAGED_BY));
+                  String name = (String) response.get(JsonKey.FIRST_NAME);
+                  if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
+                    name += (String) response.get(JsonKey.LAST_NAME);
+                  }
+                  resp.put(JsonKey.NAME, response.get(JsonKey.FIRST_NAME) + name);
                 }
                 return resp;
               }
