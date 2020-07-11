@@ -571,12 +571,12 @@ public class KeyCloakServiceImpl implements SSOManager {
   public String verifyToken(String accessToken, String url) {
 
     try {
-      PublicKey publicKey = getPublicKey();
+      PublicKey publicKey = toPublicKey(System.getenv(JsonKey.SSO_PUBLIC_KEY));
       if (publicKey == null) {
         ProjectLogger.log(
             "KeyCloakServiceImpl: SSO_PUBLIC_KEY is NULL. Keycloak server may need to be started. Read value from environment variable.",
             LoggerEnum.INFO);
-        publicKey = toPublicKey(System.getenv(JsonKey.SSO_PUBLIC_KEY));
+        publicKey = getPublicKey();
       }
       if (publicKey != null) {
         String ssoUrl = (url != null ? url : KeyCloakConnectionProvider.SSO_URL);
