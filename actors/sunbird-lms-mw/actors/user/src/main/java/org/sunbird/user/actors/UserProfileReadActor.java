@@ -948,9 +948,9 @@ public class UserProfileReadActor extends BaseActor {
                   resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
                   String name = (String) response.get(JsonKey.FIRST_NAME);
                   if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
-                    name += (String) response.get(JsonKey.LAST_NAME);
+                    name += " " + response.get(JsonKey.LAST_NAME);
                   }
-                  resp.put(JsonKey.NAME, response.get(JsonKey.FIRST_NAME) + " " + name);
+                  resp.put(JsonKey.NAME, name);
                 }
                 return resp;
               }
