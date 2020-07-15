@@ -285,31 +285,32 @@ public class UserManagementActor extends BaseActor {
 
   private void updateLocationCodeToIds(List<Map<String, String>> externalIds) {
     List<String> locCodeLst = new ArrayList<>();
-    Map<String, String> locMap = new HashMap<>();
-    externalIds.forEach(
-        externalIdMap -> {
-          if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
-              || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
-            locCodeLst.add(externalIdMap.get(JsonKey.ID));
-          }
-        });
-    LocationClientImpl locationClient = new LocationClientImpl();
-    List<Location> locationIdList =
-        locationClient.getLocationByCodes(
-            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()), locCodeLst);
-    if (locationIdList != null && !locationIdList.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(externalIds)) {
       externalIds.forEach(
           externalIdMap -> {
             if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
                 || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
-              locationIdList.forEach(
-                  location -> {
-                    if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
-                      externalIdMap.put(JsonKey.ID, location.getId());
-                    }
-                  });
+              locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
+      LocationClientImpl locationClient = new LocationClientImpl();
+      List<Location> locationIdList =
+          locationClient.getLocationByCodes(
+              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()), locCodeLst);
+      if (CollectionUtils.isNotEmpty(locationIdList)) {
+        externalIds.forEach(
+            externalIdMap -> {
+              if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                  || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
+                locationIdList.forEach(
+                    location -> {
+                      if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
+                        externalIdMap.put(JsonKey.ID, location.getId());
+                      }
+                    });
+              }
+            });
+      }
     }
   }
 
