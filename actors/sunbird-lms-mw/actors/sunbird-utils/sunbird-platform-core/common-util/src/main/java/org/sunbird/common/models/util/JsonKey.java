@@ -1054,6 +1054,8 @@ public final class JsonKey {
   public static final String CAPTCHA_SECRET = "captcha_secret";
   public static final String CAPTCHA_RESPONSE = "captchaResponse";
   public static final String ENABLE_CAPTCHA = "enable_captcha";
+  public static final String DECLARED_STATE = "declared-state";
+  public static final String DECLARED_DISTRICT = "declared-district";
 
   private JsonKey() {}
 }

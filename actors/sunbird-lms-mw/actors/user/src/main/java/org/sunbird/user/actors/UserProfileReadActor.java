@@ -18,6 +18,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -36,6 +37,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
@@ -312,6 +314,16 @@ public class UserProfileReadActor extends BaseActor {
                   if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
+                    if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+                      LocationClientImpl locationClient = new LocationClientImpl();
+                      Location location =
+                          locationClient.getLocationById(
+                              getActorRef(
+                                  LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
+                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, location.getCode());
+                    }
                     if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
                         || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
 
