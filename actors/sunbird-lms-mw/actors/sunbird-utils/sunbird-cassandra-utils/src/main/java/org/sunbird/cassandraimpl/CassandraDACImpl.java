@@ -26,6 +26,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
   public Response getRecords(
       String keySpace, String table, Map<String, Object> filters, List<String> fields) {
     Response response = new Response();
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
     try {
       Select select;
@@ -50,6 +51,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       ResultSet results = null;
       results = session.execute(select);
       response = CassandraUtil.createResponse(results);
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     } catch (Exception e) {
       ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
@@ -66,6 +68,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       Map<String, Object> filters,
       List<String> fields,
       FutureCallback<ResultSet> callback) {
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
     try {
       Select select;
@@ -87,6 +90,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
         }
       }
       ResultSetFuture future = session.executeAsync(select);
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
       Futures.addCallback(future, callback, Executors.newFixedThreadPool(1));
     } catch (Exception e) {
       ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);

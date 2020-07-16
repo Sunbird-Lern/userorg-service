@@ -741,7 +741,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     return response;
   }
 
-  private void logQueryElapseTime(
+  protected void logQueryElapseTime(
       String operation, long startTime, String query, boolean loggingEnabled) {
 
     long stopTime = System.currentTimeMillis();
