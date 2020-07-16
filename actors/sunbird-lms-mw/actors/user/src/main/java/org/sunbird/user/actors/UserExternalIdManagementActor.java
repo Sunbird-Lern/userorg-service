@@ -204,7 +204,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     map.put(JsonKey.ID_TYPE, extIdsMap.get(JsonKey.ID_TYPE));
     map.put(JsonKey.ORIGINAL_ID_TYPE, extIdsMap.get(JsonKey.ORIGINAL_ID_TYPE));
     map.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
-    map.put(JsonKey.STATUS,extIdsMap.get(JsonKey.STATUS));
+    // map.put(JsonKey.STATUS,extIdsMap.get(JsonKey.STATUS));
     if (JsonKey.CREATE.equalsIgnoreCase(operation)) {
       map.put(JsonKey.CREATED_BY, requestMap.get(JsonKey.CREATED_BY));
       map.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
