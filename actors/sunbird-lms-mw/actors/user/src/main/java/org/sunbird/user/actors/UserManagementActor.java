@@ -298,17 +298,18 @@ public class UserManagementActor extends BaseActor {
           locationClient.getLocationByCodes(
               getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()), locCodeLst);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
-        externalIds.forEach(
-            externalIdMap -> {
-              if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
-                  || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
-                locationIdList.forEach(
-                    location -> {
+        locationIdList.forEach(
+            location -> {
+              externalIds.forEach(
+                  externalIdMap -> {
+                    if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                        || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
                       if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
                         externalIdMap.put(JsonKey.ID, location.getId());
+                        externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
                       }
-                    });
-              }
+                    }
+                  });
             });
       }
     }

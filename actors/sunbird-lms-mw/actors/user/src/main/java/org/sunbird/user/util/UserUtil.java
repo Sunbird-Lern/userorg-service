@@ -663,7 +663,7 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user);
     }
-    if(CollectionUtils.isNotEmpty(user.getExternalIds())){
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       updateExternalIdsStatus(user.getExternalIds());
     }
   }
@@ -686,12 +686,11 @@ public class UserUtil {
     }
   }
 
-  private static void updateExternalIdsStatus(
-          List<Map<String, String>> externalIds) {
+  private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
     externalIds.forEach(
-            externalIdMap -> {
-              externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
-            });
+        externalIdMap -> {
+          externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
+        });
   }
 
   private static Optional<Map<String, String>> checkExternalID(

@@ -314,16 +314,6 @@ public class UserProfileReadActor extends BaseActor {
                   if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                    if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                      LocationClientImpl locationClient = new LocationClientImpl();
-                      Location location =
-                          locationClient.getLocationById(
-                              getActorRef(
-                                  LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                      s.put(JsonKey.ID, location.getCode());
-                    }
                     if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
                         || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
 
@@ -331,6 +321,14 @@ public class UserProfileReadActor extends BaseActor {
                           UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                       s.put(JsonKey.ID, decrytpedOriginalExternalId);
 
+                    } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+                      LocationClientImpl locationClient = new LocationClientImpl();
+                      Location location =
+                          locationClient.getLocationById(
+                              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, location.getCode());
                     } else {
                       s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                     }
