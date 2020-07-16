@@ -1056,7 +1056,7 @@ public final class JsonKey {
   public static final String ENABLE_CAPTCHA = "enable_captcha";
   public static final String DECLARED_STATE = "declared-state";
   public static final String DECLARED_DISTRICT = "declared-district";
-  public static final String PENDING = "pending";
+  public static final String PENDING = "PENDING";
 
   private JsonKey() {}
 }
