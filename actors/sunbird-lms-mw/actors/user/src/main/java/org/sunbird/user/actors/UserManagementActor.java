@@ -43,6 +43,7 @@ import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.*;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserType;
@@ -177,7 +178,7 @@ public class UserManagementActor extends BaseActor {
   private void updateUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    //Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
@@ -203,13 +204,13 @@ public class UserManagementActor extends BaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
+    updateLocationCodeToIds((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS));
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
     // if we are updating email then need to update isEmailVerified flag inside keycloak
     UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
     convertValidatedLocationCodesToIDs(userMap);
-
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.UPDATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -280,6 +281,38 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private void updateLocationCodeToIds(List<Map<String, String>> externalIds) {
+    List<String> locCodeLst = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(externalIds)) {
+      externalIds.forEach(
+          externalIdMap -> {
+            if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
+              locCodeLst.add(externalIdMap.get(JsonKey.ID));
+            }
+          });
+      LocationClientImpl locationClient = new LocationClientImpl();
+      List<Location> locationIdList =
+          locationClient.getLocationByCodes(
+              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()), locCodeLst);
+      if (CollectionUtils.isNotEmpty(locationIdList)) {
+        locationIdList.forEach(
+            location -> {
+              externalIds.forEach(
+                  externalIdMap -> {
+                    if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                        || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
+                      if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
+                        externalIdMap.put(JsonKey.ID, location.getId());
+                        externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
+                      }
+                    }
+                  });
+            });
+      }
+    }
   }
 
   /**
@@ -566,7 +599,7 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
     actorMessage.getRequest().putAll(userMap);
-    //Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     boolean isCustodianOrg = false;
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
