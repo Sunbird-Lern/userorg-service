@@ -689,7 +689,8 @@ public class UserUtil {
   private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
     externalIds.forEach(
         externalIdMap -> {
-          externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
+          // Needed in 3.2
+          // externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
         });
   }
 
