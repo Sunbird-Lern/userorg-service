@@ -882,7 +882,8 @@ public enum ResponseCode {
   REDIRECTION_REQUIRED(302),
   TOO_MANY_REQUESTS(429),
   SERVICE_UNAVAILABLE(503),
-  PARTIAL_SUCCESS_RESPONSE(206);
+  PARTIAL_SUCCESS_RESPONSE(206),
+  IM_A_TEAPOT(418);
   private int responseCode;
   /** error code contains String value */
   private String errorCode;

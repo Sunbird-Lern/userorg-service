@@ -275,7 +275,7 @@ public class UserController extends BaseController {
         throw new ProjectCommonException(
             ResponseCode.invalidCaptcha.getErrorCode(),
             ResponseCode.invalidCaptcha.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.IM_A_TEAPOT.getResponseCode());
       }
     }
     map.put(JsonKey.KEY, searchKey);
