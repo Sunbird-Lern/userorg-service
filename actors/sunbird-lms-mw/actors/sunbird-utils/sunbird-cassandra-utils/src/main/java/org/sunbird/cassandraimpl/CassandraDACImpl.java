@@ -26,9 +26,10 @@ public class CassandraDACImpl extends CassandraOperationImpl {
   public Response getRecords(
       String keySpace, String table, Map<String, Object> filters, List<String> fields) {
     Response response = new Response();
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -56,6 +57,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     }
     return response;
   }
@@ -66,9 +69,10 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       Map<String, Object> filters,
       List<String> fields,
       FutureCallback<ResultSet> callback) {
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -94,6 +98,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     }
   }
 
