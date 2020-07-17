@@ -180,7 +180,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String propertyName,
       Object propertyValue,
       List<String> fields) {
-    Response response;
+    Response response = new Response();
     Session session = connectionManager.getSession(keyspaceName);
     long startTime = System.currentTimeMillis();
     try {
@@ -222,7 +222,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getRecordsByProperty method started at ==" + startTime, LoggerEnum.INFO);
-    Response response;
+    Response response = new Response();
     try {
       Builder selectBuilder;
       if (CollectionUtils.isNotEmpty(fields)) {
@@ -260,7 +260,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     ProjectLogger.log(
         "Cassandra Service getRecordsByProperties method started at ==" + startTime,
         LoggerEnum.INFO);
-    Response response;
+    Response response = new Response();
     try {
       Builder selectBuilder;
       if (CollectionUtils.isNotEmpty(fields)) {
@@ -307,7 +307,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     ProjectLogger.log(
         "Cassandra Service getPropertiesValueById method started at ==" + startTime,
         LoggerEnum.INFO);
-    Response response;
+    Response response = new Response();
     try {
       String selectQuery = CassandraUtil.getSelectStatement(keyspaceName, tableName, properties);
       PreparedStatement statement = connectionManager.getSession(keyspaceName).prepare(selectQuery);
@@ -758,7 +758,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       map.put("pid", "learner-service");
       map.put("query", query);
       try {
-        contextEventLogger.info(mapper.writeValueAsString(map));
+        contextEventLogger.debug(mapper.writeValueAsString(map));
       } catch (JsonProcessingException e) {
         e.printStackTrace();
       }
@@ -926,7 +926,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       Builder selectBuilder,
       String primaryKeyColumnName) {
     long startTime = System.currentTimeMillis();
-    Response response;
+    Response response = new Response();
     Select selectQuery = selectBuilder.from(keyspaceName, tableName);
     Where selectWhere = selectQuery.where();
     Clause clause = null;
