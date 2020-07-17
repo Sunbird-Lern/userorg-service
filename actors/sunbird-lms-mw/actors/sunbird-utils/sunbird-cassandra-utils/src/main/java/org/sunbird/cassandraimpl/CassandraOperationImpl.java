@@ -437,7 +437,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getRecordBy key method started at ==" + startTime, LoggerEnum.INFO);
-    Response response;
+    Response response = new Response();
     try {
       Session session = connectionManager.getSession(keyspaceName);
       Builder selectBuilder;
