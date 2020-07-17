@@ -28,8 +28,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     Response response = new Response();
     long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -51,13 +51,14 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       ResultSet results = null;
       results = session.execute(select);
       response = CassandraUtil.createResponse(results);
-      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     } catch (Exception e) {
       ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     }
     return response;
   }
@@ -70,8 +71,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       FutureCallback<ResultSet> callback) {
     long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -90,7 +91,6 @@ public class CassandraDACImpl extends CassandraOperationImpl {
         }
       }
       ResultSetFuture future = session.executeAsync(select);
-      logQueryElapseTime("read", startTime, select.getQueryString(), true);
       Futures.addCallback(future, callback, Executors.newFixedThreadPool(1));
     } catch (Exception e) {
       ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
@@ -98,6 +98,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("read", startTime, select.getQueryString(), true);
     }
   }
 
