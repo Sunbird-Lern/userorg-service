@@ -85,7 +85,7 @@
         <appender-ref ref="kafka-appender" />
     </logger>
 
-    <logger name="ContextEventLogger" level="INFO">
+    <logger name="ContextEventLogger" level="DEBUG">
       <appender-ref ref="context-log-kafka-appender" />
     </logger>
 
