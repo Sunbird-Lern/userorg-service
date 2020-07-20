@@ -177,7 +177,7 @@ public class UserManagementActor extends BaseActor {
   private void updateUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    //Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
@@ -566,7 +566,7 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
     actorMessage.getRequest().putAll(userMap);
-    //Util.getUserProfileConfig(systemSettingActorRef);
+    // Util.getUserProfileConfig(systemSettingActorRef);
     boolean isCustodianOrg = false;
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -946,10 +946,12 @@ public class UserManagementActor extends BaseActor {
                   context().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     } else {
-      sender().tell(response, self());
       if (null != resp) {
         saveUserDetailsToEs(esResponse);
       }
+      /*The pattern of this call was incorrect that it tells the ES actor after sending a response. In a high load system,
+      this could be fatal, due to this it was  throw an error that the user is not found . so shifted this line after saving to ES */
+      sender().tell(response, self());
     }
     requestMap.put(JsonKey.PASSWORD, userMap.get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank(callerId)) {
