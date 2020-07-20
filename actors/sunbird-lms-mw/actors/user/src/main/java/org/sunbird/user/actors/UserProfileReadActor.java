@@ -18,6 +18,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -36,6 +37,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
@@ -319,6 +321,14 @@ public class UserProfileReadActor extends BaseActor {
                           UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                       s.put(JsonKey.ID, decrytpedOriginalExternalId);
 
+                    } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+                      LocationClientImpl locationClient = new LocationClientImpl();
+                      Location location =
+                          locationClient.getLocationById(
+                              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, location.getCode());
                     } else {
                       s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                     }
@@ -946,10 +956,11 @@ public class UserProfileReadActor extends BaseActor {
                   Map<String, Object> response = respList.get(0);
                   resp.put(JsonKey.EXISTS, true);
                   resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
-                  resp.put(
-                      JsonKey.NAME,
-                      (String) response.get(JsonKey.FIRST_NAME) + response.get(JsonKey.LAST_NAME));
-                  resp.put(JsonKey.MANAGED_BY, response.get(JsonKey.MANAGED_BY));
+                  String name = (String) response.get(JsonKey.FIRST_NAME);
+                  if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
+                    name += " " + response.get(JsonKey.LAST_NAME);
+                  }
+                  resp.put(JsonKey.NAME, name);
                 }
                 return resp;
               }

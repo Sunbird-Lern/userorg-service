@@ -87,6 +87,18 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
+  public List<Location> getLocationByCodes(ActorRef actorRef, List<String> locationCode) {
+    String param = GeoLocationJsonKey.CODE;
+    Object value = locationCode;
+    List<Location> locationList = getSearchResponse(actorRef, param, value);
+    if (CollectionUtils.isNotEmpty(locationList)) {
+      return locationList;
+    } else {
+      return null;
+    }
+  }
+
+  @Override
   public String createLocation(ActorRef actorRef, UpsertLocationRequest location) {
     Request request = new Request();
     String locationId = null;
