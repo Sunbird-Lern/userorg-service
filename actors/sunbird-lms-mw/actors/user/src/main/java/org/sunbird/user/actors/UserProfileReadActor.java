@@ -328,7 +328,11 @@ public class UserProfileReadActor extends BaseActor {
                           locationClient.getLocationById(
                               getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
                               s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                      s.put(JsonKey.ID, location.getCode());
+                      s.put(
+                          JsonKey.ID,
+                          (location == null
+                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
+                              : location.getCode()));
                     } else {
                       s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                     }
