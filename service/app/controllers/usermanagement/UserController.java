@@ -26,6 +26,7 @@ public class UserController extends BaseController {
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
+          request.getRequest().put("sync", true);
           new UserRequestValidator().validateCreateUserV1Request(request);
           return null;
         },
