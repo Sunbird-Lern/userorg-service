@@ -5,10 +5,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.auth.verifier.KeyManager;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.learner.util.SchedulerManager;
 import org.sunbird.learner.util.Util;
 import play.api.Environment;
@@ -27,6 +24,8 @@ public class ApplicationStart {
     ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
     SunbirdMWService.init();
     checkCassandraConnections();
+    // initialize HttpClientUtil class
+    HttpClientUtil.getInstance();
     applicationLifecycle.addStopHook(
         () -> {
           return CompletableFuture.completedFuture(null);

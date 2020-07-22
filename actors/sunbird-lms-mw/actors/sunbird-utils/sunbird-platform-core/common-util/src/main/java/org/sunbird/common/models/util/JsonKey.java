@@ -522,6 +522,7 @@ public final class JsonKey {
   public static final String SUB_SECTIONS = "subSections";
   public static final String SUBJECT = "subject";
   public static final String SUBMIT_DATE = "submitDate";
+  public static final String SUBMITTED = "submitted";
   public static final String SUBTYPE = "subtype";
   public static final String SUCCESS = "SUCCESS";
   public static final String SUCCESS_RESULT = "successResult";
@@ -1039,14 +1040,23 @@ public final class JsonKey {
   public static final String SUB = "sub";
   public static final String DOT_SEPARATOR = ".";
   public static final List<String> USER_UNAUTH_STATES =
-    Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
+      Arrays.asList(JsonKey.UNAUTHORIZED, JsonKey.ANONYMOUS);
   public static final String EKSTEP_SIGNING_SIGN_PAYLOAD = "ekstep.signing.sign.payload";
   public static final String TS = "ts";
   public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
-  public static final String MSGID= "msgid";
+  public static final String MSGID = "msgid";
   public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
   public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
   public static final String MANAGED_TOKEN = "managedToken";
   public static final String WITH_TOKENS = "withTokens";
+  public static final String DECLARED_EMAIL = "declared-email";
+  public static final String DECLARED_PHONE = "declared-phone";
+  public static final String CAPTCHA_SECRET = "captcha_secret";
+  public static final String CAPTCHA_RESPONSE = "captchaResponse";
+  public static final String ENABLE_CAPTCHA = "enable_captcha";
+  public static final String DECLARED_STATE = "declared-state";
+  public static final String DECLARED_DISTRICT = "declared-district";
+  public static final String PENDING = "PENDING";
+
   private JsonKey() {}
 }

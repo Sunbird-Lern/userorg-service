@@ -182,6 +182,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
+    // map.remove(JsonKey.STATUS);
     cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map);
   }
 
@@ -203,6 +204,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     map.put(JsonKey.ID_TYPE, extIdsMap.get(JsonKey.ID_TYPE));
     map.put(JsonKey.ORIGINAL_ID_TYPE, extIdsMap.get(JsonKey.ORIGINAL_ID_TYPE));
     map.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
+    // map.put(JsonKey.STATUS,extIdsMap.get(JsonKey.STATUS));
     if (JsonKey.CREATE.equalsIgnoreCase(operation)) {
       map.put(JsonKey.CREATED_BY, requestMap.get(JsonKey.CREATED_BY));
       map.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));

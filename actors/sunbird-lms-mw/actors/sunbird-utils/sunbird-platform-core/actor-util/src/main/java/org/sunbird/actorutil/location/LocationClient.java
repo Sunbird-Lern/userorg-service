@@ -37,6 +37,8 @@ public interface LocationClient {
    */
   Location getLocationByCode(ActorRef actorRef, String locationCode);
 
+  List<Location> getLocationByCodes(ActorRef actorRef, List<String> locationCode);
+
   /**
    * @desc This method will create Location and returns the response.
    * @param actorRef Actor reference.

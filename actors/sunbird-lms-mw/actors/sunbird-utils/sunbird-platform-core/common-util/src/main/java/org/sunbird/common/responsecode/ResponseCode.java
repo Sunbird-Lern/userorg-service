@@ -859,12 +859,20 @@ public enum ResponseCode {
   managedByNotAllowed(
       ResponseMessage.Key.MANAGED_BY_NOT_ALLOWED, ResponseMessage.Message.MANAGED_BY_NOT_ALLOWED),
   managedByEmailPhoneUpdateError(
-    ResponseMessage.Key.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR, ResponseMessage.Message.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR),
+      ResponseMessage.Key.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR,
+      ResponseMessage.Message.MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR),
   managedUserLimitExceeded(
-          ResponseMessage.Key.MANAGED_USER_LIMIT_EXCEEDED, ResponseMessage.Message.MANAGED_USER_LIMIT_EXCEEDED),
+      ResponseMessage.Key.MANAGED_USER_LIMIT_EXCEEDED,
+      ResponseMessage.Message.MANAGED_USER_LIMIT_EXCEEDED),
   unableToConnectToAdminUtil(
-          ResponseMessage.Key.UNABLE_TO_CONNECT_TO_ADMINUTIL,
-          ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
+      ResponseMessage.Key.UNABLE_TO_CONNECT_TO_ADMINUTIL,
+      ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
+  dataEncryptionError(
+      ResponseMessage.Key.DATA_ENCRYPTION_ERROR, ResponseMessage.Message.DATA_ENCRYPTION_ERROR),
+  notificationNotSent(
+      ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
+      ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
+  invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
@@ -874,7 +882,8 @@ public enum ResponseCode {
   REDIRECTION_REQUIRED(302),
   TOO_MANY_REQUESTS(429),
   SERVICE_UNAVAILABLE(503),
-  PARTIAL_SUCCESS_RESPONSE(206);
+  PARTIAL_SUCCESS_RESPONSE(206),
+  IM_A_TEAPOT(418);
   private int responseCode;
   /** error code contains String value */
   private String errorCode;

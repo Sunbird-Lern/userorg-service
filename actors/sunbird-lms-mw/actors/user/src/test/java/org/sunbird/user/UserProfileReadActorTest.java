@@ -198,6 +198,30 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
+  @Test
+  public void testCheckUserExistenceV2() {
+    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
+    boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
+    assertTrue(result);
+  }
+
+  public void setEsSearchResponse(Map<String, Object> esResponse) {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(esResponse);
+    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
+  }
+
+  private static Map<String, Object> getUserExistsSearchResponseMap() {
+    Map<String, Object> map = new HashMap<>();
+    Map<String, Object> response = new HashMap<>();
+    response.put(JsonKey.EXISTS, "true");
+    List contentList = new ArrayList<>();
+    contentList.add(response);
+    map.put(JsonKey.CONTENT, contentList);
+    return map;
+  }
+
   private void setCassandraResponse(Response cassandraResponse) {
     when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
@@ -267,5 +291,11 @@ public class UserProfileReadActorTest {
     promise.success(esResponse);
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(promise.future());
+  }
+
+  public void setEsResponseForSearch(Map<String, Object> esResponse) {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(esResponse);
+    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
   }
 }

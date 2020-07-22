@@ -295,6 +295,17 @@ public class UserUtil {
     }
   }
 
+  public static String getDecryptedData(String value) {
+    try {
+      return decService.decryptData(value);
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
+
   public static List<Map<String, String>> copyAndConvertExternalIdsToLower(
       List<Map<String, String>> externalIds) {
     List<Map<String, String>> list = new ArrayList<>();
@@ -652,6 +663,9 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user);
     }
+    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
+      updateExternalIdsStatus(user.getExternalIds());
+    }
   }
 
   public static void checkEmailSameOrDiff(
@@ -670,6 +684,14 @@ public class UserUtil {
         }
       }
     }
+  }
+
+  private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
+    externalIds.forEach(
+        externalIdMap -> {
+          // Needed in 3.2
+          // externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
+        });
   }
 
   private static Optional<Map<String, String>> checkExternalID(

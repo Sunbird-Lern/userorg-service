@@ -284,13 +284,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testCourseMgmtStatusSuccess() {
-    assertEquals("draft", ProjectUtil.CourseMgmtStatus.DRAFT.getValue());
-    assertEquals("live", ProjectUtil.CourseMgmtStatus.LIVE.getValue());
-    assertEquals("retired", ProjectUtil.CourseMgmtStatus.RETIRED.getValue());
-  }
-
-  @Test
   public void testProgressStatusSuccess() {
     assertEquals(0, ProjectUtil.ProgressStatus.NOT_STARTED.getValue());
     assertEquals(1, ProjectUtil.ProgressStatus.STARTED.getValue());

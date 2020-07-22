@@ -512,8 +512,10 @@ public class BaseController extends Controller {
       params.put(JsonKey.METHOD, request.method());
       params.put("err", exception.getResponseCode() + "");
       params.put("errtype", exception.getCode());
-      long startTime = (Long) params.get(JsonKey.START_TIME);
-      params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
+      if (null != params.get(JsonKey.START_TIME)) {
+        long startTime = (Long) params.get(JsonKey.START_TIME);
+        params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
+      }
       removeFields(params, JsonKey.START_TIME);
       params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
       params.put(JsonKey.LOG_LEVEL, "error");

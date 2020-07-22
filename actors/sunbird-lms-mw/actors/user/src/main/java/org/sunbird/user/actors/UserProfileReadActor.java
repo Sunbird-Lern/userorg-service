@@ -18,6 +18,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -36,6 +37,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
@@ -55,7 +57,8 @@ import scala.concurrent.Future;
     "getUserProfile",
     "getUserProfileV2",
     "getUserByKey",
-    "checkUserExistence"
+    "checkUserExistence",
+    "checkUserExistenceV2"
   },
   asyncTasks = {}
 )
@@ -94,6 +97,9 @@ public class UserProfileReadActor extends BaseActor {
         break;
       case "checkUserExistence":
         checkUserExistence(request);
+        break;
+      case "checkUserExistenceV2":
+        checkUserExistenceV2(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserProfileReadActor");
@@ -212,9 +218,11 @@ public class UserProfileReadActor extends BaseActor {
     if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
+
     try {
       if (!((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
           && !showMaskedData) {
+
         result = removeUserPrivateField(result);
       } else {
         ProjectLogger.log(
@@ -306,14 +314,33 @@ public class UserProfileReadActor extends BaseActor {
                   if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                    s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+
+                      String decrytpedOriginalExternalId =
+                          UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(JsonKey.ID, decrytpedOriginalExternalId);
+
+                    } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+                      LocationClientImpl locationClient = new LocationClientImpl();
+                      Location location =
+                          locationClient.getLocationById(
+                              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                      s.put(
+                          JsonKey.ID,
+                          (location == null
+                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
+                              : location.getCode()));
+                    } else {
+                      s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    }
                     s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
                     s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-
                   } else {
                     s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
                   }
-
                   s.remove(JsonKey.EXTERNAL_ID);
                   s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
                   s.remove(JsonKey.ORIGINAL_ID_TYPE);
@@ -896,24 +923,7 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void checkUserExistence(Request request) {
-    Map<String, Object> searchMap = new WeakHashMap<>();
-    String value = (String) request.get(JsonKey.VALUE);
-    String encryptedValue = null;
-    try {
-      encryptedValue = encryptionService.encryptData(StringUtils.lowerCase(value));
-    } catch (Exception var11) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-    searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
-    ProjectLogger.log(
-        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap,
-        LoggerEnum.INFO.name());
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
-    Future<Map<String, Object>> esFuture = esUtil.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esFuture = userSearchDetails(request);
     Future<Response> userResponse =
         esFuture.map(
             new Mapper<Map<String, Object>, Response>() {
@@ -932,6 +942,58 @@ public class UserProfileReadActor extends BaseActor {
             getContext().dispatcher());
 
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
+  }
+
+  private void checkUserExistenceV2(Request request) {
+    Future<Map<String, Object>> esFuture = userSearchDetails(request);
+    Future<Response> userResponse =
+        esFuture.map(
+            new Mapper<Map<String, Object>, Response>() {
+              @Override
+              public Response apply(Map<String, Object> responseMap) {
+                List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
+                long size = respList.size();
+                Response resp = new Response();
+                if (size <= 0) {
+                  resp.put(JsonKey.EXISTS, false);
+                } else {
+                  Map<String, Object> response = respList.get(0);
+                  resp.put(JsonKey.EXISTS, true);
+                  resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
+                  String name = (String) response.get(JsonKey.FIRST_NAME);
+                  if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
+                    name += " " + response.get(JsonKey.LAST_NAME);
+                  }
+                  resp.put(JsonKey.NAME, name);
+                }
+                return resp;
+              }
+            },
+            getContext().dispatcher());
+
+    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
+  }
+
+  private Future<Map<String, Object>> userSearchDetails(Request request) {
+    Map<String, Object> searchMap = new WeakHashMap<>();
+    String value = (String) request.get(JsonKey.VALUE);
+    String encryptedValue = null;
+    try {
+      encryptedValue = encryptionService.encryptData(StringUtils.lowerCase(value));
+    } catch (Exception var11) {
+      throw new ProjectCommonException(
+          ResponseCode.userDataEncryptionError.getErrorCode(),
+          ResponseCode.userDataEncryptionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
+    ProjectLogger.log(
+        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap,
+        LoggerEnum.INFO.name());
+    SearchDTO searchDTO = new SearchDTO();
+    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
+    Future<Map<String, Object>> esFuture = esUtil.search(searchDTO, EsType.user.getTypeName());
+    return esFuture;
   }
 
   private void getKey(Request actorMessage) {

@@ -9,11 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import scala.concurrent.Future;
@@ -144,7 +140,7 @@ public interface ElasticSearchService {
       // TODO:Currently this is making a rest call but needs to be modified to make
       // the call using
       // ElasticSearch client
-      String responseStr = HttpUtil.sendPostRequest(requestURL, rawQuery, headers);
+      String responseStr = HttpClientUtil.post(requestURL, rawQuery, headers);
       ObjectMapper mapper = new ObjectMapper();
       responseData = mapper.readValue(responseStr, Map.class);
     } catch (IOException e) {

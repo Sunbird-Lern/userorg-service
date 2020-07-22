@@ -108,6 +108,9 @@ public final class UserUtility {
     return userMap;
   }
 
+  public static boolean isMasked(String data){
+    return maskingService.isMasked(data);
+  }
   public static Map<String, Object> decryptUserDataFrmES(Map<String, Object> userMap) {
     DecryptionService service = ServiceFactory.getDecryptionServiceInstance(null);
     // Decrypt user basic info
