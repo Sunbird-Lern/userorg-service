@@ -37,6 +37,12 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-remote_2.11</artifactId>
 			<version>${learner.akka.version}</version>
+            <exclusions>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>*</artifactId>
+              </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -64,23 +70,6 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec</artifactId>
-			<version>4.1.11.Final</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.netty/netty-transport -->
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-transport</artifactId>
-			<version>4.1.11.Final</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.netty/netty-buffer -->
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-buffer</artifactId>
-			<version>4.1.11.Final</version>
 		</dependency>
 	</dependencies>
 
