@@ -37,12 +37,6 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-remote_2.11</artifactId>
 			<version>${learner.akka.version}</version>
-            <exclusions>
-              <exclusion>
-                <groupId>io.netty</groupId>
-                <artifactId>*</artifactId>
-              </exclusion>
-            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
