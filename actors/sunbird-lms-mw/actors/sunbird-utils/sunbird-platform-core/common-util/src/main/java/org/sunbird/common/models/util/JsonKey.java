@@ -1057,6 +1057,10 @@ public final class JsonKey {
   public static final String DECLARED_STATE = "declared-state";
   public static final String DECLARED_DISTRICT = "declared-district";
   public static final String PENDING = "PENDING";
+  public static final String USER_INFO = "userInfo";
+  public static final String USR_DECLARATION_TABLE = "user_declarations";
+  public static final String ERROR_TYPE = "errorType";
+  public static final String DECLARATIONS = "declarations";
 
   private JsonKey() {}
 }

@@ -56,6 +56,7 @@ import scala.concurrent.Future;
     "getUserDetailsByLoginId",
     "getUserProfile",
     "getUserProfileV2",
+    "getUserProfileV3",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -89,6 +90,9 @@ public class UserProfileReadActor extends BaseActor {
       case "getUserProfileV2":
         getUserProfileV2(request);
         break;
+      case "getUserProfileV3":
+        getUserProfileV3(request);
+        break;
       case "getUserDetailsByLoginId":
         getUserDetailsByLoginId(request);
         break;
@@ -112,6 +116,11 @@ public class UserProfileReadActor extends BaseActor {
    * @param actorMessage Request containing user ID
    */
   private void getUserProfile(Request actorMessage) {
+    Response response = getUserProfileData(actorMessage);
+    sender().tell(response, self());
+  }
+
+  private void getUserProfileV3(Request actorMessage) {
     Response response = getUserProfileData(actorMessage);
     sender().tell(response, self());
   }
@@ -240,9 +249,26 @@ public class UserProfileReadActor extends BaseActor {
                 ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId);
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
-        // fetch user external identity
-        List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
-        result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
+
+        // if version is 3 , then read declarations from user_declarations table
+        String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
+        if (StringUtils.isNotEmpty(version) && version.equals(JsonKey.VERSION_3)) {
+          if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
+            String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
+            if (requestFields.contains(JsonKey.DECLARATIONS)) {
+              List<Map<String, Object>> declarations = fetchUserDeclarations(userId);
+              result.put(JsonKey.DECLARATIONS, declarations);
+            }
+            if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
+              List<Map<String, String>> resExternalIds = fetchUserExternalIdentity(userId);
+              result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
+            }
+          }
+        } else {
+          // fetch user external identity
+          List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
+          result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
+        }
         result.putAll(privateResult);
       }
     } catch (Exception e) {
@@ -296,6 +322,79 @@ public class UserProfileReadActor extends BaseActor {
       response.put(JsonKey.RESPONSE, result);
     }
     return response;
+  }
+
+  /**
+   * fetch declared info from user_declaration table
+   *
+   * @param userId
+   * @return
+   */
+  private List<Map<String, Object>> fetchUserDeclarations(String userId) {
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.USER_ID, userId);
+    Response response =
+        cassandraOperation.getRecordsByProperties(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap);
+    List<Map<String, Object>> resExternalIds;
+    List<Map<String, Object>> finalRes = new ArrayList<>();
+    if (null != response && null != response.getResult()) {
+      resExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(resExternalIds)) {
+        resExternalIds.forEach(
+            item -> {
+              Map<String, String> declaredFields =
+                  (Map<String, String>) item.get(JsonKey.USER_INFO);
+              if (MapUtils.isNotEmpty(declaredFields)) {
+                decryptDeclarationFields(declaredFields);
+              }
+              declaredFields.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
+              declaredFields.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
+              declaredFields.put(JsonKey.ORG_ID, (String) item.get(JsonKey.ORG_ID));
+              finalRes.add(
+                  new HashMap<String, Object>() {
+                    {
+                      put((String) item.get(JsonKey.ROLE), declaredFields);
+                    }
+                  });
+            });
+      }
+    }
+    return finalRes;
+  }
+
+  private Map<String, String> decryptDeclarationFields(Map<String, String> declaredFields) {
+    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
+      declaredFields.put(
+          JsonKey.DECLARED_EMAIL,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL)));
+    }
+    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
+      declaredFields.put(
+          JsonKey.DECLARED_PHONE,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE)));
+    }
+    if (declaredFields.containsKey(JsonKey.DECLARED_DISTRICT)) {
+      Location location = getLocationId(declaredFields.get(JsonKey.DECLARED_DISTRICT));
+      if (location != null) {
+        declaredFields.put(JsonKey.DECLARED_DISTRICT, location.getCode());
+      }
+    }
+    if (declaredFields.containsKey(JsonKey.DECLARED_STATE)) {
+      Location location = getLocationId(declaredFields.get(JsonKey.DECLARED_STATE));
+      if (location != null) {
+        declaredFields.put(JsonKey.DECLARED_STATE, location.getCode());
+      }
+    }
+    return declaredFields;
+  }
+
+  private Location getLocationId(String value) {
+    LocationClientImpl locationClient = new LocationClientImpl();
+    Location location =
+        locationClient.getLocationById(
+            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), value);
+    return location;
   }
 
   @SuppressWarnings("unchecked")

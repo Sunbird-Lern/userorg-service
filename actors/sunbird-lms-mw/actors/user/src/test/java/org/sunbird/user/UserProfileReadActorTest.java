@@ -159,6 +159,66 @@ public class UserProfileReadActorTest {
   }
 
   @Test
+  public void testGetUserProfileV3SuccessWithFieldDeclaration() {
+    Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.DECLARATIONS);
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordsByProperties(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+        .thenReturn(getCassandraResponses(true));
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetUserProfileSuccessV3WithFieldDeclarationAndExternalIds() {
+    Request reqObj =
+        getProfileReadV3request(
+            VALID_USER_ID, JsonKey.DECLARATIONS.concat(",").concat(JsonKey.EXTERNAL_IDS));
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordsByProperties(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+        .thenReturn(getCassandraResponses(true));
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  private Request getProfileReadV3request(String userId, String fields) {
+    Request reqObj = new Request();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    innerMap.put(JsonKey.PRIVATE, false);
+    innerMap.put(JsonKey.VERSION, JsonKey.VERSION_3);
+    innerMap.put(JsonKey.FIELDS, fields);
+    reqMap = getUserProfileRequest(userId);
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(ActorOperations.GET_USER_PROFILE_V3.getValue());
+    setEsResponse(getUserResponseMap());
+    return reqObj;
+  }
+
+  private Response getCassandraResponses(boolean success) {
+    Response response = new Response();
+    if (success) {
+      List<Map<String, Object>> userList = new ArrayList<>();
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.USER_ID, VALID_USER_ID);
+      map.put(JsonKey.ROLE, "teacher");
+      Map<String, Object> userInfo = new HashMap<>();
+      userInfo.put(
+          JsonKey.DECLARED_EMAIL,
+          "ProZzR7/VhnWAewS3XjCHxVi5U8iDstpxBfgO89Ao/oHqBn9cmyQ9CnA5pT7//KkvF9QvRKpGkqv\n"
+              + "F9wmXYKjHs7J2mhT1MnarGOD2wDtVfFVEjPufgzbUvpwbSRgb0R+TQtMGOn7lhkDdxs1iV8l8A==");
+      map.put(JsonKey.USER_INFO, userInfo);
+      userList.add(map);
+      response.put(JsonKey.RESPONSE, userList);
+    }
+    return response;
+  }
+
+  @Test
   @Ignore
   public void testGetUserByEmailKeyFailureWithInvalidEmail() {
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
@@ -244,12 +304,12 @@ public class UserProfileReadActorTest {
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("30 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
 
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("30 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
