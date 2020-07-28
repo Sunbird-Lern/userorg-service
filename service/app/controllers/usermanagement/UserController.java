@@ -143,7 +143,7 @@ public class UserController extends BaseController {
   }
 
   public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
-    return handleGetUserProfile(
+    return handleGetUserProfileV3(
         ActorOperations.GET_USER_PROFILE_V3.getValue(),
         ProjectUtil.getLmsUserId(userId),
         httpRequest);
