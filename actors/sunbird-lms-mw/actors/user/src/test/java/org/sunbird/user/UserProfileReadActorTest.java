@@ -165,7 +165,7 @@ public class UserProfileReadActorTest {
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordsByProperties(
             JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
-        .thenReturn(getCassandraResponses(true));
+        .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
   }
@@ -179,7 +179,7 @@ public class UserProfileReadActorTest {
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordsByProperties(
             JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
-        .thenReturn(getCassandraResponses(true));
+        .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
   }
@@ -199,7 +199,7 @@ public class UserProfileReadActorTest {
     return reqObj;
   }
 
-  private Response getCassandraResponses(boolean success) {
+  private Response getUserDeclarationResponse(boolean success) {
     Response response = new Response();
     if (success) {
       List<Map<String, Object>> userList = new ArrayList<>();
