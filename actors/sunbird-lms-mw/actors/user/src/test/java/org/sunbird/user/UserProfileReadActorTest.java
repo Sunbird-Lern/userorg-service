@@ -205,6 +205,7 @@ public class UserProfileReadActorTest {
       List<Map<String, Object>> userList = new ArrayList<>();
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.USER_ID, VALID_USER_ID);
+      // todo This can be a role(persona) id/name Needs sync up with portal team
       map.put(JsonKey.ROLE, "teacher");
       Map<String, Object> userInfo = new HashMap<>();
       userInfo.put(

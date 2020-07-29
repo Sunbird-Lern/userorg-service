@@ -1061,6 +1061,7 @@ public final class JsonKey {
   public static final String USR_DECLARATION_TABLE = "user_declarations";
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
+  public static final String PERSONA = "persona";
 
   private JsonKey() {}
 }
