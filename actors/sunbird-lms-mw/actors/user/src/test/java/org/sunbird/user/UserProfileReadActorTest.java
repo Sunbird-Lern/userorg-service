@@ -187,7 +187,7 @@ public class UserProfileReadActorTest {
   private Request getProfileReadV3request(String userId, String fields) {
     Request reqObj = new Request();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    innerMap.put(JsonKey.REQUESTED_BY, VALID_USER_ID);
     innerMap.put(JsonKey.PRIVATE, false);
     innerMap.put(JsonKey.VERSION, JsonKey.VERSION_3);
     innerMap.put(JsonKey.FIELDS, fields);
