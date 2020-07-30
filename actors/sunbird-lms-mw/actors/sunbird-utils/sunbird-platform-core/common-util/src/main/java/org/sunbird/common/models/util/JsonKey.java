@@ -1063,6 +1063,11 @@ public final class JsonKey {
   public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";
   public static final String SELF_DECLARED_USER_OBJECT = "SELF_DECLARED_USER";
   public static final String DIKSHA_UUID = "Diksha UUID";
+  public static final String USER_INFO = "userInfo";
+  public static final String USR_DECLARATION_TABLE = "user_declarations";
+  public static final String ERROR_TYPE = "errorType";
+  public static final String DECLARATIONS = "declarations";
+  public static final String PERSONA = "persona";
 
   private JsonKey() {}
 }
