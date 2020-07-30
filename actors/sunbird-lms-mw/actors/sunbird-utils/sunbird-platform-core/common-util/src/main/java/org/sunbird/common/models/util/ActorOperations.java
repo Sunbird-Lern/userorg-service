@@ -178,7 +178,8 @@ public enum ActorOperations {
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
   V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers"),
-  CHECK_USER_EXISTENCEV2("checkUserExistenceV2");
+  CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
+  UPDATE_USER_DECLARATIONS("updateUserDeclarations");
 
   private String value;
 

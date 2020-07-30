@@ -15,6 +15,7 @@ import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
@@ -148,8 +149,7 @@ public class UserProfileUpdateActor extends BaseActor {
     List<UserDeclareEntity> selfDeclaredFields =
         UserUtil.transformExternalIdsToSelfDeclaredRequest(externalIds, userMap);
     userMap.put(JsonKey.DECLARATIONS, selfDeclaredFields);
-    return saveUserAttributes(
-        userMap, UserActorOperations.UPSERT_USER_SELF_DECLARED_DETAILS.getValue());
+    return saveUserAttributes(userMap, ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
   }
 
   private Future<Object> saveAddress(Map<String, Object> userMap, String operationType) {

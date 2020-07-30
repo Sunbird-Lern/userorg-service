@@ -17,8 +17,7 @@ public enum UserActorOperations {
   UPSERT_USER_ADDRESS_TO_ES("upsertUserAddressToES"),
   UPSERT_USER_EDUCATION_TO_ES("upsertUserEducationToES"),
   UPSERT_USER_JOB_PROFILE_TO_ES("upsertUserJobProfileToES"),
-  UPSERT_USER_ORG_DETAILS_TO_ES("upsertUserOrgDetailsToES"),
-  UPSERT_USER_SELF_DECLARED_DETAILS("upsertUserSelfDeclaredDetails");
+  UPSERT_USER_ORG_DETAILS_TO_ES("upsertUserOrgDetailsToES");
 
   private String value;
 
