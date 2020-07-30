@@ -893,7 +893,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.USER_ID, userId);
     requestData.put(JsonKey.ORGANISATION_ID, orgId);
     Response result =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByCompositeKey(
             userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData);
 
     List list = (List) result.get(JsonKey.RESPONSE);
@@ -1023,7 +1023,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.USER_ID, userId);
     requestData.put(JsonKey.ORGANISATION_ID, orgId);
     Response result =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByCompositeKey(
             userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData);
 
     List list = (List) result.get(JsonKey.RESPONSE);

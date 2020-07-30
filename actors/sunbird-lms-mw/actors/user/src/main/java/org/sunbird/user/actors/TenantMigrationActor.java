@@ -386,10 +386,11 @@ public class TenantMigrationActor extends BaseActor {
         LoggerEnum.INFO.name());
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     for (Map<String, Object> userOrg : userOrgList) {
+      Map<String, String> compositeKey = new LinkedHashMap<>(2);
+      compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
+      compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
       cassandraOperation.deleteRecord(
-          usrOrgDbInfo.getKeySpace(),
-          usrOrgDbInfo.getTableName(),
-          (String) userOrg.get(JsonKey.ID));
+          usrOrgDbInfo.getKeySpace(), usrOrgDbInfo.getTableName(), compositeKey);
     }
   }
 

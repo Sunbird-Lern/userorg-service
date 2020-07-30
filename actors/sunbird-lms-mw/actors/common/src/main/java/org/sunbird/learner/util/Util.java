@@ -522,7 +522,7 @@ public final class Util {
           "Util:registerChannel: Channel registration request data = " + reqString,
           LoggerEnum.DEBUG.name());
       regStatus =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
               reqString,
@@ -580,7 +580,7 @@ public final class Util {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-        HttpClientUtil.patch(
+          HttpClientUtil.patch(
               (ekStepBaseUrl
                       + PropertiesCache.getInstance()
                           .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
@@ -1227,17 +1227,26 @@ public final class Util {
   }
 
   public static List<Map<String, Object>> getUserOrgDetails(String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgDataList = null;
     List<Map<String, Object>> userOrganisations = new ArrayList<>();
     try {
-      Map<String, Object> reqMap = new WeakHashMap<>();
-      reqMap.put(JsonKey.USER_ID, userId);
-      reqMap.put(JsonKey.IS_DELETED, false);
+      List<String> ids = new ArrayList<>();
+      ids.add(userId);
       Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
-          cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
-      userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+          cassandraOperation.getRecordsByPrimaryKeys(
+              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), ids, JsonKey.USER_ID);
+      List<Map<String, Object>> userOrgList = new ArrayList<>();
+      userOrgDataList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      userOrgDataList
+          .stream()
+          .forEach(
+              (dataMap) -> {
+                if (null != dataMap.get(JsonKey.IS_DELETED)
+                    && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                  userOrgList.add(dataMap);
+                }
+              });
       if (CollectionUtils.isNotEmpty(userOrgList)) {
         List<String> organisationIds =
             userOrgList

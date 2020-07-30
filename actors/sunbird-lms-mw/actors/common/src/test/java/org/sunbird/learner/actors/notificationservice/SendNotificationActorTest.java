@@ -1,9 +1,18 @@
 package org.sunbird.learner.actors.notificationservice;
 
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,16 +37,6 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -73,23 +72,23 @@ public class SendNotificationActorTest {
 
   @Before
   public void beforeTest() {
-
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-      .getDecryptionServiceInstance(null))
-      .thenReturn(defaultDecryptionService);
+            .getDecryptionServiceInstance(null))
+        .thenReturn(defaultDecryptionService);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
-      .thenReturn(cassandraGetRecordById());
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+        .thenReturn(cassandraGetRecordById());
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
     when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("templateName");
-
   }
 
   private static Response cassandraGetRecordById() {
@@ -139,8 +138,8 @@ public class SendNotificationActorTest {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
-      .thenReturn(cassandraGetEmptyRecordById());
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+        .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -156,10 +155,9 @@ public class SendNotificationActorTest {
 
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
-      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     assertTrue(exc.getCode().equals(ResponseCode.notificationNotSent.getErrorCode()));
   }
-
 
   @Test
   public void testSendEmailFailureWithBlankTemplateName() {
@@ -180,7 +178,7 @@ public class SendNotificationActorTest {
     when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("");
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
-      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     assertTrue(exc.getCode().equals(ResponseCode.invalidParameterValue.getErrorCode()));
   }
 
@@ -189,8 +187,8 @@ public class SendNotificationActorTest {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
-      .thenReturn(cassandraGetEmptyRecordById());
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+        .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -210,9 +208,7 @@ public class SendNotificationActorTest {
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
-      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     assertTrue(exc.getCode().equals(ResponseCode.notificationNotSent.getErrorCode()));
   }
-
-
 }
