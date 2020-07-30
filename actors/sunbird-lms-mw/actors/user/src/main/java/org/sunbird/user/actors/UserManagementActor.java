@@ -56,6 +56,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
+import scala.annotation.meta.param;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -187,6 +188,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
+    // update provider from channel to orgId
+    updateProviderWithOrgId(userMap);
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (!isPrivate) {
@@ -281,6 +284,37 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private void updateProviderWithOrgId(Map<String, Object> userMap) {
+    if (MapUtils.isNotEmpty(userMap)) {
+      Set<String> providerSet = new HashSet<>();
+      if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
+        providerSet.add((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER));
+      } else {
+        List<Map<String, String>> extList =
+            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+        if (CollectionUtils.isNotEmpty(extList)) {
+          for (Map<String, String> extId : extList) {
+            providerSet.add(extId.get(JsonKey.PROVIDER));
+          }
+        }
+      }
+      Map<String, String> orgProviderMap =
+          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
+      if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
+        userMap.put(
+            JsonKey.EXTERNAL_ID_PROVIDER,
+            orgProviderMap.get((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER)));
+      }
+      if (CollectionUtils.isNotEmpty(
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
+        for (Map<String, String> externalId :
+            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
+          externalId.put(JsonKey.PROVIDER, orgProviderMap.get(externalId.get(JsonKey.PROVIDER)));
+        }
+      }
+    }
   }
 
   private void updateLocationCodeToIds(List<Map<String, String>> externalIds) {
@@ -910,7 +944,6 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE);
     convertValidatedLocationCodesToIDs(userMap);
-
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
