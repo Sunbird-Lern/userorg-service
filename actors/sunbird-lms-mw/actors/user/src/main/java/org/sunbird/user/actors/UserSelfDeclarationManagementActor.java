@@ -17,8 +17,8 @@ import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
-  tasks = {"updateUserDeclarations"},
-  asyncTasks = {"updateUserDeclarations"}
+  tasks = {"upsertUserSelfDeclarations"},
+  asyncTasks = {"upsertUserSelfDeclarations"}
 )
 public class UserSelfDeclarationManagementActor extends BaseActor {
 
@@ -32,7 +32,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserSelfDeclaredDetails(request);
     } else {
-      onReceiveUnsupportedOperation("updateUserDeclarations");
+      onReceiveUnsupportedOperation("upsertUserSelfDeclarations");
     }
   }
 
@@ -66,7 +66,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
       } catch (Exception e) {
         errMsgs.add(e.getMessage());
         ProjectLogger.log(
-            "UserSelfDeclarationManagementActor:upsertUserSelfDeclaredDetails: Exception occurred with error message = "
+            "UserSelfDeclarationManagementActor:upsertUserSelfDeclarations: Exception occurred with error message = "
                 + e.getMessage(),
             e);
       }
