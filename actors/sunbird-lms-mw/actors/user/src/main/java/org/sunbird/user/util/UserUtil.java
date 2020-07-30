@@ -853,7 +853,7 @@ public class UserUtil {
     }
   }
 
-  public static List<UserDeclareEntity> transformSelfDeclaredExternalIds(
+  public static List<UserDeclareEntity> transformExternalIdsToSelfDeclaredRequest(
       List<Map<String, String>> externalIds, Map<String, Object> requestMap) {
     List<UserDeclareEntity> selfDeclaredFieldsList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(externalIds)) {

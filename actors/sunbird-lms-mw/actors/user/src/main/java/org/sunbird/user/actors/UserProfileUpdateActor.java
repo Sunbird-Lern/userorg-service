@@ -146,7 +146,7 @@ public class UserProfileUpdateActor extends BaseActor {
   private Future<Object> saveUserSelfDeclareExternalIds(
       Map<String, Object> userMap, List<Map<String, String>> externalIds) {
     List<UserDeclareEntity> selfDeclaredFields =
-        UserUtil.transformSelfDeclaredExternalIds(externalIds, userMap);
+        UserUtil.transformExternalIdsToSelfDeclaredRequest(externalIds, userMap);
     userMap.put(JsonKey.DECLARATIONS, selfDeclaredFields);
     return saveUserAttributes(
         userMap, UserActorOperations.UPSERT_USER_SELF_DECLARED_DETAILS.getValue());
