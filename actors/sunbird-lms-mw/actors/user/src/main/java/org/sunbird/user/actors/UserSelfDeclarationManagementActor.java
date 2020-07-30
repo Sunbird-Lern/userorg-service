@@ -9,12 +9,12 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
   tasks = {"updateUserDeclarations"},
@@ -27,7 +27,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    if (ActorOperations.UPDATE_USER_DECLARATIONS
+    if (UserActorOperations.UPSERT_USER_SELF_DECLARATIONS
         .getValue()
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserSelfDeclaredDetails(request);

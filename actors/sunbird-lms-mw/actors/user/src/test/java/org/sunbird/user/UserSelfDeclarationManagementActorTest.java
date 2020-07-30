@@ -26,7 +26,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -36,6 +35,7 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.actors.UserSelfDeclarationManagementActor;
+import org.sunbird.user.util.UserActorOperations;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -115,7 +115,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
+    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
 
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(addUserDeclaredEntity());
@@ -136,7 +136,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
+    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(addUserDeclaredEntity());
     list.add(removeUserDeclaredEntity());
@@ -157,7 +157,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
+    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(editOrgChangeUserDeclaredEntity());
     Map<String, Object> requestMap = new HashMap<>();
