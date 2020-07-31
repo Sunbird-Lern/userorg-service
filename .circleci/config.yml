@@ -17,6 +17,7 @@ jobs:
          name: Analyze on SonarCloud
          command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/service/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/user/target/site/jacoco/jacoco.xml
 
+
 workflows:
   version: 2.1
   workflow:
