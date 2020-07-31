@@ -50,7 +50,7 @@ import scala.concurrent.Promise;
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
-  private ElasticSearchService esUtil;
+  private static ElasticSearchService esService;
 
   @Before
   public void beforeEachTest() {
@@ -75,8 +75,8 @@ public class UserUtilTest {
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
     PowerMockito.mockStatic(EsClientFactory.class);
-    esUtil = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
     PowerMockito.mockStatic(Util.class);
   }
@@ -205,9 +205,8 @@ public class UserUtilTest {
     Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
         .thenReturn(promise.future());
-    PowerMockito.verifyZeroInteractions(esUtil);
     Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
     Assert.assertTrue(true);
   }
