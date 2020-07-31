@@ -1,8 +1,13 @@
 package org.sunbird.user.dao;
 
-import org.sunbird.common.request.Request;
+import java.util.List;
+import java.util.Map;
 
 public interface UserExternalIdentityDao {
 
-  String getUserId(Request request);
+  public String getUserIdByExternalId(String extId, String provider, String idType);
+
+  public List<Map<String, String>> getUserExternalIds(String userId);
+
+  public List<Map<String, Object>> getUserSelfDeclaredDetails(String userId);
 }

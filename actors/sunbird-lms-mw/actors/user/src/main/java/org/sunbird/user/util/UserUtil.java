@@ -28,11 +28,11 @@ import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
 import org.sunbird.common.services.impl.ProfileCompletenessFactory;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.SocialMediaType;
@@ -40,11 +40,14 @@ import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
+import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
@@ -68,6 +71,8 @@ public class UserUtil {
   private static UserExternalIdentityDao userExternalIdentityDao =
       new UserExternalIdentityDaoImpl();
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private static UserExternalIdentityService userExternalIdentityService =
+      new UserExternalIdentityServiceImpl();
   static Random rand = new Random(System.nanoTime());
   private static final String[] alphabet =
       new String[] {
@@ -240,9 +245,18 @@ public class UserUtil {
   }
 
   public static String getUserIdFromExternalId(Map<String, Object> userMap) {
-    Request request = new Request();
-    request.setRequest(userMap);
-    return userExternalIdentityDao.getUserId(request);
+    String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
+    String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
+    String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
+    return userExternalIdentityService.getUser(extId, provider, idType);
+  }
+
+  public static String getUserId(Map<String, Object> userMap) {
+    String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
+    String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
+    String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
+    Map<String, String> providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
+    return userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
   }
 
   @SuppressWarnings("unchecked")
@@ -714,7 +728,7 @@ public class UserUtil {
   }
 
   public static void validateUserExternalIds(User user) {
-    List<Map<String, String>> dbResExternalIds = getUserExternalIds(user.getUserId());
+    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId());
     List<Map<String, String>> externalIds = user.getExternalIds();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
@@ -732,6 +746,18 @@ public class UserUtil {
         }
       }
     }
+  }
+
+  public static List<Map<String, String>> getExternalIds(String userId) {
+    List<Map<String, String>> dbResExternalIds =
+        userExternalIdentityService.getUserExternalIds(userId);
+    List<Map<String, String>> dbSelfDeclaredExternalIds =
+        userExternalIdentityService.getSelfDeclaredDetails(userId);
+
+    if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
+      dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+    }
+    return dbResExternalIds;
   }
 
   @SuppressWarnings("unchecked")
@@ -825,6 +851,123 @@ public class UserUtil {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
+  }
+
+  public static List<UserDeclareEntity> transformExternalIdsToSelfDeclaredRequest(
+      List<Map<String, String>> externalIds, Map<String, Object> requestMap) {
+    List<UserDeclareEntity> selfDeclaredFieldsList = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(externalIds)) {
+      String currOrgId =
+          updateAddOrEditDeclaredFieldsAndGetOrg(externalIds, selfDeclaredFieldsList, requestMap);
+      UserDeclareEntity removeDeclareFields =
+          getRemoveDeclaredFields(externalIds, currOrgId, requestMap);
+
+      if (null != removeDeclareFields) {
+        selfDeclaredFieldsList.add(removeDeclareFields);
+      }
+    }
+    return selfDeclaredFieldsList;
+  }
+
+  private static UserDeclareEntity getRemoveDeclaredFields(
+      List<Map<String, String>> externalIds, String currOrgId, Map<String, Object> requestMap) {
+    UserDeclareEntity userDeclareEntity = null;
+    String prevOrgId = "";
+    Map<String, Object> userInfo = new HashMap<>();
+    for (Map<String, String> extIdMap : externalIds) {
+      if (JsonKey.REMOVE.equals(extIdMap.get(JsonKey.OPERATION)) && !prevOrgId.equals(currOrgId)) {
+        prevOrgId = extIdMap.get(JsonKey.ORIGINAL_PROVIDER);
+        String idType = extIdMap.get(JsonKey.ORIGINAL_ID_TYPE);
+        String value = extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
+        userInfo.put(idType, value);
+      }
+    }
+    if (MapUtils.isNotEmpty(userInfo)) {
+      userDeclareEntity = new UserDeclareEntity();
+      userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+      userDeclareEntity.setOrgId(prevOrgId);
+      userDeclareEntity.setUserInfo(userInfo);
+      userDeclareEntity.setUserId((String) requestMap.get(JsonKey.USER_ID));
+      userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setOperation(JsonKey.REMOVE);
+    }
+    return userDeclareEntity;
+  }
+
+  private static String updateAddOrEditDeclaredFieldsAndGetOrg(
+      List<Map<String, String>> externalIds,
+      List<UserDeclareEntity> userDeclareEntities,
+      Map<String, Object> requestMap) {
+    String currOrgId = "";
+    Map<String, Object> userInfo = new HashMap<>();
+    for (Map<String, String> extIdMap : externalIds) {
+      if (JsonKey.ADD.equals(extIdMap.get(JsonKey.OPERATION))
+          || JsonKey.EDIT.equals(extIdMap.get(JsonKey.OPERATION))) {
+        String idType = extIdMap.get(JsonKey.ORIGINAL_ID_TYPE);
+        String value = extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
+        currOrgId = extIdMap.get(JsonKey.ORIGINAL_PROVIDER);
+        userInfo.put(idType, value);
+      }
+    }
+    if (MapUtils.isNotEmpty(userInfo)) {
+      UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+      userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+      userDeclareEntity.setStatus(JsonKey.PENDING);
+      userDeclareEntity.setOrgId(currOrgId);
+      userDeclareEntity.setUserInfo(userInfo);
+      userDeclareEntity.setUserId((String) requestMap.get(JsonKey.USER_ID));
+      userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setOperation(JsonKey.ADD);
+      userDeclareEntities.add(userDeclareEntity);
+    }
+    return currOrgId;
+  }
+
+  public static String fetchProviderByOrgId(String orgId) {
+    try {
+      if (StringUtils.isNotBlank(orgId)) {
+        Future<Map<String, Object>> esOrgResF =
+            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+        Map<String, Object> org =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
+
+        if (null != org && !org.isEmpty()) {
+          return (String) org.get(JsonKey.CHANNEL);
+        }
+      }
+    } catch (Exception ex) {
+      ProjectLogger.log(ex.getMessage(), ex);
+    }
+    return "";
+  }
+
+  public static Map<String, String> fetchOrgIdByProvider(List<String> providers) {
+    Map<String, String> providerOrgMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(providers)) {
+      try {
+        Map<String, Object> searchQueryMap = new HashMap<>();
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(JsonKey.IS_ROOT_ORG, true);
+        filters.put(JsonKey.CHANNEL, providers);
+        searchQueryMap.put(JsonKey.FILTERS, filters);
+        SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);
+        Future<Map<String, Object>> esOrgResF =
+            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
+        Map<String, Object> esResOrg =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
+        List<Map<String, Object>> orgList =
+            (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
+        if (CollectionUtils.isNotEmpty(orgList)) {
+          for (Map<String, Object> org : orgList) {
+            providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+          }
+        }
+
+      } catch (Exception ex) {
+        ProjectLogger.log(ex.getMessage(), ex);
+      }
+    }
+    return providerOrgMap;
   }
 }
 
