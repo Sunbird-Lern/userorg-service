@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +26,16 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
+import scala.concurrent.Future;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -45,7 +50,7 @@ import org.sunbird.models.user.UserDeclareEntity;
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
-  private static ElasticSearchService esService;
+  private ElasticSearchService esUtil;
 
   @Before
   public void beforeEachTest() {
@@ -70,8 +75,8 @@ public class UserUtilTest {
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
     PowerMockito.mockStatic(EsClientFactory.class);
-    esService = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    esUtil = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
 
     PowerMockito.mockStatic(Util.class);
   }
@@ -179,6 +184,32 @@ public class UserUtilTest {
     List<UserDeclareEntity> userDeclareEntityList =
         UserUtil.transformExternalIdsToSelfDeclaredRequest(externalIds, requestMap);
     Assert.assertEquals("add", userDeclareEntityList.get(0).getOperation());
+  }
+
+  @Test
+  public void testfetchOrgIdByProvider() {
+    List<String> providers = new ArrayList<>();
+    providers.add("channel004");
+
+    Map<String, Object> orgMap = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+
+    orgMap.put("id", "1234");
+    orgMap.put("channel", "channel004");
+    orgList.add(orgMap);
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, orgList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    Future<Map<String, Object>> test = promise.future();
+    SearchDTO searchDTO = new SearchDTO();
+    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+    when(esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+        .thenReturn(promise.future());
+    PowerMockito.verifyZeroInteractions(esUtil);
+    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
+    Assert.assertTrue(true);
   }
 
   private List<Map<String, String>> getExternalIds() {
