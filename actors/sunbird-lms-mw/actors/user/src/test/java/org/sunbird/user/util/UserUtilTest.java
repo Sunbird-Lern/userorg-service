@@ -27,6 +27,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -51,6 +52,9 @@ public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
+  private static EncryptionService encryptionService =
+      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+          null);
 
   @Before
   public void beforeEachTest() {
@@ -209,6 +213,23 @@ public class UserUtilTest {
         .thenReturn(promise.future());
     Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
     Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testEncryptDeclareFields() throws Exception {
+    List<Map<String, Object>> declarations = new ArrayList<>();
+    Map<String, Object> declareFieldMap = new HashMap<>();
+    declareFieldMap.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    declareFieldMap.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
+    declarations.add(declareFieldMap);
+    try {
+      UserUtil.encryptDeclarationFields(declarations);
+      Assert.assertEquals(
+          encryptionService.encryptData("abc@gmail.com"),
+          declarations.get(0).get(JsonKey.DECLARED_EMAIL));
+    } catch (Exception ex) {
+      Assert.assertTrue(false);
+    }
   }
 
   private List<Map<String, String>> getExternalIds() {
