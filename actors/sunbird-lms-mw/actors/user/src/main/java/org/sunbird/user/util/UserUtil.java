@@ -883,12 +883,13 @@ public class UserUtil {
       }
     }
     if (MapUtils.isNotEmpty(userInfo)) {
-      userDeclareEntity = new UserDeclareEntity();
-      userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
-      userDeclareEntity.setOrgId(prevOrgId);
-      userDeclareEntity.setUserInfo(userInfo);
-      userDeclareEntity.setUserId((String) requestMap.get(JsonKey.USER_ID));
-      userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity =
+          new UserDeclareEntity(
+              (String) requestMap.get(JsonKey.USER_ID),
+              prevOrgId,
+              JsonKey.TEACHER.toLowerCase(),
+              userInfo);
+      userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.REMOVE);
     }
     return userDeclareEntity;
@@ -910,13 +911,14 @@ public class UserUtil {
       }
     }
     if (MapUtils.isNotEmpty(userInfo)) {
-      UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
-      userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
-      userDeclareEntity.setStatus(JsonKey.PENDING);
-      userDeclareEntity.setOrgId(currOrgId);
-      userDeclareEntity.setUserInfo(userInfo);
-      userDeclareEntity.setUserId((String) requestMap.get(JsonKey.USER_ID));
+      UserDeclareEntity userDeclareEntity =
+          new UserDeclareEntity(
+              (String) requestMap.get(JsonKey.USER_ID),
+              currOrgId,
+              JsonKey.TEACHER.toLowerCase(),
+              userInfo);
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.ADD);
       userDeclareEntities.add(userDeclareEntity);
     }
@@ -968,6 +970,40 @@ public class UserUtil {
       }
     }
     return providerOrgMap;
+  }
+
+  public static void encryptDeclarationFields(List<Map<String, Object>> declarations)
+      throws Exception {
+    for (Map<String, Object> declareFields : declarations) {
+      Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
+      for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
+        String key = userInfo.getKey();
+        String value = (String) userInfo.getValue();
+        if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
+          userInfoMap.put(key, encryptionService.encryptData(value));
+        }
+      }
+    }
+  }
+
+  public static UserDeclareEntity createUserDeclaredObject(Map<String, Object> declareFieldMap) {
+    UserDeclareEntity userDeclareEntity =
+        new UserDeclareEntity(
+            (String) declareFieldMap.get(JsonKey.USER_ID),
+            (String) declareFieldMap.get(JsonKey.ORG_ID),
+            (String) declareFieldMap.get(JsonKey.PERSONA),
+            (Map<String, Object>) declareFieldMap.get(JsonKey.INFO),
+            (String) declareFieldMap.get(JsonKey.STATUS),
+            (String) declareFieldMap.get(JsonKey.ERR_TYPE));
+
+    if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.OPERATION))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOperationName);
+    }
+    userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
+    userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
+    userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+
+    return userDeclareEntity;
   }
 }
 

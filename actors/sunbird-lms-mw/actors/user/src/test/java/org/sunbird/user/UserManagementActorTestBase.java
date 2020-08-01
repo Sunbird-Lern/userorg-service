@@ -219,11 +219,11 @@ public abstract class UserManagementActorTestBase {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
@@ -322,5 +322,21 @@ public abstract class UserManagementActorTestBase {
       user.setRootOrgId("custodianOrgId");
     }
     return user;
+  }
+
+  public Map createUpdateUserDeclrationRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
+    Map<String, Object> userDeclareFieldMap = new HashMap<>();
+    userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
+    userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
+    userDeclareFieldMap.put(JsonKey.PERSONA, "teacher");
+    userDeclareFieldMap.put(JsonKey.INFO, userInfo);
+    List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
+    userDeclareEntityList.add(userDeclareFieldMap);
+    request.put(JsonKey.DECLARATIONS, userDeclareEntityList);
+    return request;
   }
 }
