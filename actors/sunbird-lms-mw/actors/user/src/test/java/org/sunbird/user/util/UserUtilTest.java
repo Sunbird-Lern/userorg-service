@@ -223,6 +223,7 @@ public class UserUtilTest {
     try {
       UserUtil.encryptDeclarationFields(declarations);
     } catch (Exception ex) {
+
     }
     Assert.assertTrue(true);
   }
