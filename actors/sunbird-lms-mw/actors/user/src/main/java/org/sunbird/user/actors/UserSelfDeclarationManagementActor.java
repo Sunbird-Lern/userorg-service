@@ -8,10 +8,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.util.UserActorOperations;
@@ -43,9 +45,11 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
 
     String userId = (String) requestMap.get(JsonKey.USER_ID);
     List<Map<String, Object>> responseDeclareFields = new ArrayList<>();
+    Response response = new Response();
+    List<String> errMsgs = new ArrayList<>();
+    List<UserDeclareEntity> responseSelfDeclaredLists = new ArrayList<>();
+
     if (CollectionUtils.isNotEmpty(selfDeclaredFields)) {
-      Response response = new Response();
-      List<String> errMsgs = new ArrayList<>();
       try {
         for (UserDeclareEntity userDeclareEntity : selfDeclaredFields) {
           switch (userDeclareEntity.getOperation()) {
@@ -61,7 +65,10 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
                   userDeclareEntity.getOrgId(),
                   userDeclareEntity.getPersona());
               break;
+            default:
+              ProjectCommonException.throwClientErrorException(ResponseCode.invalidOperationName);
           }
+          responseSelfDeclaredLists.add(userDeclareEntity);
         }
       } catch (Exception e) {
         errMsgs.add(e.getMessage());
@@ -70,15 +77,12 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
                 + e.getMessage(),
             e);
       }
-      if (CollectionUtils.isNotEmpty(errMsgs)) {
-        response.put(JsonKey.ERROR_MSG, errMsgs);
-      } else {
-        response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-      }
-      sender().tell(response, self());
     }
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    if (CollectionUtils.isNotEmpty(errMsgs)) {
+      response.put(JsonKey.ERROR_MSG, errMsgs);
+    } else {
+      response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    }
     sender().tell(response, self());
   }
 
@@ -118,14 +122,13 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     List<Map<String, Object>> dbSelfDeclaredResults = getUserSelfDeclaredFields(userDeclareEntity);
     Map<String, Object> extIdMap =
         mapper.convertValue(userDeclareEntity, new TypeReference<Map<String, Object>>() {});
-    if (CollectionUtils.isEmpty(dbSelfDeclaredResults)) {
-      extIdMap.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
-    } else {
+    if (CollectionUtils.isNotEmpty(dbSelfDeclaredResults)) {
       deleteUserSelfDeclaredDetails(
           userDeclareEntity.getUserId(),
           userDeclareEntity.getOrgId(),
           userDeclareEntity.getPersona());
     }
+    extIdMap.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     extIdMap.remove(JsonKey.OPERATION);
     insertSelfDeclaredFields(extIdMap);
   }
@@ -154,16 +157,22 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     updateFieldsMap.put(JsonKey.USER_INFO, userDeclareEntity.getUserInfo());
     updateFieldsMap.put(JsonKey.STATUS, userDeclareEntity.getStatus());
     updateFieldsMap.put(JsonKey.ERROR_TYPE, userDeclareEntity.getErrorType());
-    updateFieldsMap.put(JsonKey.CREATED_BY, userDeclareEntity.getCreatedBy());
-    updateFieldsMap.put(JsonKey.CREATED_ON, userDeclareEntity.getCreatedOn());
     updateFieldsMap.put(JsonKey.UPDATED_BY, userDeclareEntity.getUpdatedBy());
     updateFieldsMap.put(
         JsonKey.UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, updateFieldsMap, compositeKey);
+        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey);
     return userDeclareEntity;
   }
 
+  /**
+   * Operation is a persona change : if existing orgId is equal to orgId in the request && existing
+   * persona is different from persona in request.
+   *
+   * @param userDeclareEntity
+   * @param dbSelfDeclaredResults
+   * @param removeDeclaredFields
+   */
   private void isPersonaEditOperation(
       UserDeclareEntity userDeclareEntity,
       List<Map<String, Object>> dbSelfDeclaredResults,
@@ -178,6 +187,14 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     }
   }
 
+  /**
+   * Operation is a Org change : if existing orgId is different to orgId in the request && existing
+   * persona is same as persona in request.
+   *
+   * @param userDeclareEntity
+   * @param dbSelfDeclaredResults
+   * @param removeDeclaredFields
+   */
   private void isOrgEditOperation(
       UserDeclareEntity userDeclareEntity,
       List<Map<String, Object>> dbSelfDeclaredResults,
@@ -192,6 +209,14 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     }
   }
 
+  /**
+   * Operation is to update both Org and Persona change : if existing orgId is different to orgId in
+   * the request && existing persona is also different from the persona in request.
+   *
+   * @param userDeclareEntity
+   * @param dbSelfDeclaredResults
+   * @param removeDeclaredFields
+   */
   private void isOrgAndPersonaEditOperation(
       UserDeclareEntity userDeclareEntity,
       List<Map<String, Object>> dbSelfDeclaredResults,

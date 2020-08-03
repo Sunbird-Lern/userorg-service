@@ -12,6 +12,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.responsecode.ResponseMessage;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -1115,6 +1116,41 @@ public class UserRequestValidator extends BaseRequestValidator {
   public void validateUserId(String uuid) {
     if (StringUtils.isNotEmpty(uuid) && !ProjectUtil.validateUUID(uuid)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestParameter);
+    }
+  }
+
+  public void validateUserDeclarationRequest(Request userDeclareRequest) {
+    try {
+      List<Map<String, Object>> declarations =
+          (List<Map<String, Object>>) userDeclareRequest.getRequest().get(JsonKey.DECLARATIONS);
+      if (CollectionUtils.isEmpty(declarations)) {
+        throw new ProjectCommonException(
+            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            MessageFormat.format(
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.DECLARATIONS),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      } else {
+        for (Map<String, Object> declareFields : declarations) {
+          String userId = (String) declareFields.get(JsonKey.USER_ID);
+          String orgId = (String) declareFields.get(JsonKey.ORG_ID);
+          String persona = (String) declareFields.get(JsonKey.PERSONA);
+          if (StringUtils.isBlank(userId)
+              || StringUtils.isBlank(orgId)
+              || StringUtils.isBlank(persona)) {
+            throw new ProjectCommonException(
+                ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                MessageFormat.format(
+                    ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
+                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+        }
+      }
+    } catch (Exception ex) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ex.getMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }

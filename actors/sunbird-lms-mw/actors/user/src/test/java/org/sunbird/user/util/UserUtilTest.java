@@ -211,6 +211,23 @@ public class UserUtilTest {
     Assert.assertTrue(true);
   }
 
+  @Test
+  public void testEncryptDeclareFields() throws Exception {
+    List<Map<String, Object>> declarations = new ArrayList<>();
+    Map<String, Object> declareFieldMap = new HashMap<>();
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
+    declareFieldMap.put(JsonKey.INFO, userInfo);
+    declarations.add(declareFieldMap);
+    try {
+      UserUtil.encryptDeclarationFields(declarations);
+    } catch (Exception ex) {
+
+    }
+    Assert.assertTrue(true);
+  }
+
   private List<Map<String, String>> getExternalIds() {
     List<Map<String, String>> externalIds = new ArrayList<>();
     Map<String, String> extId1 = new HashMap<>();

@@ -325,4 +325,20 @@ public class UserController extends BaseController {
         false,
         httpRequest);
   }
+
+  public CompletionStage<Result> updateUserDeclarations(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_DECLARATIONS.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateUserDeclarationRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 }

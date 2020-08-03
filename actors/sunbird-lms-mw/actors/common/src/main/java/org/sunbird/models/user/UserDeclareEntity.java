@@ -16,6 +16,31 @@ public class UserDeclareEntity {
   private Timestamp updatedOn;
   private String updatedBy;
 
+  public UserDeclareEntity() {}
+
+  public UserDeclareEntity(
+      String userId,
+      String orgId,
+      String persona,
+      Map<String, Object> userInfo,
+      String status,
+      String errorType) {
+    this.userId = userId;
+    this.orgId = orgId;
+    this.persona = persona;
+    this.userInfo = userInfo;
+    this.status = status;
+    this.errorType = errorType;
+  }
+
+  public UserDeclareEntity(
+      String userId, String orgId, String persona, Map<String, Object> userInfo) {
+    this.userId = userId;
+    this.orgId = orgId;
+    this.persona = persona;
+    this.userInfo = userInfo;
+  }
+
   public String getUserId() {
     return userId;
   }
