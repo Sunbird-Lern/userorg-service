@@ -40,7 +40,7 @@ public class CaptchaHelperTest {
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
     when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
         .thenReturn(s);
-    boolean isValidate = CaptchaHelper.validate("5ASD");
+    boolean isValidate = CaptchaHelper.validate("5ASD", null);
     assertTrue(isValidate);
   }
 }

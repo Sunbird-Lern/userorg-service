@@ -270,9 +270,10 @@ public class UserController extends BaseController {
       String searchKey, String searchValue, Http.Request httpRequest) {
     HashMap<String, Object> map = new HashMap<>();
     String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
+    String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
         && StringUtils.isNotEmpty(captcha)) {
-      if (!CaptchaHelper.validate(captcha)) {
+      if (!CaptchaHelper.validate(captcha, mobileApp)) {
         throw new ProjectCommonException(
             ResponseCode.invalidCaptcha.getErrorCode(),
             ResponseCode.invalidCaptcha.getErrorMessage(),

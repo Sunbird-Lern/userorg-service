@@ -1052,6 +1052,8 @@ public final class JsonKey {
   public static final String DECLARED_EMAIL = "declared-email";
   public static final String DECLARED_PHONE = "declared-phone";
   public static final String CAPTCHA_SECRET = "captcha_secret";
+  public static final String MOBILE_CAPTCHA_SECRET = "mobile_captcha_secret";
+  public static final String MOBILE_APP = "app";
   public static final String CAPTCHA_RESPONSE = "captchaResponse";
   public static final String ENABLE_CAPTCHA = "enable_captcha";
   public static final String DECLARED_STATE = "declared-state";
