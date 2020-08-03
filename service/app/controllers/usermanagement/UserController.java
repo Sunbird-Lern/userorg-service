@@ -4,7 +4,6 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -272,13 +271,11 @@ public class UserController extends BaseController {
     String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
     String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
-        && StringUtils.isNotEmpty(captcha)) {
-      if (!CaptchaHelper.validate(captcha, mobileApp)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidCaptcha.getErrorCode(),
-            ResponseCode.invalidCaptcha.getErrorMessage(),
-            ResponseCode.IM_A_TEAPOT.getResponseCode());
-      }
+        && CaptchaHelper.validate(captcha, mobileApp)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidCaptcha.getErrorCode(),
+          ResponseCode.invalidCaptcha.getErrorMessage(),
+          ResponseCode.IM_A_TEAPOT.getResponseCode());
     }
     map.put(JsonKey.KEY, searchKey);
     map.put(JsonKey.VALUE, searchValue);
