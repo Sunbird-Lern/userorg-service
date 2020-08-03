@@ -19,7 +19,7 @@ public class CaptchaHelper {
         "secret",
         StringUtils.isNotEmpty(mobileApp)
             ? ProjectUtil.getConfigValue(JsonKey.MOBILE_CAPTCHA_SECRET)
-            : ProjectUtil.getConfigValue(JsonKey.CAPTCHA_SECRET));
+            : ProjectUtil.getConfigValue(JsonKey.GOOGLE_CAPTCHA_PRIVATE_KEY));
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
     headers.put("Content-type", "application/json");
