@@ -271,7 +271,7 @@ public class UserController extends BaseController {
     String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
     String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
-        && CaptchaHelper.validate(captcha, mobileApp)) {
+        && !CaptchaHelper.validate(captcha, mobileApp)) {
       throw new ProjectCommonException(
           ResponseCode.invalidCaptcha.getErrorCode(),
           ResponseCode.invalidCaptcha.getErrorMessage(),
