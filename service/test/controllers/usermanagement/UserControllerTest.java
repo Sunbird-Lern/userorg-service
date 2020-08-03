@@ -2,6 +2,7 @@ package controllers.usermanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +14,8 @@ import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -26,8 +29,9 @@ import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.CaptchaHelper;
 
-@PrepareForTest(OnRequestHandler.class)
+@PrepareForTest({OnRequestHandler.class, CaptchaHelper.class})
 public class UserControllerTest extends BaseApplicationTest {
 
   private static String userId = "someUserId";
@@ -431,9 +435,10 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUserExists2() {
+  public void testCaptchaUserExists2() {
+    PowerMockito.mockStatic(CaptchaHelper.class);
+    when(CaptchaHelper.validate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 }
