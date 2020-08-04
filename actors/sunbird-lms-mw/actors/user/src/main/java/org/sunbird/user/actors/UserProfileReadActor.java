@@ -355,7 +355,7 @@ public class UserProfileReadActor extends BaseActor {
               declaredFields.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
               declaredFields.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
               declaredFields.put(JsonKey.ORG_ID, (String) item.get(JsonKey.ORG_ID));
-              declaredFields.put(JsonKey.PERSONA, (String) item.get(JsonKey.ROLE));
+              declaredFields.put(JsonKey.PERSONA, (String) item.get(JsonKey.PERSONA));
               finalRes.add(declaredFields);
             });
       }

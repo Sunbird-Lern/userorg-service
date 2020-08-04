@@ -993,9 +993,7 @@ public class UserUtil {
             (String) declareFieldMap.get(JsonKey.USER_ID),
             (String) declareFieldMap.get(JsonKey.ORG_ID),
             (String) declareFieldMap.get(JsonKey.PERSONA),
-            (Map<String, Object>) declareFieldMap.get(JsonKey.INFO),
-            (String) declareFieldMap.get(JsonKey.STATUS),
-            (String) declareFieldMap.get(JsonKey.ERR_TYPE));
+            (Map<String, Object>) declareFieldMap.get(JsonKey.INFO));
 
     if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.OPERATION))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidOperationName);
@@ -1003,9 +1001,13 @@ public class UserUtil {
     userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
     if (JsonKey.ADD.equals(userDeclareEntity.getOperation())) {
       userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setStatus(JsonKey.PENDING);
     } else {
       userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
     }
+    userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
+
     return userDeclareEntity;
   }
 }
