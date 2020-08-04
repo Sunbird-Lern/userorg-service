@@ -8,10 +8,10 @@ import org.sunbird.common.models.util.*;
 
 public class CaptchaHelper {
 
-  static String captchaUrl = null;
-  static String mobilePrivateKey = null;
-  static String portalPrivateKey = null;
-  public static final ObjectMapper mapper = new ObjectMapper();
+  String captchaUrl = null;
+  String mobilePrivateKey = null;
+  String portalPrivateKey = null;
+  ObjectMapper mapper = new ObjectMapper();
 
   public CaptchaHelper() {
     captchaUrl = "https://www.google.com/recaptcha/api/siteverify";
