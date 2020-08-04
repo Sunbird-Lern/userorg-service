@@ -44,7 +44,9 @@ import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
+import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
@@ -56,6 +58,7 @@ import scala.concurrent.Future;
     "getUserDetailsByLoginId",
     "getUserProfile",
     "getUserProfileV2",
+    "getUserProfileV3",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -74,6 +77,8 @@ public class UserProfileReadActor extends BaseActor {
   private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserService userService = UserServiceImpl.getInstance();
+  private static UserExternalIdentityService userExternalIdentityService =
+      new UserExternalIdentityServiceImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -88,6 +93,9 @@ public class UserProfileReadActor extends BaseActor {
         break;
       case "getUserProfileV2":
         getUserProfileV2(request);
+        break;
+      case "getUserProfileV3":
+        getUserProfileV3(request);
         break;
       case "getUserDetailsByLoginId":
         getUserDetailsByLoginId(request);
@@ -116,6 +124,11 @@ public class UserProfileReadActor extends BaseActor {
     sender().tell(response, self());
   }
 
+  private void getUserProfileV3(Request actorMessage) {
+    Response response = getUserProfileData(actorMessage);
+    sender().tell(response, self());
+  }
+
   private Response getUserProfileData(Request actorMessage) {
     Map<String, Object> userMap = actorMessage.getRequest();
     String id = (String) userMap.get(JsonKey.USER_ID);
@@ -134,7 +147,7 @@ public class UserProfileReadActor extends BaseActor {
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ID_TYPE));
       } else {
-        userId = userExternalIdentityDao.getUserIdByExternalId(id, provider, idType);
+        userId = userExternalIdentityService.getUser(id, provider, idType);
         if (userId == null) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.externalIdNotFound,
@@ -240,9 +253,26 @@ public class UserProfileReadActor extends BaseActor {
                 ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId);
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
-        // fetch user external identity
-        List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
-        result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
+
+        // if version is 3 , then read declarations from user_declarations table
+        String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
+        if (StringUtils.isNotEmpty(version) && version.equals(JsonKey.VERSION_3)) {
+          if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
+            String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
+            if (requestFields.contains(JsonKey.DECLARATIONS)) {
+              List<Map<String, String>> declarations = fetchUserDeclarations(userId);
+              result.put(JsonKey.DECLARATIONS, declarations);
+            }
+            if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
+              List<Map<String, String>> resExternalIds = fetchUserExternalIdentity(userId);
+              result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
+            }
+          }
+        } else {
+          // fetch user external identity
+          List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
+          result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
+        }
         result.putAll(privateResult);
       }
     } catch (Exception e) {
@@ -298,62 +328,113 @@ public class UserProfileReadActor extends BaseActor {
     return response;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Map<String, String>> fetchUserExternalIdentity(String userId) {
+  /**
+   * fetch declared info from user_declaration table
+   *
+   * @param userId
+   * @return
+   */
+  private List<Map<String, String>> fetchUserDeclarations(String userId) {
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
-    List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+        cassandraOperation.getRecordsByProperties(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap);
+    List<Map<String, Object>> resExternalIds;
+    List<Map<String, String>> finalRes = new ArrayList<>();
     if (null != response && null != response.getResult()) {
-      dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
-      if (null != dbResExternalIds) {
-        dbResExternalIds
-            .stream()
-            .forEach(
-                s -> {
-                  if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
-                      && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                    if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                        || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-
-                      String decrytpedOriginalExternalId =
-                          UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                      s.put(JsonKey.ID, decrytpedOriginalExternalId);
-
-                    } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                        || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                      LocationClientImpl locationClient = new LocationClientImpl();
-                      Location location =
-                          locationClient.getLocationById(
-                              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                              s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                      s.put(
-                          JsonKey.ID,
-                          (location == null
-                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
-                              : location.getCode()));
-                    } else {
-                      s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                    }
-                    s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
-                    s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-                  } else {
-                    s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
-                  }
-                  s.remove(JsonKey.EXTERNAL_ID);
-                  s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
-                  s.remove(JsonKey.ORIGINAL_ID_TYPE);
-                  s.remove(JsonKey.ORIGINAL_PROVIDER);
-                  s.remove(JsonKey.CREATED_BY);
-                  s.remove(JsonKey.LAST_UPDATED_BY);
-                  s.remove(JsonKey.LAST_UPDATED_ON);
-                  s.remove(JsonKey.CREATED_ON);
-                  s.remove(JsonKey.USER_ID);
-                  s.remove(JsonKey.SLUG);
-                });
+      resExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(resExternalIds)) {
+        resExternalIds.forEach(
+            item -> {
+              Map<String, String> declaredFields =
+                  (Map<String, String>) item.get(JsonKey.USER_INFO);
+              if (MapUtils.isNotEmpty(declaredFields)) {
+                decryptDeclarationFields(declaredFields);
+              }
+              declaredFields.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
+              declaredFields.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
+              declaredFields.put(JsonKey.ORG_ID, (String) item.get(JsonKey.ORG_ID));
+              declaredFields.put(JsonKey.PERSONA, (String) item.get(JsonKey.ROLE));
+              finalRes.add(declaredFields);
+            });
       }
     }
+    return finalRes;
+  }
+
+  private Map<String, String> decryptDeclarationFields(Map<String, String> declaredFields) {
+    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
+      declaredFields.put(
+          JsonKey.DECLARED_EMAIL,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL)));
+    }
+    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
+      declaredFields.put(
+          JsonKey.DECLARED_PHONE,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE)));
+    }
+    return declaredFields;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Map<String, String>> fetchUserExternalIdentity(String userId) {
+
+    List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId);
+
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
+      // update provider with channel from orgId
+      String orgId = dbResExternalIds.get(0).get(JsonKey.ORIGINAL_PROVIDER);
+      String provider = UserUtil.fetchProviderByOrgId(orgId);
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
+                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
+                  if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                      || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+
+                    String decrytpedOriginalExternalId =
+                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    s.put(JsonKey.ID, decrytpedOriginalExternalId);
+
+                  } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
+                      || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
+                    LocationClientImpl locationClient = new LocationClientImpl();
+                    Location location =
+                        locationClient.getLocationById(
+                            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                            s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    s.put(
+                        JsonKey.ID,
+                        (location == null
+                            ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
+                            : location.getCode()));
+                  } else {
+                    s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                  }
+                  s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
+                  s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
+                } else {
+                  s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
+                }
+
+                s.put(JsonKey.PROVIDER, provider);
+                s.remove(JsonKey.EXTERNAL_ID);
+                s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
+                s.remove(JsonKey.ORIGINAL_ID_TYPE);
+                s.remove(JsonKey.ORIGINAL_PROVIDER);
+                s.remove(JsonKey.CREATED_BY);
+                s.remove(JsonKey.LAST_UPDATED_BY);
+                s.remove(JsonKey.LAST_UPDATED_ON);
+                s.remove(JsonKey.CREATED_ON);
+                s.remove(JsonKey.USER_ID);
+                s.remove(JsonKey.SLUG);
+              });
+    }
+
     return dbResExternalIds;
   }
 

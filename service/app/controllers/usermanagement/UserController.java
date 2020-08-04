@@ -141,6 +141,13 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV3(
+        ActorOperations.GET_USER_PROFILE_V3.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
@@ -224,6 +231,29 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  private CompletionStage<Result> handleGetUserProfileV3(
+      String operation, String userId, Http.Request httpRequest) {
+    final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    final String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+    userId = ProjectUtil.getLmsUserId(userId);
+    return handleRequest(
+        operation,
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          request.getContext().put(JsonKey.PRIVATE, isPrivate);
+          request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          return null;
+        },
+        userId,
+        JsonKey.USER_ID,
+        false,
+        httpRequest);
+  }
+
   public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
     HashMap<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, key);
@@ -270,7 +300,6 @@ public class UserController extends BaseController {
     HashMap<String, Object> map = new HashMap<>();
     String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
     String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
-
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
         && !new CaptchaHelper().validate(captcha, mobileApp)) {
       throw new ProjectCommonException(
@@ -292,6 +321,22 @@ public class UserController extends BaseController {
         null,
         null,
         false,
+        httpRequest);
+  }
+
+  public CompletionStage<Result> updateUserDeclarations(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_DECLARATIONS.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateUserDeclarationRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
         httpRequest);
   }
 }

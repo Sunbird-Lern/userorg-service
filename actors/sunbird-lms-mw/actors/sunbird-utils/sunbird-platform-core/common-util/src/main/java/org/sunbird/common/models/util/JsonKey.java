@@ -634,6 +634,7 @@ public final class JsonKey {
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USR_EXT_ID_DB = "user_external_identity";
+  public static final String USER_DECLARATION_DB = "user_declarations";
   public static final String USR_ORG_DB = "user_org";
   public static final String VALUE = "value";
   public static final String VER = "ver";
@@ -1060,6 +1061,11 @@ public final class JsonKey {
   public static final String DECLARED_STATE = "declared-state";
   public static final String DECLARED_DISTRICT = "declared-district";
   public static final String PENDING = "PENDING";
+  public static final String USER_INFO = "userInfo";
+  public static final String USR_DECLARATION_TABLE = "user_declarations";
+  public static final String ERROR_TYPE = "errorType";
+  public static final String DECLARATIONS = "declarations";
+  public static final String PERSONA = "persona";
 
   private JsonKey() {}
 }
