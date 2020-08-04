@@ -2,6 +2,7 @@ package controllers.usermanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -437,7 +438,8 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testCaptchaUserExists2() {
     PowerMockito.mockStatic(CaptchaHelper.class);
-    when(CaptchaHelper.validate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    CaptchaHelper captchaHelper = mock(CaptchaHelper.class);
+    when(captchaHelper.validate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
     assertTrue(getResponseStatus(result) == 200);
   }

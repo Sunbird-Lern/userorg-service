@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -23,7 +24,19 @@ import org.sunbird.common.models.util.ProjectUtil;
 public class CaptchaHelperTest {
 
   @Test
-  public void testCaptchaHelper() throws JsonProcessingException {
+  public void testCaptchaHelper() {
+    boolean isValidate = new CaptchaHelper().validate("5ASD", null);
+    assertTrue(isValidate);
+  }
+
+  @Test
+  public void testCaptchaHelperForPortal() {
+    boolean isValidate = new CaptchaHelper().validate("5ASD", "portal");
+    assertTrue(isValidate);
+  }
+
+  @Before
+  public void setup() throws JsonProcessingException {
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(ProjectUtil.class);
     Map map = new HashMap<String, String>();
@@ -33,7 +46,5 @@ public class CaptchaHelperTest {
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
     when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
         .thenReturn(s);
-    boolean isValidate = CaptchaHelper.validate("5ASD", null);
-    assertTrue(isValidate);
   }
 }
