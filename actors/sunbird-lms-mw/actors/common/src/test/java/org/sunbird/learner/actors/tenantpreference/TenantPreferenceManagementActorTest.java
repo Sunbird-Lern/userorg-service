@@ -93,20 +93,17 @@ public class TenantPreferenceManagementActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, "anyKey");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    map.put(JsonKey.DATA, new HashMap<>());
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
 
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertTrue(null != exception);
   }
 
   @Test
@@ -115,62 +112,14 @@ public class TenantPreferenceManagementActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.KEY, "differentKey");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    map.put(JsonKey.KEY, "teacher_declaration");
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
-
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
-  }
-
-  @Test
-  public void testCreateTanentPreferenceFailureWithInvalidOrgId() {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ROLE, "admin");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, "");
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
-    actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
-
-    subject.tell(actorMessage, probe.getRef());
-    ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
-  }
-
-  @Test
-  public void testCreateTanentPreferenceWithInvalidReqData() {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
-    actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
-
-    subject.tell(actorMessage, probe.getRef());
-    ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
   }
 
   @Test
@@ -352,9 +301,10 @@ public class TenantPreferenceManagementActorTest {
 
   private static Response cassandraGetRecordByProperty() {
     Response response = new Response();
-    List list = new ArrayList();
+    List<Map<String, Object>> list = new ArrayList();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, "anyKey");
+    map.put(JsonKey.ORG_ID, orgId);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;

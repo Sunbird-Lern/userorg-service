@@ -1,9 +1,12 @@
 package org.sunbird.learner.actors.tenantpreference;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -12,8 +15,8 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -31,8 +34,9 @@ import org.sunbird.learner.util.Util;
 public class TenantPreferenceManagementActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private Util.DbInfo tenantPreferenceDbInfo = Util.dbInfoMap.get(JsonKey.TENANT_PREFERENCE_DB);
+  private Util.DbInfo tenantPreferenceDbInfo = Util.dbInfoMap.get(JsonKey.TENANT_PREFERENCE_V2);
   private static final String DEFAULT_WILDCARD_ORG_ID = "*";
+  private ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -146,52 +150,51 @@ public class TenantPreferenceManagementActor extends BaseActor {
    *
    * @param actorMessage
    */
-  @SuppressWarnings("unchecked")
   private void createTenantPreference(Request actorMessage) {
-
-    String orgId = (String) actorMessage.getRequest().get(JsonKey.ROOT_ORG_ID);
+    Map<String, Object> req = actorMessage.getRequest();
+    String orgId = (String) req.get(JsonKey.ORG_ID);
     ProjectLogger.log(
         "TenantPreferenceManagementActor-createTenantPreference called for org: " + orgId);
-    validateRequest(actorMessage, true);
     List<Map<String, Object>> preferencesList = getPreferencesFromDB(orgId);
     Response finalResponse = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    List<Map<String, Object>> req =
-        (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.TENANT_PREFERENCE);
-    for (Map<String, Object> map : req) {
-      String key = (String) map.get(JsonKey.KEY);
-      boolean skip = false;
-
-      // abort creation of preferences if any of key is empty or blank
-      if (StringUtils.isBlank(key)) {
-        responseList.add(getResponseMap(orgId, key, "Preference key is null"));
-        skip = true;
-      }
-
-      // check whether already tenant preference exists for the given org id
-      for (Map<String, Object> m : preferencesList) {
-        if (key.equalsIgnoreCase((String) m.get(JsonKey.KEY))) {
-          responseList.add(getResponseMap(orgId, key, "Preference already exists for key: " + key));
-          // skip creation of the preference if already exists for the org
-          skip = true;
-          break;
+    String key = (String) req.get(JsonKey.KEY);
+    // check whether already tenant preference exists for the given org id
+    if (CollectionUtils.isNotEmpty(preferencesList)) {
+      for (Map<String, Object> preference : preferencesList) {
+        ProjectLogger.log(
+            "TenantPreferenceManagementActor-createTenantPreference key "
+                + key
+                + "already exists in the org "
+                + orgId);
+        if (key.equalsIgnoreCase((String) preference.get(JsonKey.KEY))) {
+          throw new ProjectCommonException(
+              ResponseCode.preferenceAlreadyExists.getErrorCode(),
+              MessageFormat.format(
+                  ResponseCode.preferenceAlreadyExists.getErrorMessage(), key, orgId),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
+    }
+    Map<String, Object> dbMap = new HashMap<>();
+    try {
       // create the preference if not already exists
-      if (!skip) {
-        Map<String, Object> dbMap = new HashMap<String, Object>();
-        dbMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
-        dbMap.put(JsonKey.ORG_ID, orgId);
-        dbMap.put(JsonKey.KEY, key);
-        dbMap.put(JsonKey.DATA, map.get(JsonKey.DATA));
+      dbMap.put(JsonKey.ORG_ID, orgId);
+      dbMap.put(JsonKey.KEY, key);
+      dbMap.put(JsonKey.DATA, serialize(req.get(JsonKey.DATA)));
+    } catch (Exception e) {
+      ProjectLogger.log("exception while adding preferences " + e.getMessage(), LoggerEnum.DEBUG);
+    }
+    Response response =
         cassandraOperation.insertRecord(
             tenantPreferenceDbInfo.getKeySpace(), tenantPreferenceDbInfo.getTableName(), dbMap);
-        responseList.add(getResponseMap(orgId, key, null));
-        finalResponse.getResult().put(key, JsonKey.SUCCESS);
-      }
-    }
-    finalResponse.getResult().put(JsonKey.RESPONSE, responseList);
+    finalResponse.getResult().put(JsonKey.ORG_ID, orgId);
+    finalResponse.getResult().put(JsonKey.KEY, key);
+    finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(finalResponse, self());
+  }
+
+  private String serialize(Object obj) throws Exception {
+    return mapper.writeValueAsString(obj);
   }
 
   private Map<String, Object> getResponseMap(String orgId, String key, String error) {
