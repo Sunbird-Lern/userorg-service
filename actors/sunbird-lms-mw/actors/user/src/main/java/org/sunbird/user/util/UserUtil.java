@@ -986,7 +986,8 @@ public class UserUtil {
     }
   }
 
-  public static UserDeclareEntity createUserDeclaredObject(Map<String, Object> declareFieldMap) {
+  public static UserDeclareEntity createUserDeclaredObject(
+      Map<String, Object> declareFieldMap, String callerId) {
     UserDeclareEntity userDeclareEntity =
         new UserDeclareEntity(
             (String) declareFieldMap.get(JsonKey.USER_ID),
@@ -1000,9 +1001,11 @@ public class UserUtil {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidOperationName);
     }
     userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
-    userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
-    userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
-
+    if (JsonKey.ADD.equals(userDeclareEntity.getOperation())) {
+      userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
+    } else {
+      userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+    }
     return userDeclareEntity;
   }
 }
