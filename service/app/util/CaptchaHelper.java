@@ -8,18 +8,23 @@ import org.sunbird.common.models.util.*;
 
 public class CaptchaHelper {
 
+  static String captchaUrl = null;
+  static String mobilePrivateKey = null;
+  static String portalPrivateKey = null;
   public static final ObjectMapper mapper = new ObjectMapper();
+
+  CaptchaHelper() {
+    captchaUrl = "https://www.google.com/recaptcha/api/siteverify";
+    mobilePrivateKey = ProjectUtil.getConfigValue(JsonKey.GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY);
+    portalPrivateKey = ProjectUtil.getConfigValue(JsonKey.GOOGLE_CAPTCHA_PRIVATE_KEY);
+  }
 
   public static boolean validate(String captcha, String mobileApp) {
     boolean isCaptchaValid = false;
-    String captchaUrl = "https://www.google.com/recaptcha/api/siteverify";
     Map requestMap = new HashMap<String, String>();
     requestMap.put(JsonKey.RESPONSE, captcha);
     requestMap.put(
-        "secret",
-        StringUtils.isNotEmpty(mobileApp)
-            ? ProjectUtil.getConfigValue(JsonKey.GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY)
-            : ProjectUtil.getConfigValue(JsonKey.GOOGLE_CAPTCHA_PRIVATE_KEY));
+        "secret", StringUtils.isNotEmpty(mobileApp) ? mobilePrivateKey : portalPrivateKey);
     Map<String, String> headers = new HashMap<>();
     headers.put("Accept", "application/json");
     headers.put("Content-type", "application/json");
