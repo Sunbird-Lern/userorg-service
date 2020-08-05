@@ -126,6 +126,7 @@ public class SendNotificationActorTest {
     VelocityContext context = PowerMockito.mock(VelocityContext.class);
     when(ProjectUtil.getContext(Mockito.anyMap())).thenReturn(context);
     Object[] arr = new Object[1];
+    arr[0] = "name";
     when(context.getKeys()).thenReturn(arr);
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<String, Object>();
