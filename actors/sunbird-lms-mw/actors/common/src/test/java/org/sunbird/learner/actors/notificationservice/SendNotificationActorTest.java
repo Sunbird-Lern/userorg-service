@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.velocity.VelocityContext;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class SendNotificationActorTest {
 
   @Before
   public void beforeTest() {
-
+    PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
@@ -122,7 +123,10 @@ public class SendNotificationActorTest {
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
-
+    VelocityContext context = PowerMockito.mock(VelocityContext.class);
+    when(ProjectUtil.getContext(Mockito.anyMap())).thenReturn(context);
+    Object[] arr = new Object[1];
+    when(context.getKeys()).thenReturn(arr);
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<String, Object>();
     List<String> userIdList = new ArrayList<>();
