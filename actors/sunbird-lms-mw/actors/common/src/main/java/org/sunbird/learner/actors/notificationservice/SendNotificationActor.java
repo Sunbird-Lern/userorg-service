@@ -2,14 +2,12 @@ package org.sunbird.learner.actors.notificationservice;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.VelocityContext;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -90,10 +88,18 @@ public class SendNotificationActor extends BaseActor {
       notiReq.put(JsonKey.MODE,JsonKey.PHONE);
     } else {
       templateMap.put(JsonKey.DATA,template);
+      VelocityContext context = ProjectUtil.getContext(requestMap);
+      Object[] keys = context.getKeys();
+      for (Object obj : keys) {
+        if (obj instanceof String) {
+          String key = (String)obj;
+          requestMap.put(key,context.get(key));
+        }
+      }
       templateMap.put(JsonKey.PARAMS,requestMap);
       notiReq.put("template",templateMap);
       notiReq.put(JsonKey.MODE,JsonKey.EMAIL);
-    }
+    }:
     notiReq.put("ids",phoneOrEmailList);
     return notiReq;
   }
