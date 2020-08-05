@@ -260,7 +260,7 @@ public class UserProfileReadActor extends BaseActor {
           if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
             String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
             if (requestFields.contains(JsonKey.DECLARATIONS)) {
-              List<Map<String, String>> declarations = fetchUserDeclarations(userId);
+              List<Map<String, Object>> declarations = fetchUserDeclarations(userId);
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
@@ -334,29 +334,31 @@ public class UserProfileReadActor extends BaseActor {
    * @param userId
    * @return
    */
-  private List<Map<String, String>> fetchUserDeclarations(String userId) {
+  private List<Map<String, Object>> fetchUserDeclarations(String userId) {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordsByProperties(
             JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap);
     List<Map<String, Object>> resExternalIds;
-    List<Map<String, String>> finalRes = new ArrayList<>();
+    List<Map<String, Object>> finalRes = new ArrayList<>();
     if (null != response && null != response.getResult()) {
       resExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(resExternalIds)) {
         resExternalIds.forEach(
             item -> {
+              Map<String, Object> declaration = new HashMap<>();
               Map<String, String> declaredFields =
                   (Map<String, String>) item.get(JsonKey.USER_INFO);
               if (MapUtils.isNotEmpty(declaredFields)) {
                 decryptDeclarationFields(declaredFields);
               }
-              declaredFields.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
-              declaredFields.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
-              declaredFields.put(JsonKey.ORG_ID, (String) item.get(JsonKey.ORG_ID));
-              declaredFields.put(JsonKey.PERSONA, (String) item.get(JsonKey.ROLE));
-              finalRes.add(declaredFields);
+              declaration.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
+              declaration.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
+              declaration.put(JsonKey.ORG_ID, (String) item.get(JsonKey.ORG_ID));
+              declaration.put(JsonKey.PERSONA, (String) item.get(JsonKey.PERSONA));
+              declaration.put(JsonKey.INFO, declaredFields);
+              finalRes.add(declaration);
             });
       }
     }

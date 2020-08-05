@@ -128,6 +128,7 @@ public class UserManagementActor extends BaseActor {
         "UserManagementActor:updateUserDeclarations method called.", LoggerEnum.INFO.name());
 
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
+    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     Response response = new Response();
@@ -138,7 +139,8 @@ public class UserManagementActor extends BaseActor {
       UserUtil.encryptDeclarationFields(declarations);
       List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
       for (Map<String, Object> declareFieldMap : declarations) {
-        UserDeclareEntity userDeclareEntity = UserUtil.createUserDeclaredObject(declareFieldMap);
+        UserDeclareEntity userDeclareEntity =
+            UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
         userDeclareEntityList.add(userDeclareEntity);
       }
       userMap.remove(JsonKey.DECLARATIONS);
