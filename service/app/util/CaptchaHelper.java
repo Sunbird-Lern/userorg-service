@@ -35,14 +35,13 @@ public class CaptchaHelper {
     headers.put("Accept", "application/json");
     headers.put("Content-type", "application/json");
     try {
-      reqStr = obj.writeValueAsString(requestMap);
       url =
           new URIBuilder(captchaUrl)
               .addParameter(JsonKey.RESPONSE, captcha)
               .addParameter("secret", secret)
               .build()
               .toString();
-      String response = HttpClientUtil.post(url, reqStr, headers);
+      String response = HttpClientUtil.postFormData(url, requestMap, headers);
       Map<String, Object> responseMap = mapper.readValue(response, Map.class);
       isCaptchaValid = (boolean) responseMap.get("success");
       if (!isCaptchaValid) {
