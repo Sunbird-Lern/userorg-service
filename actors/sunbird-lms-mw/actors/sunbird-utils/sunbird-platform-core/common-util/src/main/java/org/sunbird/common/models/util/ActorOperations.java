@@ -22,6 +22,7 @@ public enum ActorOperations {
   USER_AUTH("userAuth"),
   GET_USER_PROFILE("getUserProfile"),
   GET_USER_PROFILE_V2("getUserProfileV2"),
+  GET_USER_PROFILE_V3("getUserProfileV3"),
   CREATE_ORG("createOrg"),
   UPDATE_ORG("updateOrg"),
   UPDATE_ORG_STATUS("updateOrgStatus"),
@@ -177,7 +178,8 @@ public enum ActorOperations {
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
   V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers"),
-  CHECK_USER_EXISTENCEV2("checkUserExistenceV2");
+  CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
+  UPDATE_USER_DECLARATIONS("updateUserDeclarations");
 
   private String value;
 

@@ -3,6 +3,7 @@ package org.sunbird.common.request;
 
 import static org.junit.Assert.assertEquals;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.responsecode.ResponseMessage;
 
 public class UserRequestValidatorTest {
 
@@ -1415,6 +1417,65 @@ public class UserRequestValidatorTest {
       Assert.assertTrue(response);
     }
     Assert.assertTrue(response);
+  }
+
+  @Test
+  public void testValidateUserDeclarationRequest() {
+    Request request = initailizeRequest();
+    List<Map<String, Object>> declarations = createUpdateUserDeclarationRequests();
+    request.getRequest().put(JsonKey.DECLARATIONS, declarations);
+    boolean response = false;
+    try {
+      new UserRequestValidator().validateUserDeclarationRequest(request);
+      response = true;
+    } catch (Exception e) {
+      Assert.assertTrue(response);
+    }
+    Assert.assertTrue(response);
+  }
+
+  @Test
+  public void testValidateUserMissingDeclarationsFieldRequest() {
+    Request request = initailizeRequest();
+    List<Map<String, Object>> declarations = createUpdateUserDeclarationMissingUserIdRequests();
+    request.getRequest().put(JsonKey.DECLARATIONS, declarations);
+    boolean response = false;
+    try {
+      new UserRequestValidator().validateUserDeclarationRequest(request);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(
+          MessageFormat.format(
+              ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
+              new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
+          e.getMessage());
+      response = true;
+    }
+    Assert.assertTrue(response);
+  }
+
+  private List createUpdateUserDeclarationRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> declarationMap = new HashMap<>();
+    declarationMap.put(JsonKey.ORG_ID, "1234");
+    declarationMap.put(JsonKey.USER_ID, "userid");
+
+    declarationMap.put(JsonKey.PERSONA, "teacher");
+    List<Map<String, Object>> declarations = new ArrayList<>();
+    declarations.add(declarationMap);
+    return declarations;
+  }
+
+  private List createUpdateUserDeclarationMissingUserIdRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> declarationMap = new HashMap<>();
+    declarationMap.put(JsonKey.ORG_ID, "1234");
+    declarationMap.put(JsonKey.PERSONA, "teacher");
+    List<Map<String, Object>> declarations = new ArrayList<>();
+    declarations.add(declarationMap);
+    return declarations;
   }
 
   private static Map<String, Object> createFrameWork() {
