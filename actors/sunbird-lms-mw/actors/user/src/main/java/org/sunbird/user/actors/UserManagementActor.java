@@ -351,15 +351,15 @@ public class UserManagementActor extends BaseActor {
       Set<String> providerSet = new HashSet<>();
       if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
         providerSet.add((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER));
-      } else {
-        List<Map<String, String>> extList =
-            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
-        if (CollectionUtils.isNotEmpty(extList)) {
-          for (Map<String, String> extId : extList) {
-            providerSet.add(extId.get(JsonKey.PROVIDER));
-          }
+      }
+      List<Map<String, String>> extList =
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+      if (CollectionUtils.isNotEmpty(extList)) {
+        for (Map<String, String> extId : extList) {
+          providerSet.add(extId.get(JsonKey.PROVIDER));
         }
       }
+
       Map<String, String> orgProviderMap =
           UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
       if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
