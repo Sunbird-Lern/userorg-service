@@ -1,8 +1,10 @@
 package org.sunbird.learner.actors.tenantpreference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,6 +183,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
       dbMap.put(JsonKey.ORG_ID, orgId);
       dbMap.put(JsonKey.KEY, key);
       dbMap.put(JsonKey.DATA, serialize(req.get(JsonKey.DATA)));
+      dbMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+      dbMap.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
     } catch (Exception e) {
       ProjectLogger.log("exception while adding preferences " + e.getMessage(), LoggerEnum.DEBUG);
     }
