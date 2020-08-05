@@ -245,6 +245,7 @@ public class UserUtil {
   }
 
   public static String getUserIdFromExternalId(Map<String, Object> userMap) {
+
     String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
     String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
@@ -252,11 +253,23 @@ public class UserUtil {
   }
 
   public static String getUserId(Map<String, Object> userMap) {
-    String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
-    String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
-    String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-    Map<String, String> providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
-    return userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
+    String userId;
+    if (null != userMap.get(JsonKey.USER_ID)) {
+      userId = (String) userMap.get(JsonKey.USER_ID);
+    } else {
+      userId = (String) userMap.get(JsonKey.ID);
+    }
+    if (StringUtils.isBlank(userId)) {
+      String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
+      String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
+      String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
+      Map<String, String> providerOrgMap = new HashMap<>();
+      if (StringUtils.isNotBlank(provider)) {
+        providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
+      }
+      userId = userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
+    }
+    return userId;
   }
 
   @SuppressWarnings("unchecked")
