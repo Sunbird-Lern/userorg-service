@@ -264,10 +264,12 @@ public class UserUtil {
       String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
       Map<String, String> providerOrgMap = new HashMap<>();
-      if (StringUtils.isNotBlank(provider)) {
+      if (StringUtils.isNotBlank(provider)
+          && StringUtils.isNotBlank(extId)
+          && StringUtils.isNotBlank(idType)) {
         providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
+        userId = userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
       }
-      userId = userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
     }
     return userId;
   }
