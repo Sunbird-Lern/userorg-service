@@ -193,4 +193,4 @@ GET   /v1/user/feed/:userId       @controllers.feed.FeedController.getUserFeed(u
 
 POST /private/user/v1/scheduler @controllers.scheduler.SchedulerController.startScheduler(request: play.mvc.Http.Request)
 
-PATCH  /v1/user/declarations             @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)
+PATCH  /v1/user/declarations      @controllers.usermanagement.UserController.updateUserDeclarations(request: play.mvc.Http.Request)

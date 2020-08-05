@@ -634,6 +634,7 @@ public final class JsonKey {
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USR_EXT_ID_DB = "user_external_identity";
+  public static final String USER_DECLARATION_DB = "user_declarations";
   public static final String USR_ORG_DB = "user_org";
   public static final String VALUE = "value";
   public static final String VER = "ver";
