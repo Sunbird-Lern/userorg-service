@@ -4,7 +4,6 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -12,10 +11,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Result;
-import util.CaptchaHelper;
 
 public class UserController extends BaseController {
 
@@ -298,15 +295,6 @@ public class UserController extends BaseController {
   public CompletionStage<Result> userExists(
       String searchKey, String searchValue, Http.Request httpRequest) {
     HashMap<String, Object> map = new HashMap<>();
-    String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
-    String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
-    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
-        && !new CaptchaHelper().validate(captcha, mobileApp)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidCaptcha.getErrorCode(),
-          ResponseCode.invalidCaptcha.getErrorMessage(),
-          ResponseCode.IM_A_TEAPOT.getResponseCode());
-    }
     map.put(JsonKey.KEY, searchKey);
     map.put(JsonKey.VALUE, searchValue);
     return handleRequest(
@@ -315,7 +303,8 @@ public class UserController extends BaseController {
         req -> {
           Request request = (Request) req;
           request.setRequest(map);
-          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+          new UserGetRequestValidator()
+              .validateGetUserByKeyRequestaWithCaptcha(request, httpRequest);
           return null;
         },
         null,
