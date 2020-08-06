@@ -47,12 +47,6 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
       response =
           BaseController.createResponseOnException(
               request.path(), request.method(), (ProjectCommonException) t);
-    } else if (t.getCause() instanceof ProjectCommonException) {
-      commonException =
-          new ProjectCommonException(
-              ((ProjectCommonException) t.getCause()).getCode(),
-              t.getCause().getMessage(),
-              ((ProjectCommonException) t.getCause()).getResponseCode());
     } else if (t instanceof akka.pattern.AskTimeoutException) {
       commonException =
           new ProjectCommonException(
@@ -68,7 +62,6 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
     }
     response =
         BaseController.createResponseOnException(request.path(), request.method(), commonException);
-    return CompletableFuture.completedFuture(
-        Results.status(response.getResponseCode().getResponseCode(), Json.toJson(response)));
+    return CompletableFuture.completedFuture(Results.internalServerError(Json.toJson(response)));
   }
 }
