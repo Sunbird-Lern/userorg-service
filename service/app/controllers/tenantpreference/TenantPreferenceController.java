@@ -17,20 +17,18 @@ import play.mvc.Result;
 public class TenantPreferenceController extends BaseController {
 
   public CompletionStage<Result> createTenantPreference(Http.Request httpRequest) {
-    try {
-      JsonNode requestData = httpRequest.body().asJson();
-      ProjectLogger.log("Create tenant preferences: " + requestData, LoggerEnum.INFO.name());
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
-      reqObj.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-      reqObj.setEnv(getEnvironment());
-      Map<String, Object> innerMap = reqObj.getRequest();
-      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
-      reqObj.setRequest(innerMap);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
-    } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
-    }
+    return handleRequest(
+        ActorOperations.CREATE_TENANT_PREFERENCE.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new TenantPreferenceValidator().validateCreatePreferenceRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
   }
 
   public CompletionStage<Result> updateTenantPreference(Http.Request httpRequest) {
