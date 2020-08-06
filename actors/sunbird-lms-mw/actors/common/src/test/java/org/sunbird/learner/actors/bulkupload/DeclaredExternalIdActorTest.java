@@ -20,6 +20,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actorutil.InterServiceCommunication;
 import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.bean.SelfDeclaredUser;
@@ -42,7 +43,8 @@ import org.sunbird.learner.util.Util;
   DeclaredExternalIdActor.class,
   UserUploadUtil.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  InterServiceCommunicationFactory.class
+  InterServiceCommunicationFactory.class,
+  BaseActor.class
 })
 @PowerMockIgnore("javax.management.*")
 public class DeclaredExternalIdActorTest {
@@ -52,6 +54,8 @@ public class DeclaredExternalIdActorTest {
   private static DecryptionService decryptionService;
   private static UserUploadUtil userUploadUtil;
   private static InterServiceCommunication interServiceCommunication;
+  private static BaseActor baseActor;
+  private static ActorRef actorRef;
 
   @Before
   public void beforeEachTest() {
@@ -65,6 +69,9 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(decryptionService);
     PowerMockito.mockStatic(InterServiceCommunicationFactory.class);
     interServiceCommunication = mock(InterServiceCommunication.class);
+    baseActor = Mockito.mock(BaseActor.class);
+    actorRef = Mockito.mock(ActorRef.class);
+    Mockito.when(baseActor.getActorRef(Mockito.anyString())).thenReturn(actorRef);
     when(InterServiceCommunicationFactory.getInstance()).thenReturn(interServiceCommunication);
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
