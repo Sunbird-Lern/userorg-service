@@ -33,6 +33,11 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
         .getValue()
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserSelfDeclaredDetails(request);
+    }
+    if (UserActorOperations.DELETE_USER_SELF_DECLARATIONS
+        .getValue()
+        .equalsIgnoreCase(request.getOperation())) {
+      deleteUserSelfDeclaredDetails(request);
     } else {
       onReceiveUnsupportedOperation("upsertUserSelfDeclarations");
     }
@@ -250,5 +255,18 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     properties.put(JsonKey.ORG_ID, orgId);
     properties.put(JsonKey.PERSONA, persona);
     cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+  }
+
+  public void updateUserSelfDeclaredErrorStatus(Request request) {
+    Map<String, Object> requestMap = request.getRequest();
+    UserDeclareEntity userDeclareEntity = (UserDeclareEntity) requestMap.get(JsonKey.DECLARATIONS);
+    String orgId = (String) requestMap.get(JsonKey.ORG_ID);
+    String persona = (String) requestMap.get(JsonKey.PERSONA);
+    Map<String, String> properties = new HashMap<>();
+    properties.put(JsonKey.USER_ID, userDeclareEntity.getUserId());
+    properties.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
+    properties.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
+    properties.put(JsonKey.ERROR, userDeclareEntity.getErrorType());
+    cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
   }
 }

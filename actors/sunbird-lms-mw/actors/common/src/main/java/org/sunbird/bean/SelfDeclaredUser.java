@@ -5,6 +5,10 @@ public class SelfDeclaredUser extends MigrationUser {
   private String schoolId;
   private String userId;
   private String subOrgId;
+  private String orgId;
+  private String persona;
+
+  private String errorType;
 
   public String getSubOrgId() {
     return subOrgId;
@@ -36,5 +40,29 @@ public class SelfDeclaredUser extends MigrationUser {
 
   public void setUserId(String userId) {
     this.userId = userId;
+  }
+
+  public String getOrgId() {
+    return orgId;
+  }
+
+  public void setOrgId(String orgId) {
+    this.orgId = orgId;
+  }
+
+  public String getPersona() {
+    return persona;
+  }
+
+  public void setPersona(String persona) {
+    this.persona = persona;
+  }
+
+  public String getErrorType() {
+    return errorType;
+  }
+
+  public void setErrorType(String errorType) {
+    this.errorType = errorType;
   }
 }

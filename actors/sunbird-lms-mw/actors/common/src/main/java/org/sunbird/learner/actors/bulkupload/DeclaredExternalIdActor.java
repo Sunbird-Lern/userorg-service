@@ -19,6 +19,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.UserDeclareEntity;
 
 @ActorConfig(
   tasks = {},
@@ -59,23 +60,43 @@ public class DeclaredExternalIdActor extends BaseActor {
                   migrateDeclaredUser(request, migrateUser);
                   break;
                 case JsonKey.REJECTED:
-                  rejectDeclaredDetail(requestMap);
+                  rejectDeclaredDetail(request, migrateUser);
                   break;
                 case JsonKey.ERROR:
-                  updateErrorDetail(requestMap);
+                  updateErrorDetail(request, migrateUser);
                   break;
                 default:
               }
             });
   }
 
-  private void updateErrorDetail(Map requestMap) {
-    // cassandraOperation.updateRecord()
+  private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {
+    Response response = new Response();
+    response.setResponseCode(ResponseCode.OK);
+    request.setOperation("upsertUserSelfDeclarations"); // do change
+    Map<String, Object> requestMap = new HashMap();
+    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+    userDeclareEntity.setOrgId(declaredUser.getOrgId());
+    userDeclareEntity.setPersona(declaredUser.getPersona());
+    userDeclareEntity.setUserId(declaredUser.getUserId());
+    userDeclareEntity.setErrorType(declaredUser.getErrorType());
+    userDeclareEntity.setStatus(declaredUser.getInputStatus());
+    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+    tellToAnother(request);
   }
 
-  private void rejectDeclaredDetail(Map requestMap) {
-    /*cassandraOperation.deleteRecord(
-    usrExtIdDbInfo.getKeySpace(), usrExtIdDbInfo.getTableName(), requestMap);*/
+  private void rejectDeclaredDetail(Request request, SelfDeclaredUser declaredUser) {
+    Response response = new Response();
+    response.setResponseCode(ResponseCode.OK);
+    request.setOperation("upsertUserSelfDeclarations");
+    Map<String, Object> requestMap = new HashMap();
+    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+    userDeclareEntity.setOrgId(declaredUser.getOrgId());
+    userDeclareEntity.setPersona(declaredUser.getPersona());
+    userDeclareEntity.setUserId(declaredUser.getUserId());
+    userDeclareEntity.setOperation(JsonKey.REMOVE);
+    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+    tellToAnother(request);
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
