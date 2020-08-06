@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -16,6 +14,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
@@ -29,8 +28,6 @@ public class DeclaredExternalIdActor extends BaseActor {
 
   private Util.DbInfo usrExtIdDbInfo = Util.dbInfoMap.get(JsonKey.USR_EXT_ID_DB);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -77,12 +74,13 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void rejectDeclaredDetail(Map requestMap) {
-    cassandraOperation.deleteRecord(
-        usrExtIdDbInfo.getKeySpace(), usrExtIdDbInfo.getTableName(), requestMap);
+    /*cassandraOperation.deleteRecord(
+    usrExtIdDbInfo.getKeySpace(), usrExtIdDbInfo.getTableName(), requestMap);*/
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
-    Response response = null;
+    Response response = new Response();
+    response.setResponseCode(ResponseCode.REDIRECTION_REQUIRED);
     request.setOperation(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue());
     ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
@@ -96,10 +94,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       externalIdMap.put(JsonKey.PROVIDER, declaredUser.getChannel());
       externalIdLst.add(externalIdMap);
       requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
-      response =
-          (Response)
-              interServiceCommunication.getResponse(
-                  getActorRef(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue()), request);
+      tellToAnother(request);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }

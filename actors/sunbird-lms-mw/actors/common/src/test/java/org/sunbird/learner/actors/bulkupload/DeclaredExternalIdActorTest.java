@@ -1,13 +1,13 @@
 package org.sunbird.learner.actors.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +20,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
-import org.sunbird.bean.SelfDeclaredUser;
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -43,8 +40,7 @@ import org.sunbird.learner.util.Util;
   DeclaredExternalIdActor.class,
   UserUploadUtil.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  InterServiceCommunicationFactory.class,
-  BaseActor.class
+  SunbirdMWService.class
 })
 @PowerMockIgnore("javax.management.*")
 public class DeclaredExternalIdActorTest {
@@ -52,10 +48,7 @@ public class DeclaredExternalIdActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
   private static DecryptionService decryptionService;
-  private static UserUploadUtil userUploadUtil;
-  private static InterServiceCommunication interServiceCommunication;
-  private static BaseActor baseActor;
-  private static ActorRef actorRef;
+  private static SunbirdMWService SunbirdMWService;
 
   @Before
   public void beforeEachTest() {
@@ -67,12 +60,8 @@ public class DeclaredExternalIdActorTest {
     when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null))
         .thenReturn(decryptionService);
-    PowerMockito.mockStatic(InterServiceCommunicationFactory.class);
-    interServiceCommunication = mock(InterServiceCommunication.class);
-    baseActor = Mockito.mock(BaseActor.class);
-    actorRef = Mockito.mock(ActorRef.class);
-    Mockito.when(baseActor.getActorRef(Mockito.anyString())).thenReturn(actorRef);
-    when(InterServiceCommunicationFactory.getInstance()).thenReturn(interServiceCommunication);
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(createDeclaredBulkUploadData());
@@ -82,8 +71,6 @@ public class DeclaredExternalIdActorTest {
     when(decryptionService.decryptData(Mockito.anyString()))
         .thenReturn(
             "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
-    when(interServiceCommunication.getResponse(Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(new Response());
   }
 
   private Response updateData(boolean empty) {
@@ -113,20 +100,10 @@ public class DeclaredExternalIdActorTest {
   }
 
   @Test
-  public void testUploadDeclaredUser() throws Exception {
+  public void testUploadDeclaredUser() {
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
-  }
-
-  List<SelfDeclaredUser> getDeclaredUsers() throws JsonProcessingException {
-    SelfDeclaredUser selfDeclaredUser = new SelfDeclaredUser();
-    selfDeclaredUser.setInputStatus("VALIDATED");
-    selfDeclaredUser.setUserId("");
-    selfDeclaredUser.setUserExternalId("");
-    selfDeclaredUser.setChannel("");
-    List<SelfDeclaredUser> declaredUserList = new ArrayList<SelfDeclaredUser>();
-    declaredUserList.add(selfDeclaredUser);
-    return declaredUserList;
+    assertTrue(result);
   }
 
   Request createRequest(BulkUploadActorOperation actorOperation) {
@@ -146,7 +123,7 @@ public class DeclaredExternalIdActorTest {
 
     if (errorCode == null) {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.OK;
+      return null != res && res.getResponseCode() == ResponseCode.REDIRECTION_REQUIRED;
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);

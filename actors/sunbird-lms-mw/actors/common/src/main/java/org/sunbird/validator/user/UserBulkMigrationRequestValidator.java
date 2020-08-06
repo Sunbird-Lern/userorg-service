@@ -48,7 +48,7 @@ public class UserBulkMigrationRequestValidator {
 
   public void validateDeclaredUsers() {
     ProjectLogger.log(
-        "UserBulkMigrationRequestValidator:validate:start validating migration users",
+        "UserBulkMigrationRequestValidator:validateDeclaredUsers:start validating migration users ",
         LoggerEnum.INFO.name());
     checkDeclaredCsvRows();
   }
