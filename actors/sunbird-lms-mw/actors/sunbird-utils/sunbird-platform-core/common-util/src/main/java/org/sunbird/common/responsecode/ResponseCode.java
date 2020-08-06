@@ -873,6 +873,9 @@ public enum ResponseCode {
       ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
       ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
   invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
+  preferenceAlreadyExists(
+      ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
+      ResponseMessage.Message.PREFERENCE_ALREADY_EXIST),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
