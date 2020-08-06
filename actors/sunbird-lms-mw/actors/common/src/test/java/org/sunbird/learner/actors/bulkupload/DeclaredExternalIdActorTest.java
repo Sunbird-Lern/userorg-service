@@ -37,7 +37,6 @@ import org.sunbird.learner.util.Util;
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
-  DeclaredExternalIdActor.class,
   UserUploadUtil.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class
