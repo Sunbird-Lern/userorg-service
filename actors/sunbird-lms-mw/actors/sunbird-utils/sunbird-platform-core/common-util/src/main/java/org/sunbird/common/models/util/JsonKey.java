@@ -1066,6 +1066,7 @@ public final class JsonKey {
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
   public static final String PERSONA = "persona";
+  public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 
   private JsonKey() {}
 }
