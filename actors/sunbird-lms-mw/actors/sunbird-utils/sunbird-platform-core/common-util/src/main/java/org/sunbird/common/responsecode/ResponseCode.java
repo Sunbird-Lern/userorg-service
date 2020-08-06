@@ -876,6 +876,9 @@ public enum ResponseCode {
   preferenceAlreadyExists(
       ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
       ResponseMessage.Message.PREFERENCE_ALREADY_EXIST),
+  preferenceNotFound(
+      ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
+
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

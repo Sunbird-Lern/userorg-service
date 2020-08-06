@@ -53,7 +53,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     map.put(JsonKey.FIELDS, new ArrayList<>());
     innerMap.put(JsonKey.DATA, map);
     requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/org/preferences/create", "POST", requestMap);
+    Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 
@@ -63,7 +63,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.KEY, "teacher");
     requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/org/preferences/create", "POST", requestMap);
+    Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
   }
 
@@ -75,8 +75,46 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.ORG_ID, "organisationId");
     innerMap.put(JsonKey.DATA, "data");
     requestMap.put(JsonKey.REQUEST, innerMap);
-    Result result = performTest("/v1/org/preferences/create", "POST", requestMap);
+    Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
     assertEquals(getResponseCode(result), ResponseCode.dataTypeError.getErrorCode());
+  }
+
+  @Test
+  public void testUpdateTenantPreferenceSuccess() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "teacher");
+    innerMap.put(JsonKey.ORG_ID, "organisationId");
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.FIELDS, new ArrayList<>());
+    innerMap.put(JsonKey.DATA, map);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v2/org/preferences/update", "PATCH", requestMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testReadTenantPreferenceSuccess() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "teacher");
+    innerMap.put(JsonKey.ORG_ID, "organisationId");
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.FIELDS, new ArrayList<>());
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v2/org/preferences/read", "POST", requestMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testReadPreferenceWithMandatoryParamOrgId() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "teacher");
+    innerMap.put(JsonKey.ORG_ID, "");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v2/org/preferences/read", "POST", requestMap);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
   }
 
   public String mapToJson(Map map) {
