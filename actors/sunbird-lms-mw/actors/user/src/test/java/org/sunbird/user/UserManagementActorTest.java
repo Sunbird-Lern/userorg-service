@@ -5,13 +5,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
+import akka.pattern.Patterns;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import akka.pattern.Patterns;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -89,6 +88,16 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
     boolean result =
         testScenario(getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclarations() {
+    Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
+    boolean result =
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
+            null);
     assertTrue(result);
   }
 
@@ -392,7 +401,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   @Ignore
-  public void testGetManagedUsers() throws Exception{
+  public void testGetManagedUsers() throws Exception {
     HashMap<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.ID, "102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
     reqMap.put(JsonKey.WITH_TOKENS, "true");
@@ -403,17 +412,19 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, map);
 
-    when(Await.result(Patterns.ask(Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.anyLong()), Mockito.anyObject()))
-            .thenReturn(response)
-            .thenReturn(map);
+    when(Await.result(
+            Patterns.ask(
+                Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.anyLong()),
+            Mockito.anyObject()))
+        .thenReturn(response)
+        .thenReturn(map);
     boolean result =
-            testScenario(
-                    getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS),
-                    null);
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS), null);
     assertTrue(result);
   }
 
-  private Map<String, Object> getSearchResults(){
+  private Map<String, Object> getSearchResults() {
     Map<String, Object> searchRequestMap = new HashMap<>();
 
     return searchRequestMap;

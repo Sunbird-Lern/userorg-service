@@ -380,6 +380,8 @@ public interface ResponseMessage {
         "Loading {0} configuration failed as empty string is passed as parameter.";
     String ERROR_CONFIG_LOAD_PARSE_STRING =
         "Loading {0} configuration failed due to parsing error.";
+    String MISSING_SELF_DECLARED_MANDATORY_PARAMETERS =
+        "Mandatory parameter {0} or {1} or {2} is missing.";
     String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "Loading {0} configuration failed.";
     String ERROR_CONFLICTING_FIELD_CONFIGURATION =
         "Field {0} in {1} configuration is conflicting in {2} and {3}.";
@@ -477,6 +479,7 @@ public interface ResponseMessage {
     String DATA_ENCRYPTION_ERROR = "Error in encrypting the data";
     String NO_EMAIL_PHONE_ASSOCIATED = "No {0} associated with the given user.";
     String INVALID_CAPTCHA = "Captcha is invalid";
+    String PREFERENCE_ALREADY_EXIST = "preference {0} already exits in the org {1}";
   }
 
   interface Key {
@@ -880,5 +883,6 @@ public interface ResponseMessage {
     String DATA_ENCRYPTION_ERROR = "DATA_ENCRYPTION_ERROR";
     String NO_EMAIL_PHONE_ASSOCIATED = "NO_EMAIL_PHONE_ASSOCIATED";
     String INVALID_CAPTCHA = "INVALID_CAPTCHA";
+    String PREFERENCE_ALREADY_EXIST = "PREFERENCE_ALREADY_EXIST";
   }
 }
