@@ -1501,4 +1501,20 @@ public class UserRequestValidatorTest {
     frameworkMandatoryFields.add("id");
     return frameworkMandatoryFields;
   }
+
+  @Test
+  public void testTransliterateUserName() {
+    Request request = initailizeRequest();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.put(JsonKey.USERNAME, "हिन्दी");
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.validateCreateUserV1Request(request);
+      assertEquals((String) request.getRequest().get(JsonKey.USERNAME),"hindii");
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
+    }
+  }
+
 }
