@@ -31,7 +31,7 @@ public class TenantPreferenceController extends BaseController {
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          new TenantPreferenceValidator().validateCreatePreferenceRequest(request);
+          new TenantPreferenceValidator().validateUpdatePreferenceRequest(request);
           return null;
         },
         null,
