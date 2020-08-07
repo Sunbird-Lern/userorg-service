@@ -30,14 +30,12 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
 import org.sunbird.learner.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
-  UserUploadUtil.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class
 })
