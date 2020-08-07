@@ -73,7 +73,7 @@ public class DeclaredExternalIdActor extends BaseActor {
   private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {
     Response response = new Response();
     response.setResponseCode(ResponseCode.OK);
-    request.setOperation("upsertUserSelfDeclarations"); // do change
+    request.setOperation("updateUserSelfDeclarationsErrorType");
     Map<String, Object> requestMap = new HashMap();
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId(declaredUser.getOrgId());

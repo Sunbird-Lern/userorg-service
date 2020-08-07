@@ -34,10 +34,10 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserSelfDeclaredDetails(request);
     }
-    if (UserActorOperations.DELETE_USER_SELF_DECLARATIONS
+    if (UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE
         .getValue()
         .equalsIgnoreCase(request.getOperation())) {
-      deleteUserSelfDeclaredDetails(request);
+      updateUserSelfDeclaredErrorStatus(request);
     } else {
       onReceiveUnsupportedOperation("upsertUserSelfDeclarations");
     }
@@ -260,13 +260,14 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
   public void updateUserSelfDeclaredErrorStatus(Request request) {
     Map<String, Object> requestMap = request.getRequest();
     UserDeclareEntity userDeclareEntity = (UserDeclareEntity) requestMap.get(JsonKey.DECLARATIONS);
-    String orgId = (String) requestMap.get(JsonKey.ORG_ID);
-    String persona = (String) requestMap.get(JsonKey.PERSONA);
-    Map<String, String> properties = new HashMap<>();
-    properties.put(JsonKey.USER_ID, userDeclareEntity.getUserId());
-    properties.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
-    properties.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
-    properties.put(JsonKey.ERROR, userDeclareEntity.getErrorType());
-    cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+    Map<String, Object> compositePropertiesMap = new HashMap<>();
+    Map<String, Object> propertieMap = new HashMap<>();
+    compositePropertiesMap.put(JsonKey.USER_ID, userDeclareEntity.getUserId());
+    compositePropertiesMap.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
+    compositePropertiesMap.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
+    propertieMap.put(JsonKey.ERROR, userDeclareEntity.getErrorType());
+    propertieMap.put(JsonKey.STATUS, userDeclareEntity.getStatus());
+    cassandraOperation.updateRecord(
+        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, propertieMap, compositePropertiesMap);
   }
 }
