@@ -250,9 +250,9 @@ public class TenantPreferenceManagementActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, "anyKey");
     map.put(JsonKey.ORG_ID, orgId);
-    Map<String, Object> data = new HashMap<>();
-    data.put("templates", "cert-template.zip");
-    map.put(JsonKey.DATA, data);
+    map.put(
+        JsonKey.DATA,
+        "{\"default\":{\"action\":\"volunteer\",\"templateName\":\"volunteer\",\"fields\":[[{\"title\":\"Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:\",\"contents\":[{\"name\":\"Appropriateness\",\"checkList\":[\"No Hate speech, Abuse, Violence, Profanity\",\"No Discrimination or Defamation\",\"Is suitable for children\"]}]}]]}}");
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
