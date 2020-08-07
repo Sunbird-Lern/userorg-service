@@ -2,6 +2,8 @@ package controllers.usermanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,12 +15,12 @@ import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.user.UserDeclareEntity;
@@ -27,8 +29,14 @@ import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.CaptchaHelper;
 
-@PrepareForTest(OnRequestHandler.class)
+@PrepareForTest({
+  OnRequestHandler.class,
+  CaptchaHelper.class,
+  ProjectUtil.class,
+  HttpClientUtil.class
+})
 public class UserControllerTest extends BaseApplicationTest {
 
   private static String userId = "someUserId";
@@ -461,9 +469,19 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUserExists2() {
+  public void testCaptchaUserExists2() throws Exception {
+    CaptchaHelper captchaHelper = mock(CaptchaHelper.class);
+    when(captchaHelper.validate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    PowerMockito.mockStatic(HttpClientUtil.class);
+    PowerMockito.mockStatic(ProjectUtil.class);
+    Map map = new HashMap<String, String>();
+    map.put("success", true);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String s = objectMapper.writeValueAsString(map);
+    when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
+    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+        .thenReturn(s);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 }

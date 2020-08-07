@@ -7,6 +7,8 @@ import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import play.mvc.Http;
+import util.CaptchaHelper;
 
 public class UserGetRequestValidator extends BaseRequestValidator {
 
@@ -45,5 +47,18 @@ public class UserGetRequestValidator extends BaseRequestValidator {
     if (JsonKey.EMAIL.equals(request.get(JsonKey.KEY))) {
       validateEmail((String) request.get(JsonKey.VALUE));
     }
+  }
+
+  public void validateGetUserByKeyRequestaWithCaptcha(Request request, Http.Request httpRequest) {
+    String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
+    String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
+        && !new CaptchaHelper().validate(captcha, mobileApp)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidCaptcha.getErrorCode(),
+          ResponseCode.invalidCaptcha.getErrorMessage(),
+          ResponseCode.IM_A_TEAPOT.getResponseCode());
+    }
+    validateGetUserByKeyRequest(request);
   }
 }
