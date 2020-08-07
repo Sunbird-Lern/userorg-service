@@ -76,6 +76,8 @@ public class SendNotificationActorTest {
 
   @Before
   public void beforeTest() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(HttpClientUtil.class);
@@ -118,7 +120,6 @@ public class SendNotificationActorTest {
 
   @Test
   public void testSendEmailSuccess() {
-
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
