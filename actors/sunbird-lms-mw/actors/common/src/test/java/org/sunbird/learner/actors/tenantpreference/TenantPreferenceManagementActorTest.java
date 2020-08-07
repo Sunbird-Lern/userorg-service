@@ -30,11 +30,10 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-
-// import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -44,7 +43,6 @@ import org.sunbird.learner.util.Util;
   InterServiceCommunicationFactory.class,
   ElasticSearchHelper.class,
   Util.class,
-  //  UserOrgDaoImpl.class,
   DecryptionService.class,
   DataCacheHandler.class,
 })
@@ -69,16 +67,15 @@ public class TenantPreferenceManagementActorTest {
 
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(cassandraGetRecordByProperty());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(createCassandraInsertSuccessResponse());
-    when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
-        .thenReturn(createCassandraInsertSuccessResponse());
+    try {
+      when(cassandraOperation.updateRecord(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+          .thenReturn(createCassandraInsertSuccessResponse());
+    } catch (Exception e) {
+    }
   }
 
   private Response createCassandraInsertSuccessResponse() {
@@ -99,7 +96,9 @@ public class TenantPreferenceManagementActorTest {
     map.put(JsonKey.ORG_ID, orgId);
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
@@ -117,165 +116,111 @@ public class TenantPreferenceManagementActorTest {
     map.put(JsonKey.ORG_ID, orgId);
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
   @Test
-  public void testUpdateTanentPreferenceSuccessWithoutKeyValue() {
-
+  public void testUpdateTenantPreferenceSuccess() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ROLE, "admin");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
-    actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
-
-    subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
-  }
-
-  @Test
-  public void testUpdateTanentPreferenceSuccessWithSameKey() {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, "anyKey");
-    map.put(JsonKey.DATA, "anyData");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    map.put(JsonKey.DATA, new HashMap<>());
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
   @Test
-  public void testUpdateTanentPreferenceSuccessWithDifferentKey() {
-
+  public void testUpdateTenantPreferenceWithInvalidKey() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.KEY, "differentKey");
-    map.put(JsonKey.DATA, "anyData");
-    reqList.add(map);
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    map.put(JsonKey.KEY, "teacher_declaration");
+    map.put(JsonKey.DATA, new HashMap<>());
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
-  }
-
-  @Test
-  public void testUpdateTanentPreferenceFailureWithInvalidRequestData() {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
-    actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
-
-    subject.tell(actorMessage, probe.getRef());
-    ProjectCommonException exc =
+    ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
+    Assert.assertTrue(null != exception);
+    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
   }
 
   @Test
-  public void testUpdateTanentPreferenceFailureWithInvalidOrgId() {
-
+  public void testUpdateTenantPreferenceFailureWithInvalidOrgId() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-    List<Map<String, Object>> reqList = new ArrayList<>();
-
-    actorMessage.getRequest().put(JsonKey.TENANT_PREFERENCE, reqList);
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, "");
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "teacher_declaration");
+    map.put(JsonKey.DATA, new HashMap<>());
+    map.put(JsonKey.ORG_ID, "");
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
-    ProjectCommonException exc =
+    ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
+    Assert.assertTrue(null != exception);
+    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
   }
 
   @Test
-  public void testGetTanentPreferenceSuccessWithoutKey() {
-
+  public void testGetTenantPreferenceSuccess() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "anyKey");
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res);
   }
 
   @Test
-  public void testGetTanentPreferenceSuccessWithKeysDiff() {
-
+  public void testGetTenantPreferenceSuccessWithKeysDiff() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request actorMessage = new Request();
-
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, orgId);
-    actorMessage.getRequest().put(JsonKey.KEYS, Arrays.asList("anyKey"));
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "teacher");
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
-
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res);
-  }
-
-  @Test
-  public void testGetTanentPreferenceWithInvalidOrgId() {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-
-    actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, "");
-    actorMessage.getRequest().put(JsonKey.REQUESTED_BY, USER_ID);
-    actorMessage.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
-
-    subject.tell(actorMessage, probe.getRef());
-    ProjectCommonException exc =
+    ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != exc);
+    Assert.assertTrue(null != exception);
+    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
   }
 
   @Test
@@ -305,7 +250,17 @@ public class TenantPreferenceManagementActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, "anyKey");
     map.put(JsonKey.ORG_ID, orgId);
+    map.put(
+        JsonKey.DATA,
+        "{\"default\":{\"action\":\"volunteer\",\"templateName\":\"volunteer\",\"fields\":[[{\"title\":\"Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:\",\"contents\":[{\"name\":\"Appropriateness\",\"checkList\":[\"No Hate speech, Abuse, Violence, Profanity\",\"No Discrimination or Defamation\",\"Is suitable for children\"]}]}]]}}");
     list.add(map);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
+  }
+
+  private static Response cassandraGetRecordByPropertiesEmptyResponse() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList();
     response.put(JsonKey.RESPONSE, list);
     return response;
   }

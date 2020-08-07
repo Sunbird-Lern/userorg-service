@@ -25,6 +25,26 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
         request.getRequest(), Lists.newArrayList(JsonKey.DATA), Map.class, true, JsonKey.REQUEST);
   }
 
+  public void validateUpdatePreferenceRequest(Request request) {
+    validateMandatoryParamsWithType(
+        request.getRequest(),
+        Lists.newArrayList(JsonKey.ORG_ID, JsonKey.KEY),
+        String.class,
+        true,
+        JsonKey.REQUEST);
+    validateMandatoryParamsWithType(
+        request.getRequest(), Lists.newArrayList(JsonKey.DATA), Map.class, false, JsonKey.REQUEST);
+  }
+
+  public void validateGetPreferenceRequest(Request request) {
+    validateMandatoryParamsWithType(
+        request.getRequest(),
+        Lists.newArrayList(JsonKey.ORG_ID, JsonKey.KEY),
+        String.class,
+        true,
+        JsonKey.REQUEST);
+  }
+
   public static void validateMandatoryParamsWithType(
       Map<String, Object> reqMap,
       List<String> mandatoryParamsList,
