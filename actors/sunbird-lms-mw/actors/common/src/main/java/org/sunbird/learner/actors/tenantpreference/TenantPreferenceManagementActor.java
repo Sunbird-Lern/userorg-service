@@ -86,7 +86,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
       throw new ProjectCommonException(
           ResponseCode.preferenceNotFound.getErrorCode(),
           MessageFormat.format(ResponseCode.preferenceNotFound.getErrorMessage(), key, orgId),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     sender().tell(finalResponse, self());
   }
@@ -130,7 +130,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
       throw new ProjectCommonException(
           ResponseCode.preferenceNotFound.getErrorCode(),
           MessageFormat.format(ResponseCode.preferenceNotFound.getErrorMessage(), key, orgId),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     } else {
       try {
         Map<String, Object> preferenceObj = new HashMap<>();

@@ -107,7 +107,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testReadPreferenceWithMandatoryParamOrgId() {
+  public void testReadPreferenceWithoutMandatoryParamOrgId() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.KEY, "teacher");
