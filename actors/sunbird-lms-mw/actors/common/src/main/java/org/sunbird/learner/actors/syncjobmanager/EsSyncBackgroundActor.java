@@ -80,7 +80,7 @@ public class EsSyncBackgroundActor extends BaseActor {
           LoggerEnum.INFO);
       Response response =
           cassandraOperation.getRecordsByProperty(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, objectIds);
+              dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, objectIds, null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " completed",
@@ -107,7 +107,7 @@ public class EsSyncBackgroundActor extends BaseActor {
           LoggerEnum.INFO);
 
       Response response =
-          cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName());
+          cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName(), null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
       ProjectLogger.log(
@@ -151,7 +151,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     if (CollectionUtils.isEmpty(objectIds)) {
       Response response =
           cassandraOperation.getRecordsByProperties(
-              JsonKey.SUNBIRD, JsonKey.USER, null, Arrays.asList(JsonKey.ID));
+              JsonKey.SUNBIRD, JsonKey.USER, null, Arrays.asList(JsonKey.ID), null);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       objectIds = responseList.stream().map(i -> i.get(JsonKey.ID)).collect(Collectors.toList());
@@ -200,7 +200,8 @@ public class EsSyncBackgroundActor extends BaseActor {
   private Map<String, Object> getDetailsById(DbInfo dbInfo, String userId) {
     try {
       Response response =
-          cassandraOperation.getRecordById(dbInfo.getKeySpace(), dbInfo.getTableName(), userId);
+          cassandraOperation.getRecordById(
+              dbInfo.getKeySpace(), dbInfo.getTableName(), userId, null);
       return ((((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).isEmpty())
           ? new HashMap<>()
           : ((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).get(0));

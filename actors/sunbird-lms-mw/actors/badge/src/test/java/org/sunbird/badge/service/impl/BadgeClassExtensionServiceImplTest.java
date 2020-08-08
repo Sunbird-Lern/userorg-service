@@ -22,6 +22,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BadgingJsonKey;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 @RunWith(PowerMockRunner.class)
@@ -47,7 +48,9 @@ public class BadgeClassExtensionServiceImplTest {
 
   @Test
   public void testSaveSuccess() {
-    PowerMockito.when(mockDBService.upsertRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            mockDBService.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
 
     boolean thrown = false;
@@ -76,7 +79,11 @@ public class BadgeClassExtensionServiceImplTest {
         JsonKey.RESPONSE, new ArrayList<Map<String, Object>>(Arrays.asList(new HashMap<>())));
 
     PowerMockito.when(
-            mockDBService.getRecordById(Mockito.any(), Mockito.any(), Mockito.anyString()))
+            mockDBService.getRecordById(
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     BadgeClassExtension badgeClassExtension = badgeClassExtensionServiceImpl.get(VALUE_BADGE_ID);
@@ -98,7 +105,8 @@ public class BadgeClassExtensionServiceImplTest {
     response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>(Arrays.asList(badgeMap)));
 
     PowerMockito.when(
-            mockDBService.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.anyMap()))
+            mockDBService.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     List<BadgeClassExtension> badgeClassExtList =
@@ -125,7 +133,8 @@ public class BadgeClassExtensionServiceImplTest {
     response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>());
 
     PowerMockito.when(
-            mockDBService.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.anyMap()))
+            mockDBService.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     List<BadgeClassExtension> badgeClassExtList =
@@ -147,7 +156,11 @@ public class BadgeClassExtensionServiceImplTest {
     response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>());
 
     PowerMockito.when(
-            mockDBService.getRecordById(Mockito.any(), Mockito.any(), Mockito.anyString()))
+            mockDBService.getRecordById(
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
 
     boolean thrown = false;
@@ -170,7 +183,11 @@ public class BadgeClassExtensionServiceImplTest {
     response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>());
 
     PowerMockito.when(
-            mockDBService.getRecordById(Mockito.any(), Mockito.any(), Mockito.anyString()))
+            mockDBService.getRecordById(
+                Mockito.any(),
+                Mockito.any(),
+                Mockito.anyString(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     boolean thrown = false;
@@ -190,7 +207,10 @@ public class BadgeClassExtensionServiceImplTest {
   public void testDeleteSuccess() {
     PowerMockito.when(
             mockDBService.deleteRecord(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
 
     boolean thrown = false;

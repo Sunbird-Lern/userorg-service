@@ -100,7 +100,7 @@ public class UserUtil {
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, null);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -131,7 +131,7 @@ public class UserUtil {
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, null);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -151,7 +151,7 @@ public class UserUtil {
       }
       Response result =
           cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), type, value);
+              userDb.getKeySpace(), userDb.getTableName(), type, value, null);
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -174,7 +174,7 @@ public class UserUtil {
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, null);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -288,7 +288,7 @@ public class UserUtil {
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, null);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -379,7 +379,7 @@ public class UserUtil {
           externalIdReq.put(JsonKey.EXTERNAL_ID, externalId.get(JsonKey.ID));
           Response response =
               cassandraOperation.getRecordsByProperties(
-                  JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
+                  JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, null);
           List<Map<String, Object>> externalIdsRecord =
               (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
           if (CollectionUtils.isNotEmpty(externalIdsRecord)) {
@@ -780,7 +780,7 @@ public class UserUtil {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
+            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -804,7 +804,7 @@ public class UserUtil {
       Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
           cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
+              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap, null);
       userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(userOrgList)) {
         for (Map<String, Object> tempMap : userOrgList) {

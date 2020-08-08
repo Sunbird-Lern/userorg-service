@@ -14,6 +14,7 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.systemsettings.dao.SystemSettingDao;
 
@@ -37,7 +38,10 @@ public class SystemSettingDaoImplTest {
   public void testSetSystemSettingSuccess() {
     PowerMockito.when(
             cassandraOperation.upsertRecord(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyMap(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
     boolean thrown = false;
     try {
@@ -54,7 +58,11 @@ public class SystemSettingDaoImplTest {
   public void testReadSystemSettingSuccess() {
     PowerMockito.when(
             cassandraOperation.getRecordsByIndexedProperty(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(false));
     SystemSetting systemSetting = systemSettingDaoImpl.readByField(ROOT_ORG_ID);
     Assert.assertTrue(null != systemSetting);
@@ -64,7 +72,11 @@ public class SystemSettingDaoImplTest {
   public void testReadSystemSettingEmpty() {
     PowerMockito.when(
             cassandraOperation.getRecordsByIndexedProperty(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(true));
     SystemSetting systemSetting = systemSettingDaoImpl.readByField(FIELD);
     Assert.assertTrue(null == systemSetting);
@@ -72,7 +84,9 @@ public class SystemSettingDaoImplTest {
 
   @Test
   public void testReadAllSystemSettingsSuccess() {
-    PowerMockito.when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    PowerMockito.when(
+            cassandraOperation.getAllRecords(
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(false));
     List<SystemSetting> result = systemSettingDaoImpl.readAll();
     Assert.assertTrue(null != result);
@@ -80,7 +94,9 @@ public class SystemSettingDaoImplTest {
 
   @Test
   public void testReadAllSystemSettingsEmpty() {
-    PowerMockito.when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    PowerMockito.when(
+            cassandraOperation.getAllRecords(
+                Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(true));
     List<SystemSetting> result = systemSettingDaoImpl.readAll();
     Assert.assertTrue(null != result);

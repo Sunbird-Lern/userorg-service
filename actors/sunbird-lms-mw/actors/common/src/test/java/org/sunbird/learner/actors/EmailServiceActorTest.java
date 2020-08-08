@@ -96,7 +96,11 @@ public class EmailServiceActorTest {
             .getEncryptionServiceInstance(null))
         .thenReturn(defaultEncryptionServivce);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(cassandraGetRecordById());
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);

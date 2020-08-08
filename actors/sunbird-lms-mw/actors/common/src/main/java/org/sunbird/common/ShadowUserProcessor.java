@@ -150,7 +150,7 @@ public class ShadowUserProcessor {
     propertiesMap.put(JsonKey.UPDATED_BY, shadowUser.getAddedBy());
     propertiesMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     Response response =
-        cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, propertiesMap);
+        cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, propertiesMap, null);
     ProjectLogger.log(
         "ShadowUserProcessor:updateStatusInUserOrg:response from cassandra in updating user org "
             .concat(response + ""),
@@ -329,7 +329,7 @@ public class ShadowUserProcessor {
         LoggerEnum.INFO.name());
     Response response =
         cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), propertiesMap);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), propertiesMap, null);
     ProjectLogger.log(
         "ShadowUserProcessor:updateUserInUserTable:user is updated with shadow user:RESPONSE FROM CASSANDRA IS:"
             + response.getResult(),
@@ -351,7 +351,7 @@ public class ShadowUserProcessor {
     }
     Response response =
         cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.CUSTODIAN_ORG_ID);
+            JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.CUSTODIAN_ORG_ID, null);
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
@@ -437,7 +437,7 @@ public class ShadowUserProcessor {
     Map<String, Object> propertiesMap = new WeakHashMap<>();
     propertiesMap.put(JsonKey.CLAIM_STATUS, ClaimStatus.UNCLAIMED.getValue());
     cassandraOperation.applyOperationOnRecordsAsync(
-        JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, null, getSyncCallback());
+        JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, null, getSyncCallback(), null);
     propertiesMap.clear();
   }
 
@@ -470,7 +470,7 @@ public class ShadowUserProcessor {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, shadowUser.getUserExtId());
     Response response =
         cassandraOperation.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, null);
     ProjectLogger.log(
         "ShadowUserProcessor:updateUserInShadowDb:update:with processId: "
             + shadowUser.getProcessId()
@@ -565,7 +565,8 @@ public class ShadowUserProcessor {
     Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USR_ORG_DB);
     try {
       Response response =
-          cassandraOperation.insertRecord(usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap);
+          cassandraOperation.insertRecord(
+              usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap, null);
       ProjectLogger.log(
           "ShadowUserProcessor:registerUserToOrg:user status while registration with org is:"
               + response.getResult(),
@@ -587,7 +588,7 @@ public class ShadowUserProcessor {
     Map<String, Object> telemetryContext = new HashMap<>();
     Response response =
         cassandraOperation.getRecordById(
-            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId);
+            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId, null);
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));

@@ -33,6 +33,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
@@ -50,7 +51,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response insertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
+  public Response insertRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service insertRecord method started at ==" + startTime, LoggerEnum.INFO);
@@ -89,7 +91,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response updateRecord(String keyspaceName, String tableName, Map<String, Object> request) {
+  public Response updateRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service updateRecord method started at ==" + startTime, LoggerEnum.INFO);
@@ -139,7 +142,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response deleteRecord(String keyspaceName, String tableName, String identifier) {
+  public Response deleteRecord(
+      String keyspaceName, String tableName, String identifier, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service deleteRecord method started at ==" + startTime, LoggerEnum.INFO);
@@ -164,7 +168,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByProperty(
-      String keyspaceName, String tableName, String propertyName, Object propertyValue) {
+      String keyspaceName,
+      String tableName,
+      String propertyName,
+      Object propertyValue,
+      RequestContext context) {
     return getRecordsByProperty(keyspaceName, tableName, propertyName, propertyValue, null);
   }
 
@@ -174,7 +182,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       String propertyName,
       Object propertyValue,
-      List<String> fields) {
+      List<String> fields,
+      RequestContext context) {
     Response response = new Response();
     Session session = connectionManager.getSession(keyspaceName);
     try {
@@ -201,7 +210,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByProperty(
-      String keyspaceName, String tableName, String propertyName, List<Object> propertyValueList) {
+      String keyspaceName,
+      String tableName,
+      String propertyName,
+      List<Object> propertyValueList,
+      RequestContext context) {
     return getRecordsByProperty(keyspaceName, tableName, propertyName, propertyValueList, null);
   }
 
@@ -211,7 +224,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       String propertyName,
       List<Object> propertyValueList,
-      List<String> fields) {
+      List<String> fields,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getRecordsByProperty method started at ==" + startTime, LoggerEnum.INFO);
@@ -242,13 +256,20 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByProperties(
-      String keyspaceName, String tableName, Map<String, Object> propertyMap) {
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      RequestContext context) {
     return getRecordsByProperties(keyspaceName, tableName, propertyMap, null);
   }
 
   @Override
   public Response getRecordsByProperties(
-      String keyspaceName, String tableName, Map<String, Object> propertyMap, List<String> fields) {
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      List<String> fields,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getRecordsByProperties method started at ==" + startTime,
@@ -320,7 +341,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getAllRecords(String keyspaceName, String tableName) {
+  public Response getAllRecords(String keyspaceName, String tableName, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getAllRecords method started at ==" + startTime, LoggerEnum.INFO);
@@ -341,7 +362,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response upsertRecord(String keyspaceName, String tableName, Map<String, Object> request) {
+  public Response upsertRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service upsertRecord method started at ==" + startTime, LoggerEnum.INFO);
@@ -382,7 +404,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName,
       String tableName,
       Map<String, Object> request,
-      Map<String, Object> compositeKey) {
+      Map<String, Object> compositeKey,
+      RequestContext context) {
 
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
@@ -468,24 +491,34 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getRecordById(String keyspaceName, String tableName, String key) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, null);
-  }
-
-  @Override
-  public Response getRecordById(String keyspaceName, String tableName, Map<String, Object> key) {
+  public Response getRecordById(
+      String keyspaceName, String tableName, String key, RequestContext context) {
     return getRecordByIdentifier(keyspaceName, tableName, key, null);
   }
 
   @Override
   public Response getRecordById(
-      String keyspaceName, String tableName, String key, List<String> fields) {
+      String keyspaceName, String tableName, Map<String, Object> key, RequestContext context) {
+    return getRecordByIdentifier(keyspaceName, tableName, key, null);
+  }
+
+  @Override
+  public Response getRecordById(
+      String keyspaceName,
+      String tableName,
+      String key,
+      List<String> fields,
+      RequestContext context) {
     return getRecordByIdentifier(keyspaceName, tableName, key, fields);
   }
 
   @Override
   public Response getRecordById(
-      String keyspaceName, String tableName, Map<String, Object> key, List<String> fields) {
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> key,
+      List<String> fields,
+      RequestContext context) {
     return getRecordByIdentifier(keyspaceName, tableName, key, fields);
   }
 
@@ -495,7 +528,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> key,
       List<String> ttlFields,
-      List<String> fields) {
+      List<String> fields,
+      RequestContext context) {
     return getRecordWithTTLByIdentifier(keyspaceName, tableName, key, ttlFields, fields);
   }
 
@@ -542,7 +576,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response batchInsert(
-      String keyspaceName, String tableName, List<Map<String, Object>> records) {
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> records,
+      RequestContext context) {
 
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
@@ -586,11 +623,15 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
    * @param keyspaceName
    * @param tableName
    * @param records
+   * @param context
    * @return
    */
   // @Override
   public Response batchUpdateById(
-      String keyspaceName, String tableName, List<Map<String, Object>> records) {
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> records,
+      RequestContext context) {
 
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
@@ -628,11 +669,15 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
    * @param keySpaceName
    * @param tableName
    * @param inputData
+   * @param context
    * @return
    */
   @Override
   public Response performBatchAction(
-      String keySpaceName, String tableName, Map<String, Object> inputData) {
+      String keySpaceName,
+      String tableName,
+      Map<String, Object> inputData,
+      RequestContext context) {
 
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
@@ -706,7 +751,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response batchUpdate(
-      String keyspaceName, String tableName, List<Map<String, Map<String, Object>>> list) {
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Map<String, Object>>> list,
+      RequestContext context) {
 
     Session session = connectionManager.getSession(keyspaceName);
     BatchStatement batchStatement = new BatchStatement();
@@ -748,7 +796,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByIndexedProperty(
-      String keyspaceName, String tableName, String propertyName, Object propertyValue) {
+      String keyspaceName,
+      String tableName,
+      String propertyName,
+      Object propertyValue,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl:getRecordsByIndexedProperty called at " + startTime,
@@ -779,7 +831,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public void deleteRecord(
-      String keyspaceName, String tableName, Map<String, String> compositeKeyMap) {
+      String keyspaceName,
+      String tableName,
+      Map<String, String> compositeKeyMap,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl: deleteRecord by composite key called at " + startTime,
@@ -813,7 +868,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public boolean deleteRecords(String keyspaceName, String tableName, List<String> identifierList) {
+  public boolean deleteRecords(
+      String keyspaceName, String tableName, List<String> identifierList, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ResultSet resultSet;
     ProjectLogger.log(
@@ -843,7 +899,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByCompositeKey(
-      String keyspaceName, String tableName, Map<String, Object> compositeKeyMap) {
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> compositeKeyMap,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl: getRecordsByCompositeKey called at " + startTime, LoggerEnum.INFO);
@@ -876,7 +935,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecordsByIdsWithSpecifiedColumns(
-      String keyspaceName, String tableName, List<String> properties, List<String> ids) {
+      String keyspaceName,
+      String tableName,
+      List<String> properties,
+      List<String> ids,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl: getRecordsByIdsWithSpecifiedColumns call started at " + startTime,
@@ -928,7 +991,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName,
       String tableName,
       List<String> primaryKeys,
-      String primaryKeyColumnName) {
+      String primaryKeyColumnName,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl: getRecordsByPrimaryKeys call started at " + startTime,
@@ -952,7 +1016,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response insertRecordWithTTL(
-      String keyspaceName, String tableName, Map<String, Object> request, int ttl) {
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> request,
+      int ttl,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     Insert insert = QueryBuilder.insertInto(keyspaceName, tableName);
     request
@@ -978,7 +1046,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> request,
       Map<String, Object> compositeKey,
-      int ttl) {
+      int ttl,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keyspaceName);
     Update update = QueryBuilder.update(keyspaceName, tableName);
@@ -1014,7 +1083,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> primaryKeys,
       List<String> properties,
-      Map<String, String> ttlPropertiesWithAlias) {
+      Map<String, String> ttlPropertiesWithAlias,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl:getRecordsByIdsWithSpecifiedColumnsAndTTL: call started at "
@@ -1077,7 +1147,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName,
       String tableName,
       List<Map<String, Object>> records,
-      List<Integer> ttls) {
+      List<Integer> ttls,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "CassandraOperationImpl:batchInsertWithTTL: call started at " + startTime, LoggerEnum.INFO);
@@ -1140,7 +1211,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String columnName,
       String key,
       int value,
-      String objectType) {
+      String objectType,
+      RequestContext context) {
     Select selectQuery = QueryBuilder.select().column(columnName).from(keyspace, tableName);
     Clause clause = QueryBuilder.lt(key, value);
     selectQuery.where(eq(JsonKey.OBJECT_TYPE, objectType)).and(clause);
@@ -1152,7 +1224,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getRecords(
-      String keyspace, String table, Map<String, Object> filters, List<String> fields) {
+      String keyspace,
+      String table,
+      Map<String, Object> filters,
+      List<String> fields,
+      RequestContext context) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -1163,13 +1239,15 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String table,
       Map<String, Object> filters,
       List<String> fields,
-      FutureCallback<ResultSet> callback) {
+      FutureCallback<ResultSet> callback,
+      RequestContext context) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public Response searchValueInList(String keyspace, String tableName, String key, String value) {
+  public Response searchValueInList(
+      String keyspace, String tableName, String key, String value, RequestContext context) {
     return searchValueInList(keyspace, tableName, key, value, null);
   }
 
@@ -1179,7 +1257,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       String key,
       String value,
-      Map<String, Object> propertyMap) {
+      Map<String, Object> propertyMap,
+      RequestContext context) {
     Select selectQuery = QueryBuilder.select().all().from(keyspace, tableName);
     Clause clause = QueryBuilder.contains(key, value);
     selectQuery.where(clause);

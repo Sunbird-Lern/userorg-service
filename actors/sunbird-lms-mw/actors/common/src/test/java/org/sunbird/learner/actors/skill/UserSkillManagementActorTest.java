@@ -80,13 +80,17 @@ public class UserSkillManagementActorTest {
     ActorRef subject = system.actorOf(props);
     Response insertResponse = createCassandraSuccessResponse();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
     when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(createGetSkillsSuccessResponse());
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(insertResponse);
     mockCassandraRequestForGetUser(false);
     subject.tell(
@@ -118,10 +122,14 @@ public class UserSkillManagementActorTest {
 
     Request actorMessage = createUpdateSkillRequest(USER_ID, Collections.emptyList());
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
     when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(createGetSkillsSuccessResponse());
 
     mockGetSkillResponse(ENDORSED_USER_ID);
@@ -137,10 +145,14 @@ public class UserSkillManagementActorTest {
 
     Request actorMessage = createUpdateSkillRequest(USER_ID, Arrays.asList(ENDORSED_SKILL_NAME));
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
     when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(createGetSkillsSuccessResponse());
 
     mockGetSkillEmptyResponse(ENDORSED_USER_ID);
@@ -201,7 +213,7 @@ public class UserSkillManagementActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createGetSkillsSuccessResponse());
     Request actorMessage = new Request();
     actorMessage.setOperation(ActorOperations.GET_SKILLS_LIST.getValue());
@@ -260,11 +272,15 @@ public class UserSkillManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createSkillEndorsementResponse());
 
     when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(endorsementSkillResponse());
     subject.tell(
         createSkillEndorsementRequest(USER_ID, ENDORSED_USER_ID, ENDORSED_SKILL_NAME),
@@ -455,11 +471,11 @@ public class UserSkillManagementActorTest {
   private void mockCassandraRequestForGetUser(boolean isFailure) {
     if (isFailure)
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
           .thenReturn(createGetUserFailureResponse());
     else
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
           .thenReturn(createGetUserSuccessResponse());
   }
 }

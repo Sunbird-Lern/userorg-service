@@ -29,12 +29,12 @@ public final class UserOrgDaoImpl implements UserOrgDao {
   @Override
   public Response updateUserOrg(UserOrg userOrg) {
     return cassandraOperation.updateRecord(
-        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class));
+        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class), null);
   }
 
   @Override
   public Response createUserOrg(UserOrg userOrg) {
     return cassandraOperation.insertRecord(
-        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class));
+        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class), null);
   }
 }

@@ -74,7 +74,8 @@ public class GeoLocationManagementActor extends BaseActor {
             geoLocationDbInfo.getKeySpace(),
             geoLocationDbInfo.getTableName(),
             JsonKey.ID,
-            locationIds);
+            locationIds,
+            null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     for (Map<String, Object> map : list) {
       responseMap = new HashMap<>();
@@ -110,7 +111,7 @@ public class GeoLocationManagementActor extends BaseActor {
     // if logic is change then we need to update the matching logic as well
     Response response =
         cassandraOperation.getRecordById(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), topic);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), topic, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (list.isEmpty()) {
       // throw exception that invalid topic ...
@@ -155,7 +156,7 @@ public class GeoLocationManagementActor extends BaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     cassandraOperation.deleteRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId, null);
     finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(finalResponse, self());
 
@@ -192,7 +193,7 @@ public class GeoLocationManagementActor extends BaseActor {
     }
     Response response1 =
         cassandraOperation.getRecordById(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locationId, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
     if (list.isEmpty()) {
       // throw exception that invalid location id ...
@@ -216,7 +217,7 @@ public class GeoLocationManagementActor extends BaseActor {
 
     dbMap.put(JsonKey.ID, dbResult.get(JsonKey.ID));
     cassandraOperation.updateRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), dbMap);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), dbMap, null);
 
     finalResponse.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(finalResponse, self());
@@ -251,7 +252,8 @@ public class GeoLocationManagementActor extends BaseActor {
               geoLocationDbInfo.getKeySpace(),
               geoLocationDbInfo.getTableName(),
               JsonKey.ROOT_ORG_ID,
-              id);
+              id,
+              null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
 
       finalResponse.put(JsonKey.RESPONSE, list);
@@ -263,7 +265,7 @@ public class GeoLocationManagementActor extends BaseActor {
 
       Response response1 =
           cassandraOperation.getRecordById(
-              geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), id);
+              geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), id, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
       finalResponse.put(JsonKey.RESPONSE, list);
       sender().tell(finalResponse, self());
@@ -305,7 +307,7 @@ public class GeoLocationManagementActor extends BaseActor {
     // check whether org exist or not
     Response result =
         cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId);
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId, null);
     List<Map<String, Object>> orglist = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (orglist.isEmpty()) {
       throw new ProjectCommonException(
@@ -342,7 +344,7 @@ public class GeoLocationManagementActor extends BaseActor {
       dbMap.put(JsonKey.TYPE, type);
 
       cassandraOperation.insertRecord(
-          geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), dbMap);
+          geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), dbMap, null);
 
       Map<String, Object> responseMap = new HashMap<>();
       responseMap.put(JsonKey.ID, id);

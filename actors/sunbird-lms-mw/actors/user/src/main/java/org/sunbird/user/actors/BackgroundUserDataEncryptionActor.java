@@ -119,7 +119,7 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            JsonKey.SUNBIRD, JsonKey.USER, null, userIds);
+            JsonKey.SUNBIRD, JsonKey.USER, null, userIds, null);
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(userList)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
@@ -133,7 +133,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
       UserUtility.encryptSpecificUserData(userMap, fieldsToEncrypt);
       CassandraOperation cassandraOperation = ServiceFactory.getInstance();
       Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-      cassandraOperation.updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+      cassandraOperation.updateRecord(
+          usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, null);
       ProjectLogger.log(
           "BackgroundUserDataEncryptionActor:encryptUserDataAndUpdateDB: Updating user data for userId = "
               + ((String) userMap.get(JsonKey.ID))
@@ -164,7 +165,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
       UserUtility.decryptSpecificUserData(userMap, fieldsToDecrypt);
       CassandraOperation cassandraOperation = ServiceFactory.getInstance();
       Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-      cassandraOperation.updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+      cassandraOperation.updateRecord(
+          usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, null);
       ProjectLogger.log(
           "BackgroundUserDataEncryptionActor:decryptUserDataAndUpdateDB: Updating user data for userId = "
               + ((String) userMap.get(JsonKey.ID))
@@ -195,7 +197,7 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
     Response response =
         cassandraOperation.getRecordsByProperty(
-            addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, userId);
+            addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, userId, null);
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }
 
@@ -203,7 +205,8 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
     for (Map<String, Object> address : addressList) {
-      cassandraOperation.updateRecord(addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address);
+      cassandraOperation.updateRecord(
+          addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), address, null);
     }
   }
 

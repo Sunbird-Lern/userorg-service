@@ -28,6 +28,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.User;
@@ -58,10 +59,16 @@ public class CertificateActorTest {
     when(userServiceImpl.getUserById(Mockito.anyString()))
         .thenReturn(getUserDetails(new User(), false));
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(true));
     boolean result = testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, null), null);
     assertTrue(result);
@@ -73,10 +80,16 @@ public class CertificateActorTest {
     when(userServiceImpl.getUserById(Mockito.anyString()))
         .thenReturn(getUserDetails(new User(), false));
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(true));
     boolean result =
         testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, "anyOldId"), null);
@@ -86,7 +99,10 @@ public class CertificateActorTest {
   @Test
   public void testValidateCertificate() {
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getValidRecordDetails(false, true));
     boolean result =
         testScenario(getValidateCertRequest(ActorOperations.VALIDATE_CERTIFICATE), null);
@@ -96,7 +112,10 @@ public class CertificateActorTest {
   @Test
   public void testInValidateCertificateAccessCode() {
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getValidRecordDetails(false, false));
     boolean result =
         testScenario(
@@ -109,7 +128,11 @@ public class CertificateActorTest {
   @Test
   public void testMergeCertificate() {
     when(cassandraOperationImpl.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(false));
     boolean result =
         testScenario(getMergeCertRequest(ActorOperations.MERGE_USER_CERTIFICATE), null);

@@ -56,7 +56,7 @@ public class UserServiceTest {
   public void testCheckKeyUniquenessWhenKeyBlank() {
     try {
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "", ""))
+              userDb.getKeySpace(), userDb.getTableName(), "", "", null))
           .thenReturn(new Response());
       userService.checkKeyUniqueness("", "", false);
     } catch (Exception e) {
@@ -71,7 +71,7 @@ public class UserServiceTest {
       List<Map<String, Object>> userMapList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "key", "value"))
+              userDb.getKeySpace(), userDb.getTableName(), "key", "value", null))
           .thenReturn(response);
       userService.checkKeyUniqueness("key", "value", false);
     } catch (Exception e) {
@@ -89,7 +89,7 @@ public class UserServiceTest {
       userMapList.add(map);
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "email", "valueNotUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "email", "valueNotUnique", null))
           .thenReturn(response);
       userService.checkKeyUniqueness("email", "valueNotUnique", false);
     } catch (Exception e) {
@@ -107,7 +107,7 @@ public class UserServiceTest {
       userMapList.add(map);
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueNotUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueNotUnique", null))
           .thenReturn(response);
       userService.checkKeyUniqueness("phone", "valueNotUnique", false);
     } catch (Exception e) {
@@ -124,7 +124,7 @@ public class UserServiceTest {
       response.put(JsonKey.RESPONSE, userMapList);
       when(encryptionService.encryptData("valueUnique")).thenReturn("valueUnique");
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueUnique", null))
           .thenReturn(response);
       userService.checkKeyUniqueness("phone", "valueUnique", true);
     } catch (Exception e) {

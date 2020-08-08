@@ -110,7 +110,7 @@ public class HealthActor extends BaseActor {
     try {
       Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
       getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
+          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));
@@ -152,7 +152,7 @@ public class HealthActor extends BaseActor {
     try {
       Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
       getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName());
+          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));
@@ -182,7 +182,7 @@ public class HealthActor extends BaseActor {
       }
       String searchBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       String response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               searchBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               body,

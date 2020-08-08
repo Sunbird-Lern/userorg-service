@@ -414,7 +414,7 @@ public final class Util {
     Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response result =
         cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
+            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (!(list.isEmpty())) {
       return (String) (list.get(0).get(JsonKey.USERNAME));
@@ -435,7 +435,7 @@ public final class Util {
     Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response result =
         cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId);
+            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (!(list.isEmpty())) {
       return list.get(0);
@@ -667,7 +667,7 @@ public final class Util {
     DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     Response response =
         cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier);
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier, null);
     List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != res && !res.isEmpty()) {
       return res.get(0);
@@ -692,7 +692,7 @@ public final class Util {
           externalIdReq.put(JsonKey.EXTERNAL_ID, encryptData(externalId.get(JsonKey.ID)));
           Response response =
               cassandraOperation.getRecordsByProperties(
-                  KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
+                  KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, null);
           List<Map<String, Object>> externalIdsRecord =
               (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
           if (CollectionUtils.isNotEmpty(externalIdsRecord)) {
@@ -841,7 +841,7 @@ public final class Util {
         map.put(JsonKey.LAST_UPDATED_BY, requestMap.get(JsonKey.UPDATED_BY));
         map.put(JsonKey.LAST_UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
       }
-      cassandraOperation.upsertRecord(KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, map);
+      cassandraOperation.upsertRecord(KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, map, null);
     } catch (Exception ex) {
       ProjectLogger.log("Util:upsertUserExternalIdentityData : Exception occurred", ex);
     }
@@ -854,7 +854,8 @@ public final class Util {
             KEY_SPACE_NAME,
             JsonKey.USR_EXT_IDNT_TABLE,
             JsonKey.USER_ID,
-            requestMap.get(JsonKey.USER_ID));
+            requestMap.get(JsonKey.USER_ID),
+            null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -940,7 +941,7 @@ public final class Util {
     map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
-    cassandraOperation.deleteRecord(KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, map);
+    cassandraOperation.deleteRecord(KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, map, null);
   }
 
   public static void registerUserToOrg(Map<String, Object> userMap) {
@@ -958,7 +959,8 @@ public final class Util {
     }
     Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USR_ORG_DB);
     try {
-      cassandraOperation.insertRecord(usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap);
+      cassandraOperation.insertRecord(
+          usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap, null);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }
@@ -969,7 +971,7 @@ public final class Util {
     String channel = null;
     Response resultFrRootOrg =
         cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId);
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId, null);
     if (CollectionUtils.isNotEmpty(
         (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
       Map<String, Object> rootOrg =
@@ -987,7 +989,7 @@ public final class Util {
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     Response response =
         cassandraOperation.getRecordsByProperties(
-            usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map);
+            usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map, null);
     List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (!resList.isEmpty()) {
       Map<String, Object> res = resList.get(0);
@@ -1003,7 +1005,8 @@ public final class Util {
         reqMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.HASHTAGID));
       }
       try {
-        cassandraOperation.updateRecord(usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap);
+        cassandraOperation.updateRecord(
+            usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap, null);
       } catch (Exception e) {
         ProjectLogger.log("Util:upsertUserOrgData exception : " + e.getMessage(), e);
       }
@@ -1022,7 +1025,7 @@ public final class Util {
     try {
       response =
           cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId);
+              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId, null);
       userList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "Util:getUserProfile: collecting user data to save for userId : " + userId,
@@ -1208,7 +1211,11 @@ public final class Util {
     Util.DbInfo userSkillDbInfo = Util.dbInfoMap.get(JsonKey.USER_SKILL_DB);
     Response skillresponse =
         cassandraOperation.getRecordsByIndexedProperty(
-            userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), JsonKey.USER_ID, userId);
+            userSkillDbInfo.getKeySpace(),
+            userSkillDbInfo.getTableName(),
+            JsonKey.USER_ID,
+            userId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) skillresponse.get(JsonKey.RESPONSE);
     return responseList;
@@ -1220,7 +1227,7 @@ public final class Util {
     try {
       Response result =
           cassandraOperation.getRecordsByIndexedProperty(
-              badgeDbInfo.getKeySpace(), badgeDbInfo.getTableName(), JsonKey.USER_ID, userId);
+              badgeDbInfo.getKeySpace(), badgeDbInfo.getTableName(), JsonKey.USER_ID, userId, null);
       badges = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
@@ -1238,7 +1245,7 @@ public final class Util {
       Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
           cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
+              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap, null);
       userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(userOrgList)) {
         List<String> organisationIds =
@@ -1277,7 +1284,11 @@ public final class Util {
       ProjectLogger.log("collecting user jobprofile user Id : " + userId);
       jobProfileResponse =
           cassandraOperation.getRecordsByIndexedProperty(
-              jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), JsonKey.USER_ID, userId);
+              jobProDbInfo.getKeySpace(),
+              jobProDbInfo.getTableName(),
+              JsonKey.USER_ID,
+              userId,
+              null);
       userJobProfileList =
           (List<Map<String, Object>>) jobProfileResponse.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log("collecting user jobprofile collection completed userId : " + userId);
@@ -1301,7 +1312,7 @@ public final class Util {
     try {
       eduResponse =
           cassandraOperation.getRecordsByIndexedProperty(
-              eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), JsonKey.USER_ID, userId);
+              eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), JsonKey.USER_ID, userId, null);
       userEducationList = (List<Map<String, Object>>) eduResponse.getResult().get(JsonKey.RESPONSE);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
@@ -1326,11 +1337,15 @@ public final class Util {
         String encUserId = encryptData(userId);
         addrResponse =
             cassandraOperation.getRecordsByIndexedProperty(
-                addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, encUserId);
+                addrDbInfo.getKeySpace(),
+                addrDbInfo.getTableName(),
+                JsonKey.USER_ID,
+                encUserId,
+                null);
       } else {
         addrResponse =
             cassandraOperation.getRecordById(
-                addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId);
+                addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), addressId, null);
       }
       userAddressList = (List<Map<String, Object>>) addrResponse.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log("collecting user address operation completed user Id : " + userId);

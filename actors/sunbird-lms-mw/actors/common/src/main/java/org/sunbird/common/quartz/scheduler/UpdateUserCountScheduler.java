@@ -28,7 +28,7 @@ public class UpdateUserCountScheduler extends BaseJob {
     Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
     Response response =
         cassandraOperation.getAllRecords(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName());
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     for (Map<String, Object> map : list) {
       if (null == map.get(JsonKey.USER_COUNT) || 0 == ((int) map.get(JsonKey.USER_COUNT))) {

@@ -28,6 +28,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
@@ -76,14 +77,28 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(cassandraInsertRecord());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraRecordsByProperties());
-    cassandraOperation.deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap());
+    cassandraOperation.deleteRecord(
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyMap(),
+        Mockito.any(RequestContext.class));
     cassandraOperation.updateRecord(
-        Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap());
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyMap(),
+        Mockito.anyMap(),
+        Mockito.any(RequestContext.class));
 
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");

@@ -44,7 +44,8 @@ public class UploadLookUpScheduler extends BaseJob {
             bulkDb.getKeySpace(),
             bulkDb.getTableName(),
             JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.NEW.getValue());
+            ProjectUtil.BulkProcessStatus.NEW.getValue(),
+            null);
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
     ProjectLogger.log(
         "Total No. of record in Bulk_upload_process table with status as NEW are : :"
@@ -59,7 +60,8 @@ public class UploadLookUpScheduler extends BaseJob {
             bulkDb.getKeySpace(),
             bulkDb.getTableName(),
             JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());
+            ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue(),
+            null);
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
     ProjectLogger.log(
         "Total No. of record in Bulk_upload_process table with status as IN_PROGRESS are : :"

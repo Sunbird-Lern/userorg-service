@@ -70,7 +70,10 @@ public class BadgeAssertionValidator {
   private static String getUserRootOrgId(String userId) {
     Response response =
         cassandraOperation.getRecordById(
-            DbConstant.sunbirdKeyspaceName.getValue(), DbConstant.userTableName.getValue(), userId);
+            DbConstant.sunbirdKeyspaceName.getValue(),
+            DbConstant.userTableName.getValue(),
+            userId,
+            null);
     List<Map<String, Object>> userResponse =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 

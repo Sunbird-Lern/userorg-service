@@ -88,7 +88,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
 
   private void insertSelfDeclaredFields(Map<String, Object> extIdMap) {
 
-    cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, extIdMap);
+    cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, extIdMap, null);
   }
 
   public void updateUserSelfDeclaredDetails(UserDeclareEntity userDeclareEntity) {
@@ -141,7 +141,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     properties.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
     Response response =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -161,7 +161,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     updateFieldsMap.put(
         JsonKey.UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey);
+        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, null);
     return userDeclareEntity;
   }
 
@@ -237,7 +237,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     properties.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -249,6 +249,6 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     properties.put(JsonKey.USER_ID, userId);
     properties.put(JsonKey.ORG_ID, orgId);
     properties.put(JsonKey.PERSONA, persona);
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, null);
   }
 }

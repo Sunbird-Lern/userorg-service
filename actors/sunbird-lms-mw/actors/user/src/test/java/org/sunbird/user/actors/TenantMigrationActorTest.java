@@ -35,6 +35,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.feed.FeedUtil;
 import org.sunbird.feed.IFeedService;
@@ -101,14 +102,17 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
-    PowerMockito.when(cassandraOperation.upsertRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(upsertResponse);
 
     when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);

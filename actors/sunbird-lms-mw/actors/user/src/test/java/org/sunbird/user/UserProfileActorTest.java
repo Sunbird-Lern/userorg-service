@@ -33,6 +33,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -80,7 +81,8 @@ public class UserProfileActorTest {
 
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.GET_MEDIA_TYPES.getValue());
-    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
 
     subject.tell(reqObj, probe.getRef());

@@ -109,7 +109,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     response =
         cassandraOperation.getRecordById(
-            bulkDb.getKeySpace(), bulkDb.getTableName(), processId, fields);
+            bulkDb.getKeySpace(), bulkDb.getTableName(), processId, fields, null);
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> resList =
         ((List<Map<String, Object>>) response.get(JsonKey.RESPONSE));
@@ -273,13 +273,17 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     if (!StringUtils.isBlank((String) req.get(JsonKey.ORGANISATION_ID))) {
       response =
           cassandraOperation.getRecordById(
-              orgDb.getKeySpace(), orgDb.getTableName(), (String) req.get(JsonKey.ORGANISATION_ID));
+              orgDb.getKeySpace(),
+              orgDb.getTableName(),
+              (String) req.get(JsonKey.ORGANISATION_ID),
+              null);
     } else {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.EXTERNAL_ID, ((String) req.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
       map.put(JsonKey.PROVIDER, ((String) req.get(JsonKey.ORG_PROVIDER)).toLowerCase());
       response =
-          cassandraOperation.getRecordsByProperties(orgDb.getKeySpace(), orgDb.getTableName(), map);
+          cassandraOperation.getRecordsByProperties(
+              orgDb.getKeySpace(), orgDb.getTableName(), map, null);
     }
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
@@ -437,7 +441,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     map.put(JsonKey.STATUS, ProjectUtil.BulkProcessStatus.NEW.getValue());
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     Response res =
-        cassandraOperation.insertRecord(bulkDb.getKeySpace(), bulkDb.getTableName(), map);
+        cassandraOperation.insertRecord(bulkDb.getKeySpace(), bulkDb.getTableName(), map, null);
     res.put(JsonKey.PROCESS_ID, processId);
     ProjectLogger.log(
         "BulkUploadManagementActor: uploadCsvToDB returned response for processId: " + processId,

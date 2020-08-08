@@ -26,25 +26,25 @@ public class JobProfileDaoImpl implements JobProfileDao {
   @Override
   public void createJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.insertRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void updateJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.updateRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void upsertJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.upsertRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void deleteJobProfile(String jobProfileId) {
     cassandraOperation.deleteRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfileId);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfileId, null);
   }
 
   @Override

@@ -117,7 +117,8 @@ public class OrganisationManagementActor extends BaseActor {
               orgTypeDbInfo.getKeySpace(),
               orgTypeDbInfo.getTableName(),
               JsonKey.NAME,
-              request.get(JsonKey.NAME));
+              request.get(JsonKey.NAME),
+              null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (!(list.isEmpty())) {
         Map<String, Object> map = list.get(0);
@@ -135,7 +136,7 @@ public class OrganisationManagementActor extends BaseActor {
       request.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
       Response response =
           cassandraOperation.updateRecord(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), request);
+              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), request, null);
       sender().tell(response, self());
 
       targetObject =
@@ -173,7 +174,7 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> request = actorMessage.getRequest();
       Response result =
           cassandraOperation.getAllRecords(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName());
+              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (!(list.isEmpty())) {
         for (Map<String, Object> map : list) {
@@ -194,7 +195,7 @@ public class OrganisationManagementActor extends BaseActor {
       request.put(JsonKey.ID, id);
       Response response =
           cassandraOperation.insertRecord(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), request);
+              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), request, null);
       sender().tell(response, self());
 
       targetObject =
@@ -226,7 +227,7 @@ public class OrganisationManagementActor extends BaseActor {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Response response =
           cassandraOperation.getAllRecords(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName());
+              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (!(list.isEmpty())) {
         for (Map<String, Object> map : list) {
@@ -373,7 +374,7 @@ public class OrganisationManagementActor extends BaseActor {
       request = mapper.convertValue(org, Map.class);
       Response result =
           cassandraOperation.insertRecord(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), request);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), request, null);
 
       if (StringUtils.isNotBlank(passedExternalId)) {
         String channel = (String) request.get(JsonKey.CHANNEL);
@@ -415,14 +416,14 @@ public class OrganisationManagementActor extends BaseActor {
     orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
     orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
     orgExtIdRequest.put(JsonKey.ORG_ID, orgId);
-    cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest);
+    cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, null);
   }
 
   private void deleteOrgExternalIdRecord(String channel, String externalId) {
     Map<String, String> orgExtIdRequest = new HashMap<String, String>();
     orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
     orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest);
+    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, null);
   }
 
   private String validateHashTagId(String hashTagId, String opType, String orgId) {
@@ -462,7 +463,7 @@ public class OrganisationManagementActor extends BaseActor {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Response response =
           cassandraOperation.getAllRecords(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName());
+              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (!list.isEmpty()) {
         for (Map<String, Object> map : list) {
@@ -501,7 +502,7 @@ public class OrganisationManagementActor extends BaseActor {
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Response result =
           cassandraOperation.getRecordById(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), orgId);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), orgId, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (!(list.isEmpty())) {
         orgDao = list.get(0);
@@ -532,7 +533,7 @@ public class OrganisationManagementActor extends BaseActor {
       updateOrgDao.put(JsonKey.STATUS, nextStatus);
       Response response =
           cassandraOperation.updateRecord(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), updateOrgDao);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), updateOrgDao, null);
       response.getResult().put(JsonKey.ORGANISATION_ID, orgDao.get(JsonKey.ID));
       sender().tell(response, self());
 
@@ -570,7 +571,7 @@ public class OrganisationManagementActor extends BaseActor {
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Response result =
           cassandraOperation.getRecordById(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), orgId);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), orgId, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       Map<String, Object> orgDao;
       if (!(list.isEmpty())) {
@@ -766,7 +767,7 @@ public class OrganisationManagementActor extends BaseActor {
       updateOrgDao = mapper.convertValue(org, Map.class);
       Response response =
           cassandraOperation.updateRecord(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), updateOrgDao);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), updateOrgDao, null);
       response.getResult().put(JsonKey.ORGANISATION_ID, orgDao.get(JsonKey.ID));
 
       if (StringUtils.isNotBlank(passedExternalId)) {
@@ -894,7 +895,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.ORGANISATION_ID, orgId);
     Response result =
         cassandraOperation.getRecordsByProperties(
-            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData);
+            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData, null);
 
     List list = (List) result.get(JsonKey.RESPONSE);
     Map<String, Object> tempOrgap = null;
@@ -930,15 +931,15 @@ public class OrganisationManagementActor extends BaseActor {
     if (isNewRecord) {
       response =
           cassandraOperation.insertRecord(
-              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), usrOrgData);
+              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), usrOrgData, null);
     } else {
       response =
           cassandraOperation.updateRecord(
-              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), usrOrgData);
+              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), usrOrgData, null);
     }
     Response orgResult =
         cassandraOperation.getRecordById(
-            organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), orgId);
+            organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), orgId, null);
 
     List orgList = (List) orgResult.get(JsonKey.RESPONSE);
     Map<String, Object> newOrgMap = new HashMap<>();
@@ -951,7 +952,7 @@ public class OrganisationManagementActor extends BaseActor {
       newOrgMap.put(JsonKey.ID, orgId);
       newOrgMap.put(JsonKey.NO_OF_MEMBERS, count + 1);
       cassandraOperation.updateRecord(
-          organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), newOrgMap);
+          organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), newOrgMap, null);
     }
 
     sender().tell(response, self());
@@ -1024,7 +1025,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.ORGANISATION_ID, orgId);
     Response result =
         cassandraOperation.getRecordsByProperties(
-            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData);
+            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), requestData, null);
 
     List list = (List) result.get(JsonKey.RESPONSE);
     if (list.isEmpty()) {
@@ -1054,12 +1055,12 @@ public class OrganisationManagementActor extends BaseActor {
       dataMap.put(JsonKey.IS_DELETED, true);
       response =
           cassandraOperation.updateRecord(
-              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), dataMap);
+              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), dataMap, null);
       Map<String, Object> newOrgMap = new HashMap<>();
 
       Response orgresult =
           cassandraOperation.getRecordById(
-              organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), orgId);
+              organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), orgId, null);
       List orgList = (List) orgresult.get(JsonKey.RESPONSE);
       if (!orgList.isEmpty()) {
         Map<String, Object> orgMap = (Map<String, Object>) orgList.get(0);
@@ -1068,7 +1069,7 @@ public class OrganisationManagementActor extends BaseActor {
           newOrgMap.put(JsonKey.ID, orgId);
           newOrgMap.put(JsonKey.NO_OF_MEMBERS, count == 0 ? 0 : (count - 1));
           cassandraOperation.updateRecord(
-              organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), newOrgMap);
+              organisationDbInfo.getKeySpace(), organisationDbInfo.getTableName(), newOrgMap, null);
         }
       }
       sender().tell(response, self());
@@ -1130,7 +1131,8 @@ public class OrganisationManagementActor extends BaseActor {
   /** Inserts an address if not present, else updates the existing address */
   private void upsertAddress(Map<String, Object> addressReq) {
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
-    cassandraOperation.upsertRecord(orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), addressReq);
+    cassandraOperation.upsertRecord(
+        orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), addressReq, null);
   }
 
   /**
@@ -1146,7 +1148,8 @@ public class OrganisationManagementActor extends BaseActor {
           cassandraOperation.getRecordById(
               orgDbInfo.getKeySpace(),
               orgDbInfo.getTableName(),
-              (String) request.get(JsonKey.PARENT_ORG_ID));
+              (String) request.get(JsonKey.PARENT_ORG_ID),
+              null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       Map<String, Object> parentOrgDao = new HashMap<>();
       if (!(list.isEmpty())) {
@@ -1220,7 +1223,7 @@ public class OrganisationManagementActor extends BaseActor {
       requestDbMap.put(JsonKey.EXTERNAL_ID, req.get(JsonKey.EXTERNAL_ID));
       Response result =
           cassandraOperation.getRecordsByProperties(
-              userdbInfo.getKeySpace(), userdbInfo.getTableName(), requestDbMap);
+              userdbInfo.getKeySpace(), userdbInfo.getTableName(), requestDbMap, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
 
       if (list.isEmpty()) {
@@ -1339,7 +1342,8 @@ public class OrganisationManagementActor extends BaseActor {
               usrDbInfo.getKeySpace(),
               usrDbInfo.getTableName(),
               JsonKey.ID,
-              data.get(JsonKey.USER_ID));
+              data.get(JsonKey.USER_ID),
+              null);
     } else if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_EXTERNAL_ID))
         && StringUtils.isNotBlank((String) data.get(JsonKey.USER_PROVIDER))
         && StringUtils.isNotBlank((String) data.get(JsonKey.USER_ID_TYPE))) {
@@ -1350,7 +1354,7 @@ public class OrganisationManagementActor extends BaseActor {
 
       result =
           cassandraOperation.getRecordsByProperties(
-              JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap);
+              JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap, null);
       fromExtId = true;
     } else {
       usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
@@ -1377,7 +1381,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
       result =
           cassandraOperation.getRecordsByProperty(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.LOGIN_ID, loginId);
+              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.LOGIN_ID, loginId, null);
     }
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (list.isEmpty()) {
@@ -1406,7 +1410,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.IS_ROOT_ORG, true);
     Response result =
         cassandraOperation.getRecordsByProperties(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), requestData);
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), requestData, null);
     ProjectLogger.log(
         "OrganisationManagementActor:getOrg: result = " + result.toString(),
         LoggerEnum.INFO.name());
@@ -1504,7 +1508,7 @@ public class OrganisationManagementActor extends BaseActor {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response result =
           cassandraOperation.getRecordsByProperty(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), key, value);
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), key, value, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if ((list.isEmpty())) {
         return true;
@@ -1529,7 +1533,7 @@ public class OrganisationManagementActor extends BaseActor {
     if (MapUtils.isNotEmpty(compositeKeyMap)) {
       Response result =
           cassandraOperation.getRecordsByCompositeKey(
-              JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, compositeKeyMap);
+              JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, compositeKeyMap, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if ((list.isEmpty())) {
         return true;
@@ -1654,7 +1658,8 @@ public class OrganisationManagementActor extends BaseActor {
     Map<String, Object> responseMap = new HashMap<>();
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     Response response =
-        cassandraOperation.getRecordById(orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), id);
+        cassandraOperation.getRecordById(
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), id, null);
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {
       if (((List) record.get(JsonKey.RESPONSE)).size() != 0) {
@@ -1723,6 +1728,6 @@ public class OrganisationManagementActor extends BaseActor {
   private Response updateCassandraOrgRecord(Map<String, Object> reqMap) {
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     return cassandraOperation.updateRecord(
-        orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), reqMap);
+        orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), reqMap, null);
   }
 }

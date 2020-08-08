@@ -144,7 +144,7 @@ public class DataCacheHandler implements Runnable {
   @SuppressWarnings("unchecked")
   private void cacheSystemConfig(Map<String, String> configSettings) {
     Response response =
-        cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB);
+        cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
     ProjectLogger.log(
         "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult(),
         LoggerEnum.INFO.name());
@@ -171,7 +171,7 @@ public class DataCacheHandler implements Runnable {
 
   @SuppressWarnings("unchecked")
   private void orgTypeCache(Map<String, String> orgTypeMap) {
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB);
+    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
@@ -185,7 +185,7 @@ public class DataCacheHandler implements Runnable {
 
   @SuppressWarnings("unchecked")
   private void roleCache(Map<String, Object> roleMap) {
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP);
+    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
@@ -193,7 +193,7 @@ public class DataCacheHandler implements Runnable {
         roleMap.put((String) resultMap.get(JsonKey.ID), resultMap.get(JsonKey.NAME));
       }
     }
-    Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE);
+    Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE, null);
     List<Map<String, Object>> responseList2 =
         (List<Map<String, Object>>) response2.get(JsonKey.RESPONSE);
     if (null != responseList2 && !responseList2.isEmpty()) {

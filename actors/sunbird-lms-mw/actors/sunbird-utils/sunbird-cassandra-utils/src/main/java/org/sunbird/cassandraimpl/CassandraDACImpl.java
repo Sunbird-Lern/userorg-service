@@ -19,12 +19,17 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class CassandraDACImpl extends CassandraOperationImpl {
 
   public Response getRecords(
-      String keySpace, String table, Map<String, Object> filters, List<String> fields) {
+      String keySpace,
+      String table,
+      Map<String, Object> filters,
+      List<String> fields,
+      RequestContext context) {
     Response response = new Response();
     Session session = connectionManager.getSession(keySpace);
     try {
@@ -65,7 +70,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String table,
       Map<String, Object> filters,
       List<String> fields,
-      FutureCallback<ResultSet> callback) {
+      FutureCallback<ResultSet> callback,
+      RequestContext context) {
     Session session = connectionManager.getSession(keySpace);
     try {
       Select select;
@@ -103,12 +109,18 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       Map<String, Object> primaryKey,
       String column,
       String key,
-      Object value) {
+      Object value,
+      RequestContext context) {
     return updateMapRecord(keySpace, table, primaryKey, column, key, value, true);
   }
 
   public Response updateRemoveMapRecord(
-      String keySpace, String table, Map<String, Object> primaryKey, String column, String key) {
+      String keySpace,
+      String table,
+      Map<String, Object> primaryKey,
+      String column,
+      String key,
+      RequestContext context) {
     return updateMapRecord(keySpace, table, primaryKey, column, key, null, false);
   }
 

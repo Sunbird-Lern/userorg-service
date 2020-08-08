@@ -31,7 +31,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
   @Override
   public String create(BulkUploadProcessTask bulkUploadProcessTask) {
     Map<String, Object> map = mapper.convertValue(bulkUploadProcessTask, Map.class);
-    cassandraOperation.insertRecord(KEYSPACE_NAME, TABLE_NAME, map);
+    cassandraOperation.insertRecord(KEYSPACE_NAME, TABLE_NAME, map, null);
     return JsonKey.SUCCESS;
   }
 
@@ -43,7 +43,8 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
             KEYSPACE_NAME,
             TABLE_NAME,
             map.get(JsonKey.NON_PRIMARY_KEY),
-            map.get(JsonKey.PRIMARY_KEY));
+            map.get(JsonKey.PRIMARY_KEY),
+            null);
     return (String) response.get(JsonKey.RESPONSE);
   }
 
@@ -51,7 +52,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
   public BulkUploadProcessTask read(BulkUploadProcessTask bulkUploadProcessTask) {
     Response response =
         cassandraOperation.getRecordById(
-            KEYSPACE_NAME, TABLE_NAME, CassandraUtil.getPrimaryKey(bulkUploadProcessTask));
+            KEYSPACE_NAME, TABLE_NAME, CassandraUtil.getPrimaryKey(bulkUploadProcessTask), null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -67,7 +68,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
 
   @Override
   public List<BulkUploadProcessTask> readByPrimaryKeys(Map<String, Object> id) {
-    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id);
+    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -83,7 +84,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
     TypeReference<List<Map<String, Object>>> tRef =
         new TypeReference<List<Map<String, Object>>>() {};
     List<Map<String, Object>> list = mapper.convertValue(records, tRef);
-    Response response = cassandraOperation.batchInsert(KEYSPACE_NAME, TABLE_NAME, list);
+    Response response = cassandraOperation.batchInsert(KEYSPACE_NAME, TABLE_NAME, list, null);
     return (String) response.get(JsonKey.RESPONSE);
   }
 
@@ -93,7 +94,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
     for (BulkUploadProcessTask bulkUploadProcessTask : records) {
       list.add(CassandraUtil.batchUpdateQuery(bulkUploadProcessTask));
     }
-    Response response = cassandraOperation.batchUpdate(KEYSPACE_NAME, TABLE_NAME, list);
+    Response response = cassandraOperation.batchUpdate(KEYSPACE_NAME, TABLE_NAME, list, null);
     return (String) response.get(JsonKey.RESPONSE);
   }
 }

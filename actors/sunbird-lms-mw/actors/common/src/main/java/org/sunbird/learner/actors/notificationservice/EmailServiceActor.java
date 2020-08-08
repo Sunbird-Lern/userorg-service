@@ -290,7 +290,7 @@ public class EmailServiceActor extends BaseActor {
     fields.add(JsonKey.PHONE);
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIdList);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIdList, null);
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     return userList;
   }

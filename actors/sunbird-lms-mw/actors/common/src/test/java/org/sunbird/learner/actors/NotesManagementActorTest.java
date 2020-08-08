@@ -78,7 +78,7 @@ public class NotesManagementActorTest {
     when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(promise.future());
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     boolean result = testScenario(req, null);
     assertTrue(result);
@@ -178,7 +178,7 @@ public class NotesManagementActorTest {
         .thenReturn(promise.future())
         .thenReturn(promise.future());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     boolean result = testScenario(req, null);
     assertTrue(result);
@@ -284,7 +284,7 @@ public class NotesManagementActorTest {
         .thenReturn(promise.future())
         .thenReturn(promise.future());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     boolean result = testScenario(req, null);
     assertTrue(result);

@@ -29,7 +29,7 @@ public class UrlActionDaoImpl implements UrlActionDao {
   @SuppressWarnings("unchecked")
   @Override
   public List<UrlAction> getUrlActions() {
-    Response urlActionResults = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME);
+    Response urlActionResults = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
     TypeReference<List<UrlAction>> urlActionType = new TypeReference<List<UrlAction>>() {};
     List<Map<String, Object>> urlActionMapList =
         (List<Map<String, Object>>) urlActionResults.get(JsonKey.RESPONSE);

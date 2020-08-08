@@ -84,7 +84,8 @@ public class UserRoleActor extends UserBaseActor {
     searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
     searchMap.put(JsonKey.IS_DELETED, false);
     Response res =
-        cassandraOperation.getRecordsByProperties(JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap);
+        cassandraOperation.getRecordsByProperties(
+            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, null);
     List<Map<String, Object>> responseList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {
       userOrgDBMap.put(JsonKey.ORGANISATION, responseList.get(0));

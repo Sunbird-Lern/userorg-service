@@ -46,7 +46,7 @@ public class OTPDaoImpl implements OTPDao {
     ttlFields.add(JsonKey.OTP);
     Response result =
         cassandraOperation.getRecordWithTTLById(
-            Util.KEY_SPACE_NAME, TABLE_NAME, request, ttlFields, fields);
+            Util.KEY_SPACE_NAME, TABLE_NAME, request, ttlFields, fields, null);
     List<Map<String, Object>> otpMapList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(otpMapList)) {
       return null;
@@ -65,7 +65,7 @@ public class OTPDaoImpl implements OTPDao {
     String expirationInSeconds =
         PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_OTP_EXPIRATION);
     int ttl = Integer.valueOf(expirationInSeconds);
-    cassandraOperation.insertRecordWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, request, ttl);
+    cassandraOperation.insertRecordWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, request, ttl, null);
   }
 
   @Override
@@ -73,7 +73,7 @@ public class OTPDaoImpl implements OTPDao {
     Map<String, String> compositeKeyMap = new HashMap<>();
     compositeKeyMap.put(JsonKey.TYPE, type);
     compositeKeyMap.put(JsonKey.KEY, key);
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap);
+    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap, null);
     ProjectLogger.log("OTPDaoImpl:deleteOtp:otp deleted", LoggerEnum.INFO.name());
   }
 
@@ -89,6 +89,6 @@ public class OTPDaoImpl implements OTPDao {
     compositeKey.put(JsonKey.TYPE, otpDetails.get(JsonKey.TYPE));
     compositeKey.put(JsonKey.KEY, otpDetails.get(JsonKey.KEY));
     cassandraOperation.updateRecordWithTTL(
-        Util.KEY_SPACE_NAME, TABLE_NAME, request, compositeKey, ttl);
+        Util.KEY_SPACE_NAME, TABLE_NAME, request, compositeKey, ttl, null);
   }
 }

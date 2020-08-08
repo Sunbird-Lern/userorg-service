@@ -564,7 +564,8 @@ public class BadgrServiceImpl implements BadgingService {
   private static String getUserEmailFromDB(String userId) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
-        cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, null);
     List<Map<String, Object>> user = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if ((user == null) || user.isEmpty()) {
       BadgingUtil.throwBadgeClassExceptionOnErrorStatus(

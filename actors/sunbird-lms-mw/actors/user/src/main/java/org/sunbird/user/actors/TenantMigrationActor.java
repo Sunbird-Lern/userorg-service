@@ -118,7 +118,7 @@ public class TenantMigrationActor extends BaseActor {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
         cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userUpdateRequest);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userUpdateRequest, null);
     if (null == response
         || null == (String) response.get(JsonKey.RESPONSE)
         || (null != (String) response.get(JsonKey.RESPONSE)
@@ -389,7 +389,8 @@ public class TenantMigrationActor extends BaseActor {
       cassandraOperation.deleteRecord(
           usrOrgDbInfo.getKeySpace(),
           usrOrgDbInfo.getTableName(),
-          (String) userOrg.get(JsonKey.ID));
+          (String) userOrg.get(JsonKey.ID),
+          null);
     }
   }
 

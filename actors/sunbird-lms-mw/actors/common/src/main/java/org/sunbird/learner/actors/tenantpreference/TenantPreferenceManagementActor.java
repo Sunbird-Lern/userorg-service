@@ -138,7 +138,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
           cassandraOperation.updateRecord(
               tenantPreferenceDbInfo.getKeySpace(),
               tenantPreferenceDbInfo.getTableName(),
-              preferenceObj);
+              preferenceObj,
+              null);
           responseList.add(getResponseMap(orgId, key, null));
         }
       }
@@ -190,7 +191,10 @@ public class TenantPreferenceManagementActor extends BaseActor {
     }
     Response response =
         cassandraOperation.insertRecord(
-            tenantPreferenceDbInfo.getKeySpace(), tenantPreferenceDbInfo.getTableName(), dbMap);
+            tenantPreferenceDbInfo.getKeySpace(),
+            tenantPreferenceDbInfo.getTableName(),
+            dbMap,
+            null);
     finalResponse.getResult().put(JsonKey.ORG_ID, orgId);
     finalResponse.getResult().put(JsonKey.KEY, key);
     finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -220,7 +224,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
             tenantPreferenceDbInfo.getKeySpace(),
             tenantPreferenceDbInfo.getTableName(),
             JsonKey.ORG_ID,
-            orgId);
+            orgId,
+            null);
     List<Map<String, Object>> preferencesList =
         (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
     return preferencesList;

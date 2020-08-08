@@ -80,18 +80,21 @@ public class FeedServiceImplTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
-    PowerMockito.when(cassandraOperation.upsertRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.deleteRecord(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(upsertResponse);
   }
 

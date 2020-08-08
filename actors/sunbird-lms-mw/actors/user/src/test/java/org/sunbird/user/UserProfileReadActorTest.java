@@ -164,7 +164,7 @@ public class UserProfileReadActorTest {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -178,7 +178,7 @@ public class UserProfileReadActorTest {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -285,7 +285,7 @@ public class UserProfileReadActorTest {
 
   private void setCassandraResponse(Response cassandraResponse) {
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(cassandraResponse);
   }
 

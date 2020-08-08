@@ -46,7 +46,8 @@ public class SchedularActor extends BaseActor {
           bulkMap.put(JsonKey.DATA, UserUtility.encryptData(data));
           bulkMap.put(JsonKey.PROCESS_ID, map.get(JsonKey.ID));
           bulkMap.put(JsonKey.STATUS, ProjectUtil.BulkProcessStatus.FAILED.getValue());
-          cassandraOperation.updateRecord(bulkDb.getKeySpace(), bulkDb.getTableName(), bulkMap);
+          cassandraOperation.updateRecord(
+              bulkDb.getKeySpace(), bulkDb.getTableName(), bulkMap, null);
         } catch (Exception e) {
           ProjectLogger.log(
               "Exception occurred while encrypting data while running scheduler for bulk upload process : ",
@@ -57,7 +58,7 @@ public class SchedularActor extends BaseActor {
         bulkMap.put(JsonKey.RETRY_COUNT, retryCount + 1);
         bulkMap.put(JsonKey.ID, map.get(JsonKey.ID));
         bulkMap.put(JsonKey.STATUS, ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());
-        cassandraOperation.updateRecord(bulkDb.getKeySpace(), bulkDb.getTableName(), bulkMap);
+        cassandraOperation.updateRecord(bulkDb.getKeySpace(), bulkDb.getTableName(), bulkMap, null);
         Request req = new Request();
         req.put(JsonKey.PROCESS_ID, map.get(JsonKey.ID));
         ProjectLogger.log(

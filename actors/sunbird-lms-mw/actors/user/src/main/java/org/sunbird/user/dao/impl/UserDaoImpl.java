@@ -45,19 +45,19 @@ public class UserDaoImpl implements UserDao {
   @Override
   public String createUser(User user) {
     Map<String, Object> map = mapper.convertValue(user, Map.class);
-    cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map);
+    cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, null);
     return (String) map.get(JsonKey.ID);
   }
 
   @Override
   public Response updateUser(User user) {
     Map<String, Object> map = mapper.convertValue(user, Map.class);
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map);
+    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, null);
   }
 
   @Override
   public Response updateUser(Map<String, Object> userMap) {
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap);
+    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap, null);
   }
 
   @Override
@@ -87,7 +87,8 @@ public class UserDaoImpl implements UserDao {
 
   @Override
   public User getUserById(String userId) {
-    Response response = cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId);
+    Response response =
+        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {
@@ -101,7 +102,8 @@ public class UserDaoImpl implements UserDao {
   public List<User> getUsersByProperties(Map<String, Object> propertyMap) {
     List<User> userList = new ArrayList<>();
     Response response =
-        cassandraOperation.getRecordsByProperties(Util.KEY_SPACE_NAME, TABLE_NAME, propertyMap);
+        cassandraOperation.getRecordsByProperties(
+            Util.KEY_SPACE_NAME, TABLE_NAME, propertyMap, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {

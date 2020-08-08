@@ -87,7 +87,7 @@ public class FeedServiceImpl implements IFeedService {
     Response dbResponse =
         getCassandraInstance()
             .getRecordsByProperties(
-                usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties);
+                usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties, null);
     List<Map<String, Object>> responseList = null;
     List<Feed> feedList = new ArrayList<>();
     if (null != dbResponse && null != dbResponse.getResult()) {
@@ -133,12 +133,12 @@ public class FeedServiceImpl implements IFeedService {
     ProjectLogger.log(
         "FeedServiceImpl:delete method called for feedId : " + id, LoggerEnum.INFO.name());
     getCassandraInstance()
-        .deleteRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), id);
+        .deleteRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), id, null);
     getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id);
   }
 
   private Response saveFeed(Map<String, Object> feed) {
     return getCassandraInstance()
-        .upsertRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feed);
+        .upsertRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feed, null);
   }
 }

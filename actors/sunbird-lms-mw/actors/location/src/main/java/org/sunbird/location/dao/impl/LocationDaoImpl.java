@@ -35,7 +35,8 @@ public class LocationDaoImpl implements LocationDao {
   @Override
   public Response create(Location location) {
     Map<String, Object> map = mapper.convertValue(location, Map.class);
-    Response response = cassandraOperation.insertRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map);
+    Response response =
+        cassandraOperation.insertRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map, null);
     // need to send ID along with success msg
     response.put(JsonKey.ID, map.get(JsonKey.ID));
     return response;
@@ -44,12 +45,12 @@ public class LocationDaoImpl implements LocationDao {
   @Override
   public Response update(Location location) {
     Map<String, Object> map = mapper.convertValue(location, Map.class);
-    return cassandraOperation.updateRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map);
+    return cassandraOperation.updateRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map, null);
   }
 
   @Override
   public Response delete(String locationId) {
-    return cassandraOperation.deleteRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId);
+    return cassandraOperation.deleteRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, null);
   }
 
   @Override
@@ -74,7 +75,7 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response read(String locationId) {
-    return cassandraOperation.getRecordById(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId);
+    return cassandraOperation.getRecordById(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, null);
   }
 
   @Override
@@ -83,7 +84,8 @@ public class LocationDaoImpl implements LocationDao {
         KEYSPACE_NAME,
         LOCATION_TABLE_NAME,
         (String) queryMap.get(GeoLocationJsonKey.PROPERTY_NAME),
-        queryMap.get(GeoLocationJsonKey.PROPERTY_VALUE));
+        queryMap.get(GeoLocationJsonKey.PROPERTY_VALUE),
+        null);
   }
 
   public SearchDTO addSortBy(SearchDTO searchDtO) {

@@ -24,6 +24,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -95,7 +96,10 @@ public class SupportMultipleExternalIdsTest {
     response1.put(JsonKey.RESPONSE, resMapList);
     PowerMockito.when(
             cassandraOperation.getRecordsByProperties(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyMap(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(response1);
   }
 

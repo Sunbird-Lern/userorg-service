@@ -67,10 +67,10 @@ public class UserUtilTest {
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com", null))
         .thenReturn(response);
     when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400"))
+            JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400", null))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 

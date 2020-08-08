@@ -46,7 +46,8 @@ public class UserBadgeAssertion extends BaseActor {
     cassandraOperation.deleteRecord(
         dbInfo.getKeySpace(),
         dbInfo.getTableName(),
-        (String) badge.get(BadgingJsonKey.ASSERTION_ID));
+        (String) badge.get(BadgingJsonKey.ASSERTION_ID),
+        null);
     updateUserBadgeDataToES(badge);
     tellToSender(request, badge);
   }
@@ -56,7 +57,7 @@ public class UserBadgeAssertion extends BaseActor {
     DbInfo dbInfo = Util.dbInfoMap.get(BadgingJsonKey.USER_BADGE_ASSERTION_DB);
     Map<String, Object> badge = getBadgeAssertion(request);
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), badge);
+    cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), badge, null);
     updateUserBadgeDataToES(badge);
     tellToSender(request, badge);
   }

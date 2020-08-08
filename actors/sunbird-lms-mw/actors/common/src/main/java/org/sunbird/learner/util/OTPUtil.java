@@ -69,7 +69,8 @@ public final class OTPUtil {
     String sms = null;
     if (StringUtils.isBlank(template)) {
       sms = OTPService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate);
-    } else if (StringUtils.isNotBlank(template) && StringUtils.equals(template, JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
+    } else if (StringUtils.isNotBlank(template)
+        && StringUtils.equals(template, JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
       sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_WARD_LOGIN_TEMPLATE, smsTemplate);
     } else {
       sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate);
@@ -111,7 +112,8 @@ public final class OTPUtil {
   public static String getEmailPhoneByUserId(String userId, String type) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
-        cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, null);
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(userList)) {
       Map<String, Object> user = userList.get(0);
@@ -145,7 +147,10 @@ public final class OTPUtil {
     emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
     if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP);
-    } else if (StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID)) && StringUtils.equals((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID), JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
+    } else if (StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))
+        && StringUtils.equals(
+            (String) emailTemplateMap.get(JsonKey.TEMPLATE_ID),
+            JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_WARD_LOGIN_TEMPLATE);
     } else {
       // send otp to email while reseting password from portal

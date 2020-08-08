@@ -99,7 +99,7 @@ public class OrganisationMetricsActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(userOrgMap);
@@ -123,7 +123,7 @@ public class OrganisationMetricsActorTest {
 
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -144,7 +144,7 @@ public class OrganisationMetricsActorTest {
 
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-      probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 

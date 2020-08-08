@@ -92,7 +92,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.insertRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
       ProjectLogger.log("Note data saved into cassandra.");
       result.getResult().put(JsonKey.ID, uniqueId);
       result.getResult().remove(JsonKey.RESPONSE);
@@ -165,7 +165,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
       ProjectLogger.log("Note data updated");
       result.getResult().put(JsonKey.ID, noteId);
       result.getResult().remove(JsonKey.RESPONSE);
@@ -333,7 +333,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req);
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
       result.getResult().remove(JsonKey.RESPONSE);
       sender().tell(result, self());
 

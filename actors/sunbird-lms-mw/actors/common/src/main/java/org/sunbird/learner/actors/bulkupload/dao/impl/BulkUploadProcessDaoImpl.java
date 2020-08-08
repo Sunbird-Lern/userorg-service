@@ -27,7 +27,7 @@ public class BulkUploadProcessDaoImpl implements BulkUploadProcessDao {
   public Response create(BulkUploadProcess bulkUploadProcess) {
     Map<String, Object> map = mapper.convertValue(bulkUploadProcess, Map.class);
     map.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-    Response response = cassandraOperation.insertRecord(KEYSPACE_NAME, TABLE_NAME, map);
+    Response response = cassandraOperation.insertRecord(KEYSPACE_NAME, TABLE_NAME, map, null);
     // need to send ID along with success msg
     response.put(JsonKey.ID, map.get(JsonKey.ID));
     return response;
@@ -40,12 +40,12 @@ public class BulkUploadProcessDaoImpl implements BulkUploadProcessDao {
       map.remove(JsonKey.CREATED_ON);
     }
     map.put(JsonKey.LAST_UPDATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-    return cassandraOperation.updateRecord(KEYSPACE_NAME, TABLE_NAME, map);
+    return cassandraOperation.updateRecord(KEYSPACE_NAME, TABLE_NAME, map, null);
   }
 
   @Override
   public BulkUploadProcess read(String id) {
-    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id);
+    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;

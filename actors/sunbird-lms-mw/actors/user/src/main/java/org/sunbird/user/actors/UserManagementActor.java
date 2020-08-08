@@ -308,7 +308,7 @@ public class UserManagementActor extends BaseActor {
     }
     Response response =
         cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap, null);
 
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
@@ -877,7 +877,8 @@ public class UserManagementActor extends BaseActor {
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     Response response =
-        cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+        cassandraOperation.insertRecord(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, null);
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -976,7 +977,8 @@ public class UserManagementActor extends BaseActor {
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap) {
     Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
-    cassandraOperation.insertRecord(userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap);
+    cassandraOperation.insertRecord(
+        userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, null);
 
     return userOrgMap;
   }
@@ -1024,7 +1026,7 @@ public class UserManagementActor extends BaseActor {
     try {
       response =
           cassandraOperation.insertRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap);
+              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap, null);
       isPasswordUpdated = UserUtil.updatePassword(userMap);
 
     } finally {

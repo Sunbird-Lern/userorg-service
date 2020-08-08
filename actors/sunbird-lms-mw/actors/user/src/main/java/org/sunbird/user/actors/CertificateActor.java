@@ -13,7 +13,6 @@ import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.HttpUtilResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
@@ -76,7 +75,7 @@ public class CertificateActor extends UserBaseActor {
     String mergerId = (String) request.get(JsonKey.TO_ACCOUNT_ID);
     Response response =
         cassandraOperation.getRecordsByProperty(
-            certDbInfo.getKeySpace(), certDbInfo.getTableName(), JsonKey.USER_ID, mergeeId);
+            certDbInfo.getKeySpace(), certDbInfo.getTableName(), JsonKey.USER_ID, mergeeId, null);
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {
       List responseList = (List) record.get(JsonKey.RESPONSE);
@@ -87,7 +86,7 @@ public class CertificateActor extends UserBaseActor {
               responseDetails.put(JsonKey.USER_ID, mergerId);
             });
         cassandraOperation.batchUpdateById(
-            certDbInfo.getKeySpace(), certDbInfo.getTableName(), responseList);
+            certDbInfo.getKeySpace(), certDbInfo.getTableName(), responseList, null);
         ProjectLogger.log(
             "CertificateActor:getCertificate: cert details merged to user id : " + mergerId,
             LoggerEnum.INFO.name());
@@ -237,7 +236,7 @@ public class CertificateActor extends UserBaseActor {
       List<String> identifiers, List<String> attributes) {
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            userDbInfo.getKeySpace(), userDbInfo.getTableName(), attributes, identifiers);
+            userDbInfo.getKeySpace(), userDbInfo.getTableName(), attributes, identifiers, null);
     Map<String, Object> record = response.getResult();
     if (record != null && record.get(JsonKey.RESPONSE) != null) {
       List responseList = (List) record.get(JsonKey.RESPONSE);
@@ -296,7 +295,7 @@ public class CertificateActor extends UserBaseActor {
     Map<String, Object> responseDetails = null;
     Response response =
         cassandraOperation.getRecordById(
-            certDbInfo.getKeySpace(), certDbInfo.getTableName(), certificatedId);
+            certDbInfo.getKeySpace(), certDbInfo.getTableName(), certificatedId, null);
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {
       List responseList = (List) record.get(JsonKey.RESPONSE);
@@ -346,7 +345,7 @@ public class CertificateActor extends UserBaseActor {
       certAddReqMap.put(JsonKey.IS_DELETED, false);
       response =
           cassandraOperation.insertRecord(
-              certDbInfo.getKeySpace(), certDbInfo.getTableName(), certAddReqMap);
+              certDbInfo.getKeySpace(), certDbInfo.getTableName(), certAddReqMap, null);
     }
 
     ProjectLogger.log(
@@ -372,7 +371,7 @@ public class CertificateActor extends UserBaseActor {
     certUpdateReqMap.put(JsonKey.IS_DELETED, true);
     cassandraInput.put(JsonKey.UPDATE, certUpdateReqMap);
     return cassandraOperation.performBatchAction(
-        certDbInfo.getKeySpace(), certDbInfo.getTableName(), cassandraInput);
+        certDbInfo.getKeySpace(), certDbInfo.getTableName(), cassandraInput, null);
   }
 
   private void populateStoreData(
@@ -419,7 +418,7 @@ public class CertificateActor extends UserBaseActor {
       String httpResponse = HttpClientUtil.post(completeUrl, requestBody, headerMap);
       if (StringUtils.isNotBlank(httpResponse)) {
         HashMap<String, Object> val =
-          (HashMap<String, Object>) objectMapper.readValue(httpResponse, Map.class);
+            (HashMap<String, Object>) objectMapper.readValue(httpResponse, Map.class);
         HashMap<String, Object> resultMap = (HashMap<String, Object>) val.get(JsonKey.RESULT);
         Response response = new Response();
         response.put(JsonKey.SIGNED_URL, resultMap.get(JsonKey.SIGNED_URL));
@@ -461,7 +460,7 @@ public class CertificateActor extends UserBaseActor {
   private boolean isIdentityPresent(String certificateId) {
     Response response =
         cassandraOperation.getRecordById(
-            certDbInfo.getKeySpace(), certDbInfo.getTableName(), certificateId);
+            certDbInfo.getKeySpace(), certDbInfo.getTableName(), certificateId, null);
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {
       List responseList = (List) record.get(JsonKey.RESPONSE);

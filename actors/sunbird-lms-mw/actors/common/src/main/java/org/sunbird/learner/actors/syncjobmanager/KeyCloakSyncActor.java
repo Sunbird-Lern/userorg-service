@@ -73,7 +73,7 @@ public class KeyCloakSyncActor extends BaseActor {
               + " started");
       Response response =
           cassandraOperation.getRecordsByProperty(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, userIds);
+              dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, userIds, null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "fetching data for user for these ids " + Arrays.toString(userIds.toArray()) + " done");
@@ -85,7 +85,7 @@ public class KeyCloakSyncActor extends BaseActor {
     } else {
       ProjectLogger.log("fetching all data for user started");
       Response response =
-          cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName());
+          cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName(), null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       ProjectLogger.log("fetching all data for user done");
       ProjectLogger.log("total db data to sync for user to keycloak " + reponseList.size());
@@ -127,7 +127,7 @@ public class KeyCloakSyncActor extends BaseActor {
               map.put(JsonKey.EMAIL_VERIFIED, false);
               map.put(JsonKey.ID, userId);
             }
-            cassandraOperation.updateRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), map);
+            cassandraOperation.updateRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), map, null);
             esService.update(ProjectUtil.EsType.user.getTypeName(), userId, map);
           }
           ProjectLogger.log("User sync failed in KeyCloakSyncActor for userID : " + userId);

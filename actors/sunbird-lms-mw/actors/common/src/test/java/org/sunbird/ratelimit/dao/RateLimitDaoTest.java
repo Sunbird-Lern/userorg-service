@@ -42,7 +42,11 @@ public class RateLimitDaoTest {
   public void beforeEachTest() {
     MockitoAnnotations.initMocks(this);
     when(cassandraOperation.batchInsertWithTTL(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(getSuccessResponse());
   }
 
@@ -59,7 +63,11 @@ public class RateLimitDaoTest {
                 })
         .when(cassandraOperation)
         .batchInsertWithTTL(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyList());
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyList(),
+            Mockito.any());
     rateLimitdDao.insertRateLimits(getRateLimits());
   }
 
@@ -80,6 +88,7 @@ public class RateLimitDaoTest {
             Mockito.anyString(),
             Mockito.any(),
             Mockito.anyList(),
+            Mockito.any(),
             Mockito.any()))
         .then(
             (Answer)

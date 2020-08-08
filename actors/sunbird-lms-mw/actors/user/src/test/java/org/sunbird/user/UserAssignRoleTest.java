@@ -134,7 +134,8 @@ public class UserAssignRoleTest {
 
   private static void initCassandraForSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(response);
 
     Response updateResponse = new Response();
@@ -142,7 +143,8 @@ public class UserAssignRoleTest {
     responseMap.put(Constants.RESPONSE, Constants.SUCCESS);
     updateResponse.getResult().putAll(responseMap);
 
-    PowerMockito.when(cassandraOperation.updateRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.updateRecord(Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(updateResponse);
   }
 

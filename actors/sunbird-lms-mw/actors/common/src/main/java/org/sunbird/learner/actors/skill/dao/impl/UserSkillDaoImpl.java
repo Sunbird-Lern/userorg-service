@@ -32,13 +32,13 @@ public class UserSkillDaoImpl implements UserSkillDao {
   @Override
   public void add(Map<String, Object> userSkill) {
     cassandraOperation.insertRecord(
-        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), userSkill);
+        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), userSkill, null);
   }
 
   @Override
   public boolean delete(List<String> idList) {
     return cassandraOperation.deleteRecords(
-        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), idList);
+        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), idList, null);
   }
 
   @Override
@@ -46,7 +46,7 @@ public class UserSkillDaoImpl implements UserSkillDao {
     ObjectMapper objectMapper = new ObjectMapper();
     Response response =
         cassandraOperation.getRecordById(
-            userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), id);
+            userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), id, null);
     List<HashMap<String, Object>> responseList =
         (List<HashMap<String, Object>>) response.get(JsonKey.RESPONSE);
     objectMapper.configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
@@ -66,6 +66,6 @@ public class UserSkillDaoImpl implements UserSkillDao {
     }
     map.put(JsonKey.LAST_UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     cassandraOperation.updateRecord(
-        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), map);
+        userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), map, null);
   }
 }

@@ -45,7 +45,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
         getCassandraOperation()
-            .getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id);
+            .getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null);
     List<Map<String, Object>> responseList = (List) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(responseList)) {
       ProjectLogger.log(
@@ -115,7 +115,7 @@ public class IdentifierFreeUpActor extends BaseActor {
   private Response updateUser(Map<String, Object> userDbMap) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     return getCassandraOperation()
-        .updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userDbMap);
+        .updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userDbMap, null);
   }
 
   private void freeUpUserIdentifier(String id, List<String> identifiers) {

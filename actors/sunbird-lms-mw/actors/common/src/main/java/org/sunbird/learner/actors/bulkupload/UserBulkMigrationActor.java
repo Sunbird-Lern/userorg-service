@@ -116,7 +116,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     record.put(JsonKey.LAST_UPDATED_ON, new Timestamp(createdOn));
     Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     Response response =
-        cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), record);
+        cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), record, null);
     response.put(JsonKey.PROCESS_ID, bulkMigrationUser.getId());
     ProjectLogger.log(
         "UserBulkMigrationActor:insertRecord:time taken by cassandra to insert record of size "
@@ -374,7 +374,8 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   private Map<String, Object> getUserById(String userId) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
-        cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, null);
     if (((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),

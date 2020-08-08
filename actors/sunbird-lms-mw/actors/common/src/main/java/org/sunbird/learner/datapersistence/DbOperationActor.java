@@ -165,7 +165,7 @@ public class DbOperationActor extends BaseActor {
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))) {
         response =
             cassandraOperation.getAllRecords(
-                JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME));
+                JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), null);
       } else {
         throw new ProjectCommonException(
             ResponseCode.tableOrDocNameError.getErrorCode(),
@@ -189,7 +189,8 @@ public class DbOperationActor extends BaseActor {
             cassandraOperation.getRecordById(
                 JsonKey.SUNBIRD_PLUGIN,
                 (String) reqObj.getRequest().get(ENTITY_NAME),
-                (String) reqObj.getRequest().get(JsonKey.ID));
+                (String) reqObj.getRequest().get(JsonKey.ID),
+                null);
       } else {
         throw new ProjectCommonException(
             ResponseCode.tableOrDocNameError.getErrorCode(),
@@ -213,7 +214,8 @@ public class DbOperationActor extends BaseActor {
           cassandraOperation.deleteRecord(
               JsonKey.SUNBIRD_PLUGIN,
               (String) reqObj.getRequest().get(ENTITY_NAME),
-              (String) reqObj.getRequest().get(JsonKey.ID));
+              (String) reqObj.getRequest().get(JsonKey.ID),
+              null);
       if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)
           && ((boolean) reqObj.getRequest().get(INDEXED))) {
         deleteDataFromElastic(
@@ -251,7 +253,10 @@ public class DbOperationActor extends BaseActor {
         if (esResult) {
           response =
               cassandraOperation.updateRecord(
-                  JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+                  JsonKey.SUNBIRD_PLUGIN,
+                  (String) reqObj.getRequest().get(ENTITY_NAME),
+                  payload,
+                  null);
           if (!((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)) {
             deleteDataFromElastic(
                 ES_INDEX_NAME,
@@ -276,7 +281,10 @@ public class DbOperationActor extends BaseActor {
         if (data.isEmpty() || ((boolean) reqObj.getRequest().get(INDEXED))) {
           response =
               cassandraOperation.updateRecord(
-                  JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+                  JsonKey.SUNBIRD_PLUGIN,
+                  (String) reqObj.getRequest().get(ENTITY_NAME),
+                  payload,
+                  null);
         } else {
           throw new ProjectCommonException(
               ResponseCode.updateFailed.getErrorCode(),
@@ -303,7 +311,7 @@ public class DbOperationActor extends BaseActor {
       validateRequestData(payload);
       Response response =
           cassandraOperation.insertRecord(
-              JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+              JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload, null);
       if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)
           && ((boolean) reqObj.getRequest().get(INDEXED))) {
         boolean esResult = false;
@@ -426,7 +434,7 @@ public class DbOperationActor extends BaseActor {
   }
 
   private void deleteRecord(String keyspaceName, String tableName, String identifier) {
-    cassandraOperation.deleteRecord(keyspaceName, tableName, identifier);
+    cassandraOperation.deleteRecord(keyspaceName, tableName, identifier, null);
   }
 
   private void generateSearchTelemetryEvent(

@@ -29,14 +29,14 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   public Response write(SystemSetting systemSetting) {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map = mapper.convertValue(systemSetting, Map.class);
-    Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map);
+    Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map, null);
     response.put(JsonKey.ID, map.get(JsonKey.ID));
     return response;
   }
 
   @Override
   public SystemSetting readById(String id) {
-    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id);
+    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -48,7 +48,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   public SystemSetting readByField(String field) {
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, field);
+            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, field, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -57,7 +57,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   }
 
   public List<SystemSetting> readAll() {
-    Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME);
+    Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     List<SystemSetting> systemSettings = new ArrayList<>();
     ObjectMapper mapper = new ObjectMapper();

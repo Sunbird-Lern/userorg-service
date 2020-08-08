@@ -45,7 +45,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     externalIdReq.put(JsonKey.EXTERNAL_ID, extId.toLowerCase());
     Response response =
         cassandraOperation.getRecordsByProperties(
-            usrDbInfo.getKeySpace(), JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
+            usrDbInfo.getKeySpace(), JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, null);
 
     List<Map<String, Object>> userRecordList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
@@ -61,7 +61,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
+            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -73,7 +73,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     List<Map<String, Object>> dbResExternalIds = new ArrayList<>();
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, JsonKey.USER_ID, userId);
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, JsonKey.USER_ID, userId, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }

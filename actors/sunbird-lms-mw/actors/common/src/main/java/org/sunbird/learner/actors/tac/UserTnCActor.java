@@ -105,15 +105,20 @@ public class UserTnCActor extends BaseActor {
         || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)
         || StringUtils.isEmpty((String) result.get(JsonKey.TNC_ACCEPTED_ON))) {
       ProjectLogger.log(
-        "UserTnCActor:acceptTNC: tc accepted version= " +acceptedTnC+ " accepted on= "+userMap.get(JsonKey.TNC_ACCEPTED_ON)+
-          " for userId:" +userId, LoggerEnum.INFO.name());
+          "UserTnCActor:acceptTNC: tc accepted version= "
+              + acceptedTnC
+              + " accepted on= "
+              + userMap.get(JsonKey.TNC_ACCEPTED_ON)
+              + " for userId:"
+              + userId,
+          LoggerEnum.INFO.name());
       userMap.put(JsonKey.ID, userId);
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
           JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
       response =
           cassandraOperation.updateRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, null);
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
         syncUserDetails(userMap);
       }

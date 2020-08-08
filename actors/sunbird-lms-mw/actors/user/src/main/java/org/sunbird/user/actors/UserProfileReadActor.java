@@ -339,7 +339,7 @@ public class UserProfileReadActor extends BaseActor {
     propertyMap.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap);
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null);
     List<Map<String, Object>> resExternalIds;
     List<Map<String, Object>> finalRes = new ArrayList<>();
     if (null != response && null != response.getResult()) {
@@ -556,7 +556,11 @@ public class UserProfileReadActor extends BaseActor {
     // fetch all associated user orgs
     Response response1 =
         cassandraOperation.getRecordsByProperty(
-            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), JsonKey.USER_ID, userId);
+            userOrgDbInfo.getKeySpace(),
+            userOrgDbInfo.getTableName(),
+            JsonKey.USER_ID,
+            userId,
+            null);
 
     List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
 
@@ -601,7 +605,8 @@ public class UserProfileReadActor extends BaseActor {
                     cassandraOperation.getRecordById(
                         geoLocationDbInfo.getKeySpace(),
                         geoLocationDbInfo.getTableName(),
-                        locationId);
+                        locationId,
+                        null);
                 List<Map<String, Object>> list3 =
                     (List<Map<String, Object>>) response3.get(JsonKey.RESPONSE);
                 if (!list3.isEmpty()) {

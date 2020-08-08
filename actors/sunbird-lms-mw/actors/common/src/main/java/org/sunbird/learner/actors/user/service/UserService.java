@@ -40,7 +40,8 @@ public class UserService {
 
     Response result =
         getCassandraOperation()
-            .getRecordsByIndexedProperty(userDb.getKeySpace(), userDb.getTableName(), key, val);
+            .getRecordsByIndexedProperty(
+                userDb.getKeySpace(), userDb.getTableName(), key, val, null);
 
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);

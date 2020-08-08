@@ -516,14 +516,17 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
     dbReqMap.put(JsonKey.UPDATED_DATE, format.format(new Date()));
     dbReqMap.put(JsonKey.TYPE, type);
     cassandraOperation.updateRecord(
-        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap, null);
   }
 
   @SuppressWarnings("unchecked")
   private Map<String, Object> getData(String requestId) {
     Response response =
         cassandraOperation.getRecordById(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), requestId);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            requestId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (responseList.isEmpty()) {

@@ -55,7 +55,8 @@ public class RoleDaoImplTest {
       cassandraOperation = PowerMockito.mock(CassandraOperation.class);
       PowerMockito.mockStatic(ServiceFactory.class);
       when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-      when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME)).thenReturn(response);
+      when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null))
+          .thenReturn(response);
       List<Role> roleList = roleDao.getRoles();
       Assert.assertEquals("TEACHER", roleList.get(0).getName());
 

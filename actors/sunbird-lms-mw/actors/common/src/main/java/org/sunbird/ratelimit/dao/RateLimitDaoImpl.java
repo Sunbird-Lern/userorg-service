@@ -40,7 +40,7 @@ public class RateLimitDaoImpl implements RateLimitDao {
     List<Map<String, Object>> records =
         rateLimits.stream().map(rateLimit -> rateLimit.getRecord()).collect(Collectors.toList());
 
-    cassandraOperation.batchInsertWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, records, ttls);
+    cassandraOperation.batchInsertWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, records, ttls, null);
   }
 
   @Override
@@ -56,7 +56,7 @@ public class RateLimitDaoImpl implements RateLimitDao {
 
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumnsAndTTL(
-            Util.KEY_SPACE_NAME, TABLE_NAME, partitionKey, properties, ttlPropsWithAlias);
+            Util.KEY_SPACE_NAME, TABLE_NAME, partitionKey, properties, ttlPropsWithAlias, null);
 
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }

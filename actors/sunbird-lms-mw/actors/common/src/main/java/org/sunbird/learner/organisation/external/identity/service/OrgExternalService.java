@@ -21,7 +21,7 @@ public class OrgExternalService {
     dbRequestMap.put(JsonKey.PROVIDER, provider.toLowerCase());
     Response response =
         getCassandraOperation()
-            .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap);
+            .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap, null);
     List<Map<String, Object>> orgList =
         (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(orgList)) {

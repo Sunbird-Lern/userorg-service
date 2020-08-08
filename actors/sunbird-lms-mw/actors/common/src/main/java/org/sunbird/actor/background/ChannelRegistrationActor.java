@@ -75,7 +75,8 @@ public class ChannelRegistrationActor extends BaseActor {
     map.put(JsonKey.ID, JsonKey.CHANNEL_REG_STATUS_ID);
     map.put(JsonKey.FIELD, JsonKey.CHANNEL_REG_STATUS);
     map.put(JsonKey.VALUE, String.valueOf(bool));
-    Response response = cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map);
+    Response response =
+        cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map, null);
     ProjectLogger.log(
         "Upsert operation result for channel reg status =  "
             + response.getResult().get(JsonKey.RESPONSE));
@@ -131,7 +132,7 @@ public class ChannelRegistrationActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       reqString = mapper.writeValueAsString(map);
       response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_GET_CHANNEL_LIST)),
               reqString,

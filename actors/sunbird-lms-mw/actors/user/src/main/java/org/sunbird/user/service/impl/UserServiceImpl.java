@@ -335,7 +335,7 @@ public class UserServiceImpl implements UserService {
   public Map<String, Object> getUserByUsername(String userName) {
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, userName);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, userName, null);
     List<Map<String, Object>> userList =
         (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(userList)) {
@@ -429,7 +429,7 @@ public class UserServiceImpl implements UserService {
 
     Response result =
         cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username, null);
 
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);

@@ -121,7 +121,8 @@ public class UserBadgeAssertionTest {
             esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), "userId-123"))
         .thenReturn(promise1.future());
     PowerMockito.when(
-            cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap))
+            cassandraOperation.insertRecord(
+                dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap, null))
         .thenReturn(new Response());
 
     actorMessage.setOperation(BadgeOperations.assignBadgeToUser.name());
@@ -151,7 +152,8 @@ public class UserBadgeAssertionTest {
             esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), "userId-123"))
         .thenReturn(promise1.future());
     PowerMockito.when(
-            cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap))
+            cassandraOperation.insertRecord(
+                dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap, null))
         .thenReturn(new Response());
 
     actorMessage.setOperation(BadgeOperations.assignBadgeToUser.name());
@@ -181,7 +183,8 @@ public class UserBadgeAssertionTest {
         .thenReturn(promise1.future());
 
     PowerMockito.when(
-            cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap))
+            cassandraOperation.insertRecord(
+                dbInfo.getKeySpace(), dbInfo.getTableName(), tempMap, null))
         .thenReturn(new Response());
 
     actorMessage.setOperation(BadgeOperations.assignBadgeToUser.name());
@@ -202,7 +205,7 @@ public class UserBadgeAssertionTest {
 
     PowerMockito.when(
             cassandraOperation.deleteRecord(
-                dbInfo.getKeySpace(), dbInfo.getTableName(), "userId-123"))
+                dbInfo.getKeySpace(), dbInfo.getTableName(), "userId-123", null))
         .thenReturn(new Response());
 
     actorMessage.setOperation(BadgeOperations.revokeBadgeFromUser.name());

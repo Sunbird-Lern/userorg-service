@@ -30,6 +30,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -54,6 +55,7 @@ public class IdentifierFreeUpActorTest {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   Props props = Props.create(IdentifierFreeUpActor.class);
   ActorSystem system = ActorSystem.create("IdentifierFreeUpActor");
+  RequestContext context = new RequestContext();
 
   @Before
   public void beforeEachTest() {
@@ -72,7 +74,8 @@ public class IdentifierFreeUpActorTest {
     String id = "wrongUserId";
     Response response = new Response();
     response.put(JsonKey.RESPONSE, new ArrayList<>());
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     boolean result =
         testScenario(
@@ -104,10 +107,14 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
@@ -142,10 +149,11 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);

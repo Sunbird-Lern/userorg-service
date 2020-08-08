@@ -95,7 +95,7 @@ public class BackgroundJobManager extends BaseActor {
     DbInfo userbadge = Util.dbInfoMap.get(JsonKey.USER_BADGES_DB);
     Response response =
         cassandraOperation.getRecordsByProperties(
-            userbadge.getKeySpace(), userbadge.getTableName(), userBadgeMap);
+            userbadge.getKeySpace(), userbadge.getTableName(), userBadgeMap, null);
     if (response != null && response.get(JsonKey.RESPONSE) != null) {
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> badgesList =
@@ -230,7 +230,8 @@ public class BackgroundJobManager extends BaseActor {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       String id = (String) orgMap.get(JsonKey.ID);
       Response orgResponse =
-          cassandraOperation.getRecordById(orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), id);
+          cassandraOperation.getRecordById(
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), id, null);
       List<Map<String, Object>> orgList =
           (List<Map<String, Object>>) orgResponse.getResult().get(JsonKey.RESPONSE);
       Map<String, Object> esMap = new HashMap<>();

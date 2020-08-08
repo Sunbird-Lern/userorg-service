@@ -40,16 +40,16 @@ public class MigrationUtilsTest {
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "EFG"))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "EFG", null))
         .thenReturn(getRecordsById(false));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "DEF"))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "DEF", null))
         .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "ABC", new HashMap<>()))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "ABC", new HashMap<>(), null))
         .thenReturn(getRecordsById(false));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "XYZ", new HashMap<>()))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "XYZ", new HashMap<>(), null))
         .thenReturn(getRecordsById(true));
   }
 
@@ -71,7 +71,7 @@ public class MigrationUtilsTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated =
         MigrationUtils.updateRecord(new HashMap<>(), "anyChannel", "anyUserExtId");
@@ -89,7 +89,7 @@ public class MigrationUtilsTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated = MigrationUtils.markUserAsRejected(shadowUser);
     Assert.assertEquals(true, isRecordUpdated);
@@ -106,7 +106,7 @@ public class MigrationUtilsTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap))
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated =
         MigrationUtils.updateClaimStatus(shadowUser, ClaimStatus.ELIGIBLE.getValue());

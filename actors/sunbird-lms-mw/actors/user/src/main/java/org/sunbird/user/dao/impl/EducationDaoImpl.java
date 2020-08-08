@@ -25,22 +25,26 @@ public class EducationDaoImpl implements EducationDao {
 
   @Override
   public void createEducation(Map<String, Object> education) {
-    cassandraOperation.insertRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.insertRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override
   public void updateEducation(Map<String, Object> education) {
-    cassandraOperation.updateRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.updateRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override
   public void deleteEducation(String educationId) {
-    cassandraOperation.deleteRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), educationId);
+    cassandraOperation.deleteRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), educationId, null);
   }
 
   @Override
   public void upsertEducation(Map<String, Object> education) {
-    cassandraOperation.upsertRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.upsertRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override

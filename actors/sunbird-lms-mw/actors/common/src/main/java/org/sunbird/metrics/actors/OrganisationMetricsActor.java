@@ -142,7 +142,10 @@ public class OrganisationMetricsActor extends BaseMetricsActor {
     requestDbInfo.put(JsonKey.RESOURCE_NAME, orgData.get(JsonKey.ORGANISATION_NAME));
 
     cassandraOperation.insertRecord(
-        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), requestDbInfo);
+        reportTrackingdbInfo.getKeySpace(),
+        reportTrackingdbInfo.getTableName(),
+        requestDbInfo,
+        null);
 
     return requestId;
   }

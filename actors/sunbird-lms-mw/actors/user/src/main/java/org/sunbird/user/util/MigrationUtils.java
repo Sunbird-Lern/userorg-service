@@ -27,7 +27,7 @@ public class MigrationUtils {
     ShadowUser shadowUser = null;
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       shadowUser =
           mapper.convertValue(
@@ -50,7 +50,7 @@ public class MigrationUtils {
     compositeKeysMap.put(JsonKey.CHANNEL, channel);
     Response response =
         cassandraOperation.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, null);
     ProjectLogger.log(
         "MigrationUtils:updateRecord:update in cassandra  with userExtId"
             + userExtId
@@ -108,7 +108,7 @@ public class MigrationUtils {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()
@@ -133,7 +133,7 @@ public class MigrationUtils {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()

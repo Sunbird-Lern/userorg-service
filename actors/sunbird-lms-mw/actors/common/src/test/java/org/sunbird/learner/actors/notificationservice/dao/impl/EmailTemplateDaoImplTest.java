@@ -56,7 +56,7 @@ public class EmailTemplateDaoImplTest {
     orgList.add(map);
     response.put(JsonKey.RESPONSE, orgList);
     when(cassandraOperation.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME))
+            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
         .thenReturn(response);
     String resp = emailTemplateDao.getTemplate(StringUtils.EMPTY);
     Assert.assertEquals(null, resp);
@@ -73,7 +73,7 @@ public class EmailTemplateDaoImplTest {
     orgList.add(map);
     response.put(JsonKey.RESPONSE, orgList);
     when(cassandraOperation.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME))
+            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
         .thenReturn(response);
     String resp = emailTemplateDao.getTemplate("Sunbird_email_template");
     Assert.assertEquals("Course is Been completed", resp);
