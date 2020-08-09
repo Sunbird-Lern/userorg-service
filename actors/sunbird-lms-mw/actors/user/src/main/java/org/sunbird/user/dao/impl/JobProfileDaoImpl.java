@@ -1,5 +1,7 @@
 package org.sunbird.user.dao.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -49,7 +51,9 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
   @Override
   public Response getPropertiesValueById(String propertyName, String identifier) {
+    List<String> properties = new ArrayList<>(2);
+    properties.add(JsonKey.ADDRESS_ID);
     return cassandraOperation.getPropertiesValueById(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, JsonKey.ADDRESS_ID);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, properties);
   }
 }

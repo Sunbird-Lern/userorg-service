@@ -268,7 +268,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getPropertiesValueById(
-      String keyspaceName, String tableName, String id, String... properties) {
+      String keyspaceName, String tableName, String id, List<String> properties) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getPropertiesValueById method started at ==" + startTime,

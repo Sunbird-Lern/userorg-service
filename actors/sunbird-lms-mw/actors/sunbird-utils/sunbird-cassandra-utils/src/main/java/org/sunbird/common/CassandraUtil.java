@@ -129,11 +129,11 @@ public final class CassandraUtil {
    *     provided as varargs
    * @param keyspaceName String (data base keyspace name)
    * @param tableName String
-   * @param properties(String varargs)
+   * @param properties
    * @return String String
    */
   public static String getSelectStatement(
-      String keyspaceName, String tableName, String... properties) {
+      String keyspaceName, String tableName, List<String> properties) {
     StringBuilder query = new StringBuilder(Constants.SELECT);
     query.append(String.join(",", properties));
     query.append(
