@@ -559,7 +559,7 @@ public class UserSkillManagementActor extends BaseActor {
     // ElasticSearch ...
     Util.DbInfo userSkillDbInfo = Util.dbInfoMap.get(JsonKey.USER_SKILL_DB);
     Response response =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             userSkillDbInfo.getKeySpace(),
             userSkillDbInfo.getTableName(),
             JsonKey.USER_ID,

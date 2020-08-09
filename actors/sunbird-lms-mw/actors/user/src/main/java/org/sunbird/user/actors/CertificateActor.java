@@ -74,7 +74,7 @@ public class CertificateActor extends UserBaseActor {
     String mergeeId = (String) request.get(JsonKey.FROM_ACCOUNT_ID);
     String mergerId = (String) request.get(JsonKey.TO_ACCOUNT_ID);
     Response response =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             certDbInfo.getKeySpace(), certDbInfo.getTableName(), JsonKey.USER_ID, mergeeId, null);
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {

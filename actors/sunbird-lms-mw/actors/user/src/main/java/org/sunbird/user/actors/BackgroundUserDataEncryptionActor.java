@@ -196,7 +196,7 @@ public class BackgroundUserDataEncryptionActor extends BaseActor {
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Util.DbInfo addrDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
     Response response =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             addrDbInfo.getKeySpace(), addrDbInfo.getTableName(), JsonKey.USER_ID, userId, null);
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }

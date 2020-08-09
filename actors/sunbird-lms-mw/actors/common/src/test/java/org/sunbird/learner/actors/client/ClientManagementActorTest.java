@@ -219,7 +219,7 @@ public class ClientManagementActorTest {
     Request actorMessage = new Request();
     actorMessage.setRequest(request);
     actorMessage.setOperation(actorOperations.getValue());
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),

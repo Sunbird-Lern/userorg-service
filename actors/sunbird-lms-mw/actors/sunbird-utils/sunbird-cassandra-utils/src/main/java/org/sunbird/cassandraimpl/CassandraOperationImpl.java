@@ -171,72 +171,14 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName,
       String tableName,
       String propertyName,
-      Object propertyValue,
-      RequestContext context) {
-    return getRecordsByProperty(keyspaceName, tableName, propertyName, propertyValue, null);
-  }
-
-  @Override
-  public Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      List<String> fields,
-      RequestContext context) {
-    Response response = new Response();
-    Session session = connectionManager.getSession(keyspaceName);
-    try {
-      Builder selectBuilder;
-      if (CollectionUtils.isNotEmpty(fields)) {
-        selectBuilder = QueryBuilder.select((String[]) fields.toArray());
-      } else {
-        selectBuilder = QueryBuilder.select().all();
-      }
-      Statement selectStatement =
-          selectBuilder.from(keyspaceName, tableName).where(eq(propertyName, propertyValue));
-      ResultSet results = null;
-      results = session.execute(selectStatement);
-      response = CassandraUtil.createResponse(results);
-    } catch (Exception e) {
-      ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-    return response;
-  }
-
-  @Override
-  public Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
       List<Object> propertyValueList,
-      RequestContext context) {
-    return getRecordsByProperty(keyspaceName, tableName, propertyName, propertyValueList, null);
-  }
-
-  @Override
-  public Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      List<Object> propertyValueList,
-      List<String> fields,
       RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getRecordsByProperty method started at ==" + startTime, LoggerEnum.INFO);
     Response response = new Response();
     try {
-      Builder selectBuilder;
-      if (CollectionUtils.isNotEmpty(fields)) {
-        selectBuilder = QueryBuilder.select(fields.toArray(new String[fields.size()]));
-      } else {
-        selectBuilder = QueryBuilder.select().all();
-      }
+      Builder selectBuilder = QueryBuilder.select().all();
       Statement selectStatement =
           selectBuilder
               .from(keyspaceName, tableName)

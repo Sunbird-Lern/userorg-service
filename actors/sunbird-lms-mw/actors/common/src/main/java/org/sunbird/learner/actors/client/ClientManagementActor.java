@@ -246,7 +246,7 @@ public class ClientManagementActor extends BaseActor {
     Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     if (StringUtils.equalsIgnoreCase(JsonKey.CLIENT_NAME, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               clientDbInfo.getKeySpace(),
               clientDbInfo.getTableName(),
               JsonKey.CLIENT_NAME,
@@ -254,7 +254,7 @@ public class ClientManagementActor extends BaseActor {
               null);
     } else if (StringUtils.equalsIgnoreCase(JsonKey.ID, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               clientDbInfo.getKeySpace(),
               clientDbInfo.getTableName(),
               JsonKey.ID,
@@ -262,7 +262,7 @@ public class ClientManagementActor extends BaseActor {
               null);
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CHANNEL, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               clientDbInfo.getKeySpace(),
               clientDbInfo.getTableName(),
               JsonKey.CHANNEL,

@@ -555,7 +555,7 @@ public class UserProfileReadActor extends BaseActor {
 
     // fetch all associated user orgs
     Response response1 =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             userOrgDbInfo.getKeySpace(),
             userOrgDbInfo.getTableName(),
             JsonKey.USER_ID,

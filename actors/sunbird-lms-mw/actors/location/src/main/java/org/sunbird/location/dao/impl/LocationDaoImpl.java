@@ -80,7 +80,7 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response getRecordByProperty(Map<String, Object> queryMap) {
-    return cassandraOperation.getRecordsByProperty(
+    return cassandraOperation.getRecordsByIndexedProperty(
         KEYSPACE_NAME,
         LOCATION_TABLE_NAME,
         (String) queryMap.get(GeoLocationJsonKey.PROPERTY_NAME),

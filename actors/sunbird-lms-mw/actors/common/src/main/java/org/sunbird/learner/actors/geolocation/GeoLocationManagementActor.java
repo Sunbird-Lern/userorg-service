@@ -248,7 +248,7 @@ public class GeoLocationManagementActor extends BaseActor {
     }
     if (type.equalsIgnoreCase(JsonKey.ORGANISATION)) {
       Response response1 =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               geoLocationDbInfo.getKeySpace(),
               geoLocationDbInfo.getTableName(),
               JsonKey.ROOT_ORG_ID,

@@ -82,7 +82,7 @@ public class UserSkillManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),
@@ -124,7 +124,7 @@ public class UserSkillManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),
@@ -147,7 +147,7 @@ public class UserSkillManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createGetUserSuccessResponse());
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),
@@ -275,7 +275,7 @@ public class UserSkillManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createSkillEndorsementResponse());
 
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),

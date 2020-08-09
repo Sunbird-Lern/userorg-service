@@ -113,7 +113,7 @@ public class OrganisationManagementActor extends BaseActor {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Map<String, Object> request = actorMessage.getRequest();
       Response result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               orgTypeDbInfo.getKeySpace(),
               orgTypeDbInfo.getTableName(),
               JsonKey.NAME,
@@ -1335,14 +1335,13 @@ public class OrganisationManagementActor extends BaseActor {
     boolean fromExtId = false;
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> requestDbMap = new HashMap<>();
-    if (!StringUtils.isBlank((String) data.get(JsonKey.USER_ID))) {
+    if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_ID))) {
       requestDbMap.put(JsonKey.ID, data.get(JsonKey.USER_ID));
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordById(
               usrDbInfo.getKeySpace(),
               usrDbInfo.getTableName(),
-              JsonKey.ID,
-              data.get(JsonKey.USER_ID),
+              (String) data.get(JsonKey.USER_ID),
               null);
     } else if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_EXTERNAL_ID))
         && StringUtils.isNotBlank((String) data.get(JsonKey.USER_PROVIDER))
@@ -1380,7 +1379,7 @@ public class OrganisationManagementActor extends BaseActor {
         sender().tell(exception, self());
       }
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.LOGIN_ID, loginId, null);
     }
     List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -1507,7 +1506,7 @@ public class OrganisationManagementActor extends BaseActor {
     if (value != null) {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), key, value, null);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if ((list.isEmpty())) {

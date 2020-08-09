@@ -68,7 +68,7 @@ public class GeoLocationManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(cassandraGetRecordById());
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),

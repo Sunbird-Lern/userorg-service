@@ -127,7 +127,7 @@ public class CertificateActorTest {
   @Ignore
   @Test
   public void testMergeCertificate() {
-    when(cassandraOperationImpl.getRecordsByProperty(
+    when(cassandraOperationImpl.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),

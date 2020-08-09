@@ -220,7 +220,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private List<Map<String, Object>> getPreferencesFromDB(String orgId) {
     Response tenantPreferences =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             tenantPreferenceDbInfo.getKeySpace(),
             tenantPreferenceDbInfo.getTableName(),
             JsonKey.ORG_ID,

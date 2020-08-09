@@ -40,7 +40,7 @@ public class UploadLookUpScheduler extends BaseJob {
     List<Map<String, Object>> result = null;
     // get List of process with status as New
     Response res =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             bulkDb.getKeySpace(),
             bulkDb.getTableName(),
             JsonKey.STATUS,
@@ -56,7 +56,7 @@ public class UploadLookUpScheduler extends BaseJob {
     }
     // get List of Process with status as InProgress
     res =
-        cassandraOperation.getRecordsByProperty(
+        cassandraOperation.getRecordsByIndexedProperty(
             bulkDb.getKeySpace(),
             bulkDb.getTableName(),
             JsonKey.STATUS,

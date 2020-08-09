@@ -70,7 +70,7 @@ public class TenantPreferenceManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
-    when(cassandraOperation.getRecordsByProperty(
+    when(cassandraOperation.getRecordsByIndexedProperty(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),

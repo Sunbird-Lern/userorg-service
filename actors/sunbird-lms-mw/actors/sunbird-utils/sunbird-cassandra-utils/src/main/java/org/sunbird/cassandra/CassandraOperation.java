@@ -88,42 +88,6 @@ public interface CassandraOperation {
       String keyspaceName, String tableName, List<String> identifierList, RequestContext context);
 
   /**
-   * @desc This method is used to fetch record based on given parameter and it's value (it only
-   *     fetch the record on indexed property or column or it will throw exception.)
-   * @param keyspaceName String (data base keyspace name)
-   * @param tableName String
-   * @param propertyName String
-   * @param propertyValue Value to be used for matching in select query
-   * @param context
-   * @return Response Response
-   */
-  public Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      RequestContext context);
-
-  /**
-   * Fetch records with specified columns (select all if null) for given column name and value.
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Column name
-   * @param propertyValue Column value
-   * @param fields List of columns to be returned in each record
-   * @param context
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      List<String> fields,
-      RequestContext context);
-
-  /**
    * @desc This method is used to fetch record based on given parameter and it's list of value (for
    *     In Query , for example : SELECT * FROM mykeyspace.mytable WHERE id IN (‘A’,’B’,C’) )
    * @param keyspaceName String (data base keyspace name)
@@ -138,26 +102,6 @@ public interface CassandraOperation {
       String tableName,
       String propertyName,
       List<Object> propertyValueList,
-      RequestContext context);
-
-  /**
-   * Fetch records with specified columns (select all if null) for given column name with matching
-   * value in the list.
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Column name
-   * @param propertyValueList List of values to be used for matching in select query
-   * @param fields List of columns to be returned in each record
-   * @param context
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      List<Object> propertyValueList,
-      List<String> fields,
       RequestContext context);
 
   /**
