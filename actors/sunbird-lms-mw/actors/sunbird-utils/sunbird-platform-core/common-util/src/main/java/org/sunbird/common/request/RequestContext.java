@@ -12,7 +12,7 @@ public class RequestContext {
   private String reqId;
   private String logLevel;
   private String actorOperation;
-  private final String pid = "learner-service";
+  private String pid = "learner-service";
 
   public String getReqId() {
     return reqId;
@@ -78,7 +78,15 @@ public class RequestContext {
     this.appVer = appVer;
   }
 
-  public Map<String, Object> toMap() throws Exception {
+  public String getPid() {
+    return pid;
+  }
+
+  public void setPid(String pid) {
+    this.pid = pid;
+  }
+
+  public Map<String, Object> toMap() {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> reqMap = mapper.convertValue(this, Map.class);
     reqMap.remove("logLevel");
