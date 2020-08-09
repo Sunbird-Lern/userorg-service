@@ -14,8 +14,6 @@ public class ShadowUserUpload {
   private List<String> supportedFields;
   private String processId;
   private List<MigrationUser> values;
-  private List<SelfDeclaredUser> user;
-  private String uploadType;
 
   private ShadowUserUpload(ShadowUserUploadBuilder migrationBuilder) {
     this.fileSize = migrationBuilder.fileSize;
@@ -25,7 +23,6 @@ public class ShadowUserUpload {
     this.supportedFields = migrationBuilder.supportedFields;
     this.processId = migrationBuilder.processId;
     this.values = migrationBuilder.values;
-    this.user = migrationBuilder.user;
     this.mappedHeaders = migrationBuilder.mappedHeaders;
   }
 
@@ -51,10 +48,6 @@ public class ShadowUserUpload {
 
   public List<MigrationUser> getValues() {
     return values;
-  }
-
-  public List<SelfDeclaredUser> getUser() {
-    return user;
   }
 
   public List<String> getMappedHeaders() {
@@ -153,12 +146,6 @@ public class ShadowUserUpload {
     public ShadowUserUpload validate() {
       ShadowUserUpload migration = new ShadowUserUpload(this);
       validate(migration);
-      return migration;
-    }
-
-    public ShadowUserUpload validateDeclaredUsers() {
-      ShadowUserUpload migration = new ShadowUserUpload(this);
-      UserBulkMigrationRequestValidator.getInstance(migration).validateDeclaredUsers();
       return migration;
     }
 
