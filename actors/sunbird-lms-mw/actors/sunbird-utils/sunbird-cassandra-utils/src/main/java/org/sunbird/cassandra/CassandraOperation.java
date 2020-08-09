@@ -159,10 +159,15 @@ public interface CassandraOperation {
    * @param tableName String
    * @param id String
    * @param properties String varargs
+   * @param context
    * @return Response.
    */
   public Response getPropertiesValueById(
-      String keyspaceName, String tableName, String id, List<String> properties);
+      String keyspaceName,
+      String tableName,
+      String id,
+      List<String> properties,
+      RequestContext context);
 
   /**
    * @desc This method is used to fetch all records for table(i.e Select * from tableName)

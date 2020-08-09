@@ -54,6 +54,6 @@ public class JobProfileDaoImpl implements JobProfileDao {
     List<String> properties = new ArrayList<>(2);
     properties.add(JsonKey.ADDRESS_ID);
     return cassandraOperation.getPropertiesValueById(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, properties);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, properties, null);
   }
 }

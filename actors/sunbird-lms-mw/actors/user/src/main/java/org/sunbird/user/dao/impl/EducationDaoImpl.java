@@ -54,6 +54,6 @@ public class EducationDaoImpl implements EducationDao {
     List<String> properties = new ArrayList<>(2);
     properties.add(JsonKey.ADDRESS_ID);
     return cassandraOperation.getPropertiesValueById(
-        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), identifier, properties);
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), identifier, properties, null);
   }
 }

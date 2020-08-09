@@ -30,10 +30,11 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       Map<String, Object> filters,
       List<String> fields,
       RequestContext context) {
-    Response response = new Response();
+    long startTime = System.currentTimeMillis();
+    Response response;
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -61,6 +62,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("getRecords", startTime, select.getQueryString(), context);
     }
     return response;
   }
@@ -72,9 +75,10 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       List<String> fields,
       FutureCallback<ResultSet> callback,
       RequestContext context) {
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -100,6 +104,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime(
+          "applyOperationOnRecordsAsync", startTime, select.getQueryString(), context);
     }
   }
 
@@ -111,7 +118,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String key,
       Object value,
       RequestContext context) {
-    return updateMapRecord(keySpace, table, primaryKey, column, key, value, true);
+    return updateMapRecord(keySpace, table, primaryKey, column, key, value, true, context);
   }
 
   public Response updateRemoveMapRecord(
@@ -121,7 +128,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String column,
       String key,
       RequestContext context) {
-    return updateMapRecord(keySpace, table, primaryKey, column, key, null, false);
+    return updateMapRecord(keySpace, table, primaryKey, column, key, null, false, context);
   }
 
   public Response updateMapRecord(
@@ -131,7 +138,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String column,
       String key,
       Object value,
-      boolean add) {
+      boolean add,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
     Update update = QueryBuilder.update(keySpace, table);
     if (add) {
       update.with(QueryBuilder.put(column, key, value));
@@ -158,7 +167,6 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     }
     try {
       Response response = new Response();
-      ProjectLogger.log("Remove Map-Key Query: " + update.toString(), LoggerEnum.INFO);
       connectionManager.getSession(keySpace).execute(update);
       response.put(Constants.RESPONSE, Constants.SUCCESS);
       return response;
@@ -169,6 +177,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      logQueryElapseTime("updateMapRecord", startTime, update.getQueryString(), context);
     }
   }
 }

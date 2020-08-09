@@ -45,7 +45,7 @@ import org.sunbird.helper.CassandraConnectionMngrFactory;
 public abstract class CassandraOperationImpl implements CassandraOperation {
 
   protected CassandraConnectionManager connectionManager;
-  private static Logger contextEventLogger = LoggerFactory.getLogger("ContextEventLogger");
+  protected static Logger contextEventLogger = LoggerFactory.getLogger("ContextEventLogger");
 
   public CassandraOperationImpl() {
     connectionManager = CassandraConnectionMngrFactory.getInstance();
@@ -268,7 +268,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getPropertiesValueById(
-      String keyspaceName, String tableName, String id, List<String> properties) {
+      String keyspaceName,
+      String tableName,
+      String id,
+      List<String> properties,
+      RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "Cassandra Service getPropertiesValueById method started at ==" + startTime,
@@ -289,7 +293,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
-      logQueryElapseTime("getPropertiesValueById", startTime, selectQuery, null);
+      logQueryElapseTime("getPropertiesValueById", startTime, selectQuery, context);
     }
     return response;
   }
