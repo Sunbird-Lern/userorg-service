@@ -207,6 +207,14 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testGetUserDetailsV3SuccessByUserId() {
+    Result result =
+        performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testGetUserDetailsSuccessByLoginId() {
     Result result = performTest("/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
