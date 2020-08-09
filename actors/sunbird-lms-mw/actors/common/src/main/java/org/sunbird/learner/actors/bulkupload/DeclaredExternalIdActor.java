@@ -7,7 +7,6 @@ import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.bean.SelfDeclaredUser;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
@@ -15,10 +14,8 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserDeclareEntity;
 
 @ActorConfig(
@@ -26,9 +23,6 @@ import org.sunbird.models.user.UserDeclareEntity;
   asyncTasks = {"processExternalId"}
 )
 public class DeclaredExternalIdActor extends BaseActor {
-
-  private Util.DbInfo usrExtIdDbInfo = Util.dbInfoMap.get(JsonKey.USR_EXT_ID_DB);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
