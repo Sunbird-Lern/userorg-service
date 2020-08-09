@@ -8,10 +8,7 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
@@ -67,35 +64,53 @@ public class DeclaredExternalIdActor extends BaseActor {
   private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {
     Response response = new Response();
     response.setResponseCode(ResponseCode.OK);
-    request.setOperation("updateUserSelfDeclarationsErrorType");
-    Map<String, Object> requestMap = new HashMap();
-    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
-    userDeclareEntity.setOrgId(declaredUser.getOrgId());
-    userDeclareEntity.setPersona(declaredUser.getPersona());
-    userDeclareEntity.setUserId(declaredUser.getUserId());
-    userDeclareEntity.setErrorType(declaredUser.getErrorType());
-    userDeclareEntity.setStatus(declaredUser.getInputStatus());
-    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
-    tellToAnother(request);
+    try {
+      request.setOperation("updateUserSelfDeclarationsErrorType");
+      Map<String, Object> requestMap = new HashMap();
+      UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+      userDeclareEntity.setOrgId(declaredUser.getOrgId());
+      userDeclareEntity.setPersona(declaredUser.getPersona());
+      userDeclareEntity.setUserId(declaredUser.getUserId());
+      userDeclareEntity.setErrorType(declaredUser.getErrorType());
+      userDeclareEntity.setStatus(declaredUser.getInputStatus());
+      requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+      tellToAnother(request);
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "DeclaredExternalIdActor:updateErrorDetail:Exception in processing the DeclaredUser: "
+              + e.getCause(),
+          declaredUser.getUserId(),
+          LoggerEnum.ERROR.name());
+    }
+    sender().tell(response, self());
   }
 
   private void rejectDeclaredDetail(Request request, SelfDeclaredUser declaredUser) {
     Response response = new Response();
     response.setResponseCode(ResponseCode.OK);
-    request.setOperation("upsertUserSelfDeclarations");
-    Map<String, Object> requestMap = new HashMap();
-    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
-    userDeclareEntity.setOrgId(declaredUser.getOrgId());
-    userDeclareEntity.setPersona(declaredUser.getPersona());
-    userDeclareEntity.setUserId(declaredUser.getUserId());
-    userDeclareEntity.setOperation(JsonKey.REMOVE);
-    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
-    tellToAnother(request);
+    try {
+      request.setOperation("upsertUserSelfDeclarations");
+      Map<String, Object> requestMap = new HashMap();
+      UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+      userDeclareEntity.setOrgId(declaredUser.getOrgId());
+      userDeclareEntity.setPersona(declaredUser.getPersona());
+      userDeclareEntity.setUserId(declaredUser.getUserId());
+      userDeclareEntity.setOperation(JsonKey.REMOVE);
+      requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+      tellToAnother(request);
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "DeclaredExternalIdActor:rejectDeclaredDetail:Exception in processing the DeclaredUser: "
+              + e.getCause(),
+          declaredUser.getUserId(),
+          LoggerEnum.ERROR.name());
+    }
+    sender().tell(response, self());
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
     Response response = new Response();
-    response.setResponseCode(ResponseCode.REDIRECTION_REQUIRED);
+    response.setResponseCode(ResponseCode.OK);
     request.setOperation(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue());
     ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
@@ -111,7 +126,11 @@ public class DeclaredExternalIdActor extends BaseActor {
       requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      ProjectLogger.log(
+          "DeclaredExternalIdActor:migrateDeclaredUser:Exception in processing the DeclaredUser: "
+              + e.getCause(),
+          declaredUser.getUserId(),
+          LoggerEnum.ERROR.name());
     }
     sender().tell(response, self());
   }

@@ -30,15 +30,12 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
 import org.sunbird.learner.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
-  DeclaredExternalIdActor.class,
-  UserUploadUtil.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class
 })
@@ -65,9 +62,6 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(updateData(true));
-    when(decryptionService.decryptData(Mockito.anyString()))
-        .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
   }
 
   private Response updateData(boolean empty) {
@@ -94,11 +88,11 @@ public class DeclaredExternalIdActorTest {
     } else if (JsonKey.REJECTED.equals(statusType)) {
       declaredUserUploadMap.put(
           JsonKey.DATA,
-          "PYOeYF3BCS4Xv8duenjraA46kuN5J96XQMHyZz9NRDdLiOkPtBMYGuj6CRytyGwVrvNknVJ8Kzt7\\ndRBNmR5A7IPfuGm0X1XEb/YQjXzgR5G/A6fNKJKMiTYyYHeR9vJyPGJ5jf5zDC/wiAxk80kD3X9b\\nixZo4RN6k3/PPHvaU7iVxSPc1+F74JD2WV72fSbHEuabJAYAH4inbvCRiYq37/KvH9u2bhTV7TPV\\neI6rVIkaYzD07JPNMeVXJqIGbpBCOof9I/yVoczuDRCCPma3fz549diFEVWmUDkKppTGBIRlA1AP\\njIxTkX0DPSEQ5HRHvcKEMtiO6w/S/NNkyP7n6ddkjr75U0hM1uswr4HoeJh9SQeSxMGsvJpgrITO\\nEsI7rp1gID/xTOxz7eIsu7GG+ZDmfECggGC9pAiEsO3dsQZqhOeU8Ge2WAw+a4pvnGIhk478k98e\\nDtATCCcOlJt8zX4hRNuZp0gX9lKAZh5Zb1PfAaYl+wfqRl5fT12EqVdwPoMxO4DeiztONbe65fy0\\n52WWZlBorSgzxjA3qH5xUV4/EuRPcnI3DypooVZgmxDKNKm7AeAABPUNMzgH4spfsFOf1n0XnOut\\nJ2ZNY6vCaduqZluhXE9eTGPqvIzlJDKAEPH+gxPt6LzdndcUbALegmGD7YmpdY8iggsVOM0vtb4=");
+          "PYOeYF3BCS4Xv8duenjraA46kuN5J96XQMHyZz9NRDdLiOkPtBMYGuj6CRytyGwVrvNknVJ8Kzt7\\ndRBNmR5A7IPfuGm0X1XEb/YQjXzgR5G/A6fNKJKMiTYyYHeR9vJyPGJ5jf5zDC/wiAxk80kD3X9b\\nixZo4RN6k3/PPHvaU7iVxSPc1+F74JD2WV72fSbHEuabJAYAH4inbvCRiYq37/KvH9u2bhTV7TPV\\neI6rVIkaYzD07JPNMeVXJqIGbpBCOof9I/yVoczuDRCCPma3fz549diFEVWmUDkKppTGBIRlA1AP\\njIxTkX0DPSEQ5HRH9GqKI8c53rQKl9OmwLn+Kdi+pJMK3/K/DKq3noKu5jVzytvonHUIid0OFDdk\\nHIqXXYHSajzCw9hzQeoaD5sIrK+YCQklglUYq9QTkXAfFUoBDHq5jTV+qTbtLhApsCyt/H/ExLRd\\ne3W8zHKY/z2jh38VRww7G0B7Pz2xNj4auP09xbIkXRG2NLx9gQk4+pQ8r6PImlxJRkFJlYn6ePQl\\n403NiDZfKefKn4dBLm+ZAiTPT0+QO6gWevtuJgkO6VhRc8aHd/uiEZnRpudFmYu7hGgkVk4qaBJv\\n6ULNlXPpi2LT3pKUFpVaEqVkiU+H2iY1chyf2ZRjlyHabORsk2PKvQzXQ7/CA4/fLbxEU+wvlo8r\\nvNqUr8TCIIf22PnZKxlyv7HWLAL2tEhPYIdBrxUnUbKQo/LFzf4rl6QvL1wdYXAgOeWid21HySz4\\nMHmYxhkFPKboJqKv4eqZ+iijfJzxoT38RMkZtI8alOJ5ePDUmUAsmAW11Lmi7M6+YMZc2Kjg");
     } else if (JsonKey.ERROR.equals(statusType)) {
       declaredUserUploadMap.put(
           JsonKey.DATA,
-          "PYOeYF3BCS4Xv8duenjraA46kuN5J96XQMHyZz9NRDdLiOkPtBMYGuj6CRytyGwVrvNknVJ8Kzt7\\ndRBNmR5A7IPfuGm0X1XEb/YQjXzgR5G/A6fNKJKMiTYyYHeR9vJyPGJ5jf5zDC/wiAxk80kD3X9b\\nixZo4RN6k3/PPHvaU7iVxSPc1+F74JD2WV72fSbHEuabJAYAH4inbvCRiYq37/KvH9u2bhTV7TPV\\neI6rVIkaYzD07JPNMeVXJqIGbpBCOof9I/yVoczuDRCCPma3fz549diFEVWmUDkKppTGBIRlA1AP\\njIxTkX0DPSEQ5HRHvcKEMtiO6w/S/NNkyP7n6ddkjr75U0hM1uswr4HoeJh9SQeSxMGsvJpgrITO\\nEsI7rp1gID/xTOxz7eIsu7GG+ZDmfECggGC9pAiEsO3dsQZqhOeU8Ge2WAw+a4pvnGIhk478k98e\\nDtATCCcOlJt8zX4hRNuZp0gX9lKAZh5Zb1PfAaYl+wfqRl5fT12EqVdwPoMxO4DeiztONbe65fy0\\n52WWZlBorSgzxjA3qH5xUV4/EuRPcnI3DypooVZgmxDKNKm7AeAABPUNMzgH4spfsFOf1n0XnOut\\nJ2ZNY6vCaduqZluhXE9eTGPqvIzlJDKAEPH+gxPt6LzdndcUbALegmGD7YmpdY8iggsVOM0vtb4=");
+          "PYOeYF3BCS4Xv8duenjraA46kuN5J96XQMHyZz9NRDdLiOkPtBMYGuj6CRytyGwVrvNknVJ8Kzt7\\ndRBNmR5A7IPfuGm0X1XEb/YQjXzgR5G/A6fNKJKMiTYyYHeR9vJyPGJ5jf5zDC/wiAxk80kD3X9b\\nixZo4RN6k3/PPHvaU7iVxSPc1+F74JD2WV72fSbHEuabJAYAH4inbvCRiYq37/KvH9u2bhTV7TPV\\neI6rVIkaYzD07JPNMeVXJqIGbpBCOof9I/yVoczuDRCCPma3fz549diFEVWmUDkKppTGBIRlA1AP\\njIxTkX0DPSEQ5HRH9GqKI8c53rQKl9OmwLn+Kdi+pJMK3/K/DKq3noKu5jVzytvonHUIid0OFDdk\\nHIqXXYHSajzCw9hzQeoaD5sIrK+YCQklglUYq9QTkXAfFUoBDHq5jTV+qTbtLhApsCyt/H/ExLRd\\ne3W8zHKY/z2jh38VRww7G0B7Pz2xNj4auP09xbIkXRG2NLx9gQk4+pQ8r6PImlxJRkFJlYn6ePQl\\n403NiDZfKefKn4dBLm+ZAiTPT0+QO6gWevtuJgkO6VhRc8aHd/uiEZnRpudFmYu7hGgkVk4qaBJv\\n6ULNlXPpi2LT3pKUFpVaEqVkiU+H2iY1chyf2ZRjlyHabORsk2PKvQzXQ7/CA4/fLbxEU+wvlo8r\\nvNqUr8TCIIf22PnZKxlyv7HWLAL2tEhPYIdBrxUnUbKQo/LFzf4rl6QvL1wdYXAgOeWid21HySz4\\nMHmYxhkFPKboJqKv4eqZ+iijfJzxoT38RMkZtI8alOJ5ePDUmUAsmAW11Lmi7M6+YMZc2Kjg");
     }
     List<Map<String, Object>> result = new ArrayList<>();
     result.add(declaredUserUploadMap);
@@ -111,6 +105,9 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
+    when(decryptionService.decryptData(Mockito.anyString()))
+        .thenReturn(
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
     assertTrue(result);
@@ -121,6 +118,9 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
+    when(decryptionService.decryptData(Mockito.anyString()))
+        .thenReturn(
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
     assertTrue(result);
@@ -131,6 +131,9 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
+    when(decryptionService.decryptData(Mockito.anyString()))
+        .thenReturn(
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
     assertTrue(result);
@@ -153,7 +156,7 @@ public class DeclaredExternalIdActorTest {
 
     if (errorCode == null) {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.REDIRECTION_REQUIRED;
+      return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
