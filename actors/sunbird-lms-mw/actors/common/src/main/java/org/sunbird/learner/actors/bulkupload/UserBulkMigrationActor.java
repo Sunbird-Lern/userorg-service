@@ -45,7 +45,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   public void onReceive(Request request) throws Throwable {
     String env = null;
     String operation = request.getOperation();
-    if (operation.equals("")) {
+    if (operation.equals("userBulkSelfDeclared")) {
       env = "SelfDeclaredUserUpload";
     } else {
       env = "ShadowUserUpload";
@@ -379,35 +379,43 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     List<String> mappedColumns = new ArrayList<>();
     csvColumns.forEach(
         column -> {
-          if (column.equalsIgnoreCase("email id")) {
-            mappedColumns.add(JsonKey.EMAIL);
-          }
-          if (column.equalsIgnoreCase("phone number")) {
-            mappedColumns.add(JsonKey.PHONE);
-          }
-          if (column.equalsIgnoreCase("state provided ext. id")) {
-            mappedColumns.add(JsonKey.USER_EXTERNAL_ID);
-          }
-          if (column.equalsIgnoreCase("")) {
-            mappedColumns.add(JsonKey.ORG_EXTERNAL_ID);
-          }
-          if (column.equalsIgnoreCase("status")) {
-            mappedColumns.add(JsonKey.INPUT_STATUS);
-          }
-          if (column.equalsIgnoreCase("diksha uuid")) {
-            mappedColumns.add(JsonKey.USER_ID);
-          }
-          if (column.equalsIgnoreCase("channel")) {
-            mappedColumns.add(column);
-          }
-          if (column.equalsIgnoreCase("school name")) {
-            mappedColumns.add("schoolName");
-          }
-          if (column.equalsIgnoreCase("school udise id")) {
-            mappedColumns.add("schoolUdiseId");
-          }
-          if (column.equalsIgnoreCase("diksha sub-org id")) {
-            mappedColumns.add("subOrgId");
+          switch (column) {
+            case "email id":
+              mappedColumns.add(JsonKey.EMAIL);
+              break;
+            case "phone number":
+              mappedColumns.add(JsonKey.PHONE);
+              break;
+            case "state provided ext. id":
+              mappedColumns.add(JsonKey.USER_EXTERNAL_ID);
+              break;
+            case "status":
+              mappedColumns.add(JsonKey.INPUT_STATUS);
+              break;
+            case "diksha uuid":
+              mappedColumns.add(JsonKey.USER_ID);
+              break;
+            case "channel":
+              mappedColumns.add(column);
+              break;
+            case "school name":
+              mappedColumns.add("schoolName");
+              break;
+            case "school udise id":
+              mappedColumns.add("schoolUdiseId");
+              break;
+            case "diksha sub-org id":
+              mappedColumns.add("subOrgId");
+              break;
+            case "org id":
+              mappedColumns.add(JsonKey.ORG_ID);
+              break;
+            case "persona":
+              mappedColumns.add(column);
+              break;
+            case "error type":
+              mappedColumns.add("errorType");
+            default:
           }
         });
     return mappedColumns;

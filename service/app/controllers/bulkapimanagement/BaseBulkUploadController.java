@@ -91,7 +91,11 @@ public class BaseBulkUploadController extends BaseController {
     if (validateFileZize) {
       checkFileSize(byteArray, objectType);
     }
-    reqObj.setOperation(operation);
+    if (map.get("operation") != null) {
+      reqObj.setOperation("userBulkSelfDeclared");
+    } else {
+      reqObj.setOperation(operation);
+    }
     reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
     reqObj.setEnv(getEnvironment());
     map.put(JsonKey.OBJECT_TYPE, objectType);
