@@ -57,6 +57,7 @@ public class TenantMigrationActor extends BaseActor {
 
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+  private Util.DbInfo usrDecDbInfo = Util.dbInfoMap.get(JsonKey.USR_DECLARATION_TABLE);
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
@@ -137,6 +138,24 @@ public class TenantMigrationActor extends BaseActor {
         updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
     // Update user externalIds
     Response userExternalIdsResponse = updateUserExternalIds(request);
+    // update user declaration table status
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+    Response userDecResponse =
+        cassandraOperation.updateRecord(
+            usrDbInfo.getKeySpace(),
+            usrDbInfo.getTableName(),
+            userUpdateDeclaredRequest(userId),
+            null);
+    if (null == response
+        || null == (String) userDecResponse.get(JsonKey.RESPONSE)
+        || (null != (String) userDecResponse.get(JsonKey.RESPONSE)
+            && !((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS))) {
+      // throw exception for migration failed
+      ProjectLogger.log(
+          "TenantMigrationActor:migrateUser user declarations record not updated for user "
+              + userId,
+          LoggerEnum.INFO.name());
+    }
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
     if (MapUtils.isNotEmpty(userOrgResponse.getResult())
@@ -166,6 +185,13 @@ public class TenantMigrationActor extends BaseActor {
             (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, "migrate", null);
     TelemetryUtil.telemetryProcessingCall(
         reqMap, targetObject, correlatedObject, request.getContext());
+  }
+
+  private Map<String, Object> userUpdateDeclaredRequest(String userId) {
+    Map<String, Object> requestMap = new HashMap();
+    requestMap.put(JsonKey.USER_ID, userId);
+    requestMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+    return requestMap;
   }
 
   private void notify(Map<String, Object> userDetail) {
