@@ -28,6 +28,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryWriter;
@@ -757,12 +758,20 @@ public class BaseController extends Controller {
 
   public void setContextData(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
     try {
-      String reqContext = httpReq.flash().get(JsonKey.CONTEXT);
+      RequestContext requestContext = new RequestContext();
+      reqObj.setRequestContext(requestContext);
+      String context = httpReq.flash().get(JsonKey.CONTEXT);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
       reqObj.setRequestId(httpReq.flash().get(JsonKey.REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
+
+      requestContext.setAppId((String) reqObj.getContext().get(JsonKey.APP_ID));
+      requestContext.setReqId((String) reqObj.getContext().get(JsonKey.DEVICE_ID));
+      requestContext.setDid((String) reqObj.getContext().get(JsonKey.REQ_ID));
+      requestContext.setActorOperation(reqObj.getOperation());
+      requestContext.setUid(reqObj.getRequestId());
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }

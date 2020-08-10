@@ -748,7 +748,7 @@ public class UserManagementActor extends BaseActor {
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
     }
-    processUserRequest(userMap, callerId, actorMessage.getContext());
+    processUserRequest(userMap, callerId, actorMessage);
   }
 
   private void validateUserType(Map<String, Object> userMap, boolean isCustodianOrg) {
@@ -996,8 +996,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   @SuppressWarnings("unchecked")
-  private void processUserRequest(
-      Map<String, Object> userMap, String callerId, Map<String, Object> reqContext) {
+  private void processUserRequest(Map<String, Object> userMap, String callerId, Request request) {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId);
     ObjectMapper mapper = new ObjectMapper();
@@ -1026,7 +1025,10 @@ public class UserManagementActor extends BaseActor {
     try {
       response =
           cassandraOperation.insertRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap, null);
+              usrDbInfo.getKeySpace(),
+              usrDbInfo.getTableName(),
+              requestMap,
+              request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap);
 
     } finally {
@@ -1089,18 +1091,18 @@ public class UserManagementActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    reqContext.put(JsonKey.ROLLUP, rollUp);
+    request.getContext().put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
             (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
     TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
     String signupType =
-        reqContext.get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) reqContext.get(JsonKey.SIGNUP_TYPE)
+        request.getContext().get(JsonKey.SIGNUP_TYPE) != null
+            ? (String) request.getContext().get(JsonKey.SIGNUP_TYPE)
             : "";
     String source =
-        reqContext.get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) reqContext.get(JsonKey.REQUEST_SOURCE)
+        request.getContext().get(JsonKey.REQUEST_SOURCE) != null
+            ? (String) request.getContext().get(JsonKey.REQUEST_SOURCE)
             : "";
     if (StringUtils.isNotBlank(signupType)) {
       TelemetryUtil.generateCorrelatedObject(
@@ -1110,7 +1112,8 @@ public class UserManagementActor extends BaseActor {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
     }
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, reqContext);
+    TelemetryUtil.telemetryProcessingCall(
+        userMap, targetObject, correlatedObject, request.getContext());
   }
 
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
