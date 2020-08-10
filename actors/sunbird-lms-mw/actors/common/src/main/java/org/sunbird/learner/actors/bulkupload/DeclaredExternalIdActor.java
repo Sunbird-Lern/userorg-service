@@ -53,7 +53,7 @@ public class DeclaredExternalIdActor extends BaseActor {
                 case JsonKey.REJECTED:
                   rejectDeclaredDetail(request, migrateUser);
                   break;
-                case JsonKey.ERROR:
+                case JsonKey.SELF_DECLARED_ERROR:
                   updateErrorDetail(request, migrateUser);
                   break;
                 default:

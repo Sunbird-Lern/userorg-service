@@ -263,7 +263,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     Map<String, Object> requestMap = request.getRequest();
     UserDeclareEntity userDeclareEntity = (UserDeclareEntity) requestMap.get(JsonKey.DECLARATIONS);
-    if (userDeclareEntity.getStatus() == JsonKey.ERROR
+    if (JsonKey.ERROR.equals(userDeclareEntity.getStatus())
         && StringUtils.isNotEmpty(userDeclareEntity.getErrorType())) {
       Map<String, Object> compositePropertiesMap = new HashMap<>();
       Map<String, Object> propertieMap = new HashMap<>();
