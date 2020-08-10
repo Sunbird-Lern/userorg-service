@@ -15,7 +15,6 @@ public class ShadowUserUpload {
   private String processId;
   private List<MigrationUser> values;
   private List<SelfDeclaredUser> user;
-  private String uploadType;
 
   private ShadowUserUpload(ShadowUserUploadBuilder migrationBuilder) {
     this.fileSize = migrationBuilder.fileSize;

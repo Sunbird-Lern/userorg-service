@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.bean.MigrationUser;
 import org.sunbird.bean.SelfDeclaredUser;
@@ -83,7 +84,7 @@ public class UserBulkMigrationRequestValidator {
               int index = shadowUserMigration.getUser().indexOf(onCsvRow);
               validateSelfDeclaredUser(onCsvRow, index);
             });
-    if (csvRowsErrors.getErrorsList().size() > 0) {
+    if (CollectionUtils.isNotEmpty(csvRowsErrors.getErrorsList())) {
       IErrorDispatcher errorDispatcher = ErrorDispatcherFactory.getErrorDispatcher(csvRowsErrors);
       errorDispatcher.dispatchError();
     }

@@ -9,7 +9,7 @@ public enum SelfDeclaredErrorTypeEnum {
   ERROR_ID("ERROR-ID"),
   ERROR_NAME("ERROR-NAME");
 
-  public String errorType;
+  public final String errorType;
 
   SelfDeclaredErrorTypeEnum(String errorType) {
     this.errorType = errorType;

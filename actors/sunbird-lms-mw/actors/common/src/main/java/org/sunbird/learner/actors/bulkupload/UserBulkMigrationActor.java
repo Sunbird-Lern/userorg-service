@@ -77,6 +77,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   private void processCsvBytes(Map<String, Object> data, Request request) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> targetObject = null;
+    Map<String, Object> values = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
     long validationStartTime = System.currentTimeMillis();
@@ -84,7 +85,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     Map<String, Object> result = getUserById(userId);
     String channel = getChannel(result);
     String rootOrgId = getRootOrgId(result);
-    Map<String, Object> values = mapper.readValue(systemSetting.getValue(), Map.class);
 
     request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     BulkMigrationUser migrationUser = null;
@@ -98,7 +98,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
       fieldsMap.put("mandatoryFields", Arrays.asList(mandatoryFields.split(",")));
       fieldsMap.put("optionalFields", Arrays.asList(optionalFields.split(",")));
       List<SelfDeclaredUser> selfDeclaredUserList =
-          getUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), values, fieldsMap);
+          getUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
       ProjectLogger.log(
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(selfDeclaredUserList.size() + "")
@@ -110,6 +110,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               .concat(selfDeclaredUserList.size() + ""),
           LoggerEnum.INFO.name());
     } else {
+      values = mapper.readValue(systemSetting.getValue(), Map.class);
       List<MigrationUser> migrationUserList =
           getMigrationUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), values);
       ProjectLogger.log(
@@ -124,6 +125,13 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
           LoggerEnum.INFO.name());
     }
     insertRecord(migrationUser);
+    if (request
+        .getOperation()
+        .equals(BulkUploadActorOperation.USER_BULK_SELF_DECLARED.getValue())) {
+      request.setOperation(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED.getValue());
+      request.getRequest().put(JsonKey.PROCESS_ID, migrationUser.getId());
+      tellToAnother(request);
+    }
     TelemetryUtil.generateCorrelatedObject(processId, JsonKey.PROCESS_ID, null, correlatedObject);
     TelemetryUtil.generateCorrelatedObject(
         migrationUser.getTaskCount() + "", JsonKey.TASK_COUNT, null, correlatedObject);
@@ -276,11 +284,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> getUsers(
-      String channel,
-      String processId,
-      byte[] fileData,
-      Map<String, Object> fieldsMap,
-      Map<String, List<String>> columnsMap) {
+      String channel, String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
     List<String[]> csvData = readCsv(fileData);
     List<String> csvHeaders = getCsvHeadersAsList(csvData);
     List<String> mandatoryHeaders = columnsMap.get(JsonKey.MANDATORY_FIELDS);
@@ -414,7 +418,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               mappedColumns.add(column);
               break;
             case "error type":
-              mappedColumns.add("errorType");
+              mappedColumns.add(JsonKey.ERROR_TYPE);
             default:
           }
         });
@@ -511,21 +515,21 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   private void setFieldToDeclaredUserObject(
       SelfDeclaredUser migrationUser, String columnAttribute, Object value) {
 
-    if (columnAttribute.equalsIgnoreCase("email")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.EMAIL)) {
       String email = (String) value;
       migrationUser.setEmail(email);
     }
-    if (columnAttribute.equalsIgnoreCase("phone")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.PHONE)) {
       String phone = (String) value;
       migrationUser.setPhone(phone);
     }
-    if (columnAttribute.equalsIgnoreCase("userExternalId")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.USER_EXTERNAL_ID)) {
       migrationUser.setUserExternalId((String) value);
     }
-    if (columnAttribute.equalsIgnoreCase("input status")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.INPUT_STATUS)) {
       migrationUser.setInputStatus((String) value);
     }
-    if (columnAttribute.equalsIgnoreCase("channel")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.CHANNEL)) {
       migrationUser.setChannel((String) value);
     }
     if (columnAttribute.equalsIgnoreCase("schoolName")) {

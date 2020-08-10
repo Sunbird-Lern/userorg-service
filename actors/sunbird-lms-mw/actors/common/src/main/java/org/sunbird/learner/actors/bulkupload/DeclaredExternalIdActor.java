@@ -17,21 +17,22 @@ import org.sunbird.models.user.UserDeclareEntity;
 
 @ActorConfig(
   tasks = {},
-  asyncTasks = {"processExternalId"}
+  asyncTasks = {"processUserBulkSelfDeclared"}
 )
 public class DeclaredExternalIdActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
-    if (operation.equalsIgnoreCase(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue())) {
-      processDeclaredExternalId(request);
+    if (operation.equalsIgnoreCase(
+        BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED.getValue())) {
+      processSelfDeclaredExternalId(request);
     } else {
       onReceiveUnsupportedOperation("userBulkMigration");
     }
   }
 
-  private void processDeclaredExternalId(Request request) {
+  private void processSelfDeclaredExternalId(Request request) {
     Map requestMap = request.getRequest();
     String processId = (String) requestMap.get(JsonKey.PROCESS_ID);
     Map<String, Object> row = UserUploadUtil.getFullRecordFromProcessId(processId);
