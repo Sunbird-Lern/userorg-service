@@ -1510,11 +1510,10 @@ public class UserRequestValidatorTest {
     request.setRequest(requestObj);
     try {
       userRequestValidator.validateCreateUserV1Request(request);
-      assertEquals((String) request.getRequest().get(JsonKey.USERNAME),"hindii");
+      assertEquals((String) request.getRequest().get(JsonKey.USERNAME), "hindii");
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
       assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
-
 }

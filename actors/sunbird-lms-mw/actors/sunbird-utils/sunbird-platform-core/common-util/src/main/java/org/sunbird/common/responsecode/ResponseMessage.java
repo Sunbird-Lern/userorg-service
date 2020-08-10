@@ -480,6 +480,7 @@ public interface ResponseMessage {
     String NO_EMAIL_PHONE_ASSOCIATED = "No {0} associated with the given user.";
     String INVALID_CAPTCHA = "Captcha is invalid";
     String PREFERENCE_ALREADY_EXIST = "preference {0} already exits in the org {1}";
+    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "Declared user error status is not updated";
     String PREFERENCE_NOT_FOUND = "preference {0} not found in the org {1}";
   }
 
@@ -885,6 +886,7 @@ public interface ResponseMessage {
     String NO_EMAIL_PHONE_ASSOCIATED = "NO_EMAIL_PHONE_ASSOCIATED";
     String INVALID_CAPTCHA = "INVALID_CAPTCHA";
     String PREFERENCE_ALREADY_EXIST = "PREFERENCE_ALREADY_EXIST";
+    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED";
     String PREFERENCE_NOT_FOUND = "PREFERENCE_NOT_FOUND";
   }
 }

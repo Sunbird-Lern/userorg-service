@@ -876,6 +876,9 @@ public enum ResponseCode {
   preferenceAlreadyExists(
       ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
       ResponseMessage.Message.PREFERENCE_ALREADY_EXIST),
+  declaredUserErrorStatusNotUpdated(
+      ResponseMessage.Key.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED,
+      ResponseMessage.Message.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED),
   preferenceNotFound(
       ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
 

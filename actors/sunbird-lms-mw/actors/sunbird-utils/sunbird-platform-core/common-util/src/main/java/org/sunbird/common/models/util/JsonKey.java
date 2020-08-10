@@ -1068,6 +1068,7 @@ public final class JsonKey {
   public static final String PERSONA = "persona";
   public static final String VALIDATED = "VALIDATED";
   public static final String REJECTED = "REJECTED";
+  public static final String SELF_DECLARED_ERROR = "ERROR";
   public static final String DIKSHA_UUID = "DIKSHA_UUID";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 

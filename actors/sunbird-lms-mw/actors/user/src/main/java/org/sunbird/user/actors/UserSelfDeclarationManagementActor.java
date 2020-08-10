@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
@@ -33,6 +34,11 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
         .getValue()
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserSelfDeclaredDetails(request);
+    }
+    if (UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE
+        .getValue()
+        .equalsIgnoreCase(request.getOperation())) {
+      updateUserSelfDeclaredErrorStatus(request);
     } else {
       onReceiveUnsupportedOperation("upsertUserSelfDeclarations");
     }
@@ -250,5 +256,28 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     properties.put(JsonKey.ORG_ID, orgId);
     properties.put(JsonKey.PERSONA, persona);
     cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties);
+  }
+
+  public void updateUserSelfDeclaredErrorStatus(Request request) {
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    Map<String, Object> requestMap = request.getRequest();
+    UserDeclareEntity userDeclareEntity = (UserDeclareEntity) requestMap.get(JsonKey.DECLARATIONS);
+    if (JsonKey.ERROR.equals(userDeclareEntity.getStatus())
+        && StringUtils.isNotEmpty(userDeclareEntity.getErrorType())) {
+      Map<String, Object> compositePropertiesMap = new HashMap<>();
+      Map<String, Object> propertieMap = new HashMap<>();
+      compositePropertiesMap.put(JsonKey.USER_ID, userDeclareEntity.getUserId());
+      compositePropertiesMap.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
+      compositePropertiesMap.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
+      propertieMap.put(JsonKey.ERROR, userDeclareEntity.getErrorType());
+      propertieMap.put(JsonKey.STATUS, userDeclareEntity.getStatus());
+      cassandraOperation.updateRecord(
+          JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, propertieMap, compositePropertiesMap);
+    } else {
+      ProjectCommonException.throwServerErrorException(
+          ResponseCode.declaredUserErrorStatusNotUpdated);
+    }
+    sender().tell(response, self());
   }
 }
