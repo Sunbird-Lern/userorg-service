@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -47,8 +47,8 @@ public class DeclaredExternalIdActorTest {
   private static DecryptionService decryptionService;
   private static SunbirdMWService SunbirdMWService;
 
-  @Before
-  public void beforeEachTest() {
+  @BeforeClass
+  public static void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -64,7 +64,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(updateData(true));
   }
 
-  private Response updateData(boolean empty) {
+  private static Response updateData(boolean empty) {
     Response res = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     if (!empty) {
