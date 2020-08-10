@@ -63,7 +63,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
-      logQueryElapseTime("getRecords", startTime, select.getQueryString(), context);
+      if (null != select) {
+        logQueryElapseTime("getRecords", startTime, select.getQueryString(), context);
+      }
     }
     return response;
   }
@@ -105,8 +107,10 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
-      logQueryElapseTime(
-          "applyOperationOnRecordsAsync", startTime, select.getQueryString(), context);
+      if (null != select) {
+        logQueryElapseTime(
+            "applyOperationOnRecordsAsync", startTime, select.getQueryString(), context);
+      }
     }
   }
 
@@ -178,7 +182,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
-      logQueryElapseTime("updateMapRecord", startTime, update.getQueryString(), context);
+      if (null != update) {
+        logQueryElapseTime("updateMapRecord", startTime, update.getQueryString(), context);
+      }
     }
   }
 }
