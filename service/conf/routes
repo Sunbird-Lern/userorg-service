@@ -129,9 +129,9 @@ POST /v1/user/skill/update                     @controllers.skills.UserSkillCont
 POST /v1/user/skill/endorse/add                @controllers.skills.UserSkillEndorsementController.addEndorsement(request: play.mvc.Http.Request)
 
 #T&C
-POST  /v1/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference(request: play.mvc.Http.Request)
-POST  /v1/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
-POST  /v1/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
+POST  /v2/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference(request: play.mvc.Http.Request)
+PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
+POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
 
 #DB Operation API
 POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll(request: play.mvc.Http.Request)
@@ -193,4 +193,4 @@ GET   /v1/user/feed/:userId       @controllers.feed.FeedController.getUserFeed(u
 
 POST /private/user/v1/scheduler @controllers.scheduler.SchedulerController.startScheduler(request: play.mvc.Http.Request)
 
-PATCH  /v1/user/declarations             @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)
+PATCH  /v1/user/declarations      @controllers.usermanagement.UserController.updateUserDeclarations(request: play.mvc.Http.Request)

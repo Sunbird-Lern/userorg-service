@@ -36,6 +36,12 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-remote_2.11</artifactId>
 			<version>${learner.akka.version}</version>
+            <exclusions>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>*</artifactId>
+              </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -216,6 +222,10 @@
 					<artifactId>slf4j-log4j12</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+                <exclusion>
+                  <groupId>io.netty</groupId>
+                  <artifactId>*</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

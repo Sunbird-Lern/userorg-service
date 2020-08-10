@@ -167,6 +167,11 @@ public final class Util {
         getDbInfoObject(KEY_SPACE_NAME, "user_badge_assertion"));
     dbInfoMap.put(JsonKey.USER_CERT, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_CERT));
     dbInfoMap.put(JsonKey.USER_FEED_DB, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_FEED_DB));
+    dbInfoMap.put(
+        JsonKey.USR_DECLARATION_TABLE,
+        getDbInfoObject(KEY_SPACE_NAME, JsonKey.USR_DECLARATION_TABLE));
+    dbInfoMap.put(
+        JsonKey.TENANT_PREFERENCE_V2, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference_v2"));
   }
 
   /**
@@ -522,7 +527,7 @@ public final class Util {
           "Util:registerChannel: Channel registration request data = " + reqString,
           LoggerEnum.DEBUG.name());
       regStatus =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
               reqString,
@@ -580,7 +585,7 @@ public final class Util {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-        HttpClientUtil.patch(
+          HttpClientUtil.patch(
               (ekStepBaseUrl
                       + PropertiesCache.getInstance()
                           .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))

@@ -18,7 +18,9 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -113,7 +115,24 @@ public class UserProfileUpdateActor extends BaseActor {
     }
 
     if (CollectionUtils.isNotEmpty((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
-      futures.add(saveUserExternalIds(userMap));
+      List<Map<String, String>> externalIds =
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+      List<Map<String, String>> userExternalIds = new ArrayList<>();
+      List<Map<String, String>> userSelfDeclaredFields = new ArrayList<>();
+      for (Map<String, String> extIdMap : externalIds) {
+        if (extIdMap.get(JsonKey.ID_TYPE).equalsIgnoreCase(extIdMap.get(JsonKey.PROVIDER))) {
+          userExternalIds.add(extIdMap);
+        } else {
+          userSelfDeclaredFields.add(extIdMap);
+        }
+      }
+      userMap.remove(JsonKey.EXTERNAL_IDS);
+      if (CollectionUtils.isNotEmpty(userSelfDeclaredFields)) {
+        futures.add(saveUserSelfDeclareExternalIds(userMap, userSelfDeclaredFields));
+      }
+      if (CollectionUtils.isNotEmpty(userExternalIds)) {
+        futures.add(saveUserExternalIds(userMap, userExternalIds));
+      }
     }
 
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORGANISATION_ID))
@@ -122,6 +141,15 @@ public class UserProfileUpdateActor extends BaseActor {
     }
 
     return futures;
+  }
+
+  private Future<Object> saveUserSelfDeclareExternalIds(
+      Map<String, Object> userMap, List<Map<String, String>> externalIds) {
+    List<UserDeclareEntity> selfDeclaredFields =
+        UserUtil.transformExternalIdsToSelfDeclaredRequest(externalIds, userMap);
+    userMap.put(JsonKey.DECLARATIONS, selfDeclaredFields);
+    return saveUserAttributes(
+        userMap, UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
   }
 
   private Future<Object> saveAddress(Map<String, Object> userMap, String operationType) {
@@ -154,7 +182,9 @@ public class UserProfileUpdateActor extends BaseActor {
     return saveUserAttributes(userMap, actorOperation);
   }
 
-  private Future<Object> saveUserExternalIds(Map<String, Object> userMap) {
+  private Future<Object> saveUserExternalIds(
+      Map<String, Object> userMap, List<Map<String, String>> externalIds) {
+    userMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     return saveUserAttributes(
         userMap, UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
   }

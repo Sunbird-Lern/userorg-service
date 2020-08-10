@@ -634,6 +634,7 @@ public final class JsonKey {
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USR_EXT_ID_DB = "user_external_identity";
+  public static final String USER_DECLARATION_DB = "user_declarations";
   public static final String USR_ORG_DB = "user_org";
   public static final String VALUE = "value";
   public static final String VER = "ver";
@@ -1051,7 +1052,10 @@ public final class JsonKey {
   public static final String WITH_TOKENS = "withTokens";
   public static final String DECLARED_EMAIL = "declared-email";
   public static final String DECLARED_PHONE = "declared-phone";
-  public static final String CAPTCHA_SECRET = "captcha_secret";
+  public static final String GOOGLE_CAPTCHA_PRIVATE_KEY = "google_captcha_private_key";
+  public static final String GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY =
+      "google_captcha_mobile_private_key";
+  public static final String MOBILE_APP = "app";
   public static final String CAPTCHA_RESPONSE = "captchaResponse";
   public static final String ENABLE_CAPTCHA = "enable_captcha";
   public static final String DECLARED_STATE = "declared-state";
@@ -1069,6 +1073,11 @@ public final class JsonKey {
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
   public static final String PERSONA = "persona";
+  public static final String VALIDATED = "VALIDATED";
+  public static final String REJECTED = "REJECTED";
+  public static final String SELF_DECLARED_ERROR = "ERROR";
+  public static final String DIKSHA_UUID = "DIKSHA_UUID";
+  public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 
   private JsonKey() {}
 }
