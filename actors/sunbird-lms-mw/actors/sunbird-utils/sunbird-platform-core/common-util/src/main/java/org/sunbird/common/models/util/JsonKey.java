@@ -1059,6 +1059,7 @@ public final class JsonKey {
   public static final String PENDING = "PENDING";
   public static final String VALIDATED = "VALIDATED";
   public static final String REJECTED = "REJECTED";
+  public static final String SELF_DECLARED_ERROR = "ERROR";
   public static final String SELF_DECLARED_MANDATORY_FIELDS = "self_declared_mandatory_fields";
   public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";
   public static final String SELF_DECLARED_USER_OBJECT = "SELF_DECLARED_USER";
