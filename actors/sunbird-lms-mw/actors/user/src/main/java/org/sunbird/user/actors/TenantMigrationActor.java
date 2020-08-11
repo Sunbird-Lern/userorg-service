@@ -51,7 +51,7 @@ import scala.concurrent.Future;
  */
 @ActorConfig(
   tasks = {"userTenantMigrate", "migrateUser"},
-  asyncTasks = {}
+  asyncTasks = {"userSelfDeclaredTenantMigrate"}
 )
 public class TenantMigrationActor extends BaseActor {
 
@@ -85,11 +85,47 @@ public class TenantMigrationActor extends BaseActor {
       case "userTenantMigrate":
         migrateUser(request, true);
         break;
+      case "userSelfDeclaredTenantMigrate":
+        migrateSelfDeclaredUser(request);
+        break;
       case "migrateUser":
         processShadowUserMigrate(request);
         break;
       default:
         onReceiveUnsupportedOperation("TenantMigrationActor");
+    }
+  }
+
+  private void migrateSelfDeclaredUser(Request request) {
+    Response response = new Response();
+    ProjectLogger.log(
+        "TenantMigrationActor:migrateSelfDeclaredUser called.", LoggerEnum.INFO.name());
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    // update user declaration table status
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+    Map compositeKeyMap = new HashMap<String, Object>();
+    compositeKeyMap.put(JsonKey.USER_ID, userId);
+    Response existingRecord =
+        cassandraOperation.getRecordsByProperties(
+            usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), compositeKeyMap);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
+    if (responseList.isEmpty()) {
+      ProjectLogger.log(
+          "TenantMigrationActor:migrateSelfDeclaredUser record not found for user: " + userId,
+          LoggerEnum.INFO.name());
+      response.setResponseCode(ResponseCode.declaredUserValidatedStatusNotUpdated);
+      sender().tell(response, self());
+    } else {
+      migrateUser(request, true);
+      Map<String, Object> responseMap = responseList.get(0);
+      Map attrMap = new HashMap<String, Object>();
+      responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      attrMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      compositeKeyMap.put(JsonKey.ORG_ID, responseMap.get(JsonKey.ORG_ID));
+      compositeKeyMap.put(JsonKey.PERSONA, responseMap.get(JsonKey.PERSONA));
+      cassandraOperation.updateRecord(
+          usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), attrMap, compositeKeyMap);
     }
   }
 
@@ -138,21 +174,6 @@ public class TenantMigrationActor extends BaseActor {
         updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
     // Update user externalIds
     Response userExternalIdsResponse = updateUserExternalIds(request);
-    // update user declaration table status
-    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-    Response userDecResponse =
-        cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userUpdateDeclaredRequest(userId));
-    if (null == response
-        || null == (String) userDecResponse.get(JsonKey.RESPONSE)
-        || (null != (String) userDecResponse.get(JsonKey.RESPONSE)
-            && !((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS))) {
-      // throw exception for migration failed
-      ProjectLogger.log(
-          "TenantMigrationActor:migrateUser user declarations record not updated for user "
-              + userId,
-          LoggerEnum.INFO.name());
-    }
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
     if (MapUtils.isNotEmpty(userOrgResponse.getResult())
@@ -182,13 +203,6 @@ public class TenantMigrationActor extends BaseActor {
             (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, "migrate", null);
     TelemetryUtil.telemetryProcessingCall(
         reqMap, targetObject, correlatedObject, request.getContext());
-  }
-
-  private Map<String, Object> userUpdateDeclaredRequest(String userId) {
-    Map<String, Object> requestMap = new HashMap();
-    requestMap.put(JsonKey.USER_ID, userId);
-    requestMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
-    return requestMap;
   }
 
   private void notify(Map<String, Object> userDetail) {

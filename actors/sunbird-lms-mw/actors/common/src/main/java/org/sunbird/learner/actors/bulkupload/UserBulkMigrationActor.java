@@ -472,8 +472,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
                 String columnName = getColumnNameByIndex(mappedHeaders, i);
                 setFieldToDeclaredUserObject(selfDeclaredUser, columnName, trimValue(row[i]));
               }
-              // channel to be added here
-              selfDeclaredUser.setChannel(channel);
               declaredUserList.add(selfDeclaredUser);
             });
     return declaredUserList;

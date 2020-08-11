@@ -879,6 +879,9 @@ public enum ResponseCode {
   declaredUserErrorStatusNotUpdated(
       ResponseMessage.Key.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED,
       ResponseMessage.Message.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED),
+  declaredUserValidatedStatusNotUpdated(
+      ResponseMessage.Key.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED,
+      ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
   preferenceNotFound(
       ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
 
