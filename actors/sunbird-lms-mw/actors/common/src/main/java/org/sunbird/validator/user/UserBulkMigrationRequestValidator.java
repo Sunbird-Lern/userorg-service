@@ -2,8 +2,12 @@ package org.sunbird.validator.user;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.bean.MigrationUser;
+import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.bean.ShadowUserUpload;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
@@ -16,6 +20,8 @@ import org.sunbird.error.CsvRowErrorDetails;
 import org.sunbird.error.ErrorEnum;
 import org.sunbird.error.IErrorDispatcher;
 import org.sunbird.error.factory.ErrorDispatcherFactory;
+import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredErrorTypeEnum;
+import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredStatusEnum;
 
 /**
  * this class will validate the csv file for shadow db
@@ -45,6 +51,13 @@ public class UserBulkMigrationRequestValidator {
     checkCsvRows();
   }
 
+  public void validateDeclaredUsers() {
+    ProjectLogger.log(
+        "UserBulkMigrationRequestValidator:validate:start validating migration users",
+        LoggerEnum.INFO.name());
+    checkDeclaredCsvRows();
+  }
+
   private void checkCsvRows() {
     validateRowsCount();
     shadowUserMigration
@@ -61,14 +74,36 @@ public class UserBulkMigrationRequestValidator {
     }
   }
 
+  private void checkDeclaredCsvRows() {
+    validateRowsCount();
+    shadowUserMigration
+        .getUser()
+        .stream()
+        .forEach(
+            onCsvRow -> {
+              int index = shadowUserMigration.getUser().indexOf(onCsvRow);
+              validateSelfDeclaredUser(onCsvRow, index);
+            });
+    if (CollectionUtils.isNotEmpty(csvRowsErrors.getErrorsList())) {
+      IErrorDispatcher errorDispatcher = ErrorDispatcherFactory.getErrorDispatcher(csvRowsErrors);
+      errorDispatcher.dispatchError();
+    }
+  }
+
   private void validateRowsCount() {
     int ROW_BEGINNING_INDEX = 1;
-    if (shadowUserMigration.getValues().size() >= MAX_ROW_SUPPORTED) {
+    if ((shadowUserMigration.getValues() != null
+            && shadowUserMigration.getValues().size() >= MAX_ROW_SUPPORTED)
+        || (shadowUserMigration.getUser() != null
+            && shadowUserMigration.getUser().size() >= MAX_ROW_SUPPORTED)) {
       throw new ProjectCommonException(
           ResponseCode.csvRowsExceeds.getErrorCode(),
           ResponseCode.csvRowsExceeds.getErrorMessage().concat("supported:" + MAX_ROW_SUPPORTED),
           ResponseCode.CLIENT_ERROR.getResponseCode());
-    } else if (shadowUserMigration.getValues().size() < ROW_BEGINNING_INDEX) {
+    } else if ((shadowUserMigration.getValues() != null
+            && shadowUserMigration.getValues().size() < ROW_BEGINNING_INDEX)
+        || (shadowUserMigration.getUser() != null
+            && shadowUserMigration.getUser().size() < ROW_BEGINNING_INDEX)) {
       throw new ProjectCommonException(
           ResponseCode.noDataForConsumption.getErrorCode(),
           ResponseCode.noDataForConsumption.getErrorMessage(),
@@ -82,6 +117,34 @@ public class UserBulkMigrationRequestValidator {
     checkUserExternalId(migrationUser.getUserExternalId(), index);
     checkName(migrationUser.getName(), index);
     checkInputStatus(migrationUser.getInputStatus(), index);
+  }
+
+  private void validateSelfDeclaredUser(SelfDeclaredUser migrationUser, int index) {
+    checkUserExternalId(migrationUser.getUserExternalId(), index);
+    checkSelfDeclaredInputStatus(migrationUser.getInputStatus(), index);
+    if ((migrationUser.getInputStatus().equals(JsonKey.SELF_DECLARED_ERROR))) {
+      checkSelfDeclaredErrorTypeIfPresent(migrationUser.getErrorType(), index);
+    }
+    checkValue(migrationUser.getUserId(), index, JsonKey.DIKSHA_UUID);
+    checkValue(migrationUser.getChannel(), index, JsonKey.CHANNEL);
+  }
+
+  private void checkSelfDeclaredErrorTypeIfPresent(String errorType, int index) {
+    CsvRowErrorDetails errorDetails = new CsvRowErrorDetails();
+    errorDetails.setRowId(index);
+    if (StringUtils.isBlank(errorType)) {
+      errorDetails.setHeader("Error Type");
+      errorDetails.setErrorEnum(ErrorEnum.missing);
+      addErrorToList(errorDetails);
+
+    } else if (!Stream.of(SelfDeclaredErrorTypeEnum.values())
+        .map(Enum::name)
+        .collect(Collectors.toList())
+        .contains(errorType)) {
+      errorDetails.setHeader("Error Type");
+      errorDetails.setErrorEnum(ErrorEnum.invalid);
+      addErrorToList(errorDetails);
+    }
   }
 
   private void addErrorToList(CsvRowErrorDetails errorDetails) {
@@ -172,6 +235,24 @@ public class UserBulkMigrationRequestValidator {
     } else if (!(inputStatus.equalsIgnoreCase(JsonKey.ACTIVE)
         || inputStatus.equalsIgnoreCase(JsonKey.INACTIVE))) {
       errorDetails.setHeader(JsonKey.INPUT_STATUS);
+      errorDetails.setErrorEnum(ErrorEnum.invalid);
+      addErrorToList(errorDetails);
+    }
+  }
+
+  private void checkSelfDeclaredInputStatus(String inputStatus, int index) {
+    CsvRowErrorDetails errorDetails = new CsvRowErrorDetails();
+    errorDetails.setRowId(index);
+    if (StringUtils.isBlank(inputStatus)) {
+      errorDetails.setHeader(JsonKey.STATUS);
+      errorDetails.setErrorEnum(ErrorEnum.missing);
+      addErrorToList(errorDetails);
+
+    } else if (!Stream.of(SelfDeclaredStatusEnum.values())
+        .map(Enum::name)
+        .collect(Collectors.toList())
+        .contains(inputStatus)) {
+      errorDetails.setHeader(JsonKey.STATUS);
       errorDetails.setErrorEnum(ErrorEnum.invalid);
       addErrorToList(errorDetails);
     }
