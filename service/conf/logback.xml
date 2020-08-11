@@ -6,19 +6,18 @@
     <timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
     <!-- common transactions logs -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+          <level>INFO</level>
+        </filter>
         <encoder>
-            <pattern>%d %msg%n</pattern>
+          <pattern>[%date{ISO8601}] [%level] %logger{0}:%line [%X{sourceThread}] MDC: {%mdc} - %msg %n
+          </pattern>
         </encoder>
     </appender>
 
     <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="STDOUT" />
     </appender>
-
-
-    <logger name="play" level="INFO" />
-    <logger name="DefaultPlatformLogger" level="INFO" />
-    <!-- Telemetry Loggers-->
 
     <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT" />

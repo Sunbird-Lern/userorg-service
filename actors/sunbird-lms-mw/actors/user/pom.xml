@@ -26,7 +26,13 @@
 			<version>${learner.akka.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.30</version>
+        <scope>compile</scope>
+      </dependency>
+    </dependencies>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>

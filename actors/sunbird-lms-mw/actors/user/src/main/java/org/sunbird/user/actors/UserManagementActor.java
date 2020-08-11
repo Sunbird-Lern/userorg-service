@@ -54,6 +54,7 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.user.util.UpdatePassword;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
@@ -890,12 +891,23 @@ public class UserManagementActor extends BaseActor {
       saveUserToKafka(esResponse);
       sender().tell(response, self());
     } else {
+      logger.info("user signup log");
+      Map<String, Object> contextMap = logger.getMDC();
+      Map<String, String> reqContext = new HashMap<>();
+      contextMap
+          .entrySet()
+          .forEach(
+              entry -> {
+                reqContext.put(entry.getKey(), entry.getValue().toString());
+              });
+      reqContext.put("trace", "1");
       Future<Boolean> kcFuture =
           Futures.future(
               new Callable<Boolean>() {
-
                 @Override
                 public Boolean call() {
+                  // MDC.setContextMap(reqContext);
+                  logger.info("user signup log update user password");
                   try {
                     Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
                     updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
@@ -906,7 +918,10 @@ public class UserManagementActor extends BaseActor {
                             + " --"
                             + (String) userMap.get(JsonKey.ID),
                         LoggerEnum.INFO.name());
-                    return UserUtil.updatePassword(updatePasswordMap);
+                    UpdatePassword updatePassword = new UpdatePassword(reqContext);
+                    // UpdatePassword updatePassword2 =  new UpdatePassword(logger);
+                    // updatePassword2.updatePassword(updatePasswordMap);
+                    return updatePassword.updatePassword(updatePasswordMap);
                   } catch (Exception e) {
                     ProjectLogger.log(
                         "Error occured during update pasword : " + e.getMessage(),
@@ -924,6 +939,7 @@ public class UserManagementActor extends BaseActor {
 
                     @Override
                     public Response apply(Tuple2<String, Boolean> parameter) {
+                      logger.info("updating user password.");
                       boolean updatePassResponse = parameter._2;
                       ProjectLogger.log(
                           "UserManagementActor:processUserRequest: Response from update password call "
@@ -1225,7 +1241,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap) {
-
+    logger.info("user signup log saveUserToES");
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),

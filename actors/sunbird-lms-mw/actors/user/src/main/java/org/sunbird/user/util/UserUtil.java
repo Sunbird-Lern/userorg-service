@@ -14,6 +14,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -51,7 +54,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
 public class UserUtil {
-
+  private static Logger logger = LoggerFactory.getLogger(UserUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
@@ -456,6 +459,27 @@ public class UserUtil {
   }
 
   public static boolean updatePassword(Map<String, Object> userMap) {
+    logger.info("Update user password for userid : " + userMap.get(JsonKey.ID));
+    if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PASSWORD))) {
+      return ssoManager.updatePassword(
+          (String) userMap.get(JsonKey.ID), (String) userMap.get(JsonKey.PASSWORD));
+    }
+    return true;
+  }
+
+  public static boolean updatePassword(
+      Map<String, Object> userMap, Map<String, Object> contextMap) {
+    Logger logger2 = LoggerFactory.getLogger(UserUtil.class);
+    Map<String, String> context = new HashMap<>();
+    contextMap
+        .entrySet()
+        .forEach(
+            entry -> {
+              context.put(entry.getKey(), entry.getValue().toString());
+            });
+    MDC.setContextMap(context);
+    logger.info("from logger Update user password for userid : " + userMap.get(JsonKey.ID));
+    logger2.info("from logger2 Update user password for userid : " + userMap.get(JsonKey.ID));
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PASSWORD))) {
       return ssoManager.updatePassword(
           (String) userMap.get(JsonKey.ID), (String) userMap.get(JsonKey.PASSWORD));

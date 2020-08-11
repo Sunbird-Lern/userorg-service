@@ -3,7 +3,11 @@ package org.sunbird.actor.core;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.UntypedAbstractActor;
+import akka.event.DiagnosticLoggingAdapter;
+import akka.event.Logging;
 import akka.util.Timeout;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import org.sunbird.actor.router.BackgroundRequestRouter;
@@ -11,6 +15,7 @@ import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
@@ -18,6 +23,8 @@ import org.sunbird.common.responsecode.ResponseCode;
 import scala.concurrent.duration.Duration;
 
 public abstract class BaseActor extends UntypedAbstractActor {
+
+  protected final DiagnosticLoggingAdapter logger = Logging.getLogger(this);
 
   public abstract void onReceive(Request request) throws Throwable;
 
@@ -32,12 +39,18 @@ public abstract class BaseActor extends UntypedAbstractActor {
       ProjectLogger.log(
           "BaseActor: onReceive called for operation: " + operation, LoggerEnum.INFO.name());
       try {
+        Map<String, Object> mdc = new HashMap<>();
+        mdc.put(JsonKey.REQUEST_ID, System.currentTimeMillis());
+        mdc.put(JsonKey.OPERATION, request.getOperation());
+        logger.setMDC(mdc);
         onReceive(request);
       } catch (Exception e) {
         ProjectLogger.log(
             "BaseActor: FAILED onReceive called for operation: " + operation,
             LoggerEnum.INFO.name());
         onReceiveException(operation, e);
+      } finally {
+        logger.clearMDC();
       }
     }
   }
