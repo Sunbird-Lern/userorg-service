@@ -33,12 +33,12 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void processSelfDeclaredExternalId(Request request) {
+    Response response = new Response();
+    response.setResponseCode(ResponseCode.OK);
     Map requestMap = request.getRequest();
     String processId = (String) requestMap.get(JsonKey.PROCESS_ID);
     Map<String, Object> row = UserUploadUtil.getFullRecordFromProcessId(processId);
     BulkMigrationUser bulkMigrationUser = UserUploadUtil.convertRowToObject(row);
-    UserUploadUtil.updateStatusInUserBulkTable(
-        bulkMigrationUser.getId(), ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());
     List<SelfDeclaredUser> userList = UserUploadUtil.getMigrationUserAsList(bulkMigrationUser);
     userList
         .parallelStream()
@@ -47,24 +47,32 @@ public class DeclaredExternalIdActor extends BaseActor {
               // add entry in usr_external_id
               // modify status to validated to user_declarations
               // call to migrate api
-              switch (migrateUser.getInputStatus()) {
-                case JsonKey.VALIDATED:
-                  migrateDeclaredUser(request, migrateUser);
-                  break;
-                case JsonKey.REJECTED:
-                  rejectDeclaredDetail(request, migrateUser);
-                  break;
-                case JsonKey.SELF_DECLARED_ERROR:
-                  updateErrorDetail(request, migrateUser);
-                  break;
-                default:
+              if (migrateUser.getPersona().equalsIgnoreCase(JsonKey.TEACHER)) {
+                switch (migrateUser.getInputStatus()) {
+                  case JsonKey.VALIDATED:
+                    migrateDeclaredUser(request, migrateUser);
+                    break;
+                  case JsonKey.REJECTED:
+                    rejectDeclaredDetail(request, migrateUser);
+                    break;
+                  case JsonKey.SELF_DECLARED_ERROR:
+                    updateErrorDetail(request, migrateUser);
+                    break;
+                  default:
+                }
               }
             });
+    UserUploadUtil.updateStatusInUserBulkTable(
+        bulkMigrationUser.getId(), ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
+    ProjectLogger.log(
+        "DeclaredExternalIdActor:processSelfDeclaredExternalId: processing the DeclaredUser of processId: "
+            + bulkMigrationUser.getId()
+            + "is completed",
+        LoggerEnum.INFO.name());
+    sender().tell(response, self());
   }
 
   private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {
-    Response response = new Response();
-    response.setResponseCode(ResponseCode.OK);
     try {
       request.setOperation("updateUserSelfDeclarationsErrorType");
       Map<String, Object> requestMap = new HashMap();
@@ -83,12 +91,9 @@ public class DeclaredExternalIdActor extends BaseActor {
           declaredUser.getUserId(),
           LoggerEnum.ERROR.name());
     }
-    sender().tell(response, self());
   }
 
   private void rejectDeclaredDetail(Request request, SelfDeclaredUser declaredUser) {
-    Response response = new Response();
-    response.setResponseCode(ResponseCode.OK);
     try {
       request.setOperation("upsertUserSelfDeclarations");
       Map<String, Object> requestMap = new HashMap();
@@ -106,12 +111,9 @@ public class DeclaredExternalIdActor extends BaseActor {
           declaredUser.getUserId(),
           LoggerEnum.ERROR.name());
     }
-    sender().tell(response, self());
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
-    Response response = new Response();
-    response.setResponseCode(ResponseCode.OK);
     request.setOperation(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue());
     ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
@@ -133,6 +135,5 @@ public class DeclaredExternalIdActor extends BaseActor {
           declaredUser.getUserId(),
           LoggerEnum.ERROR.name());
     }
-    sender().tell(response, self());
   }
 }

@@ -538,11 +538,20 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     if (columnAttribute.equalsIgnoreCase("schoolUdiseId")) {
       migrationUser.setSchoolId((String) value);
     }
-    if (columnAttribute.equalsIgnoreCase("userId")) {
+    if (columnAttribute.equalsIgnoreCase(JsonKey.USER_ID)) {
       migrationUser.setUserId((String) value);
     }
     if (columnAttribute.equalsIgnoreCase("subOrgId")) {
       migrationUser.setSubOrgId((String) value);
+    }
+    if (columnAttribute.equalsIgnoreCase(JsonKey.PERSONA)) {
+      migrationUser.setPersona((String) value);
+    }
+    if (columnAttribute.equalsIgnoreCase(JsonKey.ERROR_TYPE)) {
+      migrationUser.setErrorType((String) value);
+    }
+    if (columnAttribute.equalsIgnoreCase(JsonKey.ORG_ID)) {
+      migrationUser.setOrgId((String) value);
     }
   }
 
