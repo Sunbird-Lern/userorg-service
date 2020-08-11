@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.bean.MigrationUser;
+import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.bean.ShadowUserUpload;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -251,6 +252,110 @@ public class UserBulkMigrationRequestValidatorTest {
     } catch (Exception e) {
       System.out.println(e.getMessage());
       Assert.assertEquals("[ In Row 1:the Column name:is invalid ]", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testRowsCountFailureWithEmptyCSVFileForDeclaredUsers() {
+    List<MigrationUser> declaredUserList = new ArrayList<>();
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("1024")
+          .setValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals(ResponseCode.noDataForConsumption.getErrorMessage(), e.getMessage());
+    }
+  }
+
+  @Test
+  public void testRowsCountFailureWithMoreCsvRowsSupportedForDeclaredUsers() {
+    List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    for (int i = 0; i < MAX_ROW_SUPPORTED + 1; i++) {
+      SelfDeclaredUser declaredUser = new SelfDeclaredUser();
+      declaredUser.setChannel("TN");
+      declaredUserList.add(declaredUser);
+    }
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("2024")
+          .setUserValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals(
+          ResponseCode.csvRowsExceeds.getErrorMessage().concat("supported:" + MAX_ROW_SUPPORTED),
+          e.getMessage());
+    }
+  }
+
+  @Test
+  public void testMigrationWithBlankStatusDikshaUUIDForDeclaredUsers() {
+    List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    SelfDeclaredUser declaredUser = new SelfDeclaredUser();
+    declaredUser.setChannel("TN");
+    declaredUser.setPhone("9876543210");
+    declaredUser.setInputStatus(JsonKey.ACTIVE);
+    declaredUser.setOrgExternalId("org ext id");
+    declaredUser.setUserExternalId("user ext id");
+    declaredUserList.add(declaredUser);
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("1024")
+          .setUserValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals(
+          "[ In Row 1:the Column status:is invalid, In Row 1:the Column Diksha UUID:is missing ]",
+          e.getMessage());
+    }
+  }
+
+  @Test
+  public void testMigrationWithInValidStatusDikshaUUIDForDeclaredUsers() {
+    List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    SelfDeclaredUser declaredUser = new SelfDeclaredUser();
+    declaredUser.setChannel("TN");
+    declaredUser.setPhone("9876543210");
+    declaredUser.setInputStatus(JsonKey.ACTIVE);
+    declaredUser.setOrgExternalId("org ext id");
+    declaredUser.setUserExternalId("user ext id");
+    declaredUser.setInputStatus("INVALIDATED");
+    declaredUser.setUserId("user ext id");
+    declaredUserList.add(declaredUser);
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("1024")
+          .setUserValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals("[ In Row 1:the Column status:is invalid ]", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testMigrationWithInValidErrorTypeForDeclaredUsers() {
+    List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    SelfDeclaredUser declaredUser = new SelfDeclaredUser();
+    declaredUser.setChannel("TN");
+    declaredUser.setPhone("9876543210");
+    declaredUser.setInputStatus(JsonKey.SELF_DECLARED_ERROR);
+    declaredUser.setOrgExternalId("org ext id");
+    declaredUser.setUserId("user ext id");
+    declaredUser.setErrorType("INVALIDATED");
+    declaredUser.setUserExternalId("user ext id");
+    declaredUserList.add(declaredUser);
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("1024")
+          .setUserValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals("[ In Row 1:the Column Error Type:is invalid ]", e.getMessage());
     }
   }
 }

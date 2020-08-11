@@ -21,7 +21,7 @@ import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
   tasks = {"upsertUserSelfDeclarations"},
-  asyncTasks = {"upsertUserSelfDeclarations"}
+  asyncTasks = {"upsertUserSelfDeclarations", "updateUserSelfDeclarationsErrorType"}
 )
 public class UserSelfDeclarationManagementActor extends BaseActor {
 

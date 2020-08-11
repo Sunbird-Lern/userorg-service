@@ -107,9 +107,9 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
     when(decryptionService.decryptData(Mockito.anyString()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
-        testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
+        testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
 
@@ -120,9 +120,9 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
     when(decryptionService.decryptData(Mockito.anyString()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
-        testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
+        testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
 
@@ -133,9 +133,9 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
     when(decryptionService.decryptData(Mockito.anyString()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
-        testScenario(createRequest(BulkUploadActorOperation.USER_BULK_MIGRATION), null);
+        testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
 
