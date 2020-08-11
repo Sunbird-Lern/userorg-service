@@ -167,6 +167,11 @@ public final class Util {
         getDbInfoObject(KEY_SPACE_NAME, "user_badge_assertion"));
     dbInfoMap.put(JsonKey.USER_CERT, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_CERT));
     dbInfoMap.put(JsonKey.USER_FEED_DB, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_FEED_DB));
+    dbInfoMap.put(
+        JsonKey.USR_DECLARATION_TABLE,
+        getDbInfoObject(KEY_SPACE_NAME, JsonKey.USR_DECLARATION_TABLE));
+    dbInfoMap.put(
+        JsonKey.TENANT_PREFERENCE_V2, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference_v2"));
   }
 
   /**

@@ -3,6 +3,7 @@ package org.sunbird.common.request;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -12,6 +13,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.responsecode.ResponseMessage;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -38,6 +40,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateWebPages(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
+    transliterateUserName(userRequest);
   }
 
   public static boolean isGoodPassword(String password) {
@@ -76,6 +79,14 @@ public class UserRequestValidator extends BaseRequestValidator {
         (String) userRequest.getRequest().get(JsonKey.USERNAME),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USERNAME);
+  }
+
+  private void transliterateUserName(Request userRequest) {
+    String userName = (String) userRequest.getRequest().get(JsonKey.USERNAME);
+    if (StringUtils.isNotEmpty(userName)) {
+      String translatedUserName = Junidecode.unidecode(userName);
+      userRequest.getRequest().put(JsonKey.USERNAME, translatedUserName);
+    }
   }
 
   public void validateUserCreateV3(Request userRequest) {
@@ -1115,6 +1126,41 @@ public class UserRequestValidator extends BaseRequestValidator {
   public void validateUserId(String uuid) {
     if (StringUtils.isNotEmpty(uuid) && !ProjectUtil.validateUUID(uuid)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestParameter);
+    }
+  }
+
+  public void validateUserDeclarationRequest(Request userDeclareRequest) {
+    try {
+      List<Map<String, Object>> declarations =
+          (List<Map<String, Object>>) userDeclareRequest.getRequest().get(JsonKey.DECLARATIONS);
+      if (CollectionUtils.isEmpty(declarations)) {
+        throw new ProjectCommonException(
+            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            MessageFormat.format(
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.DECLARATIONS),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      } else {
+        for (Map<String, Object> declareFields : declarations) {
+          String userId = (String) declareFields.get(JsonKey.USER_ID);
+          String orgId = (String) declareFields.get(JsonKey.ORG_ID);
+          String persona = (String) declareFields.get(JsonKey.PERSONA);
+          if (StringUtils.isBlank(userId)
+              || StringUtils.isBlank(orgId)
+              || StringUtils.isBlank(persona)) {
+            throw new ProjectCommonException(
+                ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                MessageFormat.format(
+                    ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
+                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+        }
+      }
+    } catch (Exception ex) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ex.getMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }

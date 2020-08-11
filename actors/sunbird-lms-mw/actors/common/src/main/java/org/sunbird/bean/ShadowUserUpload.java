@@ -91,6 +91,7 @@ public class ShadowUserUpload {
     private List<String> supportedFields;
     private String processId;
     private List<MigrationUser> values;
+    private List<SelfDeclaredUser> user;
     private List<String> mappedHeaders;
 
     public ShadowUserUploadBuilder() {}
@@ -129,6 +130,11 @@ public class ShadowUserUpload {
 
     public ShadowUserUploadBuilder setValues(List<MigrationUser> values) {
       this.values = values;
+      return this;
+    }
+
+    public ShadowUserUploadBuilder setUserValues(List<SelfDeclaredUser> values) {
+      this.user = values;
       return this;
     }
 

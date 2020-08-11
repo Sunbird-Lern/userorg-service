@@ -2,6 +2,8 @@ package controllers.usermanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,21 +15,28 @@ import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.models.user.UserDeclareEntity;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.CaptchaHelper;
 
-@PrepareForTest(OnRequestHandler.class)
+@PrepareForTest({
+  OnRequestHandler.class,
+  CaptchaHelper.class,
+  ProjectUtil.class,
+  HttpClientUtil.class
+})
 public class UserControllerTest extends BaseApplicationTest {
 
   private static String userId = "someUserId";
@@ -82,7 +91,6 @@ public class UserControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateUserV3SyncSuccess() {
-
     Result result =
         performTest(
             "/v3/user/create",
@@ -207,6 +215,14 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testGetUserDetailsV3SuccessByUserId() {
+    Result result =
+        performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testGetUserDetailsSuccessByLoginId() {
     Result result = performTest("/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
@@ -273,6 +289,28 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testUserExistsWithInValidPhone() {
     Result result = performTest(USER_EXISTS_API.concat("phone/98765432103"), "GET", null);
     assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testUpdateUserDeclarations() {
+    Result result =
+        performTest("/v1/user/declarations", "PATCH", (Map) createUpdateUserDeclrationRequests());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  private Map createUpdateUserDeclrationRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_PHONE, "abc@tenant.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
+    UserDeclareEntity userDeclareEntity =
+        new UserDeclareEntity("userid", "orgid", "teacher", userInfo);
+    List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
+    userDeclareEntityList.add(userDeclareEntity);
+    innerMap.put(JsonKey.DECLARATIONS, userDeclareEntityList);
+    request.put(JsonKey.REQUEST, innerMap);
+    return request;
   }
 
   private Map updateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
@@ -431,9 +469,19 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUserExists2() {
+  public void testCaptchaUserExists2() throws Exception {
+    CaptchaHelper captchaHelper = mock(CaptchaHelper.class);
+    when(captchaHelper.validate(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+    PowerMockito.mockStatic(HttpClientUtil.class);
+    PowerMockito.mockStatic(ProjectUtil.class);
+    Map map = new HashMap<String, String>();
+    map.put("success", true);
+    ObjectMapper objectMapper = new ObjectMapper();
+    String s = objectMapper.writeValueAsString(map);
+    when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
+    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+        .thenReturn(s);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 }

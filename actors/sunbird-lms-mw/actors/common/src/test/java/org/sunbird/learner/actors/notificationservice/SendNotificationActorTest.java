@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.velocity.VelocityContext;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -46,7 +48,8 @@ import org.sunbird.learner.util.Util;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
   SunbirdMWService.class,
-  HttpClientUtil.class
+  HttpClientUtil.class,
+  ProjectUtil.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class SendNotificationActorTest {
@@ -62,6 +65,7 @@ public class SendNotificationActorTest {
   public static void setUp() {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
@@ -74,6 +78,7 @@ public class SendNotificationActorTest {
   public void beforeTest() {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
@@ -115,12 +120,15 @@ public class SendNotificationActorTest {
 
   @Test
   public void testSendEmailSuccess() {
-
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
-
+    VelocityContext context = PowerMockito.mock(VelocityContext.class);
+    when(ProjectUtil.getContext(Mockito.anyMap())).thenReturn(context);
+    Object[] arr = new Object[1];
+    arr[0] = "name";
+    when(context.getKeys()).thenReturn(arr);
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<String, Object>();
     List<String> userIdList = new ArrayList<>();

@@ -39,6 +39,7 @@ import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
 public class UserServiceImpl implements UserService {
@@ -107,7 +108,7 @@ public class UserServiceImpl implements UserService {
       // TODO: Unify and rely on one header for the context user identification
       ctxtUserId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
     } else {
-      userId = userExtIdentityDao.getUserId(request);
+      userId = UserUtil.getUserId(request.getRequest());
     }
     ProjectLogger.log(
         "validateUserId :: ctxtUserId : "

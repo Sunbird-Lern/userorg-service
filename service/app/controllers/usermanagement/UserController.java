@@ -4,8 +4,6 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
-import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -13,10 +11,8 @@ import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
-import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Result;
-import util.CaptchaHelper;
 
 public class UserController extends BaseController {
 
@@ -142,6 +138,13 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV3(
+        ActorOperations.GET_USER_PROFILE_V3.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
@@ -225,6 +228,29 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  private CompletionStage<Result> handleGetUserProfileV3(
+      String operation, String userId, Http.Request httpRequest) {
+    final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    final String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+    userId = ProjectUtil.getLmsUserId(userId);
+    return handleRequest(
+        operation,
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          request.getContext().put(JsonKey.PRIVATE, isPrivate);
+          request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          return null;
+        },
+        userId,
+        JsonKey.USER_ID,
+        false,
+        httpRequest);
+  }
+
   public CompletionStage<Result> isUserValid(String key, String value, Http.Request httpRequest) {
     HashMap<String, Object> map = new HashMap<>();
     map.put(JsonKey.KEY, key);
@@ -269,16 +295,6 @@ public class UserController extends BaseController {
   public CompletionStage<Result> userExists(
       String searchKey, String searchValue, Http.Request httpRequest) {
     HashMap<String, Object> map = new HashMap<>();
-    String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
-    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
-        && StringUtils.isNotEmpty(captcha)) {
-      if (!CaptchaHelper.validate(captcha)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidCaptcha.getErrorCode(),
-            ResponseCode.invalidCaptcha.getErrorMessage(),
-            ResponseCode.IM_A_TEAPOT.getResponseCode());
-      }
-    }
     map.put(JsonKey.KEY, searchKey);
     map.put(JsonKey.VALUE, searchValue);
     return handleRequest(
@@ -287,12 +303,29 @@ public class UserController extends BaseController {
         req -> {
           Request request = (Request) req;
           request.setRequest(map);
-          new UserGetRequestValidator().validateGetUserByKeyRequest(request);
+          new UserGetRequestValidator()
+              .validateGetUserByKeyRequestaWithCaptcha(request, httpRequest);
           return null;
         },
         null,
         null,
         false,
+        httpRequest);
+  }
+
+  public CompletionStage<Result> updateUserDeclarations(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_DECLARATIONS.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateUserDeclarationRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
         httpRequest);
   }
 }
