@@ -47,7 +47,7 @@ public class DeclaredExternalIdActor extends BaseActor {
               // add entry in usr_external_id
               // modify status to validated to user_declarations
               // call to migrate api
-              if (migrateUser.getPersona().equalsIgnoreCase(JsonKey.TEACHER)) {
+              if (migrateUser.getPersona().equals(JsonKey.TEACHER.toLowerCase())) {
                 switch (migrateUser.getInputStatus()) {
                   case JsonKey.VALIDATED:
                     migrateDeclaredUser(request, migrateUser);
