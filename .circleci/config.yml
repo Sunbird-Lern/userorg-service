@@ -15,7 +15,7 @@ jobs:
           paths: ~/.m2
       - run:
          name: Analyze on SonarCloud
-         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/models/**,**/bean/*,**/CassandraOperationImpl -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/service/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/user/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/common/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/sunbird-utils/target/site/jacoco/jacoco.xml
+         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/models/**,**/bean/* -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/service/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/user/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/sunbird-utils/target/site/jacoco/jacoco.xml,/home/circleci/project/actors/sunbird-lms-mw/actors/common/target/site/jacoco/jacoco.xml
 
 
 workflows:
