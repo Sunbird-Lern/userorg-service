@@ -13,7 +13,7 @@ import org.sunbird.user.dao.UserOrgDao;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 
-  private static final String TABLE_NAME = "user_org";
+  private static final String TABLE_NAME = JsonKey.USER_ORG;
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private ObjectMapper mapper = new ObjectMapper();

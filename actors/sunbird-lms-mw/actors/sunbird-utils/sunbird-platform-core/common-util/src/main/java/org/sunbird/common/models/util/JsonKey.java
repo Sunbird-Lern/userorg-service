@@ -627,7 +627,7 @@ public final class JsonKey {
   public static final String USER_NAME = "username";
   public static final String USER_NOT_FOUND = "user does not exist with this login Id.";
   public static final String USER_NOTES_DB = "userNotes_db";
-  public static final String USER_ORG = "user_org";
+  public static final String USER_ORG = "user_organisation";
   public static final String USER_ORG_DB = "user_org_db";
   public static final String USER_RELATIONS = "user_relations";
   public static final String USER_SKILL_DB = "userSkillDb";
@@ -635,7 +635,6 @@ public final class JsonKey {
   public static final String USERNAME = "userName";
   public static final String USR_EXT_ID_DB = "user_external_identity";
   public static final String USER_DECLARATION_DB = "user_declarations";
-  public static final String USR_ORG_DB = "user_org";
   public static final String VALUE = "value";
   public static final String VER = "ver";
   public static final String VERSION = "version";
