@@ -285,7 +285,7 @@ public class UserSelfDeclarationManagementActorTest {
     userDeclareEntity.setPersona("teacher");
     userDeclareEntity.setUserId("someUserID");
     if (errorStatus) {
-      userDeclareEntity.setStatus(JsonKey.ERROR);
+      userDeclareEntity.setStatus(JsonKey.SELF_DECLARED_ERROR);
     } else {
       userDeclareEntity.setStatus(JsonKey.VALIDATED);
     }

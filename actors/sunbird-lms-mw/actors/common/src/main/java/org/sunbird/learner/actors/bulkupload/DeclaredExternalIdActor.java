@@ -83,6 +83,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       userDeclareEntity.setErrorType(declaredUser.getErrorType());
       userDeclareEntity.setStatus(declaredUser.getInputStatus());
       requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+      request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
       ProjectLogger.log(
@@ -102,7 +103,10 @@ public class DeclaredExternalIdActor extends BaseActor {
       userDeclareEntity.setPersona(declaredUser.getPersona());
       userDeclareEntity.setUserId(declaredUser.getUserId());
       userDeclareEntity.setOperation(JsonKey.REMOVE);
-      requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+      List userDeclareEntityLst = new ArrayList<UserDeclareEntity>();
+      userDeclareEntityLst.add(userDeclareEntity);
+      requestMap.put(JsonKey.DECLARATIONS, userDeclareEntityLst);
+      request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
       ProjectLogger.log(
@@ -114,7 +118,7 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
-    request.setOperation(BulkUploadActorOperation.USER_BULK_MIGRATION.getValue());
+    request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
     ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
       Map<String, Object> requestMap = new HashMap();
@@ -127,6 +131,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       externalIdMap.put(JsonKey.PROVIDER, declaredUser.getChannel());
       externalIdLst.add(externalIdMap);
       requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
+      request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
       ProjectLogger.log(
