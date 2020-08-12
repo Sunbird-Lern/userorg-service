@@ -124,6 +124,7 @@ public enum ActorOperations {
   CREATE_TENANT_PREFERENCE("createTanentPreference"),
   UPDATE_TENANT_PREFERENCE("updateTenantPreference"),
   GET_TENANT_PREFERENCE("getTenantPreference"),
+  DELETE_TENANT_PREFERENCE("deleteTenantPreference"),
   REGISTER_CLIENT("registerClient"),
   UPDATE_CLIENT_KEY("updateClientKey"),
   GET_CLIENT_KEY("getClientKey"),

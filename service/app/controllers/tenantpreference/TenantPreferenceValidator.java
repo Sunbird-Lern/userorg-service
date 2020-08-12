@@ -36,6 +36,7 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
         request.getRequest(), Lists.newArrayList(JsonKey.DATA), Map.class, false, JsonKey.REQUEST);
   }
 
+  // validates both get and delete preference request
   public void validateGetPreferenceRequest(Request request) {
     validateMandatoryParamsWithType(
         request.getRequest(),

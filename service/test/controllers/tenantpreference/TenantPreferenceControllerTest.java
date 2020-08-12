@@ -107,6 +107,32 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testDeleteTenantPreferenceSuccess() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "teacher");
+    innerMap.put(JsonKey.ORG_ID, "organisationId");
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.FIELDS, new ArrayList<>());
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v1/org/preferences/delete", "DELETE", requestMap);
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testDeleteTenantPreferenceFailure() {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "teacher");
+    innerMap.put(JsonKey.ORG_ID, "");
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.FIELDS, new ArrayList<>());
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    Result result = performTest("/v1/org/preferences/delete", "DELETE", requestMap);
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+  }
+
+  @Test
   public void testReadPreferenceWithoutMandatoryParamOrgId() {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
