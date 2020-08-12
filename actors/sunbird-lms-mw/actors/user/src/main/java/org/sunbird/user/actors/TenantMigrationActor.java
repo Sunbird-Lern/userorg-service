@@ -97,7 +97,7 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void migrateSelfDeclaredUser(Request request) {
-    Response response = new Response();
+    Response response = null;
     ProjectLogger.log(
         "TenantMigrationActor:migrateSelfDeclaredUser called.", LoggerEnum.INFO.name());
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -110,22 +110,26 @@ public class TenantMigrationActor extends BaseActor {
             usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), compositeKeyMap);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
-    if (responseList.isEmpty()) {
+    if (CollectionUtils.isEmpty(responseList)) {
       ProjectLogger.log(
           "TenantMigrationActor:migrateSelfDeclaredUser record not found for user: " + userId,
           LoggerEnum.INFO.name());
-      response.setResponseCode(ResponseCode.declaredUserValidatedStatusNotUpdated);
-      sender().tell(response, self());
+      ProjectCommonException.throwServerErrorException(
+          ResponseCode.declaredUserValidatedStatusNotUpdated);
     } else {
-      migrateUser(request, true);
       Map<String, Object> responseMap = responseList.get(0);
       Map attrMap = new HashMap<String, Object>();
       responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
       attrMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
       compositeKeyMap.put(JsonKey.ORG_ID, responseMap.get(JsonKey.ORG_ID));
       compositeKeyMap.put(JsonKey.PERSONA, responseMap.get(JsonKey.PERSONA));
-      cassandraOperation.updateRecord(
-          usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), attrMap, compositeKeyMap);
+      response =
+          cassandraOperation.updateRecord(
+              usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), attrMap, compositeKeyMap);
+      if (response.get(JsonKey.RESPONSE).equals(JsonKey.SUCCESS)) {
+        migrateUser(request, true);
+      }
+      sender().tell(response, self());
     }
   }
 

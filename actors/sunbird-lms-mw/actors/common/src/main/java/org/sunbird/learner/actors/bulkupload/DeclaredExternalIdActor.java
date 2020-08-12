@@ -118,7 +118,7 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
-    request.setOperation("userSelfDeclaredTenantMigrate");
+    request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
     ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
       Map<String, Object> requestMap = new HashMap();
