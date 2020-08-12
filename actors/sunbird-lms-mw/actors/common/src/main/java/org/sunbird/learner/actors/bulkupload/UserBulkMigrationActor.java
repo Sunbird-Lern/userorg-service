@@ -98,7 +98,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
       fieldsMap.put("mandatoryFields", Arrays.asList(mandatoryFields.split(",")));
       fieldsMap.put("optionalFields", Arrays.asList(optionalFields.split(",")));
       List<SelfDeclaredUser> selfDeclaredUserList =
-          getUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
+          getUsers(processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
       ProjectLogger.log(
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(selfDeclaredUserList.size() + "")
@@ -284,7 +284,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> getUsers(
-      String channel, String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
+      String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
     List<String[]> csvData = readCsv(fileData);
     List<String> csvHeaders = getCsvHeadersAsList(csvData);
     List<String> mandatoryHeaders = columnsMap.get(JsonKey.MANDATORY_FIELDS);
@@ -294,7 +294,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
     List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders);
     List<SelfDeclaredUser> selfDeclaredUserList =
-        parseSelfDeclaredCsvRows(channel, getCsvRowsAsList(csvData), mappedCsvHeaders);
+        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
     ShadowUserUpload migration =
         new ShadowUserUpload.ShadowUserUploadBuilder()
             .setHeaders(csvHeaders)
@@ -453,7 +453,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> parseSelfDeclaredCsvRows(
-      String channel, List<String[]> values, List<String> mappedHeaders) {
+      List<String[]> values, List<String> mappedHeaders) {
     List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
     values
         .stream()
@@ -472,8 +472,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
                 String columnName = getColumnNameByIndex(mappedHeaders, i);
                 setFieldToDeclaredUserObject(selfDeclaredUser, columnName, trimValue(row[i]));
               }
-              // channel to be added here
-              selfDeclaredUser.setChannel(channel);
               declaredUserList.add(selfDeclaredUser);
             });
     return declaredUserList;

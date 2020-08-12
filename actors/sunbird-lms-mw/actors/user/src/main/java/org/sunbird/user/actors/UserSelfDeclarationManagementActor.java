@@ -263,14 +263,14 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     Map<String, Object> requestMap = request.getRequest();
     UserDeclareEntity userDeclareEntity = (UserDeclareEntity) requestMap.get(JsonKey.DECLARATIONS);
-    if (JsonKey.ERROR.equals(userDeclareEntity.getStatus())
+    if (JsonKey.SELF_DECLARED_ERROR.equals(userDeclareEntity.getStatus())
         && StringUtils.isNotEmpty(userDeclareEntity.getErrorType())) {
       Map<String, Object> compositePropertiesMap = new HashMap<>();
       Map<String, Object> propertieMap = new HashMap<>();
       compositePropertiesMap.put(JsonKey.USER_ID, userDeclareEntity.getUserId());
       compositePropertiesMap.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
       compositePropertiesMap.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
-      propertieMap.put(JsonKey.ERROR, userDeclareEntity.getErrorType());
+      propertieMap.put(JsonKey.ERROR_TYPE, userDeclareEntity.getErrorType());
       propertieMap.put(JsonKey.STATUS, userDeclareEntity.getStatus());
       cassandraOperation.updateRecord(
           JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, propertieMap, compositePropertiesMap);
