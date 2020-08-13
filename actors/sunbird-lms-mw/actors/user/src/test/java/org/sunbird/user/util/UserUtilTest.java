@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -56,7 +55,6 @@ public class UserUtilTest {
   private static ElasticSearchService esService;
   private static EncryptionService encryptionService;
 
-  @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
     encryptionService = PowerMockito.mock(EncryptionService.class);
@@ -92,12 +90,14 @@ public class UserUtilTest {
 
   @Test
   public void generateUniqueStringSuccess() {
+    beforeEachTest();
     String val = UserUtil.generateUniqueString(4);
     assertTrue(val.length() == 4);
   }
 
   @Test
   public void generateUniqueStringSecondCharCheck() {
+    beforeEachTest();
     String val = UserUtil.generateUniqueString(5);
     assertTrue(val.length() == 5);
     assertTrue(
@@ -105,7 +105,28 @@ public class UserUtilTest {
   }
 
   @Test
-  public void checkPhoneUniquenessExist() {
+  public void checkPhoneUniquenessExist() throws Exception {
+    beforeEachTest();
+    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    encryptionService = PowerMockito.mock(EncryptionService.class);
+    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+            .getEncryptionServiceInstance(null))
+        .thenReturn(encryptionService);
+    Map<String, String> settingMap = new HashMap<String, String>();
+    settingMap.put(JsonKey.PHONE_UNIQUE, "True");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+
+    when(encryptionService.encryptData(Mockito.anyString())).thenReturn("9663890400");
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, false);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperationImpl.getRecordsByIndexedProperty(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(response1);
     User user = new User();
     user.setPhone("9663890400");
     boolean response = false;
@@ -120,6 +141,7 @@ public class UserUtilTest {
 
   @Test
   public void checkPhoneExist() {
+    beforeEachTest();
     boolean response = false;
     try {
       UserUtil.checkPhoneUniqueness("9663890400");
@@ -132,6 +154,7 @@ public class UserUtilTest {
 
   @Test
   public void checkEmailExist() {
+    beforeEachTest();
     boolean response = false;
     try {
       UserUtil.checkEmailUniqueness("test@test.com");
@@ -144,6 +167,7 @@ public class UserUtilTest {
 
   @Test
   public void copyAndConvertExternalIdsToLower() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<Map<String, String>>();
     Map<String, String> userExternalIdMap = new HashMap<String, String>();
     userExternalIdMap.put(JsonKey.ID, "test123");
@@ -158,6 +182,7 @@ public class UserUtilTest {
 
   @Test
   public void setUserDefaultValueForV3() {
+    beforeEachTest();
     Map<String, Object> userMap = new HashMap<String, Object>();
     userMap.put(JsonKey.FIRST_NAME, "Test User");
     UserUtil.setUserDefaultValueForV3(userMap);
@@ -168,7 +193,7 @@ public class UserUtilTest {
 
   @Test
   public void testValidateManagedUserLimit() {
-
+    beforeEachTest();
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
     List managedUserList = new ArrayList<User>();
@@ -186,6 +211,7 @@ public class UserUtilTest {
 
   @Test
   public void testTransformExternalIdsToSelfDeclaredRequest() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = getExternalIds();
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.USER_ID, "user1");
@@ -197,6 +223,7 @@ public class UserUtilTest {
 
   @Test
   public void testfetchOrgIdByProvider() {
+    beforeEachTest();
     List<String> providers = new ArrayList<>();
     providers.add("channel004");
 
@@ -222,6 +249,7 @@ public class UserUtilTest {
 
   @Test
   public void testEncryptDeclareFields() throws Exception {
+    beforeEachTest();
     List<Map<String, Object>> declarations = new ArrayList<>();
     Map<String, Object> declareFieldMap = new HashMap<>();
     Map<String, Object> userInfo = new HashMap<>();
@@ -238,6 +266,7 @@ public class UserUtilTest {
   }
 
   private List<Map<String, String>> getExternalIds() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<>();
     Map<String, String> extId1 = new HashMap<>();
     extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
@@ -258,6 +287,7 @@ public class UserUtilTest {
 
   @Test
   public void testgetUserOrgDetails() {
+    beforeEachTest();
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -277,6 +307,7 @@ public class UserUtilTest {
 
   @Test
   public void testgetUserOrgDetailsDeActive() {
+    beforeEachTest();
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -296,6 +327,12 @@ public class UserUtilTest {
 
   @Test
   public void checkEmailUniqueness() throws Exception {
+    beforeEachTest();
+    Map<String, String> settingMap = new HashMap<String, String>();
+    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+
+    when(encryptionService.encryptData(Mockito.anyString())).thenReturn("test@test.com");
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -303,13 +340,10 @@ public class UserUtilTest {
     result.put(JsonKey.USER_ID, "123-456-789");
     responseList.add(result);
     response1.getResult().put(JsonKey.RESPONSE, responseList);
-    Map<String, String> settingMap = new HashMap<String, String>();
-    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
     when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(response1);
-    when(encryptionService.encryptData("test@test.com")).thenReturn("test@test.com");
+
     boolean response = false;
     try {
       UserUtil.checkEmailUniqueness("test@test.com");
@@ -322,6 +356,7 @@ public class UserUtilTest {
 
   @Test
   public void identifierExists() throws Exception {
+    beforeEachTest();
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
