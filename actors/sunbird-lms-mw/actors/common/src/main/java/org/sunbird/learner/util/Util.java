@@ -1231,7 +1231,7 @@ public final class Util {
   }
 
   public static List<Map<String, Object>> getUserOrgDetails(String userId) {
-    List<Map<String, Object>> userOrgDataList = null;
+    List<Map<String, Object>> userOrgDataList = new ArrayList<>();
     List<Map<String, Object>> userOrganisations = new ArrayList<>();
     try {
       List<String> ids = new ArrayList<>();

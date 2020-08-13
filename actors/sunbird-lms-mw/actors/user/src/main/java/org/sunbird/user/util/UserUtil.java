@@ -792,7 +792,7 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
       Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
