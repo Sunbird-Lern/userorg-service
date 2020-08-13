@@ -246,4 +246,23 @@ public class UserUtilTest {
 
     return externalIds;
   }
+
+  @Test
+  public void testgetUserOrgDetails() {
+    Response response = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, false);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response.getResult().put(JsonKey.RESPONSE, responseList);
+    List<String> ids = new ArrayList<>();
+    ids.add("123-456-789");
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
+            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID))
+        .thenReturn(response);
+    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
+    Assert.assertNotNull(res);
+  }
 }
