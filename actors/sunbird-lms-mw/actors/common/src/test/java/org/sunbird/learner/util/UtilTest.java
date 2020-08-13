@@ -149,6 +149,15 @@ public class UtilTest {
     Assert.assertNotNull(res);
   }
 
+  @Test
+  public void testgetLoginId() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.USERNAME, "user");
+    map.put(JsonKey.CHANNEL, "channel");
+    String loginid = Util.getLoginId(map);
+    Assert.assertEquals("user@channel", loginid);
+  }
+
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.IS_ROOT_ORG, true);
