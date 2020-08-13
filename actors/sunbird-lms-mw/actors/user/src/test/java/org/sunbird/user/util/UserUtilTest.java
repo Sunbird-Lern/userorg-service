@@ -27,6 +27,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -44,16 +45,24 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  Util.class
+  Util.class,
+  EncryptionService.class,
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
+  private static EncryptionService encryptionService;
 
   @Before
   public void beforeEachTest() {
+    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    encryptionService = PowerMockito.mock(EncryptionService.class);
+    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+            .getEncryptionServiceInstance(null))
+        .thenReturn(encryptionService);
     PowerMockito.mockStatic(DataCacheHandler.class);
     response = new Response();
     List<Map<String, Object>> userMapList = new ArrayList<Map<String, Object>>();
@@ -286,7 +295,7 @@ public class UserUtilTest {
   }
 
   @Test
-  public void checkEmailUniqueness() {
+  public void checkEmailUniqueness() throws Exception {
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -300,6 +309,7 @@ public class UserUtilTest {
     when(cassandraOperationImpl.getRecordsByIndexedProperty(
             JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
         .thenReturn(response1);
+    when(encryptionService.encryptData("test@test.com")).thenReturn("test@test.com");
     boolean response = false;
     try {
       UserUtil.checkEmailUniqueness("test@test.com");
@@ -311,7 +321,7 @@ public class UserUtilTest {
   }
 
   @Test
-  public void identifierExists() {
+  public void identifierExists() throws Exception {
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -325,10 +335,8 @@ public class UserUtilTest {
     when(cassandraOperationImpl.getRecordsByIndexedProperty(
             JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
         .thenReturn(response1);
-    boolean response = false;
-
+    when(encryptionService.encryptData("test@test.com")).thenReturn("test@test.com");
     boolean bool = UserUtil.identifierExists("email", "test@test.com");
-
     assertTrue(bool);
   }
 }
