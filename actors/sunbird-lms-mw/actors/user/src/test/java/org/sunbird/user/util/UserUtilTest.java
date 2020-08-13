@@ -288,26 +288,6 @@ public class UserUtilTest {
   }
 
   @Test
-  public void testgetUserOrgDetails() {
-    beforeEachTest();
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, false);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    List<String> ids = new ArrayList<>();
-    ids.add("123-456-789");
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID))
-        .thenReturn(response1);
-    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
-    Assert.assertNotNull(res);
-  }
-
-  @Test
   public void testgetUserOrgDetailsDeActive() {
     beforeEachTest();
     Response response1 = new Response();
