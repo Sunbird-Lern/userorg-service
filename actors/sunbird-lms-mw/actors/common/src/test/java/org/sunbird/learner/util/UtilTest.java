@@ -18,6 +18,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -31,6 +32,7 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
+  ElasticSearchHelper.class,
   CassandraOperationImpl.class,
 })
 @PowerMockIgnore({"javax.management.*"})
@@ -54,6 +56,7 @@ public class UtilTest {
     Map<String, Object> result = new HashMap<>();
     result.put(JsonKey.IS_DELETED, false);
     result.put(JsonKey.USER_ID, "123-456-789");
+    result.put(JsonKey.ORGANISATION_ID, "1234567890");
     responseList.add(result);
     response.getResult().put(JsonKey.RESPONSE, responseList);
     List<String> ids = new ArrayList<>();

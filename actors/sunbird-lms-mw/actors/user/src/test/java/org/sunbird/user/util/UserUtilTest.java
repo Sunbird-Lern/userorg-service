@@ -284,4 +284,51 @@ public class UserUtilTest {
     List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
     Assert.assertNotNull(res);
   }
+
+  @Test
+  public void checkEmailUniqueness() {
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, false);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    Map<String, String> settingMap = new HashMap<String, String>();
+    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+    when(cassandraOperationImpl.getRecordsByIndexedProperty(
+            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+        .thenReturn(response1);
+    boolean response = false;
+    try {
+      UserUtil.checkEmailUniqueness("test@test.com");
+      response = true;
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getResponseCode(), 400);
+    }
+    assertFalse(response);
+  }
+
+  @Test
+  public void identifierExists() {
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, false);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    Map<String, String> settingMap = new HashMap<String, String>();
+    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+    when(cassandraOperationImpl.getRecordsByIndexedProperty(
+            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+        .thenReturn(response1);
+    boolean response = false;
+
+    boolean bool = UserUtil.identifierExists("email", "test@test.com");
+
+    assertTrue(bool);
+  }
 }
