@@ -27,6 +27,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -44,6 +45,7 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
+  DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
@@ -53,14 +55,8 @@ public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
-  private static EncryptionService encryptionService;
 
   public void beforeEachTest() {
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    encryptionService = PowerMockito.mock(EncryptionService.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-            .getEncryptionServiceInstance(null))
-        .thenReturn(encryptionService);
     PowerMockito.mockStatic(DataCacheHandler.class);
     response = new Response();
     List<Map<String, Object>> userMapList = new ArrayList<Map<String, Object>>();
@@ -70,6 +66,7 @@ public class UserUtilTest {
     existResponse.put(JsonKey.RESPONSE, userMapList);
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Map<String, String> settingMap = new HashMap<String, String>();
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
@@ -108,11 +105,11 @@ public class UserUtilTest {
   public void checkPhoneUniquenessExist() throws Exception {
     beforeEachTest();
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    encryptionService = PowerMockito.mock(EncryptionService.class);
+    EncryptionService encryptionService = PowerMockito.mock(EncryptionService.class);
     when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
-    Map<String, String> settingMap = new HashMap<String, String>();
+    Map<String, String> settingMap = new HashMap<>();
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
@@ -141,6 +138,11 @@ public class UserUtilTest {
 
   @Test
   public void checkPhoneExist() {
+    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    EncryptionService encryptionService = PowerMockito.mock(EncryptionService.class);
+    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+            .getEncryptionServiceInstance(null))
+        .thenReturn(encryptionService);
     beforeEachTest();
     boolean response = false;
     try {
@@ -323,55 +325,5 @@ public class UserUtilTest {
         .thenReturn(response1);
     List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
     Assert.assertNotNull(res);
-  }
-
-  @Test
-  public void checkEmailUniqueness() throws Exception {
-    beforeEachTest();
-    Map<String, String> settingMap = new HashMap<String, String>();
-    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
-
-    when(encryptionService.encryptData(Mockito.anyString())).thenReturn("test@test.com");
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, false);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(response1);
-
-    boolean response = false;
-    try {
-      UserUtil.checkEmailUniqueness("test@test.com");
-      response = true;
-    } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
-    }
-    assertFalse(response);
-  }
-
-  @Test
-  public void identifierExists() throws Exception {
-    beforeEachTest();
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, false);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    Map<String, String> settingMap = new HashMap<String, String>();
-    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
-        .thenReturn(response1);
-    when(encryptionService.encryptData("test@test.com")).thenReturn("test@test.com");
-    boolean bool = UserUtil.identifierExists("email", "test@test.com");
-    assertTrue(bool);
   }
 }
