@@ -137,6 +137,41 @@ public class UserUtilTest {
   }
 
   @Test
+  public void checkEmailUniquenessExist() throws Exception {
+    beforeEachTest();
+    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    EncryptionService encryptionService = PowerMockito.mock(EncryptionService.class);
+    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+            .getEncryptionServiceInstance(null))
+        .thenReturn(encryptionService);
+    Map<String, String> settingMap = new HashMap<>();
+    settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
+
+    when(encryptionService.encryptData(Mockito.anyString())).thenReturn("test@test.com");
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, false);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperationImpl.getRecordsByIndexedProperty(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(response1);
+    User user = new User();
+    user.setEmail("test@test.com");
+    boolean response = false;
+    try {
+      UserUtil.checkEmailUniqueness(user, "create");
+      response = true;
+    } catch (ProjectCommonException e) {
+      assertEquals(e.getResponseCode(), 400);
+    }
+    assertFalse(response);
+  }
+
+  @Test
   public void checkPhoneExist() {
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
     EncryptionService encryptionService = PowerMockito.mock(EncryptionService.class);

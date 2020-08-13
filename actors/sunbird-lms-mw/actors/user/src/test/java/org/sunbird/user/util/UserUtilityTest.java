@@ -20,7 +20,9 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -32,8 +34,10 @@ import org.sunbird.learner.util.Util;
   CassandraOperationImpl.class,
   DataCacheHandler.class,
   DefaultEncryptionServivceImpl.class,
+  DefaultDecryptionServiceImpl.class,
   Util.class,
   EncryptionService.class,
+  DecryptionService.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
