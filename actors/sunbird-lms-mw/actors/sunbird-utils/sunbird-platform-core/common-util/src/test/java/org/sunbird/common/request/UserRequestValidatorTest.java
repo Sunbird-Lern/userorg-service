@@ -1461,7 +1461,7 @@ public class UserRequestValidatorTest {
     declarationMap.put(JsonKey.ORG_ID, "1234");
     declarationMap.put(JsonKey.USER_ID, "userid");
 
-    declarationMap.put(JsonKey.PERSONA, "teacher");
+    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     List<Map<String, Object>> declarations = new ArrayList<>();
     declarations.add(declarationMap);
     return declarations;
@@ -1472,7 +1472,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> declarationMap = new HashMap<>();
     declarationMap.put(JsonKey.ORG_ID, "1234");
-    declarationMap.put(JsonKey.PERSONA, "teacher");
+    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     List<Map<String, Object>> declarations = new ArrayList<>();
     declarations.add(declarationMap);
     return declarations;

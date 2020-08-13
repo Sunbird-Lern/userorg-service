@@ -104,7 +104,7 @@ public class UserSelfDeclarationManagementActorTest {
     map.put(JsonKey.PROVIDER, "anyProvider");
     map.put(JsonKey.USER_ID, "userid1");
     map.put(JsonKey.ORG_ID, "org1");
-    map.put(JsonKey.PERSONA, "teacher");
+    map.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -192,7 +192,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity addUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("01234848481");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -205,7 +205,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity removeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("018329328293892");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -231,7 +231,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity editOrgChangeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -282,7 +282,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity userDeclaredEntityWithErrorStatus(boolean errorStatus) {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setUserId("someUserID");
     if (errorStatus) {
       userDeclareEntity.setStatus(JsonKey.SELF_DECLARED_ERROR);
