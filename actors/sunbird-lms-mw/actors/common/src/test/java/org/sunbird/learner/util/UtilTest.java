@@ -50,7 +50,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testgetUserOrgDetails() {
+  public void testGetUserOrgDetails() {
     Response response = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -77,85 +77,6 @@ public class UtilTest {
         .thenReturn(promise.future());
     List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789");
     Assert.assertNotNull(res);
-  }
-
-  @Test
-  public void testGetJobProfileTest() {
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(response1);
-    List<Map<String, Object>> resList = Util.getJobProfileDetails("123-456-789");
-    Assert.assertNotNull(resList);
-  }
-
-  @Test
-  public void testGetUserEducationDetails() {
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(response1);
-    List<Map<String, Object>> resList = Util.getUserEducationDetails("123-456-789");
-    Assert.assertNotNull(resList);
-  }
-
-  @Test
-  public void testgetUserNamebyUserId() {
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    result.put(JsonKey.USERNAME, "abc");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(response1);
-    String res = Util.getUserNamebyUserId("123-456-789");
-    Assert.assertNotNull(res);
-  }
-
-  @Test
-  public void testgetUserbyUserId() {
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    result.put(JsonKey.USERNAME, "abc");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(response1);
-    Map<String, Object> res = Util.getUserbyUserId("123-456-789");
-    Assert.assertNotNull(res);
-  }
-
-  @Test
-  public void testgetLoginId() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.USERNAME, "user");
-    map.put(JsonKey.CHANNEL, "channel");
-    String loginid = Util.getLoginId(map);
-    Assert.assertEquals("user@channel", loginid);
   }
 
   public static Map<String, Object> getEsResponseMap() {
