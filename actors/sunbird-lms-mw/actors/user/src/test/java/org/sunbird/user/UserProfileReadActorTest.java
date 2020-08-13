@@ -174,9 +174,20 @@ public class UserProfileReadActorTest {
   public void testGetUserProfileSuccessV3WithFieldDeclarationAndExternalIds() {
     Request reqObj =
         getProfileReadV3request(
-            VALID_USER_ID, JsonKey.DECLARATIONS.concat(",").concat(JsonKey.EXTERNAL_IDS));
+            VALID_USER_ID,
+            JsonKey.DECLARATIONS
+                .concat(",")
+                .concat(JsonKey.EXTERNAL_IDS)
+                .concat(",")
+                .concat(JsonKey.TOPIC));
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByPrimaryKeys(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyString()))
+        .thenReturn(response1);
     when(cassandraOperation.getRecordsByProperties(
             JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
         .thenReturn(getUserDeclarationResponse(true));
