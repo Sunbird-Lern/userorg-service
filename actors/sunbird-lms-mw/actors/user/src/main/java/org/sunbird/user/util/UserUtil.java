@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -594,7 +596,8 @@ public class UserUtil {
       while (StringUtils.isBlank(userName)) {
         userName = getUsername(name);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, userName);
+          String translatedUserName = Junidecode.unidecode(userName);
+          userMap.put(JsonKey.USERNAME, translatedUserName);
         }
       }
     } else {
