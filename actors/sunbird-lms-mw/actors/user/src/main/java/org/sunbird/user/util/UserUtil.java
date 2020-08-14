@@ -29,6 +29,7 @@ import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
@@ -523,12 +524,20 @@ public class UserUtil {
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
       firstName = firstName.split(" ")[0];
-      userMap.put(JsonKey.USERNAME, firstName + "_" + generateUniqueString(4));
+      String translatedFirstName = transliterateUserName(firstName);
+      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
     } else {
-      if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
+      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
+      userMap.put(JsonKey.USERNAME, userName);
+      if (!userService.checkUsernameUniqueness(userName, false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
+  }
+
+  public static String transliterateUserName(String userName) {
+      String translatedUserName = Junidecode.unidecode(userName);
+      return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
@@ -596,11 +605,11 @@ public class UserUtil {
       while (StringUtils.isBlank(userName)) {
         userName = getUsername(name);
         if (StringUtils.isNotBlank(userName)) {
-          String translatedUserName = Junidecode.unidecode(userName);
-          userMap.put(JsonKey.USERNAME, translatedUserName);
+          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
         }
       }
     } else {
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
