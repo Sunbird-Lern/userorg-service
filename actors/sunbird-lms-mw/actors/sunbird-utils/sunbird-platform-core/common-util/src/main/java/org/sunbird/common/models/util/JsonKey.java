@@ -1072,6 +1072,9 @@ public final class JsonKey {
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
   public static final String PERSONA = "persona";
+  //This denotes the persona of the user in self declaration and
+  //is different from role or user type = TEACHER
+  public static final String TEACHER_PERSONA = "teacher";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 
   private JsonKey() {}
