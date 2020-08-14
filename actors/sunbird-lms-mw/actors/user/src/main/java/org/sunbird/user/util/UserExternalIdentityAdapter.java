@@ -45,7 +45,7 @@ public class UserExternalIdentityAdapter {
       }
       selfDeclaredField.put(JsonKey.USER_ID, externalIds.get(0).get(JsonKey.USER_ID));
       selfDeclaredField.put(JsonKey.ORG_ID, externalIds.get(0).get(JsonKey.ORIGINAL_PROVIDER));
-      selfDeclaredField.put(JsonKey.PERSONA, JsonKey.TEACHER.toLowerCase());
+      selfDeclaredField.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
       selfDeclaredField.put(JsonKey.USER_INFO, userInfo);
     }
     return selfDeclaredField;

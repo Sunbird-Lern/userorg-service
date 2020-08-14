@@ -902,7 +902,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               prevOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.REMOVE);
@@ -930,7 +930,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               currOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
