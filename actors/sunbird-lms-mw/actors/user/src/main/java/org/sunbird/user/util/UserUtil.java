@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -793,20 +792,31 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
-      Map<String, Object> reqMap = new WeakHashMap<>();
-      reqMap.put(JsonKey.USER_ID, userId);
-      if (!isdeleted) {
-        reqMap.put(JsonKey.IS_DELETED, false);
-      }
-      Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      List<String> ids = new ArrayList<>();
+      ids.add(userId);
       Response result =
-          cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
-      userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(userOrgList)) {
+          cassandraOperation.getRecordsByPrimaryKeys(
+              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), ids, JsonKey.USER_ID);
+      List<Map<String, Object>> responseList =
+          (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(responseList)) {
+        if (!isdeleted) {
+          responseList
+              .stream()
+              .forEach(
+                  (dataMap) -> {
+                    if (null != dataMap.get(JsonKey.IS_DELETED)
+                        && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                      userOrgList.add(dataMap);
+                    }
+                  });
+        } else {
+          userOrgList.addAll(responseList);
+        }
         for (Map<String, Object> tempMap : userOrgList) {
           organisations.add(tempMap);
         }

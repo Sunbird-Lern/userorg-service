@@ -130,27 +130,29 @@ public class ShadowUserProcessor {
   }
 
   private void deleteUserFromOrganisations(
-      ShadowUser shadowUser, String rootOrgId, List<Map<String, Object>> organisations) {
-    organisations
+      ShadowUser shadowUser, String rootOrgId, List<Map<String, Object>> userOrg) {
+    userOrg
         .stream()
         .forEach(
             organisation -> {
               String orgId = (String) organisation.get(JsonKey.ORGANISATION_ID);
               if (!isRootOrgMatchedWithOrgId(rootOrgId, orgId)) {
-                String id = (String) organisation.get(JsonKey.ID);
-                updateStatusInUserOrg(shadowUser, id);
+                updateStatusInUserOrg(shadowUser, organisation);
               }
             });
   }
 
-  private void updateStatusInUserOrg(ShadowUser shadowUser, String id) {
-    Map<String, Object> propertiesMap = new WeakHashMap<>();
-    propertiesMap.put(JsonKey.ID, id);
-    propertiesMap.put(JsonKey.IS_DELETED, true);
-    propertiesMap.put(JsonKey.UPDATED_BY, shadowUser.getAddedBy());
-    propertiesMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+  private void updateStatusInUserOrg(ShadowUser shadowUser, Map<String, Object> userOrg) {
+    Map<String, Object> compositeKey = new LinkedHashMap<>(2);
+    compositeKey.put(JsonKey.USER_ID, userOrg.get(JsonKey.USER_ID));
+    compositeKey.put(JsonKey.ORGANISATION_ID, userOrg.get(JsonKey.ORGANISATION_ID));
+    Map<String, Object> request = new WeakHashMap<>();
+    request.put(JsonKey.IS_DELETED, true);
+    request.put(JsonKey.UPDATED_BY, shadowUser.getAddedBy());
+    request.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+
     Response response =
-        cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, propertiesMap);
+        cassandraOperation.updateRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, request, compositeKey);
     ProjectLogger.log(
         "ShadowUserProcessor:updateStatusInUserOrg:response from cassandra in updating user org "
             .concat(response + ""),
@@ -562,7 +564,7 @@ public class ShadowUserProcessor {
     reqMap.put(JsonKey.ORGANISATION_ID, organisationId);
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     reqMap.put(JsonKey.IS_DELETED, false);
-    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USR_ORG_DB);
+    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
     try {
       Response response =
           cassandraOperation.insertRecord(usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap);
