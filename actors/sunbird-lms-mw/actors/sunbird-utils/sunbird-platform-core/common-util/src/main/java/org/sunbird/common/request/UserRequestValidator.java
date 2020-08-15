@@ -3,7 +3,6 @@ package org.sunbird.common.request;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -40,7 +39,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateWebPages(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
-    transliterateUserName(userRequest);
   }
 
   public static boolean isGoodPassword(String password) {
@@ -79,14 +77,6 @@ public class UserRequestValidator extends BaseRequestValidator {
         (String) userRequest.getRequest().get(JsonKey.USERNAME),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.USERNAME);
-  }
-
-  private void transliterateUserName(Request userRequest) {
-    String userName = (String) userRequest.getRequest().get(JsonKey.USERNAME);
-    if (StringUtils.isNotEmpty(userName)) {
-      String translatedUserName = Junidecode.unidecode(userName);
-      userRequest.getRequest().put(JsonKey.USERNAME, translatedUserName);
-    }
   }
 
   public void validateUserCreateV3(Request userRequest) {

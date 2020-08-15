@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -57,7 +56,6 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class
 })
 @PowerMockIgnore({"javax.management.*"})
-@Ignore
 public class EmailServiceActorTest {
 
   private static final Props props = Props.create(EmailServiceActor.class);

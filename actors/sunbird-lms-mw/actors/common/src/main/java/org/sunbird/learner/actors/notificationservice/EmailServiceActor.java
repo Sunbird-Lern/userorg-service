@@ -144,33 +144,36 @@ public class EmailServiceActor extends BaseActor {
             "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails",
             LoggerEnum.INFO.name());
       }
-
-      try {
-        SendEmail sendEmail = new SendEmail();
-        Velocity.init();
-        VelocityContext context = ProjectUtil.getContext(request);
-        StringWriter writer = new StringWriter();
-        Velocity.evaluate(context, writer, "SimpleVelocity", template);
-        if ((!connection.getTransport().isConnected())) {
-          System.out.println("SMTP Transport client connection is closed. Create new connection.");
-          connection.createConnection();
-        }
-        sendEmail.send(
-            emails.toArray(new String[emails.size()]),
-            (String) request.get(JsonKey.SUBJECT),
-            context,
-            writer,
-            connection.getSession(),
-            connection.getTransport());
-      } catch (Exception e) {
-        ProjectLogger.log(
-            "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
-      }
+      sendMail(request, emails, template);
     }
 
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());
+  }
+
+  private void sendMail(Map<String, Object> request, List<String> emails, String template) {
+    try {
+      SendEmail sendEmail = new SendEmail();
+      Velocity.init();
+      VelocityContext context = ProjectUtil.getContext(request);
+      StringWriter writer = new StringWriter();
+      Velocity.evaluate(context, writer, "SimpleVelocity", template);
+      if ((!connection.getTransport().isConnected())) {
+        System.out.println("SMTP Transport client connection is closed. Create new connection.");
+        connection.createConnection();
+      }
+      sendEmail.send(
+          emails.toArray(new String[emails.size()]),
+          (String) request.get(JsonKey.SUBJECT),
+          context,
+          writer,
+          connection.getSession(),
+          connection.getTransport());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
+    }
   }
 
   /**

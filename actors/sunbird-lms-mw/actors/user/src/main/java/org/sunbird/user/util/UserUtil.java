@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -521,12 +522,20 @@ public class UserUtil {
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
       firstName = firstName.split(" ")[0];
-      userMap.put(JsonKey.USERNAME, firstName + "_" + generateUniqueString(4));
+      String translatedFirstName = transliterateUserName(firstName);
+      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
     } else {
-      if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
+      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
+      userMap.put(JsonKey.USERNAME, userName);
+      if (!userService.checkUsernameUniqueness(userName, false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
+  }
+
+  public static String transliterateUserName(String userName) {
+    String translatedUserName = Junidecode.unidecode(userName);
+    return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
@@ -594,10 +603,11 @@ public class UserUtil {
       while (StringUtils.isBlank(userName)) {
         userName = getUsername(name);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, userName);
+          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
         }
       }
     } else {
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
@@ -792,7 +802,7 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
       Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
@@ -912,7 +922,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               prevOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.REMOVE);
@@ -940,7 +950,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               currOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
