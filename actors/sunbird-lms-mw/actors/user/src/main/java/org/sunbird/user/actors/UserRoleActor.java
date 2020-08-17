@@ -1,9 +1,7 @@
 package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -79,14 +77,24 @@ public class UserRoleActor extends UserBaseActor {
     // update userOrg role with requested roles.
     Map<String, Object> userOrgDBMap = new HashMap<>();
 
-    Map<String, Object> searchMap = new HashMap<>();
+    Map<String, Object> searchMap = new LinkedHashMap<>(2);
     searchMap.put(JsonKey.USER_ID, userId);
     searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
-    searchMap.put(JsonKey.IS_DELETED, false);
     Response res =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByCompositeKey(
             JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, null);
-    List<Map<String, Object>> responseList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    dataList
+        .stream()
+        .forEach(
+            (dataMap) -> {
+              if (null != dataMap.get(JsonKey.IS_DELETED)
+                  && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                responseList.add(dataMap);
+              }
+            });
+
     if (CollectionUtils.isNotEmpty(responseList)) {
       userOrgDBMap.put(JsonKey.ORGANISATION, responseList.get(0));
     }

@@ -135,7 +135,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.ADDRESS_DB, getDbInfoObject(KEY_SPACE_NAME, "address"));
     dbInfoMap.put(JsonKey.EDUCATION_DB, getDbInfoObject(KEY_SPACE_NAME, "user_education"));
     dbInfoMap.put(JsonKey.JOB_PROFILE_DB, getDbInfoObject(KEY_SPACE_NAME, "user_job_profile"));
-    dbInfoMap.put(JsonKey.USR_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_org"));
     dbInfoMap.put(JsonKey.USR_EXT_ID_DB, getDbInfoObject(KEY_SPACE_NAME, "user_external_identity"));
 
     dbInfoMap.put(JsonKey.ORG_MAP_DB, getDbInfoObject(KEY_SPACE_NAME, "org_mapping"));
@@ -146,7 +145,7 @@ public final class Util {
     dbInfoMap.put(JsonKey.ACTION_GROUP, getDbInfoObject(KEY_SPACE_NAME, "action_group"));
     dbInfoMap.put(JsonKey.USER_ACTION_ROLE, getDbInfoObject(KEY_SPACE_NAME, "user_action_role"));
     dbInfoMap.put(JsonKey.ROLE_GROUP, getDbInfoObject(KEY_SPACE_NAME, "role_group"));
-    dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_org"));
+    dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_organisation"));
     dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
     dbInfoMap.put(JsonKey.REPORT_TRACKING_DB, getDbInfoObject(KEY_SPACE_NAME, "report_tracking"));
     dbInfoMap.put(JsonKey.BADGES_DB, getDbInfoObject(KEY_SPACE_NAME, "badge"));
@@ -960,7 +959,7 @@ public final class Util {
     if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {
       reqMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.HASHTAGID));
     }
-    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USR_ORG_DB);
+    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
     try {
       cassandraOperation.insertRecord(
           usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), reqMap, null);
@@ -986,7 +985,7 @@ public final class Util {
 
   @SuppressWarnings("unchecked")
   public static void upsertUserOrgData(Map<String, Object> userMap) {
-    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USR_ORG_DB);
+    Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
     Map<String, Object> map = new WeakHashMap<>();
     map.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
@@ -1239,17 +1238,26 @@ public final class Util {
   }
 
   public static List<Map<String, Object>> getUserOrgDetails(String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgDataList = new ArrayList<>();
     List<Map<String, Object>> userOrganisations = new ArrayList<>();
     try {
-      Map<String, Object> reqMap = new WeakHashMap<>();
-      reqMap.put(JsonKey.USER_ID, userId);
-      reqMap.put(JsonKey.IS_DELETED, false);
+      List<String> ids = new ArrayList<>();
+      ids.add(userId);
       Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
-          cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap, null);
-      userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+          cassandraOperation.getRecordsByPrimaryKeys(
+              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), ids, JsonKey.USER_ID, null);
+      List<Map<String, Object>> userOrgList = new ArrayList<>();
+      userOrgDataList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      userOrgDataList
+          .stream()
+          .forEach(
+              (dataMap) -> {
+                if (null != dataMap.get(JsonKey.IS_DELETED)
+                    && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                  userOrgList.add(dataMap);
+                }
+              });
       if (CollectionUtils.isNotEmpty(userOrgList)) {
         List<String> organisationIds =
             userOrgList

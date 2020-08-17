@@ -24,6 +24,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -118,7 +119,7 @@ public class UserSelfDeclarationManagementActorTest {
     map.put(JsonKey.PROVIDER, "anyProvider");
     map.put(JsonKey.USER_ID, "userid1");
     map.put(JsonKey.ORG_ID, "org1");
-    map.put(JsonKey.PERSONA, "teacher");
+    map.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -184,10 +185,29 @@ public class UserSelfDeclarationManagementActorTest {
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
 
+  @Test
+  public void testUpdateUserSelfDeclaredDetailsSuccess() {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request request = new Request();
+    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    List<UserDeclareEntity> list = new ArrayList<>();
+    list.add(editOrgChangeUserDeclaredEntity());
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.DECLARATIONS, list);
+    request.setRequest(requestMap);
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
+    Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
+  }
+
   private UserDeclareEntity addUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("01234848481");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -200,7 +220,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity removeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("018329328293892");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -226,13 +246,65 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity editOrgChangeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
     userInfo.put(JsonKey.DECLARED_PHONE, "0890321830");
     userDeclareEntity.setUserInfo(userInfo);
     userDeclareEntity.setOperation(JsonKey.EDIT);
+    return userDeclareEntity;
+  }
+
+  @Test
+  public void updateUserSelfDeclaredErrorStatus() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request request = new Request();
+    request.setOperation(UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
+    UserDeclareEntity userDeclareEntity = userDeclaredEntityWithErrorStatus(true);
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+    request.setRequest(requestMap);
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
+    Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclaredErrorStatusWithOtherStatus() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request request = new Request();
+    request.setOperation(UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
+    UserDeclareEntity userDeclareEntity = userDeclaredEntityWithErrorStatus(false);
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
+    request.setRequest(requestMap);
+    subject.tell(request, probe.getRef());
+    ProjectCommonException projectCommonException =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertTrue(
+        null != projectCommonException && projectCommonException.getResponseCode() == 500);
+    Assert.assertEquals(
+        ResponseCode.declaredUserErrorStatusNotUpdated.getErrorMessage(),
+        projectCommonException.getMessage());
+  }
+
+  private UserDeclareEntity userDeclaredEntityWithErrorStatus(boolean errorStatus) {
+    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+    userDeclareEntity.setOrgId("org2");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
+    userDeclareEntity.setUserId("someUserID");
+    if (errorStatus) {
+      userDeclareEntity.setStatus(JsonKey.SELF_DECLARED_ERROR);
+    } else {
+      userDeclareEntity.setStatus(JsonKey.VALIDATED);
+    }
+    userDeclareEntity.setErrorType("ERROR-PHONE");
     return userDeclareEntity;
   }
 }

@@ -342,7 +342,7 @@ public abstract class UserManagementActorTestBase {
     Map<String, Object> userDeclareFieldMap = new HashMap<>();
     userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
     userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
-    userDeclareFieldMap.put(JsonKey.PERSONA, "teacher");
+    userDeclareFieldMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     userDeclareFieldMap.put(JsonKey.INFO, userInfo);
     List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
     userDeclareEntityList.add(userDeclareFieldMap);

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.WeakHashMap;
 import java.util.stream.Collectors;
+import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -522,12 +522,20 @@ public class UserUtil {
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
       firstName = firstName.split(" ")[0];
-      userMap.put(JsonKey.USERNAME, firstName + "_" + generateUniqueString(4));
+      String translatedFirstName = transliterateUserName(firstName);
+      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
     } else {
-      if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
+      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
+      userMap.put(JsonKey.USERNAME, userName);
+      if (!userService.checkUsernameUniqueness(userName, false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
+  }
+
+  public static String transliterateUserName(String userName) {
+    String translatedUserName = Junidecode.unidecode(userName);
+    return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
@@ -595,10 +603,11 @@ public class UserUtil {
       while (StringUtils.isBlank(userName)) {
         userName = getUsername(name);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, userName);
+          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
         }
       }
     } else {
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
@@ -793,20 +802,35 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
-      Map<String, Object> reqMap = new WeakHashMap<>();
-      reqMap.put(JsonKey.USER_ID, userId);
-      if (!isdeleted) {
-        reqMap.put(JsonKey.IS_DELETED, false);
-      }
-      Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      List<String> ids = new ArrayList<>();
+      ids.add(userId);
       Response result =
-          cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap, null);
-      userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(userOrgList)) {
+          cassandraOperation.getRecordsByPrimaryKeys(
+              userOrgDbInfo.getKeySpace(),
+              userOrgDbInfo.getTableName(),
+              ids,
+              JsonKey.USER_ID,
+              null);
+      List<Map<String, Object>> responseList =
+          (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(responseList)) {
+        if (!isdeleted) {
+          responseList
+              .stream()
+              .forEach(
+                  (dataMap) -> {
+                    if (null != dataMap.get(JsonKey.IS_DELETED)
+                        && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                      userOrgList.add(dataMap);
+                    }
+                  });
+        } else {
+          userOrgList.addAll(responseList);
+        }
         for (Map<String, Object> tempMap : userOrgList) {
           organisations.add(tempMap);
         }
@@ -902,7 +926,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               prevOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.REMOVE);
@@ -930,7 +954,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               currOrgId,
-              JsonKey.TEACHER.toLowerCase(),
+              JsonKey.TEACHER_PERSONA,
               userInfo);
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));

@@ -407,6 +407,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
               });
       updateQuery = where;
       session.execute(updateQuery);
+      response.put(Constants.RESPONSE, Constants.SUCCESS);
     } catch (Exception e) {
       ProjectLogger.log(Constants.EXCEPTION_MSG_UPDATE + tableName + " : " + e.getMessage(), e);
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)) {

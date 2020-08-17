@@ -87,6 +87,7 @@ public class UserRoleActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.IS_DELETED, false);
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -124,7 +125,7 @@ public class UserRoleActorTest {
     when(cassandraOperation.getAllRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraResponse());
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyMap(),

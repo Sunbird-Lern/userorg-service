@@ -554,13 +554,11 @@ public class UserProfileReadActor extends BaseActor {
     Set<String> topicSet = new HashSet<>();
 
     // fetch all associated user orgs
+    List<String> ids = new ArrayList<>();
+    ids.add(userId);
     Response response1 =
-        cassandraOperation.getRecordsByIndexedProperty(
-            userOrgDbInfo.getKeySpace(),
-            userOrgDbInfo.getTableName(),
-            JsonKey.USER_ID,
-            userId,
-            null);
+        cassandraOperation.getRecordsByPrimaryKeys(
+            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), ids, JsonKey.USER_ID, null);
 
     List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
 

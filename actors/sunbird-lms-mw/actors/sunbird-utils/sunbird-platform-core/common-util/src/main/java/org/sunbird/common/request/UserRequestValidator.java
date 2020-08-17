@@ -40,7 +40,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateWebPages(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
-    transliterateUserName(userRequest);
   }
 
   public static boolean isGoodPassword(String password) {

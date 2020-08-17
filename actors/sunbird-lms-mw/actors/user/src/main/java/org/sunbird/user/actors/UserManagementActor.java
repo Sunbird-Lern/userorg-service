@@ -371,7 +371,17 @@ public class UserManagementActor extends BaseActor {
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
         for (Map<String, String> externalId :
             (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
-          externalId.put(JsonKey.PROVIDER, orgProviderMap.get(externalId.get(JsonKey.PROVIDER)));
+
+          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          if (StringUtils.isBlank(orgId)) {
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                    JsonKey.PROVIDER,
+                    externalId.get(JsonKey.PROVIDER)));
+          }
+          externalId.put(JsonKey.PROVIDER, orgId);
         }
       }
     }

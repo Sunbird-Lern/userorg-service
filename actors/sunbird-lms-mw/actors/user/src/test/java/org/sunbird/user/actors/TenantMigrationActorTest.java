@@ -278,4 +278,71 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     feedList.add(feed);
     return feedList;
   }
+
+  @Test
+  public void testUserSelfDeclarationMigrationWhenRecordNotFoundInUserDeclarations() {
+    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    PowerMockito.when(
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(new Response());
+    boolean result =
+        testScenario(
+            getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
+            ResponseCode.declaredUserValidatedStatusNotUpdated,
+            null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUserSelfDeclarationMigrationWithValidatedStatus() {
+    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    PowerMockito.when(
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getSelfDeclarationResponse());
+    Response updateResponse = new Response();
+    updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(updateResponse);
+    boolean result =
+        testScenario(
+            getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
+            null,
+            ResponseCode.OK);
+    assertTrue(result);
+  }
+
+  public Request getSelfDeclaredMigrateReq(ActorOperations actorOperation) {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap();
+    Map<String, String> externalIdMap = new HashMap();
+    List<Map<String, String>> externalIdLst = new ArrayList();
+    requestMap.put(JsonKey.USER_ID, "anyUserID");
+    requestMap.put(JsonKey.CHANNEL, "anyChannel");
+    externalIdMap.put(JsonKey.ID, "anyID");
+    externalIdMap.put(JsonKey.ID_TYPE, "anyIDtype");
+    externalIdMap.put(JsonKey.PROVIDER, "anyProvider");
+    externalIdLst.add(externalIdMap);
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
+    reqObj.setRequest(requestMap);
+    reqObj.setOperation(actorOperation.getValue());
+    return reqObj;
+  }
+
+  private Response getSelfDeclarationResponse() {
+    Response response = new Response();
+    Map<String, Object> fMap = new HashMap<>();
+
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put(JsonKey.ORG_ID, "anyOrgID");
+    responseMap.put(JsonKey.PERSONA, "anyPersona");
+    responseMap.put(Constants.RESPONSE, Arrays.asList(responseMap));
+    response.getResult().putAll(responseMap);
+    return response;
+  }
 }
