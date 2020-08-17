@@ -267,7 +267,7 @@ public class UserProfileReadActor extends BaseActor {
               List<Map<String, String>> resExternalIds =
                   userExternalIdentityService.getUserExternalIds(userId);
               decryptUserExternalIds(resExternalIds);
-              updateExternalIdsWithProvider(resExternalIds);
+              UserUtil.updateExternalIdsWithProvider(resExternalIds);
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
@@ -389,7 +389,7 @@ public class UserProfileReadActor extends BaseActor {
 
     decryptUserExternalIds(dbResExternalIds);
     // update orgId to provider in externalIds
-    updateExternalIdsWithProvider(dbResExternalIds);
+    UserUtil.updateExternalIdsWithProvider(dbResExternalIds);
     return dbResExternalIds;
   }
 
@@ -440,32 +440,6 @@ public class UserProfileReadActor extends BaseActor {
                 s.remove(JsonKey.CREATED_ON);
                 s.remove(JsonKey.USER_ID);
                 s.remove(JsonKey.SLUG);
-              });
-    }
-  }
-
-  /**
-   * Till 3.1.0 there will be only 1 provider will be active for a user in self declaration and user
-   * can migrate only to 1 state. TODO: Need fix .If a user can be migrated to multiple states in
-   * future
-   *
-   * @param dbResExternalIds
-   */
-  private void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
-
-    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
-      String provider = UserUtil.fetchProviderByOrgId(orgId);
-      Set<String> providerSet = new HashSet<>();
-      dbResExternalIds
-          .stream()
-          .forEach(
-              s -> {
-                if (s.get(JsonKey.PROVIDER) != null
-                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                  s.put(JsonKey.ID_TYPE, provider);
-                }
-                s.put(JsonKey.PROVIDER, provider);
               });
     }
   }

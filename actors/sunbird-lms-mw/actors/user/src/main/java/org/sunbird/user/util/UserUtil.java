@@ -386,6 +386,30 @@ public class UserUtil {
         });
   }
 
+  /**
+   * Till 3.1.0 there will be only 1 provider will be active for a user in self declaration and user
+   * can migrate only to 1 state. Note: Need fix .If a user can be migrated to multiple states in
+   * future
+   *
+   * @param dbResExternalIds
+   */
+  public static void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
+      String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+      String provider = fetchProviderByOrgId(orgId);
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+    }
+  }
+
   public static List<Map<String, String>> convertExternalIdsValueToLowerCase(
       List<Map<String, String>> externalIds) {
     ConvertValuesToLowerCase mapper =
