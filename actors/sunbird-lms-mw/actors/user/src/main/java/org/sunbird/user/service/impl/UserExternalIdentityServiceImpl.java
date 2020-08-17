@@ -1,13 +1,12 @@
 package org.sunbird.user.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.util.UserExternalIdentityAdapter;
+import org.sunbird.user.util.UserUtil;
 
 public class UserExternalIdentityServiceImpl implements UserExternalIdentityService {
   private static UserExternalIdentityDao userExternalIdentityDao =
@@ -39,7 +38,14 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   }
 
   @Override
-  public String getUser(String extId, String provider, String idType) {
-    return userExternalIdentityDao.getUserIdByExternalId(extId, provider, idType);
+  public String getUserV1(String extId, String provider, String idType) {
+    Map<String, String> providerOrgMap = UserUtil.fetchOrgIdByProvider(Arrays.asList(provider));
+    return userExternalIdentityDao.getUserIdByExternalId(
+        extId, providerOrgMap.get(provider), idType);
+  }
+
+  @Override
+  public String getUserV2(String extId, String orgId, String idType) {
+    return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, idType);
   }
 }

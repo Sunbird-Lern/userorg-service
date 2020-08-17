@@ -2,13 +2,8 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
@@ -161,6 +156,45 @@ public class UserUtil {
     }
   }
 
+  // Update channel info with orgId info
+  public static void updateExternalIdsProviderWithOrgId(Map<String, Object> userMap) {
+    if (MapUtils.isNotEmpty(userMap)) {
+      Set<String> providerSet = new HashSet<>();
+      List<Map<String, String>> extList =
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+      if (CollectionUtils.isNotEmpty(extList)) {
+        for (Map<String, String> extId : extList) {
+          providerSet.add(extId.get(JsonKey.PROVIDER));
+        }
+      }
+      Map<String, String> orgProviderMap =
+          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
+
+      if (CollectionUtils.isNotEmpty(
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
+        for (Map<String, String> externalId :
+            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
+
+          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          if (StringUtils.isBlank(orgId)) {
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                    JsonKey.PROVIDER,
+                    externalId.get(JsonKey.PROVIDER)));
+          }
+          if (null != externalId.get(JsonKey.PROVIDER)
+              && null != externalId.get(JsonKey.ID_TYPE)
+              && externalId.get(JsonKey.PROVIDER).equals(externalId.get(JsonKey.ID_TYPE))) {
+            externalId.put(JsonKey.ID_TYPE, orgId);
+          }
+          externalId.put(JsonKey.PROVIDER, orgId);
+        }
+      }
+    }
+  }
+
   public static void checkEmailUniqueness(String email) {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
@@ -249,7 +283,7 @@ public class UserUtil {
     String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
     String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-    return userExternalIdentityService.getUser(extId, provider, idType);
+    return userExternalIdentityService.getUserV2(extId, provider, idType);
   }
 
   public static String getUserId(Map<String, Object> userMap) {
@@ -263,12 +297,10 @@ public class UserUtil {
       String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
       String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-      Map<String, String> providerOrgMap = new HashMap<>();
       if (StringUtils.isNotBlank(provider)
           && StringUtils.isNotBlank(extId)
           && StringUtils.isNotBlank(idType)) {
-        providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
-        userId = userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
+        userId = userExternalIdentityService.getUserV1(extId, provider, idType);
       }
     }
     return userId;

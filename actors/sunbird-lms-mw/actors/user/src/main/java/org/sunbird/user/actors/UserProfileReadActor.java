@@ -147,7 +147,7 @@ public class UserProfileReadActor extends BaseActor {
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ID_TYPE));
       } else {
-        userId = userExternalIdentityService.getUser(id, provider, idType);
+        userId = userExternalIdentityService.getUserV1(id, provider, idType);
         if (userId == null) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.externalIdNotFound,
@@ -216,6 +216,9 @@ public class UserProfileReadActor extends BaseActor {
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String) result.get(JsonKey.MANAGED_BY);
+    managedBy = userId;
+    requestedById = managedBy;
+    managedForId = userId;
     ProjectLogger.log(
         "requested By and requested user id == "
             + requestedById
@@ -264,7 +267,10 @@ public class UserProfileReadActor extends BaseActor {
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
-              List<Map<String, String>> resExternalIds = fetchUserExternalIdentity(userId);
+              List<Map<String, String>> resExternalIds =
+                  userExternalIdentityService.getUserExternalIds(userId);
+              decryptUserExternalIds(resExternalIds);
+              updateExternalIdsWithProvider(resExternalIds);
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
@@ -384,10 +390,14 @@ public class UserProfileReadActor extends BaseActor {
 
     List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId);
 
+    decryptUserExternalIds(dbResExternalIds);
+    // update orgId to provider in externalIds
+    updateExternalIdsWithProvider(dbResExternalIds);
+    return dbResExternalIds;
+  }
+
+  private void decryptUserExternalIds(List<Map<String, String>> dbResExternalIds) {
     if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      // update provider with channel from orgId
-      String orgId = dbResExternalIds.get(0).get(JsonKey.ORIGINAL_PROVIDER);
-      String provider = UserUtil.fetchProviderByOrgId(orgId);
       dbResExternalIds
           .stream()
           .forEach(
@@ -423,7 +433,6 @@ public class UserProfileReadActor extends BaseActor {
                   s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
                 }
 
-                s.put(JsonKey.PROVIDER, provider);
                 s.remove(JsonKey.EXTERNAL_ID);
                 s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
                 s.remove(JsonKey.ORIGINAL_ID_TYPE);
@@ -436,8 +445,32 @@ public class UserProfileReadActor extends BaseActor {
                 s.remove(JsonKey.SLUG);
               });
     }
+  }
 
-    return dbResExternalIds;
+  /**
+   * Till 3.1.0 there will be only 1 provider will be active for a user in self declaration and user
+   * can migrate only to 1 state. TODO: Need fix .If a user can be migrated to multiple states in
+   * future
+   *
+   * @param dbResExternalIds
+   */
+  private void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
+
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
+      String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+      String provider = UserUtil.fetchProviderByOrgId(orgId);
+      Set<String> providerSet = new HashSet<>();
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+    }
   }
 
   @SuppressWarnings("unchecked")
