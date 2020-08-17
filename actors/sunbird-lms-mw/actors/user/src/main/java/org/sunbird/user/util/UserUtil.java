@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-
 import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -29,7 +28,6 @@ import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
@@ -536,8 +534,8 @@ public class UserUtil {
   }
 
   public static String transliterateUserName(String userName) {
-      String translatedUserName = Junidecode.unidecode(userName);
-      return translatedUserName;
+    String translatedUserName = Junidecode.unidecode(userName);
+    return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
