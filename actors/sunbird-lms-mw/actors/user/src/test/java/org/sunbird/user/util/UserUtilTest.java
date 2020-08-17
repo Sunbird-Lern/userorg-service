@@ -335,5 +335,45 @@ public class UserUtilTest {
     List<Map<String, String>> externalIdList = new ArrayList<>();
     externalIdList.add(externalIds);
     UserUtil.updateExternalIdsWithProvider(externalIdList);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testupdateExternalIdsProviderWithOrgId() {
+    beforeEachTest();
+    List<String> providers = new ArrayList<>();
+    providers.add("channel004");
+
+    Map<String, Object> orgMap = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+
+    orgMap.put("id", "1234");
+    orgMap.put("channel", "channel004");
+    orgList.add(orgMap);
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, orgList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    Future<Map<String, Object>> test = promise.future();
+    SearchDTO searchDTO = new SearchDTO();
+    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+        .thenReturn(promise.future());
+    Map<String, String> externalIds = new HashMap<>();
+    externalIds.put(JsonKey.PROVIDER, "channel1004");
+    externalIds.put(JsonKey.USER_ID, "w131-2323-323-232-3232");
+    List<Map<String, String>> externalIdList = new ArrayList<>();
+    externalIdList.add(externalIds);
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.EXTERNAL_IDS, externalIdList);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(userMap);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertEquals(
+          "Invalid value provider for parameter channel1004. Please provide a valid value.",
+          ex.getMessage());
+    }
   }
 }

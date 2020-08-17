@@ -1048,11 +1048,13 @@ public class UserUtil {
             esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
         Map<String, Object> esResOrg =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
-        List<Map<String, Object>> orgList =
-            (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
-        if (CollectionUtils.isNotEmpty(orgList)) {
-          for (Map<String, Object> org : orgList) {
-            providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+        if (MapUtils.isNotEmpty(esResOrg)) {
+          List<Map<String, Object>> orgList =
+              (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
+          if (CollectionUtils.isNotEmpty(orgList)) {
+            for (Map<String, Object> org : orgList) {
+              providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+            }
           }
         }
 
