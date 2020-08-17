@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -45,7 +46,7 @@ public class BaseBulkUploadController extends BaseController {
   protected org.sunbird.common.request.Request createAndInitBulkRequest(
       String operation, String objectType, Boolean validateFileZize, Http.Request httpRequest)
       throws IOException {
-    ProjectLogger.log("API call for operation : " + operation);
+    ProjectLogger.log("API call for operation : " + operation, LoggerEnum.INFO.name());
     org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
@@ -53,6 +54,7 @@ public class BaseBulkUploadController extends BaseController {
     Map<String, String[]> formUrlEncodeddata = httpRequest.body().asFormUrlEncoded();
     JsonNode requestData = httpRequest.body().asJson();
     if (body != null) {
+      ProjectLogger.log("Data sent as body", LoggerEnum.INFO.name());
       Map<String, String[]> data = body.asFormUrlEncoded();
       for (Entry<String, String[]> entry : data.entrySet()) {
         map.put(entry.getKey(), entry.getValue()[0]);
@@ -63,6 +65,7 @@ public class BaseBulkUploadController extends BaseController {
         byteArray = IOUtils.toByteArray(is);
       }
     } else if (null != formUrlEncodeddata) {
+      ProjectLogger.log("Data sent as form encoded data", LoggerEnum.INFO.name());
       // read data as string from request
       for (Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
         map.put(entry.getKey(), entry.getValue()[0]);
@@ -72,6 +75,7 @@ public class BaseBulkUploadController extends BaseController {
               ((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
       byteArray = IOUtils.toByteArray(is);
     } else if (null != requestData) {
+      ProjectLogger.log("Data sent as request", LoggerEnum.INFO.name());
       reqObj =
           (org.sunbird.common.request.Request)
               mapper.RequestMapper.mapRequest(
@@ -83,6 +87,7 @@ public class BaseBulkUploadController extends BaseController {
       reqObj.getRequest().remove(JsonKey.DATA);
       map.putAll(reqObj.getRequest());
     } else {
+      ProjectLogger.log("No recognized data", LoggerEnum.INFO.name());
       throw new ProjectCommonException(
           ResponseCode.invalidData.getErrorCode(),
           ResponseCode.invalidData.getErrorMessage(),

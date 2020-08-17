@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.notificationservice;
 
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +11,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -26,7 +29,8 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.mail.SendMail;
+import org.sunbird.common.models.util.mail.SendEmail;
+import org.sunbird.common.models.util.mail.SendgridConnection;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
@@ -52,9 +56,13 @@ public class EmailServiceActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private SendgridConnection connection = new SendgridConnection();
 
   @Override
   public void onReceive(Request request) throws Throwable {
+    if (null == connection.getTransport()) {
+      connection.createConnection();
+    }
     if (request.getOperation().equalsIgnoreCase(BackgroundOperations.emailService.name())) {
       sendMail(request);
     } else {
@@ -136,22 +144,36 @@ public class EmailServiceActor extends BaseActor {
             "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails",
             LoggerEnum.INFO.name());
       }
-
-      try {
-        SendMail.sendMailWithBody(
-            emails.toArray(new String[emails.size()]),
-            (String) request.get(JsonKey.SUBJECT),
-            ProjectUtil.getContext(request),
-            template);
-      } catch (Exception e) {
-        ProjectLogger.log(
-            "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
-      }
+      sendMail(request, emails, template);
     }
 
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());
+  }
+
+  private void sendMail(Map<String, Object> request, List<String> emails, String template) {
+    try {
+      SendEmail sendEmail = new SendEmail();
+      Velocity.init();
+      VelocityContext context = ProjectUtil.getContext(request);
+      StringWriter writer = new StringWriter();
+      Velocity.evaluate(context, writer, "SimpleVelocity", template);
+      if ((!connection.getTransport().isConnected())) {
+        System.out.println("SMTP Transport client connection is closed. Create new connection.");
+        connection.createConnection();
+      }
+      sendEmail.send(
+          emails.toArray(new String[emails.size()]),
+          (String) request.get(JsonKey.SUBJECT),
+          context,
+          writer,
+          connection.getSession(),
+          connection.getTransport());
+    } catch (Exception e) {
+      ProjectLogger.log(
+          "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
+    }
   }
 
   /**
