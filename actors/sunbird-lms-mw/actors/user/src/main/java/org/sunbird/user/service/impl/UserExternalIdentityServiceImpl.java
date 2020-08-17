@@ -37,6 +37,14 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
     return userExternalIdentityDao.getUserExternalIds(userId);
   }
 
+  /**
+   * Fetch userid using channel info from usr_external_identity table
+   *
+   * @param extId
+   * @param provider
+   * @param idType
+   * @return
+   */
   @Override
   public String getUserV1(String extId, String provider, String idType) {
     Map<String, String> providerOrgMap = UserUtil.fetchOrgIdByProvider(Arrays.asList(provider));
@@ -44,6 +52,14 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
         extId, providerOrgMap.get(provider), idType);
   }
 
+  /**
+   * Fetch userid using orgId info to support usr_external_identity table
+   *
+   * @param extId
+   * @param orgId
+   * @param idType
+   * @return
+   */
   @Override
   public String getUserV2(String extId, String orgId, String idType) {
     return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, idType);

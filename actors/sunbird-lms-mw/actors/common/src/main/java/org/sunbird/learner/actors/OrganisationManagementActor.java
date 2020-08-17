@@ -1353,7 +1353,8 @@ public class OrganisationManagementActor extends BaseActor {
       result =
           cassandraOperation.getRecordsByProperties(
               JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap);
-      fromExtId = true;*/
+       */
+      fromExtId = true;
     } else {
       usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
       requestDbMap.put(JsonKey.PROVIDER, data.get(JsonKey.PROVIDER));

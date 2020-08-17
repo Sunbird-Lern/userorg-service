@@ -100,7 +100,7 @@ public class SupportMultipleExternalIdsTest {
   }
 
   @Test
-  public void testSuccessForCreate() {
+  public void testCheckExternalIdUniquenessSuccessForCreate() {
 
     try {
       Util.checkExternalIdUniqueness(user, JsonKey.CREATE);
