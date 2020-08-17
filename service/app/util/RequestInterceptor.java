@@ -133,6 +133,7 @@ public class RequestInterceptor {
         }
       }
     } catch (Exception e) {
+      ProjectLogger.log(e.getMessage() + e.getStackTrace());
       ProjectLogger.log("Likely a possibility? " + request.uri(), LoggerEnum.INFO.name());
     }
     return requestedForUserID;
