@@ -106,7 +106,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       return dValue;
     } catch (Exception ex) {
       ProjectLogger.log(
-          "DefaultDecryptionServiceImpl:decrypt:value {}", value, LoggerEnum.INFO.name());
+          "DefaultDecryptionServiceImpl:decrypt:value " + value, LoggerEnum.INFO.name());
       ProjectLogger.log(
           "DefaultDecryptionServiceImpl:decrypt: Exception occurred with error message = "
               + ex.getMessage(),

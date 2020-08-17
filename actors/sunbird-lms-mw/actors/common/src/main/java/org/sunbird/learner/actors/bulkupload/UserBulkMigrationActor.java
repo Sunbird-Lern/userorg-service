@@ -45,7 +45,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   public void onReceive(Request request) throws Throwable {
     String env = null;
     String operation = request.getOperation();
-    ProjectLogger.log("OnReceive Upload csv processing {}", operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("OnReceive Upload csv processing " + operation, LoggerEnum.INFO.name());
     if (operation.equals("userBulkSelfDeclared")) {
       env = "SelfDeclaredUserUpload";
     } else {

@@ -46,7 +46,7 @@ public class BaseBulkUploadController extends BaseController {
   protected org.sunbird.common.request.Request createAndInitBulkRequest(
       String operation, String objectType, Boolean validateFileZize, Http.Request httpRequest)
       throws IOException {
-    ProjectLogger.log("API call for operation : {}", operation, LoggerEnum.INFO.name());
+    ProjectLogger.log("API call for operation : " + operation, LoggerEnum.INFO.name());
     org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
