@@ -133,7 +133,7 @@ public class RequestInterceptor {
         }
       }
     } catch (Exception e) {
-      ProjectLogger.log("Likely a possibility? {}", request.uri(), LoggerEnum.INFO.name());
+      ProjectLogger.log("Likely a possibility? " + request.uri(), LoggerEnum.INFO.name());
     }
     return requestedForUserID;
   }
