@@ -147,7 +147,7 @@ public class UserProfileReadActor extends BaseActor {
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ID_TYPE));
       } else {
-        userId = userExternalIdentityService.getUser(id, provider, idType);
+        userId = userExternalIdentityService.getUserV1(id, provider, idType);
         if (userId == null) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.externalIdNotFound,
@@ -264,12 +264,18 @@ public class UserProfileReadActor extends BaseActor {
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
-              List<Map<String, String>> resExternalIds = fetchUserExternalIdentity(userId);
+              ProjectLogger.log("Get external Ids explicitly from usr_external_identity for v3");
+              List<Map<String, String>> resExternalIds =
+                  userExternalIdentityService.getUserExternalIds(userId);
+              decryptUserExternalIds(resExternalIds);
+              UserUtil.updateExternalIdsWithProvider(resExternalIds);
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
         } else {
           // fetch user external identity
+          ProjectLogger.log(
+              "Get external Ids from both declarations and usr_external_identity for merge them");
           List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
@@ -384,10 +390,14 @@ public class UserProfileReadActor extends BaseActor {
 
     List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId);
 
+    decryptUserExternalIds(dbResExternalIds);
+    // update orgId to provider in externalIds
+    UserUtil.updateExternalIdsWithProvider(dbResExternalIds);
+    return dbResExternalIds;
+  }
+
+  private void decryptUserExternalIds(List<Map<String, String>> dbResExternalIds) {
     if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      // update provider with channel from orgId
-      String orgId = dbResExternalIds.get(0).get(JsonKey.ORIGINAL_PROVIDER);
-      String provider = UserUtil.fetchProviderByOrgId(orgId);
       dbResExternalIds
           .stream()
           .forEach(
@@ -423,7 +433,6 @@ public class UserProfileReadActor extends BaseActor {
                   s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
                 }
 
-                s.put(JsonKey.PROVIDER, provider);
                 s.remove(JsonKey.EXTERNAL_ID);
                 s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
                 s.remove(JsonKey.ORIGINAL_ID_TYPE);
@@ -436,8 +445,6 @@ public class UserProfileReadActor extends BaseActor {
                 s.remove(JsonKey.SLUG);
               });
     }
-
-    return dbResExternalIds;
   }
 
   @SuppressWarnings("unchecked")
