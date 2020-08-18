@@ -37,6 +37,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.Promise;
@@ -424,13 +425,16 @@ public class UserSkillManagementActorTest {
     promise.success(createGetSkillResponse());
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(esDtoMap)),
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName())))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     Promise<Map<String, Object>> promise_esDtoMap = Futures.promise();
     promise_esDtoMap.success(esDtoMap);
 
     when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName()), Mockito.eq(userId)))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.eq(userId),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise_esDtoMap.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise_esDtoMap.future())).thenReturn(esDtoMap);
     when(ElasticSearchHelper.getResponseFromFuture(promise.future()))
@@ -449,12 +453,15 @@ public class UserSkillManagementActorTest {
     promise.success(createGetSkillResponse());
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(esDtoMap)),
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName())))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     Promise<Map<String, Object>> promise_esDtoMap = Futures.promise();
     promise_esDtoMap.success(esDtoMap);
     when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName()), Mockito.eq(userId)))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.eq(userId),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise_esDtoMap.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise_esDtoMap.future())).thenReturn(esDtoMap);
     when(ElasticSearchHelper.getResponseFromFuture(promise.future()))

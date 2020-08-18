@@ -92,9 +92,11 @@ public class LocationActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 
-    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString()))
+    when(esSearch.search(
+            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
-    when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esSearch.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     data = getDataMap();
   }
@@ -166,7 +168,8 @@ public class LocationActorTest {
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getContentMapFromES());
-    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString()))
+    when(esSearch.search(
+            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     boolean result =
         testScenario(

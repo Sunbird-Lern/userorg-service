@@ -54,7 +54,7 @@ public class FeedServiceImpl implements IFeedService {
     // save data to ES
     dbMap.put(JsonKey.FEED_DATA, feedData);
     dbMap.put(JsonKey.CREATED_ON, Calendar.getInstance().getTimeInMillis());
-    getESInstance().save(ProjectUtil.EsType.userfeed.getTypeName(), feedId, dbMap);
+    getESInstance().save(ProjectUtil.EsType.userfeed.getTypeName(), feedId, dbMap, null);
     return response;
   }
 
@@ -76,7 +76,7 @@ public class FeedServiceImpl implements IFeedService {
     // update data to ES
     dbMap.put(JsonKey.FEED_DATA, feedData);
     dbMap.put(JsonKey.UPDATED_ON, Calendar.getInstance().getTimeInMillis());
-    getESInstance().update(ProjectUtil.EsType.userfeed.getTypeName(), feed.getId(), dbMap);
+    getESInstance().update(ProjectUtil.EsType.userfeed.getTypeName(), feed.getId(), dbMap, null);
     return response;
   }
 
@@ -120,7 +120,7 @@ public class FeedServiceImpl implements IFeedService {
   public Response search(SearchDTO searchDTO) {
     ProjectLogger.log("FeedServiceImpl:search method called : ", LoggerEnum.INFO.name());
     Future<Map<String, Object>> resultF =
-        getESInstance().search(searchDTO, ProjectUtil.EsType.userfeed.getTypeName());
+        getESInstance().search(searchDTO, ProjectUtil.EsType.userfeed.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
@@ -134,7 +134,7 @@ public class FeedServiceImpl implements IFeedService {
         "FeedServiceImpl:delete method called for feedId : " + id, LoggerEnum.INFO.name());
     getCassandraInstance()
         .deleteRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), id, null);
-    getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id);
+    getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id, null);
   }
 
   private Response saveFeed(Map<String, Object> feed) {

@@ -210,7 +210,7 @@ public class UserUtil {
               ? ((String) userMap.get(JsonKey.USER_ID))
               : ((String) userMap.get(JsonKey.ID));
       Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
       user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
       if (MapUtils.isEmpty(user)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound, null);
@@ -238,7 +238,7 @@ public class UserUtil {
     String userId = getUserIdFromExternalId(userMap);
     if (!StringUtils.isEmpty(userId)) {
       Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
       user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
     }
     return user;
@@ -859,7 +859,7 @@ public class UserUtil {
 
   public static Map<String, Object> validateManagedByUser(String managedBy) {
     Future<Map<String, Object>> managedByInfoF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy, null);
     Map<String, Object> managedByInfo =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(managedByInfoF);
     if (ProjectUtil.isNull(managedByInfo)
@@ -968,7 +968,7 @@ public class UserUtil {
     try {
       if (StringUtils.isNotBlank(orgId)) {
         Future<Map<String, Object>> esOrgResF =
-            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
         Map<String, Object> org =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
 
@@ -993,7 +993,7 @@ public class UserUtil {
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);
         Future<Map<String, Object>> esOrgResF =
-            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
+            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null);
         Map<String, Object> esResOrg =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
         List<Map<String, Object>> orgList =

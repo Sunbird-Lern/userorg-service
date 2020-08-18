@@ -285,7 +285,7 @@ public class TenantMigrationActor extends BaseActor {
       if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))) {
         orgId = (String) migrateReq.get(JsonKey.ORG_ID);
         Future<Map<String, Object>> resultF =
-            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
         Map<String, Object> result =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
         if (MapUtils.isEmpty(result)) {

@@ -165,7 +165,7 @@ public class UserProfileReadActor extends BaseActor {
     Map<String, Object> result = null;
     if (!isPrivate) {
       Future<Map<String, Object>> resultF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
       try {
         Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
         if (object != null) {
@@ -250,7 +250,7 @@ public class UserProfileReadActor extends BaseActor {
         // and merge it with user index data
         Future<Map<String, Object>> privateResultF =
             esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId);
+                ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, null);
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
 
@@ -473,7 +473,8 @@ public class UserProfileReadActor extends BaseActor {
     try {
       if (isNotNull(result.get(JsonKey.ROOT_ORG_ID))) {
         String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-        return esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), rootOrgId);
+        return esUtil.getDataByIdentifier(
+            ProjectUtil.EsType.organisation.getTypeName(), rootOrgId, null);
       }
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
@@ -584,7 +585,7 @@ public class UserProfileReadActor extends BaseActor {
         searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
         searchDTO.setFields(orgfields);
         Future<Map<String, Object>> esresultF =
-            esUtil.search(searchDTO, EsType.organisation.getTypeName());
+            esUtil.search(searchDTO, EsType.organisation.getTypeName(), null);
         Map<String, Object> esresult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esresultF);
         List<Map<String, Object>> esContent =
@@ -703,7 +704,8 @@ public class UserProfileReadActor extends BaseActor {
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     searchDTO.setFields(fields);
 
-    Future<Map<String, Object>> resultF = esUtil.search(searchDTO, typeToSearch.getTypeName());
+    Future<Map<String, Object>> resultF =
+        esUtil.search(searchDTO, typeToSearch.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -790,7 +792,7 @@ public class UserProfileReadActor extends BaseActor {
       filter.put(JsonKey.LOGIN_ID, loginId);
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
       Future<Map<String, Object>> esResponseF =
-          esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+          esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
       Map<String, Object> esResponse =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
       List<Map<String, Object>> userList =
@@ -884,7 +886,8 @@ public class UserProfileReadActor extends BaseActor {
         Future<Map<String, Object>> privateResultF =
             esUtil.getDataByIdentifier(
                 ProjectUtil.EsType.userprofilevisibility.getTypeName(),
-                (String) result.get(JsonKey.USER_ID));
+                (String) result.get(JsonKey.USER_ID),
+                null);
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
         // fetch user external identity
@@ -1078,7 +1081,8 @@ public class UserProfileReadActor extends BaseActor {
         LoggerEnum.INFO.name());
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
-    Future<Map<String, Object>> esFuture = esUtil.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esFuture =
+        esUtil.search(searchDTO, EsType.user.getTypeName(), null);
     return esFuture;
   }
 
@@ -1110,7 +1114,7 @@ public class UserProfileReadActor extends BaseActor {
 
   private void handleUserSearchAsyncRequest(SearchDTO searchDto, Request actorMessage) {
     Future<Map<String, Object>> futureResponse =
-        esUtil.search(searchDto, EsType.user.getTypeName());
+        esUtil.search(searchDto, EsType.user.getTypeName(), null);
 
     Future<Map<String, Object>> userResponse =
         futureResponse.map(

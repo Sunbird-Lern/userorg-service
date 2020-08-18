@@ -139,7 +139,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
 
   Map<String, Object> getUser(String userId) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null || result.size() > 0) {
@@ -150,7 +150,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
 
   Map<String, Object> getOrg(String orgId) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null && result.size() > 0) {

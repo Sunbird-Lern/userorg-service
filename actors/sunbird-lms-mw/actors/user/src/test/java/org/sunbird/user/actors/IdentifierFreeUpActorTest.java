@@ -118,7 +118,11 @@ public class IdentifierFreeUpActorTest {
         .thenReturn(new Response());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
-    when(elasticSearchService.update(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(elasticSearchService.update(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);
@@ -157,7 +161,11 @@ public class IdentifierFreeUpActorTest {
         .thenReturn(new Response());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
-    when(elasticSearchService.update(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(elasticSearchService.update(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);

@@ -342,7 +342,8 @@ public class EmailServiceActor extends BaseActor {
         Future<Map<String, Object>> esResultF =
             esService.search(
                 ElasticSearchHelper.createSearchDTO(recipientSearchQuery),
-                EsType.user.getTypeName());
+                EsType.user.getTypeName(),
+                null);
         esResult = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
       } catch (Exception ex) {
         ProjectLogger.log(
@@ -387,7 +388,7 @@ public class EmailServiceActor extends BaseActor {
       return orgName;
     }
     Future<Map<String, Object>> esUserResultF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), usrId);
+        esService.getDataByIdentifier(EsType.user.getTypeName(), usrId, null);
     Map<String, Object> esUserResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esUserResultF);
     if (null != esUserResult) {
@@ -395,7 +396,7 @@ public class EmailServiceActor extends BaseActor {
       if (!(StringUtils.isBlank(rootOrgId))) {
 
         Future<Map<String, Object>> esOrgResultF =
-            esService.getDataByIdentifier(EsType.organisation.getTypeName(), rootOrgId);
+            esService.getDataByIdentifier(EsType.organisation.getTypeName(), rootOrgId, null);
         Map<String, Object> esOrgResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResultF);
         if (null != esOrgResult) {
@@ -421,7 +422,8 @@ public class EmailServiceActor extends BaseActor {
     Map<String, Object> additionalProperties = new HashMap<>();
     additionalProperties.put(JsonKey.EMAIL, encryptedMail);
     searchDTO.addAdditionalProperty(JsonKey.FILTERS, additionalProperties);
-    Future<Map<String, Object>> esResultF = esService.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esResultF =
+        esService.search(searchDTO, EsType.user.getTypeName(), null);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isNotEmpty(esResult)

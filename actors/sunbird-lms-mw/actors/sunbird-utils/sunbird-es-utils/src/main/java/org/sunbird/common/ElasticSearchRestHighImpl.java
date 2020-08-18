@@ -41,6 +41,7 @@ import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ConnectionManager;
@@ -62,10 +63,12 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    * @param index String ES index name
    * @param identifier ES column identifier as an String
    * @param data Map<String,Object>
+   * @param context
    * @return Future<String> which contains identifier for created data
    */
   @Override
-  public Future<String> save(String index, String identifier, Map<String, Object> data) {
+  public Future<String> save(
+      String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
     Promise<String> promise = Futures.promise();
     ProjectLogger.log(
@@ -144,10 +147,12 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    * @param index String ES index name
    * @param identifier ES column identifier as an String
    * @param data Map<String,Object>
+   * @param context
    * @return true or false
    */
   @Override
-  public Future<Boolean> update(String index, String identifier, Map<String, Object> data) {
+  public Future<Boolean> update(
+      String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "ElasticSearchRestHighImpl:update: method started at =="
@@ -207,10 +212,12 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    *
    * @param type String
    * @param identifier String
+   * @param context
    * @return Map<String,Object> or empty map
    */
   @Override
-  public Future<Map<String, Object>> getDataByIdentifier(String index, String identifier) {
+  public Future<Map<String, Object>> getDataByIdentifier(
+      String index, String identifier, RequestContext context) {
     long startTime = System.currentTimeMillis();
     Promise<Map<String, Object>> promise = Futures.promise();
     if (StringUtils.isNotEmpty(identifier) && StringUtils.isNotEmpty(index)) {
@@ -275,12 +282,13 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   /**
    * This method will remove data from ES based on identifier.
    *
-   * @param index String
    * @param type String
+   * @param index String
    * @param identifier String
+   * @param context
    */
   @Override
-  public Future<Boolean> delete(String index, String identifier) {
+  public Future<Boolean> delete(String index, String identifier, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "ElasticSearchRestHighImpl:delete: method started at ==" + startTime,
@@ -341,11 +349,13 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    * or multiple type or null
    *
    * @param type var arg of String
+   * @param context
    * @return search result as Map.
    */
   @Override
   @SuppressWarnings({"unchecked", "rawtypes"})
-  public Future<Map<String, Object>> search(SearchDTO searchDTO, String index) {
+  public Future<Map<String, Object>> search(
+      SearchDTO searchDTO, String index, RequestContext context) {
     long startTime = System.currentTimeMillis();
 
     ProjectLogger.log(
@@ -530,13 +540,15 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   /**
    * This method will do the bulk data insertion.
    *
-   * @param index String index name
    * @param type String type name
+   * @param index String index name
    * @param dataList List<Map<String, Object>>
+   * @param context
    * @return boolean
    */
   @Override
-  public Future<Boolean> bulkInsert(String index, List<Map<String, Object>> dataList) {
+  public Future<Boolean> bulkInsert(
+      String index, List<Map<String, Object>> dataList, RequestContext context) {
     long startTime = System.currentTimeMillis();
     ProjectLogger.log(
         "ElasticSearchRestHighImpl:bulkInsert: method started at =="
@@ -628,14 +640,16 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    * This method will update data based on identifier.take the data based on identifier and merge
    * with incoming data then update it.
    *
-   * @param index String
    * @param type String
+   * @param index String
    * @param identifier String
    * @param data Map<String,Object>
+   * @param context
    * @return boolean
    */
   @Override
-  public Future<Boolean> upsert(String index, String identifier, Map<String, Object> data) {
+  public Future<Boolean> upsert(
+      String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
     Promise<Boolean> promise = Futures.promise();
     ProjectLogger.log(
@@ -696,15 +710,16 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   /**
    * This method will return map of objects on the basis of ids provided.
    *
+   * @param data Map<String,Object>
    * @param ids List of String
    * @param fields List of String
    * @param index index of elasticserach for query
-   * @param data Map<String,Object>
+   * @param context
    * @return future of requested data in the form of map
    */
   @Override
   public Future<Map<String, Map<String, Object>>> getEsResultByListOfIds(
-      List<String> ids, List<String> fields, String index) {
+      List<String> ids, List<String> fields, String index, RequestContext context) {
     long startTime = System.currentTimeMillis();
 
     Map<String, Object> filters = new HashMap<>();
@@ -714,7 +729,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     searchDTO.setFields(fields);
 
-    Future<Map<String, Object>> resultF = search(searchDTO, index);
+    Future<Map<String, Object>> resultF = search(searchDTO, index, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     List<Map<String, Object>> esContent = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);

@@ -432,7 +432,7 @@ public class OrganisationManagementActor extends BaseActor {
     SearchDTO searchDto = new SearchDTO();
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> resultF =
-        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName());
+        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     List<Map<String, Object>> dataMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
@@ -1112,7 +1112,7 @@ public class OrganisationManagementActor extends BaseActor {
     }
     String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -1282,7 +1282,7 @@ public class OrganisationManagementActor extends BaseActor {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, requestDbMap);
     Future<Map<String, Object>> esResponseF =
-        esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
+        esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> list = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
@@ -1474,7 +1474,7 @@ public class OrganisationManagementActor extends BaseActor {
 
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Future<Map<String, Object>> resultF = esService.search(searchDTO, type);
+    Future<Map<String, Object>> resultF = esService.search(searchDTO, type, null);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return esResponse;
@@ -1617,7 +1617,7 @@ public class OrganisationManagementActor extends BaseActor {
       SearchDTO searchDTO = new SearchDTO();
       searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filterMap);
       Future<Map<String, Object>> esResponseF =
-          esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
+          esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null);
       Map<String, Object> esResponse =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
 

@@ -1,17 +1,14 @@
 package org.sunbird.actorutil.user.impl;
 
 import akka.actor.ActorRef;
-
-import java.io.IOException;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.actorutil.InterServiceCommunication;
@@ -70,7 +67,7 @@ public class UserClientImpl implements UserClient {
     searchDto.setFacets(list);
 
     Future<Map<String, Object>> esResponseF =
-        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
 
@@ -124,9 +121,9 @@ public class UserClientImpl implements UserClient {
 
   /**
    * Get managed user list for LUA uuid (JsonKey.ID)
+   *
    * @param actorRef
    * @param req
-   *
    * @return Map<String, Object>
    */
   public Map<String, Object> searchManagedUser(ActorRef actorRef, Request req) {
@@ -134,17 +131,17 @@ public class UserClientImpl implements UserClient {
 
     Map<String, Object> searchRequestMap = new HashMap<>();
     Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.MANAGED_BY, (String)req.get(JsonKey.ID));
+    filters.put(JsonKey.MANAGED_BY, (String) req.get(JsonKey.ID));
     List<String> objectType = new ArrayList<String>();
     objectType.add("user");
     filters.put(JsonKey.OBJECT_TYPE, objectType);
     searchRequestMap.put(JsonKey.FILTERS, filters);
 
     String sortByField = (String) req.get(JsonKey.SORTBY);
-    if(StringUtils.isNotEmpty(sortByField)) {
+    if (StringUtils.isNotEmpty(sortByField)) {
       String order = (String) req.get(JsonKey.ORDER);
       Map<String, Object> sortby = new HashMap<>();
-      sortby.put(sortByField, StringUtils.isEmpty(order)?"asc":order);
+      sortby.put(sortByField, StringUtils.isEmpty(order) ? "asc" : order);
       searchRequestMap.put(JsonKey.SORT_BY, sortby);
     }
 
@@ -156,28 +153,24 @@ public class UserClientImpl implements UserClient {
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       obj = Await.result(Patterns.ask(actorRef, request, t), t.duration());
-    }catch (Exception e) {
-      ProjectLogger.log(
-              "getFuture: Exception occured with error message = "
-                      + e.getMessage(),
-              e);
+    } catch (Exception e) {
+      ProjectLogger.log("getFuture: Exception occured with error message = " + e.getMessage(), e);
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
 
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
-      return (Map<String, Object>)responseObj.getResult().get(JsonKey.RESPONSE);
+      return (Map<String, Object>) responseObj.getResult().get(JsonKey.RESPONSE);
     } else if (obj instanceof ProjectCommonException) {
       throw (ProjectCommonException) obj;
     } else {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
-
 }

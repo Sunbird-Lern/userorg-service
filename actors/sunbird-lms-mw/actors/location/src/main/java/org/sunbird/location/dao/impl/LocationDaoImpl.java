@@ -58,7 +58,7 @@ public class LocationDaoImpl implements LocationDao {
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     addSortBy(searchDto);
     String type = ProjectUtil.EsType.location.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type);
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();

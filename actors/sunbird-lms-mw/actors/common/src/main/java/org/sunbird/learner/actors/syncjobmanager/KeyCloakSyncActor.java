@@ -128,7 +128,7 @@ public class KeyCloakSyncActor extends BaseActor {
               map.put(JsonKey.ID, userId);
             }
             cassandraOperation.updateRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), map, null);
-            esService.update(ProjectUtil.EsType.user.getTypeName(), userId, map);
+            esService.update(ProjectUtil.EsType.user.getTypeName(), userId, map, null);
           }
           ProjectLogger.log("User sync failed in KeyCloakSyncActor for userID : " + userId);
         }

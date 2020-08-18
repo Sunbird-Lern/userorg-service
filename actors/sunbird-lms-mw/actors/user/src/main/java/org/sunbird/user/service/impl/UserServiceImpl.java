@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     map.put(JsonKey.FILTERS, filters);
     SearchDTO searchDto = Util.createSearchDto(map);
     Future<Map<String, Object>> resultF =
-        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
@@ -136,14 +136,15 @@ public class UserServiceImpl implements UserService {
   @Override
   public void syncUserProfile(
       String userId, Map<String, Object> userDataMap, Map<String, Object> userPrivateDataMap) {
-    esUtil.save(ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, userPrivateDataMap);
-    esUtil.save(ProjectUtil.EsType.user.getTypeName(), userId, userDataMap);
+    esUtil.save(
+        ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, userPrivateDataMap, null);
+    esUtil.save(ProjectUtil.EsType.user.getTypeName(), userId, userDataMap, null);
   }
 
   @Override
   public Map<String, Object> esGetPublicUserProfileById(String userId) {
     Future<Map<String, Object>> esResultF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (esResult == null || esResult.size() == 0) {
@@ -158,7 +159,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public Map<String, Object> esGetPrivateUserProfileById(String userId) {
     Future<Map<String, Object>> resultF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId);
+        esUtil.getDataByIdentifier(
+            ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, null);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
@@ -185,7 +187,8 @@ public class UserServiceImpl implements UserService {
     Map<String, Object> custodianOrg = null;
     if (StringUtils.isNotBlank(custodianOrgId)) {
       Future<Map<String, Object>> custodianOrgF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), custodianOrgId);
+          esUtil.getDataByIdentifier(
+              ProjectUtil.EsType.organisation.getTypeName(), custodianOrgId, null);
       custodianOrg = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(custodianOrgF);
       if (MapUtils.isNotEmpty(custodianOrg)) {
 
@@ -239,7 +242,7 @@ public class UserServiceImpl implements UserService {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, EsType.organisation.getTypeName());
+        esUtil.search(searchDTO, EsType.organisation.getTypeName(), null);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isNotEmpty(esResult)
@@ -407,7 +410,8 @@ public class UserServiceImpl implements UserService {
     searchDTO.setFields(list);
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
 
-    Future<Map<String, Object>> esResultF = esUtil.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esResultF =
+        esUtil.search(searchDTO, EsType.user.getTypeName(), null);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
 

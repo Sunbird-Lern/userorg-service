@@ -30,6 +30,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -75,7 +76,7 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.CREATE_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -101,7 +102,7 @@ public class NotesManagementActorTest {
     req.setRequest(reqMap);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(new HashMap<>());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     req.setOperation(ActorOperations.CREATE_NOTE.getValue());
     boolean result = testScenario(req, ResponseCode.invalidUserId);
@@ -119,7 +120,7 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.UPDATE_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(new HashMap<>());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     boolean result = testScenario(req, ResponseCode.unAuthorized);
     assertTrue(result);
@@ -137,7 +138,7 @@ public class NotesManagementActorTest {
     promise.success(reqMap);
 
     req.setOperation(ActorOperations.UPDATE_NOTE.getValue());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     boolean result = testScenario(req, ResponseCode.errorForbidden);
     assertTrue(result);
@@ -156,7 +157,7 @@ public class NotesManagementActorTest {
     promise.success(reqMap);
     Promise<Map<String, Object>> promiseAny = Futures.promise();
     promiseAny.success(new HashMap<>());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future())
         .thenReturn(promiseAny.future());
     boolean result = testScenario(req, ResponseCode.invalidNoteId);
@@ -174,7 +175,7 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.UPDATE_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future())
         .thenReturn(promise.future());
     when(cassandraOperation.updateRecord(
@@ -194,7 +195,8 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.SEARCH_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.search(Mockito.any(), Mockito.anyString())).thenReturn(promise.future());
+    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
     boolean result = testScenario(req, null);
     assertTrue(result);
   }
@@ -211,7 +213,7 @@ public class NotesManagementActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
 
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     boolean result = testScenario(req, ResponseCode.errorForbidden);
     assertTrue(result);
@@ -224,7 +226,7 @@ public class NotesManagementActorTest {
     req.setRequest(reqMap);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(new HashMap<>());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     req.setOperation(ActorOperations.GET_NOTE.getValue());
     boolean result = testScenario(req, ResponseCode.invalidParameterValue);
@@ -242,9 +244,10 @@ public class NotesManagementActorTest {
     req.setRequest(reqMap);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(esUtil.search(Mockito.any(), Mockito.anyString())).thenReturn(promise.future());
+    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
     req.setOperation(ActorOperations.GET_NOTE.getValue());
     boolean result = testScenario(req, ResponseCode.invalidNoteId);
     assertTrue(result);
@@ -261,9 +264,10 @@ public class NotesManagementActorTest {
     req.setRequest(reqMap);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(esUtil.search(Mockito.any(), Mockito.anyString())).thenReturn(promise.future());
+    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
     req.setOperation(ActorOperations.GET_NOTE.getValue());
     boolean result = testScenario(req, null);
     assertTrue(result);
@@ -280,7 +284,7 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.DELETE_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future())
         .thenReturn(promise.future());
     when(cassandraOperation.updateRecord(
@@ -303,7 +307,7 @@ public class NotesManagementActorTest {
     promise.success(reqMap);
     Promise<Map<String, Object>> promise_any = Futures.promise();
     promise_any.success(new HashMap<>());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future())
         .thenReturn(promise_any.future());
     boolean result = testScenario(req, ResponseCode.invalidNoteId);
@@ -321,7 +325,7 @@ public class NotesManagementActorTest {
     req.setOperation(ActorOperations.DELETE_NOTE.getValue());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     boolean result = testScenario(req, ResponseCode.errorForbidden);
     assertTrue(result);

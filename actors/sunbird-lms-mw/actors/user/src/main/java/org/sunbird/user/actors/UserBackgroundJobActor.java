@@ -129,7 +129,7 @@ public class UserBackgroundJobActor extends BaseActor {
   private void upsertDataToElastic(
       String indexName, String typeName, String id, Map<String, Object> userDetails) {
 
-    Future<Boolean> bool = esUtil.upsert(typeName, id, userDetails);
+    Future<Boolean> bool = esUtil.upsert(typeName, id, userDetails, null);
 
     ProjectLogger.log(
         "Getting ES save response for type , identifier=="

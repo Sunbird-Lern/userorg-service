@@ -67,7 +67,7 @@ public class UserBadgeAssertion extends BaseActor {
     Future<Map<String, Object>> resultF =
         EsClientFactory.getInstance(JsonKey.REST)
             .getDataByIdentifier(
-                ProjectUtil.EsType.user.getTypeName(), (String) map.get(JsonKey.USER_ID));
+                ProjectUtil.EsType.user.getTypeName(), (String) map.get(JsonKey.USER_ID), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (MapUtils.isEmpty(result)) {
@@ -112,7 +112,7 @@ public class UserBadgeAssertion extends BaseActor {
       String indexName, String typeName, String identifier, Map<String, Object> data) {
 
     Future<Boolean> responseF =
-        EsClientFactory.getInstance(JsonKey.REST).update(typeName, identifier, data);
+        EsClientFactory.getInstance(JsonKey.REST).update(typeName, identifier, data, null);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (!response) {
       ProjectLogger.log(

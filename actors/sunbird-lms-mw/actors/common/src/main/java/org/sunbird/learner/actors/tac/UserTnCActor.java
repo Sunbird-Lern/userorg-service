@@ -71,7 +71,7 @@ public class UserTnCActor extends BaseActor {
     }
     // Search user account in ES
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result == null || result.size() == 0) {

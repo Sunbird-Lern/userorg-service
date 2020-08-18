@@ -140,7 +140,8 @@ public class IdentifierFreeUpActor extends BaseActor {
             .update(
                 ProjectUtil.EsType.user.getTypeName(),
                 (String) userDbMap.get(JsonKey.ID),
-                userDbMap);
+                userDbMap,
+                null);
     return (boolean) ElasticSearchHelper.getResponseFromFuture(future);
   }
 

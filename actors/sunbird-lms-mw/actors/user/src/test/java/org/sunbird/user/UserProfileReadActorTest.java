@@ -37,6 +37,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -285,7 +286,9 @@ public class UserProfileReadActorTest {
   public void setEsSearchResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
+    when(esService.search(
+            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
   }
 
   private static Map<String, Object> getUserExistsSearchResponseMap() {
@@ -365,13 +368,16 @@ public class UserProfileReadActorTest {
   public void setEsResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
   }
 
   public void setEsResponseForSearch(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
+    when(esService.search(
+            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
   }
 }

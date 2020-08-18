@@ -136,12 +136,17 @@ public abstract class UserManagementActorTestBase {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     Map<String, Object> map = new HashMap<>();
     Promise<String> esPromise = Futures.promise();
     esPromise.success("success");
-    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(esService.save(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(esPromise.future());
     PowerMockito.mockStatic(Util.class);
     Util.getUserProfileConfig(Mockito.any(ActorRef.class));
@@ -162,7 +167,8 @@ public abstract class UserManagementActorTestBase {
   public void mockForUserOrgUpdate() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getListOrgResponse());
-    when(esService.search(Mockito.any(), Mockito.anyString())).thenReturn(promise.future());
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
     when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
     when(cassandraOperation.insertRecord(
             Mockito.anyString(),

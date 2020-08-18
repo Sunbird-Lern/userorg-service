@@ -74,7 +74,7 @@ public class SearchHandlerActor extends BaseActor {
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
-    Future<Map<String, Object>> resultF = esService.search(searchDto, filterObjectType);
+    Future<Map<String, Object>> resultF = esService.search(searchDto, filterObjectType, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
@@ -117,7 +117,7 @@ public class SearchHandlerActor extends BaseActor {
 
   private void handleOrgSearchAsyncRequest(
       String indexType, SearchDTO searchDto, Map<String, Object> context) {
-    Future<Map<String, Object>> futureResponse = esService.search(searchDto, indexType);
+    Future<Map<String, Object>> futureResponse = esService.search(searchDto, indexType, null);
     Future<Response> response =
         futureResponse.map(
             new Mapper<Map<String, Object>, Response>() {

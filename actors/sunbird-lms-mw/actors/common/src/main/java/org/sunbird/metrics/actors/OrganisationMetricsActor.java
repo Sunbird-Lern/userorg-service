@@ -105,7 +105,7 @@ public class OrganisationMetricsActor extends BaseMetricsActor {
     String period = (String) actorMessage.get(JsonKey.PERIOD);
 
     Future<Map<String, Object>> requestedByInfoF =
-        esUtil.getDataByIdentifier(EsType.user.getTypeName(), requestedBy);
+        esUtil.getDataByIdentifier(EsType.user.getTypeName(), requestedBy, null);
     Map<String, Object> requestedByInfo =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(requestedByInfoF);
     if (ProjectUtil.isNull(requestedByInfo)
@@ -705,7 +705,7 @@ public class OrganisationMetricsActor extends BaseMetricsActor {
   private Map<String, Object> validateOrg(String orgId) {
     try {
       Future<Map<String, Object>> resultF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
       if (null == result || result.isEmpty()) {

@@ -200,7 +200,8 @@ public class UserSkillManagementActor extends BaseActor {
     fields.add(JsonKey.SKILLS);
     esDtoMap.put(JsonKey.FIELDS, fields);
     Future<Map<String, Object>> resultF =
-        esService.search(ElasticSearchHelper.createSearchDTO(esDtoMap), EsType.user.getTypeName());
+        esService.search(
+            ElasticSearchHelper.createSearchDTO(esDtoMap), EsType.user.getTypeName(), null);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
@@ -570,7 +571,7 @@ public class UserSkillManagementActor extends BaseActor {
     Map<String, Object> esMap = new HashMap<>();
     esMap.put(JsonKey.SKILLS, responseList);
     Future<Map<String, Object>> profileF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(EsType.user.getTypeName(), userId, null);
     Map<String, Object> profile =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(profileF);
     if (MapUtils.isNotEmpty(profile)) {
@@ -583,15 +584,15 @@ public class UserSkillManagementActor extends BaseActor {
       if (MapUtils.isNotEmpty(privateVisibilityMap)
           && privateVisibilityMap.containsKey(JsonKey.SKILLS)) {
         Future<Map<String, Object>> visibilityMapF =
-            esService.getDataByIdentifier(EsType.userprofilevisibility.getTypeName(), userId);
+            esService.getDataByIdentifier(EsType.userprofilevisibility.getTypeName(), userId, null);
         Map<String, Object> visibilityMap =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(visibilityMapF);
         if (MapUtils.isNotEmpty(visibilityMap)) {
           visibilityMap.putAll(esMap);
-          esService.save(EsType.userprofilevisibility.getTypeName(), userId, visibilityMap);
+          esService.save(EsType.userprofilevisibility.getTypeName(), userId, visibilityMap, null);
         }
       } else {
-        esService.update(EsType.user.getTypeName(), userId, esMap);
+        esService.update(EsType.user.getTypeName(), userId, esMap, null);
       }
     }
   }

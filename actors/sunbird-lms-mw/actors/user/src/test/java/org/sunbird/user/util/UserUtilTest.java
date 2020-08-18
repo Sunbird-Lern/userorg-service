@@ -247,7 +247,7 @@ public class UserUtilTest {
     Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
     Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
     Assert.assertTrue(true);

@@ -134,7 +134,7 @@ public class EsSyncBackgroundActor extends BaseActor {
         result.add(getOrgDetails(itr.next()));
       }
     }
-    esService.bulkInsert(getType(objectType), result);
+    esService.bulkInsert(getType(objectType), result, null);
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
 

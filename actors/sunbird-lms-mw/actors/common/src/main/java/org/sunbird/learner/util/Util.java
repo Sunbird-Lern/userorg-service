@@ -461,7 +461,7 @@ public final class Util {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
 
-    Future<Map<String, Object>> mapF = esService.search(searchDTO, type);
+    Future<Map<String, Object>> mapF = esService.search(searchDTO, type, null);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(mapF);
   }
 
@@ -613,7 +613,9 @@ public final class Util {
     if (JsonKey.USER.equalsIgnoreCase((String) request.getContext().get(JsonKey.ACTOR_TYPE))) {
       Future<Map<String, Object>> resultF =
           esService.getDataByIdentifier(
-              EsType.user.getTypeName(), (String) request.getContext().get(JsonKey.REQUESTED_BY));
+              EsType.user.getTypeName(),
+              (String) request.getContext().get(JsonKey.REQUESTED_BY),
+              null);
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -783,7 +785,7 @@ public final class Util {
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     Future<Map<String, Object>> resultf =
-        esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+        esService.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
     if (MapUtils.isNotEmpty(result)) {
@@ -1142,7 +1144,8 @@ public final class Util {
       esService.upsert(
           ProjectUtil.EsType.userprofilevisibility.getTypeName(),
           (String) userMap.get(JsonKey.USER_ID),
-          privateFieldsMap);
+          privateFieldsMap,
+          null);
     } else {
       userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     }
@@ -1269,7 +1272,7 @@ public final class Util {
 
         Future<Map<String, Map<String, Object>>> orgInfoMapF =
             esService.getEsResultByListOfIds(
-                organisationIds, fields, EsType.organisation.getTypeName());
+                organisationIds, fields, EsType.organisation.getTypeName(), null);
         Map<String, Map<String, Object>> orgInfoMap =
             (Map<String, Map<String, Object>>)
                 ElasticSearchHelper.getResponseFromFuture(orgInfoMapF);

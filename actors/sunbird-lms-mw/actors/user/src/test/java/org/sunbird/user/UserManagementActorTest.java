@@ -19,6 +19,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
 import scala.concurrent.Await;
@@ -153,7 +154,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testCreateUserFailureWithInvalidOrg() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(null);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     boolean result =
         testScenario(

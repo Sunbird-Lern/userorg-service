@@ -89,7 +89,7 @@ public class UserTnCActorTest {
   public void testAcceptUserTcnSuccessWithAcceptFirstTime() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getUser(null));
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     Response response =
         setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
@@ -101,7 +101,7 @@ public class UserTnCActorTest {
   public void testAcceptUserTncSuccessAlreadyAccepted() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getUser(LATEST_VERSION));
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     Response response =
         setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
@@ -116,7 +116,7 @@ public class UserTnCActorTest {
     recipientSearchQuery.put(JsonKey.ROOT_ORG_ID, "anyRootId");
     recipientSearchQuery.put(JsonKey.IS_DELETED, true);
     promise_recipientSearchQuery.trySuccess(recipientSearchQuery);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise_recipientSearchQuery.future());
     ProjectCommonException response =
         setRequest(ACCEPTED_CORRECT_VERSION)

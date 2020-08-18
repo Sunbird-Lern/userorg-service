@@ -68,7 +68,7 @@ public class FeedServiceImplTest {
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
+    when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     initCassandraForSuccess();
@@ -136,7 +136,7 @@ public class FeedServiceImplTest {
   public void testSearch() {
     Response response = feedService.search(search);
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
-    PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
+    PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
     Assert.assertTrue(esResponse != null);
   }

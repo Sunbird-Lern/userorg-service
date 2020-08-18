@@ -1244,7 +1244,8 @@ public class UserManagementActor extends BaseActor {
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
-        completeUserMap);
+        completeUserMap,
+        null);
   }
 
   private void saveUserToKafka(Map<String, Object> completeUserMap) {

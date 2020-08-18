@@ -247,7 +247,8 @@ public class UserRoleActorTest {
   private void mockGetOrgResponse(boolean isResponseRequired) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(isResponseRequired));
-    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg()))
+    when(esService.search(
+            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
   }
 

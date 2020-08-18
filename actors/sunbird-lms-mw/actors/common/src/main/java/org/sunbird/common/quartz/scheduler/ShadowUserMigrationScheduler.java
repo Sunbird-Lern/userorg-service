@@ -462,7 +462,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
         (Map<String, Object>)
             ElasticSearchHelper.getResponseFromFuture(
                 elasticSearchService.search(
-                    searchDTO, ProjectUtil.EsType.organisation.getTypeName()));
+                    searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null));
     if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) response.get(JsonKey.CONTENT))) {
       verifiedChannelOrgExternalIdSet.add(
           migrationUser.getChannel() + ":" + migrationUser.getOrgExternalId());

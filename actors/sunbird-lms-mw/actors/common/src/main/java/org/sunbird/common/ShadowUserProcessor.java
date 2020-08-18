@@ -72,7 +72,7 @@ public class ShadowUserProcessor {
         (Map<String, Object>)
             ElasticSearchHelper.getResponseFromFuture(
                 elasticSearchService.getDataByIdentifier(
-                    ProjectUtil.EsType.user.getTypeName(), shadowUser.getUserId()));
+                    ProjectUtil.EsType.user.getTypeName(), shadowUser.getUserId(), null));
     String userId = (String) esUser.get(JsonKey.ID);
     String rootOrgId = (String) esUser.get(JsonKey.ROOT_ORG_ID);
     ProjectLogger.log(
@@ -195,7 +195,7 @@ public class ShadowUserProcessor {
     Map<String, Object> response =
         (Map<String, Object>)
             ElasticSearchHelper.getResponseFromFuture(
-                elasticSearchService.search(searchDTO, JsonKey.USER));
+                elasticSearchService.search(searchDTO, JsonKey.USER, null));
     ProjectLogger.log(
         "ShadowUserProcessor:getUserMatchedIdentifierFromES:response got from elasticSearch is with processId: "
             + shadowUser.getProcessId()
@@ -505,7 +505,7 @@ public class ShadowUserProcessor {
           (Map<String, Object>)
               ElasticSearchHelper.getResponseFromFuture(
                   elasticSearchService.search(
-                      searchDTO, ProjectUtil.EsType.organisation.getTypeName()));
+                      searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null));
       List<Map<String, Object>> orgData =
           ((List<Map<String, Object>>) response.get(JsonKey.CONTENT));
       if (CollectionUtils.isNotEmpty(orgData)) {
@@ -533,7 +533,8 @@ public class ShadowUserProcessor {
   private void syncUserToES(String userId) {
     Map<String, Object> fullUserDetails = Util.getUserDetails(userId, null);
     try {
-      Future<Boolean> future = elasticSearchService.update(JsonKey.USER, userId, fullUserDetails);
+      Future<Boolean> future =
+          elasticSearchService.update(JsonKey.USER, userId, fullUserDetails, null);
       if ((boolean) ElasticSearchHelper.getResponseFromFuture(future)) {
         ProjectLogger.log(
             "ShadowUserMigrationScheduler:updateUserStatus: data successfully updated to elastic search with userId:"

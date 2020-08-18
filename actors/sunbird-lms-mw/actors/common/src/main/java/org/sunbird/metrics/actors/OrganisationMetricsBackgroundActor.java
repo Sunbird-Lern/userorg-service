@@ -242,7 +242,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
       try {
         Future<Map<String, Object>> resultF =
             esService.search(
-                createESRequest(filter, null, coursefields), EsType.user.getTypeName());
+                createESRequest(filter, null, coursefields), EsType.user.getTypeName(), null);
         Map<String, Object> result =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
         if (null != result && !result.isEmpty()) {
@@ -460,7 +460,8 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
     filter.put("organisations.organisationId", orgId);
     try {
       Future<Map<String, Object>> resultF =
-          esService.search(createESRequest(filter, null, coursefields), EsType.user.getTypeName());
+          esService.search(
+              createESRequest(filter, null, coursefields), EsType.user.getTypeName(), null);
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 

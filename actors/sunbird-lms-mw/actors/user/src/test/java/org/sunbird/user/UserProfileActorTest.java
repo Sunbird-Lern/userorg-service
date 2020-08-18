@@ -97,7 +97,7 @@ public class UserProfileActorTest {
     ActorRef subject = system.actorOf(props);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createGetResponse(true));
-    when(esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId))
+    when(esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any()))
         .thenReturn(createGetResponse(true));
@@ -116,7 +116,7 @@ public class UserProfileActorTest {
     ActorRef subject = system.actorOf(props);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(null);
-    when(esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId))
+    when(esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(null);
     Request reqObj = new Request();

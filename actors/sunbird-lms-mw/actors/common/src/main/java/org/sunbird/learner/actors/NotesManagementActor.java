@@ -280,7 +280,7 @@ public class NotesManagementActor extends BaseActor {
     excludedFields.add(JsonKey.IS_DELETED);
     searchDto.setExcludedFields(excludedFields);
     Future<Map<String, Object>> resultF =
-        esService.search(searchDto, EsType.usernotes.getTypeName());
+        esService.search(searchDto, EsType.usernotes.getTypeName(), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null) {
@@ -366,7 +366,7 @@ public class NotesManagementActor extends BaseActor {
 
     if (!StringUtils.isBlank(userId)) {
       Future<Map<String, Object>> dataF =
-          esService.getDataByIdentifier(EsType.user.getTypeName(), userId);
+          esService.getDataByIdentifier(EsType.user.getTypeName(), userId, null);
       Map<String, Object> data =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(dataF);
       if (null != data && !data.isEmpty()) {
@@ -399,7 +399,7 @@ public class NotesManagementActor extends BaseActor {
    */
   private Map<String, Object> getNoteRecordById(String noteId) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(EsType.usernotes.getTypeName(), noteId);
+        esService.getDataByIdentifier(EsType.usernotes.getTypeName(), noteId, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return result;

@@ -126,9 +126,9 @@ public class UserAssignRoleTest {
     promise.success(userOrg);
     Promise<Map<String, Object>> promise_es = Futures.promise();
     promise_es.success(esRespone);
-    PowerMockito.when(esService.getDataByIdentifier(Mockito.any(), Mockito.any()))
+    PowerMockito.when(esService.getDataByIdentifier(Mockito.any(), Mockito.any(), null))
         .thenReturn(promise.future());
-    PowerMockito.when(esService.search(Mockito.any(), Mockito.any()))
+    PowerMockito.when(esService.search(Mockito.any(), Mockito.any(), null))
         .thenReturn(promise_es.future());
   }
 

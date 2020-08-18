@@ -138,7 +138,9 @@ public class BackgroundJobManager extends BaseActor {
     String orgId = (String) actorMessage.get(JsonKey.ORGANISATION_ID);
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(), (String) actorMessage.get(JsonKey.USER_ID));
+            ProjectUtil.EsType.user.getTypeName(),
+            (String) actorMessage.get(JsonKey.USER_ID),
+            null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (type.equals(JsonKey.USER)) {
@@ -166,7 +168,7 @@ public class BackgroundJobManager extends BaseActor {
     Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(), (String) orgMap.get(JsonKey.USER_ID));
+            ProjectUtil.EsType.user.getTypeName(), (String) orgMap.get(JsonKey.USER_ID), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result.containsKey(JsonKey.ORGANISATIONS) && null != result.get(JsonKey.ORGANISATIONS)) {
@@ -197,7 +199,7 @@ public class BackgroundJobManager extends BaseActor {
     Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(), (String) orgMap.get(JsonKey.USER_ID));
+            ProjectUtil.EsType.user.getTypeName(), (String) orgMap.get(JsonKey.USER_ID), null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result.containsKey(JsonKey.ORGANISATIONS) && null != result.get(JsonKey.ORGANISATIONS)) {
@@ -275,7 +277,7 @@ public class BackgroundJobManager extends BaseActor {
 
   private boolean updateDataToElastic(
       String indexName, String typeName, String identifier, Map<String, Object> data) {
-    Future<Boolean> responseF = esService.update(typeName, identifier, data);
+    Future<Boolean> responseF = esService.update(typeName, identifier, data, null);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (response) {
       return true;
@@ -321,7 +323,7 @@ public class BackgroundJobManager extends BaseActor {
      * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
      * service.computeProfile(data); data.putAll(responsemap); }
      */
-    Future<String> responseF = esService.save(type, identifier, data);
+    Future<String> responseF = esService.save(type, identifier, data, null);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     ProjectLogger.log(
         "Getting  ********** ES save response for type , identiofier=="
