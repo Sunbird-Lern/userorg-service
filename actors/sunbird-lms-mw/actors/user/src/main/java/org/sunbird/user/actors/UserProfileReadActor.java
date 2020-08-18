@@ -264,6 +264,7 @@ public class UserProfileReadActor extends BaseActor {
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
+              ProjectLogger.log("Get external Ids explicitly from usr_external_identity for v3");
               List<Map<String, String>> resExternalIds =
                   userExternalIdentityService.getUserExternalIds(userId);
               decryptUserExternalIds(resExternalIds);
@@ -273,6 +274,8 @@ public class UserProfileReadActor extends BaseActor {
           }
         } else {
           // fetch user external identity
+          ProjectLogger.log(
+              "Get external Ids from both declarations and usr_external_identity for merge them");
           List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
