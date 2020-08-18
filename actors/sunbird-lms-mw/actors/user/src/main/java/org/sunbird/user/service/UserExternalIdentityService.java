@@ -11,5 +11,7 @@ public interface UserExternalIdentityService {
 
   List<Map<String, String>> getUserExternalIds(String userId);
 
-  String getUser(String extId, String provider, String idType);
+  String getUserV1(String extId, String provider, String idType);
+
+  String getUserV2(String extId, String orgId, String idType);
 }

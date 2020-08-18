@@ -180,6 +180,7 @@ public class TenantMigrationActor extends BaseActor {
     // Update user org details
     Response userOrgResponse =
         updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
+
     // Update user externalIds
     Response userExternalIdsResponse = updateUserExternalIds(request);
     // Collect all the error message
@@ -356,6 +357,8 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
+      // Update channel to orgId  for provider field in usr_external_identiy table
+      UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq);
       User user = mapper.convertValue(userExtIdsReq, User.class);
       UserUtil.validateExternalIds(user, JsonKey.CREATE);
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());

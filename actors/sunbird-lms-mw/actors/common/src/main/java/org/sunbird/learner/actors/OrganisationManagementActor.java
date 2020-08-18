@@ -1346,6 +1346,9 @@ public class OrganisationManagementActor extends BaseActor {
     } else if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_EXTERNAL_ID))
         && StringUtils.isNotBlank((String) data.get(JsonKey.USER_PROVIDER))
         && StringUtils.isNotBlank((String) data.get(JsonKey.USER_ID_TYPE))) {
+      // not used any more as externalids are not store in encrypted format now
+      ProjectLogger.log(
+          "This condition should not run, as external ids are not stored in encrypted format");
       requestDbMap.put(JsonKey.PROVIDER, data.get(JsonKey.USER_PROVIDER));
       requestDbMap.put(JsonKey.ID_TYPE, data.get(JsonKey.USER_ID_TYPE));
       requestDbMap.put(

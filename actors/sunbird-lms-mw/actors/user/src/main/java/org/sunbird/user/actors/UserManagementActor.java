@@ -248,8 +248,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
-    // update provider from channel to orgId
-    updateProviderWithOrgId(userMap);
+    // update externalIds provider from channel to orgId
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (!isPrivate) {
@@ -344,47 +344,6 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
-  }
-
-  private void updateProviderWithOrgId(Map<String, Object> userMap) {
-    if (MapUtils.isNotEmpty(userMap)) {
-      Set<String> providerSet = new HashSet<>();
-      if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
-        providerSet.add((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER));
-      }
-      List<Map<String, String>> extList =
-          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
-      if (CollectionUtils.isNotEmpty(extList)) {
-        for (Map<String, String> extId : extList) {
-          providerSet.add(extId.get(JsonKey.PROVIDER));
-        }
-      }
-
-      Map<String, String> orgProviderMap =
-          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
-      if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER))) {
-        userMap.put(
-            JsonKey.EXTERNAL_ID_PROVIDER,
-            orgProviderMap.get((String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER)));
-      }
-      if (CollectionUtils.isNotEmpty(
-          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
-        for (Map<String, String> externalId :
-            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
-
-          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
-          if (StringUtils.isBlank(orgId)) {
-            ProjectCommonException.throwClientErrorException(
-                ResponseCode.invalidParameterValue,
-                MessageFormat.format(
-                    ResponseCode.invalidParameterValue.getErrorMessage(),
-                    JsonKey.PROVIDER,
-                    externalId.get(JsonKey.PROVIDER)));
-          }
-          externalId.put(JsonKey.PROVIDER, orgId);
-        }
-      }
-    }
   }
 
   private void updateLocationCodeToIds(List<Map<String, String>> externalIds) {
@@ -1010,6 +969,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId);
     ObjectMapper mapper = new ObjectMapper();
+    // Update external ids provider with OrgId
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
