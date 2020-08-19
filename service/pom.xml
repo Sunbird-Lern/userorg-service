@@ -111,6 +111,18 @@
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
+                <exclusion>
+                  <groupId>com.typesafe.akka</groupId>
+                  <artifactId>akka-protobuf_2.11</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>com.typesafe.akka</groupId>
+                  <artifactId>akka-stream_2.11</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>com.typesafe.akka</groupId>
+                  <artifactId>akka-actor_2.11</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
