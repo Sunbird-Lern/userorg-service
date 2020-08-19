@@ -52,7 +52,7 @@ public class UserExternalIdentityServiceTest {
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Map<String, String> orgProviderMap = new HashMap<>();
     orgProviderMap.put("channel1004", "01234567687");
@@ -74,7 +74,7 @@ public class UserExternalIdentityServiceTest {
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 

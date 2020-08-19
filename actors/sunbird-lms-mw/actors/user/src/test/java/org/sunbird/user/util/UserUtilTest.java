@@ -331,7 +331,7 @@ public class UserUtilTest {
     Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
     Map<String, String> externalIds = new HashMap<>();
     externalIds.put(JsonKey.PROVIDER, "1234");
@@ -362,7 +362,7 @@ public class UserUtilTest {
     Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
     Map<String, String> externalIds = new HashMap<>();
     externalIds.put(JsonKey.PROVIDER, "channel1004");
