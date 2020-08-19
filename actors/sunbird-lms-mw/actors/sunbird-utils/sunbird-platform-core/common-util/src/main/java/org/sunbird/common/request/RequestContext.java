@@ -1,6 +1,6 @@
 package org.sunbird.common.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestContext {
@@ -10,87 +10,87 @@ public class RequestContext {
   private String appId;
   private String appVer;
   private String reqId;
-  private String logLevel;
-  private String actorOperation;
-  private String pid = "learner-service";
+  private String debugEnabled;
+  private String op;
+  private final String pid = "learner-service";
+  private Map<String, Object> contextMap = new HashMap<>();
+
+  public RequestContext() {}
+
+  public RequestContext(
+      String uid,
+      String did,
+      String sid,
+      String appId,
+      String appVer,
+      String reqId,
+      String debugEnabled,
+      String op) {
+    super();
+    this.uid = uid;
+    this.did = did;
+    this.sid = sid;
+    this.appId = appId;
+    this.appVer = appVer;
+    this.reqId = reqId;
+    this.debugEnabled = debugEnabled;
+    this.op = op;
+
+    contextMap.putAll(
+        new HashMap<String, Object>() {
+          {
+            put("uid", uid);
+            put("did", did);
+            put("sid", sid);
+            put("appId", appId);
+            put("appVer", appVer);
+            put("reqId", reqId);
+            put("op", op);
+          }
+        });
+  }
 
   public String getReqId() {
     return reqId;
   }
 
-  public void setReqId(String reqId) {
-    this.reqId = reqId;
-  }
-
-  public String getLogLevel() {
-    return logLevel;
-  }
-
-  public void setLogLevel(String logLevel) {
-    this.logLevel = logLevel;
-  }
-
   public String getActorOperation() {
-    return actorOperation;
+    return op;
   }
 
   public void setActorOperation(String actorOperation) {
-    this.actorOperation = actorOperation;
+    this.op = actorOperation;
   }
 
   public String getUid() {
     return uid;
   }
 
-  public void setUid(String uid) {
-    this.uid = uid;
-  }
-
   public String getDid() {
     return did;
-  }
-
-  public void setDid(String did) {
-    this.did = did;
   }
 
   public String getSid() {
     return sid;
   }
 
-  public void setSid(String sid) {
-    this.sid = sid;
-  }
-
   public String getAppId() {
     return appId;
-  }
-
-  public void setAppId(String appId) {
-    this.appId = appId;
   }
 
   public String getAppVer() {
     return appVer;
   }
 
-  public void setAppVer(String appVer) {
-    this.appVer = appVer;
+  public String getDebugEnabled() {
+    return debugEnabled;
   }
 
-  public String getPid() {
-    return pid;
+  public String getOp() {
+    return op;
   }
 
-  public void setPid(String pid) {
-    this.pid = pid;
-  }
-
-  public Map<String, Object> toMap() {
-    ObjectMapper mapper = new ObjectMapper();
-    Map<String, Object> reqMap = mapper.convertValue(this, Map.class);
-    reqMap.remove("logLevel");
-    reqMap.keySet().removeIf(key -> null == reqMap.get(key));
-    return reqMap;
+  public Map<String, Object> getContextMap() {
+    return contextMap;
   }
 }

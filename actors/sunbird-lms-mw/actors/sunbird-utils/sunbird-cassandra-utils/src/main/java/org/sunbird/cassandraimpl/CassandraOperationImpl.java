@@ -804,7 +804,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       ObjectMapper mapper = new ObjectMapper();
       Map<String, Object> map = new WeakHashMap<>(3);
       if (null != context) {
-        map.put("context", context.toMap());
+        map.put("context", context.getContextMap());
       } else {
         map.put("pid", "learner-service");
       }

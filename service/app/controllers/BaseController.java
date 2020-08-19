@@ -767,11 +767,6 @@ public class BaseController extends Controller {
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
 
-      requestContext.setAppId((String) reqObj.getContext().get(JsonKey.APP_ID));
-      requestContext.setReqId((String) reqObj.getContext().get(JsonKey.DEVICE_ID));
-      requestContext.setDid((String) reqObj.getContext().get(JsonKey.REQ_ID));
-      requestContext.setActorOperation(reqObj.getOperation());
-      requestContext.setUid(reqObj.getRequestId());
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }

@@ -55,7 +55,6 @@ public class IdentifierFreeUpActorTest {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   Props props = Props.create(IdentifierFreeUpActor.class);
   ActorSystem system = ActorSystem.create("IdentifierFreeUpActor");
-  RequestContext context = new RequestContext();
 
   @Before
   public void beforeEachTest() {
