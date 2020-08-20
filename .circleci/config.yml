@@ -4,8 +4,6 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: git submodule update --init
-      - run: git submodule update --init --recursive --remote
       - restore_cache:
           key: lms-dependency-cache-{{ checksum "pom.xml" }}
       - run: mvn clean install
