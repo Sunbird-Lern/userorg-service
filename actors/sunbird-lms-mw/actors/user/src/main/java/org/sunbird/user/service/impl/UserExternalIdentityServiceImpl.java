@@ -49,7 +49,9 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   public String getUserV1(String extId, String provider, String idType) {
     Map<String, String> providerOrgMap = UserUtil.fetchOrgIdByProvider(Arrays.asList(provider));
     return userExternalIdentityDao.getUserIdByExternalId(
-        extId, providerOrgMap.get(provider), idType);
+        extId,
+        providerOrgMap.get(provider),
+        provider.equals(idType) ? providerOrgMap.get(idType) : idType);
   }
 
   /**
