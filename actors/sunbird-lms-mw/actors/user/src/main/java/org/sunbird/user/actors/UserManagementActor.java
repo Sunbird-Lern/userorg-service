@@ -220,7 +220,7 @@ public class UserManagementActor extends BaseActor {
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy);
     }
-    processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage.getContext());
+    processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
   }
 
   private void cacheFrameworkFieldsConfig() {
@@ -800,7 +800,7 @@ public class UserManagementActor extends BaseActor {
       String signupType,
       String source,
       String managedBy,
-      Map<String, Object> context) {
+      Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
@@ -847,7 +847,10 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.PASSWORD);
     Response response =
         cassandraOperation.insertRecord(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, null);
+            usrDbInfo.getKeySpace(),
+            usrDbInfo.getTableName(),
+            userMap,
+            actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -910,7 +913,7 @@ public class UserManagementActor extends BaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
 
-    processTelemetry(userMap, signupType, source, userId, context);
+    processTelemetry(userMap, signupType, source, userId, actorMessage.getContext());
   }
 
   private void processTelemetry(
