@@ -71,7 +71,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     Map<String, Object> request = new HashMap<>();
     Map<String, String> reqMap = new HashMap<>();
     reqMap.put(JsonKey.ACTION, "accept");
-    reqMap.put(JsonKey.USER_ID, "e41e5c97-6497-4321-bba4-45379722440a");
+    reqMap.put(JsonKey.USER_ID, "userId");
     reqMap.put(JsonKey.USER_EXT_ID, "abc_ext_id");
     reqMap.put(JsonKey.CHANNEL, "TN");
     request.put(JsonKey.REQUEST, reqMap);
