@@ -609,7 +609,9 @@ public final class Util {
     env = StringUtils.isNotBlank(env) ? env : "";
     requestContext.put(JsonKey.ENV, env);
     requestContext.put(JsonKey.REQUEST_TYPE, JsonKey.API_CALL);
-
+    ProjectLogger.log(
+            "initializeContext" + JsonKey.API_CALL,
+            LoggerEnum.INFO.name());
     if (JsonKey.USER.equalsIgnoreCase((String) request.getContext().get(JsonKey.ACTOR_TYPE))) {
       Future<Map<String, Object>> resultF =
           esService.getDataByIdentifier(
