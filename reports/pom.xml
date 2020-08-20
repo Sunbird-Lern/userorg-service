@@ -108,7 +108,9 @@
                             <goal>report-aggregate</goal>
                         </goals>
                         <configuration>
-                            <dataFileIncludes>**/target/jacoco-unit.exec</dataFileIncludes>
+                            <dataFileIncludes>
+                                <dataFileInclude>**/target/jacoco-unit.exec</dataFileInclude>
+                            </dataFileIncludes>
                             <outputDirectory>${basedir}/target/jacoco</outputDirectory>
                         </configuration>
                     </execution>
