@@ -712,6 +712,10 @@ public final class JsonKey {
   public static final String TEACHER_PERSONA = "teacher";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
   public static final String REQUESTED_FOR = "requestedFor";
+  public static final String X_Session_ID = "x-session-id";
+  public static final String X_APP_VERSION = "x-app-ver";
+  public static final String X_TRACE_ENABLED = "x-trace-enabled";
+  public static final String X_REQUEST_ID = "x-request-id";
 
   private JsonKey() {}
 }

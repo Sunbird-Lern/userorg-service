@@ -25,6 +25,7 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
+import util.Attrs;
 import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
@@ -52,13 +53,13 @@ public class OnRequestHandler implements ActionCreator {
         // From 3.0.0 checking user access-token and managed-by from the request header
         String message = RequestInterceptor.verifyRequestData(request);
         // call method to set all the required params for the telemetry event(log)...
-        initializeRequestInfo(request, message, requestId);
+        request = initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
-          request.flash().put(JsonKey.USER_ID, message);
-          request.flash().put(JsonKey.IS_AUTH_REQ, "false");
+          request = request.addAttr(Attrs.USER_ID, message);
+          request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
           for (String uri : RequestInterceptor.restrictedUriList) {
             if (request.path().contains(uri)) {
-              request.flash().put(JsonKey.IS_AUTH_REQ, "true");
+              request = request.addAttr(Attrs.IS_AUTH_REQ, "true");
               break;
             }
           }
@@ -104,12 +105,11 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  public void initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  public Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
       String methodName = actionMethod;
-      long startTime = System.currentTimeMillis();
       String signType = "";
       String source = "";
       if (request.body() != null && request.body().asJson() != null) {
@@ -148,9 +148,27 @@ public class OnRequestHandler implements ActionCreator {
       if (optionalDeviceId.isPresent()) {
         reqContext.put(JsonKey.DEVICE_ID, optionalDeviceId.get());
       }
-      Optional<String> optionalTraceId = request.header(HeaderParam.X_Trace_ID.getName());
+
+      Optional<String> optionalSessionId = request.header(HeaderParam.X_Session_ID.getName());
+      if (optionalSessionId.isPresent()) {
+        reqContext.put(JsonKey.X_Session_ID, optionalSessionId.get());
+      }
+
+      Optional<String> optionalAppVersion = request.header(HeaderParam.X_APP_VERSION.getName());
+      if (optionalAppVersion.isPresent()) {
+        reqContext.put(JsonKey.X_APP_VERSION, optionalAppVersion.get());
+      }
+
+      Optional<String> optionalTraceEnabled = request.header(HeaderParam.X_TRACE_ENABLED.getName());
+      if (optionalTraceEnabled.isPresent()) {
+        reqContext.put(JsonKey.X_TRACE_ENABLED, optionalTraceEnabled.get());
+      }
+
+      Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
       if (optionalTraceId.isPresent()) {
-        reqContext.put(JsonKey.REQ_ID, optionalTraceId.get());
+        reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+      } else {
+        reqContext.put(JsonKey.X_REQUEST_ID, requestId);
       }
       if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);
@@ -172,11 +190,12 @@ public class OnRequestHandler implements ActionCreator {
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
       map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-      request.flash().put(JsonKey.REQUEST_ID, requestId);
-      request.flash().put(JsonKey.CONTEXT, mapper.writeValueAsString(map));
+      request = request.addAttr(Attrs.REQUEST_ID, requestId);
+      request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(map));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
+    return request;
   }
 
   private static String getCustodianOrgHashTagId() {

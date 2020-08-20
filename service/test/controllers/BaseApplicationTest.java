@@ -1,5 +1,7 @@
 package controllers;
 
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -14,6 +16,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -29,7 +33,12 @@ import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
-@PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, AccessLogFilter.class})
+@PrepareForTest({
+  RequestInterceptor.class,
+  TelemetryWriter.class,
+  AccessLogFilter.class,
+  LoggerFactory.class
+})
 public abstract class BaseApplicationTest {
   protected Application application;
   private ActorSystem system;
@@ -49,10 +58,10 @@ public abstract class BaseApplicationTest {
       ActorRef subject = system.actorOf(props);
       BaseController.setActorRef(subject);
       AccessLogFilter filter = PowerMockito.mock(AccessLogFilter.class);
-      PowerMockito.mockStatic(RequestInterceptor.class);
-      PowerMockito.mockStatic(TelemetryWriter.class);
+      mockStatic(RequestInterceptor.class);
+      mockStatic(TelemetryWriter.class);
       PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
-      PowerMockito.mockStatic(OnRequestHandler.class);
+      mockStatic(OnRequestHandler.class);
       PowerMockito.doReturn("12345678990").when(OnRequestHandler.class, "getCustodianOrgHashTagId");
     } catch (Exception e) {
       e.printStackTrace();
@@ -60,6 +69,9 @@ public abstract class BaseApplicationTest {
   }
 
   public Result performTest(String url, String method) {
+    mockStatic(LoggerFactory.class);
+    Logger logger = PowerMockito.mock(Logger.class);
+    PowerMockito.when(LoggerFactory.getLogger((Class<?>) Mockito.any())).thenReturn(logger);
     Http.RequestBuilder req = new Http.RequestBuilder().uri(url).method(method);
     Result result = Helpers.route(application, req);
     return result;

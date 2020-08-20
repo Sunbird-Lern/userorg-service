@@ -38,6 +38,7 @@ import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Result;
 import play.mvc.Results;
+import util.Attrs;
 
 /**
  * This controller we can use for writing some common method.
@@ -64,16 +65,17 @@ public class BaseController extends Controller {
   private org.sunbird.common.request.Request initRequest(
       org.sunbird.common.request.Request request, String operation, Request httpRequest) {
     request.setOperation(operation);
-    request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-    request.getParams().setMsgid(httpRequest.flash().get(JsonKey.REQUEST_ID));
+    request.setRequestId(httpRequest.attrs().getOptional(Attrs.REQUEST_ID).orElse(null));
+    request.getParams().setMsgid(httpRequest.attrs().getOptional(Attrs.REQUEST_ID).orElse(null));
     request.setEnv(getEnvironment());
-    request.getContext().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+    request
+        .getContext()
+        .put(JsonKey.REQUESTED_BY, httpRequest.attrs().getOptional(Attrs.USER_ID).orElse(null));
     String muid = httpRequest.flash().get(JsonKey.MANAGED_FOR);
     request.getContext().put(JsonKey.MANAGED_FOR, muid);
     Optional<String> manageToken = httpRequest.header(HeaderParam.X_Authenticated_For.getName());
     String managedToken = manageToken.isPresent() ? manageToken.get() : "";
     request.getContext().put(JsonKey.MANAGED_TOKEN, managedToken);
-
     request = transformUserId(request);
     return request;
   }
@@ -267,7 +269,9 @@ public class BaseController extends Controller {
         ((Map) (request.getRequest().get(JsonKey.FILTERS)))
             .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
       }
-      request.getRequest().put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      request
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, httpRequest.attrs().getOptional(Attrs.USER_ID).orElse(null));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       ProjectLogger.log(
@@ -303,7 +307,9 @@ public class BaseController extends Controller {
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
-    response.setParams(createResponseParamObj(code, null, request.flash().get(JsonKey.REQUEST_ID)));
+    response.setParams(
+        createResponseParamObj(
+            code, null, request.attrs().getOptional(Attrs.REQUEST_ID).orElse(null)));
     return response;
   }
 
@@ -338,7 +344,9 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
-    response.setParams(createResponseParamObj(code, null, request.flash().get(JsonKey.REQUEST_ID)));
+    response.setParams(
+        createResponseParamObj(
+            code, null, request.attrs().getOptional(Attrs.REQUEST_ID).orElse(null)));
     String value = null;
     try {
       if (response.getResult() != null) {
@@ -391,7 +399,9 @@ public class BaseController extends Controller {
     }
     response.setParams(
         createResponseParamObj(
-            code, exception.getMessage(), request.flash().get(JsonKey.REQUEST_ID)));
+            code,
+            exception.getMessage(),
+            request.attrs().getOptional(Attrs.REQUEST_ID).orElse(null)));
     if (response.getParams() != null) {
       response.getParams().setStatus(response.getParams().getStatus());
       if (exception.getCode() != null) {
@@ -504,7 +514,7 @@ public class BaseController extends Controller {
 
   private void generateExceptionTelemetry(Request request, ProjectCommonException exception) {
     try {
-      String reqContext = request.flash().get(JsonKey.CONTEXT);
+      String reqContext = request.attrs().getOptional(Attrs.CONTEXT).orElse(null);
       Map<String, Object> requestInfo =
           objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
       org.sunbird.common.request.Request reqForTelemetry = new org.sunbird.common.request.Request();
@@ -740,7 +750,7 @@ public class BaseController extends Controller {
   private static Map<String, Object> generateTelemetryInfoForError(Request request) {
     try {
       Map<String, Object> map = new HashMap<>();
-      String reqContext = request.flash().get(JsonKey.CONTEXT);
+      String reqContext = request.attrs().getOptional(Attrs.CONTEXT).orElse(null);
       Map<String, Object> requestInfo =
           objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
       if (requestInfo != null) {
@@ -759,41 +769,32 @@ public class BaseController extends Controller {
 
   public void setContextData(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
     try {
-      reqObj.setRequestContext(getRequestContext(httpReq, reqObj.getOperation()));
-      String context = httpReq.flash().get(JsonKey.CONTEXT);
+      String context = httpReq.attrs().getOptional(Attrs.CONTEXT).orElse(null);
       Map<String, Object> requestInfo =
           objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
-      reqObj.setRequestId(httpReq.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(httpReq.attrs().getOptional(Attrs.REQUEST_ID).orElse(null));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
+      reqObj.setRequestContext(
+          getRequestContext(
+              (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT), reqObj.getOperation()));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
   }
 
-  private RequestContext getRequestContext(Request httpRequest, String actorOperation) {
+  private RequestContext getRequestContext(Map<String, Object> context, String actorOperation) {
     return new RequestContext(
-        httpRequest.flash().get(JsonKey.USER_ID),
-        (httpRequest.header(HeaderParam.X_Device_ID.getName()).isPresent()
-            ? httpRequest.header(HeaderParam.X_Device_ID.getName()).orElse(null)
-            : null),
-        (httpRequest.header(HeaderParam.X_Session_ID.getName()).isPresent()
-            ? httpRequest.header(HeaderParam.X_Session_ID.getName()).orElse(null)
-            : null),
-        (httpRequest.header(HeaderParam.X_APP_ID.getName()).isPresent()
-            ? httpRequest.header(HeaderParam.X_APP_ID.getName()).orElse(null)
-            : null),
-        (httpRequest.header(HeaderParam.X_APP_VERSION.getName()).isPresent()
-            ? httpRequest.header(HeaderParam.X_APP_VERSION.getName()).orElse(null)
-            : null),
-        (httpRequest.header(HeaderParam.X_REQUEST_ID.getName()).isPresent()
-            ? httpRequest
-                .header(HeaderParam.X_REQUEST_ID.getName())
-                .orElse(UUID.randomUUID().toString())
-            : UUID.randomUUID().toString()),
-        (httpRequest.header(HeaderParam.X_TRACE_ENABLED.getName()).isPresent()
-            ? httpRequest.header(HeaderParam.X_TRACE_ENABLED.getName()).orElse(debugEnabled)
-            : debugEnabled),
+        (String) context.get(JsonKey.ACTOR_ID),
+        (String) context.get(JsonKey.DEVICE_ID),
+        (String) context.get(JsonKey.X_Session_ID),
+        (String) context.get(JsonKey.APP_ID),
+        (String) context.get(JsonKey.X_APP_VERSION),
+        (String) context.get(JsonKey.X_REQUEST_ID),
+        (String)
+            ((context.get(JsonKey.X_TRACE_ENABLED) != null)
+                ? context.get(JsonKey.X_TRACE_ENABLED)
+                : debugEnabled),
         actorOperation);
   }
 
