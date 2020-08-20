@@ -52,7 +52,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     headerMap.clear();
   }
 
-  @Test
+  // @Test
   public void testMigrationUserSuccess() {
     Result result = performTest("/v1/user/migrate", "POST", getSuccessMigrationReq());
     assertEquals(
