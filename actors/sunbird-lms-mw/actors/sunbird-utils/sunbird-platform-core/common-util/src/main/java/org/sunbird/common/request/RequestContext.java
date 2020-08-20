@@ -46,48 +46,73 @@ public class RequestContext {
             put("appVer", appVer);
             put("reqId", reqId);
             put("op", op);
+            put("pid", pid);
           }
         });
-  }
-
-  public String getReqId() {
-    return reqId;
-  }
-
-  public String getActorOperation() {
-    return op;
-  }
-
-  public void setActorOperation(String actorOperation) {
-    this.op = actorOperation;
   }
 
   public String getUid() {
     return uid;
   }
 
+  public void setUid(String uid) {
+    this.uid = uid;
+  }
+
   public String getDid() {
     return did;
+  }
+
+  public void setDid(String did) {
+    this.did = did;
   }
 
   public String getSid() {
     return sid;
   }
 
+  public void setSid(String sid) {
+    this.sid = sid;
+  }
+
   public String getAppId() {
     return appId;
+  }
+
+  public void setAppId(String appId) {
+    this.appId = appId;
   }
 
   public String getAppVer() {
     return appVer;
   }
 
+  public void setAppVer(String appVer) {
+    this.appVer = appVer;
+  }
+
+  public String getReqId() {
+    return reqId;
+  }
+
+  public void setReqId(String reqId) {
+    this.reqId = reqId;
+  }
+
   public String getDebugEnabled() {
     return debugEnabled;
   }
 
+  public void setDebugEnabled(String debugEnabled) {
+    this.debugEnabled = debugEnabled;
+  }
+
   public String getOp() {
     return op;
+  }
+
+  public void setOp(String op) {
+    this.op = op;
   }
 
   public Map<String, Object> getContextMap() {

@@ -51,6 +51,7 @@ public class BaseController extends Controller {
   private static final String version = "v1";
   private static Object actorRef = null;
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
+  private static final String debugEnabled = "false";
 
   static {
     try {
@@ -758,18 +759,42 @@ public class BaseController extends Controller {
 
   public void setContextData(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
     try {
-      RequestContext requestContext = new RequestContext();
-      reqObj.setRequestContext(requestContext);
+      reqObj.setRequestContext(getRequestContext(httpReq, reqObj.getOperation()));
       String context = httpReq.flash().get(JsonKey.CONTEXT);
       Map<String, Object> requestInfo =
           objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
       reqObj.setRequestId(httpReq.flash().get(JsonKey.REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
-
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
+  }
+
+  private RequestContext getRequestContext(Request httpRequest, String actorOperation) {
+    return new RequestContext(
+        httpRequest.flash().get(JsonKey.USER_ID),
+        (httpRequest.header(HeaderParam.X_Device_ID.getName()).isPresent()
+            ? httpRequest.header(HeaderParam.X_Device_ID.getName()).orElse(null)
+            : null),
+        (httpRequest.header(HeaderParam.X_Session_ID.getName()).isPresent()
+            ? httpRequest.header(HeaderParam.X_Session_ID.getName()).orElse(null)
+            : null),
+        (httpRequest.header(HeaderParam.X_APP_ID.getName()).isPresent()
+            ? httpRequest.header(HeaderParam.X_APP_ID.getName()).orElse(null)
+            : null),
+        (httpRequest.header(HeaderParam.X_APP_VERSION.getName()).isPresent()
+            ? httpRequest.header(HeaderParam.X_APP_VERSION.getName()).orElse(null)
+            : null),
+        (httpRequest.header(HeaderParam.X_REQUEST_ID.getName()).isPresent()
+            ? httpRequest
+                .header(HeaderParam.X_REQUEST_ID.getName())
+                .orElse(UUID.randomUUID().toString())
+            : UUID.randomUUID().toString()),
+        (httpRequest.header(HeaderParam.X_TRACE_ENABLED.getName()).isPresent()
+            ? httpRequest.header(HeaderParam.X_TRACE_ENABLED.getName()).orElse(debugEnabled)
+            : debugEnabled),
+        actorOperation);
   }
 
   /**
