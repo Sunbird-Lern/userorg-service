@@ -21,7 +21,9 @@ public class Request implements Serializable {
   private static final Integer MAX_TIMEOUT = 30;
   private static final int WAIT_TIME_VALUE = 30;
 
+  // Telemetry context
   protected Map<String, Object> context;
+  // Request context
   private RequestContext requestContext;
 
   private String id;

@@ -1,7 +1,5 @@
 package org.sunbird.common.models.util;
 
-// import net.logstash.logback.marker.Markers;
-
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,7 +21,7 @@ public class LoggerUtil {
 
   public void info(RequestContext requestContext, String message) {
     if (null != requestContext) {
-      // logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+      logger.info(message + ", RequestContext : " + requestContext.getContextMap());
     } else {
       logger.info(message);
     }
@@ -35,7 +33,7 @@ public class LoggerUtil {
 
   public void error(RequestContext requestContext, String message, Throwable e) {
     if (null != requestContext) {
-      // logger.error(Markers.appendEntries(requestContext.getContextMap()) ,message, e);
+      logger.error(message + ", RequestContext : " + requestContext.getContextMap(), e);
     } else {
       logger.error(message, e);
     }
@@ -51,7 +49,7 @@ public class LoggerUtil {
       Throwable e,
       Map<String, Object> telemetryInfo) {
     if (null != requestContext) {
-      // logger.error(Markers.appendEntries(requestContext.getContextMap()) ,message, e);
+      logger.error(message + ", RequestContext : " + requestContext.getContextMap(), e);
     } else {
       logger.error(message, e);
     }
@@ -60,7 +58,7 @@ public class LoggerUtil {
 
   public void warn(RequestContext requestContext, String message, Throwable e) {
     if (null != requestContext) {
-      // logger.warn(Markers.appendEntries(requestContext.getContextMap()), message, e);
+      logger.warn(message + ", RequestContext : " + requestContext.getContextMap(), e);
     } else {
       logger.warn(message, e);
     }
@@ -68,7 +66,7 @@ public class LoggerUtil {
 
   public void debug(RequestContext requestContext, String message) {
     if (isDebugEnabled(requestContext)) {
-      // logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+      logger.info(message + ", RequestContext : " + requestContext.getContextMap());
     } else {
       logger.debug(message);
     }
