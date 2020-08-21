@@ -11,12 +11,16 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.systemsettings.dao.SystemSettingDao;
 
 public class SystemSettingDaoImpl implements SystemSettingDao {
+  private static LoggerUtil logger = new LoggerUtil(SystemSettingDaoImpl.class);
+
   private CassandraOperation cassandraOperation;
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
@@ -26,17 +30,17 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   }
 
   @Override
-  public Response write(SystemSetting systemSetting) {
+  public Response write(SystemSetting systemSetting, RequestContext context) {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map = mapper.convertValue(systemSetting, Map.class);
-    Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map, null);
+    Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map, context);
     response.put(JsonKey.ID, map.get(JsonKey.ID));
     return response;
   }
 
   @Override
-  public SystemSetting readById(String id) {
-    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id, null);
+  public SystemSetting readById(String id, RequestContext context) {
+    Response response = cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, id, context);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -45,10 +49,10 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   }
 
   @Override
-  public SystemSetting readByField(String field) {
+  public SystemSetting readByField(String field, RequestContext context) {
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, field, null);
+            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, field, context);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(list)) {
       return null;
@@ -56,8 +60,8 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
     return getSystemSetting(list);
   }
 
-  public List<SystemSetting> readAll() {
-    Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
+  public List<SystemSetting> readAll(RequestContext context) {
+    Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, context);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     List<SystemSetting> systemSettings = new ArrayList<>();
     ObjectMapper mapper = new ObjectMapper();

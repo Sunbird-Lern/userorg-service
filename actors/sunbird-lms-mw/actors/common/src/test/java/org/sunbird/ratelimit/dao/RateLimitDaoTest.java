@@ -68,13 +68,13 @@ public class RateLimitDaoTest {
             Mockito.any(),
             Mockito.anyList(),
             Mockito.any());
-    rateLimitdDao.insertRateLimits(getRateLimits());
+    rateLimitdDao.insertRateLimits(getRateLimits(), null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testInsertRateLimitsFailureWithInvalidData() {
     try {
-      rateLimitdDao.insertRateLimits(getInvalidRateLimits());
+      rateLimitdDao.insertRateLimits(getInvalidRateLimits(), null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getResponseCode());
       throw e;
@@ -96,7 +96,7 @@ public class RateLimitDaoTest {
                   return getRateLimitRecords();
                 });
 
-    List<Map<String, Object>> results = rateLimitdDao.getRateLimits(KEY);
+    List<Map<String, Object>> results = rateLimitdDao.getRateLimits(KEY, null);
     assertTrue(CollectionUtils.isNotEmpty(results));
     assertSame(KEY, results.get(0).get(JsonKey.KEY));
     assertSame(5, results.get(0).get(JsonKey.COUNT));

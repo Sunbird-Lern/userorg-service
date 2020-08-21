@@ -100,7 +100,8 @@ public class SendNotificationActorTest {
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("templateName");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+        .thenReturn("templateName");
   }
 
   private static Response cassandraGetRecordById() {
@@ -199,7 +200,7 @@ public class SendNotificationActorTest {
     innerMap.put(JsonKey.EMAIL_REQUEST, reqMap);
     reqObj.setRequest(innerMap);
 
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn("");
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);

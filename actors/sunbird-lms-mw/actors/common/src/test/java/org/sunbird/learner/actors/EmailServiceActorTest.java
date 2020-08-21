@@ -106,7 +106,8 @@ public class EmailServiceActorTest {
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("templateName");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+        .thenReturn("templateName");
 
     Map<String, Object> recipientSearchQuery = new HashMap<>();
     recipientSearchQuery.put(JsonKey.FILTERS, "anyName");
@@ -315,7 +316,7 @@ public class EmailServiceActorTest {
     innerMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     innerMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
     reqObj.setRequest(innerMap);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn("");
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);

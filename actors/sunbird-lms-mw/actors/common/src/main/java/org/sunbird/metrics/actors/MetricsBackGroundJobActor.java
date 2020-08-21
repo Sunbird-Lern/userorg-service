@@ -276,7 +276,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
     templateMap.put(JsonKey.ACTION_NAME, "DOWNLOAD REPORT");
     VelocityContext context = ProjectUtil.getContext(templateMap);
     String courseProgressMailTemplate =
-        emailTemplateDao.getTemplate(JsonKey.COURSE_PROGRESS_MAIL_TEMPLATE);
+        emailTemplateDao.getTemplate(JsonKey.COURSE_PROGRESS_MAIL_TEMPLATE, null);
     return SendMail.sendMailWithBody(
         new String[] {(String) reportDbInfo.get(JsonKey.EMAIL)},
         reportDbInfo.get(JsonKey.TYPE) + " for " + resource,

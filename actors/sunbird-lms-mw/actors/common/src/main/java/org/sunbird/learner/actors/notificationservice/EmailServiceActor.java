@@ -290,7 +290,7 @@ public class EmailServiceActor extends BaseActor {
 
   private String getEmailTemplateFile(String templateName) {
     EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
-    String template = emailTemplateDao.getTemplate(templateName);
+    String template = emailTemplateDao.getTemplate(templateName, null);
     if (StringUtils.isBlank(template)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
