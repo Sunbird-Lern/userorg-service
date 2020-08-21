@@ -12,6 +12,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.EmailTemplateDao;
@@ -39,29 +40,32 @@ public class SendNotificationActor extends BaseActor {
     List<String> phoneOrEmailList;
     Map<String, Object> notificationReq;
     String mode = (String) requestMap.remove(JsonKey.MODE);
-    ProjectLogger.log(
-        "SendNotificationActor:sendNotification : called for mode =" + mode,
-        LoggerEnum.INFO.name());
+    logger.info(
+        request.getRequestContext(),
+        "SendNotificationActor:sendNotification : called for mode =" + mode);
     if (StringUtils.isNotBlank(mode) && JsonKey.SMS.equalsIgnoreCase(mode)) {
-      phoneOrEmailList = getUsersEmailOrPhone(userIds, JsonKey.PHONE);
+      phoneOrEmailList = getUsersEmailOrPhone(userIds, JsonKey.PHONE, request.getRequestContext());
       notificationReq = getNotificationRequest(phoneOrEmailList, requestMap, JsonKey.SMS, null);
     } else {
-      phoneOrEmailList = getUsersEmailOrPhone(userIds, JsonKey.EMAIL);
-      String template = getEmailTemplateFile((String) requestMap.get(JsonKey.EMAIL_TEMPLATE_TYPE));
+      phoneOrEmailList = getUsersEmailOrPhone(userIds, JsonKey.EMAIL, request.getRequestContext());
+      String template =
+          getEmailTemplateFile(
+              (String) requestMap.get(JsonKey.EMAIL_TEMPLATE_TYPE), request.getRequestContext());
       notificationReq =
           getNotificationRequest(phoneOrEmailList, requestMap, JsonKey.EMAIL, template);
     }
-    ProjectLogger.log(
-        "SendNotificationActor:sendNotification : called for userIds =" + userIds,
-        LoggerEnum.INFO.name());
-    process(notificationReq, request.getRequestId());
+    logger.info(
+        request.getRequestContext(),
+        "SendNotificationActor:sendNotification : called for userIds =" + userIds);
+    process(notificationReq, request.getRequestId(), request.getRequestContext());
 
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());
   }
 
-  private void process(Map<String, Object> notificationReq, String requestId) {
+  private void process(
+      Map<String, Object> notificationReq, String requestId, RequestContext context) {
     List<Map<String, Object>> notificationList = new ArrayList<>();
     notificationList.add(notificationReq);
     Map<String, Object> reqMap = new HashMap<>();
@@ -70,6 +74,7 @@ public class SendNotificationActor extends BaseActor {
     reqMap.put(JsonKey.REQUEST, request);
 
     Request bgRequest = new Request();
+    bgRequest.setRequestContext(context);
     bgRequest.setRequestId(requestId);
     bgRequest.getRequest().putAll(reqMap);
     bgRequest.setOperation("processNotification");
@@ -108,9 +113,9 @@ public class SendNotificationActor extends BaseActor {
     return notiReq;
   }
 
-  private String getEmailTemplateFile(String templateName) {
+  private String getEmailTemplateFile(String templateName, RequestContext context) {
     EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
-    String template = emailTemplateDao.getTemplate(templateName, null);
+    String template = emailTemplateDao.getTemplate(templateName, context);
     if (StringUtils.isBlank(template)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
@@ -122,19 +127,21 @@ public class SendNotificationActor extends BaseActor {
     return template;
   }
 
-  private List<String> getUsersEmailOrPhone(List<String> userIds, String key) {
+  private List<String> getUsersEmailOrPhone(
+      List<String> userIds, String key, RequestContext context) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     List<String> fields = new ArrayList<>();
     fields.add(key);
     Response response =
         ServiceFactory.getInstance()
             .getRecordsByIdsWithSpecifiedColumns(
-                usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIds, null);
+                usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIds, context);
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    return getPhoneOrEmailList(userList, key);
+    return getPhoneOrEmailList(userList, key, context);
   }
 
-  private List<String> getPhoneOrEmailList(List<Map<String, Object>> userList, String key) {
+  private List<String> getPhoneOrEmailList(
+      List<Map<String, Object>> userList, String key, RequestContext context) {
     if (CollectionUtils.isNotEmpty(userList)) {
       DecryptionService decryptionService =
           org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
@@ -143,7 +150,7 @@ public class SendNotificationActor extends BaseActor {
       for (Map<String, Object> userMap : userList) {
         String email = (String) userMap.get(key);
         if (StringUtils.isNotBlank(email)) {
-          String decryptedEmail = decryptionService.decryptData(email, null);
+          String decryptedEmail = decryptionService.decryptData(email, context);
           emailOrPhoneList.add(decryptedEmail);
         }
       }
