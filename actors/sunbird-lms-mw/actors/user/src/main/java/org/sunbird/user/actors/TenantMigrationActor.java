@@ -145,7 +145,7 @@ public class TenantMigrationActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> userDetails =
         UserServiceImpl.getInstance()
-            .esGetPublicUserProfileById((String) request.getRequest().get(JsonKey.USER_ID));
+            .esGetPublicUserProfileById((String) request.getRequest().get(JsonKey.USER_ID), null);
     validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
@@ -226,7 +226,7 @@ public class TenantMigrationActor extends BaseActor {
     try {
       Map<String, Object> userDbMap = new HashMap<>();
       userDbMap.put(JsonKey.USER_ID, userId);
-      String status = getSSOManager().deactivateUser(userDbMap);
+      String status = getSSOManager().deactivateUser(userDbMap, null);
       ProjectLogger.log(
           "TenantMigrationActor:deactivateUserFromKC:user status in deactivating Keycloak" + status,
           LoggerEnum.INFO.name());
@@ -328,7 +328,8 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void validateUserCustodianOrgId(String rootOrgId) {
-    String custodianOrgId = UserServiceImpl.getInstance().getCustodianOrgId(systemSettingActorRef);
+    String custodianOrgId =
+        UserServiceImpl.getInstance().getCustodianOrgId(systemSettingActorRef, null);
     if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.parameterMismatch,
@@ -358,9 +359,9 @@ public class TenantMigrationActor extends BaseActor {
     try {
       ObjectMapper mapper = new ObjectMapper();
       // Update channel to orgId  for provider field in usr_external_identiy table
-      UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq);
+      UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq, request.getRequestContext());
       User user = mapper.convertValue(userExtIdsReq, User.class);
-      UserUtil.validateExternalIds(user, JsonKey.CREATE);
+      UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
       Request userequest = new Request();
       userequest.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
@@ -446,7 +447,7 @@ public class TenantMigrationActor extends BaseActor {
     String rootOrgId = "";
     String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
     if (StringUtils.isNotBlank(channel)) {
-      rootOrgId = UserServiceImpl.getInstance().getRootOrgIdFromChannel(channel);
+      rootOrgId = UserServiceImpl.getInstance().getRootOrgIdFromChannel(channel, null);
       request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     }
   }

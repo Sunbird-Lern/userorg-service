@@ -29,6 +29,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.ConfigUtil;
 import org.sunbird.helper.ServiceFactory;
@@ -95,12 +96,13 @@ public class UserMergeActorTest {
 
   @Test
   public void testMergeUserIsAlreadyDeleted() {
-    when(userService.getUserById(Mockito.anyString()))
+    when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getUserDetails(true))
         .thenReturn(getUserDetails(true));
     when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
-    when(ssoManager.verifyToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result =
         testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.invalidIdentifier);
@@ -109,12 +111,14 @@ public class UserMergeActorTest {
 
   @Test
   public void testValidMergeUser() throws Exception {
-    when(userService.getUserById(Mockito.anyString()))
+    when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getUserDetails(false))
         .thenReturn(getUserDetails(false));
     when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
-    when(ssoManager.verifyToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
+    when(ssoManager.verifyToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
     assertTrue(result);

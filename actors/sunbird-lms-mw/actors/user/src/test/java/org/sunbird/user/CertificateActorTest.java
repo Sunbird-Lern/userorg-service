@@ -56,7 +56,7 @@ public class CertificateActorTest {
 
   @Test
   public void testAddCertificate() {
-    when(userServiceImpl.getUserById(Mockito.anyString()))
+    when(userServiceImpl.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUserDetails(new User(), false));
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(),
@@ -77,7 +77,7 @@ public class CertificateActorTest {
   @Ignore
   @Test
   public void testAddReIssueCertificate() {
-    when(userServiceImpl.getUserById(Mockito.anyString()))
+    when(userServiceImpl.getUserById(Mockito.anyString(), null))
         .thenReturn(getUserDetails(new User(), false));
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(),

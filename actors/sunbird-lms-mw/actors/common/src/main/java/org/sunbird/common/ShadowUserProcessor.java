@@ -110,7 +110,7 @@ public class ShadowUserProcessor {
           "ShadowUserProcessor:processClaimedUse:request Got to deactivate user account from KC:"
               + userMap,
           LoggerEnum.INFO.name());
-      String status = keyCloakService.deactivateUser(userMap);
+      String status = keyCloakService.deactivateUser(userMap, null);
       ProjectLogger.log(
           "ShadowUserProcessor:processClaimedUse:deactivate user account from KC:" + status,
           LoggerEnum.INFO.name());

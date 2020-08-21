@@ -119,17 +119,20 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("anyId");
-    when(userService.getCustodianChannel(Mockito.anyMap(), Mockito.any(ActorRef.class)))
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyId");
+    when(userService.getCustodianChannel(
+            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any()))
         .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("rootOrgId");
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId");
 
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(Util.class);
     Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);

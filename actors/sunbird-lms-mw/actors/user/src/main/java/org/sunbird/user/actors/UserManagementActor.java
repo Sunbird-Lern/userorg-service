@@ -33,6 +33,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -215,7 +216,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.CREATED_BY, userId);
       // If user account isManagedUser (managedBy passed in request) should be same as context
       // user_id
-      userService.validateUserId(actorMessage, managedBy);
+      userService.validateUserId(actorMessage, managedBy, null);
 
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy);
@@ -249,14 +250,14 @@ public class UserManagementActor extends BaseActor {
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
-    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (!isPrivate) {
       if (StringUtils.isNotBlank(callerId)) {
-        userService.validateUploader(actorMessage);
+        userService.validateUploader(actorMessage, null);
       } else {
-        userService.validateUserId(actorMessage, managedById);
+        userService.validateUserId(actorMessage, managedById, null);
       }
     }
     validateUserFrameworkData(userMap, userDbRecord);
@@ -268,12 +269,13 @@ public class UserManagementActor extends BaseActor {
     UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     updateLocationCodeToIds((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS));
-    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.UPDATE);
+    UserUtil.validateUserPhoneEmailAndWebPages(
+        user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
     // if we are updating email then need to update isEmailVerified flag inside keycloak
     UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
-    convertValidatedLocationCodesToIDs(userMap);
+    convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.UPDATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -496,7 +498,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private String getUserRootOrgId(String userId) {
-    User user = userService.getUserById(userId);
+    User user = userService.getUserById(userId, null);
     return user.getRootOrgId();
   }
 
@@ -547,7 +549,7 @@ public class UserManagementActor extends BaseActor {
   private boolean isCustodianOrgUser(Map<String, Object> userMap) {
     boolean isCustodianOrgUser = false;
     String custodianRootOrgId = null;
-    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID));
+    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), null);
     try {
       custodianRootOrgId = getCustodianRootOrgId();
     } catch (Exception ex) {
@@ -669,8 +671,8 @@ public class UserManagementActor extends BaseActor {
       try {
         if (StringUtils.isBlank((String) userMap.get(JsonKey.CHANNEL))
             && StringUtils.isBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
-          String channel = userService.getCustodianChannel(userMap, systemSettingActorRef);
-          String rootOrgId = userService.getRootOrgIdFromChannel(channel);
+          String channel = userService.getCustodianChannel(userMap, systemSettingActorRef, null);
+          String rootOrgId = userService.getRootOrgIdFromChannel(channel, null);
           userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
           userMap.put(JsonKey.CHANNEL, channel);
           isCustodianOrg = true;
@@ -780,7 +782,7 @@ public class UserManagementActor extends BaseActor {
     }
     String rootOrgId = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      rootOrgId = userService.getRootOrgIdFromChannel(requestedChannel);
+      rootOrgId = userService.getRootOrgIdFromChannel(requestedChannel, null);
       if (StringUtils.isNotBlank(subOrgRootOrgId) && !rootOrgId.equalsIgnoreCase(subOrgRootOrgId)) {
         throwParameterMismatchException(JsonKey.CHANNEL, JsonKey.ORGANISATION_ID);
       }
@@ -801,18 +803,20 @@ public class UserManagementActor extends BaseActor {
       String source,
       String managedBy,
       Request actorMessage) {
-    UserUtil.setUserDefaultValueForV3(userMap);
+    UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserUtil.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE));
-      UserUtil.checkEmailUniqueness((String) userMap.get(JsonKey.EMAIL));
+      UserUtil.checkPhoneUniqueness(
+          (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
+      UserUtil.checkEmailUniqueness(
+          (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
       String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
       userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
       userMap.put(JsonKey.CHANNEL, channel);
       Map<String, Object> managedByInfo = UserUtil.validateManagedByUser(managedBy);
-      convertValidatedLocationCodesToIDs(userMap);
+      convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
       ignoreOrAcceptFrameworkData(userMap, managedByInfo);
     }
     String userId = ProjectUtil.generateUniqueId();
@@ -879,7 +883,8 @@ public class UserManagementActor extends BaseActor {
                             + " --"
                             + (String) userMap.get(JsonKey.ID),
                         LoggerEnum.INFO.name());
-                    return UserUtil.updatePassword(updatePasswordMap);
+                    return UserUtil.updatePassword(
+                        updatePasswordMap, actorMessage.getRequestContext());
                   } catch (Exception e) {
                     ProjectLogger.log(
                         "Error occured during update pasword : " + e.getMessage(),
@@ -970,15 +975,15 @@ public class UserManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void processUserRequest(Map<String, Object> userMap, String callerId, Request request) {
     Map<String, Object> requestMap = null;
-    UserUtil.setUserDefaultValue(userMap, callerId);
+    UserUtil.setUserDefaultValue(userMap, callerId, request.getRequestContext());
     ObjectMapper mapper = new ObjectMapper();
     // Update external ids provider with OrgId
-    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap, request.getRequestContext());
     User user = mapper.convertValue(userMap, User.class);
-    UserUtil.validateExternalIds(user, JsonKey.CREATE);
+    UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE);
-    convertValidatedLocationCodesToIDs(userMap);
+    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
+    convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -1003,7 +1008,7 @@ public class UserManagementActor extends BaseActor {
               usrDbInfo.getTableName(),
               requestMap,
               request.getRequestContext());
-      isPasswordUpdated = UserUtil.updatePassword(userMap);
+      isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
     } finally {
       if (response == null) {
@@ -1160,12 +1165,13 @@ public class UserManagementActor extends BaseActor {
 
   private String getCustodianRootOrgId() {
     String custodianChannel =
-        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef);
-    return userService.getRootOrgIdFromChannel(custodianChannel);
+        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef, null);
+    return userService.getRootOrgIdFromChannel(custodianChannel, null);
   }
 
   @SuppressWarnings("unchecked")
-  private void convertValidatedLocationCodesToIDs(Map<String, Object> userMap) {
+  private void convertValidatedLocationCodesToIDs(
+      Map<String, Object> userMap, RequestContext context) {
     if (userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
       LocationClientImpl locationClient = new LocationClientImpl();
@@ -1416,9 +1422,9 @@ public class UserManagementActor extends BaseActor {
     if (withTokens && CollectionUtils.isNotEmpty(activeUserList)) {
       // Fetch encrypted token from admin utils
       Map<String, Object> encryptedTokenList =
-          userService.fetchEncryptedToken(uuid, activeUserList);
+          userService.fetchEncryptedToken(uuid, activeUserList, null);
       // encrypted token for each managedUser in respList
-      userService.appendEncryptedToken(encryptedTokenList, activeUserList);
+      userService.appendEncryptedToken(encryptedTokenList, activeUserList, null);
     }
     Map<String, Object> responseMap = new HashMap<>();
     if (CollectionUtils.isNotEmpty(activeUserList)) {

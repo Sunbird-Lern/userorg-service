@@ -48,7 +48,7 @@ public class AuthenticationHelper {
     String userId = JsonKey.UNAUTHORIZED;
     try {
       if (ssoEnabled) {
-        userId = ssoManager.verifyToken(token);
+        userId = ssoManager.verifyToken(token, null);
       } else {
         Response authResponse =
             cassandraOperation.getRecordById(

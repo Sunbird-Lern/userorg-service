@@ -59,7 +59,7 @@ public class UserStatusActor extends UserBaseActor {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     String logMsgPrefix =
         MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
-    User user = userService.getUserById(userId);
+    User user = userService.getUserById(userId, null);
 
     if (operation.equals(ActorOperations.BLOCK_USER.getValue())
         && Boolean.TRUE.equals(user.getIsDeleted())) {
@@ -85,9 +85,9 @@ public class UserStatusActor extends UserBaseActor {
     SSOManager ssoManager = SSOServiceFactory.getInstance();
     UserDao userDao = UserDaoImpl.getInstance();
     if (isBlocked) {
-      ssoManager.deactivateUser(userMapES);
+      ssoManager.deactivateUser(userMapES, null);
     } else {
-      ssoManager.activateUser(userMapES);
+      ssoManager.activateUser(userMapES, null);
     }
 
     Response response = userDao.updateUser(updatedUser);

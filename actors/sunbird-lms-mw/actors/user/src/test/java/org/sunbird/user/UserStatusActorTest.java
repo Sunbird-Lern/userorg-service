@@ -83,7 +83,8 @@ public class UserStatusActorTest {
     UserResource userResource = mock(UserResource.class);
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    when(userService.getUserById(Mockito.anyString())).thenReturn(user);
+    when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(user);
   }
 
   @Test

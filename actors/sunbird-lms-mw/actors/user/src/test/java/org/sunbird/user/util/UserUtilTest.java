@@ -132,7 +132,7 @@ public class UserUtilTest {
     user.setPhone("9663890400");
     boolean response = false;
     try {
-      UserUtil.checkPhoneUniqueness(user, "create");
+      UserUtil.checkPhoneUniqueness(user, "create", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -150,7 +150,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      UserUtil.checkPhoneUniqueness("9663890400");
+      UserUtil.checkPhoneUniqueness("9663890400", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -163,7 +163,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      UserUtil.checkEmailUniqueness("test@test.com");
+      UserUtil.checkEmailUniqueness("test@test.com", null);
       response = true;
     } catch (ProjectCommonException e) {
 
@@ -191,7 +191,7 @@ public class UserUtilTest {
     beforeEachTest();
     Map<String, Object> userMap = new HashMap<String, Object>();
     userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap);
+    UserUtil.setUserDefaultValueForV3(userMap, null);
     assertNotNull(userMap.get(JsonKey.USERNAME));
     assertNotNull(userMap.get(JsonKey.STATUS));
     assertNotNull(userMap.get(JsonKey.ROLES));
@@ -372,7 +372,7 @@ public class UserUtilTest {
     Map<String, Object> userMap = new HashMap<>();
     userMap.put(JsonKey.EXTERNAL_IDS, externalIdList);
     try {
-      UserUtil.updateExternalIdsProviderWithOrgId(userMap);
+      UserUtil.updateExternalIdsProviderWithOrgId(userMap, null);
     } catch (Exception ex) {
       Assert.assertTrue(true);
       Assert.assertEquals(

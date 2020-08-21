@@ -317,9 +317,9 @@ public class UserProfileReadActor extends BaseActor {
           userList.add(result);
           // Fetch encrypted token from admin utils
           Map<String, Object> encryptedTokenList =
-              userService.fetchEncryptedToken(managedBy, userList);
+              userService.fetchEncryptedToken(managedBy, userList, null);
           // encrypted token for each managedUser in respList
-          userService.appendEncryptedToken(encryptedTokenList, userList);
+          userService.appendEncryptedToken(encryptedTokenList, userList, null);
           result = userList.get(0);
         } else {
           result.put(JsonKey.MANAGED_TOKEN, managedToken);

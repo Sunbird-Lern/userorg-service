@@ -27,7 +27,7 @@ public class UserServiceGenerateUsernameTest {
 
   @Test
   public void testGenerateUsernamesFailureWithBlankName() {
-    List<String> result = userService.generateUsernames("", new ArrayList<String>());
+    List<String> result = userService.generateUsernames("", new ArrayList<String>(), null);
     assertTrue(result == null);
   }
 
@@ -47,7 +47,7 @@ public class UserServiceGenerateUsernameTest {
   }
 
   private boolean performTest(String name) {
-    List<String> result = userService.generateUsernames(name, new ArrayList<String>());
+    List<String> result = userService.generateUsernames(name, new ArrayList<String>(), null);
     pattern = Pattern.compile(userNameValidatorRegex);
     boolean flag = true;
     for (int i = 0; i < result.size(); i++) {

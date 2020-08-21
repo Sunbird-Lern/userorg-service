@@ -330,7 +330,7 @@ public class CertificateActor extends UserBaseActor {
     Map<String, Object> certAddReqMap = request.getRequest();
     String userId = (String) certAddReqMap.get(JsonKey.USER_ID);
     String oldCertId = (String) certAddReqMap.get(JsonKey.OLD_ID);
-    User user = userService.getUserById(userId);
+    User user = userService.getUserById(userId, null);
     assureUniqueCertId((String) certAddReqMap.get(JsonKey.ID));
     populateStoreData(storeMap, certAddReqMap);
     certAddReqMap.put(JsonKey.STORE, storeMap);

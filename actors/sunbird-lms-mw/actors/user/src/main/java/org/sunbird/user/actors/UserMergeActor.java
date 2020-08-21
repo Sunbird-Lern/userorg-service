@@ -77,8 +77,8 @@ public class UserMergeActor extends UserBaseActor {
     // validating tokens
     checkTokenDetails(headers, mergeeId, mergerId);
     Map telemetryMap = (HashMap) requestMap.clone();
-    User mergee = userService.getUserById(mergeeId);
-    User merger = userService.getUserById(mergerId);
+    User mergee = userService.getUserById(mergeeId, null);
+    User merger = userService.getUserById(mergerId, null);
     String custodianId = getCustodianValue();
     if ((!custodianId.equals(mergee.getRootOrgId())) || custodianId.equals(merger.getRootOrgId())) {
       ProjectLogger.log(
@@ -280,10 +280,10 @@ public class UserMergeActor extends UserBaseActor {
     ProjectLogger.log(
         "UserMergeActor:checkTokenDetails subdomain url value " + subDomainUrl,
         LoggerEnum.INFO.name());
-    String userId = keyCloakService.verifyToken(userAuthToken);
+    String userId = keyCloakService.verifyToken(userAuthToken, null);
     // Since source token is generated from subdomain , so verification also need with
     // same subdomain.
-    String sourceUserId = keyCloakService.verifyToken(sourceUserAuthToken, subDomainUrl);
+    String sourceUserId = keyCloakService.verifyToken(sourceUserAuthToken, subDomainUrl, null);
     if (!(mergeeId.equals(sourceUserId) && mergerId.equals(userId))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
@@ -313,6 +313,6 @@ public class UserMergeActor extends UserBaseActor {
         "UserMergeActor:deactivateMergeeFromKC: request Got to deactivate mergee account from KC:"
             + userMap,
         LoggerEnum.INFO.name());
-    return keyCloakService.removeUser(userMap);
+    return keyCloakService.removeUser(userMap, null);
   }
 }

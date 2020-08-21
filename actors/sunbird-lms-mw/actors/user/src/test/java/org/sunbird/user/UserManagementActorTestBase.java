@@ -129,10 +129,15 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("anyId");
-    when(userService.getCustodianChannel(Mockito.anyMap(), Mockito.any(ActorRef.class)))
+    when(userService.getRootOrgIdFromChannel(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("anyId");
+    when(userService.getCustodianChannel(
+            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any(RequestContext.class)))
         .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("rootOrgId");
+    when(userService.getRootOrgIdFromChannel(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("rootOrgId");
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
@@ -152,7 +157,7 @@ public abstract class UserManagementActorTestBase {
     Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
@@ -169,7 +174,7 @@ public abstract class UserManagementActorTestBase {
     promise.success(getListOrgResponse());
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
-    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     when(cassandraOperation.insertRecord(
             Mockito.anyString(),
             Mockito.anyString(),
