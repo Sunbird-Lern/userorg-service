@@ -264,7 +264,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
       }
     }
     // decrypt the userdata and return
-    return decryptionService.decryptData(userResult);
+    return decryptionService.decryptData(userResult, null);
   }
 
   private String getRequestObject(String operation, String requestId) {
@@ -475,7 +475,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
         }
       }
       // decrypt the userdata
-      userResult = decryptionService.decryptData(userResult);
+      userResult = decryptionService.decryptData(userResult, null);
       return userResult;
     } catch (Exception e) {
       throw new ProjectCommonException(

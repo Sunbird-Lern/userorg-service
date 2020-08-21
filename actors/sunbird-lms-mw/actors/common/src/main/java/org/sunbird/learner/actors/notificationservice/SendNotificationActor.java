@@ -143,7 +143,7 @@ public class SendNotificationActor extends BaseActor {
       for (Map<String, Object> userMap : userList) {
         String email = (String) userMap.get(key);
         if (StringUtils.isNotBlank(email)) {
-          String decryptedEmail = decryptionService.decryptData(email);
+          String decryptedEmail = decryptionService.decryptData(email, null);
           emailOrPhoneList.add(decryptedEmail);
         }
       }

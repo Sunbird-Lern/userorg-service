@@ -57,10 +57,12 @@ public class UserExternalIdentityServiceTest {
     Map<String, String> orgProviderMap = new HashMap<>();
     orgProviderMap.put("channel1004", "01234567687");
     PowerMockito.mockStatic(UserUtil.class);
-    when(UserUtil.fetchOrgIdByProvider(Mockito.anyList())).thenReturn(orgProviderMap);
+    when(UserUtil.fetchOrgIdByProvider(Mockito.anyList(), Mockito.any()))
+        .thenReturn(orgProviderMap);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
-    String userId = userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004");
+    String userId =
+        userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004", null);
     Assert.assertTrue(true);
   }
 
@@ -78,7 +80,8 @@ public class UserExternalIdentityServiceTest {
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
-    String userId = userExternalIdentityService.getUserV2("1234", "channel1004", "channel1004");
+    String userId =
+        userExternalIdentityService.getUserV2("1234", "channel1004", "channel1004", null);
     Assert.assertTrue(true);
   }
 }

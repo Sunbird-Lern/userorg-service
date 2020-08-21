@@ -53,9 +53,9 @@ public class AddressManagementActor extends BaseActor {
         org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null);
     try {
-      String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID));
+      String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID), null);
       String encCreatedById =
-          encryptionService.encryptData((String) requestMap.get(JsonKey.CREATED_BY));
+          encryptionService.encryptData((String) requestMap.get(JsonKey.CREATED_BY), null);
       for (int i = 0; i < addressList.size(); i++) {
         try {
           Map<String, Object> address = addressList.get(i);
@@ -100,9 +100,9 @@ public class AddressManagementActor extends BaseActor {
         org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null);
     try {
-      String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID));
+      String encUserId = encryptionService.encryptData((String) requestMap.get(JsonKey.ID), null);
       String encCreatedById =
-          encryptionService.encryptData((String) requestMap.get(JsonKey.CREATED_BY));
+          encryptionService.encryptData((String) requestMap.get(JsonKey.CREATED_BY), null);
       AddressDao addressDao = AddressDaoImpl.getInstance();
       for (int i = 0; i < addressList.size(); i++) {
         try {

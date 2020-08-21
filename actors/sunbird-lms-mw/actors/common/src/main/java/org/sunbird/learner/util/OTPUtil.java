@@ -117,7 +117,7 @@ public final class OTPUtil {
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(userList)) {
       Map<String, Object> user = userList.get(0);
-      String emailPhone = decService.decryptData((String) user.get(type));
+      String emailPhone = decService.decryptData((String) user.get(type), null);
       if (StringUtils.isBlank(emailPhone)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
       }

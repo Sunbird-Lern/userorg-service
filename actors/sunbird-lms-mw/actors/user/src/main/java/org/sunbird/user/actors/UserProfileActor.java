@@ -203,7 +203,7 @@ public class UserProfileActor extends UserBaseActor {
     user.setId(userId);
     user.setProfileVisibility(privateFieldMap);
     UserDao userDao = UserDaoImpl.getInstance();
-    Response response = userDao.updateUser(user);
+    Response response = userDao.updateUser(user, null);
 
     String responseStr = (String) response.get(JsonKey.RESPONSE);
     ProjectLogger.log("UserProfileActor:saveUserProfileVisibility: responseStr = " + responseStr);

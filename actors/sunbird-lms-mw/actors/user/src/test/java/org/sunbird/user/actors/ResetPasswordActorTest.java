@@ -49,12 +49,12 @@ public class ResetPasswordActorTest {
         .thenReturn("/url/password");
     when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
-    when(userDao.getUserById("ValidUserId")).thenReturn(getValidUserResponse());
+    when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
   }
 
   @Test
   public void testResetPasswordWithInvalidUserIdFailure() {
-    when(userDao.getUserById("invalidUserId")).thenReturn(null);
+    when(userDao.getUserById("invalidUserId", null)).thenReturn(null);
     boolean result = testScenario(getInvalidRequest(), ResponseCode.userNotFound);
     Assert.assertTrue(result);
   }

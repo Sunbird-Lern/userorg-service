@@ -50,7 +50,7 @@ public class UserOrgDaoImplTest {
     userOrg.setOrganisationId("1234567890");
     userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.updateUserOrg(userOrg);
+    Response res = userOrgDao.updateUserOrg(userOrg, null);
     Assert.assertNotNull(res);
   }
 }

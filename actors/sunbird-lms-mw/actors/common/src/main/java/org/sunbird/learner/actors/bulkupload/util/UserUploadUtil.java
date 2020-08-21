@@ -59,7 +59,7 @@ public class UserUploadUtil {
   public static List<SelfDeclaredUser> getMigrationUserAsList(BulkMigrationUser bulkMigrationUser) {
     List<SelfDeclaredUser> userList = new ArrayList<>();
     try {
-      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData());
+      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData(), null);
       userList = mapper.readValue(decryptedData, new TypeReference<List<SelfDeclaredUser>>() {});
     } catch (Exception e) {
       e.printStackTrace();

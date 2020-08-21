@@ -29,7 +29,7 @@ public class UserService {
     String val = value;
     if (isEncrypted) {
       try {
-        val = getEncryptionService().encryptData(val);
+        val = getEncryptionService().encryptData(val, null);
       } catch (Exception e) {
         ProjectLogger.log(
             "UserService:checkKeyUniqueness: Exception occurred with error message = "

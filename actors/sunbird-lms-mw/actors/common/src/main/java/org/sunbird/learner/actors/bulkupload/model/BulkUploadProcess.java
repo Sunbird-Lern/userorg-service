@@ -185,7 +185,7 @@ public class BulkUploadProcess implements Serializable {
   @JsonIgnore
   public void setEncryptedStorageDetails(StorageDetails cloudStorageData) {
     try {
-      setStorageDetails(encryptionService.encryptData(cloudStorageData.toJsonString()));
+      setStorageDetails(encryptionService.encryptData(cloudStorageData.toJsonString(), null));
     } catch (Exception e) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.errorSavingStorageDetails, null);
@@ -198,7 +198,7 @@ public class BulkUploadProcess implements Serializable {
     String rawData = getStorageDetails();
     if (rawData != null) {
       ObjectMapper mapper = new ObjectMapper();
-      String decryptedData = decryptionService.decryptData(getStorageDetails());
+      String decryptedData = decryptionService.decryptData(getStorageDetails(), null);
       return mapper.readValue(decryptedData, StorageDetails.class);
     } else {
       return null;

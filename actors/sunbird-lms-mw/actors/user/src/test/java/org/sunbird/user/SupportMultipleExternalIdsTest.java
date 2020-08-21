@@ -59,7 +59,8 @@ public class SupportMultipleExternalIdsTest {
                 .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     try {
-      Mockito.when(encryptionService.encryptData(Mockito.anyString())).thenReturn("abc123");
+      Mockito.when(encryptionService.encryptData(Mockito.anyString(), Mockito.any()))
+          .thenReturn("abc123");
     } catch (Exception e) { // TODO Auto-generated catch block
       Assert.fail("Initialization failed");
     }

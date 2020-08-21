@@ -31,6 +31,7 @@ import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -147,7 +148,9 @@ public class UserProfileReadActor extends BaseActor {
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ID_TYPE));
       } else {
-        userId = userExternalIdentityService.getUserV1(id, provider, idType);
+        userId =
+            userExternalIdentityService.getUserV1(
+                id, provider, idType, actorMessage.getRequestContext());
         if (userId == null) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.externalIdNotFound,
@@ -165,7 +168,8 @@ public class UserProfileReadActor extends BaseActor {
     Map<String, Object> result = null;
     if (!isPrivate) {
       Future<Map<String, Object>> resultF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
+          esUtil.getDataByIdentifier(
+              ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
       try {
         Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
         if (object != null) {
@@ -180,7 +184,7 @@ public class UserProfileReadActor extends BaseActor {
       }
     } else {
       UserDao userDao = new UserDaoImpl();
-      User foundUser = userDao.getUserById(userId);
+      User foundUser = userDao.getUserById(userId, null);
       if (foundUser == null) {
         throw new ProjectCommonException(
             ResponseCode.userNotFound.getErrorCode(),
@@ -206,7 +210,8 @@ public class UserProfileReadActor extends BaseActor {
         && (Boolean) result.get(JsonKey.IS_DELETED)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-    Future<Map<String, Object>> esResultF = fetchRootAndRegisterOrganisation(result);
+    Future<Map<String, Object>> esResultF =
+        fetchRootAndRegisterOrganisation(result, actorMessage.getRequestContext());
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     result.put(JsonKey.ROOT_ORG, esResult);
@@ -250,7 +255,9 @@ public class UserProfileReadActor extends BaseActor {
         // and merge it with user index data
         Future<Map<String, Object>> privateResultF =
             esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, null);
+                ProjectUtil.EsType.userprofilevisibility.getTypeName(),
+                userId,
+                actorMessage.getRequestContext());
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
 
@@ -260,15 +267,18 @@ public class UserProfileReadActor extends BaseActor {
           if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
             String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
             if (requestFields.contains(JsonKey.DECLARATIONS)) {
-              List<Map<String, Object>> declarations = fetchUserDeclarations(userId);
+              List<Map<String, Object>> declarations =
+                  fetchUserDeclarations(userId, actorMessage.getRequestContext());
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
               ProjectLogger.log("Get external Ids explicitly from usr_external_identity for v3");
               List<Map<String, String>> resExternalIds =
-                  userExternalIdentityService.getUserExternalIds(userId);
+                  userExternalIdentityService.getUserExternalIds(
+                      userId, actorMessage.getRequestContext());
               decryptUserExternalIds(resExternalIds);
-              UserUtil.updateExternalIdsWithProvider(resExternalIds);
+              UserUtil.updateExternalIdsWithProvider(
+                  resExternalIds, actorMessage.getRequestContext());
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
@@ -276,7 +286,8 @@ public class UserProfileReadActor extends BaseActor {
           // fetch user external identity
           ProjectLogger.log(
               "Get external Ids from both declarations and usr_external_identity for merge them");
-          List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(userId);
+          List<Map<String, String>> dbResExternalIds =
+              fetchUserExternalIdentity(userId, actorMessage.getRequestContext());
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
         result.putAll(privateResult);
@@ -317,9 +328,11 @@ public class UserProfileReadActor extends BaseActor {
           userList.add(result);
           // Fetch encrypted token from admin utils
           Map<String, Object> encryptedTokenList =
-              userService.fetchEncryptedToken(managedBy, userList, null);
+              userService.fetchEncryptedToken(
+                  managedBy, userList, actorMessage.getRequestContext());
           // encrypted token for each managedUser in respList
-          userService.appendEncryptedToken(encryptedTokenList, userList, null);
+          userService.appendEncryptedToken(
+              encryptedTokenList, userList, actorMessage.getRequestContext());
           result = userList.get(0);
         } else {
           result.put(JsonKey.MANAGED_TOKEN, managedToken);
@@ -340,12 +353,12 @@ public class UserProfileReadActor extends BaseActor {
    * @param userId
    * @return
    */
-  private List<Map<String, Object>> fetchUserDeclarations(String userId) {
+  private List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null);
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, context);
     List<Map<String, Object>> resExternalIds;
     List<Map<String, Object>> finalRes = new ArrayList<>();
     if (null != response && null != response.getResult()) {
@@ -357,7 +370,7 @@ public class UserProfileReadActor extends BaseActor {
               Map<String, String> declaredFields =
                   (Map<String, String>) item.get(JsonKey.USER_INFO);
               if (MapUtils.isNotEmpty(declaredFields)) {
-                decryptDeclarationFields(declaredFields);
+                decryptDeclarationFields(declaredFields, context);
               }
               declaration.put(JsonKey.STATUS, (String) item.get(JsonKey.STATUS));
               declaration.put(JsonKey.ERROR_TYPE, (String) item.get(JsonKey.ERROR_TYPE));
@@ -371,28 +384,30 @@ public class UserProfileReadActor extends BaseActor {
     return finalRes;
   }
 
-  private Map<String, String> decryptDeclarationFields(Map<String, String> declaredFields) {
+  private Map<String, String> decryptDeclarationFields(
+      Map<String, String> declaredFields, RequestContext context) {
     if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
       declaredFields.put(
           JsonKey.DECLARED_EMAIL,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL)));
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL), context));
     }
     if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
       declaredFields.put(
           JsonKey.DECLARED_PHONE,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE)));
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE), context));
     }
     return declaredFields;
   }
 
   @SuppressWarnings("unchecked")
-  private List<Map<String, String>> fetchUserExternalIdentity(String userId) {
+  private List<Map<String, String>> fetchUserExternalIdentity(
+      String userId, RequestContext context) {
 
-    List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId);
+    List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
 
     decryptUserExternalIds(dbResExternalIds);
     // update orgId to provider in externalIds
-    UserUtil.updateExternalIdsWithProvider(dbResExternalIds);
+    UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
     return dbResExternalIds;
   }
 
@@ -409,7 +424,7 @@ public class UserProfileReadActor extends BaseActor {
                       || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
 
                     String decrytpedOriginalExternalId =
-                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), null);
                     s.put(JsonKey.ID, decrytpedOriginalExternalId);
 
                   } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
@@ -477,12 +492,13 @@ public class UserProfileReadActor extends BaseActor {
     return responseMap;
   }
 
-  private Future<Map<String, Object>> fetchRootAndRegisterOrganisation(Map<String, Object> result) {
+  private Future<Map<String, Object>> fetchRootAndRegisterOrganisation(
+      Map<String, Object> result, RequestContext context) {
     try {
       if (isNotNull(result.get(JsonKey.ROOT_ORG_ID))) {
         String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
         return esUtil.getDataByIdentifier(
-            ProjectUtil.EsType.organisation.getTypeName(), rootOrgId, null);
+            ProjectUtil.EsType.organisation.getTypeName(), rootOrgId, context);
       }
     } catch (Exception ex) {
       ProjectLogger.log(ex.getMessage(), ex);
@@ -786,7 +802,7 @@ public class UserProfileReadActor extends BaseActor {
     if (null != userMap.get(JsonKey.LOGIN_ID)) {
       String loginId = (String) userMap.get(JsonKey.LOGIN_ID);
       try {
-        loginId = encryptionService.encryptData((String) userMap.get(JsonKey.LOGIN_ID));
+        loginId = encryptionService.encryptData((String) userMap.get(JsonKey.LOGIN_ID), null);
       } catch (Exception e) {
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -849,7 +865,8 @@ public class UserProfileReadActor extends BaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    Future<Map<String, Object>> future = fetchRootAndRegisterOrganisation(result);
+    Future<Map<String, Object>> future =
+        fetchRootAndRegisterOrganisation(result, actorMessage.getRequestContext());
     Future<Response> response =
         future.map(
             new Mapper<Map<String, Object>, Response>() {
@@ -900,7 +917,8 @@ public class UserProfileReadActor extends BaseActor {
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
         // fetch user external identity
-        List<Map<String, String>> dbResExternalIds = fetchUserExternalIdentity(requestedById);
+        List<Map<String, String>> dbResExternalIds =
+            fetchUserExternalIdentity(requestedById, actorMessage.getRequestContext());
         result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         result.putAll(privateResult);
       }
@@ -1006,7 +1024,7 @@ public class UserProfileReadActor extends BaseActor {
     String value = (String) request.get(JsonKey.VALUE);
     String type = (String) request.get(JsonKey.KEY);
     try {
-      boolean exists = UserUtil.identifierExists(type, value);
+      boolean exists = UserUtil.identifierExists(type, value, request.getRequestContext());
       Response response = new Response();
       response.put(JsonKey.EXISTS, exists);
       sender().tell(response, self());
@@ -1077,7 +1095,8 @@ public class UserProfileReadActor extends BaseActor {
     String value = (String) request.get(JsonKey.VALUE);
     String encryptedValue = null;
     try {
-      encryptedValue = encryptionService.encryptData(StringUtils.lowerCase(value));
+      encryptedValue =
+          encryptionService.encryptData(StringUtils.lowerCase(value), request.getRequestContext());
     } catch (Exception var11) {
       throw new ProjectCommonException(
           ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -1091,7 +1110,7 @@ public class UserProfileReadActor extends BaseActor {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
     Future<Map<String, Object>> esFuture =
-        esUtil.search(searchDTO, EsType.user.getTypeName(), null);
+        esUtil.search(searchDTO, EsType.user.getTypeName(), request.getRequestContext());
     return esFuture;
   }
 
@@ -1103,7 +1122,7 @@ public class UserProfileReadActor extends BaseActor {
     }
     String encryptedValue = null;
     try {
-      encryptedValue = encryptionService.encryptData(value);
+      encryptedValue = encryptionService.encryptData(value, null);
     } catch (Exception e) {
       ProjectCommonException exception =
           new ProjectCommonException(
@@ -1153,7 +1172,8 @@ public class UserProfileReadActor extends BaseActor {
                 esOrgMap =
                     (Map<String, Object>)
                         ElasticSearchHelper.getResponseFromFuture(
-                            fetchRootAndRegisterOrganisation(parameter));
+                            fetchRootAndRegisterOrganisation(
+                                parameter, actorMessage.getRequestContext()));
                 return esOrgMap;
               }
             },
@@ -1191,7 +1211,8 @@ public class UserProfileReadActor extends BaseActor {
                     (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
                 if (((String) result.get(JsonKey.USER_ID)).equalsIgnoreCase(requestedById)) {
                   List<Map<String, String>> dbResExternalIds =
-                      fetchUserExternalIdentity((String) result.get(JsonKey.USER_ID));
+                      fetchUserExternalIdentity(
+                          (String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext());
                   extIdMap.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
                   return extIdMap;
                 }

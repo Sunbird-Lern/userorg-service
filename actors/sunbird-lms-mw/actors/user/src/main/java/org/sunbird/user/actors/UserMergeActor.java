@@ -96,7 +96,7 @@ public class UserMergeActor extends UserBaseActor {
       prepareMergeeAccountData(mergee, mergeeDBMap);
       userRequest.put(JsonKey.USER_MERGEE_ACCOUNT, mergeeDBMap);
       UserDao userDao = UserDaoImpl.getInstance();
-      Response mergeeResponse = userDao.updateUser(mergeeDBMap);
+      Response mergeeResponse = userDao.updateUser(mergeeDBMap, null);
       String mergeeResponseStr = (String) mergeeResponse.get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "UserMergeActor: updateUserMergeDetails: mergeeResponseStr = " + mergeeResponseStr,

@@ -744,7 +744,7 @@ public final class Util {
 
   public static String encryptData(String value) {
     try {
-      return encryptionService.encryptData(value);
+      return encryptionService.encryptData(value, null);
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -1205,10 +1205,10 @@ public final class Util {
     userMap.put(JsonKey.ENC_PHONE, phone);
     userMap.put(JsonKey.ENC_EMAIL, email);
     if (!StringUtils.isBlank(phone)) {
-      userMap.put(JsonKey.PHONE, maskingService.maskPhone(decService.decryptData(phone)));
+      userMap.put(JsonKey.PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
     }
     if (!StringUtils.isBlank(email)) {
-      userMap.put(JsonKey.EMAIL, maskingService.maskEmail(decService.decryptData(email)));
+      userMap.put(JsonKey.EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
     }
   }
 

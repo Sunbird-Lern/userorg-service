@@ -197,7 +197,7 @@ public class EmailServiceActor extends BaseActor {
         for (Map<String, Object> userMap : userList) {
           String phone = (String) userMap.get(JsonKey.PHONE);
           if (StringUtils.isNotBlank(phone)) {
-            String decryptedPhone = decryptionService.decryptData(phone);
+            String decryptedPhone = decryptionService.decryptData(phone, null);
             if (!phones.contains(decryptedPhone)) {
               phones.add(decryptedPhone);
             }
@@ -255,7 +255,7 @@ public class EmailServiceActor extends BaseActor {
         for (Map<String, Object> userMap : userList) {
           String email = (String) userMap.get(JsonKey.EMAIL);
           if (StringUtils.isNotBlank(email)) {
-            String decryptedEmail = decryptionService.decryptData(email);
+            String decryptedEmail = decryptionService.decryptData(email, null);
             emails.add(decryptedEmail);
           }
         }
@@ -365,7 +365,8 @@ public class EmailServiceActor extends BaseActor {
         usersList.forEach(
             user -> {
               if (StringUtils.isNotBlank((String) user.get(JsonKey.EMAIL))) {
-                String email = decryptionService.decryptData((String) user.get(JsonKey.EMAIL));
+                String email =
+                    decryptionService.decryptData((String) user.get(JsonKey.EMAIL), null);
                 if (ProjectUtil.isEmailvalid(email)) {
                   emails.add(email);
                 } else {
@@ -414,7 +415,7 @@ public class EmailServiceActor extends BaseActor {
   private Map<String, Object> getUserInfo(String email) {
     String encryptedMail = "";
     try {
-      encryptedMail = encryptionService.encryptData(email);
+      encryptedMail = encryptionService.encryptData(email, null);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }

@@ -55,7 +55,8 @@ public class AddressManagementActorTest {
         .thenReturn(encryptionService);
 
     try {
-      Mockito.when(encryptionService.encryptData(Mockito.anyString())).thenReturn("encrptUserId");
+      Mockito.when(encryptionService.encryptData(Mockito.anyString(), Mockito.any()))
+          .thenReturn("encrptUserId");
     } catch (Exception e) {
       fail(
           "AddressManagementActorTest initialization failed, with exception message: "

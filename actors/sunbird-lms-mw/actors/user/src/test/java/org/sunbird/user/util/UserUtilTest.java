@@ -113,7 +113,8 @@ public class UserUtilTest {
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
-    when(encryptionService.encryptData(Mockito.anyString())).thenReturn("9663890400");
+    when(encryptionService.encryptData(Mockito.anyString(), Mockito.any()))
+        .thenReturn("9663890400");
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -249,7 +250,7 @@ public class UserUtilTest {
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
     when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
-    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
+    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers, null);
     Assert.assertTrue(true);
   }
 
@@ -307,7 +308,7 @@ public class UserUtilTest {
     when(cassandraOperationImpl.getRecordsByPrimaryKeys(
             JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
         .thenReturn(response1);
-    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
+    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
 
@@ -338,7 +339,7 @@ public class UserUtilTest {
     externalIds.put(JsonKey.USER_ID, "w131-2323-323-232-3232");
     List<Map<String, String>> externalIdList = new ArrayList<>();
     externalIdList.add(externalIds);
-    UserUtil.updateExternalIdsWithProvider(externalIdList);
+    UserUtil.updateExternalIdsWithProvider(externalIdList, null);
     Assert.assertTrue(true);
   }
 

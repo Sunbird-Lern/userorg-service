@@ -252,7 +252,8 @@ public class UserManagementActor extends BaseActor {
     validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
-    Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
+    Map<String, Object> userDbRecord =
+        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (!isPrivate) {
       if (StringUtils.isNotBlank(callerId)) {
@@ -267,7 +268,8 @@ public class UserManagementActor extends BaseActor {
     validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
-    UserUtil.validateExternalIdsForUpdateUser(user, isCustodianOrgUser);
+    UserUtil.validateExternalIdsForUpdateUser(
+        user, isCustodianOrgUser, actorMessage.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     updateLocationCodeToIds((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS));
     UserUtil.validateUserPhoneEmailAndWebPages(
@@ -482,7 +484,8 @@ public class UserManagementActor extends BaseActor {
           (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
       String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
       String rootOrgId = getUserRootOrgId(userId);
-      List<Map<String, Object>> orgListDb = UserUtil.getAllUserOrgDetails(userId);
+      List<Map<String, Object>> orgListDb =
+          UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
       Map<String, Object> orgDbMap = new HashMap<>();
       if (CollectionUtils.isNotEmpty(orgListDb)) {
         orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
@@ -519,14 +522,14 @@ public class UserManagementActor extends BaseActor {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ID));
-        userOrgDao.updateUserOrg(userOrg);
+        userOrgDao.updateUserOrg(userOrg, null);
         orgDbMap.remove(orgId);
       } else {
         userOrg.setHashTagId((String) (org.get(JsonKey.HASH_TAG_ID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
-        userOrgDao.createUserOrg(userOrg);
+        userOrgDao.createUserOrg(userOrg, null);
       }
     }
   }
@@ -545,7 +548,7 @@ public class UserManagementActor extends BaseActor {
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);
       userOrg.setOrgLeftDate(ProjectUtil.getFormattedDate());
-      userOrgDao.updateUserOrg(userOrg);
+      userOrgDao.updateUserOrg(userOrg, null);
     }
   }
   // Check if the user is Custodian Org user

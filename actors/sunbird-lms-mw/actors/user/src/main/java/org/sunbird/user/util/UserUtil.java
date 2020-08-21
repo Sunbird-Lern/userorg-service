@@ -86,13 +86,13 @@ public class UserUtil {
       String phone = user.getPhone();
       if (StringUtils.isNotBlank(phone)) {
         try {
-          phone = encryptionService.encryptData(phone);
+          phone = encryptionService.encryptData(phone, context);
         } catch (Exception e) {
           logger.error(context, "Exception occurred while encrypting phone number ", e);
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, null);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, context);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -117,13 +117,13 @@ public class UserUtil {
     if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
       if (StringUtils.isNotBlank(phone)) {
         try {
-          phone = encryptionService.encryptData(phone);
+          phone = encryptionService.encryptData(phone, context);
         } catch (Exception e) {
           logger.error(context, "Exception occurred while encrypting phone number ", e);
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, null);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, context);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -133,17 +133,17 @@ public class UserUtil {
     }
   }
 
-  public static boolean identifierExists(String type, String value) {
+  public static boolean identifierExists(String type, String value, RequestContext context) {
 
     if (StringUtils.isNotBlank(value)) {
       try {
-        value = encryptionService.encryptData(value);
+        value = encryptionService.encryptData(value, context);
       } catch (Exception e) {
-        logger.error("Exception occurred while encrypting email/phone", e);
+        logger.error(context, "Exception occurred while encrypting email/phone", e);
       }
       Response result =
           cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), type, value, null);
+              userDb.getKeySpace(), userDb.getTableName(), type, value, context);
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -166,7 +166,7 @@ public class UserUtil {
         }
       }
       Map<String, String> orgProviderMap =
-          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
+          fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
 
       if (CollectionUtils.isNotEmpty(
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
@@ -200,13 +200,13 @@ public class UserUtil {
     if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
       if (StringUtils.isNotBlank(email)) {
         try {
-          email = encryptionService.encryptData(email);
+          email = encryptionService.encryptData(email, context);
         } catch (Exception e) {
           logger.error(context, "Exception occurred while encrypting phone number ", e);
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, null);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, context);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -218,7 +218,7 @@ public class UserUtil {
   }
 
   public static Map<String, Object> validateExternalIdsAndReturnActiveUser(
-      Map<String, Object> userMap) {
+      Map<String, Object> userMap, RequestContext context) {
     String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
     String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
@@ -228,7 +228,7 @@ public class UserUtil {
         && StringUtils.isNotEmpty(extId)
         && StringUtils.isNotEmpty(provider)
         && StringUtils.isNotEmpty(idType)) {
-      user = getUserFromExternalId(userMap);
+      user = getUserFromExternalId(userMap, context);
       if (MapUtils.isEmpty(user)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.externalIdNotFound,
@@ -242,7 +242,7 @@ public class UserUtil {
               ? ((String) userMap.get(JsonKey.USER_ID))
               : ((String) userMap.get(JsonKey.ID));
       Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
       user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
       if (MapUtils.isEmpty(user)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound, null);
@@ -265,23 +265,25 @@ public class UserUtil {
   }
 
   @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserFromExternalId(Map<String, Object> userMap) {
+  public static Map<String, Object> getUserFromExternalId(
+      Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> user = null;
-    String userId = getUserIdFromExternalId(userMap);
+    String userId = getUserIdFromExternalId(userMap, context);
     if (!StringUtils.isEmpty(userId)) {
       Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
+          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
       user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
     }
     return user;
   }
 
-  public static String getUserIdFromExternalId(Map<String, Object> userMap) {
+  public static String getUserIdFromExternalId(
+      Map<String, Object> userMap, RequestContext context) {
 
     String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
     String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-    return userExternalIdentityService.getUserV2(extId, provider, idType);
+    return userExternalIdentityService.getUserV2(extId, provider, idType, context);
   }
 
   public static String getUserId(Map<String, Object> userMap, RequestContext context) {
@@ -298,7 +300,7 @@ public class UserUtil {
       if (StringUtils.isNotBlank(provider)
           && StringUtils.isNotBlank(extId)
           && StringUtils.isNotBlank(idType)) {
-        userId = userExternalIdentityService.getUserV1(extId, provider, idType);
+        userId = userExternalIdentityService.getUserV1(extId, provider, idType, context);
       }
     }
     return userId;
@@ -312,13 +314,13 @@ public class UserUtil {
       String email = user.getEmail();
       if (StringUtils.isNotBlank(email)) {
         try {
-          email = encryptionService.encryptData(email);
+          email = encryptionService.encryptData(email, context);
         } catch (Exception e) {
           logger.error(context, "Exception occurred while encrypting email:", e);
         }
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, null);
+                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, context);
         List<Map<String, Object>> userMapList =
             (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
         if (!userMapList.isEmpty()) {
@@ -344,9 +346,9 @@ public class UserUtil {
     }
   }
 
-  public static String getDecryptedData(String value) {
+  public static String getDecryptedData(String value, RequestContext context) {
     try {
-      return decService.decryptData(value);
+      return decService.decryptData(value, context);
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -381,10 +383,11 @@ public class UserUtil {
    *
    * @param dbResExternalIds
    */
-  public static void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
+  public static void updateExternalIdsWithProvider(
+      List<Map<String, String>> dbResExternalIds, RequestContext context) {
     if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
       String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
-      String provider = fetchProviderByOrgId(orgId);
+      String provider = fetchProviderByOrgId(orgId, context);
       dbResExternalIds
           .stream()
           .forEach(
@@ -492,7 +495,7 @@ public class UserUtil {
 
   public static String encryptData(String value) {
     try {
-      return encryptionService.encryptData(value);
+      return encryptionService.encryptData(value, null);
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -513,10 +516,12 @@ public class UserUtil {
     String phone = (String) userMap.get(JsonKey.PHONE);
     String email = (String) userMap.get(JsonKey.EMAIL);
     if (!StringUtils.isBlank(phone)) {
-      userMap.put(JsonKey.MASKED_PHONE, maskingService.maskPhone(decService.decryptData(phone)));
+      userMap.put(
+          JsonKey.MASKED_PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
     }
     if (!StringUtils.isBlank(email)) {
-      userMap.put(JsonKey.MASKED_EMAIL, maskingService.maskEmail(decService.decryptData(email)));
+      userMap.put(
+          JsonKey.MASKED_EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
     }
   }
 
@@ -707,7 +712,7 @@ public class UserUtil {
       }
 
     } while (StringUtils.isBlank(userName));
-    return decService.decryptData(userName);
+    return decService.decryptData(userName, null);
   }
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {
@@ -718,17 +723,18 @@ public class UserUtil {
     checkExternalIdUniqueness(user, operationType, context);
   }
   // validateExternalIds For UPDATE USER
-  public static void validateExternalIdsForUpdateUser(User user, boolean isCustodianOrg) {
+  public static void validateExternalIdsForUpdateUser(
+      User user, boolean isCustodianOrg, RequestContext context) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
     // If operation is update and user is custodian org, ignore uniqueness check
     if (!isCustodianOrg) {
-      checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      checkExternalIdUniqueness(user, JsonKey.UPDATE, context);
     }
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
-      validateUserExternalIds(user);
+      validateUserExternalIds(user, context);
     }
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       updateExternalIdsStatus(user.getExternalIds());
@@ -742,7 +748,8 @@ public class UserUtil {
       String encEmail = (String) userRequestMap.get(JsonKey.EMAIL);
       if (StringUtils.isNotBlank(email)) {
         try {
-          encEmail = encryptionService.encryptData((String) userRequestMap.get(JsonKey.EMAIL));
+          encEmail =
+              encryptionService.encryptData((String) userRequestMap.get(JsonKey.EMAIL), null);
         } catch (Exception ex) {
           logger.error("Exception occurred while encrypting user email.", ex);
         }
@@ -780,8 +787,8 @@ public class UserUtil {
     return extMap;
   }
 
-  public static void validateUserExternalIds(User user) {
-    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId());
+  public static void validateUserExternalIds(User user, RequestContext context) {
+    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId(), context);
     List<Map<String, String>> externalIds = user.getExternalIds();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
@@ -801,11 +808,11 @@ public class UserUtil {
     }
   }
 
-  public static List<Map<String, String>> getExternalIds(String userId) {
+  public static List<Map<String, String>> getExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds =
-        userExternalIdentityService.getUserExternalIds(userId);
+        userExternalIdentityService.getUserExternalIds(userId, context);
     List<Map<String, String>> dbSelfDeclaredExternalIds =
-        userExternalIdentityService.getSelfDeclaredDetails(userId);
+        userExternalIdentityService.getSelfDeclaredDetails(userId, context);
 
     if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
       dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
@@ -813,12 +820,14 @@ public class UserUtil {
     return dbResExternalIds;
   }
 
-  public static List<Map<String, Object>> getActiveUserOrgDetails(String userId) {
-    return getUserOrgDetails(false, userId);
+  public static List<Map<String, Object>> getActiveUserOrgDetails(
+      String userId, RequestContext context) {
+    return getUserOrgDetails(false, userId, context);
   }
 
   @SuppressWarnings("unchecked")
-  private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
+  private static List<Map<String, Object>> getUserOrgDetails(
+      boolean isdeleted, String userId, RequestContext context) {
     List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
@@ -831,7 +840,7 @@ public class UserUtil {
               userOrgDbInfo.getTableName(),
               ids,
               JsonKey.USER_ID,
-              null);
+              context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
@@ -858,8 +867,9 @@ public class UserUtil {
     return organisations;
   }
 
-  public static List<Map<String, Object>> getAllUserOrgDetails(String userId) {
-    return getUserOrgDetails(true, userId);
+  public static List<Map<String, Object>> getAllUserOrgDetails(
+      String userId, RequestContext context) {
+    return getUserOrgDetails(true, userId, context);
   }
 
   public static void toLower(Map<String, Object> userMap) {
@@ -981,11 +991,12 @@ public class UserUtil {
     return currOrgId;
   }
 
-  public static String fetchProviderByOrgId(String orgId) {
+  public static String fetchProviderByOrgId(String orgId, RequestContext context) {
     try {
       if (StringUtils.isNotBlank(orgId)) {
         Future<Map<String, Object>> esOrgResF =
-            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
+            esUtil.getDataByIdentifier(
+                ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
         Map<String, Object> org =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
 
@@ -994,12 +1005,13 @@ public class UserUtil {
         }
       }
     } catch (Exception ex) {
-      logger.error(ex.getMessage(), ex);
+      logger.error(context, ex.getMessage(), ex);
     }
     return "";
   }
 
-  public static Map<String, String> fetchOrgIdByProvider(List<String> providers) {
+  public static Map<String, String> fetchOrgIdByProvider(
+      List<String> providers, RequestContext context) {
     Map<String, String> providerOrgMap = new HashMap<>();
     if (CollectionUtils.isNotEmpty(providers)) {
       try {
@@ -1010,7 +1022,7 @@ public class UserUtil {
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);
         Future<Map<String, Object>> esOrgResF =
-            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null);
+            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), context);
         Map<String, Object> esResOrg =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
         if (MapUtils.isNotEmpty(esResOrg)) {
@@ -1024,7 +1036,7 @@ public class UserUtil {
         }
 
       } catch (Exception ex) {
-        logger.error(ex.getMessage(), ex);
+        logger.error(context, ex.getMessage(), ex);
       }
     }
     return providerOrgMap;
@@ -1038,7 +1050,7 @@ public class UserUtil {
         String key = userInfo.getKey();
         String value = (String) userInfo.getValue();
         if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
-          userInfoMap.put(key, encryptionService.encryptData(value));
+          userInfoMap.put(key, encryptionService.encryptData(value, null));
         }
       }
     }

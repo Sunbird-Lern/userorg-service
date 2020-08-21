@@ -45,7 +45,7 @@ public class GetUserOrgDetailsTest {
     when(cassandraOperationImpl.getRecordsByPrimaryKeys(
             JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
         .thenReturn(response1);
-    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
+    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
 }

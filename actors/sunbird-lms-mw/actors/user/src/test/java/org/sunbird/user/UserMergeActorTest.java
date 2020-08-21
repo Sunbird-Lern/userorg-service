@@ -99,7 +99,7 @@ public class UserMergeActorTest {
     when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getUserDetails(true))
         .thenReturn(getUserDetails(true));
-    when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
+    when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn("anyUserId");
@@ -114,7 +114,7 @@ public class UserMergeActorTest {
     when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getUserDetails(false))
         .thenReturn(getUserDetails(false));
-    when(userDao.updateUser(Mockito.anyMap())).thenReturn(getSuccessResponse());
+    when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
     when(ssoManager.verifyToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))

@@ -127,7 +127,8 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
             if (null != resMap.get(JsonKey.SUCCESS_RESULT)) {
               successMap =
                   mapper.readValue(
-                      decryptionService.decryptData((String) resMap.get(JsonKey.SUCCESS_RESULT)),
+                      decryptionService.decryptData(
+                          (String) resMap.get(JsonKey.SUCCESS_RESULT), null),
                       Object[].class);
               if (JsonKey.USER.equalsIgnoreCase(objectType)) {
                 Arrays.stream(successMap)
@@ -142,7 +143,8 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
             if (null != resMap.get(JsonKey.FAILURE_RESULT)) {
               failureMap =
                   mapper.readValue(
-                      decryptionService.decryptData((String) resMap.get(JsonKey.FAILURE_RESULT)),
+                      decryptionService.decryptData(
+                          (String) resMap.get(JsonKey.FAILURE_RESULT), null),
                       Object[].class);
               if (JsonKey.USER.equalsIgnoreCase(objectType)) {
                 Arrays.stream(successMap)

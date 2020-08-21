@@ -70,7 +70,6 @@ public interface ElasticSearchService {
    * criteria like fields, facets, sort by , filters etc. here user can pass single type to search
    * or multiple type or null
    *
-   * @param type var arg of String
    * @param context
    * @return search result as Map.
    */

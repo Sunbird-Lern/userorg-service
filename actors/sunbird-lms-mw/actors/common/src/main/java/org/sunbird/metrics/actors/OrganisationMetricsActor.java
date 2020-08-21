@@ -136,7 +136,7 @@ public class OrganisationMetricsActor extends BaseMetricsActor {
     requestDbInfo.put(JsonKey.CREATED_DATE, simpleDateFormat.format(new Date()));
     requestDbInfo.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
     String decryptedEmail =
-        decryptionService.decryptData((String) requestedByInfo.get(JsonKey.ENC_EMAIL));
+        decryptionService.decryptData((String) requestedByInfo.get(JsonKey.ENC_EMAIL), null);
     requestDbInfo.put(JsonKey.EMAIL, decryptedEmail);
     requestDbInfo.put(JsonKey.FORMAT, actorMessage.get(JsonKey.FORMAT));
     requestDbInfo.put(JsonKey.RESOURCE_NAME, orgData.get(JsonKey.ORGANISATION_NAME));

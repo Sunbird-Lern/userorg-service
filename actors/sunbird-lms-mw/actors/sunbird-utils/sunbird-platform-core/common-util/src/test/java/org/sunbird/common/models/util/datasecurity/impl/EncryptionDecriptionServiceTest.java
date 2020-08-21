@@ -55,8 +55,8 @@ public class EncryptionDecriptionServiceTest {
     decryptionService = ServiceFactory.getDecryptionServiceInstance(null);
     maskingService = ServiceFactory.getMaskingServiceInstance(null);
     try {
-      encryptedData = encryptionService.encryptData(data);
-      decryptedData = decryptionService.decryptData(encryptedData);
+      encryptedData = encryptionService.encryptData(data, null);
+      decryptedData = decryptionService.decryptData(encryptedData, null);
     } catch (Exception e) {
     }
   }
@@ -66,7 +66,7 @@ public class EncryptionDecriptionServiceTest {
     try {
       assertEquals(
           decryptionService
-              .decryptData(encryptionService.encryptData(map2))
+              .decryptData(encryptionService.encryptData(map2, null), null)
               .get(JsonKey.FIRST_NAME),
           "Amit");
     } catch (Exception e) {
@@ -78,7 +78,9 @@ public class EncryptionDecriptionServiceTest {
     try {
       map2.put(JsonKey.LOCATION, null);
       assertEquals(
-          decryptionService.decryptData(encryptionService.encryptData(map2)).get(JsonKey.LOCATION),
+          decryptionService
+              .decryptData(encryptionService.encryptData(map2, null), null)
+              .get(JsonKey.LOCATION),
           null);
     } catch (Exception e) {
     }
@@ -89,7 +91,9 @@ public class EncryptionDecriptionServiceTest {
     try {
       map2.put(JsonKey.LOCATION, "");
       assertEquals(
-          decryptionService.decryptData(encryptionService.encryptData(map2)).get(JsonKey.LOCATION),
+          decryptionService
+              .decryptData(encryptionService.encryptData(map2, null), null)
+              .get(JsonKey.LOCATION),
           "");
     } catch (Exception e) {
     }
@@ -101,7 +105,7 @@ public class EncryptionDecriptionServiceTest {
       map2.put(JsonKey.LOCATION, "");
       assertEquals(
           decryptionService
-              .decryptData(encryptionService.encryptData(mapList2))
+              .decryptData(encryptionService.encryptData(mapList2, null), null)
               .get(0)
               .get(JsonKey.LOCATION),
           "");
@@ -113,7 +117,7 @@ public class EncryptionDecriptionServiceTest {
   public void testDataEncryptionFrMap() {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
-        assertNotEquals(encryptionService.encryptData(map).get(JsonKey.FIRST_NAME), "Amit");
+        assertNotEquals(encryptionService.encryptData(map, null).get(JsonKey.FIRST_NAME), "Amit");
       }
     } catch (Exception e) {
     }
@@ -124,7 +128,7 @@ public class EncryptionDecriptionServiceTest {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
         assertNotEquals(
-            encryptionService.encryptData(mapList).get(0).get(JsonKey.FIRST_NAME), "Amit");
+            encryptionService.encryptData(mapList, null).get(0).get(JsonKey.FIRST_NAME), "Amit");
       }
     } catch (Exception e) {
     }
@@ -135,7 +139,7 @@ public class EncryptionDecriptionServiceTest {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
         map.put(JsonKey.LAST_NAME, null);
-        assertEquals(encryptionService.encryptData(map).get(JsonKey.LAST_NAME), null);
+        assertEquals(encryptionService.encryptData(map, null).get(JsonKey.LAST_NAME), null);
       }
     } catch (Exception e) {
     }
@@ -146,7 +150,7 @@ public class EncryptionDecriptionServiceTest {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
         map.put(JsonKey.LAST_NAME, "");
-        assertNotEquals(encryptionService.encryptData(map).get(JsonKey.LAST_NAME), "");
+        assertNotEquals(encryptionService.encryptData(map, null).get(JsonKey.LAST_NAME), "");
       }
     } catch (Exception e) {
     }
@@ -155,7 +159,7 @@ public class EncryptionDecriptionServiceTest {
   @Test
   public void testDataEncryption() {
     try {
-      assertEquals(encryptedData, encryptionService.encryptData(data));
+      assertEquals(encryptedData, encryptionService.encryptData(data, null));
     } catch (Exception e) {
     }
   }
@@ -163,7 +167,7 @@ public class EncryptionDecriptionServiceTest {
   @Test
   public void testDataDecryption() {
     try {
-      assertEquals(decryptedData, decryptionService.decryptData(encryptedData));
+      assertEquals(decryptedData, decryptionService.decryptData(encryptedData, null));
     } catch (Exception e) {
     }
   }
@@ -172,9 +176,9 @@ public class EncryptionDecriptionServiceTest {
   public void testADataEncryption() {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
-        assertNotEquals("Hello", encryptionService.encryptData("Hello"));
+        assertNotEquals("Hello", encryptionService.encryptData("Hello", null));
       } else {
-        assertEquals("Hello", encryptionService.encryptData("Hello"));
+        assertEquals("Hello", encryptionService.encryptData("Hello", null));
       }
     } catch (Exception e) {
     }
@@ -183,7 +187,9 @@ public class EncryptionDecriptionServiceTest {
   @Test
   public void testADataDecryption() {
     try {
-      assertEquals("Hello", decryptionService.decryptData(encryptionService.encryptData("Hello")));
+      assertEquals(
+          "Hello",
+          decryptionService.decryptData(encryptionService.encryptData("Hello", null), null));
     } catch (Exception e) {
     }
   }
@@ -193,8 +199,8 @@ public class EncryptionDecriptionServiceTest {
     try {
       if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
         assertNotEquals(
-            encryptionService.encryptData("Hello"),
-            decryptionService.decryptData(encryptionService.encryptData("Hello")));
+            encryptionService.encryptData("Hello", null),
+            decryptionService.decryptData(encryptionService.encryptData("Hello", null), null));
       }
     } catch (Exception e) {
     }

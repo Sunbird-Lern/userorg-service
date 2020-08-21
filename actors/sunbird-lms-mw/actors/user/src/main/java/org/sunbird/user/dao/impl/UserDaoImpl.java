@@ -15,6 +15,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -43,31 +44,31 @@ public class UserDaoImpl implements UserDao {
   }
 
   @Override
-  public String createUser(User user) {
+  public String createUser(User user, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(user, Map.class);
-    cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, null);
+    cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, context);
     return (String) map.get(JsonKey.ID);
   }
 
   @Override
-  public Response updateUser(User user) {
+  public Response updateUser(User user, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(user, Map.class);
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, null);
+    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, context);
   }
 
   @Override
-  public Response updateUser(Map<String, Object> userMap) {
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap, null);
+  public Response updateUser(Map<String, Object> userMap, RequestContext context) {
+    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap, context);
   }
 
   @Override
-  public List<User> searchUser(Map<String, Object> searchQueryMap) {
+  public List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
     List<User> userList = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     String type = ProjectUtil.EsType.user.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, null);
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -86,9 +87,9 @@ public class UserDaoImpl implements UserDao {
   }
 
   @Override
-  public User getUserById(String userId) {
+  public User getUserById(String userId, RequestContext context) {
     Response response =
-        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId, null);
+        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {
@@ -99,11 +100,11 @@ public class UserDaoImpl implements UserDao {
   }
 
   @Override
-  public List<User> getUsersByProperties(Map<String, Object> propertyMap) {
+  public List<User> getUsersByProperties(Map<String, Object> propertyMap, RequestContext context) {
     List<User> userList = new ArrayList<>();
     Response response =
         cassandraOperation.getRecordsByProperties(
-            Util.KEY_SPACE_NAME, TABLE_NAME, propertyMap, null);
+            Util.KEY_SPACE_NAME, TABLE_NAME, propertyMap, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {

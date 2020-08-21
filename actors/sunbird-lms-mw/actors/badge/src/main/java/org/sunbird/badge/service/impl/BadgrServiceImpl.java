@@ -574,7 +574,7 @@ public class BadgrServiceImpl implements BadgingService {
     String email =
         org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null)
-            .decryptData((String) user.get(0).get(JsonKey.EMAIL));
+            .decryptData((String) user.get(0).get(JsonKey.EMAIL), null);
     // verify the email format.
     if (ProjectUtil.isEmailvalid(email)) {
       return email;

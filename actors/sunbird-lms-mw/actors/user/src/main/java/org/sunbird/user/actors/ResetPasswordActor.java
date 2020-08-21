@@ -39,7 +39,7 @@ public class ResetPasswordActor extends BaseActor {
 
   private void resetPassword(String userId, String type) {
     ProjectLogger.log("ResetPasswordActor:resetPassword: method called.", LoggerEnum.INFO.name());
-    User user = getUserDao().getUserById(userId);
+    User user = getUserDao().getUserById(userId, null);
     ObjectMapper mapper = new ObjectMapper();
     if (null != user) {
       user = removeUnUsedIdentity(user, type);

@@ -122,7 +122,7 @@ public class UserServiceTest {
       Response response = new Response();
       List<Map<String, Object>> userMapList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, userMapList);
-      when(encryptionService.encryptData("valueUnique")).thenReturn("valueUnique");
+      when(encryptionService.encryptData("valueUnique", null)).thenReturn("valueUnique");
       when(cassandraOperation.getRecordsByIndexedProperty(
               userDb.getKeySpace(), userDb.getTableName(), "phone", "valueUnique", null))
           .thenReturn(response);

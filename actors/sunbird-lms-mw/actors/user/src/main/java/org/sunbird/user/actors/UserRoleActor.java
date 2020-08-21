@@ -106,7 +106,7 @@ public class UserRoleActor extends UserBaseActor {
     UserOrg userOrg = prepareUserOrg(requestMap, hashTagId, userOrgDBMap);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
 
-    Response response = userOrgDao.updateUserOrg(userOrg);
+    Response response = userOrgDao.updateUserOrg(userOrg, null);
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       syncUserRoles(requestMap, JsonKey.ORGANISATION, userId, organisationId);

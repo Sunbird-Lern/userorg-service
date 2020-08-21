@@ -90,7 +90,7 @@ public class UserStatusActor extends UserBaseActor {
       ssoManager.activateUser(userMapES, null);
     }
 
-    Response response = userDao.updateUser(updatedUser);
+    Response response = userDao.updateUser(updatedUser, null);
     sender().tell(response, self());
 
     // Update status in ES

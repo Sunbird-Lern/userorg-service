@@ -266,11 +266,11 @@ public class TenantMigrationActor extends BaseActor {
   private Map<String, Object> createUserData(Map<String, Object> userData) {
     if (StringUtils.isNotBlank((String) userData.get(JsonKey.EMAIL))) {
       userData.put(
-          JsonKey.EMAIL, decryptionService.decryptData((String) userData.get(JsonKey.EMAIL)));
+          JsonKey.EMAIL, decryptionService.decryptData((String) userData.get(JsonKey.EMAIL), null));
       userData.put(MASK_IDENTIFIER, maskingService.maskEmail((String) userData.get(JsonKey.EMAIL)));
     } else {
       userData.put(
-          JsonKey.PHONE, decryptionService.decryptData((String) userData.get(JsonKey.PHONE)));
+          JsonKey.PHONE, decryptionService.decryptData((String) userData.get(JsonKey.PHONE), null));
       userData.put(MASK_IDENTIFIER, maskingService.maskPhone((String) userData.get(JsonKey.PHONE)));
     }
     return userData;

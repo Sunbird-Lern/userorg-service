@@ -48,20 +48,22 @@ public class OrganisationClientImpl implements OrganisationClient {
 
   @Override
   public String createOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
-    ProjectLogger.log("OrganisationClientImpl: createOrg called", LoggerEnum.INFO);
-    return upsertOrg(actorRef, orgMap, ActorOperations.CREATE_ORG.getValue());
+    logger.info(context, "createOrg called");
+    return upsertOrg(actorRef, orgMap, ActorOperations.CREATE_ORG.getValue(), context);
   }
 
   @Override
   public void updateOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
-    ProjectLogger.log("OrganisationClientImpl: updateOrg called", LoggerEnum.INFO);
-    upsertOrg(actorRef, orgMap, ActorOperations.UPDATE_ORG.getValue());
+    logger.info(context, "updateOrg called");
+    upsertOrg(actorRef, orgMap, ActorOperations.UPDATE_ORG.getValue(), context);
   }
 
-  private String upsertOrg(ActorRef actorRef, Map<String, Object> orgMap, String operation) {
+  private String upsertOrg(
+      ActorRef actorRef, Map<String, Object> orgMap, String operation, RequestContext context) {
     String orgId = null;
 
     Request request = new Request();
+    request.setRequestContext(context);
     request.setRequest(orgMap);
     request.setOperation(operation);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
@@ -84,10 +86,11 @@ public class OrganisationClientImpl implements OrganisationClient {
 
   @Override
   public Organisation getOrgById(ActorRef actorRef, String orgId, RequestContext context) {
-    ProjectLogger.log("OrganisationClientImpl: getOrgById called", LoggerEnum.INFO);
+    logger.info(context, "getOrgById called");
     Organisation organisation = null;
 
     Request request = new Request();
+    request.setRequestContext(context);
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ORGANISATION_ID, orgId);
     request.setRequest(requestMap);
@@ -127,7 +130,7 @@ public class OrganisationClientImpl implements OrganisationClient {
     filter.put(JsonKey.PROVIDER, provider);
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     Future<Map<String, Object>> esResponseF =
-        esUtil.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), null);
+        esUtil.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> list = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
@@ -143,7 +146,7 @@ public class OrganisationClientImpl implements OrganisationClient {
   public Organisation esGetOrgById(String id, RequestContext context) {
     Map<String, Object> map = null;
     Future<Map<String, Object>> mapF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), id, null);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), id, context);
 
     map = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(mapF);
     if (MapUtils.isEmpty(map)) {
@@ -159,14 +162,15 @@ public class OrganisationClientImpl implements OrganisationClient {
       Map<String, Object> filter, RequestContext context) {
     SearchDTO searchDto = new SearchDTO();
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
-    return searchOrganisation(searchDto);
+    return searchOrganisation(searchDto, context);
   }
 
   @SuppressWarnings("unchecked")
-  private List<Organisation> searchOrganisation(SearchDTO searchDto) {
+  private List<Organisation> searchOrganisation(SearchDTO searchDto, RequestContext context) {
     List<Organisation> orgList = new ArrayList<>();
+    logger.info(context, "search org.");
     Future<Map<String, Object>> resultF =
-        esUtil.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), null);
+        esUtil.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -194,6 +198,6 @@ public class OrganisationClientImpl implements OrganisationClient {
 
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
 
-    return searchOrganisation(searchDTO);
+    return searchOrganisation(searchDTO, context);
   }
 }

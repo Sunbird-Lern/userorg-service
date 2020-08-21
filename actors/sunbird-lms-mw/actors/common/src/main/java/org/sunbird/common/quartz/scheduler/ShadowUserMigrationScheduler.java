@@ -188,7 +188,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
   private List<MigrationUser> getMigrationUserAsList(BulkMigrationUser bulkMigrationUser) {
     List<MigrationUser> migrationUserList = new ArrayList<>();
     try {
-      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData());
+      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData(), null);
       migrationUserList =
           mapper.readValue(decryptedData, new TypeReference<List<MigrationUser>>() {});
     } catch (Exception e) {
@@ -475,7 +475,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
 
   private String encryptValue(String key) {
     try {
-      return encryptionService.encryptData(key);
+      return encryptionService.encryptData(key, null);
     } catch (Exception e) {
       ProjectLogger.log(
           "ShadowUserMigrationScheduler:getEncryptedValue: error occurred in encrypting value "

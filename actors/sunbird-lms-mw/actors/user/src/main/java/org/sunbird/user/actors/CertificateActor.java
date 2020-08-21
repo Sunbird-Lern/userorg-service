@@ -174,12 +174,14 @@ public class CertificateActor extends UserBaseActor {
     String MASK_IDENTIFIER = "maskIdentifier";
     if (isMergerAccount) {
       if (StringUtils.isNotBlank((String) userMap.get(JsonKey.EMAIL))) {
-        String deceryptedEmail = decryptionService.decryptData((String) userMap.get(JsonKey.EMAIL));
+        String deceryptedEmail =
+            decryptionService.decryptData((String) userMap.get(JsonKey.EMAIL), null);
         String maskEmail = maskingService.maskEmail(deceryptedEmail);
         userMap.put(JsonKey.EMAIL, deceryptedEmail);
         userMap.put(MASK_IDENTIFIER, maskEmail);
       } else {
-        String deceryptedPhone = decryptionService.decryptData((String) userMap.get(JsonKey.PHONE));
+        String deceryptedPhone =
+            decryptionService.decryptData((String) userMap.get(JsonKey.PHONE), null);
         String maskPhone = maskingService.maskPhone(deceryptedPhone);
         userMap.put(JsonKey.PHONE, deceryptedPhone);
         userMap.put(MASK_IDENTIFIER, maskPhone);
@@ -187,13 +189,13 @@ public class CertificateActor extends UserBaseActor {
     } else {
       if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PREV_USED_EMAIL))) {
         String deceryptedEmail =
-            decryptionService.decryptData((String) userMap.get(JsonKey.PREV_USED_EMAIL));
+            decryptionService.decryptData((String) userMap.get(JsonKey.PREV_USED_EMAIL), null);
         String maskEmail = maskingService.maskEmail(deceryptedEmail);
         userMap.put(JsonKey.PREV_USED_EMAIL, deceryptedEmail);
         userMap.put(MASK_IDENTIFIER, maskEmail);
       } else {
         String deceryptedPhone =
-            decryptionService.decryptData((String) userMap.get(JsonKey.PREV_USED_PHONE));
+            decryptionService.decryptData((String) userMap.get(JsonKey.PREV_USED_PHONE), null);
         String maskPhone = maskingService.maskPhone(deceryptedPhone);
         userMap.put(JsonKey.PREV_USED_PHONE, deceryptedPhone);
         userMap.put(MASK_IDENTIFIER, maskPhone);

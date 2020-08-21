@@ -26,11 +26,19 @@ public interface UserClient {
    */
   void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context);
 
-  /** Verify phone uniqueness across all users in the system. */
-  void esVerifyPhoneUniqueness();
+  /**
+   * Verify phone uniqueness across all users in the system.
+   *
+   * @param context
+   */
+  void esVerifyPhoneUniqueness(RequestContext context);
 
-  /** Verify email uniqueness across all users in the system. */
-  void esVerifyEmailUniqueness();
+  /**
+   * Verify email uniqueness across all users in the system.
+   *
+   * @param context
+   */
+  void esVerifyEmailUniqueness(RequestContext context);
 
   /**
    * Search user details.

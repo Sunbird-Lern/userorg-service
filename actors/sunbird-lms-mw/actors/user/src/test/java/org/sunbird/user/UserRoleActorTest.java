@@ -110,7 +110,8 @@ public class UserRoleActorTest {
     when(RoleDaoImpl.getInstance()).thenReturn(roleDao);
     UserOrgDao userOrgDao = Mockito.mock(UserOrgDaoImpl.class);
     when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
-    when(userOrgDao.updateUserOrg(Mockito.anyObject())).thenReturn(getSuccessResponse());
+    when(userOrgDao.updateUserOrg(Mockito.anyObject(), Mockito.any()))
+        .thenReturn(getSuccessResponse());
     CompletionStage completionStage = Mockito.mock(CompletionStage.class);
     ActorSelection actorSelection = Mockito.mock(ActorSelection.class);
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(actorSelection);
@@ -177,7 +178,8 @@ public class UserRoleActorTest {
       subject.tell(reqObj, probe.getRef());
     } else {
       DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
-      when(decryptionService.decryptData(Mockito.anyMap())).thenReturn(getOrganisationsMap());
+      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
+          .thenReturn(getOrganisationsMap());
       when(interServiceCommunication.getResponse(Mockito.anyObject(), Mockito.anyObject()))
           .thenReturn(response);
       if (errorResponse == null) {

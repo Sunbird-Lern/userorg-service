@@ -30,33 +30,36 @@ import scala.concurrent.duration.Duration;
 
 public class UserClientImpl implements UserClient {
 
+  private static LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
+
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public String createUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
-    ProjectLogger.log("UserClientImpl: createUser called", LoggerEnum.INFO);
-    return upsertUser(actorRef, userMap, ActorOperations.CREATE_USER.getValue());
+    logger.info(context, "createUser called");
+    return upsertUser(actorRef, userMap, ActorOperations.CREATE_USER.getValue(), context);
   }
 
   @Override
   public void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
-    ProjectLogger.log("UserClientImpl: updateUser called", LoggerEnum.INFO);
-    upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue());
+    logger.info(context, "updateUser called");
+    upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue(), context);
   }
 
   @Override
-  public void esVerifyPhoneUniqueness() {
-    esVerifyFieldUniqueness(JsonKey.ENC_PHONE, JsonKey.PHONE);
+  public void esVerifyPhoneUniqueness(RequestContext context) {
+    esVerifyFieldUniqueness(JsonKey.ENC_PHONE, JsonKey.PHONE, context);
   }
 
   @Override
-  public void esVerifyEmailUniqueness() {
-    esVerifyFieldUniqueness(JsonKey.ENC_EMAIL, JsonKey.EMAIL);
+  public void esVerifyEmailUniqueness(RequestContext context) {
+    esVerifyFieldUniqueness(JsonKey.ENC_EMAIL, JsonKey.EMAIL, context);
   }
 
-  private void esVerifyFieldUniqueness(String facetsKey, String objectType) {
+  private void esVerifyFieldUniqueness(
+      String facetsKey, String objectType, RequestContext context) {
     SearchDTO searchDto = null;
     searchDto = new SearchDTO();
     searchDto.setLimit(0);
@@ -68,7 +71,7 @@ public class UserClientImpl implements UserClient {
     searchDto.setFacets(list);
 
     Future<Map<String, Object>> esResponseF =
-        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
+        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), context);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
 
@@ -94,11 +97,13 @@ public class UserClientImpl implements UserClient {
     }
   }
 
-  private String upsertUser(ActorRef actorRef, Map<String, Object> userMap, String operation) {
+  private String upsertUser(
+      ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
     String userId = null;
 
     Request request = new Request();
     request.setRequest(userMap);
+    request.setRequestContext(context);
     request.setOperation(operation);
     request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_USER_UPLOAD);
@@ -149,6 +154,7 @@ public class UserClientImpl implements UserClient {
     }
 
     Request request = new Request();
+    request.setRequestContext(context);
     request.getRequest().putAll(searchRequestMap);
     request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
 

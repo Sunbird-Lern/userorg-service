@@ -1372,7 +1372,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
       String loginId = "";
       try {
-        loginId = encryptionService.encryptData((String) data.get(JsonKey.LOGIN_ID));
+        loginId = encryptionService.encryptData((String) data.get(JsonKey.LOGIN_ID), null);
       } catch (Exception e) {
         ProjectCommonException exception =
             new ProjectCommonException(

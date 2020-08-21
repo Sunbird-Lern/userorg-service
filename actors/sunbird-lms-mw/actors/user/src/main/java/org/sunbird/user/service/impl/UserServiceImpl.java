@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUserById(String userId, RequestContext context) {
-    User user = userDao.getUserById(userId);
+    User user = userDao.getUserById(userId, null);
     if (null == user) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
@@ -267,7 +267,7 @@ public class UserServiceImpl implements UserService {
     for (String data : dataList) {
       String encData = "";
       try {
-        encData = encryptionService.encryptData(data);
+        encData = encryptionService.encryptData(data, null);
       } catch (Exception e) {
         logger.error(
             context,
@@ -340,7 +340,7 @@ public class UserServiceImpl implements UserService {
   public boolean checkUsernameUniqueness(
       String username, boolean isEncrypted, RequestContext context) {
     try {
-      if (!isEncrypted) username = encryptionService.encryptData(username);
+      if (!isEncrypted) username = encryptionService.encryptData(username, null);
     } catch (Exception e) {
       logger.error(
           context,
