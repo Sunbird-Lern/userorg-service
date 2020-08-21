@@ -531,7 +531,7 @@ public class ShadowUserProcessor {
   }
 
   private void syncUserToES(String userId) {
-    Map<String, Object> fullUserDetails = Util.getUserDetails(userId, null);
+    Map<String, Object> fullUserDetails = Util.getUserDetails(userId, null, null);
     try {
       Future<Boolean> future =
           elasticSearchService.update(JsonKey.USER, userId, fullUserDetails, null);

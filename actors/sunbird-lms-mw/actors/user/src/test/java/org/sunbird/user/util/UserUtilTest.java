@@ -207,9 +207,9 @@ public class UserUtilTest {
     while (managedUserList.size() <= 31) {
       managedUserList.add(new User());
     }
-    when(Util.searchUser(req)).thenReturn(managedUserList);
+    when(Util.searchUser(req, null)).thenReturn(managedUserList);
     try {
-      UserUtil.validateManagedUserLimit("ManagedBy");
+      UserUtil.validateManagedUserLimit("ManagedBy", null);
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
       assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());

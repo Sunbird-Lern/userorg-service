@@ -310,7 +310,8 @@ public class TenantMigrationActor extends BaseActor {
         orgId =
             orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                 (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
-                (String) migrateReq.get(JsonKey.CHANNEL));
+                (String) migrateReq.get(JsonKey.CHANNEL),
+                null);
         if (StringUtils.isBlank(orgId)) {
           ProjectLogger.log(
               "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgExternalId is Invalid",

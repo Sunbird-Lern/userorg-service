@@ -634,7 +634,7 @@ public class UserUtil {
 
       String userName = null;
       while (StringUtils.isBlank(userName)) {
-        userName = getUsername(name);
+        userName = getUsername(name, context);
         if (StringUtils.isNotBlank(userName)) {
           userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
         }
@@ -642,7 +642,7 @@ public class UserUtil {
     } else {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userService.checkUsernameUniqueness(
-          (String) userMap.get(JsonKey.USERNAME), false, null)) {
+          (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -651,7 +651,7 @@ public class UserUtil {
     userMap.put(JsonKey.LOGIN_ID, loginId);
   }
 
-  private static String getUsername(String name) {
+  private static String getUsername(String name, RequestContext context) {
     List<Map<String, Object>> users = null;
     List<String> esUserNameList = new ArrayList<>();
     List<String> encryptedUserNameList = new ArrayList<>();
@@ -665,11 +665,11 @@ public class UserUtil {
         excludedUsernames.addAll(userNameList);
 
         // Generate usernames
-        userNameList = userService.generateUsernames(name, excludedUsernames, null);
+        userNameList = userService.generateUsernames(name, excludedUsernames, context);
 
         // Encrypt each user name
         userService
-            .getEncryptedList(userNameList, null)
+            .getEncryptedList(userNameList, context)
             .stream()
             .forEach(value -> encryptedUserNameList.add(value));
 
@@ -682,7 +682,7 @@ public class UserUtil {
         List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
         Map<String, Object> filters = new HashMap<>();
         filters.put(JsonKey.USERNAME, filtersEncryptedUserNameList);
-        users = userService.esSearchUserByFilters(filters, null);
+        users = userService.esSearchUserByFilters(filters, context);
       } while (CollectionUtils.isNotEmpty(users) && users.size() >= encryptedUserNameList.size());
 
       esUserNameList.clear();
@@ -701,7 +701,7 @@ public class UserUtil {
               .filter(
                   value -> {
                     if (!esUserNameList.contains(value)) {
-                      return userService.checkUsernameUniqueness(value, true, null);
+                      return userService.checkUsernameUniqueness(value, true, context);
                     }
                     return false;
                   })
@@ -712,7 +712,7 @@ public class UserUtil {
       }
 
     } while (StringUtils.isBlank(userName));
-    return decService.decryptData(userName, null);
+    return decService.decryptData(userName, context);
   }
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {
@@ -884,9 +884,10 @@ public class UserUtil {
             });
   }
 
-  public static Map<String, Object> validateManagedByUser(String managedBy) {
+  public static Map<String, Object> validateManagedByUser(
+      String managedBy, RequestContext context) {
     Future<Map<String, Object>> managedByInfoF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy, null);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy, context);
     Map<String, Object> managedByInfo =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(managedByInfoF);
     if (ProjectUtil.isNull(managedByInfo)
@@ -903,11 +904,11 @@ public class UserUtil {
     return managedByInfo;
   }
 
-  public static void validateManagedUserLimit(String managedBy) {
+  public static void validateManagedUserLimit(String managedBy, RequestContext context) {
     if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
       Map<String, Object> searchQueryMap = new HashMap<>();
       searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
-      List<User> managedUserList = Util.searchUser(searchQueryMap);
+      List<User> managedUserList = Util.searchUser(searchQueryMap, context);
       if (CollectionUtils.isNotEmpty(managedUserList)
           && managedUserList.size()
               >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {

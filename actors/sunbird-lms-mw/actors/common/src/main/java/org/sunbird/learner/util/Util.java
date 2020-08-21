@@ -29,6 +29,7 @@ import org.sunbird.common.models.util.url.URLShortner;
 import org.sunbird.common.models.util.url.URLShortnerImpl;
 import org.sunbird.common.quartz.scheduler.SchedulerManager;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
@@ -777,15 +778,16 @@ public final class Util {
    * This method will search in ES for user with given search query
    *
    * @param searchQueryMap Query filters as Map.
+   * @param context
    * @return List<User> List of User object.
    */
-  public static List<User> searchUser(Map<String, Object> searchQueryMap) {
+  public static List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
     List<User> userList = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     Future<Map<String, Object>> resultf =
-        esService.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
+        esService.search(searchDto, ProjectUtil.EsType.user.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
     if (MapUtils.isNotEmpty(result)) {
@@ -1020,7 +1022,8 @@ public final class Util {
   }
 
   @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserDetails(String userId, ActorRef actorRef) {
+  public static Map<String, Object> getUserDetails(
+      String userId, ActorRef actorRef, RequestContext context) {
     ProjectLogger.log("get user profile method call started user Id : " + userId);
     Util.DbInfo userDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response = null;
@@ -1029,7 +1032,7 @@ public final class Util {
     try {
       response =
           cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId, null);
+              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId, context);
       userList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       ProjectLogger.log(
           "Util:getUserProfile: collecting user data to save for userId : " + userId,

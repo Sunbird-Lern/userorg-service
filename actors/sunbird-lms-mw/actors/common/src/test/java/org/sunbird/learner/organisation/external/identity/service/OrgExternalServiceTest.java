@@ -60,7 +60,8 @@ public class OrgExternalServiceTest {
               Util.KEY_SPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap, null))
           .thenReturn(response);
       String resp =
-          orgExternalService.getOrgIdFromOrgExternalIdAndProvider("anyOrgExtid", "anyprovider");
+          orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+              "anyOrgExtid", "anyprovider", null);
       Assert.assertEquals(null, resp);
 
     } catch (Exception e) {
@@ -83,7 +84,8 @@ public class OrgExternalServiceTest {
       when(cassandraOperation.getRecordsByCompositeKey(
               Util.KEY_SPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap, null))
           .thenReturn(response);
-      String resp = orgExternalService.getOrgIdFromOrgExternalIdAndProvider("OrgExtid", "provider");
+      String resp =
+          orgExternalService.getOrgIdFromOrgExternalIdAndProvider("OrgExtid", "provider", null);
       Assert.assertEquals("anyOrgId", resp);
 
     } catch (Exception e) {

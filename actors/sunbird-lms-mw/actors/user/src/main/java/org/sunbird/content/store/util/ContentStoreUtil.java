@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
 import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 
 public class ContentStoreUtil {
+  private static LoggerUtil logger = new LoggerUtil(ContentStoreUtil.class);
 
   private static Map<String, String> getHeaders() {
     Map<String, String> headers = new HashMap<>();
@@ -16,19 +18,19 @@ public class ContentStoreUtil {
     return headers;
   }
 
-  public static Map<String, Object> readFramework(String frameworkId) {
-    ProjectLogger.log(
-        "ContentStoreUtil:readFramework: frameworkId = " + frameworkId, LoggerEnum.INFO.name());
-    return handleReadRequest(frameworkId, JsonKey.SUNBIRD_FRAMEWORK_READ_API);
+  public static Map<String, Object> readFramework(String frameworkId, RequestContext context) {
+    logger.info(context, "ContentStoreUtil:readFramework: frameworkId = " + frameworkId);
+    return handleReadRequest(frameworkId, JsonKey.SUNBIRD_FRAMEWORK_READ_API, context);
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Object> handleReadRequest(String id, String urlPath) {
+  private static Map<String, Object> handleReadRequest(
+      String id, String urlPath, RequestContext context) {
     Map<String, String> headers = getHeaders();
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> resultMap = new HashMap<>();
 
-    ProjectLogger.log("ContentStoreUtil:handleReadRequest: id = " + id, LoggerEnum.INFO.name());
+    logger.info(context, "ContentStoreUtil:handleReadRequest: id = " + id);
 
     try {
       String requestUrl =
@@ -40,13 +42,12 @@ public class ContentStoreUtil {
 
       resultMap = mapper.readValue(response, Map.class);
       if (!((String) resultMap.get(JsonKey.RESPONSE_CODE)).equalsIgnoreCase(JsonKey.OK)) {
-        ProjectLogger.log(
-            "ContentStoreUtil:handleReadRequest: Response code is not ok.",
-            LoggerEnum.ERROR.name());
+        logger.info(context, "ContentStoreUtil:handleReadRequest: Response code is not ok.");
         return null;
       }
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "ContentStoreUtil:handleReadRequest: Exception occurred with error message = "
               + e.getMessage(),
           e);

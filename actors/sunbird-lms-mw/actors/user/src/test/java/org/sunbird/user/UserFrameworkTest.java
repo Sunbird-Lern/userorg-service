@@ -80,7 +80,7 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
   private void mockContentStoreUtil() {
     Map<String, Object> contentMap = new HashMap<>();
     contentMap.put(JsonKey.RESPONSE, null);
-    when(ContentStoreUtil.readFramework("invalidFrameworkId")).thenReturn(contentMap);
+    when(ContentStoreUtil.readFramework("invalidFrameworkId", null)).thenReturn(contentMap);
   }
 
   private void mockDataCacheHandler() {

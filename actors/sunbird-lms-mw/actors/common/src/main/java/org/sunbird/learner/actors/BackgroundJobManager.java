@@ -290,7 +290,8 @@ public class BackgroundJobManager extends BaseActor {
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails =
-        Util.getUserDetails(userId, getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()));
+        Util.getUserDetails(
+            userId, getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()), null);
     ProjectLogger.log(
         "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
             + userDetails.get(JsonKey.ROOT_ORG_ID),
