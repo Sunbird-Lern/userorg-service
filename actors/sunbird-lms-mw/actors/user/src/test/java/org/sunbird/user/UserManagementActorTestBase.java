@@ -120,7 +120,8 @@ public abstract class UserManagementActorTestBase {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(new HashMap<>());
 
     PowerMockito.mockStatic(UserClientImpl.class);

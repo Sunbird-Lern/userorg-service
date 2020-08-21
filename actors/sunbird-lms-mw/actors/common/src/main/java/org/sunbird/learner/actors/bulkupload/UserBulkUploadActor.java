@@ -46,7 +46,8 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             "userProfileConfig",
             "csv",
-            new TypeReference<Map>() {});
+            new TypeReference<Map>() {},
+            null);
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {

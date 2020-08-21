@@ -130,12 +130,12 @@ public class UserRoleActor extends UserBaseActor {
 
       organisation =
           orgClient.getOrgById(
-              getActorRef(ActorOperations.GET_ORG_DETAILS.getValue()), organisationId);
+              getActorRef(ActorOperations.GET_ORG_DETAILS.getValue()), organisationId, null);
       if (organisation != null) {
         requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());
       }
     } else {
-      organisation = orgClient.esGetOrgByExternalId(externalId, provider);
+      organisation = orgClient.esGetOrgByExternalId(externalId, provider, null);
       if (organisation != null) {
         requestMap.put(JsonKey.ORGANISATION_ID, organisation.getId());
         requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());

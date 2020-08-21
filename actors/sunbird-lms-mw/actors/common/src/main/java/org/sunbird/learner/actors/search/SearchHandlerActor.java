@@ -237,7 +237,8 @@ public class SearchHandlerActor extends BaseActor {
             });
 
     List<String> orgIds = new ArrayList<>(orgIdList);
-    List<Organisation> organisations = orgClient.esSearchOrgByIds(orgIds, filteredRequestedFileds);
+    List<Organisation> organisations =
+        orgClient.esSearchOrgByIds(orgIds, filteredRequestedFileds, null);
     Map<String, Organisation> orgMap = new HashMap<>();
     organisations
         .stream()

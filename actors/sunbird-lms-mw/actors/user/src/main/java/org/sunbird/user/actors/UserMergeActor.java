@@ -154,7 +154,8 @@ public class UserMergeActor extends UserBaseActor {
         SystemSetting custodianIdSetting =
             systemSettingClient.getSystemSettingByField(
                 getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-                JsonKey.CUSTODIAN_ORG_ID);
+                JsonKey.CUSTODIAN_ORG_ID,
+                null);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();

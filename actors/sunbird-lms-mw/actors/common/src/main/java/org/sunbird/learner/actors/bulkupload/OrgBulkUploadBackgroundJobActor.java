@@ -48,14 +48,16 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "orgProfileConfig",
               "csv.outputColumns",
-              new TypeReference<Map<String, String>>() {});
+              new TypeReference<Map<String, String>>() {},
+              null);
 
       String[] outputColumnsOrder =
           systemSettingClient.getSystemSettingByFieldAndKey(
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "orgProfileConfig",
               "csv.outputColumnsOrder",
-              new TypeReference<String[]>() {});
+              new TypeReference<String[]>() {},
+              null);
 
       handleBulkUploadBackground(
           request,
@@ -106,7 +108,8 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "orgProfileConfig",
               "csv.mandatoryColumns",
-              new TypeReference<String[]>() {});
+              new TypeReference<String[]>() {},
+              null);
       if (mandatoryColumnsObject != null) {
         validateMandatoryFields(orgMap, task, (String[]) mandatoryColumnsObject);
       }
@@ -157,7 +160,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
         if (locationCache.containsKey(locationCode)) {
           locationNames.add(locationCache.get(locationCode).getName());
         } else {
-          Location location = locationClient.getLocationByCode(locationActor, locationCode);
+          Location location = locationClient.getLocationByCode(locationActor, locationCode, null);
           locationNames.add(location.getName());
         }
       }
@@ -196,7 +199,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     String orgId;
     try {
-      orgId = orgClient.createOrg(getActorRef(ActorOperations.CREATE_ORG.getValue()), row);
+      orgId = orgClient.createOrg(getActorRef(ActorOperations.CREATE_ORG.getValue()), row, null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "OrgBulkUploadBackgroundJobActor:callCreateOrg: Exception occurred with error message = "
@@ -230,7 +233,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      orgClient.updateOrg(getActorRef(ActorOperations.UPDATE_ORG.getValue()), row);
+      orgClient.updateOrg(getActorRef(ActorOperations.UPDATE_ORG.getValue()), row, null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "OrgBulkUploadBackgroundJobActor:callUpdateOrg: Exception occurred with error message = "

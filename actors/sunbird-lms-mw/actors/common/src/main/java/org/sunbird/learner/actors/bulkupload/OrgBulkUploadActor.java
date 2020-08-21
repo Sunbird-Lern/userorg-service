@@ -52,7 +52,8 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             "orgProfileConfig",
             "csv",
-            new TypeReference<Map>() {});
+            new TypeReference<Map>() {},
+            null);
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {

@@ -84,7 +84,7 @@ public class FeedUtil {
     if (!orgIdMap.isEmpty() && orgIdMap.containsKey(channel)) {
       orgMap = (Map<String, String>) orgIdMap.get(channel);
     } else {
-      Organisation org = organisationClient.esSearchOrgByFilter(filters).get(0);
+      Organisation org = organisationClient.esSearchOrgByFilter(filters, null).get(0);
       orgMap.put("id", org.getRootOrgId());
       orgMap.put("name", org.getChannel());
       orgIdMap.put(channel, orgMap);

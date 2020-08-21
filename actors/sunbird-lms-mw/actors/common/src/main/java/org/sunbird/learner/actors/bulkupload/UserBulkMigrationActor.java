@@ -66,7 +66,9 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     systemSetting =
         systemSettingClient.getSystemSettingByField(
-            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()), "shadowdbmandatorycolumn");
+            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+            "shadowdbmandatorycolumn",
+            null);
     processCsvBytes(req, request);
   }
 

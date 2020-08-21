@@ -47,14 +47,16 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "userProfileConfig",
               "csv.outputColumns",
-              new TypeReference<Map>() {});
+              new TypeReference<Map>() {},
+              null);
 
       String[] outputColumnsOrder =
           systemSettingClient.getSystemSettingByFieldAndKey(
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "userProfileConfig",
               "csv.outputColumnsOrder",
-              new TypeReference<String[]>() {});
+              new TypeReference<String[]>() {},
+              null);
 
       handleBulkUploadBackground(
           request,
@@ -108,7 +110,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               "userProfileConfig",
               "csv.mandatoryColumns",
-              new TypeReference<String[]>() {});
+              new TypeReference<String[]>() {},
+              null);
       if (mandatoryColumnsObject != null) {
         validateMandatoryFields(userMap, task, mandatoryColumnsObject);
       }
@@ -229,7 +232,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     ProjectLogger.log("UserBulkUploadBackgroundJobActor: callCreateUser called", LoggerEnum.INFO);
     String userId;
     try {
-      userId = userClient.createUser(getActorRef(ActorOperations.CREATE_USER.getValue()), user);
+      userId =
+          userClient.createUser(getActorRef(ActorOperations.CREATE_USER.getValue()), user, null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "UserBulkUploadBackgroundJobActor:callCreateUser: Exception occurred with error message = "
@@ -262,7 +266,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     ProjectLogger.log("UserBulkUploadBackgroundJobActor: callUpdateUser called", LoggerEnum.INFO);
     try {
       user.put(JsonKey.ORG_NAME, orgName);
-      userClient.updateUser(getActorRef(ActorOperations.UPDATE_USER.getValue()), user);
+      userClient.updateUser(getActorRef(ActorOperations.UPDATE_USER.getValue()), user, null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "UserBulkUploadBackgroundJobActor:callUpdateUser: Exception occurred with error message = "
@@ -284,12 +288,12 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       Map<String, Object> filters = new HashMap<>();
       filters.put(
           JsonKey.EXTERNAL_ID, ((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
-      if (CollectionUtils.isNotEmpty(organisationClient.esSearchOrgByFilter(filters))) {
-        return organisationClient.esSearchOrgByFilter(filters).get(0);
+      if (CollectionUtils.isNotEmpty(organisationClient.esSearchOrgByFilter(filters, null))) {
+        return organisationClient.esSearchOrgByFilter(filters, null).get(0);
       }
       return null;
     } else if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORG_ID))) {
-      return organisationClient.esGetOrgById((String) userMap.get(JsonKey.ORG_ID));
+      return organisationClient.esGetOrgById((String) userMap.get(JsonKey.ORG_ID), null);
     }
     return null;
   }

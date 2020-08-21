@@ -113,7 +113,8 @@ public class UserProfileReadActorTest {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(new HashMap<>());
 
     PowerMockito.mockStatic(UserServiceImpl.class);

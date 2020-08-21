@@ -72,7 +72,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
           location =
               locationClient.getLocationByCode(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                  (String) row.get(GeoLocationJsonKey.CODE));
+                  (String) row.get(GeoLocationJsonKey.CODE),
+                  null);
         } catch (Exception ex) {
           setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, null);
         }
@@ -134,7 +135,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     try {
       locationClient.updateLocation(
           getActorRef(LocationActorOperation.UPDATE_LOCATION.getValue()),
-          mapper.convertValue(row, UpsertLocationRequest.class));
+          mapper.convertValue(row, UpsertLocationRequest.class),
+          null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "LocationBulkUploadBackGroundJobActor : callUpdateLocation - got exception "
@@ -164,7 +166,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       locationId =
           locationClient.createLocation(
               getActorRef(LocationActorOperation.CREATE_LOCATION.getValue()),
-              mapper.convertValue(row, UpsertLocationRequest.class));
+              mapper.convertValue(row, UpsertLocationRequest.class),
+              null);
     } catch (Exception ex) {
       ProjectLogger.log(
           "LocationBulkUploadBackGroundJobActor : callCreateLocation - got exception "

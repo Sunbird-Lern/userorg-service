@@ -123,7 +123,8 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(new HashMap<>());
     PowerMockito.mockStatic(MigrationUtils.class);
     when(MigrationUtils.markUserAsRejected(Mockito.any(ShadowUser.class))).thenReturn(true);

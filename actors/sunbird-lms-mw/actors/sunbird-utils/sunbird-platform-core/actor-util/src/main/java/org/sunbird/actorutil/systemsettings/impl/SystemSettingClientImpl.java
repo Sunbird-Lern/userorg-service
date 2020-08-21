@@ -15,6 +15,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
 
@@ -32,7 +33,8 @@ public class SystemSettingClientImpl implements SystemSettingClient {
   }
 
   @Override
-  public SystemSetting getSystemSettingByField(ActorRef actorRef, String field) {
+  public SystemSetting getSystemSettingByField(
+      ActorRef actorRef, String field, RequestContext context) {
     ProjectLogger.log(
         "SystemSettingClientImpl:getSystemSettingByField: field is " + field,
         LoggerEnum.INFO.name());
@@ -42,8 +44,12 @@ public class SystemSettingClientImpl implements SystemSettingClient {
 
   @Override
   public <T> T getSystemSettingByFieldAndKey(
-      ActorRef actorRef, String field, String key, TypeReference typeReference) {
-    SystemSetting systemSetting = getSystemSettingByField(actorRef, field);
+      ActorRef actorRef,
+      String field,
+      String key,
+      TypeReference typeReference,
+      RequestContext context) {
+    SystemSetting systemSetting = getSystemSettingByField(actorRef, field, null);
     ObjectMapper objectMapper = new ObjectMapper();
     if (systemSetting != null) {
       try {

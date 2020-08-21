@@ -164,7 +164,8 @@ public class UserTnCActorTest {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(LATEST_VERSION);
   }
 

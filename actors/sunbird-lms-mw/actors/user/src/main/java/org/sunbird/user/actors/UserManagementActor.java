@@ -231,7 +231,8 @@ public class UserManagementActor extends BaseActor {
               getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
               JsonKey.USER_PROFILE_CONFIG,
               JsonKey.FRAMEWORK,
-              new TypeReference<Map<String, List<String>>>() {});
+              new TypeReference<Map<String, List<String>>>() {},
+              null);
       DataCacheHandler.setFrameworkFieldsConfig(frameworkFieldsConfig);
     }
   }
@@ -361,7 +362,9 @@ public class UserManagementActor extends BaseActor {
       LocationClientImpl locationClient = new LocationClientImpl();
       List<Location> locationIdList =
           locationClient.getLocationByCodes(
-              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()), locCodeLst);
+              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
+              locCodeLst,
+              null);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location -> {
@@ -437,7 +440,7 @@ public class UserManagementActor extends BaseActor {
         List<String> fields = new ArrayList<>();
         fields.add(JsonKey.HASHTAGID);
         fields.add(JsonKey.ID);
-        List<Organisation> orgList = organisationClient.esSearchOrgByIds(orgIdList, fields);
+        List<Organisation> orgList = organisationClient.esSearchOrgByIds(orgIdList, fields, null);
         Map<String, Object> orgMap = new HashMap<>();
         orgList.forEach(org -> orgMap.put(org.getId(), org));
         List<String> missingOrgIds = new ArrayList<>();
@@ -657,7 +660,7 @@ public class UserManagementActor extends BaseActor {
     } else {
       userRequestValidator.validateCreateUserV1Request(actorMessage);
     }
-    validateChannelAndOrganisationId(userMap);
+    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
 
     // remove these fields from req
@@ -751,12 +754,13 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void validateChannelAndOrganisationId(Map<String, Object> userMap) {
+  private void validateChannelAndOrganisationId(
+      Map<String, Object> userMap, RequestContext context) {
     String organisationId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String subOrgRootOrgId = "";
     if (StringUtils.isNotBlank(organisationId)) {
-      Organisation organisation = organisationClient.esGetOrgById(organisationId);
+      Organisation organisation = organisationClient.esGetOrgById(organisationId, null);
       if (null == organisation) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgData);
       }
@@ -769,7 +773,7 @@ public class UserManagementActor extends BaseActor {
         userMap.put(JsonKey.CHANNEL, organisation.getChannel());
       } else {
         subOrgRootOrgId = organisation.getRootOrgId();
-        Organisation subOrgRootOrg = organisationClient.esGetOrgById(subOrgRootOrgId);
+        Organisation subOrgRootOrg = organisationClient.esGetOrgById(subOrgRootOrgId, null);
         if (null != subOrgRootOrg) {
           if (StringUtils.isNotBlank(requestedChannel)
               && !requestedChannel.equalsIgnoreCase(subOrgRootOrg.getChannel())) {
@@ -1178,7 +1182,8 @@ public class UserManagementActor extends BaseActor {
       List<String> locationIdList =
           locationClient.getRelatedLocationIds(
               getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-              (List<String>) userMap.get(JsonKey.LOCATION_CODES));
+              (List<String>) userMap.get(JsonKey.LOCATION_CODES),
+              null);
       if (locationIdList != null && !locationIdList.isEmpty()) {
         userMap.put(JsonKey.LOCATION_IDS, locationIdList);
         userMap.remove(JsonKey.LOCATION_CODES);
@@ -1408,7 +1413,7 @@ public class UserManagementActor extends BaseActor {
 
     Map<String, Object> searchResult =
         userClient.searchManagedUser(
-            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request);
+            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()), request, null);
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;

@@ -19,6 +19,7 @@ import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
@@ -30,17 +31,19 @@ public class LocationClientImpl implements LocationClient {
   private ObjectMapper mapper = new ObjectMapper();
 
   @Override
-  public List<Location> getLocationsByCodes(ActorRef actorRef, List<String> codeList) {
+  public List<Location> getLocationsByCodes(
+      ActorRef actorRef, List<String> codeList, RequestContext context) {
     return getSearchResponse(actorRef, GeoLocationJsonKey.CODE, codeList);
   }
 
   @Override
-  public List<Location> getLocationByIds(ActorRef actorRef, List<String> idsList) {
+  public List<Location> getLocationByIds(
+      ActorRef actorRef, List<String> idsList, RequestContext context) {
     return getSearchResponse(actorRef, GeoLocationJsonKey.ID, idsList);
   }
 
   @Override
-  public Location getLocationById(ActorRef actorRef, String id) {
+  public Location getLocationById(ActorRef actorRef, String id, RequestContext context) {
     List<Location> locationList = getSearchResponse(actorRef, JsonKey.ID, id);
     if (CollectionUtils.isNotEmpty(locationList)) {
       return locationList.get(0);
@@ -75,7 +78,8 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
-  public Location getLocationByCode(ActorRef actorRef, String locationCode) {
+  public Location getLocationByCode(
+      ActorRef actorRef, String locationCode, RequestContext context) {
     String param = GeoLocationJsonKey.CODE;
     Object value = locationCode;
     List<Location> locationList = getSearchResponse(actorRef, param, value);
@@ -87,7 +91,8 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
-  public List<Location> getLocationByCodes(ActorRef actorRef, List<String> locationCode) {
+  public List<Location> getLocationByCodes(
+      ActorRef actorRef, List<String> locationCode, RequestContext context) {
     String param = GeoLocationJsonKey.CODE;
     Object value = locationCode;
     List<Location> locationList = getSearchResponse(actorRef, param, value);
@@ -99,7 +104,8 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
-  public String createLocation(ActorRef actorRef, UpsertLocationRequest location) {
+  public String createLocation(
+      ActorRef actorRef, UpsertLocationRequest location, RequestContext context) {
     Request request = new Request();
     String locationId = null;
     request.getRequest().putAll(mapper.convertValue(location, Map.class));
@@ -116,7 +122,8 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
-  public void updateLocation(ActorRef actorRef, UpsertLocationRequest location) {
+  public void updateLocation(
+      ActorRef actorRef, UpsertLocationRequest location, RequestContext context) {
     Request request = new Request();
     request.getRequest().putAll(mapper.convertValue(location, Map.class));
     request.setOperation(LocationActorOperation.UPDATE_LOCATION.getValue());
@@ -126,7 +133,8 @@ public class LocationClientImpl implements LocationClient {
   }
 
   @Override
-  public List<String> getRelatedLocationIds(ActorRef actorRef, List<String> codes) {
+  public List<String> getRelatedLocationIds(
+      ActorRef actorRef, List<String> codes, RequestContext context) {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.LOCATION_CODES, codes);
 

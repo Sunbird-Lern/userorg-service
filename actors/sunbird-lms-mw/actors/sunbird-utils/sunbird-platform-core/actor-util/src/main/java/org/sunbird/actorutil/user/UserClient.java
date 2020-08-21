@@ -1,9 +1,9 @@
 package org.sunbird.actorutil.user;
 
 import akka.actor.ActorRef;
-import org.sunbird.common.request.Request;
-
 import java.util.Map;
+import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 
 public interface UserClient {
 
@@ -12,17 +12,19 @@ public interface UserClient {
    *
    * @param actorRef Actor reference
    * @param userMap User details
+   * @param context
    * @return User ID
    */
-  String createUser(ActorRef actorRef, Map<String, Object> userMap);
+  String createUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context);
 
   /**
    * Update user details.
    *
    * @param actorRef Actor reference
    * @param userMap User details
+   * @param context
    */
-  void updateUser(ActorRef actorRef, Map<String, Object> userMap);
+  void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context);
 
   /** Verify phone uniqueness across all users in the system. */
   void esVerifyPhoneUniqueness();
@@ -35,7 +37,7 @@ public interface UserClient {
    *
    * @param actorRef Actor reference
    * @param req Search req
+   * @param context
    */
-  Map<String, Object> searchManagedUser(ActorRef actorRef, Request req);
-
+  Map<String, Object> searchManagedUser(ActorRef actorRef, Request req, RequestContext context);
 }

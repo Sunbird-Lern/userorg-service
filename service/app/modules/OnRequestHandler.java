@@ -212,7 +212,8 @@ public class OnRequestHandler implements ActionCreator {
               orgClient
                   .getOrgById(
                       orgActorRef,
-                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID))
+                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID),
+                      null)
                   .getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";

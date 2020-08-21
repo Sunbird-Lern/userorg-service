@@ -62,7 +62,8 @@ public class UserTnCActor extends BaseActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             JsonKey.TNC_CONFIG,
             JsonKey.LATEST_VERSION,
-            new TypeReference<String>() {});
+            new TypeReference<String>() {},
+            null);
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,

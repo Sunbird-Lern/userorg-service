@@ -73,7 +73,8 @@ public class FeedUtilTest {
 
     // whenNew(OrganisationClientImpl.class).withNoArguments().thenReturn(organisationClient);
     when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
-    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap())).thenReturn(getFeedOrgs());
+    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getFeedOrgs());
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);

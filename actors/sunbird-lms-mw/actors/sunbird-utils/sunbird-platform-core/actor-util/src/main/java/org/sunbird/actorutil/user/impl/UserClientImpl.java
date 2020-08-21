@@ -21,6 +21,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import scala.concurrent.Await;
@@ -34,13 +35,13 @@ public class UserClientImpl implements UserClient {
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
-  public String createUser(ActorRef actorRef, Map<String, Object> userMap) {
+  public String createUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
     ProjectLogger.log("UserClientImpl: createUser called", LoggerEnum.INFO);
     return upsertUser(actorRef, userMap, ActorOperations.CREATE_USER.getValue());
   }
 
   @Override
-  public void updateUser(ActorRef actorRef, Map<String, Object> userMap) {
+  public void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
     ProjectLogger.log("UserClientImpl: updateUser called", LoggerEnum.INFO);
     upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue());
   }
@@ -124,9 +125,11 @@ public class UserClientImpl implements UserClient {
    *
    * @param actorRef
    * @param req
+   * @param context
    * @return Map<String, Object>
    */
-  public Map<String, Object> searchManagedUser(ActorRef actorRef, Request req) {
+  public Map<String, Object> searchManagedUser(
+      ActorRef actorRef, Request req, RequestContext context) {
     ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
 
     Map<String, Object> searchRequestMap = new HashMap<>();

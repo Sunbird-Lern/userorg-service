@@ -17,12 +17,9 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.models.organisation.Organisation;
@@ -30,6 +27,7 @@ import scala.concurrent.Future;
 
 public class OrganisationClientImpl implements OrganisationClient {
 
+  private static LoggerUtil logger = new LoggerUtil(OrganisationClientImpl.class);
   public static OrganisationClient organisationClient = null;
 
   public static OrganisationClient getInstance() {
@@ -49,13 +47,13 @@ public class OrganisationClientImpl implements OrganisationClient {
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
-  public String createOrg(ActorRef actorRef, Map<String, Object> orgMap) {
+  public String createOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
     ProjectLogger.log("OrganisationClientImpl: createOrg called", LoggerEnum.INFO);
     return upsertOrg(actorRef, orgMap, ActorOperations.CREATE_ORG.getValue());
   }
 
   @Override
-  public void updateOrg(ActorRef actorRef, Map<String, Object> orgMap) {
+  public void updateOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
     ProjectLogger.log("OrganisationClientImpl: updateOrg called", LoggerEnum.INFO);
     upsertOrg(actorRef, orgMap, ActorOperations.UPDATE_ORG.getValue());
   }
@@ -85,7 +83,7 @@ public class OrganisationClientImpl implements OrganisationClient {
   }
 
   @Override
-  public Organisation getOrgById(ActorRef actorRef, String orgId) {
+  public Organisation getOrgById(ActorRef actorRef, String orgId, RequestContext context) {
     ProjectLogger.log("OrganisationClientImpl: getOrgById called", LoggerEnum.INFO);
     Organisation organisation = null;
 
@@ -119,7 +117,8 @@ public class OrganisationClientImpl implements OrganisationClient {
   }
 
   @Override
-  public Organisation esGetOrgByExternalId(String externalId, String provider) {
+  public Organisation esGetOrgByExternalId(
+      String externalId, String provider, RequestContext context) {
     Organisation organisation = null;
     Map<String, Object> map = null;
     SearchDTO searchDto = new SearchDTO();
@@ -141,7 +140,7 @@ public class OrganisationClientImpl implements OrganisationClient {
   }
 
   @Override
-  public Organisation esGetOrgById(String id) {
+  public Organisation esGetOrgById(String id, RequestContext context) {
     Map<String, Object> map = null;
     Future<Map<String, Object>> mapF =
         esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), id, null);
@@ -156,7 +155,8 @@ public class OrganisationClientImpl implements OrganisationClient {
   }
 
   @Override
-  public List<Organisation> esSearchOrgByFilter(Map<String, Object> filter) {
+  public List<Organisation> esSearchOrgByFilter(
+      Map<String, Object> filter, RequestContext context) {
     SearchDTO searchDto = new SearchDTO();
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     return searchOrganisation(searchDto);
@@ -183,7 +183,8 @@ public class OrganisationClientImpl implements OrganisationClient {
   }
 
   @Override
-  public List<Organisation> esSearchOrgByIds(List<String> orgIds, List<String> outputColumns) {
+  public List<Organisation> esSearchOrgByIds(
+      List<String> orgIds, List<String> outputColumns, RequestContext context) {
     SearchDTO searchDTO = new SearchDTO();
 
     searchDTO.setFields(outputColumns);

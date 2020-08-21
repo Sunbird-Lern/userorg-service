@@ -418,7 +418,8 @@ public class UserProfileReadActor extends BaseActor {
                     Location location =
                         locationClient.getLocationById(
                             getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                            s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                            s.get(JsonKey.ORIGINAL_EXTERNAL_ID),
+                            null);
                     s.put(
                         JsonKey.ID,
                         (location == null
@@ -756,7 +757,8 @@ public class UserProfileReadActor extends BaseActor {
             systemSettingActorRef,
             JsonKey.USER_PROFILE_CONFIG,
             JsonKey.SUNBIRD_USER_PROFILE_READ_EXCLUDED_FIELDS,
-            new TypeReference<List<String>>() {});
+            new TypeReference<List<String>>() {},
+            null);
     if (excludedFieldList != null) {
       removeExcludedFieldsFromUserProfileResponse(
           (Map<String, Object>) response.get(JsonKey.RESPONSE), (List<String>) excludedFieldList);

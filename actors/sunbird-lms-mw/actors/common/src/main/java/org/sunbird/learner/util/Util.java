@@ -1561,7 +1561,7 @@ public final class Util {
     SystemSetting systemSetting = null;
     try {
       SystemSettingClient client = SystemSettingClientImpl.getInstance();
-      systemSetting = client.getSystemSettingByField(actorRef, systemSettingField);
+      systemSetting = client.getSystemSettingByField(actorRef, systemSettingField, null);
       if (null == systemSetting || null == systemSetting.getValue()) {
         throw new Exception();
       }
