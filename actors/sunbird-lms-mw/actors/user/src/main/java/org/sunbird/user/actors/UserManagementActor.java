@@ -337,7 +337,8 @@ public class UserManagementActor extends BaseActor {
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
     } else {
-      ProjectLogger.log("UserManagementActor:updateUser: User update failure");
+      logger.info(
+          actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
     }
     response.put(
         JsonKey.ERRORS,
@@ -350,7 +351,7 @@ public class UserManagementActor extends BaseActor {
     if (null != resp) {
       Map<String, Object> completeUserDetails = new HashMap<>(userDbRecord);
       completeUserDetails.putAll(requestMap);
-      saveUserDetailsToEs(completeUserDetails);
+      saveUserDetailsToEs(completeUserDetails, actorMessage.getRequestContext());
     }
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
@@ -431,8 +432,7 @@ public class UserManagementActor extends BaseActor {
               }
 
             } catch (Exception e) {
-              ProjectLogger.log(
-                  "Error in encrypting in the external id details", LoggerEnum.INFO.name());
+              logger.error("Error in encrypting in the external id details", e);
               throw new ProjectCommonException(
                   ResponseCode.dataEncryptionError.getErrorCode(),
                   ResponseCode.dataEncryptionError.getErrorMessage(),
@@ -492,7 +492,8 @@ public class UserManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
-      ProjectLogger.log("UserManagementActor: updateUserOrganisation called", LoggerEnum.INFO);
+      logger.info(
+          actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
       List<Map<String, Object>> orgList =
           (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
       String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
@@ -509,10 +510,10 @@ public class UserManagementActor extends BaseActor {
         }
       }
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(orgDbMap, rootOrgId, requestedBy);
-      ProjectLogger.log(
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed",
-          LoggerEnum.INFO);
+      removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      logger.info(
+          actorMessage.getRequestContext(),
+          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
     }
   }
 
@@ -535,21 +536,21 @@ public class UserManagementActor extends BaseActor {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ID));
-        userOrgDao.updateUserOrg(userOrg, null);
+        userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
         userOrg.setHashTagId((String) (org.get(JsonKey.HASH_TAG_ID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
-        userOrgDao.createUserOrg(userOrg, null);
+        userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
   }
 
   @SuppressWarnings("unchecked")
   private void removeOrganisations(
-      Map<String, Object> orgDbMap, String rootOrgId, String requestedBy) {
+      Map<String, Object> orgDbMap, String rootOrgId, String requestedBy, RequestContext context) {
     Set<String> ids = orgDbMap.keySet();
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     ids.remove(rootOrgId);
@@ -561,7 +562,7 @@ public class UserManagementActor extends BaseActor {
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);
       userOrg.setOrgLeftDate(ProjectUtil.getFormattedDate());
-      userOrgDao.updateUserOrg(userOrg, null);
+      userOrgDao.updateUserOrg(userOrg, context);
     }
   }
   // Check if the user is Custodian Org user
@@ -572,10 +573,11 @@ public class UserManagementActor extends BaseActor {
     try {
       custodianRootOrgId = getCustodianRootOrgId(context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserManagementActor: isCustodianOrgUser :"
               + " Exception Occured while fetching Custodian Org ",
-          LoggerEnum.INFO);
+          ex);
     }
     if (StringUtils.isNotBlank(custodianRootOrgId)
         && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
@@ -975,13 +977,13 @@ public class UserManagementActor extends BaseActor {
       TelemetryUtil.generateCorrelatedObject(
           signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
     } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No signupType found");
+      logger.info("UserManagementActor:processUserRequest: No signupType found");
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
     } else {
-      ProjectLogger.log("UserManagementActor:processUserRequest: No source found");
+      logger.info("UserManagementActor:processUserRequest: No source found");
     }
 
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
@@ -1096,7 +1098,7 @@ public class UserManagementActor extends BaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     } else {
       if (null != resp) {
-        saveUserDetailsToEs(esResponse);
+        saveUserDetailsToEs(esResponse, request.getRequestContext());
       }
       /*The pattern of this call was incorrect that it tells the ES actor after sending a response. In a high load system,
       this could be fatal, due to this it was  throw an error that the user is not found . so shifted this line after saving to ES */
@@ -1270,12 +1272,13 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void saveUserDetailsToEs(Map<String, Object> completeUserMap) {
+  private void saveUserDetailsToEs(Map<String, Object> completeUserMap, RequestContext context) {
     Request userRequest = new Request();
+    userRequest.setRequestContext(context);
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
-    ProjectLogger.log(
-        "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+    logger.info(
+        context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
 
@@ -1284,13 +1287,13 @@ public class UserManagementActor extends BaseActor {
     request.setRequestContext(context);
     request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
     request.getRequest().putAll(userMap);
-    ProjectLogger.log("UserManagementActor:saveUserAttributes");
+    logger.info(context, "UserManagementActor:saveUserAttributes");
     try {
       return (Response)
           interServiceCommunication.getResponse(
               getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()), request);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     }
     return null;
   }
@@ -1380,10 +1383,9 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
-    ProjectLogger.log(
+    logger.info(
         "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
-            + "should not same as primary ".concat(type + ""),
-        LoggerEnum.ERROR.name());
+            + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
         MessageFormat.format(
@@ -1493,13 +1495,13 @@ public class UserManagementActor extends BaseActor {
     request.setRequestContext(context);
     request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     request.getRequest().putAll(userMap);
-    ProjectLogger.log("UserManagementActor:saveUserSelfDeclareAttributes");
+    logger.info(context, "UserManagementActor:saveUserSelfDeclareAttributes");
     try {
       return (Response)
           interServiceCommunication.getResponse(
               getActorRef(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue()), request);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     }
     return null;
   }
