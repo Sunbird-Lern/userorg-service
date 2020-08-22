@@ -16,6 +16,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.helper.ServiceFactory;
@@ -36,7 +37,7 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public Response insert(Feed feed) {
+  public Response insert(Feed feed, RequestContext context) {
     ProjectLogger.log("FeedServiceImpl:insert method called : ", LoggerEnum.INFO.name());
     Map<String, Object> feedData = feed.getData();
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
@@ -59,7 +60,7 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public Response update(Feed feed) {
+  public Response update(Feed feed, RequestContext context) {
     ProjectLogger.log("FeedServiceImpl:update method called : ", LoggerEnum.INFO.name());
     Map<String, Object> feedData = feed.getData();
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
@@ -81,7 +82,7 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public List<Feed> getRecordsByProperties(Map<String, Object> properties) {
+  public List<Feed> getRecordsByProperties(Map<String, Object> properties, RequestContext context) {
     ProjectLogger.log(
         "FeedServiceImpl:getRecordsByProperties method called : ", LoggerEnum.INFO.name());
     Response dbResponse =
@@ -117,7 +118,7 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public Response search(SearchDTO searchDTO) {
+  public Response search(SearchDTO searchDTO, RequestContext context) {
     ProjectLogger.log("FeedServiceImpl:search method called : ", LoggerEnum.INFO.name());
     Future<Map<String, Object>> resultF =
         getESInstance().search(searchDTO, ProjectUtil.EsType.userfeed.getTypeName(), null);
@@ -129,7 +130,7 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public void delete(String id) {
+  public void delete(String id, RequestContext context) {
     ProjectLogger.log(
         "FeedServiceImpl:delete method called for feedId : " + id, LoggerEnum.INFO.name());
     getCassandraInstance()

@@ -108,7 +108,7 @@ public class SupportMultipleExternalIdsTest {
   public void testCheckExternalIdUniquenessSuccessForCreate() {
 
     try {
-      Util.checkExternalIdUniqueness(user, JsonKey.CREATE);
+      Util.checkExternalIdUniqueness(user, JsonKey.CREATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.userAlreadyExists.getErrorCode(), e.getCode());
     }
@@ -120,7 +120,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE);
+      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }
@@ -132,7 +132,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).remove(JsonKey.OPERATION);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE);
+      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getCode());
     }
@@ -144,7 +144,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE);
+      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }

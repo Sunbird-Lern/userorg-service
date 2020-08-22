@@ -388,7 +388,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         String channel = null;
         // channel is required only in case of the user type bulk upload.
         if (StringUtils.isNotBlank(objectType) && objectType.equalsIgnoreCase(JsonKey.USER)) {
-          channel = Util.getChannel(rootOrgId);
+          channel = Util.getChannel(rootOrgId, null);
         }
         for (int i = 1; i < dataList.size(); i++) {
           dataMap = new HashMap<>();

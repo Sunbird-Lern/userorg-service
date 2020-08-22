@@ -100,14 +100,14 @@ public class FeedServiceImplTest {
 
   @Test
   public void testInsert() {
-    Response res = feedService.insert(getFeed(false));
+    Response res = feedService.insert(getFeed(false), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
 
   @Test
   public void testUpdate() {
-    Response res = feedService.update(getFeed(true));
+    Response res = feedService.update(getFeed(true), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
@@ -116,7 +116,7 @@ public class FeedServiceImplTest {
   public void testDelete() {
     boolean response = false;
     try {
-      feedService.delete("123-456-789");
+      feedService.delete("123-456-789", null);
       response = true;
     } catch (Exception ex) {
       Assert.assertTrue(response);
@@ -128,13 +128,13 @@ public class FeedServiceImplTest {
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getRecordsByProperties(props);
+    List<Feed> res = feedService.getRecordsByProperties(props, null);
     Assert.assertTrue(res != null);
   }
 
   @Test
   public void testSearch() {
-    Response response = feedService.search(search);
+    Response response = feedService.search(search, null);
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());

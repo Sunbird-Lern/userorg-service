@@ -557,7 +557,7 @@ public class ShadowUserProcessor {
     reqMap.put(JsonKey.ROLES, roles);
     String hashTagId = hashTagIdMap.get(organisationId);
     if (StringUtils.isBlank(hashTagId)) {
-      hashTagId = Util.getHashTagIdFromOrgId(organisationId);
+      hashTagId = Util.getHashTagIdFromOrgId(organisationId, null);
       hashTagIdMap.put(organisationId, hashTagId);
     }
     reqMap.put(JsonKey.HASHTAGID, hashTagId);

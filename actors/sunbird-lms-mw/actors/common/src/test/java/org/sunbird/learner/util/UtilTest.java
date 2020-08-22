@@ -78,7 +78,7 @@ public class UtilTest {
     when(esService.getEsResultByListOfIds(
             Mockito.anyList(), Mockito.anyList(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise2.future());
-    List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789");
+    List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
 

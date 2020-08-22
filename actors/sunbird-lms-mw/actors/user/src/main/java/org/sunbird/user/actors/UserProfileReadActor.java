@@ -176,15 +176,16 @@ public class UserProfileReadActor extends BaseActor {
           result = (Map<String, Object>) object;
         }
       } catch (Exception e) {
-        ProjectLogger.log(
+        logger.error(
+            actorMessage.getRequestContext(),
             String.format(
                 "%s:%s:User not found with provided id == %s and error %s",
                 this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
-            LoggerEnum.ERROR.name());
+            e);
       }
     } else {
       UserDao userDao = new UserDaoImpl();
-      User foundUser = userDao.getUserById(userId, null);
+      User foundUser = userDao.getUserById(userId, actorMessage.getRequestContext());
       if (foundUser == null) {
         throw new ProjectCommonException(
             ResponseCode.userNotFound.getErrorCode(),
@@ -194,7 +195,8 @@ public class UserProfileReadActor extends BaseActor {
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
       result = objectMapper.convertValue(foundUser, Map.class);
-      result.put(JsonKey.ORGANISATIONS, Util.getUserOrgDetails(userId));
+      result.put(
+          JsonKey.ORGANISATIONS, Util.getUserOrgDetails(userId, actorMessage.getRequestContext()));
     }
     // check user found or not
     if (result == null || result.size() == 0) {
@@ -221,7 +223,8 @@ public class UserProfileReadActor extends BaseActor {
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String) result.get(JsonKey.MANAGED_BY);
-    ProjectLogger.log(
+    logger.info(
+        actorMessage.getRequestContext(),
         "requested By and requested user id == "
             + requestedById
             + "  "
@@ -231,8 +234,7 @@ public class UserProfileReadActor extends BaseActor {
             + " managedBy "
             + managedBy
             + " showMaskedData= "
-            + showMaskedData,
-        LoggerEnum.INFO);
+            + showMaskedData);
     if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
@@ -243,8 +245,9 @@ public class UserProfileReadActor extends BaseActor {
 
         result = removeUserPrivateField(result);
       } else {
-        ProjectLogger.log(
-            "Response with externalIds and complete profile details", LoggerEnum.INFO);
+        logger.info(
+            actorMessage.getRequestContext(),
+            "Response with externalIds and complete profile details");
         // These values are set to ensure backward compatibility post introduction of global
         // settings in user profile visibility
         setCompleteProfileVisibilityMap(result);
@@ -272,11 +275,13 @@ public class UserProfileReadActor extends BaseActor {
               result.put(JsonKey.DECLARATIONS, declarations);
             }
             if (requestFields.contains(JsonKey.EXTERNAL_IDS)) {
-              ProjectLogger.log("Get external Ids explicitly from usr_external_identity for v3");
+              logger.info(
+                  actorMessage.getRequestContext(),
+                  "Get external Ids explicitly from usr_external_identity for v3");
               List<Map<String, String>> resExternalIds =
                   userExternalIdentityService.getUserExternalIds(
                       userId, actorMessage.getRequestContext());
-              decryptUserExternalIds(resExternalIds);
+              decryptUserExternalIds(resExternalIds, actorMessage.getRequestContext());
               UserUtil.updateExternalIdsWithProvider(
                   resExternalIds, actorMessage.getRequestContext());
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
@@ -284,7 +289,8 @@ public class UserProfileReadActor extends BaseActor {
           }
         } else {
           // fetch user external identity
-          ProjectLogger.log(
+          logger.info(
+              actorMessage.getRequestContext(),
               "Get external Ids from both declarations and usr_external_identity for merge them");
           List<Map<String, String>> dbResExternalIds =
               fetchUserExternalIdentity(userId, actorMessage.getRequestContext());
@@ -293,14 +299,16 @@ public class UserProfileReadActor extends BaseActor {
         result.putAll(privateResult);
       }
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          actorMessage.getRequestContext(),
           "Error in UserProfileReadActor: getUserProfileData: error message " + e.getMessage(),
-          LoggerEnum.INFO);
+          e);
       ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
       String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
-      addExtraFieldsInUserProfileResponse(result, requestFields, userId);
+      addExtraFieldsInUserProfileResponse(
+          result, requestFields, userId, actorMessage.getRequestContext());
     } else {
       result.remove(JsonKey.MISSING_FIELDS);
       result.remove(JsonKey.COMPLETENESS);
@@ -321,9 +329,9 @@ public class UserProfileReadActor extends BaseActor {
 
       if (withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
         if (StringUtils.isEmpty(managedToken)) {
-          ProjectLogger.log(
-              "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId,
-              LoggerEnum.INFO.name());
+          logger.info(
+              actorMessage.getRequestContext(),
+              "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId);
           List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
           userList.add(result);
           // Fetch encrypted token from admin utils
@@ -399,19 +407,19 @@ public class UserProfileReadActor extends BaseActor {
     return declaredFields;
   }
 
-  @SuppressWarnings("unchecked")
   private List<Map<String, String>> fetchUserExternalIdentity(
       String userId, RequestContext context) {
 
     List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
 
-    decryptUserExternalIds(dbResExternalIds);
+    decryptUserExternalIds(dbResExternalIds, context);
     // update orgId to provider in externalIds
     UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
     return dbResExternalIds;
   }
 
-  private void decryptUserExternalIds(List<Map<String, String>> dbResExternalIds) {
+  private void decryptUserExternalIds(
+      List<Map<String, String>> dbResExternalIds, RequestContext context) {
     if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
       dbResExternalIds
           .stream()
@@ -424,7 +432,7 @@ public class UserProfileReadActor extends BaseActor {
                       || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
 
                     String decrytpedOriginalExternalId =
-                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), null);
+                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), context);
                     s.put(JsonKey.ID, decrytpedOriginalExternalId);
 
                   } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
@@ -434,7 +442,7 @@ public class UserProfileReadActor extends BaseActor {
                         locationClient.getLocationById(
                             getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
                             s.get(JsonKey.ORIGINAL_EXTERNAL_ID),
-                            null);
+                            context);
                     s.put(
                         JsonKey.ID,
                         (location == null
@@ -463,7 +471,6 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void setCompleteProfileVisibilityMap(Map<String, Object> userMap) {
     Map<String, String> profileVisibilityMap =
         (Map<String, String>) userMap.get(JsonKey.PROFILE_VISIBILITY);
@@ -484,11 +491,11 @@ public class UserProfileReadActor extends BaseActor {
    * @param responseMap Map<String,Object>
    */
   private Map<String, Object> removeUserPrivateField(Map<String, Object> responseMap) {
-    ProjectLogger.log("Start removing User private field==");
+    logger.info("Start removing User private field==");
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
-    ProjectLogger.log("All private filed removed=");
+    logger.info("All private filed removed=");
     return responseMap;
   }
 
@@ -501,14 +508,13 @@ public class UserProfileReadActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), rootOrgId, context);
       }
     } catch (Exception ex) {
-      ProjectLogger.log(ex.getMessage(), ex);
+      logger.error(context, ex.getMessage(), ex);
     }
     return null;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   private void addExtraFieldsInUserProfileResponse(
-      Map<String, Object> result, String fields, String userId) {
+      Map<String, Object> result, String fields, String userId, RequestContext context) {
     if (!StringUtils.isBlank(fields)) {
       if (!fields.contains(JsonKey.COMPLETENESS)) {
         result.remove(JsonKey.COMPLETENESS);
@@ -525,10 +531,10 @@ public class UserProfileReadActor extends BaseActor {
       }
       if (fields.contains(JsonKey.TOPIC)) {
         // fetch the topic details of all user associated orgs and append in the result
-        fetchTopicOfAssociatedOrgs(result);
+        fetchTopicOfAssociatedOrgs(result, context);
       }
       if (fields.contains(JsonKey.ORGANISATIONS)) {
-        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS));
+        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
       }
       if (fields.contains(JsonKey.ROLES)) {
         updateRoleMasterInfo(result);
@@ -536,13 +542,12 @@ public class UserProfileReadActor extends BaseActor {
       if (fields.contains(JsonKey.LOCATIONS)) {
         result.put(
             JsonKey.USER_LOCATIONS,
-            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS)));
+            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
         result.remove(JsonKey.LOCATION_IDS);
       }
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void updateSkillWithEndoresmentCount(Map<String, Object> result) {
     if (MapUtils.isNotEmpty(result) && result.containsKey(JsonKey.SKILLS)) {
       List<Map<String, Object>> skillList = (List<Map<String, Object>>) result.get(JsonKey.SKILLS);
@@ -571,8 +576,7 @@ public class UserProfileReadActor extends BaseActor {
     return lastLoginTime;
   }
 
-  @SuppressWarnings("unchecked")
-  private void fetchTopicOfAssociatedOrgs(Map<String, Object> result) {
+  private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
 
     String userId = (String) result.get(JsonKey.ID);
     Map<String, Object> locationCache = new HashMap<>();
@@ -583,7 +587,11 @@ public class UserProfileReadActor extends BaseActor {
     ids.add(userId);
     Response response1 =
         cassandraOperation.getRecordsByPrimaryKeys(
-            userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), ids, JsonKey.USER_ID, null);
+            userOrgDbInfo.getKeySpace(),
+            userOrgDbInfo.getTableName(),
+            ids,
+            JsonKey.USER_ID,
+            context);
 
     List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
 
@@ -609,7 +617,7 @@ public class UserProfileReadActor extends BaseActor {
         searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
         searchDTO.setFields(orgfields);
         Future<Map<String, Object>> esresultF =
-            esUtil.search(searchDTO, EsType.organisation.getTypeName(), null);
+            esUtil.search(searchDTO, EsType.organisation.getTypeName(), context);
         Map<String, Object> esresult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esresultF);
         List<Map<String, Object>> esContent =
@@ -629,7 +637,7 @@ public class UserProfileReadActor extends BaseActor {
                         geoLocationDbInfo.getKeySpace(),
                         geoLocationDbInfo.getTableName(),
                         locationId,
-                        null);
+                        context);
                 List<Map<String, Object>> list3 =
                     (List<Map<String, Object>>) response3.get(JsonKey.RESPONSE);
                 if (!list3.isEmpty()) {
@@ -647,13 +655,14 @@ public class UserProfileReadActor extends BaseActor {
     result.put(JsonKey.TOPICS, topicSet);
   }
 
-  private void updateUserOrgInfo(List<Map<String, Object>> userOrgs) {
-    Map<String, Map<String, Object>> orgInfoMap = fetchAllOrgsById(userOrgs);
-    Map<String, Map<String, Object>> locationInfoMap = fetchAllLocationsById(orgInfoMap);
+  private void updateUserOrgInfo(List<Map<String, Object>> userOrgs, RequestContext context) {
+    Map<String, Map<String, Object>> orgInfoMap = fetchAllOrgsById(userOrgs, context);
+    Map<String, Map<String, Object>> locationInfoMap = fetchAllLocationsById(orgInfoMap, context);
     prepUserOrgInfoWithAdditionalData(userOrgs, orgInfoMap, locationInfoMap);
   }
 
-  private Map<String, Map<String, Object>> fetchAllOrgsById(List<Map<String, Object>> userOrgs) {
+  private Map<String, Map<String, Object>> fetchAllOrgsById(
+      List<Map<String, Object>> userOrgs, RequestContext context) {
     List<String> orgIds =
         userOrgs
             .stream()
@@ -665,13 +674,12 @@ public class UserProfileReadActor extends BaseActor {
             JsonKey.ORG_NAME, JsonKey.CHANNEL, JsonKey.HASHTAGID, JsonKey.LOCATION_IDS, JsonKey.ID);
 
     Map<String, Map<String, Object>> orgInfoMap =
-        getEsResultByListOfIds(orgIds, fields, EsType.organisation);
+        getEsResultByListOfIds(orgIds, fields, EsType.organisation, context);
     return orgInfoMap;
   }
 
-  @SuppressWarnings("unchecked")
   private Map<String, Map<String, Object>> fetchAllLocationsById(
-      Map<String, Map<String, Object>> orgInfoMap) {
+      Map<String, Map<String, Object>> orgInfoMap, RequestContext context) {
     List<String> searchLocations = new ArrayList<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
       List<String> locations = (List<String>) org.get(JsonKey.LOCATION_IDS);
@@ -686,11 +694,10 @@ public class UserProfileReadActor extends BaseActor {
     List<String> locationFields =
         Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
     Map<String, Map<String, Object>> locationInfoMap =
-        getEsResultByListOfIds(searchLocations, locationFields, EsType.location);
+        getEsResultByListOfIds(searchLocations, locationFields, EsType.location, context);
     return locationInfoMap;
   }
 
-  @SuppressWarnings("unchecked")
   private void prepUserOrgInfoWithAdditionalData(
       List<Map<String, Object>> userOrgs,
       Map<String, Map<String, Object>> orgInfoMap,
@@ -718,9 +725,8 @@ public class UserProfileReadActor extends BaseActor {
     return retList;
   }
 
-  @SuppressWarnings("unchecked")
   private Map<String, Map<String, Object>> getEsResultByListOfIds(
-      List<String> orgIds, List<String> fields, EsType typeToSearch) {
+      List<String> orgIds, List<String> fields, EsType typeToSearch, RequestContext context) {
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.ID, orgIds);
 
@@ -729,7 +735,7 @@ public class UserProfileReadActor extends BaseActor {
     searchDTO.setFields(fields);
 
     Future<Map<String, Object>> resultF =
-        esUtil.search(searchDTO, typeToSearch.getTypeName(), null);
+        esUtil.search(searchDTO, typeToSearch.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -764,7 +770,6 @@ public class UserProfileReadActor extends BaseActor {
    *
    * @param actorMessage Request containing user ID
    */
-  @SuppressWarnings("unchecked")
   private void getUserProfileV2(Request actorMessage) {
     Response response = getUserProfileData(actorMessage);
     SystemSettingClient systemSetting = new SystemSettingClientImpl();
@@ -774,14 +779,14 @@ public class UserProfileReadActor extends BaseActor {
             JsonKey.USER_PROFILE_CONFIG,
             JsonKey.SUNBIRD_USER_PROFILE_READ_EXCLUDED_FIELDS,
             new TypeReference<List<String>>() {},
-            null);
+            actorMessage.getRequestContext());
     if (excludedFieldList != null) {
       removeExcludedFieldsFromUserProfileResponse(
           (Map<String, Object>) response.get(JsonKey.RESPONSE), (List<String>) excludedFieldList);
     } else {
-      ProjectLogger.log(
-          "UserProfileReadActor:getUserProfileV2: System setting userProfileConfig.read.excludedFields not configured.",
-          LoggerEnum.INFO.name());
+      logger.info(
+          actorMessage.getRequestContext(),
+          "UserProfileReadActor:getUserProfileV2: System setting userProfileConfig.read.excludedFields not configured.");
     }
     sender().tell(response, self());
   }
@@ -795,15 +800,17 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void getUserDetailsByLoginId(Request actorMessage) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (null != userMap.get(JsonKey.LOGIN_ID)) {
       String loginId = (String) userMap.get(JsonKey.LOGIN_ID);
       try {
-        loginId = encryptionService.encryptData((String) userMap.get(JsonKey.LOGIN_ID), null);
+        loginId =
+            encryptionService.encryptData(
+                (String) userMap.get(JsonKey.LOGIN_ID), actorMessage.getRequestContext());
       } catch (Exception e) {
+        logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
         ProjectCommonException exception =
             new ProjectCommonException(
                 ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -817,7 +824,8 @@ public class UserProfileReadActor extends BaseActor {
       filter.put(JsonKey.LOGIN_ID, loginId);
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
       Future<Map<String, Object>> esResponseF =
-          esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
+          esUtil.search(
+              searchDto, ProjectUtil.EsType.user.getTypeName(), actorMessage.getRequestContext());
       Map<String, Object> esResponse =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
       List<Map<String, Object>> userList =
@@ -872,9 +880,9 @@ public class UserProfileReadActor extends BaseActor {
             new Mapper<Map<String, Object>, Response>() {
               @Override
               public Response apply(Map<String, Object> responseMap) {
-                ProjectLogger.log(
-                    "UserProfileReadActor:handle user profile read async call ",
-                    LoggerEnum.INFO.name());
+                logger.info(
+                    actorMessage.getRequestContext(),
+                    "UserProfileReadActor:handle user profile read async call ");
                 result.put(JsonKey.ROOT_ORG, responseMap);
                 Response response = new Response();
                 handleUserCallAsync(result, response, actorMessage);
@@ -891,7 +899,8 @@ public class UserProfileReadActor extends BaseActor {
     // user data id is not same.
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
-    ProjectLogger.log(
+    logger.info(
+        actorMessage.getRequestContext(),
         "requested By and requested user id == "
             + requestedById
             + "  "
@@ -913,7 +922,7 @@ public class UserProfileReadActor extends BaseActor {
             esUtil.getDataByIdentifier(
                 ProjectUtil.EsType.userprofilevisibility.getTypeName(),
                 (String) result.get(JsonKey.USER_ID),
-                null);
+                actorMessage.getRequestContext());
         Map<String, Object> privateResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
         // fetch user external identity
@@ -923,6 +932,7 @@ public class UserProfileReadActor extends BaseActor {
         result.putAll(privateResult);
       }
     } catch (Exception e) {
+      logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
       ProjectCommonException exception =
           new ProjectCommonException(
               ResponseCode.userDataEncryptionError.getErrorCode(),
@@ -941,7 +951,10 @@ public class UserProfileReadActor extends BaseActor {
         List<String> requestFields = (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
         if (requestFields != null) {
           addExtraFieldsInUserProfileResponse(
-              result, String.join(",", requestFields), (String) result.get(JsonKey.USER_ID));
+              result,
+              String.join(",", requestFields),
+              (String) result.get(JsonKey.USER_ID),
+              actorMessage.getRequestContext());
         } else {
           result.remove(JsonKey.MISSING_FIELDS);
           result.remove(JsonKey.COMPLETENESS);
@@ -966,11 +979,11 @@ public class UserProfileReadActor extends BaseActor {
       tncConfigMap = mapper.readValue(tncValue, Map.class);
 
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
           "UserProfileReadActor:updateTncInfo: Exception occurred while getting system setting for"
               + JsonKey.TNC_CONFIG
               + e.getMessage(),
-          LoggerEnum.ERROR.name());
+          e);
     }
 
     if (MapUtils.isNotEmpty(tncConfigMap)) {
@@ -989,53 +1002,34 @@ public class UserProfileReadActor extends BaseActor {
 
         if (tncConfigMap.containsKey(tncLatestVersion)) {
           String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
-          ProjectLogger.log(
-              "UserProfileReadActor:updateTncInfo: url = " + url, LoggerEnum.INFO.name());
+          logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
           userSearchMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
         } else {
           userSearchMap.put(JsonKey.PROMPT_TNC, false);
-          ProjectLogger.log(
+          logger.info(
               "UserProfileReadActor:updateTncInfo: TnC version URL is missing from configuration");
         }
       } catch (Exception e) {
-        ProjectLogger.log(
+        logger.error(
             "UserProfileReadActor:updateTncInfo: Exception occurred with error message = "
                 + e.getMessage(),
-            LoggerEnum.ERROR.name());
+            e);
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
     }
   }
 
-  private List<Map<String, Object>> getUserLocations(List<String> locationIds) {
+  private List<Map<String, Object>> getUserLocations(
+      List<String> locationIds, RequestContext context) {
     if (CollectionUtils.isNotEmpty(locationIds)) {
       List<String> locationFields =
           Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
       Map<String, Map<String, Object>> locationInfoMap =
-          getEsResultByListOfIds(locationIds, locationFields, EsType.location);
+          getEsResultByListOfIds(locationIds, locationFields, EsType.location, context);
 
       return locationInfoMap.values().stream().collect(Collectors.toList());
     }
     return new ArrayList<>();
-  }
-
-  private void checkUserExistences(Request request) {
-
-    String value = (String) request.get(JsonKey.VALUE);
-    String type = (String) request.get(JsonKey.KEY);
-    try {
-      boolean exists = UserUtil.identifierExists(type, value, request.getRequestContext());
-      Response response = new Response();
-      response.put(JsonKey.EXISTS, exists);
-      sender().tell(response, self());
-    } catch (Exception var11) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.userDataEncryptionError.getErrorCode(),
-              ResponseCode.userDataEncryptionError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-      sender().tell(exception, self());
-    }
   }
 
   private void checkUserExistence(Request request) {
@@ -1104,9 +1098,9 @@ public class UserProfileReadActor extends BaseActor {
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
-    ProjectLogger.log(
-        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap,
-        LoggerEnum.INFO.name());
+    logger.info(
+        request.getRequestContext(),
+        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap);
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
     Future<Map<String, Object>> esFuture =
@@ -1122,7 +1116,7 @@ public class UserProfileReadActor extends BaseActor {
     }
     String encryptedValue = null;
     try {
-      encryptedValue = encryptionService.encryptData(value, null);
+      encryptedValue = encryptionService.encryptData(value, actorMessage.getRequestContext());
     } catch (Exception e) {
       ProjectCommonException exception =
           new ProjectCommonException(
@@ -1142,16 +1136,16 @@ public class UserProfileReadActor extends BaseActor {
 
   private void handleUserSearchAsyncRequest(SearchDTO searchDto, Request actorMessage) {
     Future<Map<String, Object>> futureResponse =
-        esUtil.search(searchDto, EsType.user.getTypeName(), null);
+        esUtil.search(searchDto, EsType.user.getTypeName(), actorMessage.getRequestContext());
 
     Future<Map<String, Object>> userResponse =
         futureResponse.map(
             new Mapper<Map<String, Object>, Map<String, Object>>() {
               @Override
               public Map<String, Object> apply(Map<String, Object> responseMap) {
-                ProjectLogger.log(
-                    "SearchHandlerActor:handleUserSearchAsyncRequest user search call ",
-                    LoggerEnum.INFO);
+                logger.info(
+                    actorMessage.getRequestContext(),
+                    "SearchHandlerActor:handleUserSearchAsyncRequest user search call ");
                 List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
                 isUserExists(respList);
                 Map<String, Object> userMap = respList.get(0);
@@ -1234,7 +1228,8 @@ public class UserProfileReadActor extends BaseActor {
                     addExtraFieldsInUserProfileResponse(
                         result,
                         String.join(",", requestFields),
-                        (String) result.get(JsonKey.USER_ID));
+                        (String) result.get(JsonKey.USER_ID),
+                        actorMessage.getRequestContext());
                   } else {
                     result.remove(JsonKey.MISSING_FIELDS);
                     result.remove(JsonKey.COMPLETENESS);
@@ -1258,7 +1253,8 @@ public class UserProfileReadActor extends BaseActor {
                   public Response apply(
                       Tuple2<Map<String, Object>, Map<String, Object>> parameter) {
                     Map<String, Object> externalIdMap = parameter._1;
-                    System.out.println("the externalId maap is " + externalIdMap);
+                    logger.info(
+                        actorMessage.getRequestContext(), "the externalId map is " + externalIdMap);
                     Map<String, Object> tncMap = parameter._2;
                     tncMap.putAll(externalIdMap);
                     Response response = new Response();

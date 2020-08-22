@@ -74,7 +74,7 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     Map<String, Object> rootOrgMap = new HashMap<>();
     String hashTagId = "someHashTagId";
     rootOrgMap.put(JsonKey.HASHTAGID, hashTagId);
-    when(Util.getOrgDetails(Mockito.anyString())).thenReturn(rootOrgMap);
+    when(Util.getOrgDetails(Mockito.anyString(), Mockito.any())).thenReturn(rootOrgMap);
   }
 
   private void mockContentStoreUtil() {

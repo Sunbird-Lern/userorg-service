@@ -635,7 +635,7 @@ public class UserManagementActor extends BaseActor {
       userRequestValidator.validateMandatoryFrameworkFields(
           userRequestMap, frameworkFields, frameworkMandatoryFields);
       Map<String, Object> rootOrgMap =
-          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));
+          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
       String hashtagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
 
       verifyFrameworkId(hashtagId, frameworkIdList, context);
@@ -893,7 +893,7 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
       Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
-      esResponse = Util.getUserDetails(userMap, orgMap);
+      esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(),

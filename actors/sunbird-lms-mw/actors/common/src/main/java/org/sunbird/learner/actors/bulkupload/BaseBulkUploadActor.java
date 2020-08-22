@@ -482,7 +482,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.NEW.getValue());
     bulkUploadProcess.setTaskCount(taskCount);
 
-    Map<String, Object> user = Util.getUserbyUserId(requestedBy);
+    Map<String, Object> user = Util.getUserbyUserId(requestedBy, null);
     if (user != null) {
       bulkUploadProcess.setOrganisationId((String) user.get(JsonKey.ROOT_ORG_ID));
     }

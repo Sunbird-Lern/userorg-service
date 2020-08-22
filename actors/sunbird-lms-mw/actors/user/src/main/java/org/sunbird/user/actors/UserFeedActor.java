@@ -43,7 +43,7 @@ public class UserFeedActor extends BaseActor {
     filters.put(JsonKey.USER_ID, userId);
     SearchDTO search = new SearchDTO();
     search.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Response userFeedResponse = feedService.search(search);
+    Response userFeedResponse = feedService.search(search, null);
     Map<String, Object> result =
         (Map<String, Object>) userFeedResponse.getResult().get(JsonKey.RESPONSE);
     result.put(

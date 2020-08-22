@@ -35,7 +35,7 @@ public class FeedUtil {
     reqMap.put(JsonKey.CATEGORY, FeedAction.ORG_MIGRATION_ACTION.getfeedAction());
     ProjectLogger.log(
         "FeedUtil:saveFeed:fetching feed for userId ." + userId, LoggerEnum.INFO.name());
-    List<Feed> feedList = feedService.getRecordsByProperties(reqMap);
+    List<Feed> feedList = feedService.getRecordsByProperties(reqMap, null);
     ProjectLogger.log(
         "FeedUtil:saveFeed total no. of feed fetched for user id ."
             + userId
@@ -44,7 +44,7 @@ public class FeedUtil {
         LoggerEnum.INFO.name());
     int index = getIndexOfMatchingFeed(feedList);
     if (index == -1) {
-      response = feedService.insert(createFeedObj(shadowUser, userId));
+      response = feedService.insert(createFeedObj(shadowUser, userId), null);
     } else {
       Map<String, Object> data = feedList.get(index).getData();
       List<String> channelList = (List<String>) data.get(JsonKey.PROSPECT_CHANNELS);
@@ -54,7 +54,7 @@ public class FeedUtil {
             (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
         orgList.addAll(getOrgDetails(shadowUser.getChannel()));
       }
-      response = feedService.update(feedList.get(index));
+      response = feedService.update(feedList.get(index), null);
     }
     return response;
   }
