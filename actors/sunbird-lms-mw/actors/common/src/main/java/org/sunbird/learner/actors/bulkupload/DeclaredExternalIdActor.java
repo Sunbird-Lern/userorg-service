@@ -37,9 +37,12 @@ public class DeclaredExternalIdActor extends BaseActor {
     response.setResponseCode(ResponseCode.OK);
     Map requestMap = request.getRequest();
     String processId = (String) requestMap.get(JsonKey.PROCESS_ID);
-    Map<String, Object> row = UserUploadUtil.getFullRecordFromProcessId(processId);
-    BulkMigrationUser bulkMigrationUser = UserUploadUtil.convertRowToObject(row);
-    List<SelfDeclaredUser> userList = UserUploadUtil.getMigrationUserAsList(bulkMigrationUser);
+    Map<String, Object> row =
+        UserUploadUtil.getFullRecordFromProcessId(processId, request.getRequestContext());
+    BulkMigrationUser bulkMigrationUser =
+        UserUploadUtil.convertRowToObject(row, request.getRequestContext());
+    List<SelfDeclaredUser> userList =
+        UserUploadUtil.getMigrationUserAsList(bulkMigrationUser, request.getRequestContext());
     userList
         .parallelStream()
         .forEach(
@@ -63,12 +66,14 @@ public class DeclaredExternalIdActor extends BaseActor {
               }
             });
     UserUploadUtil.updateStatusInUserBulkTable(
-        bulkMigrationUser.getId(), ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
-    ProjectLogger.log(
+        bulkMigrationUser.getId(),
+        ProjectUtil.BulkProcessStatus.COMPLETED.getValue(),
+        request.getRequestContext());
+    logger.info(
+        request.getRequestContext(),
         "DeclaredExternalIdActor:processSelfDeclaredExternalId: processing the DeclaredUser of processId: "
             + bulkMigrationUser.getId()
-            + "is completed",
-        LoggerEnum.INFO.name());
+            + "is completed");
     sender().tell(response, self());
   }
 
@@ -86,11 +91,12 @@ public class DeclaredExternalIdActor extends BaseActor {
       request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          request.getRequestContext(),
           "DeclaredExternalIdActor:updateErrorDetail:Exception in processing the DeclaredUser: "
-              + e.getCause(),
-          declaredUser.getUserId(),
-          LoggerEnum.ERROR.name());
+              + e.getCause()
+              + declaredUser.getUserId(),
+          e);
     }
   }
 
@@ -109,17 +115,18 @@ public class DeclaredExternalIdActor extends BaseActor {
       request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          request.getRequestContext(),
           "DeclaredExternalIdActor:rejectDeclaredDetail:Exception in processing the DeclaredUser: "
-              + e.getCause(),
-          declaredUser.getUserId(),
-          LoggerEnum.ERROR.name());
+              + e.getCause()
+              + declaredUser.getUserId(),
+          e);
     }
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
     request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
-    ProjectLogger.log("DeclaredExternalIdActor:migrateDeclaredUser ");
+    logger.info(request.getRequestContext(), "DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
       Map<String, Object> requestMap = new HashMap();
       Map<String, String> externalIdMap = new HashMap();
@@ -134,11 +141,12 @@ public class DeclaredExternalIdActor extends BaseActor {
       request.setRequest(requestMap);
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          request.getRequestContext(),
           "DeclaredExternalIdActor:migrateDeclaredUser:Exception in processing the DeclaredUser: "
-              + e.getCause(),
-          declaredUser.getUserId(),
-          LoggerEnum.ERROR.name());
+              + e.getCause()
+              + declaredUser.getUserId(),
+          e);
     }
   }
 }

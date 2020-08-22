@@ -34,8 +34,6 @@ import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.user.dao.UserExternalIdentityDao;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
@@ -43,7 +41,6 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
 public class UserUtil {
-
   private static LoggerUtil logger = new LoggerUtil(UserUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
@@ -60,8 +57,6 @@ public class UserUtil {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
   private static UserService userService = UserServiceImpl.getInstance();
-  private static UserExternalIdentityDao userExternalIdentityDao =
-      new UserExternalIdentityDaoImpl();
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();

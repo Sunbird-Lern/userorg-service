@@ -22,6 +22,7 @@ import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
@@ -65,13 +66,14 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
             processBulkUpload(
                 (BulkUploadProcess) baseBulkUpload,
                 (tasks) -> {
-                  processTasks((List<BulkUploadProcessTask>) tasks);
+                  processTasks((List<BulkUploadProcessTask>) tasks, request.getRequestContext());
                   return null;
                 },
                 outputColumns,
                 outputColumnsOrder != null
                     ? outputColumnsOrder
-                    : (String[]) request.get(JsonKey.FIELDS));
+                    : (String[]) request.get(JsonKey.FIELDS),
+                request.getRequestContext());
             return null;
           });
     } else {
@@ -79,14 +81,15 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     }
   }
 
-  private void processTasks(List<BulkUploadProcessTask> bulkUploadProcessTasks) {
+  private void processTasks(
+      List<BulkUploadProcessTask> bulkUploadProcessTasks, RequestContext context) {
     Map<String, Location> locationCache = new HashMap<>();
     LocationClient locationClient = new LocationClientImpl();
     ActorRef locationActor = getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue());
     for (BulkUploadProcessTask task : bulkUploadProcessTasks) {
       if (task.getStatus() != null
           && task.getStatus() != ProjectUtil.BulkProcessStatus.COMPLETED.getValue()) {
-        processOrg(task, locationClient, locationCache, locationActor);
+        processOrg(task, locationClient, locationCache, locationActor, context);
         task.setLastUpdatedOn(new Timestamp(System.currentTimeMillis()));
         task.setIterationId(task.getIterationId() + 1);
       }
@@ -97,8 +100,9 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       BulkUploadProcessTask task,
       LocationClient locationClient,
       Map<String, Location> locationCache,
-      ActorRef locationActor) {
-    ProjectLogger.log("OrgBulkUploadBackgroundJobActor: processOrg called", LoggerEnum.INFO);
+      ActorRef locationActor,
+      RequestContext context) {
+    logger.info(context, "OrgBulkUploadBackgroundJobActor: processOrg called");
     String data = task.getData();
     ObjectMapper mapper = new ObjectMapper();
     try {
@@ -109,7 +113,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
               "orgProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
-              null);
+              context);
       if (mandatoryColumnsObject != null) {
         validateMandatoryFields(orgMap, task, (String[]) mandatoryColumnsObject);
       }
@@ -133,16 +137,18 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       organisation.setId((String) orgMap.get(JsonKey.ORGANISATION_ID));
 
       if (StringUtils.isEmpty(organisation.getId())) {
-        callCreateOrg(organisation, task, locationCodes);
+        callCreateOrg(organisation, task, locationCodes, context);
       } else {
-        callUpdateOrg(organisation, task, locationCodes);
+        callUpdateOrg(organisation, task, locationCodes, context);
       }
-      setLocationInformation(task, locationClient, locationCache, locationActor, locationCodes);
+      setLocationInformation(
+          task, locationClient, locationCache, locationActor, locationCodes, context);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "OrgBulkUploadBackgroundJobActor:callCreateOrg: Exception occurred with error message = "
               + e.getMessage(),
-          LoggerEnum.INFO);
+          e);
     }
   }
 
@@ -151,7 +157,8 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       LocationClient locationClient,
       Map<String, Location> locationCache,
       ActorRef locationActor,
-      List<String> locationCodes)
+      List<String> locationCodes,
+      RequestContext context)
       throws IOException, JsonParseException, JsonMappingException {
     ObjectMapper mapper = new ObjectMapper();
     if (ProjectUtil.BulkProcessStatus.COMPLETED.getValue() == task.getStatus()) {
@@ -160,7 +167,8 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
         if (locationCache.containsKey(locationCode)) {
           locationNames.add(locationCache.get(locationCode).getName());
         } else {
-          Location location = locationClient.getLocationByCode(locationActor, locationCode, null);
+          Location location =
+              locationClient.getLocationByCode(locationActor, locationCode, context);
           locationNames.add(location.getName());
         }
       }
@@ -192,27 +200,30 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   }
 
   private void callCreateOrg(
-      Organisation org, BulkUploadProcessTask task, List<String> locationCodes)
+      Organisation org,
+      BulkUploadProcessTask task,
+      List<String> locationCodes,
+      RequestContext context)
       throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     String orgId;
     try {
-      orgId = orgClient.createOrg(getActorRef(ActorOperations.CREATE_ORG.getValue()), row, null);
+      orgId = orgClient.createOrg(getActorRef(ActorOperations.CREATE_ORG.getValue()), row, context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "OrgBulkUploadBackgroundJobActor:callCreateOrg: Exception occurred with error message = "
               + ex.getMessage(),
-          LoggerEnum.INFO);
+          ex);
       setTaskStatus(
           task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), row, JsonKey.CREATE);
       return;
     }
 
     if (StringUtils.isEmpty(orgId)) {
-      ProjectLogger.log(
-          "OrgBulkUploadBackgroundJobActor:callCreateOrg: Org ID is null !", LoggerEnum.ERROR);
+      logger.info(context, "OrgBulkUploadBackgroundJobActor:callCreateOrg: Org ID is null !");
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
@@ -226,19 +237,23 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   }
 
   private void callUpdateOrg(
-      Organisation org, BulkUploadProcessTask task, List<String> locationCodes)
+      Organisation org,
+      BulkUploadProcessTask task,
+      List<String> locationCodes,
+      RequestContext context)
       throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      orgClient.updateOrg(getActorRef(ActorOperations.UPDATE_ORG.getValue()), row, null);
+      orgClient.updateOrg(getActorRef(ActorOperations.UPDATE_ORG.getValue()), row, context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "OrgBulkUploadBackgroundJobActor:callUpdateOrg: Exception occurred with error message = "
               + ex.getMessage(),
-          LoggerEnum.INFO);
+          ex);
       row.put(JsonKey.ERROR_MSG, ex.getMessage());
       setTaskStatus(
           task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), row, JsonKey.UPDATE);

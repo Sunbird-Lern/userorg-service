@@ -10,14 +10,16 @@ import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.util.Util;
 
 public class UserUploadUtil {
+  private static LoggerUtil logger = new LoggerUtil(UserUploadUtil.class);
+
   public static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   public static Util.DbInfo bulkUploadDbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
   public static ObjectMapper mapper = new ObjectMapper();
@@ -25,78 +27,86 @@ public class UserUploadUtil {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
 
-  public static Map<String, Object> getFullRecordFromProcessId(String processId) {
+  public static Map<String, Object> getFullRecordFromProcessId(
+      String processId, RequestContext context) {
 
     int FIRST_RECORD = 0;
     Response response =
         cassandraOperation.getRecordById(
-            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId, null);
+            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId, context);
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
     }
-    ProjectLogger.log(
+    logger.info(
+        context,
         "UserUploadUtil:getFullRecordFromProcessId:got single row data from bulk_upload_process with processId:"
-            + processId,
-        LoggerEnum.INFO.name());
+            + processId);
     return result.get(FIRST_RECORD);
   }
 
-  public static BulkMigrationUser convertRowToObject(Map<String, Object> row) {
+  public static BulkMigrationUser convertRowToObject(
+      Map<String, Object> row, RequestContext context) {
     BulkMigrationUser bulkMigrationUser = null;
     try {
       bulkMigrationUser = mapper.convertValue(row, BulkMigrationUser.class);
     } catch (Exception e) {
-      e.printStackTrace();
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserUploadUtil:convertMapToMigrationObject:error occurred while converting map to pojo"
               .concat(e.getMessage() + ""),
-          LoggerEnum.ERROR.name());
+          e);
     }
     return bulkMigrationUser;
   }
 
-  public static List<SelfDeclaredUser> getMigrationUserAsList(BulkMigrationUser bulkMigrationUser) {
+  public static List<SelfDeclaredUser> getMigrationUserAsList(
+      BulkMigrationUser bulkMigrationUser, RequestContext context) {
     List<SelfDeclaredUser> userList = new ArrayList<>();
     try {
-      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData(), null);
+      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData(), context);
       userList = mapper.readValue(decryptedData, new TypeReference<List<SelfDeclaredUser>>() {});
     } catch (Exception e) {
-      e.printStackTrace();
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserUploadUtil:getMigrationUserAsList:error occurred while converting map to POJO: " + e,
-          LoggerEnum.ERROR.name());
+          e);
     }
     return userList;
   }
 
-  public static void updateStatusInUserBulkTable(String processId, int statusVal) {
+  public static void updateStatusInUserBulkTable(
+      String processId, int statusVal, RequestContext context) {
     try {
-      ProjectLogger.log(
+      logger.info(
+          context,
           "UserUploadUtil:updateStatusInUserBulkTable: got status to change in bulk upload table"
                   .concat(statusVal + "")
               + "with processId"
-              + processId,
-          LoggerEnum.INFO.name());
+              + processId);
       Map<String, Object> propertiesMap = new WeakHashMap<>();
       propertiesMap.put(JsonKey.ID, processId);
       propertiesMap.put(JsonKey.STATUS, statusVal);
-      updateBulkUserTable(propertiesMap);
+      updateBulkUserTable(propertiesMap, null);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserUploadUtil:updateStatusInUserBulkTable: status update failed".concat(e + "")
               + "with processId"
               + processId,
-          LoggerEnum.ERROR.name());
+          e);
     }
   }
 
-  private static void updateBulkUserTable(Map<String, Object> propertiesMap) {
+  private static void updateBulkUserTable(
+      Map<String, Object> propertiesMap, RequestContext context) {
     Response response =
         cassandraOperation.updateRecord(
-            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), propertiesMap, null);
-    ProjectLogger.log(
-        "UserUploadUtil:updateBulkUserTable: status update result".concat(response + ""),
-        LoggerEnum.INFO.name());
+            bulkUploadDbInfo.getKeySpace(),
+            bulkUploadDbInfo.getTableName(),
+            propertiesMap,
+            context);
+    logger.info(
+        context, "UserUploadUtil:updateBulkUserTable: status update result".concat(response + ""));
   }
 }
