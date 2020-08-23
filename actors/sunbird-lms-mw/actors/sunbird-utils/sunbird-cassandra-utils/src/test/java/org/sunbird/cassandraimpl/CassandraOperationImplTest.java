@@ -1,6 +1,7 @@
 package org.sunbird.cassandraimpl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.datastax.driver.core.*;
@@ -254,7 +255,6 @@ public class CassandraOperationImplTest {
     when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
 
     Session session = PowerMockito.mock(Session.class);
-    ResultSet resultSet = PowerMockito.mock(ResultSet.class);
     when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
     PreparedStatement statement = PowerMockito.mock(PreparedStatement.class);
     when(session.prepare(Mockito.anyString())).thenReturn(statement);
@@ -277,5 +277,41 @@ public class CassandraOperationImplTest {
     } catch (Exception ex) {
       assertEquals("Invalid property xyz.", ex.getMessage());
     }
+  }
+
+  @Test
+  public void testDeleteRecordSuccess() {
+    when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
+
+    Session session = PowerMockito.mock(Session.class);
+    when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
+
+    session.execute(Mockito.any(Delete.Where.class));
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+
+    Response response = cassandraOperation.deleteRecord("sunbird", "address1", "1234567890", null);
+    assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+  }
+
+  @Test
+  public void testDeleteRecordError() {
+    PowerMockito.mockStatic(QueryBuilder.class);
+    when(QueryBuilder.delete())
+        .thenThrow(
+            new ProjectCommonException(
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode()));
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    Throwable exception = null;
+    try {
+      cassandraOperation.deleteRecord("sunbird", "address1", "123", null);
+
+    } catch (Exception ex) {
+      exception = ex;
+    }
+    assertTrue(
+        (((ProjectCommonException) exception).getResponseCode())
+            == ResponseCode.SERVER_ERROR.getResponseCode());
   }
 }
