@@ -87,7 +87,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     Map<String, Object> result = getUserById(userId);
     String channel = getChannel(result);
     String rootOrgId = getRootOrgId(result);
-
     request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     BulkMigrationUser migrationUser = null;
 
