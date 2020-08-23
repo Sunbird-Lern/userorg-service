@@ -14,10 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -36,12 +33,14 @@ import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.telemetry.util.TelemetryWriter;
 
 @PrepareForTest({
   ServiceFactory.class,
   TelemetryWriter.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  DataCacheHandler.class
 })
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
@@ -55,6 +54,8 @@ public class UserBulkMigrationActorTest {
   public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    when(DataCacheHandler.getTenantConfigMap()).thenReturn(getTenantConfig());
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response response = getCassandraRecordById();
     when(cassandraOperation.getRecordById(
@@ -69,6 +70,7 @@ public class UserBulkMigrationActorTest {
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     TelemetryWriter.write(Mockito.any());
+
     system = ActorSystem.create("system");
   }
 
@@ -162,5 +164,20 @@ public class UserBulkMigrationActorTest {
     list.add(bulkUploadProcessMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
+  }
+
+  private Map<String, Map<String, Object>> getTenantConfig() {
+    Map<String, Map<String, Object>> tenantConfig = new HashMap<>();
+    Map<String, Object> keyConfig = new HashMap<>();
+    String data =
+        "{\"templateName\":\"defaultTemplate\",\"action\":\"update\",\"private\":[\"declared-phone\",\"declared-email\"],"
+            + "\"aliases\":{\"Diksha UUID\":\"userId\",\"Status\":\"input status\",\"State provided ext. ID\":\"userExternalId\",\"Channel\":\"channel\","
+            + "\"Org ID\":\"orgId\",\"Persona\":\"persona\",\"Phone number\":\"phone\",\"Email ID\":\"email\",\"School Name\":\"schoolName\","
+            + "\"School UDISE ID\":\"schoolUdiseId\",\"Diksha Sub-Org ID\":\"subOrgId\",\"Error Type\":\"errorType\"},\"mandatoryFields\":[\"Diksha UUID\","
+            + "\"Status\",\"State provided ext. ID\",\"Channel\",\"Org ID\",\"Persona\"],\"optionalFields\":[\"School Name\",\"School UDISE ID\",\"Email ID\","
+            + "\"Phone number\",\"Diksha Sub-Org ID\",\"Error Type\"]}";
+    keyConfig.put(JsonKey.SELF_DECLARATIONS, data);
+    tenantConfig.put(JsonKey.ALL, keyConfig);
+    return tenantConfig;
   }
 }
