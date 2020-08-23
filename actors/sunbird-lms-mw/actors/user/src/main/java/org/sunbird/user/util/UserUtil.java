@@ -1,5 +1,6 @@
 package org.sunbird.user.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
@@ -909,6 +910,55 @@ public class UserUtil {
             });
   }
 
+  /**
+   * Get Tenant Private Fields mapped to OrgId and role
+   *
+   * @param orgId
+   * @param key
+   * @return
+   */
+  public static Set<String> getTenantPrivateFields(String orgId, String key) {
+    Set<String> privateFieldsSet = new HashSet<>();
+    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
+    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
+    if (MapUtils.isNotEmpty(roleConfigMap)) {
+      String data = (String) roleConfigMap.get(key);
+      Map<String, Object> dataConfigMap = new HashMap<>();
+      try {
+        dataConfigMap = mapper.readValue(data, Map.class);
+      } catch (JsonProcessingException e) {
+        ProjectLogger.log("Error getting Private fields");
+      }
+      List<String> privateFields = (List<String>) dataConfigMap.get(JsonKey.PRIVATE);
+      if (CollectionUtils.isNotEmpty(privateFields)) {
+        privateFieldsSet.addAll(privateFields);
+      }
+    }
+    return privateFieldsSet;
+  }
+
+  /**
+   * Get All Private Fields mapped to OrgId
+   *
+   * @param orgId
+   * @return
+   */
+  public static Set<String> getTenantPrivateFields(String orgId) {
+    Set<String> privateFieldsSet = new HashSet<>();
+    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
+    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
+    if (MapUtils.isNotEmpty(roleConfigMap)) {
+      for (Map.Entry<String, Object> keyEntry : roleConfigMap.entrySet()) {
+        Map<String, Object> data = (Map<String, Object>) keyEntry.getValue();
+        List<String> privateFields = (List<String>) data.get(JsonKey.PRIVATE);
+        if (CollectionUtils.isNotEmpty(privateFieldsSet)) {
+          privateFieldsSet.addAll(privateFields);
+        }
+      }
+    }
+    return privateFieldsSet;
+  }
+
   public static Map<String, Object> validateManagedByUser(String managedBy) {
     Future<Map<String, Object>> managedByInfoF =
         esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy);
@@ -1067,12 +1117,13 @@ public class UserUtil {
 
   public static void encryptDeclarationFields(List<Map<String, Object>> declarations)
       throws Exception {
+    Set<String> privateFieldsSet = getTenantPrivateFields(JsonKey.ALL, JsonKey.SELF_DECLARATIONS);
     for (Map<String, Object> declareFields : declarations) {
       Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
       for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
         String key = userInfo.getKey();
         String value = (String) userInfo.getValue();
-        if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
+        if (privateFieldsSet.contains(key)) {
           userInfoMap.put(key, encryptionService.encryptData(value));
         }
       }

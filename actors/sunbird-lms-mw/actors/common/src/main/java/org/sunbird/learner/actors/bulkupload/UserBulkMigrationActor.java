@@ -24,6 +24,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
+import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -89,17 +90,24 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
 
     request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     BulkMigrationUser migrationUser = null;
+
     if (request
         .getOperation()
         .equals(BulkUploadActorOperation.USER_BULK_SELF_DECLARED.getValue())) {
-      PropertiesCache propertiesCache = PropertiesCache.getInstance();
+      /* PropertiesCache propertiesCache = PropertiesCache.getInstance();
       String mandatoryFields = propertiesCache.getProperty(JsonKey.SELF_DECLARED_MANDATORY_FIELDS);
-      String optionalFields = propertiesCache.getProperty(JsonKey.SELF_DECLARED_OPTIONAL_FIELDS);
+      String optionalFields = propertiesCache.getProperty(JsonKey.SELF_DECLARED_OPTIONAL_FIELDS);*/
+      List<String> mandatoryFields =
+          UserUtility.getTenantMandatoryFields(JsonKey.ALL, JsonKey.SELF_DECLARATIONS);
+      List<String> optionalFields =
+          UserUtility.getTenantOptionalFields(JsonKey.ALL, JsonKey.SELF_DECLARATIONS);
+      Map<String, String> aliasFields = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+      aliasFields.putAll(UserUtility.getTenantAliasFields(JsonKey.ALL, JsonKey.SELF_DECLARATIONS));
       Map fieldsMap = new HashMap();
-      fieldsMap.put("mandatoryFields", Arrays.asList(mandatoryFields.split(",")));
-      fieldsMap.put("optionalFields", Arrays.asList(optionalFields.split(",")));
+      fieldsMap.put("mandatoryFields", mandatoryFields);
+      fieldsMap.put("optionalFields", optionalFields);
       List<SelfDeclaredUser> selfDeclaredUserList =
-          getUsers(processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
+          getUsers(processId, (byte[]) data.get(JsonKey.FILE), fieldsMap, aliasFields);
       ProjectLogger.log(
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(selfDeclaredUserList.size() + "")
@@ -285,7 +293,10 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> getUsers(
-      String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
+      String processId,
+      byte[] fileData,
+      Map<String, List<String>> columnsMap,
+      Map<String, String> aliasesFields) {
     List<String[]> csvData = readCsv(fileData);
     List<String> csvHeaders = getCsvHeadersAsList(csvData);
     List<String> mandatoryHeaders = columnsMap.get(JsonKey.MANDATORY_FIELDS);
@@ -293,7 +304,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     mandatoryHeaders.replaceAll(String::toLowerCase);
     supportedHeaders.replaceAll(String::toLowerCase);
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
-    List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders);
+    List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders, aliasesFields);
     List<SelfDeclaredUser> selfDeclaredUserList =
         parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
     ShadowUserUpload migration =
@@ -356,6 +367,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
 
   private List<String> mapCsvColumn(List<String> csvColumns) {
     List<String> mappedColumns = new ArrayList<>();
+
     csvColumns.forEach(
         column -> {
           if (column.equalsIgnoreCase(JsonKey.EMAIL)) {
@@ -380,48 +392,12 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     return mappedColumns;
   }
 
-  private List<String> mapSelfDeclaredCsvColumn(List<String> csvColumns) {
+  private List<String> mapSelfDeclaredCsvColumn(
+      List<String> csvColumns, Map<String, String> aliasFields) {
     List<String> mappedColumns = new ArrayList<>();
     csvColumns.forEach(
         column -> {
-          switch (column) {
-            case "email id":
-              mappedColumns.add(JsonKey.EMAIL);
-              break;
-            case "phone number":
-              mappedColumns.add(JsonKey.PHONE);
-              break;
-            case "state provided ext. id":
-              mappedColumns.add(JsonKey.USER_EXTERNAL_ID);
-              break;
-            case "status":
-              mappedColumns.add(JsonKey.INPUT_STATUS);
-              break;
-            case "diksha uuid":
-              mappedColumns.add(JsonKey.USER_ID);
-              break;
-            case "channel":
-              mappedColumns.add(column);
-              break;
-            case "school name":
-              mappedColumns.add("schoolName");
-              break;
-            case "school udise id":
-              mappedColumns.add("schoolUdiseId");
-              break;
-            case "diksha sub-org id":
-              mappedColumns.add("subOrgId");
-              break;
-            case "org id":
-              mappedColumns.add(JsonKey.ORG_ID);
-              break;
-            case "persona":
-              mappedColumns.add(column);
-              break;
-            case "error type":
-              mappedColumns.add(JsonKey.ERROR_TYPE);
-            default:
-          }
+          mappedColumns.add(aliasFields.get(column));
         });
     return mappedColumns;
   }

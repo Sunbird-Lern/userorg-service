@@ -57,6 +57,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
+import scala.annotation.meta.param;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -388,28 +389,22 @@ public class UserManagementActor extends BaseActor {
     List<Map<String, Object>> extList =
         (List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS);
     if (!(extList == null || extList.isEmpty())) {
+      Set<String> privateFieldsSet =
+          UserUtil.getTenantPrivateFields(JsonKey.ALL, JsonKey.SELF_DECLARATIONS);
       extList.forEach(
           map -> {
             try {
               String idType = (String) map.get(JsonKey.ID_TYPE);
-              switch (idType) {
-                case JsonKey.DECLARED_EMAIL:
-                case JsonKey.DECLARED_PHONE:
-                  /* Check whether email and phone contains mask value, if mask then copy the
-                      encrypted value from user table
-                  * */
-                  if (UserUtility.isMasked((String) map.get(JsonKey.ID))) {
-                    if (idType.equals(JsonKey.DECLARED_EMAIL)) {
-                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.EMAIL));
-                    } else {
-                      map.put(JsonKey.ID, userDbRecords.get(JsonKey.PHONE));
-                    }
+              if (privateFieldsSet.contains(idType)) {
+                if (UserUtility.isMasked((String) map.get(JsonKey.ID))) {
+                  if (idType.equals(JsonKey.DECLARED_EMAIL)) {
+                    map.put(JsonKey.ID, userDbRecords.get(JsonKey.EMAIL));
                   } else {
-                    // If not masked encrypt the plain text
-                    map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+                    map.put(JsonKey.ID, userDbRecords.get(JsonKey.PHONE));
                   }
-                  break;
-                default: // do nothing
+                } else {
+                  map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
+                }
               }
 
             } catch (Exception e) {

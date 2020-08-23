@@ -39,6 +39,7 @@ public class DataCacheHandler implements Runnable {
   private static Response roleCacheResponse;
   private static List<String> sunbirdPluginTableList = null;
   private static Map<String, Integer> orderMap;
+  private static Map<String, Map<String, Object>> tenantConfigMap;
   public static String[] bulkUserAllowedFields = {
     JsonKey.FIRST_NAME,
     JsonKey.LAST_NAME,
@@ -91,7 +92,35 @@ public class DataCacheHandler implements Runnable {
     cacheTelemetryPdata(telemetryPdata);
     createSunbirdPluginTableList();
     initLocationOrderMap();
+    cacheTenantConfig();
     ProjectLogger.log("DataCacheHandler:run: Cache refresh completed.", LoggerEnum.INFO.name());
+  }
+
+  private void cacheTenantConfig() {
+    if (null == tenantConfigMap) {
+      tenantConfigMap = new HashMap<>();
+    }
+    Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.TENANT_PREFERENCE_V2);
+    Response response =
+        cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName());
+    ProjectLogger.log(
+        "DataCacheHandler:cacheTenantConfig: Cache Tenant preference fields" + response.getResult(),
+        LoggerEnum.INFO.name());
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    if (null != responseList && !responseList.isEmpty()) {
+      for (Map<String, Object> resultMap : responseList) {
+        if (tenantConfigMap.containsKey(resultMap.get(JsonKey.ORG_ID))) {
+          Map<String, Object> tenantRoleConfigMap =
+              tenantConfigMap.get(resultMap.get(JsonKey.ORG_ID));
+          tenantRoleConfigMap.put((String) resultMap.get(JsonKey.KEY), resultMap.get(JsonKey.DATA));
+        } else {
+          Map<String, Object> tenantRoleConfigMap = new HashMap<>();
+          tenantRoleConfigMap.put((String) resultMap.get(JsonKey.KEY), resultMap.get(JsonKey.DATA));
+          tenantConfigMap.put((String) resultMap.get(JsonKey.ORG_ID), tenantRoleConfigMap);
+        }
+      }
+    }
   }
 
   private void initLocationOrderMap() {
@@ -272,5 +301,9 @@ public class DataCacheHandler implements Runnable {
 
   public static Map<String, Integer> getLocationOrderMap() {
     return orderMap;
+  }
+
+  public static Map<String, Map<String, Object>> getTenantConfigMap() {
+    return tenantConfigMap;
   }
 }

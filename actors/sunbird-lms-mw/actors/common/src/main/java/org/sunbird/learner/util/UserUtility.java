@@ -1,9 +1,9 @@
 package org.sunbird.learner.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
@@ -29,6 +29,7 @@ public final class UserUtility {
   private static DataMaskingService maskingService;
   private static List<String> phoneMaskedAttributes;
   private static List<String> emailMaskedAttributes;
+  private static ObjectMapper mapper;
 
   static {
     init();
@@ -108,9 +109,10 @@ public final class UserUtility {
     return userMap;
   }
 
-  public static boolean isMasked(String data){
+  public static boolean isMasked(String data) {
     return maskingService.isMasked(data);
   }
+
   public static Map<String, Object> decryptUserDataFrmES(Map<String, Object> userMap) {
     DecryptionService service = ServiceFactory.getDecryptionServiceInstance(null);
     // Decrypt user basic info
@@ -136,6 +138,78 @@ public final class UserUtility {
       }
     }
     return userMap;
+  }
+
+  /**
+   * Get Tenant Mandatory Fields mapped to OrgId and role
+   *
+   * @param orgId
+   * @param key
+   * @return
+   */
+  public static List<String> getTenantMandatoryFields(String orgId, String key) {
+    List<String> mandatoryFields = new ArrayList<>();
+    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
+    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
+    if (MapUtils.isNotEmpty(roleConfigMap)) {
+      String data = (String) roleConfigMap.get(key);
+      Map<String, Object> dataConfigMap = new HashMap<>();
+      try {
+        dataConfigMap = mapper.readValue(data, Map.class);
+      } catch (JsonProcessingException e) {
+        ProjectLogger.log("Error getting Mandatory fields");
+      }
+      mandatoryFields = (List<String>) dataConfigMap.get(JsonKey.MANDATORY_FIELDS);
+    }
+    return mandatoryFields;
+  }
+
+  /**
+   * Get Tenant Optional Fields mapped to OrgId and role
+   *
+   * @param orgId
+   * @param key
+   * @return
+   */
+  public static List<String> getTenantOptionalFields(String orgId, String key) {
+    List<String> optionalFields = new ArrayList<>();
+    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
+    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
+    if (MapUtils.isNotEmpty(roleConfigMap)) {
+      String data = (String) roleConfigMap.get(key);
+      Map<String, Object> dataConfigMap = new HashMap<>();
+      try {
+        dataConfigMap = mapper.readValue(data, Map.class);
+      } catch (JsonProcessingException e) {
+        ProjectLogger.log("Error getting optional fields");
+      }
+      optionalFields = (List<String>) dataConfigMap.get(JsonKey.OPTIONAL_FIELDS);
+    }
+    return optionalFields;
+  }
+
+  /**
+   * Get Tenant aliases mapped to OrgId and role
+   *
+   * @param orgId
+   * @param key
+   * @return
+   */
+  public static Map<String, String> getTenantAliasFields(String orgId, String key) {
+    Map<String, String> aliasFieldsMap = new HashMap<>();
+    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
+    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
+    if (MapUtils.isNotEmpty(roleConfigMap)) {
+      String data = (String) roleConfigMap.get(key);
+      Map<String, Object> dataConfigMap = new HashMap<>();
+      try {
+        dataConfigMap = mapper.readValue(data, Map.class);
+      } catch (JsonProcessingException e) {
+        ProjectLogger.log("Error getting Alias fields");
+      }
+      aliasFieldsMap = (Map<String, String>) dataConfigMap.get(JsonKey.ALIASES);
+    }
+    return aliasFieldsMap;
   }
 
   public static List<Map<String, Object>> decryptUserAddressData(
@@ -223,5 +297,7 @@ public final class UserUtility {
     ProjectLogger.log(
         "UserUtility:init:phone masked attributes got".concat(phoneTypeAttributeKey + ""),
         LoggerEnum.INFO.name());
+
+    mapper = new ObjectMapper();
   }
 }
