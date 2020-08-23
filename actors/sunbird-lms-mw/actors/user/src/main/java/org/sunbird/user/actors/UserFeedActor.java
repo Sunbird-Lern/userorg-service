@@ -9,6 +9,7 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
@@ -26,24 +27,24 @@ public class UserFeedActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
+    RequestContext context = request.getRequestContext();
     String operation = request.getOperation();
     if (ActorOperations.GET_USER_FEED_BY_ID.getValue().equalsIgnoreCase(operation)) {
-      ProjectLogger.log(
-          "UserFeedActor:onReceive getUserFeed method called", LoggerEnum.INFO.name());
+      logger.info(context, "UserFeedActor:onReceive getUserFeed method called");
       String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-      getUserFeed(userId);
+      getUserFeed(userId, context);
     } else {
       onReceiveUnsupportedOperation("UserFeedActor");
     }
   }
 
-  private void getUserFeed(String userId) {
+  private void getUserFeed(String userId, RequestContext context) {
     IFeedService feedService = FeedFactory.getInstance();
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.USER_ID, userId);
     SearchDTO search = new SearchDTO();
     search.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Response userFeedResponse = feedService.search(search, null);
+    Response userFeedResponse = feedService.search(search, context);
     Map<String, Object> result =
         (Map<String, Object>) userFeedResponse.getResult().get(JsonKey.RESPONSE);
     result.put(

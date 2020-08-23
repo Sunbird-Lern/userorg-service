@@ -117,7 +117,7 @@ public class UserRoleActor extends UserBaseActor {
           organisationId,
           actorMessage.getRequestContext());
     } else {
-      ProjectLogger.log("UserRoleActor: No ES call to save user roles");
+      logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
     }
     generateTelemetryEvent(requestMap, userId, "userLevel", actorMessage.getContext());
   }
