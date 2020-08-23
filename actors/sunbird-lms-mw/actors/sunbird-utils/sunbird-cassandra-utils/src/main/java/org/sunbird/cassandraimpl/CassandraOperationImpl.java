@@ -64,7 +64,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           || e.getMessage().contains(JsonKey.UNDEFINED_IDENTIFIER)) {
         logger.error(
             context,
-            "Exception occured while inserting record to " + tableName + " : " + e.getMessage(),
+            "Exception occurred while inserting record to " + tableName + " : " + e.getMessage(),
             e);
         throw new ProjectCommonException(
             ResponseCode.invalidPropertyError.getErrorCode(),

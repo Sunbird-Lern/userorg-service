@@ -22,11 +22,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -46,6 +42,8 @@ import util.Attrs;
  * @author Manzarul
  */
 public class BaseController extends Controller {
+
+  private static LoggerUtil logger = new LoggerUtil(BaseController.class);
 
   private static ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
@@ -573,16 +571,21 @@ public class BaseController extends Controller {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
             setGlobalHealthFlag(result);
           }
-
+          logger.info(
+              request.getRequestContext(),
+              "actorResponseHandler: called for actor operation :" + request.getOperation());
           if (result instanceof Response) {
             Response response = (Response) result;
             if (ResponseCode.OK.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got response");
               return createCommonResponse(response, responseKey, httpReq);
             } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got client error");
               return createClientErrorResponse(httpReq, (ClientErrorResponse) response);
             } else if (result instanceof ProjectCommonException) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got exception");
               return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
             } else if (result instanceof File) {
               return createFileDownloadResponse((File) result);
