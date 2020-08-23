@@ -7,9 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.querybuilder.*;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -22,8 +20,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.CassandraUtil;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
@@ -63,7 +63,8 @@ import org.sunbird.helper.ServiceFactory;
   Select.SelectionOrAlias.class,
   CassandraConnectionManagerImpl.class,
   PropertiesCache.class,
-  CassandraOperationImpl.class
+  CassandraOperationImpl.class,
+  CassandraUtil.class
 })
 @PowerMockIgnore("javax.management.*")
 public class CassandraOperationImplTest {
@@ -313,5 +314,40 @@ public class CassandraOperationImplTest {
     assertTrue(
         (((ProjectCommonException) exception).getResponseCode())
             == ResponseCode.SERVER_ERROR.getResponseCode());
+  }
+
+  @Test
+  public void testGetRecordByPropertySuccess() {
+
+    List<Object> list = new ArrayList<>();
+    list.add("123");
+    list.add("321");
+
+    when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
+    PowerMockito.mockStatic(QueryBuilder.class);
+    Select.Builder selectBuilder = PowerMockito.mock(Select.Builder.class);
+    Select.Selection selectSelection = PowerMockito.mock(Select.Selection.class);
+    when(QueryBuilder.select()).thenReturn(selectSelection);
+    when(selectSelection.all()).thenReturn(selectBuilder);
+    Select select = PowerMockito.mock(Select.class);
+    when(selectBuilder.from(Mockito.anyString(), Mockito.anyString())).thenReturn(select);
+    Select.Where selectWhere = PowerMockito.mock(Select.Where.class);
+    when(select.where(QueryBuilder.in(Mockito.anyString(), Mockito.anyList())))
+        .thenReturn(selectWhere);
+
+    Session session = PowerMockito.mock(Session.class);
+    ResultSet resultSet = PowerMockito.mock(ResultSet.class);
+    when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
+
+    when(session.execute(selectWhere)).thenReturn(resultSet);
+
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+
+    Iterator<Row> rowItr = Mockito.mock(Iterator.class);
+    Mockito.when(resultSet.iterator()).thenReturn(rowItr);
+    PowerMockito.mockStatic(CassandraUtil.class);
+    when(CassandraUtil.createResponse(resultSet)).thenReturn(new Response());
+    cassandraOperation.getRecordsByProperty("sunbird", "address1", JsonKey.ID, list, null);
+    assertTrue(true);
   }
 }
