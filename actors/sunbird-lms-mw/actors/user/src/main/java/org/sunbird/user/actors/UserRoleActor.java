@@ -13,6 +13,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
@@ -63,12 +64,12 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    ProjectLogger.log("UserRoleActor: assignRoles called");
+    logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRoles called");
 
     Map<String, Object> requestMap = actorMessage.getRequest();
     RoleService.validateRoles((List<String>) requestMap.get(JsonKey.ROLES));
 
-    boolean orgNotFound = initializeHashTagIdFromOrg(requestMap);
+    boolean orgNotFound = initializeHashTagIdFromOrg(requestMap, actorMessage.getRequestContext());
     if (orgNotFound) return;
 
     String userId = (String) requestMap.get(JsonKey.USER_ID);
@@ -82,7 +83,7 @@ public class UserRoleActor extends UserBaseActor {
     searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
     Response res =
         cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, null);
+            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, actorMessage.getRequestContext());
     List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
     List<Map<String, Object>> responseList = new ArrayList<>();
     dataList
@@ -106,17 +107,23 @@ public class UserRoleActor extends UserBaseActor {
     UserOrg userOrg = prepareUserOrg(requestMap, hashTagId, userOrgDBMap);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
 
-    Response response = userOrgDao.updateUserOrg(userOrg, null);
+    Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(requestMap, JsonKey.ORGANISATION, userId, organisationId);
+      syncUserRoles(
+          requestMap,
+          JsonKey.ORGANISATION,
+          userId,
+          organisationId,
+          actorMessage.getRequestContext());
     } else {
       ProjectLogger.log("UserRoleActor: No ES call to save user roles");
     }
     generateTelemetryEvent(requestMap, userId, "userLevel", actorMessage.getContext());
   }
 
-  private boolean initializeHashTagIdFromOrg(Map<String, Object> requestMap) {
+  private boolean initializeHashTagIdFromOrg(
+      Map<String, Object> requestMap, RequestContext context) {
 
     String externalId = (String) requestMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) requestMap.get(JsonKey.PROVIDER);
@@ -130,12 +137,12 @@ public class UserRoleActor extends UserBaseActor {
 
       organisation =
           orgClient.getOrgById(
-              getActorRef(ActorOperations.GET_ORG_DETAILS.getValue()), organisationId, null);
+              getActorRef(ActorOperations.GET_ORG_DETAILS.getValue()), organisationId, context);
       if (organisation != null) {
         requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());
       }
     } else {
-      organisation = orgClient.esGetOrgByExternalId(externalId, provider, null);
+      organisation = orgClient.esGetOrgByExternalId(externalId, provider, context);
       if (organisation != null) {
         requestMap.put(JsonKey.ORGANISATION_ID, organisation.getId());
         requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());
@@ -188,20 +195,26 @@ public class UserRoleActor extends UserBaseActor {
   }
 
   private void syncUserRoles(
-      Map<String, Object> tempMap, String type, String userid, String orgId) {
-    ProjectLogger.log("UserRoleActor: syncUserRoles called");
+      Map<String, Object> tempMap,
+      String type,
+      String userid,
+      String orgId,
+      RequestContext context) {
+    logger.info(context, "UserRoleActor: syncUserRoles called");
 
     Request request = new Request();
+    request.setRequestContext(context);
     request.setOperation(ActorOperations.UPDATE_USER_ROLES_ES.getValue());
     request.getRequest().put(JsonKey.ROLES, tempMap.get(JsonKey.ROLES));
     request.getRequest().put(JsonKey.TYPE, type);
     request.getRequest().put(JsonKey.USER_ID, userid);
     request.getRequest().put(JsonKey.ORGANISATION_ID, orgId);
-    ProjectLogger.log("UserRoleActor:syncUserRoles: Syncing to ES");
+    logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     try {
       tellToAnother(request);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserRoleActor:syncUserRoles: Exception occurred with error message = " + ex.getMessage(),
           ex);
     }
