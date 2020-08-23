@@ -177,4 +177,105 @@ public class CassandraOperationImplTest {
       assertEquals("Invalid property xyz.", ex.getMessage());
     }
   }
+
+  @Test
+  public void testUpdateRecordSuccess() throws Exception {
+    Map<String, Object> address = new HashMap<>();
+    address.put("id", "1234567890");
+    address.put("addrLine1", "Line 1");
+    address.put("addrLine2", "Line 2");
+
+    when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
+
+    Session session = PowerMockito.mock(Session.class);
+    ResultSet resultSet = PowerMockito.mock(ResultSet.class);
+    when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
+    PreparedStatement statement = PowerMockito.mock(PreparedStatement.class);
+    when(session.prepare(Mockito.anyString())).thenReturn(statement);
+
+    BoundStatement boundStatement = PowerMockito.mock(BoundStatement.class);
+    PowerMockito.whenNew(BoundStatement.class).withAnyArguments().thenReturn(boundStatement);
+    when(statement.bind()).thenReturn(boundStatement);
+
+    session.execute(Mockito.any(BoundStatement.class));
+
+    when(session.execute(boundStatement.bind(Mockito.any()))).thenReturn(resultSet);
+
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+
+    Response response = cassandraOperation.updateRecord("sunbird", "address1", address, null);
+    assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+  }
+
+  @Test
+  public void testUpdateRecordDBUpdateError() throws Exception {
+    Map<String, Object> address = new HashMap<>();
+    address.put("id", "1234567890");
+    address.put("addrLine1", "Line 1");
+    address.put("addrLine2", "Line 2");
+
+    when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
+
+    Session session = PowerMockito.mock(Session.class);
+    ResultSet resultSet = PowerMockito.mock(ResultSet.class);
+    when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
+    PreparedStatement statement = PowerMockito.mock(PreparedStatement.class);
+    when(session.prepare(Mockito.anyString())).thenReturn(statement);
+
+    BoundStatement boundStatement = PowerMockito.mock(BoundStatement.class);
+    PowerMockito.whenNew(BoundStatement.class).withAnyArguments().thenReturn(boundStatement);
+    when(statement.bind()).thenReturn(boundStatement);
+
+    session.execute(Mockito.any(BoundStatement.class));
+
+    when(session.execute(boundStatement.bind(Mockito.any())))
+        .thenThrow(
+            new ProjectCommonException(
+                ResponseCode.dbUpdateError.getErrorCode(),
+                ResponseCode.dbUpdateError.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode()));
+
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+
+    try {
+      cassandraOperation.updateRecord("sunbird", "address1", address, null);
+    } catch (Exception ex) {
+      assertEquals("Db update operation failed.", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateRecordFailureUnKnownIdentifierError() throws Exception {
+    Map<String, Object> address = new HashMap<>();
+    address.put("id", "1234567890");
+    address.put("addrLine1", "Line 1");
+    address.put("addrLine2", "Line 2");
+
+    when(CassandraConnectionMngrFactory.getInstance()).thenReturn(connectionManager);
+
+    Session session = PowerMockito.mock(Session.class);
+    ResultSet resultSet = PowerMockito.mock(ResultSet.class);
+    when(connectionManager.getSession(Mockito.anyString())).thenReturn(session);
+    PreparedStatement statement = PowerMockito.mock(PreparedStatement.class);
+    when(session.prepare(Mockito.anyString())).thenReturn(statement);
+
+    BoundStatement boundStatement = PowerMockito.mock(BoundStatement.class);
+    PowerMockito.whenNew(BoundStatement.class).withAnyArguments().thenReturn(boundStatement);
+    when(statement.bind()).thenReturn(boundStatement);
+
+    session.execute(Mockito.any(BoundStatement.class));
+    Exception e =
+        new ProjectCommonException(
+            "Undefined column name xyz",
+            "Undefined column name xyz",
+            ResponseCode.SERVER_ERROR.getResponseCode());
+    when(session.execute(boundStatement.bind(Mockito.any()))).thenThrow(e);
+
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    try {
+      cassandraOperation.updateRecord("sunbird", "address1", address, null);
+    } catch (Exception ex) {
+      assertEquals("Invalid property xyz.", ex.getMessage());
+    }
+  }
 }
