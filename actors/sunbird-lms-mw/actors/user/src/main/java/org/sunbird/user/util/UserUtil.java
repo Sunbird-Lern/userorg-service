@@ -937,28 +937,6 @@ public class UserUtil {
     return privateFieldsSet;
   }
 
-  /**
-   * Get All Private Fields mapped to OrgId
-   *
-   * @param orgId
-   * @return
-   */
-  public static Set<String> getTenantPrivateFields(String orgId) {
-    Set<String> privateFieldsSet = new HashSet<>();
-    Map<String, Map<String, Object>> tenantConfigMap = DataCacheHandler.getTenantConfigMap();
-    Map<String, Object> roleConfigMap = tenantConfigMap.get(orgId);
-    if (MapUtils.isNotEmpty(roleConfigMap)) {
-      for (Map.Entry<String, Object> keyEntry : roleConfigMap.entrySet()) {
-        Map<String, Object> data = (Map<String, Object>) keyEntry.getValue();
-        List<String> privateFields = (List<String>) data.get(JsonKey.PRIVATE);
-        if (CollectionUtils.isNotEmpty(privateFieldsSet)) {
-          privateFieldsSet.addAll(privateFields);
-        }
-      }
-    }
-    return privateFieldsSet;
-  }
-
   public static Map<String, Object> validateManagedByUser(String managedBy) {
     Future<Map<String, Object>> managedByInfoF =
         esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy);

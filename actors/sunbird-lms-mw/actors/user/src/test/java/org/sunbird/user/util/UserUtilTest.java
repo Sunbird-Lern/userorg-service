@@ -5,10 +5,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.dispatch.Futures;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,7 +74,7 @@ public class UserUtilTest {
             JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400"))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
-
+    when(DataCacheHandler.getTenantConfigMap()).thenReturn(getTenantConfig());
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -375,5 +372,20 @@ public class UserUtilTest {
           "Invalid value provider for parameter channel1004. Please provide a valid value.",
           ex.getMessage());
     }
+  }
+
+  private Map<String, Map<String, Object>> getTenantConfig() {
+    Map<String, Map<String, Object>> tenantConfig = new HashMap<>();
+    Map<String, Object> keyConfig = new HashMap<>();
+    String data =
+        "{\"templateName\":\"defaultTemplate\",\"action\":\"update\",\"private\":[\"declared-phone\",\"declared-email\"],"
+            + "\"aliases\":{\"Diksha UUID\":\"userId\",\"Status\":\"input status\",\"State provided ext. ID\":\"userExternalId\",\"Channel\":\"channel\","
+            + "\"Org ID\":\"orgId\",\"Persona\":\"persona\",\"Phone number\":\"phone\",\"Email ID\":\"email\",\"School Name\":\"schoolName\","
+            + "\"School UDISE ID\":\"schoolUdiseId\",\"Diksha Sub-Org ID\":\"subOrgId\",\"Error Type\":\"errorType\"},\"mandatoryFields\":[\"Diksha UUID\","
+            + "\"Status\",\"State provided ext. ID\",\"Channel\",\"Org ID\",\"Persona\"],\"optionalFields\":[\"School Name\",\"School UDISE ID\",\"Email ID\","
+            + "\"Phone number\",\"Diksha Sub-Org ID\",\"Error Type\"]}";
+    keyConfig.put(JsonKey.SELF_DECLARATIONS, data);
+    tenantConfig.put(JsonKey.ALL, keyConfig);
+    return tenantConfig;
   }
 }
