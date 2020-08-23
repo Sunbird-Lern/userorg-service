@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -42,10 +41,10 @@ public class DeclaredExternalIdActor extends BaseActor {
     response.setResponseCode(ResponseCode.OK);
     Map requestMap = request.getRequest();
     String processId = (String) requestMap.get(JsonKey.PROCESS_ID);
+    String rootOrgId = (String) requestMap.get(JsonKey.ROOT_ORG_ID);
     Map<String, Object> row = UserUploadUtil.getFullRecordFromProcessId(processId);
     BulkMigrationUser bulkMigrationUser = UserUploadUtil.convertRowToObject(row);
     List<SelfDeclaredUser> userList = UserUploadUtil.getMigrationUserAsList(bulkMigrationUser);
-    String orgId = getOrgIdByChannel(userList.get(0).getChannel());
     userList
         .parallelStream()
         .forEach(
@@ -53,7 +52,7 @@ public class DeclaredExternalIdActor extends BaseActor {
               // add entry in usr_external_id
               // modify status to validated to user_declarations
               // call to migrate api
-              migrateUser.setOrgId(orgId);
+              migrateUser.setOrgId(rootOrgId);
               if (migrateUser.getPersona().equals(JsonKey.TEACHER_PERSONA)) {
                 switch (migrateUser.getInputStatus()) {
                   case JsonKey.VALIDATED:
@@ -77,18 +76,6 @@ public class DeclaredExternalIdActor extends BaseActor {
             + "is completed",
         LoggerEnum.INFO.name());
     sender().tell(response, self());
-  }
-
-  private String getOrgIdByChannel(String channel) {
-    OrganisationClient organisationClient = new OrganisationClientImpl();
-
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.CHANNEL, channel);
-    if (CollectionUtils.isNotEmpty(organisationClient.esSearchOrgByFilter(filters))) {
-      Organisation organisation = organisationClient.esSearchOrgByFilter(filters).get(0);
-      return organisation.getId();
-    }
-    return null;
   }
 
   private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {

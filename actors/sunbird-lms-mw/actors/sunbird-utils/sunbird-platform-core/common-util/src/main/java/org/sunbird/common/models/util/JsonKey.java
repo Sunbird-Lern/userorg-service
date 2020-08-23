@@ -1067,13 +1067,14 @@ public final class JsonKey {
   public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";
   public static final String SELF_DECLARED_USER_OBJECT = "SELF_DECLARED_USER";
   public static final String DIKSHA_UUID = "Diksha UUID";
+  public static final String STATE_PROVIDED_EXT_ID = "State provided ext. ID";
   public static final String USER_INFO = "userInfo";
   public static final String USR_DECLARATION_TABLE = "user_declarations";
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
   public static final String PERSONA = "persona";
-  //This denotes the persona of the user in self declaration and
-  //is different from role or user type = TEACHER
+  // This denotes the persona of the user in self declaration and
+  // is different from role or user type = TEACHER
   public static final String TEACHER_PERSONA = "teacher";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 
