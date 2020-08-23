@@ -1501,5 +1501,4 @@ public class UserRequestValidatorTest {
     frameworkMandatoryFields.add("id");
     return frameworkMandatoryFields;
   }
-
 }

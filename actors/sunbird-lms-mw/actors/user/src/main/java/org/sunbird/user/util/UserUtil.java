@@ -2,15 +2,9 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.stream.Collectors;
-
 import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -29,7 +23,6 @@ import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
@@ -163,6 +156,45 @@ public class UserUtil {
     }
   }
 
+  // Update channel info with orgId info
+  public static void updateExternalIdsProviderWithOrgId(Map<String, Object> userMap) {
+    if (MapUtils.isNotEmpty(userMap)) {
+      Set<String> providerSet = new HashSet<>();
+      List<Map<String, String>> extList =
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+      if (CollectionUtils.isNotEmpty(extList)) {
+        for (Map<String, String> extId : extList) {
+          providerSet.add(extId.get(JsonKey.PROVIDER));
+        }
+      }
+      Map<String, String> orgProviderMap =
+          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
+
+      if (CollectionUtils.isNotEmpty(
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
+        for (Map<String, String> externalId :
+            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
+
+          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          if (StringUtils.isBlank(orgId)) {
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                    JsonKey.PROVIDER,
+                    externalId.get(JsonKey.PROVIDER)));
+          }
+          if (null != externalId.get(JsonKey.PROVIDER)
+              && null != externalId.get(JsonKey.ID_TYPE)
+              && externalId.get(JsonKey.PROVIDER).equals(externalId.get(JsonKey.ID_TYPE))) {
+            externalId.put(JsonKey.ID_TYPE, orgId);
+          }
+          externalId.put(JsonKey.PROVIDER, orgId);
+        }
+      }
+    }
+  }
+
   public static void checkEmailUniqueness(String email) {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
@@ -251,7 +283,7 @@ public class UserUtil {
     String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
     String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-    return userExternalIdentityService.getUser(extId, provider, idType);
+    return userExternalIdentityService.getUserV2(extId, provider, idType);
   }
 
   public static String getUserId(Map<String, Object> userMap) {
@@ -265,12 +297,10 @@ public class UserUtil {
       String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
       String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
       String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
-      Map<String, String> providerOrgMap = new HashMap<>();
       if (StringUtils.isNotBlank(provider)
           && StringUtils.isNotBlank(extId)
           && StringUtils.isNotBlank(idType)) {
-        providerOrgMap = fetchOrgIdByProvider(Arrays.asList(provider));
-        userId = userExternalIdentityService.getUser(extId, providerOrgMap.get(provider), idType);
+        userId = userExternalIdentityService.getUserV1(extId, provider, idType);
       }
     }
     return userId;
@@ -354,6 +384,30 @@ public class UserUtil {
           externalIdMap.put(JsonKey.ORIGINAL_PROVIDER, externalIdMap.get(JsonKey.PROVIDER));
           externalIdMap.put(JsonKey.ORIGINAL_ID_TYPE, externalIdMap.get(JsonKey.ID_TYPE));
         });
+  }
+
+  /**
+   * Till 3.1.0 there will be only 1 provider will be active for a user in self declaration and user
+   * can migrate only to 1 state. Note: Need fix .If a user can be migrated to multiple states in
+   * future
+   *
+   * @param dbResExternalIds
+   */
+  public static void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
+      String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+      String provider = fetchProviderByOrgId(orgId);
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+    }
   }
 
   public static List<Map<String, String>> convertExternalIdsValueToLowerCase(
@@ -536,8 +590,8 @@ public class UserUtil {
   }
 
   public static String transliterateUserName(String userName) {
-      String translatedUserName = Junidecode.unidecode(userName);
-      return translatedUserName;
+    String translatedUserName = Junidecode.unidecode(userName);
+    return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
@@ -994,11 +1048,13 @@ public class UserUtil {
             esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
         Map<String, Object> esResOrg =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
-        List<Map<String, Object>> orgList =
-            (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
-        if (CollectionUtils.isNotEmpty(orgList)) {
-          for (Map<String, Object> org : orgList) {
-            providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+        if (MapUtils.isNotEmpty(esResOrg)) {
+          List<Map<String, Object>> orgList =
+              (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
+          if (CollectionUtils.isNotEmpty(orgList)) {
+            for (Map<String, Object> org : orgList) {
+              providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+            }
           }
         }
 
