@@ -158,6 +158,7 @@ public final class UserUtility {
         dataConfigMap = mapper.readValue(data, Map.class);
       } catch (JsonProcessingException e) {
         ProjectLogger.log("Error getting Mandatory fields");
+        return new ArrayList<>();
       }
       mandatoryFields = (List<String>) dataConfigMap.get(JsonKey.MANDATORY_FIELDS);
     }
@@ -182,6 +183,7 @@ public final class UserUtility {
         dataConfigMap = mapper.readValue(data, Map.class);
       } catch (JsonProcessingException e) {
         ProjectLogger.log("Error getting optional fields");
+        return new ArrayList<>();
       }
       optionalFields = (List<String>) dataConfigMap.get(JsonKey.OPTIONAL_FIELDS);
     }
@@ -206,6 +208,7 @@ public final class UserUtility {
         dataConfigMap = mapper.readValue(data, Map.class);
       } catch (JsonProcessingException e) {
         ProjectLogger.log("Error getting Alias fields");
+        return new HashMap<>();
       }
       aliasFieldsMap = (Map<String, String>) dataConfigMap.get(JsonKey.ALIASES);
     }

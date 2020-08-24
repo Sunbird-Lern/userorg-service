@@ -216,9 +216,6 @@ public class UserProfileReadActor extends BaseActor {
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String) result.get(JsonKey.MANAGED_BY);
-    managedBy = userId;
-    managedForId = userId;
-    requestedById = userId;
     ProjectLogger.log(
         "requested By and requested user id == "
             + requestedById
