@@ -21,7 +21,7 @@ public class LoggerUtil {
 
   public void info(RequestContext requestContext, String message) {
     if (null != requestContext) {
-      logger.info(message + ", RequestContext : " + requestContext.getContextMap());
+      logger.info(message + ", context : " + requestContext.getContextMap());
     } else {
       logger.info(message);
     }
