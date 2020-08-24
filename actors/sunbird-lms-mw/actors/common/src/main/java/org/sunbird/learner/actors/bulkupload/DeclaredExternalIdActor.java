@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.UserDeclareEntity;
 
 @ActorConfig(
@@ -37,6 +42,7 @@ public class DeclaredExternalIdActor extends BaseActor {
     response.setResponseCode(ResponseCode.OK);
     Map requestMap = request.getRequest();
     String processId = (String) requestMap.get(JsonKey.PROCESS_ID);
+    String rootOrgId = (String) requestMap.get(JsonKey.ROOT_ORG_ID);
     Map<String, Object> row =
         UserUploadUtil.getFullRecordFromProcessId(processId, request.getRequestContext());
     BulkMigrationUser bulkMigrationUser =
@@ -50,6 +56,7 @@ public class DeclaredExternalIdActor extends BaseActor {
               // add entry in usr_external_id
               // modify status to validated to user_declarations
               // call to migrate api
+              migrateUser.setOrgId(rootOrgId);
               if (migrateUser.getPersona().equals(JsonKey.TEACHER_PERSONA)) {
                 switch (migrateUser.getInputStatus()) {
                   case JsonKey.VALIDATED:
@@ -128,11 +135,16 @@ public class DeclaredExternalIdActor extends BaseActor {
     request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
     logger.info(request.getRequestContext(), "DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
+      if (StringUtils.isNotEmpty(declaredUser.getSubOrgId())) {
+        declaredUser.setOrgExternalId(
+            getOrgDetails(declaredUser.getSubOrgId(), request.getRequestContext()).getExternalId());
+      }
       Map<String, Object> requestMap = new HashMap();
       Map<String, String> externalIdMap = new HashMap();
       List<Map<String, String>> externalIdLst = new ArrayList();
       requestMap.put(JsonKey.USER_ID, declaredUser.getUserId());
       requestMap.put(JsonKey.CHANNEL, declaredUser.getChannel());
+      requestMap.put(JsonKey.ORG_EXTERNAL_ID, declaredUser.getSubOrgId());
       externalIdMap.put(JsonKey.ID, declaredUser.getUserExternalId());
       externalIdMap.put(JsonKey.ID_TYPE, declaredUser.getChannel());
       externalIdMap.put(JsonKey.PROVIDER, declaredUser.getChannel());
@@ -148,5 +160,10 @@ public class DeclaredExternalIdActor extends BaseActor {
               + declaredUser.getUserId(),
           e);
     }
+  }
+
+  private Organisation getOrgDetails(String subOrgId, RequestContext context) {
+    OrganisationClient organisationClient = new OrganisationClientImpl();
+    return organisationClient.esGetOrgById(subOrgId, context);
   }
 }
