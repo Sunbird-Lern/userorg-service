@@ -924,7 +924,7 @@ public class UserManagementActor extends BaseActor {
                   } catch (Exception e) {
                     logger.error(
                         actorMessage.getRequestContext(),
-                        "Error occured during update pasword : " + e.getMessage(),
+                        "Error occurred during update password : " + e.getMessage(),
                         e);
                     return false;
                   }

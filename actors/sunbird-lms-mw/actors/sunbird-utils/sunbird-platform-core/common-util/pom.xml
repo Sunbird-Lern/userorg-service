@@ -253,6 +253,11 @@
 			<artifactId>kafka-clients</artifactId>
 			<version>0.10.0.1</version>
 		</dependency>
+        <dependency>
+          <groupId>net.logstash.logback</groupId>
+          <artifactId>logstash-logback-encoder</artifactId>
+          <version>6.3</version>
+        </dependency>
 	</dependencies>
 
 	<repositories>
