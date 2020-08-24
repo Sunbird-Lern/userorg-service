@@ -308,7 +308,7 @@ public class UserBulkMigrationRequestValidatorTest {
           .validateDeclaredUsers();
     } catch (Exception e) {
       Assert.assertEquals(
-          "[ In Row 1:the Column status:is invalid, In Row 1:the Column Diksha UUID:is missing ]",
+          "[ In Row 1:the Column status:is invalid, In Row 1:the Column Diksha UUID:is missing, In Row 1:the Column persona:is missing ]",
           e.getMessage());
     }
   }
@@ -324,6 +324,7 @@ public class UserBulkMigrationRequestValidatorTest {
     declaredUser.setUserExternalId("user ext id");
     declaredUser.setInputStatus("INVALIDATED");
     declaredUser.setUserId("user ext id");
+    declaredUser.setPersona("teacher");
     declaredUserList.add(declaredUser);
     try {
       new ShadowUserUpload.ShadowUserUploadBuilder()
@@ -347,6 +348,7 @@ public class UserBulkMigrationRequestValidatorTest {
     declaredUser.setUserId("user ext id");
     declaredUser.setErrorType("INVALIDATED");
     declaredUser.setUserExternalId("user ext id");
+    declaredUser.setPersona("teacher");
     declaredUserList.add(declaredUser);
     try {
       new ShadowUserUpload.ShadowUserUploadBuilder()
