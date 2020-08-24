@@ -8,8 +8,11 @@
     <timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
     <!-- common transactions logs -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+          <level>INFO</level>
+        </filter>
         <encoder>
-            <pattern>%d %msg%n</pattern>
+            <pattern>[%date{ISO8601}] [%level] %logger{0}:%line [%X{sourceThread}] - %msg%n</pattern>
         </encoder>
     </appender>
 

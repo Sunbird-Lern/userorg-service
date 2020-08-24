@@ -35,7 +35,7 @@ import org.sunbird.helper.CassandraConnectionMngrFactory;
 public abstract class CassandraOperationImpl implements CassandraOperation {
 
   protected CassandraConnectionManager connectionManager;
-  protected LoggerUtil logger = new LoggerUtil(this.getClass());
+  private LoggerUtil logger = new LoggerUtil(CassandraOperationImpl.class);
 
   public CassandraOperationImpl() {
     connectionManager = CassandraConnectionMngrFactory.getInstance();

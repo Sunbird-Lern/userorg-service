@@ -17,10 +17,12 @@ import org.sunbird.common.CassandraUtil;
 import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class CassandraDACImpl extends CassandraOperationImpl {
+  private LoggerUtil logger = new LoggerUtil(CassandraDACImpl.class);
 
   public Response getRecords(
       String keySpace,

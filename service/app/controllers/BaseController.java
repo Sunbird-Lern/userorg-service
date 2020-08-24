@@ -566,14 +566,14 @@ public class BaseController extends Controller {
       String responseKey,
       Request httpReq) {
     setContextData(httpReq, request);
+    logger.info(
+        request.getRequestContext(),
+        "actorResponseHandler: called for actor operation :" + request.getOperation());
     Function<Object, Result> function =
         result -> {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
             setGlobalHealthFlag(result);
           }
-          logger.info(
-              request.getRequestContext(),
-              "actorResponseHandler: called for actor operation :" + request.getOperation());
           if (result instanceof Response) {
             Response response = (Response) result;
             if (ResponseCode.OK.getResponseCode()
