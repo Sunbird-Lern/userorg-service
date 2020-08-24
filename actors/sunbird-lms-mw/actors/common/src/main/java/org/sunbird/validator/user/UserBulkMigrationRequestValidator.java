@@ -120,6 +120,7 @@ public class UserBulkMigrationRequestValidator {
   }
 
   private void validateSelfDeclaredUser(SelfDeclaredUser migrationUser, int index) {
+    checkUserDeclaredExternalId(migrationUser.getUserExternalId(), index);
     checkSelfDeclaredInputStatus(migrationUser.getInputStatus(), index);
     if ((migrationUser.getInputStatus().equals(JsonKey.SELF_DECLARED_ERROR))) {
       checkSelfDeclaredErrorTypeIfPresent(migrationUser.getErrorType(), index);
@@ -127,7 +128,21 @@ public class UserBulkMigrationRequestValidator {
     checkValue(migrationUser.getUserId(), index, JsonKey.DIKSHA_UUID);
     checkValue(migrationUser.getChannel(), index, JsonKey.CHANNEL);
     checkValue(migrationUser.getPersona(), index, JsonKey.PERSONA);
-    checkValue(migrationUser.getUserExternalId(), index, JsonKey.STATE_PROVIDED_EXT_ID);
+  }
+
+  private void checkUserDeclaredExternalId(String userExternalId, int index) {
+    CsvRowErrorDetails errorDetails = new CsvRowErrorDetails();
+    errorDetails.setRowId(index);
+    errorDetails.setHeader(JsonKey.STATE_PROVIDED_EXT_ID);
+    if (StringUtils.isBlank(userExternalId)) {
+      errorDetails.setErrorEnum(ErrorEnum.missing);
+    }
+    if (!userExternalIdsSet.add(userExternalId)) {
+      errorDetails.setErrorEnum(ErrorEnum.duplicate);
+    }
+    if (errorDetails.getErrorEnum() != null) {
+      addErrorToList(errorDetails);
+    }
   }
 
   private void checkSelfDeclaredErrorTypeIfPresent(String errorType, int index) {
