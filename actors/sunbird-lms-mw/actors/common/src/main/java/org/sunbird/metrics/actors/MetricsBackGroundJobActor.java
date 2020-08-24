@@ -319,7 +319,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
             ResponseCode.invalidRequestData.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
-      storageUrl = service.uploadFile(container, file);
+      storageUrl = service.uploadFile(container, file, null);
     } catch (Exception e) {
       ProjectLogger.log("Exception Occurred while reading file in FileUploadServiceActor", e);
       throw e;

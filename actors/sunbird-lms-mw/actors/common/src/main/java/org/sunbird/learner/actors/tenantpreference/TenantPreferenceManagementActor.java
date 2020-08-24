@@ -17,9 +17,8 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -65,11 +64,12 @@ public class TenantPreferenceManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void getTenantPreference(Request actorMessage) {
+    RequestContext context = actorMessage.getRequestContext();
     String orgId = (String) actorMessage.getRequest().get(JsonKey.ORG_ID);
-    ProjectLogger.log(
-        "TenantPreferenceManagementActor-getTenantPreference called for org: " + orgId);
+    logger.info(
+        context, "TenantPreferenceManagementActor-getTenantPreference called for org: " + orgId);
     String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
-    List<Map<String, Object>> orgPrefMap = getTenantPreferencesFromDB(orgId, key);
+    List<Map<String, Object>> orgPrefMap = getTenantPreferencesFromDB(orgId, key, context);
     Response finalResponse = new Response();
 
     if (CollectionUtils.isNotEmpty(orgPrefMap)) {
@@ -79,8 +79,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
         orgPrefMap.get(0).put(JsonKey.DATA, map);
         finalResponse.getResult().put(JsonKey.RESPONSE, orgPrefMap.get(0));
       } catch (Exception e) {
-        ProjectLogger.log(
-            "exception while reading preferences " + e.getMessage(), LoggerEnum.DEBUG);
+        logger.error(context, "exception while reading preferences " + e.getMessage(), e);
       }
     } else {
       throw new ProjectCommonException(
@@ -91,7 +90,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
     sender().tell(finalResponse, self());
   }
 
-  private List<Map<String, Object>> getTenantPreferencesFromDB(String orgId, String key) {
+  private List<Map<String, Object>> getTenantPreferencesFromDB(
+      String orgId, String key, RequestContext context) {
     Map<String, Object> properties = new LinkedHashMap<>();
     properties.put(JsonKey.KEY, key);
     properties.put(JsonKey.ORG_ID, orgId);
@@ -100,7 +100,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
             tenantPreferenceDbInfo.getKeySpace(),
             tenantPreferenceDbInfo.getTableName(),
             properties,
-            null);
+            context);
     List<Map<String, Object>> preferencesList =
         (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
     return preferencesList;
@@ -111,19 +111,21 @@ public class TenantPreferenceManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void updateTenantPreference(Request actorMessage) {
-
+    RequestContext context = actorMessage.getRequestContext();
     Map<String, Object> req = actorMessage.getRequest();
     String orgId = (String) req.get(JsonKey.ORG_ID);
     String key = (String) req.get(JsonKey.KEY);
-    ProjectLogger.log(
+    logger.info(
+        context,
         "TenantPreferenceManagementActor-updateTenantPreference called for org: "
             + orgId
             + "key "
             + key);
     Response finalResponse = new Response();
-    List<Map<String, Object>> preferencesList = getTenantPreferencesFromDB(orgId, key);
+    List<Map<String, Object>> preferencesList = getTenantPreferencesFromDB(orgId, key, context);
     if (CollectionUtils.isEmpty(preferencesList)) {
-      ProjectLogger.log(
+      logger.info(
+          context,
           "TenantPreferenceManagementActor-updateTenantPreference key "
               + key
               + "already exists in the org "
@@ -147,10 +149,9 @@ public class TenantPreferenceManagementActor extends BaseActor {
             tenantPreferenceDbInfo.getTableName(),
             preferenceObj,
             clusteringKeys,
-            null);
+            context);
       } catch (Exception e) {
-        ProjectLogger.log(
-            "exception while updating preferences " + e.getMessage(), LoggerEnum.DEBUG);
+        logger.error(context, "exception while updating preferences " + e.getMessage(), e);
       }
     }
     finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -163,16 +164,18 @@ public class TenantPreferenceManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void createTenantPreference(Request actorMessage) {
+    RequestContext context = actorMessage.getRequestContext();
     Map<String, Object> req = actorMessage.getRequest();
     String orgId = (String) req.get(JsonKey.ORG_ID);
     String key = (String) req.get(JsonKey.KEY);
-    ProjectLogger.log(
-        "TenantPreferenceManagementActor-createTenantPreference called for org: " + orgId);
-    List<Map<String, Object>> preferencesList = getTenantPreferencesFromDB(orgId, key);
+    logger.info(
+        context, "TenantPreferenceManagementActor-createTenantPreference called for org: " + orgId);
+    List<Map<String, Object>> preferencesList = getTenantPreferencesFromDB(orgId, key, context);
     Response finalResponse = new Response();
     // check whether already tenant preference exists for the given org id
     if (CollectionUtils.isNotEmpty(preferencesList)) {
-      ProjectLogger.log(
+      logger.info(
+          context,
           "TenantPreferenceManagementActor-createTenantPreference key "
               + key
               + "already exists in the org "
@@ -190,14 +193,14 @@ public class TenantPreferenceManagementActor extends BaseActor {
       dbMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
       dbMap.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
     } catch (Exception e) {
-      ProjectLogger.log("exception while adding preferences " + e.getMessage(), LoggerEnum.DEBUG);
+      logger.error(context, "exception while adding preferences " + e.getMessage(), e);
     }
     Response response =
         cassandraOperation.insertRecord(
             tenantPreferenceDbInfo.getKeySpace(),
             tenantPreferenceDbInfo.getTableName(),
             dbMap,
-            null);
+            context);
     finalResponse.getResult().put(JsonKey.ORG_ID, orgId);
     finalResponse.getResult().put(JsonKey.KEY, key);
     finalResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);

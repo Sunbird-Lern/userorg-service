@@ -5,7 +5,6 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 
 /** Sync data between Cassandra and Elastic Search. */
@@ -32,13 +31,15 @@ public class EsSyncActor extends BaseActor {
     sender().tell(response, self());
 
     Request backgroundSyncRequest = new Request();
+    backgroundSyncRequest.setRequestContext(request.getRequestContext());
     backgroundSyncRequest.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
     backgroundSyncRequest.getRequest().put(JsonKey.DATA, request.getRequest().get(JsonKey.DATA));
 
     try {
       tellToAnother(backgroundSyncRequest);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          request.getRequestContext(),
           "EsSyncActor:triggerBackgroundSync: Exception occurred with error message = "
               + e.getMessage(),
           e);

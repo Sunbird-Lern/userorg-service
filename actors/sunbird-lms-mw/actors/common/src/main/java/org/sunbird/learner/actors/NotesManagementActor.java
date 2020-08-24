@@ -14,6 +14,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -64,13 +65,14 @@ public class NotesManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private void createNote(Request actorMessage) {
-    ProjectLogger.log("Create Note method call start");
+    RequestContext context = actorMessage.getRequestContext();
+    logger.info(context, "Create Note method call start");
     // object of telemetry event...
     Map<String, Object> targetObject = new HashMap<>();
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     try {
       Map<String, Object> req = actorMessage.getRequest();
-      if (!validUser((String) req.get(JsonKey.USER_ID))) {
+      if (!validUser((String) req.get(JsonKey.USER_ID), context)) {
         ProjectCommonException exception =
             new ProjectCommonException(
                 ResponseCode.invalidUserId.getErrorCode(),
@@ -92,8 +94,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.insertRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
-      ProjectLogger.log("Note data saved into cassandra.");
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, context);
       result.getResult().put(JsonKey.ID, uniqueId);
       result.getResult().remove(JsonKey.RESPONSE);
       sender().tell(result, self());
@@ -112,12 +113,13 @@ public class NotesManagementActor extends BaseActor {
           actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
 
       Request request = new Request();
+      request.setRequestContext(context);
       request.setOperation(ActorOperations.INSERT_USER_NOTES_ES.getValue());
       request.getRequest().put(JsonKey.NOTE, req);
-      ProjectLogger.log("Calling background job to save org data into ES" + uniqueId);
+      logger.info(context, "Calling background job to save org data into ES" + uniqueId);
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log("Error occurred", e);
+      logger.error(context, "Error occurred", e);
       sender().tell(e, self());
       return;
     }
@@ -130,20 +132,21 @@ public class NotesManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private void updateNote(Request actorMessage) {
-    ProjectLogger.log("Update Note method call start");
+    RequestContext context = actorMessage.getRequestContext();
+    logger.info(context, "Update Note method call start");
     // object of telemetry event...
     Map<String, Object> targetObject = new HashMap<>();
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     try {
       String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      if (!validateUserForNoteUpdation(userId, noteId)) {
+      if (!validateUserForNoteUpdation(userId, noteId, context)) {
         throw new ProjectCommonException(
             ResponseCode.unAuthorized.getErrorCode(),
             ResponseCode.unAuthorized.getErrorMessage(),
             ResponseCode.UNAUTHORIZED.getResponseCode());
       }
-      Map<String, Object> list = getNoteRecordById(noteId);
+      Map<String, Object> list = getNoteRecordById(noteId, context);
       if (list.isEmpty()) {
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -165,7 +168,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, context);
       ProjectLogger.log("Note data updated");
       result.getResult().put(JsonKey.ID, noteId);
       result.getResult().remove(JsonKey.RESPONSE);
@@ -181,12 +184,13 @@ public class NotesManagementActor extends BaseActor {
           actorMessage.getRequest(), targetObject, correlatedObject, actorMessage.getContext());
 
       Request request = new Request();
+      request.setRequestContext(context);
       request.getRequest().put(JsonKey.NOTE, req);
       request.setOperation(ActorOperations.UPDATE_USER_NOTES_ES.getValue());
       tellToAnother(request);
 
     } catch (Exception e) {
-      ProjectLogger.log("Error occurred", e);
+      logger.error(context, "Error occurred", e);
       sender().tell(e, self());
       return;
     }
@@ -198,11 +202,12 @@ public class NotesManagementActor extends BaseActor {
    * @param actorMessage containing noteId and requestedBy
    */
   private void getNote(Request actorMessage) {
-    ProjectLogger.log("Update Note method call start");
+    RequestContext context = actorMessage.getRequestContext();
+    logger.info(context, "Update Note method call start");
     try {
       String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      if (!validateUserForNoteUpdation(userId, noteId)) {
+      if (!validateUserForNoteUpdation(userId, noteId, context)) {
         throw new ProjectCommonException(
             ResponseCode.invalidParameterValue.getErrorCode(),
             ResponseCode.invalidParameterValue.getErrorMessage(),
@@ -214,7 +219,7 @@ public class NotesManagementActor extends BaseActor {
 
       request.put(JsonKey.FILTERS, filters);
       Response response = new Response();
-      Map<String, Object> result = getElasticSearchData(request);
+      Map<String, Object> result = getElasticSearchData(request, context);
       if (!result.isEmpty() && ((Long) result.get(JsonKey.COUNT) == 0)) {
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -227,7 +232,7 @@ public class NotesManagementActor extends BaseActor {
       response.put(JsonKey.RESPONSE, result);
       sender().tell(response, self());
     } catch (Exception e) {
-      ProjectLogger.log("Error occurred", e);
+      logger.error(context, "Error occurred", e);
       sender().tell(e, self());
       return;
     }
@@ -239,17 +244,18 @@ public class NotesManagementActor extends BaseActor {
    * @param actorMessage containing search parameters
    */
   private void searchNote(Request actorMessage) {
-    ProjectLogger.log("Update Note method call start");
+    RequestContext context = actorMessage.getRequestContext();
+    logger.info(context, "Update Note method call start");
     try {
 
       Map<String, Object> searchQueryMap = actorMessage.getRequest();
       searchQueryMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
       Response response = new Response();
-      Map<String, Object> result = getElasticSearchData(searchQueryMap);
+      Map<String, Object> result = getElasticSearchData(searchQueryMap, context);
       response.put(JsonKey.RESPONSE, result);
       sender().tell(response, self());
     } catch (Exception e) {
-      ProjectLogger.log("Error occurred", e);
+      logger.error(context, "Error occurred", e);
       sender().tell(e, self());
       return;
     }
@@ -262,7 +268,8 @@ public class NotesManagementActor extends BaseActor {
    * @return Map<String, Object> - note data
    */
   @SuppressWarnings("unchecked")
-  private Map<String, Object> getElasticSearchData(Map<String, Object> searchQueryMap) {
+  private Map<String, Object> getElasticSearchData(
+      Map<String, Object> searchQueryMap, RequestContext context) {
     Map<String, Object> filters = new HashMap<>();
     if (searchQueryMap.containsKey(JsonKey.FILTERS)) {
       filters = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
@@ -280,7 +287,7 @@ public class NotesManagementActor extends BaseActor {
     excludedFields.add(JsonKey.IS_DELETED);
     searchDto.setExcludedFields(excludedFields);
     Future<Map<String, Object>> resultF =
-        esService.search(searchDto, EsType.usernotes.getTypeName(), null);
+        esService.search(searchDto, EsType.usernotes.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null) {
@@ -303,20 +310,21 @@ public class NotesManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void deleteNote(Request actorMessage) {
-    ProjectLogger.log("Delete Note method call start");
+    RequestContext context = actorMessage.getRequestContext();
+    logger.info(context, "Delete Note method call start");
     // object of telemetry event...
     Map<String, Object> targetObject = new HashMap<>();
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     try {
       String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      if (!validateUserForNoteUpdation(userId, noteId)) {
+      if (!validateUserForNoteUpdation(userId, noteId, context)) {
         throw new ProjectCommonException(
             ResponseCode.unAuthorized.getErrorCode(),
             ResponseCode.unAuthorized.getErrorMessage(),
             ResponseCode.UNAUTHORIZED.getResponseCode());
       }
-      if (!noteIdExists(noteId)) {
+      if (!noteIdExists(noteId, context)) {
         ProjectCommonException exception =
             new ProjectCommonException(
                 ResponseCode.invalidNoteId.getErrorCode(),
@@ -333,7 +341,7 @@ public class NotesManagementActor extends BaseActor {
       Util.DbInfo userNotesDbInfo = Util.dbInfoMap.get(JsonKey.USER_NOTES_DB);
       Response result =
           cassandraOperation.updateRecord(
-              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, null);
+              userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, context);
       result.getResult().remove(JsonKey.RESPONSE);
       sender().tell(result, self());
 
@@ -346,10 +354,11 @@ public class NotesManagementActor extends BaseActor {
 
       Request request = new Request();
       request.getRequest().put(JsonKey.NOTE, req);
+      request.setRequestContext(context);
       request.setOperation(ActorOperations.UPDATE_USER_NOTES_ES.getValue());
       tellToAnother(request);
     } catch (Exception e) {
-      ProjectLogger.log("Error occurred", e);
+      logger.error(context, "Error occurred", e);
       sender().tell(e, self());
       return;
     }
@@ -361,12 +370,12 @@ public class NotesManagementActor extends BaseActor {
    * @param userId
    * @return true if user data is present in ES else false
    */
-  private Boolean validUser(String userId) {
+  private Boolean validUser(String userId, RequestContext context) {
     Boolean result = false;
 
     if (!StringUtils.isBlank(userId)) {
       Future<Map<String, Object>> dataF =
-          esService.getDataByIdentifier(EsType.user.getTypeName(), userId, null);
+          esService.getDataByIdentifier(EsType.user.getTypeName(), userId, context);
       Map<String, Object> data =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(dataF);
       if (null != data && !data.isEmpty()) {
@@ -382,9 +391,9 @@ public class NotesManagementActor extends BaseActor {
    * @param noteId
    * @return true if note exists in Cassandra else false
    */
-  private Boolean noteIdExists(String noteId) {
+  private Boolean noteIdExists(String noteId, RequestContext context) {
     Boolean result = false;
-    Map<String, Object> list = getNoteRecordById(noteId);
+    Map<String, Object> list = getNoteRecordById(noteId, context);
     if (!list.isEmpty()) {
       result = true;
     }
@@ -397,17 +406,18 @@ public class NotesManagementActor extends BaseActor {
    * @param noteId
    * @return Note data as List<Map<String, Object>>
    */
-  private Map<String, Object> getNoteRecordById(String noteId) {
+  private Map<String, Object> getNoteRecordById(String noteId, RequestContext context) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(EsType.usernotes.getTypeName(), noteId, null);
+        esService.getDataByIdentifier(EsType.usernotes.getTypeName(), noteId, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return result;
   }
 
-  private Boolean validateUserForNoteUpdation(String userId, String noteId) {
+  private Boolean validateUserForNoteUpdation(
+      String userId, String noteId, RequestContext context) {
     Boolean result = false;
-    Map<String, Object> noteData = getNoteRecordById(noteId);
+    Map<String, Object> noteData = getNoteRecordById(noteId, context);
     if (MapUtils.isEmpty(noteData)) return result;
     if (!StringUtils.isBlank(userId)) {
       result = true;
