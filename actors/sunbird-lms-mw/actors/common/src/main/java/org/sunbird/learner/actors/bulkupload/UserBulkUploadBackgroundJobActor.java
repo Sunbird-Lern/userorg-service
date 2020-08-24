@@ -306,7 +306,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       filters.put(
           JsonKey.EXTERNAL_ID, ((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
       if (CollectionUtils.isNotEmpty(organisationClient.esSearchOrgByFilter(filters, context))) {
-        return organisationClient.esSearchOrgByFilter(filters, null).get(0);
+        return organisationClient.esSearchOrgByFilter(filters, context).get(0);
       }
       return null;
     } else if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORG_ID))) {

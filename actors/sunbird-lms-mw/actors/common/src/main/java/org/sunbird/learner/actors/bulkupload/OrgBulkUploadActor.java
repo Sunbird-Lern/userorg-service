@@ -131,7 +131,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
       bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
       bulkUploadProcess.setFailureResult(ResponseCode.errorNoRootOrgAssociated.getErrorMessage());
       BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
-      bulkUploadDao.update(bulkUploadProcess, null);
+      bulkUploadDao.update(bulkUploadProcess, context);
       ProjectCommonException.throwClientErrorException(
           ResponseCode.errorNoRootOrgAssociated,
           ResponseCode.errorNoRootOrgAssociated.getErrorMessage());

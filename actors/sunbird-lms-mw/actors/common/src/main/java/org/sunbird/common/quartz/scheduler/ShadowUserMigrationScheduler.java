@@ -41,7 +41,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
         LoggerEnum.INFO.name());
     processRecords(unprocessedRecordIds);
     ShadowUserProcessor processorObject = new ShadowUserProcessor();
-    processorObject.process();
+    processorObject.process(null);
     unprocessedRecordIds.clear();
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:execute:Scheduler Job ended for shadow user migration",
@@ -305,7 +305,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
             "ShadowUserMigrationScheduler:updateUserInShadowDb: isClaimed ",
             LoggerEnum.INFO.name());
         ShadowUser newShadowUser = getUpdatedShadowUser(compositeKeysMap);
-        new ShadowUserProcessor().processClaimedUser(newShadowUser);
+        new ShadowUserProcessor().processClaimedUser(newShadowUser, null);
       }
     }
 

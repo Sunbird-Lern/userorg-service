@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
@@ -13,7 +12,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 
 /** This class contains API related to user feed. */
@@ -22,7 +20,6 @@ import org.sunbird.learner.util.Util;
   asyncTasks = {}
 )
 public class UserFeedActor extends BaseActor {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

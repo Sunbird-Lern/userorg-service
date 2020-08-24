@@ -87,7 +87,7 @@ public class UserUploadUtil {
       Map<String, Object> propertiesMap = new WeakHashMap<>();
       propertiesMap.put(JsonKey.ID, processId);
       propertiesMap.put(JsonKey.STATUS, statusVal);
-      updateBulkUserTable(propertiesMap, null);
+      updateBulkUserTable(propertiesMap, context);
     } catch (Exception e) {
       logger.error(
           context,

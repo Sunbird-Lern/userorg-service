@@ -131,7 +131,7 @@ public class FeedUtilTest {
   public void saveFeedInsertTest() {
     List<String> userIds = new ArrayList<>();
     userIds.add("123-456-7890");
-    Response response = FeedUtil.saveFeed(getShadowUser(), userIds);
+    Response response = FeedUtil.saveFeed(getShadowUser(), userIds, null);
     Assert.assertNotNull(response);
   }
 
