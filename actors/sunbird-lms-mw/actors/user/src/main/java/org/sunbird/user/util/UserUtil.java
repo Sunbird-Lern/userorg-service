@@ -2,15 +2,10 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.WeakHashMap;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.stream.Collectors;
+import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,11 +23,11 @@ import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
 import org.sunbird.common.services.impl.ProfileCompletenessFactory;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.SocialMediaType;
@@ -40,11 +35,14 @@ import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
+import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
@@ -68,6 +66,8 @@ public class UserUtil {
   private static UserExternalIdentityDao userExternalIdentityDao =
       new UserExternalIdentityDaoImpl();
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private static UserExternalIdentityService userExternalIdentityService =
+      new UserExternalIdentityServiceImpl();
   static Random rand = new Random(System.nanoTime());
   private static final String[] alphabet =
       new String[] {
@@ -156,6 +156,45 @@ public class UserUtil {
     }
   }
 
+  // Update channel info with orgId info
+  public static void updateExternalIdsProviderWithOrgId(Map<String, Object> userMap) {
+    if (MapUtils.isNotEmpty(userMap)) {
+      Set<String> providerSet = new HashSet<>();
+      List<Map<String, String>> extList =
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
+      if (CollectionUtils.isNotEmpty(extList)) {
+        for (Map<String, String> extId : extList) {
+          providerSet.add(extId.get(JsonKey.PROVIDER));
+        }
+      }
+      Map<String, String> orgProviderMap =
+          UserUtil.fetchOrgIdByProvider(new ArrayList<String>(providerSet));
+
+      if (CollectionUtils.isNotEmpty(
+          (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
+        for (Map<String, String> externalId :
+            (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
+
+          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          if (StringUtils.isBlank(orgId)) {
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                    JsonKey.PROVIDER,
+                    externalId.get(JsonKey.PROVIDER)));
+          }
+          if (null != externalId.get(JsonKey.PROVIDER)
+              && null != externalId.get(JsonKey.ID_TYPE)
+              && externalId.get(JsonKey.PROVIDER).equals(externalId.get(JsonKey.ID_TYPE))) {
+            externalId.put(JsonKey.ID_TYPE, orgId);
+          }
+          externalId.put(JsonKey.PROVIDER, orgId);
+        }
+      }
+    }
+  }
+
   public static void checkEmailUniqueness(String email) {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
@@ -240,9 +279,31 @@ public class UserUtil {
   }
 
   public static String getUserIdFromExternalId(Map<String, Object> userMap) {
-    Request request = new Request();
-    request.setRequest(userMap);
-    return userExternalIdentityDao.getUserId(request);
+
+    String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
+    String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
+    String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
+    return userExternalIdentityService.getUserV2(extId, provider, idType);
+  }
+
+  public static String getUserId(Map<String, Object> userMap) {
+    String userId;
+    if (null != userMap.get(JsonKey.USER_ID)) {
+      userId = (String) userMap.get(JsonKey.USER_ID);
+    } else {
+      userId = (String) userMap.get(JsonKey.ID);
+    }
+    if (StringUtils.isBlank(userId)) {
+      String extId = (String) userMap.get(JsonKey.EXTERNAL_ID);
+      String provider = (String) userMap.get(JsonKey.EXTERNAL_ID_PROVIDER);
+      String idType = (String) userMap.get(JsonKey.EXTERNAL_ID_TYPE);
+      if (StringUtils.isNotBlank(provider)
+          && StringUtils.isNotBlank(extId)
+          && StringUtils.isNotBlank(idType)) {
+        userId = userExternalIdentityService.getUserV1(extId, provider, idType);
+      }
+    }
+    return userId;
   }
 
   @SuppressWarnings("unchecked")
@@ -323,6 +384,30 @@ public class UserUtil {
           externalIdMap.put(JsonKey.ORIGINAL_PROVIDER, externalIdMap.get(JsonKey.PROVIDER));
           externalIdMap.put(JsonKey.ORIGINAL_ID_TYPE, externalIdMap.get(JsonKey.ID_TYPE));
         });
+  }
+
+  /**
+   * Till 3.1.0 there will be only 1 provider will be active for a user in self declaration and user
+   * can migrate only to 1 state. Note: Need fix .If a user can be migrated to multiple states in
+   * future
+   *
+   * @param dbResExternalIds
+   */
+  public static void updateExternalIdsWithProvider(List<Map<String, String>> dbResExternalIds) {
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
+      String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+      String provider = fetchProviderByOrgId(orgId);
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+    }
   }
 
   public static List<Map<String, String>> convertExternalIdsValueToLowerCase(
@@ -493,12 +578,20 @@ public class UserUtil {
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
       firstName = firstName.split(" ")[0];
-      userMap.put(JsonKey.USERNAME, firstName + "_" + generateUniqueString(4));
+      String translatedFirstName = transliterateUserName(firstName);
+      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
     } else {
-      if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
+      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
+      userMap.put(JsonKey.USERNAME, userName);
+      if (!userService.checkUsernameUniqueness(userName, false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
+  }
+
+  public static String transliterateUserName(String userName) {
+    String translatedUserName = Junidecode.unidecode(userName);
+    return translatedUserName;
   }
 
   public static String generateUniqueString(int length) {
@@ -566,10 +659,11 @@ public class UserUtil {
       while (StringUtils.isBlank(userName)) {
         userName = getUsername(name);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, userName);
+          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
         }
       }
     } else {
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userService.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
@@ -714,7 +808,7 @@ public class UserUtil {
   }
 
   public static void validateUserExternalIds(User user) {
-    List<Map<String, String>> dbResExternalIds = getUserExternalIds(user.getUserId());
+    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId());
     List<Map<String, String>> externalIds = user.getExternalIds();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
@@ -732,6 +826,18 @@ public class UserUtil {
         }
       }
     }
+  }
+
+  public static List<Map<String, String>> getExternalIds(String userId) {
+    List<Map<String, String>> dbResExternalIds =
+        userExternalIdentityService.getUserExternalIds(userId);
+    List<Map<String, String>> dbSelfDeclaredExternalIds =
+        userExternalIdentityService.getSelfDeclaredDetails(userId);
+
+    if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
+      dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+    }
+    return dbResExternalIds;
   }
 
   @SuppressWarnings("unchecked")
@@ -752,20 +858,31 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(boolean isdeleted, String userId) {
-    List<Map<String, Object>> userOrgList = null;
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
-      Map<String, Object> reqMap = new WeakHashMap<>();
-      reqMap.put(JsonKey.USER_ID, userId);
-      if (!isdeleted) {
-        reqMap.put(JsonKey.IS_DELETED, false);
-      }
-      Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      List<String> ids = new ArrayList<>();
+      ids.add(userId);
       Response result =
-          cassandraOperation.getRecordsByProperties(
-              orgUsrDbInfo.getKeySpace(), orgUsrDbInfo.getTableName(), reqMap);
-      userOrgList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(userOrgList)) {
+          cassandraOperation.getRecordsByPrimaryKeys(
+              userOrgDbInfo.getKeySpace(), userOrgDbInfo.getTableName(), ids, JsonKey.USER_ID);
+      List<Map<String, Object>> responseList =
+          (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(responseList)) {
+        if (!isdeleted) {
+          responseList
+              .stream()
+              .forEach(
+                  (dataMap) -> {
+                    if (null != dataMap.get(JsonKey.IS_DELETED)
+                        && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                      userOrgList.add(dataMap);
+                    }
+                  });
+        } else {
+          userOrgList.addAll(responseList);
+        }
         for (Map<String, Object> tempMap : userOrgList) {
           organisations.add(tempMap);
         }
@@ -825,6 +942,166 @@ public class UserUtil {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
+  }
+
+  public static List<UserDeclareEntity> transformExternalIdsToSelfDeclaredRequest(
+      List<Map<String, String>> externalIds, Map<String, Object> requestMap) {
+    List<UserDeclareEntity> selfDeclaredFieldsList = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(externalIds)) {
+      String currOrgId =
+          updateAddOrEditDeclaredFieldsAndGetOrg(externalIds, selfDeclaredFieldsList, requestMap);
+      UserDeclareEntity removeDeclareFields =
+          getRemoveDeclaredFields(externalIds, currOrgId, requestMap);
+
+      if (null != removeDeclareFields) {
+        selfDeclaredFieldsList.add(removeDeclareFields);
+      }
+    }
+    return selfDeclaredFieldsList;
+  }
+
+  private static UserDeclareEntity getRemoveDeclaredFields(
+      List<Map<String, String>> externalIds, String currOrgId, Map<String, Object> requestMap) {
+    UserDeclareEntity userDeclareEntity = null;
+    String prevOrgId = "";
+    Map<String, Object> userInfo = new HashMap<>();
+    for (Map<String, String> extIdMap : externalIds) {
+      if (JsonKey.REMOVE.equals(extIdMap.get(JsonKey.OPERATION)) && !prevOrgId.equals(currOrgId)) {
+        prevOrgId = extIdMap.get(JsonKey.ORIGINAL_PROVIDER);
+        String idType = extIdMap.get(JsonKey.ORIGINAL_ID_TYPE);
+        String value = extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
+        userInfo.put(idType, value);
+      }
+    }
+    if (MapUtils.isNotEmpty(userInfo)) {
+      userDeclareEntity =
+          new UserDeclareEntity(
+              (String) requestMap.get(JsonKey.USER_ID),
+              prevOrgId,
+              JsonKey.TEACHER_PERSONA,
+              userInfo);
+      userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setOperation(JsonKey.REMOVE);
+    }
+    return userDeclareEntity;
+  }
+
+  private static String updateAddOrEditDeclaredFieldsAndGetOrg(
+      List<Map<String, String>> externalIds,
+      List<UserDeclareEntity> userDeclareEntities,
+      Map<String, Object> requestMap) {
+    String currOrgId = "";
+    Map<String, Object> userInfo = new HashMap<>();
+    for (Map<String, String> extIdMap : externalIds) {
+      if (JsonKey.ADD.equals(extIdMap.get(JsonKey.OPERATION))
+          || JsonKey.EDIT.equals(extIdMap.get(JsonKey.OPERATION))) {
+        String idType = extIdMap.get(JsonKey.ORIGINAL_ID_TYPE);
+        String value = extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
+        currOrgId = extIdMap.get(JsonKey.ORIGINAL_PROVIDER);
+        userInfo.put(idType, value);
+      }
+    }
+    if (MapUtils.isNotEmpty(userInfo)) {
+      UserDeclareEntity userDeclareEntity =
+          new UserDeclareEntity(
+              (String) requestMap.get(JsonKey.USER_ID),
+              currOrgId,
+              JsonKey.TEACHER_PERSONA,
+              userInfo);
+      userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setOperation(JsonKey.ADD);
+      userDeclareEntities.add(userDeclareEntity);
+    }
+    return currOrgId;
+  }
+
+  public static String fetchProviderByOrgId(String orgId) {
+    try {
+      if (StringUtils.isNotBlank(orgId)) {
+        Future<Map<String, Object>> esOrgResF =
+            esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+        Map<String, Object> org =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
+
+        if (null != org && !org.isEmpty()) {
+          return (String) org.get(JsonKey.CHANNEL);
+        }
+      }
+    } catch (Exception ex) {
+      ProjectLogger.log(ex.getMessage(), ex);
+    }
+    return "";
+  }
+
+  public static Map<String, String> fetchOrgIdByProvider(List<String> providers) {
+    Map<String, String> providerOrgMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(providers)) {
+      try {
+        Map<String, Object> searchQueryMap = new HashMap<>();
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(JsonKey.IS_ROOT_ORG, true);
+        filters.put(JsonKey.CHANNEL, providers);
+        searchQueryMap.put(JsonKey.FILTERS, filters);
+        SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);
+        Future<Map<String, Object>> esOrgResF =
+            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName());
+        Map<String, Object> esResOrg =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
+        if (MapUtils.isNotEmpty(esResOrg)) {
+          List<Map<String, Object>> orgList =
+              (List<Map<String, Object>>) esResOrg.get(JsonKey.CONTENT);
+          if (CollectionUtils.isNotEmpty(orgList)) {
+            for (Map<String, Object> org : orgList) {
+              providerOrgMap.put((String) org.get(JsonKey.CHANNEL), (String) org.get(JsonKey.ID));
+            }
+          }
+        }
+
+      } catch (Exception ex) {
+        ProjectLogger.log(ex.getMessage(), ex);
+      }
+    }
+    return providerOrgMap;
+  }
+
+  public static void encryptDeclarationFields(List<Map<String, Object>> declarations)
+      throws Exception {
+    for (Map<String, Object> declareFields : declarations) {
+      Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
+      for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
+        String key = userInfo.getKey();
+        String value = (String) userInfo.getValue();
+        if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
+          userInfoMap.put(key, encryptionService.encryptData(value));
+        }
+      }
+    }
+  }
+
+  public static UserDeclareEntity createUserDeclaredObject(
+      Map<String, Object> declareFieldMap, String callerId) {
+    UserDeclareEntity userDeclareEntity =
+        new UserDeclareEntity(
+            (String) declareFieldMap.get(JsonKey.USER_ID),
+            (String) declareFieldMap.get(JsonKey.ORG_ID),
+            (String) declareFieldMap.get(JsonKey.PERSONA),
+            (Map<String, Object>) declareFieldMap.get(JsonKey.INFO));
+
+    if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.OPERATION))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOperationName);
+    }
+    userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
+    if (JsonKey.ADD.equals(userDeclareEntity.getOperation())) {
+      userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setStatus(JsonKey.PENDING);
+    } else {
+      userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
+    }
+    userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
+
+    return userDeclareEntity;
   }
 }
 

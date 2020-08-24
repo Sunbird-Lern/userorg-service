@@ -1,16 +1,15 @@
 package org.sunbird.user.dao.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -23,15 +22,8 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
-  @Override
+  /*  @Override
   public String getUserId(Request reqObj) {
-    String userId;
-
-    if (null != reqObj.getRequest().get(JsonKey.USER_ID)) {
-      userId = (String) reqObj.getRequest().get(JsonKey.USER_ID);
-    } else {
-      userId = (String) reqObj.getRequest().get(JsonKey.ID);
-    }
 
     if (StringUtils.isBlank(userId)) {
       String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
@@ -42,9 +34,9 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     }
 
     return userId;
-  }
+  }*/
 
-  @SuppressWarnings({"unchecked"})
+  @Override
   public String getUserIdByExternalId(String extId, String provider, String idType) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> externalIdReq = new HashMap<>();
@@ -62,6 +54,30 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     }
 
     return null;
+  }
+
+  @Override
+  public List<Map<String, String>> getUserExternalIds(String userId) {
+    List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Response response =
+        cassandraOperation.getRecordsByIndexedProperty(
+            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
+    if (null != response && null != response.getResult()) {
+      dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
+    }
+    return dbResExternalIds;
+  }
+
+  @Override
+  public List<Map<String, Object>> getUserSelfDeclaredDetails(String userId) {
+    List<Map<String, Object>> dbResExternalIds = new ArrayList<>();
+    Response response =
+        cassandraOperation.getRecordsByIndexedProperty(
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, JsonKey.USER_ID, userId);
+    if (null != response && null != response.getResult()) {
+      dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+    }
+    return dbResExternalIds;
   }
 
   private String getEncryptedData(String value) {

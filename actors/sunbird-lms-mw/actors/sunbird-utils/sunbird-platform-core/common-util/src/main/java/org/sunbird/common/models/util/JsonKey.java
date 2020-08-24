@@ -627,14 +627,14 @@ public final class JsonKey {
   public static final String USER_NAME = "username";
   public static final String USER_NOT_FOUND = "user does not exist with this login Id.";
   public static final String USER_NOTES_DB = "userNotes_db";
-  public static final String USER_ORG = "user_org";
+  public static final String USER_ORG = "user_organisation";
   public static final String USER_ORG_DB = "user_org_db";
   public static final String USER_RELATIONS = "user_relations";
   public static final String USER_SKILL_DB = "userSkillDb";
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USR_EXT_ID_DB = "user_external_identity";
-  public static final String USR_ORG_DB = "user_org";
+  public static final String USER_DECLARATION_DB = "user_declarations";
   public static final String VALUE = "value";
   public static final String VER = "ver";
   public static final String VERSION = "version";
@@ -1051,12 +1051,32 @@ public final class JsonKey {
   public static final String WITH_TOKENS = "withTokens";
   public static final String DECLARED_EMAIL = "declared-email";
   public static final String DECLARED_PHONE = "declared-phone";
-  public static final String CAPTCHA_SECRET = "captcha_secret";
+  public static final String GOOGLE_CAPTCHA_PRIVATE_KEY = "google_captcha_private_key";
+  public static final String GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY =
+      "google_captcha_mobile_private_key";
+  public static final String MOBILE_APP = "app";
   public static final String CAPTCHA_RESPONSE = "captchaResponse";
   public static final String ENABLE_CAPTCHA = "enable_captcha";
   public static final String DECLARED_STATE = "declared-state";
   public static final String DECLARED_DISTRICT = "declared-district";
   public static final String PENDING = "PENDING";
+  public static final String VALIDATED = "VALIDATED";
+  public static final String REJECTED = "REJECTED";
+  public static final String SELF_DECLARED_ERROR = "ERROR";
+  public static final String SELF_DECLARED_MANDATORY_FIELDS = "self_declared_mandatory_fields";
+  public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";
+  public static final String SELF_DECLARED_USER_OBJECT = "SELF_DECLARED_USER";
+  public static final String DIKSHA_UUID = "Diksha UUID";
+  public static final String STATE_PROVIDED_EXT_ID = "State provided ext. ID";
+  public static final String USER_INFO = "userInfo";
+  public static final String USR_DECLARATION_TABLE = "user_declarations";
+  public static final String ERROR_TYPE = "errorType";
+  public static final String DECLARATIONS = "declarations";
+  public static final String PERSONA = "persona";
+  // This denotes the persona of the user in self declaration and
+  // is different from role or user type = TEACHER
+  public static final String TEACHER_PERSONA = "teacher";
+  public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
 
   private JsonKey() {}
 }

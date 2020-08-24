@@ -46,6 +46,7 @@ import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.UserType;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -59,7 +60,14 @@ import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
+  tasks = {
+    "createUser",
+    "updateUser",
+    "createUserV3",
+    "createUserV4",
+    "getManagedUsers",
+    "updateUserDeclarations"
+  },
   asyncTasks = {}
 )
 public class UserManagementActor extends BaseActor {
@@ -102,10 +110,63 @@ public class UserManagementActor extends BaseActor {
       case "getManagedUsers": // managedUser search
         getManagedUsers(request);
         break;
+      case "updateUserDeclarations": // update self declare
+        updateUserDeclarations(request);
+        break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
     }
   }
+
+  /**
+   * This method will update self declaration for the user to Cassandra
+   *
+   * @param actorMessage
+   */
+  private void updateUserDeclarations(Request actorMessage) {
+    ProjectLogger.log(
+        "UserManagementActor:updateUserDeclarations method called.", LoggerEnum.INFO.name());
+
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
+    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
+    actorMessage.toLower();
+    Map<String, Object> userMap = actorMessage.getRequest();
+    Response response = new Response();
+    List<String> errMsgs = new ArrayList<>();
+    try {
+      List<Map<String, Object>> declarations =
+          (List<Map<String, Object>>) userMap.get(JsonKey.DECLARATIONS);
+      UserUtil.encryptDeclarationFields(declarations);
+      List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
+      for (Map<String, Object> declareFieldMap : declarations) {
+        UserDeclareEntity userDeclareEntity =
+            UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
+        userDeclareEntityList.add(userDeclareEntity);
+      }
+      userMap.remove(JsonKey.DECLARATIONS);
+      userMap.put(JsonKey.DECLARATIONS, userDeclareEntityList);
+      response = saveUserSelfDeclareAttributes(userMap);
+    } catch (Exception ex) {
+      errMsgs.add(ex.getMessage());
+      ProjectLogger.log(
+          "UserSelfDeclarationManagementActor:upsertUserSelfDeclarations: Exception occurred with error message = "
+              + ex.getMessage(),
+          ex);
+    }
+    if (CollectionUtils.isNotEmpty((List<String>) response.getResult().get(JsonKey.ERROR_MSG))
+        || CollectionUtils.isNotEmpty(errMsgs)) {
+      ProjectCommonException.throwServerErrorException(ResponseCode.internalError, errMsgs.get(0));
+    }
+    sender().tell(response, self());
+    Map<String, Object> targetObject = null;
+    List<Map<String, Object>> correlatedObject = new ArrayList<>();
+    targetObject =
+        TelemetryUtil.generateTargetObject(
+            (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
+    TelemetryUtil.telemetryProcessingCall(
+        userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
   /**
    * This method will create user in user in cassandra and update to ES as well at same time.
    *
@@ -187,6 +248,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
+    // update externalIds provider from channel to orgId
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
     Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (!isPrivate) {
@@ -905,12 +968,13 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId);
     ObjectMapper mapper = new ObjectMapper();
+    // Update external ids provider with OrgId
+    UserUtil.updateExternalIdsProviderWithOrgId(userMap);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE);
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE);
     convertValidatedLocationCodesToIDs(userMap);
-
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -1358,5 +1422,20 @@ public class UserManagementActor extends BaseActor {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
+  }
+
+  private Response saveUserSelfDeclareAttributes(Map<String, Object> userMap) {
+    Request request = new Request();
+    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    request.getRequest().putAll(userMap);
+    ProjectLogger.log("UserManagementActor:saveUserSelfDeclareAttributes");
+    try {
+      return (Response)
+          interServiceCommunication.getResponse(
+              getActorRef(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue()), request);
+    } catch (Exception e) {
+      ProjectLogger.log(e.getMessage(), e);
+    }
+    return null;
   }
 }

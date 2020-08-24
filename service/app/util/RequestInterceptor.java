@@ -68,9 +68,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
     apiHeaderIgnoreMap.put("/v1/notification/audience", var);
-    apiHeaderIgnoreMap.put("/v1/org/preferences/read", var);
-    apiHeaderIgnoreMap.put("/v1/org/preferences/create", var);
-    apiHeaderIgnoreMap.put("/v1/org/preferences/update", var);
     apiHeaderIgnoreMap.put("/v1/telemetry", var);
     // making badging api's as public access
     apiHeaderIgnoreMap.put("/v1/issuer/create", var);
@@ -115,24 +112,29 @@ public class RequestInterceptor {
   private static String getUserRequestedFor(Http.Request request) {
     String requestedForUserID = null;
     JsonNode jsonBody = request.body().asJson();
-    if (!(jsonBody == null)) { // for search and update and create_mui api's
-      if (!(jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID) == null)) {
-        requestedForUserID = jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID).asText();
+    try {
+      if (!(jsonBody == null)) { // for search and update and create_mui api's
+        if (!(jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID) == null)) {
+          requestedForUserID = jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID).asText();
+        }
+      } else { // for read-api
+        String uuidSegment = null;
+        Path path = Paths.get(request.uri());
+        if (request.queryString().isEmpty()) {
+          uuidSegment = path.getFileName().toString();
+        } else {
+          String[] queryPath = path.getFileName().toString().split("\\?");
+          uuidSegment = queryPath[0];
+        }
+        try {
+          requestedForUserID = UUID.fromString(uuidSegment).toString();
+        } catch (IllegalArgumentException iae) {
+          ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
+        }
       }
-    } else { // for read-api
-      String uuidSegment = null;
-      Path path = Paths.get(request.uri());
-      if (request.queryString().isEmpty()) {
-        uuidSegment = path.getFileName().toString();
-      } else {
-        String[] queryPath = path.getFileName().toString().split("\\?");
-        uuidSegment = queryPath[0];
-      }
-      try {
-        requestedForUserID = UUID.fromString(uuidSegment).toString();
-      } catch (IllegalArgumentException iae) {
-        ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
-      }
+    } catch (Exception e) {
+      ProjectLogger.log(e.getMessage() + e.getStackTrace());
+      ProjectLogger.log("Likely a possibility? " + request.uri(), LoggerEnum.INFO.name());
     }
     return requestedForUserID;
   }

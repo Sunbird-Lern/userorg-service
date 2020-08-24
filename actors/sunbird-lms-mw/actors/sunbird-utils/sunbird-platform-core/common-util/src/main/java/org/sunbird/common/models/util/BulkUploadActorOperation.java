@@ -10,7 +10,9 @@ public enum BulkUploadActorOperation {
 
   USER_BULK_UPLOAD("userBulkUpload"),
   USER_BULK_UPLOAD_BACKGROUND_JOB("userBulkUploadBackground"),
-  USER_BULK_MIGRATION("userBulkMigration");
+  USER_BULK_MIGRATION("userBulkMigration"),
+  USER_BULK_SELF_DECLARED("userBulkSelfDeclared"),
+  PROCESS_USER_BULK_SELF_DECLARED("processUserBulkSelfDeclared");
 
   private String value;
 

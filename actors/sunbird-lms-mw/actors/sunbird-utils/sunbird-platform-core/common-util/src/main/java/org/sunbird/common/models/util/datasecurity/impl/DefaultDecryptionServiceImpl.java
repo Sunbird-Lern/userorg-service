@@ -105,11 +105,14 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       }
       return dValue;
     } catch (Exception ex) {
+      // This could happen with masked email and phone number. Not others.
       ProjectLogger.log(
-          "DefaultDecryptionServiceImpl:decrypt: Exception occurred with error message = "
-              + ex.getMessage(),
+          "DefaultDecryptionServiceImpl:decrypt: ignorable errorMsg = " + ex.getMessage(),
           LoggerEnum.ERROR.name());
       if (throwExceptionOnFailure) {
+        ProjectLogger.log(
+            "Throwing exception error upon explicit ask by callers for value " + value,
+            LoggerEnum.ERROR.name());
         ProjectCommonException.throwClientErrorException(ResponseCode.userDataEncryptionError);
       }
     }

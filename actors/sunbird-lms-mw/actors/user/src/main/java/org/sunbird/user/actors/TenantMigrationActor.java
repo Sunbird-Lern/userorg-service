@@ -51,12 +51,13 @@ import scala.concurrent.Future;
  */
 @ActorConfig(
   tasks = {"userTenantMigrate", "migrateUser"},
-  asyncTasks = {}
+  asyncTasks = {"userSelfDeclaredTenantMigrate"}
 )
 public class TenantMigrationActor extends BaseActor {
 
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+  private Util.DbInfo usrDecDbInfo = Util.dbInfoMap.get(JsonKey.USR_DECLARATION_TABLE);
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
@@ -84,11 +85,51 @@ public class TenantMigrationActor extends BaseActor {
       case "userTenantMigrate":
         migrateUser(request, true);
         break;
+      case "userSelfDeclaredTenantMigrate":
+        migrateSelfDeclaredUser(request);
+        break;
       case "migrateUser":
         processShadowUserMigrate(request);
         break;
       default:
         onReceiveUnsupportedOperation("TenantMigrationActor");
+    }
+  }
+
+  private void migrateSelfDeclaredUser(Request request) {
+    Response response = null;
+    ProjectLogger.log(
+        "TenantMigrationActor:migrateSelfDeclaredUser called.", LoggerEnum.INFO.name());
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+    // update user declaration table status
+    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+    Map compositeKeyMap = new HashMap<String, Object>();
+    compositeKeyMap.put(JsonKey.USER_ID, userId);
+    Response existingRecord =
+        cassandraOperation.getRecordsByProperties(
+            usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), compositeKeyMap);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isEmpty(responseList)) {
+      ProjectLogger.log(
+          "TenantMigrationActor:migrateSelfDeclaredUser record not found for user: " + userId,
+          LoggerEnum.INFO.name());
+      ProjectCommonException.throwServerErrorException(
+          ResponseCode.declaredUserValidatedStatusNotUpdated);
+    } else {
+      Map<String, Object> responseMap = responseList.get(0);
+      Map attrMap = new HashMap<String, Object>();
+      responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      attrMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      compositeKeyMap.put(JsonKey.ORG_ID, responseMap.get(JsonKey.ORG_ID));
+      compositeKeyMap.put(JsonKey.PERSONA, responseMap.get(JsonKey.PERSONA));
+      response =
+          cassandraOperation.updateRecord(
+              usrDecDbInfo.getKeySpace(), usrDecDbInfo.getTableName(), attrMap, compositeKeyMap);
+      if (response.get(JsonKey.RESPONSE).equals(JsonKey.SUCCESS)) {
+        migrateUser(request, true);
+      }
+      sender().tell(response, self());
     }
   }
 
@@ -135,6 +176,7 @@ public class TenantMigrationActor extends BaseActor {
     // Update user org details
     Response userOrgResponse =
         updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
+
     // Update user externalIds
     Response userExternalIdsResponse = updateUserExternalIds(request);
     // Collect all the error message
@@ -311,6 +353,8 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
+      // Update channel to orgId  for provider field in usr_external_identiy table
+      UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq);
       User user = mapper.convertValue(userExtIdsReq, User.class);
       UserUtil.validateExternalIds(user, JsonKey.CREATE);
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
@@ -386,10 +430,11 @@ public class TenantMigrationActor extends BaseActor {
         LoggerEnum.INFO.name());
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     for (Map<String, Object> userOrg : userOrgList) {
+      Map<String, String> compositeKey = new LinkedHashMap<>(2);
+      compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
+      compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
       cassandraOperation.deleteRecord(
-          usrOrgDbInfo.getKeySpace(),
-          usrOrgDbInfo.getTableName(),
-          (String) userOrg.get(JsonKey.ID));
+          usrOrgDbInfo.getKeySpace(), usrOrgDbInfo.getTableName(), compositeKey);
     }
   }
 

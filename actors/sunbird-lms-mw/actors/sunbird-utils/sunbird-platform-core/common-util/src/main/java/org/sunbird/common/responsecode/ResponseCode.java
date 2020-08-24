@@ -873,6 +873,18 @@ public enum ResponseCode {
       ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
       ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
   invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
+  preferenceAlreadyExists(
+      ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
+      ResponseMessage.Message.PREFERENCE_ALREADY_EXIST),
+  declaredUserErrorStatusNotUpdated(
+      ResponseMessage.Key.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED,
+      ResponseMessage.Message.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED),
+  declaredUserValidatedStatusNotUpdated(
+      ResponseMessage.Key.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED,
+      ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
+  preferenceNotFound(
+      ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
+
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

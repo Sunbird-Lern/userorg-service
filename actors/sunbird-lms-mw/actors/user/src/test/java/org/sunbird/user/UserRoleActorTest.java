@@ -86,6 +86,7 @@ public class UserRoleActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.IS_DELETED, false);
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -122,7 +123,7 @@ public class UserRoleActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
         .thenReturn(getCassandraResponse());
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn(getRecordByPropertyResponse());
     esService = mock(ElasticSearchRestHighImpl.class);
