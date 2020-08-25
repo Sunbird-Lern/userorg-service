@@ -107,6 +107,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
       fieldsMap.put("optionalFields", optionalFields);
       List<SelfDeclaredUser> selfDeclaredUserList =
           getUsers(processId, (byte[]) data.get(JsonKey.FILE), fieldsMap, aliasFields);
+
       ProjectLogger.log(
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(selfDeclaredUserList.size() + "")
@@ -304,6 +305,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     supportedHeaders.replaceAll(String::toLowerCase);
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
     List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders, aliasesFields);
+
     List<SelfDeclaredUser> selfDeclaredUserList =
         parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
     ShadowUserUpload migration =

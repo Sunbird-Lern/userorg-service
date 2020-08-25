@@ -70,7 +70,6 @@ public class UserBulkMigrationActorTest {
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     TelemetryWriter.write(Mockito.any());
-
     system = ActorSystem.create("system");
   }
 
