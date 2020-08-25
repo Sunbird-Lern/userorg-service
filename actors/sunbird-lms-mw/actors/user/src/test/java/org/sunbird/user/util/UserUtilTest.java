@@ -5,10 +5,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.dispatch.Futures;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -377,6 +374,13 @@ public class UserUtilTest {
     }
   }
 
+  @Test
+  public void testGetPrivateFieldsWithOrgId() {
+    beforeEachTest();
+    Set<String> privateFieldsSet = UserUtil.getTenantPrivateFields(JsonKey.ALL);
+    Assert.assertTrue(!privateFieldsSet.isEmpty());
+  }
+
   private Map<String, Map<String, Object>> getTenantConfig() {
     Map<String, Map<String, Object>> tenantConfig = new HashMap<>();
     Map<String, Object> keyConfig = new HashMap<>();
@@ -385,7 +389,7 @@ public class UserUtilTest {
             + "\"aliases\":{\"Diksha UUID\":\"userId\",\"Status\":\"input status\",\"State provided ext. ID\":\"userExternalId\",\"Channel\":\"channel\","
             + "\"Org ID\":\"orgId\",\"Persona\":\"persona\",\"Phone number\":\"phone\",\"Email ID\":\"email\",\"School Name\":\"schoolName\","
             + "\"School UDISE ID\":\"schoolUdiseId\",\"Diksha Sub-Org ID\":\"subOrgId\",\"Error Type\":\"errorType\"},\"mandatoryFields\":[\"Diksha UUID\","
-            + "\"Status\",\"State provided ext. ID\"\"Channel\",\"Org ID\",\"Persona\"],\"optionalFields\":[\"School Name\",\"School UDISE ID\",\"Email ID\","
+            + "\"Status\",\"State provided ext. ID\",\"Channel\",\"Org ID\",\"Persona\"],\"optionalFields\":[\"School Name\",\"School UDISE ID\",\"Email ID\","
             + "\"Phone number\",\"Diksha Sub-Org ID\",\"Error Type\"]}";
     keyConfig.put(JsonKey.SELF_DECLARATIONS, data);
     tenantConfig.put(JsonKey.ALL, keyConfig);
