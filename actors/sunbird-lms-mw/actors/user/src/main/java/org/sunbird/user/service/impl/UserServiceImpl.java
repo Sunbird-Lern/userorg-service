@@ -20,9 +20,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -35,9 +33,7 @@ import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
@@ -45,14 +41,12 @@ import scala.concurrent.Future;
 public class UserServiceImpl implements UserService {
 
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
-  private static DecryptionService decryptionService = new DefaultDecryptionServiceImpl();
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
-  private UserExternalIdentityDao userExtIdentityDao = new UserExternalIdentityDaoImpl();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
@@ -66,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUserById(String userId, RequestContext context) {
-    User user = userDao.getUserById(userId, null);
+    User user = userDao.getUserById(userId, context);
     if (null == user) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
@@ -118,14 +112,17 @@ public class UserServiceImpl implements UserService {
       Map<String, Object> userPrivateDataMap,
       RequestContext context) {
     esUtil.save(
-        ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, userPrivateDataMap, null);
-    esUtil.save(ProjectUtil.EsType.user.getTypeName(), userId, userDataMap, null);
+        ProjectUtil.EsType.userprofilevisibility.getTypeName(),
+        userId,
+        userPrivateDataMap,
+        context);
+    esUtil.save(ProjectUtil.EsType.user.getTypeName(), userId, userDataMap, context);
   }
 
   @Override
   public Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context) {
     Future<Map<String, Object>> esResultF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, null);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (esResult == null || esResult.size() == 0) {
@@ -141,7 +138,7 @@ public class UserServiceImpl implements UserService {
   public Map<String, Object> esGetPrivateUserProfileById(String userId, RequestContext context) {
     Future<Map<String, Object>> resultF =
         esUtil.getDataByIdentifier(
-            ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, null);
+            ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, context);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
@@ -168,7 +165,7 @@ public class UserServiceImpl implements UserService {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, EsType.organisation.getTypeName(), null);
+        esUtil.search(searchDTO, EsType.organisation.getTypeName(), context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isNotEmpty(esResult)
@@ -218,7 +215,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(channel)) {
           SystemSettingClient client = SystemSettingClientImpl.getInstance();
           SystemSetting custodianOrgChannelSetting =
-              client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL, null);
+              client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL, context);
           if (custodianOrgChannelSetting != null
               && StringUtils.isNotBlank(custodianOrgChannelSetting.getValue())) {
             configSettingMap.put(
@@ -254,8 +251,8 @@ public class UserServiceImpl implements UserService {
     Map<String, Object> userMap = request.getRequest();
     String userId = (String) userMap.get(JsonKey.USER_ID);
     String uploaderUserId = (String) userMap.get(JsonKey.UPDATED_BY);
-    User uploader = userService.getUserById(uploaderUserId, null);
-    User user = userService.getUserById(userId, null);
+    User uploader = userService.getUserById(uploaderUserId, context);
+    User user = userService.getUserById(userId, context);
     if (!user.getRootOrgId().equalsIgnoreCase(uploader.getRootOrgId())) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
@@ -267,7 +264,7 @@ public class UserServiceImpl implements UserService {
     for (String data : dataList) {
       String encData = "";
       try {
-        encData = encryptionService.encryptData(data, null);
+        encData = encryptionService.encryptData(data, context);
       } catch (Exception e) {
         logger.error(
             context,
@@ -328,7 +325,7 @@ public class UserServiceImpl implements UserService {
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
 
     Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, EsType.user.getTypeName(), null);
+        esUtil.search(searchDTO, EsType.user.getTypeName(), context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
 
@@ -340,7 +337,7 @@ public class UserServiceImpl implements UserService {
   public boolean checkUsernameUniqueness(
       String username, boolean isEncrypted, RequestContext context) {
     try {
-      if (!isEncrypted) username = encryptionService.encryptData(username, null);
+      if (!isEncrypted) username = encryptionService.encryptData(username, context);
     } catch (Exception e) {
       logger.error(
           context,
@@ -352,7 +349,7 @@ public class UserServiceImpl implements UserService {
 
     Response result =
         cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username, null);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username, context);
 
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -369,7 +366,7 @@ public class UserServiceImpl implements UserService {
     try {
       SystemSettingClient client = SystemSettingClientImpl.getInstance();
       SystemSetting systemSetting =
-          client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID, null);
+          client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID, context);
       if (null != systemSetting && StringUtils.isNotBlank(systemSetting.getValue())) {
         custodianOrgId = systemSetting.getValue();
       }
