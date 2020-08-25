@@ -49,9 +49,11 @@ public class HealthControllerTest extends BaseApplicationTest {
 
   @Test
   public void testgetHealth() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req = new RequestBuilder().uri("/v1/health").method("GET");
     //req.headers(headerMap);
     Result result = Helpers.route(application,req);

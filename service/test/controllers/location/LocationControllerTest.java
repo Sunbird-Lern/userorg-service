@@ -38,7 +38,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class LocationControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
-  private static final String USER_TOKEN = "{userId} uuiuhcf784508 8y8c79-fhh";
   private static final String LOCATION_NAME = "Laddakh";
   private static final String LOCATION_CODE = "LOC_01";
   private static final String LOCATION_TYPE = "State";
@@ -60,8 +59,9 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocation() {
-
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(USER_TOKEN);
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);

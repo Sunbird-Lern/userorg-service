@@ -8,6 +8,8 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -18,7 +20,7 @@ public class UserSkillController extends BaseController {
     try {
       JsonNode bodyJson = httpRequest.body().asJson();
       Request reqObj = createAndInitRequest(ActorOperations.ADD_SKILL.getValue(), bodyJson, httpRequest);
-      reqObj.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      reqObj.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

@@ -15,6 +15,8 @@ import org.sunbird.common.request.Request;
 import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /**
  * This controller will handle all api related to badge assertions. issue badge, revoke badge,get
@@ -41,9 +43,9 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgingActorOperations.CREATE_BADGE_ASSERTION.getValue(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -67,9 +69,9 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgingActorOperations.GET_BADGE_ASSERTION.getValue(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -91,9 +93,9 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgingActorOperations.GET_BADGE_ASSERTION_LIST.getValue(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -116,9 +118,9 @@ public class BadgeAssertionController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgingActorOperations.REVOKE_BADGE.getValue(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {

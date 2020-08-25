@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
+
+import org.slf4j.MDC;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.telemetry.util.TelemetryEvents;
@@ -32,49 +34,14 @@ public class AccessLogFilter extends EssentialFilter {
   public EssentialAction apply(EssentialAction next) {
     return EssentialAction.of(
         request -> {
-          long startTime = System.currentTimeMillis();
-          Accumulator<ByteString, Result> accumulator = next.apply(request);
-          return accumulator.map(
-              result -> {
-                long endTime = System.currentTimeMillis();
-                long requestTime = endTime - startTime;
-                try {
-                  org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
-                  Map<String, Object> params = new WeakHashMap<>();
-                  params.put(JsonKey.URL, request.uri());
-                  params.put(JsonKey.METHOD, request.method());
-                  params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
-                  params.put(JsonKey.MESSAGE, "");
-                  params.put(JsonKey.METHOD, request.method());
-                  params.put(JsonKey.DURATION, requestTime);
-                  params.put(JsonKey.STATUS, result.status());
-                  params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
-                  String contextDetails = request.flash().get(JsonKey.CONTEXT);
-                  Map<String, Object> context =
-                      objectMapper.readValue(
-                          contextDetails, new TypeReference<Map<String, Object>>() {});
-                  req.setRequest(
-                      generateTelemetryRequestForController(
-                          TelemetryEvents.LOG.getName(),
-                          params,
-                          (Map<String, Object>) context.get(JsonKey.CONTEXT)));
-                  TelemetryWriter.write(req);
-                } catch (Exception ex) {
-                  ProjectLogger.log("AccessLogFilter:apply Exception in writing telemetry", ex);
-                }
-                return result;
-              },
-              executor);
-        });
-  }
-
-  private Map<String, Object> generateTelemetryRequestForController(
-      String eventType, Map<String, Object> params, Map<String, Object> context) {
-
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.TELEMETRY_EVENT_TYPE, eventType);
-    map.put(JsonKey.CONTEXT, context);
-    map.put(JsonKey.PARAMS, params);
-    return map;
+            Accumulator<ByteString, Result> accumulator = next.apply(request);
+            return accumulator.map(
+                result -> {
+                    //MDC.clear();
+                    return result;
+                },
+                executor);
+        }
+    );
   }
 }
