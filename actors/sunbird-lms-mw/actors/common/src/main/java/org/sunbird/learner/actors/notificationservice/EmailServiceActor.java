@@ -113,7 +113,7 @@ public class EmailServiceActor extends BaseActor {
       validateUserIds(userIds, emails, actorMessage.getRequestContext());
       validateRecipientsLimit(emails);
 
-      Map<String, Object> user = null;
+      Map<String, Object> user = Collections.EMPTY_MAP;
       if (CollectionUtils.isNotEmpty(emails)) {
         user = getUserInfo(emails.get(0), actorMessage.getRequestContext());
       }

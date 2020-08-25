@@ -36,19 +36,14 @@ public class RequestContext {
     this.debugEnabled = debugEnabled;
     this.op = op;
 
-    contextMap.putAll(
-        new HashMap<String, Object>() {
-          {
-            put("uid", uid);
-            put("did", did);
-            put("sid", sid);
-            put("appId", appId);
-            put("appVer", appVer);
-            put("reqId", reqId);
-            put("op", op);
-            put("pid", pid);
-          }
-        });
+    contextMap.put("uid", uid);
+    contextMap.put("did", did);
+    contextMap.put("sid", sid);
+    contextMap.put("appId", appId);
+    contextMap.put("appVer", appVer);
+    contextMap.put("reqId", reqId);
+    contextMap.put("op", op);
+    contextMap.put("pid", pid);
   }
 
   public String getUid() {
