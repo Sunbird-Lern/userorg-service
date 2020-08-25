@@ -25,7 +25,6 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
-import util.Attrs;
 import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
@@ -53,13 +52,13 @@ public class OnRequestHandler implements ActionCreator {
         // From 3.0.0 checking user access-token and managed-by from the request header
         String message = RequestInterceptor.verifyRequestData(request);
         // call method to set all the required params for the telemetry event(log)...
-        request = initializeRequestInfo(request, message, requestId);
+        initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
-          request = request.addAttr(Attrs.USER_ID, message);
-          request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
+          request.flash().put(JsonKey.USER_ID, message);
+          request.flash().put(JsonKey.IS_AUTH_REQ, "false");
           for (String uri : RequestInterceptor.restrictedUriList) {
             if (request.path().contains(uri)) {
-              request = request.addAttr(Attrs.IS_AUTH_REQ, "true");
+              request.flash().put(JsonKey.IS_AUTH_REQ, "true");
               break;
             }
           }
@@ -105,7 +104,7 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  public Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  public void initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
@@ -190,12 +189,11 @@ public class OnRequestHandler implements ActionCreator {
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
       map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-      request = request.addAttr(Attrs.REQUEST_ID, requestId);
-      request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(map));
+      request.flash().put(JsonKey.REQUEST_ID, requestId);
+      request.flash().put(JsonKey.CONTEXT, mapper.writeValueAsString(map));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
-    return request;
   }
 
   private static String getCustodianOrgHashTagId() {
