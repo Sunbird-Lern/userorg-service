@@ -1036,7 +1036,6 @@ public class UserUtil {
       String provider, Map<String, String> providerOrgMap) {
     // In some cases channel is provided in smaller case
     String orgId = providerOrgMap.get(provider);
-
     if (null == orgId && StringUtils.isNotBlank(provider)) {
       ProjectLogger.log(
           String.format("Checking channel: %s as with lower case", provider), LoggerEnum.INFO);
