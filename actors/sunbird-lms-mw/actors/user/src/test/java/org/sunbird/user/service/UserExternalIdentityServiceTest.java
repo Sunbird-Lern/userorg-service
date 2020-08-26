@@ -58,6 +58,9 @@ public class UserExternalIdentityServiceTest {
     orgProviderMap.put("channel1004", "01234567687");
     PowerMockito.mockStatic(UserUtil.class);
     when(UserUtil.fetchOrgIdByProvider(Mockito.anyList())).thenReturn(orgProviderMap);
+    when(UserUtil.getCaseInsensitiveOrgFromProvider(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("01234567687");
+
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
     String userId = userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004");
