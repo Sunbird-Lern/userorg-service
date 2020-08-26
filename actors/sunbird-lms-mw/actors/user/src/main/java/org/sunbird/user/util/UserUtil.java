@@ -16,10 +16,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -175,7 +172,8 @@ public class UserUtil {
         for (Map<String, String> externalId :
             (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
 
-          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          String orgId =
+              getCaseInsensitiveOrgFromProvider(externalId.get(JsonKey.PROVIDER), orgProviderMap);
           if (StringUtils.isBlank(orgId)) {
             ProjectCommonException.throwClientErrorException(
                 ResponseCode.invalidParameterValue,
@@ -1032,6 +1030,18 @@ public class UserUtil {
       ProjectLogger.log(ex.getMessage(), ex);
     }
     return "";
+  }
+
+  public static String getCaseInsensitiveOrgFromProvider(
+      String provider, Map<String, String> providerOrgMap) {
+    // In some cases channel is provided in smaller case
+    String orgId = providerOrgMap.get(provider);
+    if (null == orgId && StringUtils.isNotBlank(provider)) {
+      ProjectLogger.log(
+          String.format("Checking channel: %s as with lower case", provider), LoggerEnum.INFO);
+      orgId = providerOrgMap.get(provider.toLowerCase());
+    }
+    return orgId;
   }
 
   public static Map<String, String> fetchOrgIdByProvider(List<String> providers) {
