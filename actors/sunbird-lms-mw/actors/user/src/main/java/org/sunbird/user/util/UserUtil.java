@@ -175,7 +175,8 @@ public class UserUtil {
         for (Map<String, String> externalId :
             (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
 
-          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          String orgId =
+              getCaseInsensitiveOrgFromProvider(externalId.get(JsonKey.PROVIDER), orgProviderMap);
           if (StringUtils.isBlank(orgId)) {
             ProjectCommonException.throwClientErrorException(
                 ResponseCode.invalidParameterValue,
@@ -1032,6 +1033,19 @@ public class UserUtil {
       ProjectLogger.log(ex.getMessage(), ex);
     }
     return "";
+  }
+
+  public static String getCaseInsensitiveOrgFromProvider(
+      String provider, Map<String, String> providerOrgMap) {
+    // In some cases channel is provided in smaller case
+    Map<String, String> providerOrgMapCaseInsensitiveMap =
+        new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    providerOrgMapCaseInsensitiveMap.putAll(providerOrgMap);
+    String orgId = providerOrgMap.get(provider);
+    if (null == orgId) {
+      orgId = providerOrgMapCaseInsensitiveMap.get(provider);
+    }
+    return orgId;
   }
 
   public static Map<String, String> fetchOrgIdByProvider(List<String> providers) {

@@ -48,10 +48,9 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   @Override
   public String getUserV1(String extId, String provider, String idType) {
     Map<String, String> providerOrgMap = UserUtil.fetchOrgIdByProvider(Arrays.asList(provider));
+    String orgId = UserUtil.getCaseInsensitiveOrgFromProvider(provider, providerOrgMap);
     return userExternalIdentityDao.getUserIdByExternalId(
-        extId,
-        providerOrgMap.get(provider),
-        provider.equals(idType) ? providerOrgMap.get(idType) : idType);
+        extId, orgId, provider.equals(idType) ? orgId : idType);
   }
 
   /**

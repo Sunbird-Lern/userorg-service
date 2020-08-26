@@ -412,9 +412,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
             case "diksha sub-org id":
               mappedColumns.add("subOrgId");
               break;
-            case "org id":
-              mappedColumns.add(JsonKey.ORG_ID);
-              break;
             case "persona":
               mappedColumns.add(column);
               break;
@@ -548,9 +545,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     }
     if (columnAttribute.equalsIgnoreCase(JsonKey.ERROR_TYPE)) {
       migrationUser.setErrorType((String) value);
-    }
-    if (columnAttribute.equalsIgnoreCase(JsonKey.ORG_ID)) {
-      migrationUser.setOrgId((String) value);
     }
   }
 
