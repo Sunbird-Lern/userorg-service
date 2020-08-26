@@ -1038,12 +1038,9 @@ public class UserUtil {
   public static String getCaseInsensitiveOrgFromProvider(
       String provider, Map<String, String> providerOrgMap) {
     // In some cases channel is provided in smaller case
-    Map<String, String> providerOrgMapCaseInsensitiveMap =
-        new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    providerOrgMapCaseInsensitiveMap.putAll(providerOrgMap);
     String orgId = providerOrgMap.get(provider);
     if (null == orgId) {
-      orgId = providerOrgMapCaseInsensitiveMap.get(provider);
+      orgId = providerOrgMap.get(provider.toLowerCase());
     }
     return orgId;
   }
