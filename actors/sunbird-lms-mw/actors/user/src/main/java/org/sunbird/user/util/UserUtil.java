@@ -1038,8 +1038,8 @@ public class UserUtil {
     String orgId = providerOrgMap.get(provider);
     if (null == orgId && StringUtils.isNotBlank(provider)) {
       ProjectLogger.log(
-          String.format("Checking channel: %s as with lower case", provider), LoggerEnum.INFO);
-      orgId = providerOrgMap.get(provider.toLowerCase());
+          String.format("Checking channel: %s as with upper case case", provider), LoggerEnum.INFO);
+      orgId = providerOrgMap.get(provider.toUpperCase());
     }
     return orgId;
   }
