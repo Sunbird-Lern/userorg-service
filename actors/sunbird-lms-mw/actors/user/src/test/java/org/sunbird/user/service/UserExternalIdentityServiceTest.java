@@ -62,7 +62,6 @@ public class UserExternalIdentityServiceTest {
         .thenReturn("01234567687");
 
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
-
     String userId = userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004");
     Assert.assertTrue(true);
   }
