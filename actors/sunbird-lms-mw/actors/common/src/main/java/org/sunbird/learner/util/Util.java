@@ -1241,19 +1241,20 @@ public final class Util {
   }
 
   public static String getUserRequiredActionLink(
-      Map<String, Object> templateMap, boolean isUrlShortRequired) {
+      Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {
     URLShortner urlShortner = new URLShortnerImpl();
     String redirectUri =
         StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
             ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
             : null;
-    logger.info("Util:getUserRequiredActionLink redirectURI = " + redirectUri);
+    logger.info(context, "Util:getUserRequiredActionLink redirectURI = " + redirectUri);
     if (StringUtils.isBlank((String) templateMap.get(JsonKey.PASSWORD))) {
       String url =
           KeycloakRequiredActionLinkUtil.getLink(
               (String) templateMap.get(JsonKey.USERNAME),
               redirectUri,
-              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD);
+              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD,
+              context);
 
       templateMap.put(
           JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
@@ -1264,15 +1265,17 @@ public final class Util {
           KeycloakRequiredActionLinkUtil.getLink(
               (String) templateMap.get(JsonKey.USERNAME),
               redirectUri,
-              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL);
+              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
+              context);
       templateMap.put(
           JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
       return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
     }
   }
 
-  public static void getUserRequiredActionLink(Map<String, Object> templateMap) {
-    getUserRequiredActionLink(templateMap, true);
+  public static void getUserRequiredActionLink(
+      Map<String, Object> templateMap, RequestContext context) {
+    getUserRequiredActionLink(templateMap, true, context);
   }
 
   public static void sendSMS(Map<String, Object> userMap) {

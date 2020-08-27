@@ -45,7 +45,7 @@ public class ResetPasswordActorTest {
     when(UserDaoImpl.getInstance()).thenReturn(userDao);
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
-    when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean()))
+    when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean(), Mockito.any()))
         .thenReturn("/url/password");
     when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());

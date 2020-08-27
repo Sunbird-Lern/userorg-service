@@ -105,7 +105,7 @@ public class HttpUtilTest extends BaseHttpTest {
   @Test
   public void testGetHeaderWithInput() throws Exception {
     PowerMockito.mockStatic(KeycloakRequiredActionLinkUtil.class);
-    when(KeycloakRequiredActionLinkUtil.getAdminAccessToken()).thenReturn("testAuthToken");
+    when(KeycloakRequiredActionLinkUtil.getAdminAccessToken(null)).thenReturn("testAuthToken");
     Map<String, String> input =
         new HashMap<String, String>() {
           {
@@ -125,7 +125,7 @@ public class HttpUtilTest extends BaseHttpTest {
   @Test
   public void testGetHeaderWithoutInput() throws Exception {
     PowerMockito.mockStatic(KeycloakRequiredActionLinkUtil.class);
-    when(KeycloakRequiredActionLinkUtil.getAdminAccessToken()).thenReturn("testAuthToken");
+    when(KeycloakRequiredActionLinkUtil.getAdminAccessToken(null)).thenReturn("testAuthToken");
     Map<String, String> headers = HttpUtil.getHeader(null);
     assertTrue(!headers.isEmpty());
     assertTrue(headers.size() == 2);

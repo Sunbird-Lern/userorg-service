@@ -9,8 +9,6 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -31,15 +29,15 @@ public class ResetPasswordActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    String userId = (String) request.get(JsonKey.USER_ID);
-    String type = (String) request.get(JsonKey.TYPE);
-    resetPassword(userId, type);
+    resetPassword(request);
     generateTelemetry(request);
   }
 
-  private void resetPassword(String userId, String type) {
-    ProjectLogger.log("ResetPasswordActor:resetPassword: method called.", LoggerEnum.INFO.name());
-    User user = getUserDao().getUserById(userId, null);
+  private void resetPassword(Request request) {
+    String userId = (String) request.get(JsonKey.USER_ID);
+    String type = (String) request.get(JsonKey.TYPE);
+    logger.info(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
+    User user = getUserDao().getUserById(userId, request.getRequestContext());
     ObjectMapper mapper = new ObjectMapper();
     if (null != user) {
       user = removeUnUsedIdentity(user, type);
@@ -47,20 +45,20 @@ public class ResetPasswordActor extends BaseActor {
       UserUtility.decryptUserData(userMap);
       userMap.put(JsonKey.USERNAME, userMap.get(JsonKey.USERNAME));
       userMap.put(JsonKey.REDIRECT_URI, Util.getSunbirdLoginUrl());
-      String url = Util.getUserRequiredActionLink(userMap, false);
+      String url = Util.getUserRequiredActionLink(userMap, false, request.getRequestContext());
       userMap.put(JsonKey.SET_PASSWORD_LINK, url);
       if ((String) userMap.get(JsonKey.SET_PASSWORD_LINK) != null) {
-        ProjectLogger.log(
-            "ResetPasswordActor:resetPassword: link generated for reset password.",
-            LoggerEnum.INFO.name());
+        logger.info(
+            request.getRequestContext(),
+            "ResetPasswordActor:resetPassword: link generated for reset password.");
         Response response = new Response();
         response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
         response.put(JsonKey.LINK, (String) userMap.get(JsonKey.SET_PASSWORD_LINK));
         sender().tell(response, self());
       } else {
-        ProjectLogger.log(
-            "ResetPasswordActor:resetPassword: not able to generate reset password link.",
-            LoggerEnum.INFO.name());
+        logger.info(
+            request.getRequestContext(),
+            "ResetPasswordActor:resetPassword: not able to generate reset password link.");
         ProjectCommonException.throwServerErrorException(ResponseCode.internalError);
       }
     } else {
