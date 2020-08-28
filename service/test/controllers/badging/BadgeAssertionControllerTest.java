@@ -48,9 +48,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void testAssertionCreate() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.ISSUER_ID, "issuerId");
@@ -70,9 +72,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void createAssertionWithInvalidData() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.BADGE_CLASS_ID, "badgeid");
@@ -91,9 +95,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void assertionWithInvalidRecipent() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.BADGE_CLASS_ID, "badgeid");
@@ -112,9 +118,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void getAssertionTest() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     RequestBuilder req =
         new RequestBuilder().uri("/v1/issuer/badge/assertion/read/assertionId").method("GET");
@@ -125,9 +133,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
   @Test
   @Ignore
   public void getAssertionListTest() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     List<String> assertionList = new ArrayList<String>();
@@ -145,9 +155,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void getAssertionListWithInvalidTYpe() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.ASSERTION_ID, "assertionId");
@@ -166,9 +178,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void revokeAssertionTest() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.ASSERTION_ID, "assertionId");
@@ -189,9 +203,11 @@ public class BadgeAssertionControllerTest extends BaseApplicationTest {
 
   @Test
   public void revokeAssertionFailureTest() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(BadgingJsonKey.ASSERTION_ID, "assertionId");

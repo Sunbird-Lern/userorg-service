@@ -50,9 +50,11 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testcourseProgress() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/org/orgId?period=7d").method("GET");
     //req.headers(headerMap);
@@ -62,9 +64,11 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testorgConsumption() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/consumption/org/orgId?period=7d").method("GET");
     //req.headers(headerMap);
@@ -74,9 +78,11 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testorgCreationReport() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/org/orgId/export?period=7d").method("GET");
     //req.headers(headerMap);
@@ -86,9 +92,11 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testorgConsumptionReport() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder()
             .uri("/v1/dashboard/consumption/org/orgId/export?period=7d")

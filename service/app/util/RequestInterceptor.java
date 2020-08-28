@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -146,9 +148,13 @@ public class RequestInterceptor {
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned release-3.0.0 on-wards validating managedBy token.
    */
-  public static String verifyRequestData(Http.Request request) {
+  public static Map verifyRequestData(Http.Request request) {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,null);
+    userAuthentication.put(JsonKey.MANAGED_FOR,null);
+
     String clientId = JsonKey.UNAUTHORIZED;
-    request.flash().put(JsonKey.MANAGED_FOR, null);
+    String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     Optional<String> authClientToken =
         request.header(HeaderParam.X_Authenticated_Client_Token.getName());
@@ -169,7 +175,7 @@ public class RequestInterceptor {
               String managedFor =
                   ManagedTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
-                request.flash().put(JsonKey.MANAGED_FOR, managedFor);
+                managedForId = managedFor;
               } else {
                 clientId = JsonKey.UNAUTHORIZED;
               }
@@ -178,15 +184,17 @@ public class RequestInterceptor {
             ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
           }
         }
+        userAuthentication.put(JsonKey.USER_ID, clientId);
+        userAuthentication.put(JsonKey.MANAGED_FOR, managedForId);
       } else if (authClientToken.isPresent() && authClientId.isPresent()) {
         // Client token is present
         clientId =
             AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
         if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
-          request.flash().put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
+          userAuthentication.put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
         }
       }
-      return clientId;
+      userAuthentication.put(JsonKey.USER_ID, clientId);
     } else {
       if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
@@ -199,12 +207,14 @@ public class RequestInterceptor {
           ProjectLogger.log(ex.getMessage(), ex);
           clientAccessTokenId = null;
         }
-        return StringUtils.isNotBlank(clientAccessTokenId)
+        userAuthentication.put(JsonKey.USER_ID, StringUtils.isNotBlank(clientAccessTokenId)
             ? clientAccessTokenId
-            : JsonKey.ANONYMOUS;
+            : JsonKey.ANONYMOUS);
+      }else {
+        userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
       }
-      return JsonKey.ANONYMOUS;
     }
+    return userAuthentication;
   }
 
   private static boolean isRequestPrivate(String path) {

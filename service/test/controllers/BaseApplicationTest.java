@@ -6,6 +6,9 @@ import akka.actor.Props;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import filters.AccessLogFilter;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import modules.OnRequestHandler;
 import modules.StartModule;
 import org.junit.runner.RunWith;
@@ -16,6 +19,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.telemetry.util.TelemetryWriter;
@@ -36,6 +40,8 @@ public abstract class BaseApplicationTest {
   private Props props;
 
   public <T> void setup(Class<T> actorClass) {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"userId");
     try {
       application =
           new GuiceApplicationBuilder()
@@ -51,7 +57,7 @@ public abstract class BaseApplicationTest {
       AccessLogFilter filter = PowerMockito.mock(AccessLogFilter.class);
       PowerMockito.mockStatic(RequestInterceptor.class);
       PowerMockito.mockStatic(TelemetryWriter.class);
-      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
+      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn(userAuthentication);
       PowerMockito.mockStatic(OnRequestHandler.class);
       PowerMockito.doReturn("12345678990").when(OnRequestHandler.class, "getCustodianOrgHashTagId");
     } catch (Exception e) {

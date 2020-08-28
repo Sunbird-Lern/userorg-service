@@ -11,6 +11,8 @@ import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class OrganisationMetricsController extends BaseController {
 
@@ -26,7 +28,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CREATION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       ProjectLogger.log("Return from Org Metrics Creation Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -46,7 +48,7 @@ public class OrganisationMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       ProjectLogger.log("Return from Org Metrics Consumption Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -63,12 +65,12 @@ public class OrganisationMetricsController extends BaseController {
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
       map.put(JsonKey.FORMAT, format);
-      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       Request request = new Request();
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CREATION_METRICS_REPORT.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       ProjectLogger.log("Return from Org Creation Report Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -85,12 +87,12 @@ public class OrganisationMetricsController extends BaseController {
       map.put(JsonKey.ORG_ID, orgId);
       map.put(JsonKey.PERIOD, periodStr);
       map.put(JsonKey.FORMAT, format);
-      map.put(JsonKey.REQUESTED_BY, ctx().flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       Request request = new Request();
       request.setEnv(getEnvironment());
       request.setOperation(ActorOperations.ORG_CONSUMPTION_METRICS_REPORT.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       ProjectLogger.log("Return from Org Consumption Report Contoller");
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {

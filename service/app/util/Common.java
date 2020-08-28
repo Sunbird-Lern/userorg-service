@@ -1,5 +1,8 @@
 package util;
 
+import play.libs.typedmap.TypedKey;
+import play.mvc.Http;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -12,5 +15,12 @@ public class Common {
             requestHeadersArray.put(entry.getKey(), (String[]) entry.getValue().toArray());
         });
         return requestHeadersArray;
+    }
+    public static String getFromRequest(Http.Request httpReq, TypedKey<?> attribute){
+        String attributeValue = null;
+        if (httpReq.attrs() != null && httpReq.attrs().containsKey(attribute)) {
+            attributeValue = (String) httpReq.attrs().get(attribute);
+        }
+        return attributeValue;
     }
 }

@@ -46,9 +46,11 @@ public class ClientControllerTest extends BaseApplicationTest {
 
   @Test
   public void testregisterClient() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put("clientName", "ap");
@@ -65,9 +67,11 @@ public class ClientControllerTest extends BaseApplicationTest {
   @Test
   @Ignore
   public void testupdateClientKey() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put("x-authenticated-client-token", "ap");
@@ -84,9 +88,11 @@ public class ClientControllerTest extends BaseApplicationTest {
 
   @Test
   public void testgetClientKey() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/client/key/read/clientId?type=channel").method("GET");
     /*req.headers(headerMap);*/

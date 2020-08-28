@@ -14,6 +14,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class EmailServiceController extends BaseController {
 
@@ -32,11 +34,11 @@ public class EmailServiceController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
       reqObj.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setRequest(innerMap);
 
       JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
@@ -63,11 +65,11 @@ public class EmailServiceController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
       reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
-      innerMap.put(JsonKey.REQUESTED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setRequest(innerMap);
 
       JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);

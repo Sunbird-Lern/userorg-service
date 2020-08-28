@@ -10,6 +10,8 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class UserMetricsController extends BaseController {
 
@@ -21,7 +23,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.USER_CREATION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -36,7 +38,7 @@ public class UserMetricsController extends BaseController {
       request.setRequest(map);
       request.setOperation(ActorOperations.USER_CONSUMPTION_METRICS.getValue());
       request.setRequest(map);
-      request.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      request.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

@@ -15,6 +15,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /**
  * Controller class to handle request for clients. Created mainly for handling operations related to
@@ -34,7 +36,7 @@ public class ClientController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateRegisterClient(reqObj);
       reqObj.setOperation(ActorOperations.REGISTER_CLIENT.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -59,7 +61,7 @@ public class ClientController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateUpdateClientKey(clientId.get(), masterKey.get());
       reqObj.setOperation(ActorOperations.UPDATE_CLIENT_KEY.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = (HashMap<String, Object>) reqObj.getRequest();
       innerMap.put(JsonKey.CLIENT_ID, clientId);
@@ -85,7 +87,7 @@ public class ClientController extends BaseController {
       RequestValidator.validateGetClientKey(clientId, type);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_CLIENT_KEY.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.CLIENT_ID, clientId);

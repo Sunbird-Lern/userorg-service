@@ -13,6 +13,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.UserRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class UserController extends BaseController {
 
@@ -111,12 +113,12 @@ public class UserController extends BaseController {
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          request.getContext().put(JsonKey.USER_ID, httpRequest.flash().get(JsonKey.USER_ID));
+          request.getContext().put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRequestValidator().validateUpdateUserRequest(request);
           request
               .getContext()
-              .put(JsonKey.IS_AUTH_REQ, httpRequest.flash().get(JsonKey.IS_AUTH_REQ));
+              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
 
           return null;
         },

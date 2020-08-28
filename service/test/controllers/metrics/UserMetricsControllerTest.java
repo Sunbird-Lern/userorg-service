@@ -53,9 +53,11 @@ public class UserMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testuserCreation() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/user/userId").method("GET");
     //req.headers(headerMap);
@@ -65,9 +67,11 @@ public class UserMetricsControllerTest extends BaseApplicationTest {
 
   @Test
   public void testuserConsumption() {
+    Map userAuthentication = new HashMap<String,String>();
+    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+        .thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/consumption/user/userId").method("GET");
     //req.headers(headerMap);
