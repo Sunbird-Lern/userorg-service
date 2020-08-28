@@ -483,7 +483,8 @@ public interface ResponseMessage {
     String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "Declared user error status is not updated";
     String PREFERENCE_NOT_FOUND = "preference {0} not found in the org {1}";
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
-        "Declared user validated status is not updated";;
+        "Declared user validated status is not updated";
+    String INVALID_USER_INFO_VALUE = "Null value is not allowed";
   }
 
   interface Key {
@@ -892,5 +893,6 @@ public interface ResponseMessage {
     String PREFERENCE_NOT_FOUND = "PREFERENCE_NOT_FOUND";
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
         "DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED";
+    String INVALID_USER_INFO_VALUE = "INVALID_USER_INFO_VALUE";
   }
 }

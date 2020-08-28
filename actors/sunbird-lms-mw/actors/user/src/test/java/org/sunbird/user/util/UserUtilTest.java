@@ -255,12 +255,14 @@ public class UserUtilTest {
     List<Map<String, Object>> declarations = new ArrayList<>();
     Map<String, Object> declareFieldMap = new HashMap<>();
     Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
     userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
     declareFieldMap.put(JsonKey.INFO, userInfo);
     declarations.add(declareFieldMap);
+    Map<String, Object> dbRecords = new HashMap<>();
     try {
-      UserUtil.encryptDeclarationFields(declarations);
+      UserUtil.encryptDeclarationFields(declarations, dbRecords);
     } catch (Exception ex) {
 
     }
