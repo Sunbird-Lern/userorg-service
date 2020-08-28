@@ -136,7 +136,10 @@ public class UserManagementActor extends BaseActor {
     try {
       List<Map<String, Object>> declarations =
           (List<Map<String, Object>>) userMap.get(JsonKey.DECLARATIONS);
-      UserUtil.encryptDeclarationFields(declarations);
+      // Get the User ID
+      userMap.put(JsonKey.USER_ID, declarations.get(0).get(JsonKey.USER_ID));
+      Map<String, Object> userDbRecord = UserUtil.validateExternalIdsAndReturnActiveUser(userMap);
+      UserUtil.encryptDeclarationFields(declarations, userDbRecord);
       List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
       for (Map<String, Object> declareFieldMap : declarations) {
         UserDeclareEntity userDeclareEntity =
@@ -149,7 +152,7 @@ public class UserManagementActor extends BaseActor {
     } catch (Exception ex) {
       errMsgs.add(ex.getMessage());
       ProjectLogger.log(
-          "UserSelfDeclarationManagementActor:upsertUserSelfDeclarations: Exception occurred with error message = "
+          "UserSelfDeclarationManagementActor:rtUserSelfDeclarations: Exception occurred with error message = "
               + ex.getMessage(),
           ex);
     }

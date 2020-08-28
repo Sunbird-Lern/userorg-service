@@ -1078,15 +1078,23 @@ public class UserUtil {
     return providerOrgMap;
   }
 
-  public static void encryptDeclarationFields(List<Map<String, Object>> declarations)
-      throws Exception {
+  public static void encryptDeclarationFields(
+      List<Map<String, Object>> declarations, Map<String, Object> userDbRecords) throws Exception {
     for (Map<String, Object> declareFields : declarations) {
       Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
       for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
         String key = userInfo.getKey();
         String value = (String) userInfo.getValue();
         if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
-          userInfoMap.put(key, encryptionService.encryptData(value));
+          if (UserUtility.isMasked(value)) {
+            if (JsonKey.DECLARED_EMAIL.equals(key)) {
+              userInfoMap.put(key, userDbRecords.get(JsonKey.EMAIL));
+            } else {
+              userInfoMap.put(key, userDbRecords.get(JsonKey.PHONE));
+            }
+          } else {
+            userInfoMap.put(key, encryptionService.encryptData(value));
+          }
         }
       }
     }
@@ -1107,13 +1115,15 @@ public class UserUtil {
     userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
     if (JsonKey.ADD.equals(userDeclareEntity.getOperation())) {
       userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
-      userDeclareEntity.setStatus(JsonKey.PENDING);
     } else {
       userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+    }
+    if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.STATUS))) {
+      userDeclareEntity.setStatus(JsonKey.PENDING);
+    } else {
       userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
     }
     userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
-
     return userDeclareEntity;
   }
 }

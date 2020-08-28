@@ -259,8 +259,9 @@ public class UserUtilTest {
     userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
     declareFieldMap.put(JsonKey.INFO, userInfo);
     declarations.add(declareFieldMap);
+    Map<String, Object> dbRecords = new HashMap<>();
     try {
-      UserUtil.encryptDeclarationFields(declarations);
+      UserUtil.encryptDeclarationFields(declarations, dbRecords);
     } catch (Exception ex) {
 
     }

@@ -1134,6 +1134,8 @@ public class UserRequestValidator extends BaseRequestValidator {
           String userId = (String) declareFields.get(JsonKey.USER_ID);
           String orgId = (String) declareFields.get(JsonKey.ORG_ID);
           String persona = (String) declareFields.get(JsonKey.PERSONA);
+          Map<String, Object> info = (Map<String, Object>) declareFields.get(JsonKey.INFO);
+
           if (StringUtils.isBlank(userId)
               || StringUtils.isBlank(orgId)
               || StringUtils.isBlank(persona)) {
@@ -1143,6 +1145,9 @@ public class UserRequestValidator extends BaseRequestValidator {
                     ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
                     new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+          if (info.containsValue(null)) {
+            ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
           }
         }
       }
