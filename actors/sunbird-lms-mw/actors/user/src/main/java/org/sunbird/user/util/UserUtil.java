@@ -1037,9 +1037,12 @@ public class UserUtil {
     // In some cases channel is provided in smaller case
     String orgId = providerOrgMap.get(provider);
     if (null == orgId && StringUtils.isNotBlank(provider)) {
+      Map<String, String> providerOrgCaseInsensitiveMap =
+          new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+      providerOrgCaseInsensitiveMap.putAll(providerOrgMap);
       ProjectLogger.log(
-          String.format("Checking channel: %s as with upper case case", provider), LoggerEnum.INFO);
-      orgId = providerOrgMap.get(provider.toUpperCase());
+          String.format("Checking channel: %s as with any case", provider), LoggerEnum.INFO);
+      orgId = providerOrgCaseInsensitiveMap.get(provider);
     }
     return orgId;
   }
