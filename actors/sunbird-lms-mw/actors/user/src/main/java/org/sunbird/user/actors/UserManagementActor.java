@@ -152,7 +152,7 @@ public class UserManagementActor extends BaseActor {
     } catch (Exception ex) {
       errMsgs.add(ex.getMessage());
       ProjectLogger.log(
-          "UserSelfDeclarationManagementActor:rtUserSelfDeclarations: Exception occurred with error message = "
+          "UserSelfDeclarationManagementActor:upsertUserSelfDeclarations: Exception occurred with error message = "
               + ex.getMessage(),
           ex);
     }

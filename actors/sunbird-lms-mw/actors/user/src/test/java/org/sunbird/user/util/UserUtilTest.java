@@ -51,7 +51,7 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
-public class UserUtilTest {
+public class st {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
@@ -255,7 +255,8 @@ public class UserUtilTest {
     List<Map<String, Object>> declarations = new ArrayList<>();
     Map<String, Object> declareFieldMap = new HashMap<>();
     Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
     userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
     declareFieldMap.put(JsonKey.INFO, userInfo);
     declarations.add(declareFieldMap);
