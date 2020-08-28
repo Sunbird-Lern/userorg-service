@@ -56,7 +56,7 @@ public class UserSkillEndorsementControllerTest extends BaseApplicationTest {
   @Test
   public void testAddSkillEndorsement() {
     Map userAuthentication = new HashMap<String,String>();
-    userAuthentication.put(JsonKey.USER_ID,"uuiuhcf784508 8y8c79-fhh");
+    userAuthentication.put(JsonKey.USER_ID,"{userId} uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
         .thenReturn(userAuthentication);
