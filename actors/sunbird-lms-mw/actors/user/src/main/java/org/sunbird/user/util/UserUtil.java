@@ -1009,6 +1009,7 @@ public class UserUtil {
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.ADD);
+      userDeclareEntity.setStatus(JsonKey.PENDING);
       userDeclareEntities.add(userDeclareEntity);
     }
     return currOrgId;
@@ -1110,7 +1111,9 @@ public class UserUtil {
       userDeclareEntity.setStatus(JsonKey.PENDING);
     } else {
       userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
-      userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
+      if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.STATUS))) {
+        userDeclareEntity.setStatus(JsonKey.PENDING);
+      }
     }
     userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
 
