@@ -51,7 +51,7 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
-public class st {
+public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
