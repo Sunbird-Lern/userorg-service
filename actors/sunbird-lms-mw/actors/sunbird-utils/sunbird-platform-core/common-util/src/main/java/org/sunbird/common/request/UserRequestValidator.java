@@ -1146,7 +1146,7 @@ public class UserRequestValidator extends BaseRequestValidator {
                     new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
-          if (info.containsValue(null)) {
+          if (MapUtils.isNotEmpty(info) && info.containsValue(null)) {
             ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
           }
         }
