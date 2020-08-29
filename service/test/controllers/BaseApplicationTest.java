@@ -48,6 +48,9 @@ public abstract class BaseApplicationTest {
   private Props props;
 
   public <T> void setup(Class<T> actorClass) {
+    PowerMockito.mockStatic(LoggerFactory.class);
+    Logger logger = PowerMockito.mock(Logger.class);
+    PowerMockito.when(LoggerFactory.getLogger((Class<?>) Mockito.any())).thenReturn(logger);
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "userId");
     try {
@@ -75,9 +78,6 @@ public abstract class BaseApplicationTest {
   }
 
   public Result performTest(String url, String method) {
-    PowerMockito.mockStatic(LoggerFactory.class);
-    Logger logger = PowerMockito.mock(Logger.class);
-    PowerMockito.when(LoggerFactory.getLogger((Class<?>) Mockito.any())).thenReturn(logger);
     Http.RequestBuilder req = new Http.RequestBuilder().uri(url).method(method);
     Result result = Helpers.route(application, req);
     return result;

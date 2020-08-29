@@ -221,7 +221,7 @@
           <artifactId>logstash-logback-encoder</artifactId>
           <version>6.3</version>
         </dependency>
-	</dependencies>
+    </dependencies>
 	<build>
 		<sourceDirectory>${basedir}/app</sourceDirectory>
 		<testSourceDirectory>${basedir}/test</testSourceDirectory>
