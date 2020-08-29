@@ -18,6 +18,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /** @author Manzarul */
 public class HealthController extends BaseController {
@@ -42,8 +44,10 @@ public class HealthController extends BaseController {
       handleSigTerm();
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -68,8 +72,10 @@ public class HealthController extends BaseController {
           handleSigTerm();
           Request reqObj = new Request();
           reqObj.setOperation(val);
-          reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-          reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+          reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+          reqObj
+              .getRequest()
+              .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
           reqObj.setEnv(getEnvironment());
           return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
         } catch (Exception e) {
@@ -87,7 +93,7 @@ public class HealthController extends BaseController {
         response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
         response.setId("learner.service.health.api");
         response.setVer(getApiVersion(httpRequest.path()));
-        response.setTs(httpRequest.flash().get(JsonKey.REQUEST_ID));
+        response.setTs(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
         return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
       } catch (Exception e) {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -125,7 +131,7 @@ public class HealthController extends BaseController {
       headers.put("Content-Type", "application/json");
       String ekStepBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       String response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               body,
@@ -147,7 +153,7 @@ public class HealthController extends BaseController {
     response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
     response.setId("Ekstep.service.health.api");
     response.setVer(getApiVersion(request.path()));
-    response.setTs(request.flash().get(JsonKey.REQUEST_ID));
+    response.setTs(Common.getFromRequest(request, Attrs.REQUEST_ID));
     return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
 }

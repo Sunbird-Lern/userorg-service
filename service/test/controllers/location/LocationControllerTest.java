@@ -1,13 +1,17 @@
 package controllers.location;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import controllers.TestUtil;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -24,12 +28,6 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** @author arvind on 19/4/18. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -38,7 +36,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 public class LocationControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
-  private static final String USER_TOKEN = "{userId} uuiuhcf784508 8y8c79-fhh";
   private static final String LOCATION_NAME = "Laddakh";
   private static final String LOCATION_CODE = "LOC_01";
   private static final String LOCATION_TYPE = "State";
@@ -53,15 +50,16 @@ public class LocationControllerTest extends BaseApplicationTest {
     setup(DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(
-            HeaderParam.X_Authenticated_User_Token.getName(),
-            new String[] {"Authenticated user token"});
+        HeaderParam.X_Authenticated_User_Token.getName(),
+        new String[] {"Authenticated user token"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
   @Test
   public void testCreateLocation() {
-
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(USER_TOKEN);
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
@@ -72,8 +70,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -89,8 +87,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -108,8 +106,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -125,8 +123,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
   }
 
@@ -134,8 +132,8 @@ public class LocationControllerTest extends BaseApplicationTest {
   public void testDeleteLocation() {
     RequestBuilder req =
         new RequestBuilder().uri(DELETE_LOCATION_URL + "/" + LOCATION_ID).method("DELETE");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
@@ -154,8 +152,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(SEARCH_LOCATION_URL).method("POST");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 }

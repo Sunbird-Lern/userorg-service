@@ -1,7 +1,12 @@
 package controllers.metrics;
 
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -21,12 +26,6 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 /** Created by arvind on 4/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -34,7 +33,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(OnRequestHandler.class)
 @Ignore
 public class OrganisationMetricsControllerTest extends BaseApplicationTest {
-  
+
   private static Map<String, String[]> headerMap;
 
   @Before
@@ -44,57 +43,61 @@ public class OrganisationMetricsControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
     headerMap.put(
-            HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
+        HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
   @Test
   public void testcourseProgress() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/org/orgId?period=7d").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testorgConsumption() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/consumption/org/orgId?period=7d").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testorgCreationReport() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder().uri("/v1/dashboard/creation/org/orgId/export?period=7d").method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 
   @Test
   public void testorgConsumptionReport() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     RequestBuilder req =
         new RequestBuilder()
             .uri("/v1/dashboard/consumption/org/orgId/export?period=7d")
             .method("GET");
-    //req.headers(headerMap);
-    Result result = Helpers.route(application,req);
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
 }

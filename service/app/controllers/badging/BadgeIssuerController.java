@@ -26,6 +26,8 @@ import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /** Created by arvind on 2/3/18. This controller is for handling the badge issuer apis. */
 public class BadgeIssuerController extends BaseController {
@@ -61,9 +63,9 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgeOperations.createBadgeIssuer.name(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -82,9 +84,9 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgeOperations.getBadgeIssuer.name(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
       new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);
@@ -105,9 +107,9 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgeOperations.getAllIssuer.name(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -126,9 +128,9 @@ public class BadgeIssuerController extends BaseController {
       reqObj =
           setExtraParam(
               reqObj,
-              httpRequest.flash().get(JsonKey.REQUEST_ID),
+              Common.getFromRequest(httpRequest, Attrs.REQUEST_ID),
               BadgeOperations.deleteIssuer.name(),
-              httpRequest.flash().get(JsonKey.USER_ID),
+              Common.getFromRequest(httpRequest, Attrs.USER_ID),
               getEnvironment());
       reqObj.getRequest().put(JsonKey.SLUG, issuerId);
       new BadgeIssuerRequestValidator().validateGetBadgeIssuerDetail(reqObj);

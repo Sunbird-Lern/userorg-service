@@ -2,6 +2,7 @@ package controllers.badging;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
@@ -9,11 +10,9 @@ import controllers.DummyActor;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -48,9 +47,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateBadgeIssuer() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.NAME, "goldBadge");
@@ -69,9 +69,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateBadgeIssuerMissingUrl() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.NAME, "goldBadge");
@@ -89,9 +90,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateBadgeIssuerInvalidUrl() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.NAME, "goldBadge");
@@ -110,9 +112,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testGetBadgeIssuer() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
 
     RequestBuilder req = new RequestBuilder().uri("/v1/issuer/read/123").method("GET");
     Result result = Helpers.route(application, req);
@@ -121,9 +124,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testGetAllIssuer() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
 
     RequestBuilder req = new RequestBuilder().uri("/v1/issuer/list").method("GET");
     Result result = Helpers.route(application, req);
@@ -132,9 +136,10 @@ public class BadgeIssuerControllerTest extends BaseApplicationTest {
 
   @Test
   public void testDeleteBadgeIssuer() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
-        .thenReturn("{userId} uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
 
     RequestBuilder req = new RequestBuilder().uri("/v1/issuer/delete/123").method("DELETE");
     Result result = Helpers.route(application, req);

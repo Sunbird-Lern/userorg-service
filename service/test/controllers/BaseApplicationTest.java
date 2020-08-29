@@ -8,6 +8,8 @@ import akka.actor.Props;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import filters.AccessLogFilter;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import modules.OnRequestHandler;
 import modules.StartModule;
 import org.junit.runner.RunWith;
@@ -20,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.telemetry.util.TelemetryWriter;
@@ -45,6 +48,8 @@ public abstract class BaseApplicationTest {
   private Props props;
 
   public <T> void setup(Class<T> actorClass) {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "userId");
     try {
       application =
           new GuiceApplicationBuilder()
@@ -60,7 +65,8 @@ public abstract class BaseApplicationTest {
       AccessLogFilter filter = PowerMockito.mock(AccessLogFilter.class);
       mockStatic(RequestInterceptor.class);
       mockStatic(TelemetryWriter.class);
-      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any())).thenReturn("userId");
+      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.any()))
+          .thenReturn(userAuthentication);
       mockStatic(OnRequestHandler.class);
       PowerMockito.doReturn("12345678990").when(OnRequestHandler.class, "getCustodianOrgHashTagId");
     } catch (Exception e) {
@@ -69,7 +75,7 @@ public abstract class BaseApplicationTest {
   }
 
   public Result performTest(String url, String method) {
-    mockStatic(LoggerFactory.class);
+    PowerMockito.mockStatic(LoggerFactory.class);
     Logger logger = PowerMockito.mock(Logger.class);
     PowerMockito.when(LoggerFactory.getLogger((Class<?>) Mockito.any())).thenReturn(logger);
     Http.RequestBuilder req = new Http.RequestBuilder().uri(url).method(method);
