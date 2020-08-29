@@ -1,7 +1,6 @@
 package filters;
 
 import akka.util.ByteString;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import play.libs.streams.Accumulator;
@@ -12,7 +11,6 @@ import play.mvc.Result;
 public class AccessLogFilter extends EssentialFilter {
 
   private final Executor executor;
-  private ObjectMapper objectMapper = new ObjectMapper();
 
   @Inject
   public AccessLogFilter(Executor executor) {

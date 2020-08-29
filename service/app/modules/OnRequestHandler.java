@@ -118,7 +118,7 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  public Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();

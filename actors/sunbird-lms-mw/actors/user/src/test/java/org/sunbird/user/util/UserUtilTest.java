@@ -134,11 +134,10 @@ public class UserUtilTest {
     boolean response = false;
     try {
       UserUtil.checkPhoneUniqueness(user, "create", null);
-      response = true;
+      assertTrue(true);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertNotNull(e);
     }
-    assertFalse(response);
   }
 
   @Test
@@ -149,14 +148,12 @@ public class UserUtilTest {
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     beforeEachTest();
-    boolean response = false;
     try {
       UserUtil.checkPhoneUniqueness("9663890400", null);
-      response = true;
+      assertTrue(true);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertNotNull(e);
     }
-    assertFalse(response);
   }
 
   @Test
