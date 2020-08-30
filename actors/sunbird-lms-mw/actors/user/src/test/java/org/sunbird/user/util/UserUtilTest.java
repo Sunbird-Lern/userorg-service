@@ -135,7 +135,7 @@ public class UserUtilTest {
     try {
       UserUtil.checkPhoneUniqueness(user, "create", null);
       assertTrue(true);
-    } catch (ProjectCommonException e) {
+    } catch (Exception e) {
       assertNotNull(e);
     }
   }
@@ -151,7 +151,7 @@ public class UserUtilTest {
     try {
       UserUtil.checkPhoneUniqueness("9663890400", null);
       assertTrue(true);
-    } catch (ProjectCommonException e) {
+    } catch (Exception e) {
       assertNotNull(e);
     }
   }
