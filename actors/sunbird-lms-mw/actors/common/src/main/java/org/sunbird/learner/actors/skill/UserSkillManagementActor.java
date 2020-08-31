@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -574,27 +573,6 @@ public class UserSkillManagementActor extends BaseActor {
         esService.getDataByIdentifier(EsType.user.getTypeName(), userId, null);
     Map<String, Object> profile =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(profileF);
-    if (MapUtils.isNotEmpty(profile)) {
-      Map<String, String> visibility =
-          (Map<String, String>) profile.get(JsonKey.PROFILE_VISIBILITY);
-      // Fetching complete private map including global settings
-      Map<String, String> privateVisibilityMap =
-          Util.getCompleteProfileVisibilityPrivateMap(
-              visibility, getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()));
-      if (MapUtils.isNotEmpty(privateVisibilityMap)
-          && privateVisibilityMap.containsKey(JsonKey.SKILLS)) {
-        Future<Map<String, Object>> visibilityMapF =
-            esService.getDataByIdentifier(EsType.userprofilevisibility.getTypeName(), userId, null);
-        Map<String, Object> visibilityMap =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(visibilityMapF);
-        if (MapUtils.isNotEmpty(visibilityMap)) {
-          visibilityMap.putAll(esMap);
-          esService.save(EsType.userprofilevisibility.getTypeName(), userId, visibilityMap, null);
-        }
-      } else {
-        esService.update(EsType.user.getTypeName(), userId, esMap, null);
-      }
-    }
   }
 
   // method will compare two strings and return true id both are same otherwise
