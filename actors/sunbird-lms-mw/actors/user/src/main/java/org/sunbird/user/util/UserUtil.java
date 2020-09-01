@@ -112,6 +112,8 @@ public class UserUtil {
     }
   }
 
+  // Todo create a new private method to reduce the repeatation of code checkPhoneUniqueness
+
   @SuppressWarnings("unchecked")
   public static void checkPhoneUniqueness(String phone) {
     // Get Phone configuration if not found , by default phone will be unique across
@@ -124,6 +126,7 @@ public class UserUtil {
         } catch (Exception e) {
           ProjectLogger.log("Exception occurred while encrypting phone number ", e);
         }
+        // look up table
         Response result =
             cassandraOperation.getRecordsByIndexedProperty(
                 userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
@@ -144,6 +147,7 @@ public class UserUtil {
       } catch (Exception e) {
         ProjectLogger.log("Exception occurred while encrypting email/phone", e);
       }
+      // todo new lookup table
       Response result =
           cassandraOperation.getRecordsByIndexedProperty(
               userDb.getKeySpace(), userDb.getTableName(), type, value);

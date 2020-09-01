@@ -59,6 +59,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   @Override
   public List<Map<String, String>> getUserExternalIds(String userId) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    // todo change to getRecordByPrimary key
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
             JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
