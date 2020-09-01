@@ -49,20 +49,17 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
-        //From 3.0.0 checking user access-token and managed-by from the request header
+        // From 3.0.0 checking user access-token and managed-by from the request header
         String message = RequestInterceptor.verifyRequestData(request);
         // call method to set all the required params for the telemetry event(log)...
         initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request.flash().put(JsonKey.USER_ID, message);
           request.flash().put(JsonKey.IS_AUTH_REQ, "false");
-          for (String uri : RequestInterceptor.restrictedUriList) {
-            if (request.path().contains(uri)) {
-              request.flash().put(JsonKey.IS_AUTH_REQ, "true");
-              break;
-            }
+          if (RequestInterceptor.restrictedUriList.contains(request.path())) {
+            request.flash().put(JsonKey.IS_AUTH_REQ, "true");
           }
-            result = delegate.call(request);
+          result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
               onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());

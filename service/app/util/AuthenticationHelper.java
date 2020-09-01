@@ -1,21 +1,21 @@
 package util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.sunbird.auth.verifier.ManagedTokenValidator;
+import org.apache.commons.lang3.StringUtils;
+import org.keycloak.common.util.Time;
+import org.sunbird.auth.verifier.Base64Util;
+import org.sunbird.auth.verifier.CryptoUtil;
+import org.sunbird.auth.verifier.KeyManager;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.learner.util.Util.DbInfo;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
 
 /**
  * This class will handle all the method related to authentication. For example verifying user
@@ -25,49 +25,54 @@ import org.sunbird.services.sso.SSOServiceFactory;
  */
 public class AuthenticationHelper {
 
-  private static boolean ssoEnabled =
-      ((PropertiesCache.getInstance().getProperty(JsonKey.SSO_PUBLIC_KEY) != null)
-          && (Boolean.parseBoolean(
-              PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))));
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static DbInfo userAuth = Util.dbInfoMap.get(JsonKey.USER_AUTH_DB);
-  public static final String KEY_SPACE_NAME = "sunbird";
-  private static EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
 
-  /**
-   * This method will verify the incoming user access token against store data base /cache. If token
-   * is valid then it would be associated with some user id. In case of token matched it will
-   * provide user id. else will provide empty string.
-   *
-   * @param token String
-   * @return String
-   */
-  @SuppressWarnings("unchecked")
-  public static String verifyUserAccesToken(String token) {
-    SSOManager ssoManager = SSOServiceFactory.getInstance();
+  public static String verifyUserAccessToken(String token) {
     String userId = JsonKey.UNAUTHORIZED;
     try {
-      if (ssoEnabled) {
-        userId = ssoManager.verifyToken(token);
-      } else {
-        Response authResponse =
-            cassandraOperation.getRecordById(
-                userAuth.getKeySpace(), userAuth.getTableName(), token);
-        if (authResponse != null && authResponse.get(JsonKey.RESPONSE) != null) {
-          List<Map<String, Object>> authList =
-              (List<Map<String, Object>>) authResponse.get(JsonKey.RESPONSE);
-          if (authList != null && !authList.isEmpty()) {
-            Map<String, Object> authMap = authList.get(0);
-            userId = (String) authMap.get(JsonKey.USER_ID);
-          }
-        }
+      String[] tokenElements = token.split("\\.");
+      String header = tokenElements[0];
+      String body = tokenElements[1];
+      String signature = tokenElements[2];
+      String payLoad = header + JsonKey.DOT_SEPARATOR + body;
+      ObjectMapper mapper = new ObjectMapper();
+      Map<Object, Object> headerData =
+          mapper.readValue(new String(decodeFromBase64(header)), Map.class);
+      String keyId = headerData.get("kid").toString();
+      Map<String, Object> tokenBody =
+          mapper.readValue(new String(decodeFromBase64(body)), Map.class);
+      userId = (String) tokenBody.get(JsonKey.SUB);
+      if (StringUtils.isNotBlank(userId)) {
+        int pos = userId.lastIndexOf(":");
+        userId = userId.substring(pos + 1);
       }
-    } catch (Exception e) {
-      ProjectLogger.log("invalid auth token =" + token, e);
+      boolean isExp = isExpired((Integer) tokenBody.get("exp"));
+      boolean issChecked = checkIss((String) tokenBody.get("iss"));
+      boolean isValid =
+          CryptoUtil.verifyRSASign(
+              payLoad,
+              decodeFromBase64(signature),
+              KeyManager.getPublicKey(keyId).getPublicKey(),
+              JsonKey.SHA_256_WITH_RSA);
+      if (!isExp && issChecked && isValid) {
+        return userId;
+      } else {
+        return JsonKey.UNAUTHORIZED;
+      }
+    } catch (Exception ex) {
+      ProjectLogger.log("Exception in verifyUserAccessToken: verify ", ex);
     }
     return userId;
+  }
+
+  private static boolean checkIss(String iss) {
+    String realmUrl =
+        KeyCloakConnectionProvider.SSO_URL + "realms/" + KeyCloakConnectionProvider.SSO_REALM;
+    return (realmUrl.equalsIgnoreCase(iss));
+  }
+
+  private static boolean isExpired(Integer expiration) {
+    return (Time.currentTime() > expiration);
   }
 
   @SuppressWarnings("unchecked")
@@ -91,5 +96,8 @@ public class AuthenticationHelper {
     }
     return validClientId;
   }
-  
+
+  private static byte[] decodeFromBase64(String data) {
+    return Base64Util.decode(data, 11);
+  }
 }
