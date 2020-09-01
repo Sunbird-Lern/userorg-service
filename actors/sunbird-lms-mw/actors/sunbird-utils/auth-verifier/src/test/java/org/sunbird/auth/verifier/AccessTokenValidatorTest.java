@@ -2,8 +2,14 @@ package org.sunbird.auth.verifier;
 
 import static org.junit.Assert.assertNotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.security.PublicKey;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.keycloak.common.util.Time;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -11,12 +17,25 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CryptoUtil.class, KeyManager.class})
+@PrepareForTest({CryptoUtil.class, KeyManager.class, Base64Util.class, AccessTokenValidator.class})
 @PowerMockIgnore({"javax.management.*"})
 public class AccessTokenValidatorTest {
   @Test
-  public void verifyUserAccessToken() {
+  public void verifyUserAccessToken() throws JsonProcessingException {
     PowerMockito.mockStatic(CryptoUtil.class);
+    PowerMockito.mockStatic(Base64Util.class);
+    PowerMockito.mockStatic(KeyManager.class);
+    KeyData keyData = PowerMockito.mock(KeyData.class);
+    Mockito.when(KeyManager.getPublicKey(Mockito.anyString())).thenReturn(keyData);
+    PublicKey publicKey = PowerMockito.mock(PublicKey.class);
+    Mockito.when(keyData.getPublicKey()).thenReturn(publicKey);
+    Map<String, Object> payload = new HashMap<>();
+    int expTime = Time.currentTime() + 3600000;
+    payload.put("exp", expTime);
+    payload.put("kid", "kid");
+    ObjectMapper mapper = new ObjectMapper();
+    Mockito.when(Base64Util.decode(Mockito.any(String.class), Mockito.anyInt()))
+        .thenReturn(mapper.writeValueAsString(payload).getBytes());
     Mockito.when(
             CryptoUtil.verifyRSASign(
                 Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -28,8 +47,26 @@ public class AccessTokenValidatorTest {
   }
 
   @Test
-  public void verifyToken() {
+  public void verifyToken() throws JsonProcessingException {
     PowerMockito.mockStatic(CryptoUtil.class);
+    PowerMockito.mockStatic(Base64Util.class);
+    PowerMockito.mockStatic(KeyManager.class);
+    KeyData keyData = PowerMockito.mock(KeyData.class);
+    Mockito.when(KeyManager.getPublicKey(Mockito.anyString())).thenReturn(keyData);
+    PublicKey publicKey = PowerMockito.mock(PublicKey.class);
+    Mockito.when(keyData.getPublicKey()).thenReturn(publicKey);
+    Map<String, Object> payload = new HashMap<>();
+    int expTime = Time.currentTime() + 3600000;
+    payload.put("exp", expTime);
+    payload.put("requestedByUserId", "386c7960-7f85-4a24-8131-a8aba519ce7d");
+    payload.put("requestedForUserId", "386c7960-7f85-4a24-8131-a8aba519ce7e");
+    payload.put("kid", "kid");
+    payload.put("parentId", "386c7960-7f85-4a24-8131-a8aba519ce7d");
+    payload.put("sub", "386c7960-7f85-4a24-8131-a8aba519ce7e");
+    ObjectMapper mapper = new ObjectMapper();
+    Mockito.when(Base64Util.decode(Mockito.any(String.class), Mockito.anyInt()))
+        .thenReturn(mapper.writeValueAsString(payload).getBytes());
+
     Mockito.when(
             CryptoUtil.verifyRSASign(
                 Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
