@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.auth.verifier.ManagedTokenValidator;
+import org.sunbird.auth.verifier.AccessTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
@@ -156,7 +156,7 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
-        clientId = AuthenticationHelper.verifyUserAccessToken(accessToken.get());
+        clientId = AccessTokenValidator.verifyToken(accessToken.get());
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
@@ -167,7 +167,7 @@ public class RequestInterceptor {
             String managedAccessToken = forTokenHeader.isPresent() ? forTokenHeader.get() : "";
             if (StringUtils.isNotEmpty(managedAccessToken)) {
               String managedFor =
-                  ManagedTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
+                  AccessTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 request.flash().put(JsonKey.MANAGED_FOR, managedFor);
               } else {
