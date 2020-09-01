@@ -156,7 +156,7 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
-        clientId = AccessTokenValidator.verifyToken(accessToken.get());
+        clientId = AccessTokenValidator.verifyUserToken(accessToken.get());
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
@@ -167,7 +167,8 @@ public class RequestInterceptor {
             String managedAccessToken = forTokenHeader.isPresent() ? forTokenHeader.get() : "";
             if (StringUtils.isNotEmpty(managedAccessToken)) {
               String managedFor =
-                  AccessTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
+                  AccessTokenValidator.verifyManagedUserToken(
+                      managedAccessToken, clientId, requestedForUserID);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 request.flash().put(JsonKey.MANAGED_FOR, managedFor);
               } else {

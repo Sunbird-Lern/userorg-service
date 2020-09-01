@@ -1,7 +1,10 @@
 package org.sunbird.auth.verifier;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
 import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
 import org.sunbird.common.models.util.JsonKey;
@@ -13,6 +16,35 @@ public class AccessTokenValidator {
 
   private static ObjectMapper mapper = new ObjectMapper();
 
+  private static Map<String, Object> validateToken(String token) throws JsonProcessingException {
+    String[] tokenElements = token.split("\\.");
+    String header = tokenElements[0];
+    String body = tokenElements[1];
+    String signature = tokenElements[2];
+    String payLoad = header + JsonKey.DOT_SEPARATOR + body;
+    Map<Object, Object> headerData =
+        mapper.readValue(new String(decodeFromBase64(header)), Map.class);
+    String keyId = headerData.get("kid").toString();
+
+    boolean isValid =
+        CryptoUtil.verifyRSASign(
+            payLoad,
+            decodeFromBase64(signature),
+            KeyManager.getPublicKey(keyId).getPublicKey(),
+            JsonKey.SHA_256_WITH_RSA);
+
+    if (isValid) {
+      Map<String, Object> tokenBody =
+          mapper.readValue(new String(decodeFromBase64(body)), Map.class);
+      boolean isExp = isExpired((Integer) tokenBody.get("exp"));
+      if (isExp) {
+        return Collections.EMPTY_MAP;
+      }
+      return tokenBody;
+    }
+    return Collections.EMPTY_MAP;
+  }
+
   /**
    * managedtoken is validated and requestedByUserID, requestedForUserID values are validated
    * aganist the managedEncToken
@@ -22,86 +54,48 @@ public class AccessTokenValidator {
    * @param requestedForUserId
    * @return
    */
-  public static String verify(
+  public static String verifyManagedUserToken(
       String managedEncToken, String requestedByUserId, String requestedForUserId) {
-    boolean isValid = false;
     String managedFor = JsonKey.UNAUTHORIZED;
     try {
-      String[] tokenElements = managedEncToken.split("\\.");
-      String header = tokenElements[0];
-      String body = tokenElements[1];
-      String signature = tokenElements[2];
-      String payLoad = header + JsonKey.DOT_SEPARATOR + body;
-      Map<Object, Object> headerData =
-          mapper.readValue(new String(decodeFromBase64(header)), Map.class);
-      String keyId = headerData.get("kid").toString();
-      ProjectLogger.log("AccessTokenValidator:verify: keyId: " + keyId, LoggerEnum.INFO.name());
-      Map<String, String> tokenBody =
-          mapper.readValue(new String(decodeFromBase64(body)), Map.class);
-      String parentId = tokenBody.get(JsonKey.PARENT_ID);
-      String muaId = tokenBody.get(JsonKey.SUB);
-      ProjectLogger.log(
-          "AccessTokenValidator: parent uuid: "
-              + parentId
-              + " managedBy uuid: "
-              + muaId
-              + " requestedByUserID: "
-              + requestedByUserId
-              + " requestedForUserId: "
-              + requestedForUserId,
-          LoggerEnum.INFO.name());
-      ProjectLogger.log(
-          "AccessTokenValidator: key modified value: " + keyId, LoggerEnum.INFO.name());
-      isValid =
-          CryptoUtil.verifyRSASign(
-              payLoad,
-              decodeFromBase64(signature),
-              KeyManager.getPublicKey(keyId).getPublicKey(),
-              JsonKey.SHA_256_WITH_RSA);
-      isValid &=
-          parentId.equalsIgnoreCase(requestedByUserId)
-              && muaId.equalsIgnoreCase(requestedForUserId);
-      if (isValid) {
-        managedFor = muaId;
+      Map<String, Object> payload = validateToken(managedEncToken);
+      if (MapUtils.isNotEmpty(payload)) {
+        String parentId = (String) payload.get(JsonKey.PARENT_ID);
+        String muaId = (String) payload.get(JsonKey.SUB);
+        ProjectLogger.log(
+            "AccessTokenValidator: parent uuid: "
+                + parentId
+                + " managedBy uuid: "
+                + muaId
+                + " requestedByUserID: "
+                + requestedByUserId
+                + " requestedForUserId: "
+                + requestedForUserId,
+            LoggerEnum.INFO.name());
+        boolean isValid =
+            parentId.equalsIgnoreCase(requestedByUserId)
+                && muaId.equalsIgnoreCase(requestedForUserId);
+        if (isValid) {
+          managedFor = muaId;
+        }
       }
     } catch (Exception ex) {
       ProjectLogger.log("Exception in AccessTokenValidator: verify ", LoggerEnum.ERROR);
       ex.printStackTrace();
     }
-
     return managedFor;
   }
 
-  public static String verifyToken(String token) {
+  public static String verifyUserToken(String token) {
     String userId = JsonKey.UNAUTHORIZED;
     try {
-      String[] tokenElements = token.split("\\.");
-      String header = tokenElements[0];
-      String body = tokenElements[1];
-      String signature = tokenElements[2];
-      String payLoad = header + JsonKey.DOT_SEPARATOR + body;
-      Map<Object, Object> headerData =
-          mapper.readValue(new String(decodeFromBase64(header)), Map.class);
-      String keyId = headerData.get("kid").toString();
-      Map<String, Object> tokenBody =
-          mapper.readValue(new String(decodeFromBase64(body)), Map.class);
-      userId = (String) tokenBody.get(JsonKey.SUB);
-      if (StringUtils.isNotBlank(userId)) {
-        int pos = userId.lastIndexOf(":");
-        userId = userId.substring(pos + 1);
-      }
-      boolean isExp = isExpired((Integer) tokenBody.get("exp"));
-      boolean issChecked = checkIss((String) tokenBody.get("iss"));
-      boolean isValid =
-          CryptoUtil.verifyRSASign(
-              payLoad,
-              decodeFromBase64(signature),
-              KeyManager.getPublicKey(keyId).getPublicKey(),
-              JsonKey.SHA_256_WITH_RSA);
-      if (!isExp && issChecked && isValid) {
-        return userId;
-      } else {
-        return JsonKey.UNAUTHORIZED;
+      Map<String, Object> payload = validateToken(token);
+      if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
+        userId = (String) payload.get(JsonKey.SUB);
+        if (StringUtils.isNotBlank(userId)) {
+          int pos = userId.lastIndexOf(":");
+          userId = userId.substring(pos + 1);
+        }
       }
     } catch (Exception ex) {
       ProjectLogger.log("Exception in verifyUserAccessToken: verify ", ex);
