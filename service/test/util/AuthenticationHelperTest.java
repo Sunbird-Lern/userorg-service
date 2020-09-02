@@ -20,13 +20,13 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  ServiceFactory.class,
-  CassandraOperationImpl.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
-})
-@PowerMockIgnore({"javax.management.*"})
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest({
+//  ServiceFactory.class,
+//  CassandraOperationImpl.class,
+//  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+//})
+//@PowerMockIgnore({"javax.management.*"})
 public class AuthenticationHelperTest {
   //@Test
   public void verifyUserAccessToken() {
