@@ -38,11 +38,12 @@ public class KeyManager {
                       x -> {
                         contentBuilder.append(x);
                       });
-              String key = file.replace(basePath + "/", "");
-              KeyData keyData = new KeyData(key, loadPublicKey(contentBuilder.toString()));
-              keyMap.put(key, keyData);
+              KeyData keyData =
+                  new KeyData(
+                      path.getFileName().toString(), loadPublicKey(contentBuilder.toString()));
+              keyMap.put(path.getFileName().toString(), keyData);
               ProjectLogger.log(
-                  "Complete keyMap " + keyData.getKeyId() + " " + keyData.getPublicKey(),
+                  "Complete keyMap " + keyData.getKeyId() + " --------- " + keyData.getPublicKey(),
                   LoggerEnum.INFO.name());
               ProjectLogger.log("Complete keyMap " + keyMap, LoggerEnum.INFO.name());
             } catch (Exception e) {
