@@ -55,6 +55,7 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
@@ -804,8 +805,10 @@ public class UserManagementActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserUtil.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE));
-      UserUtil.checkEmailUniqueness((String) userMap.get(JsonKey.EMAIL));
+      UserLookUp userLookUp = new UserLookUp();
+      // check phone and uniqueness using user look table
+      userLookUp.getRecordByPhone((String) userMap.get(JsonKey.PHONE));
+      userLookUp.getRecordByEmail((String) userMap.get(JsonKey.EMAIL));
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
       String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);

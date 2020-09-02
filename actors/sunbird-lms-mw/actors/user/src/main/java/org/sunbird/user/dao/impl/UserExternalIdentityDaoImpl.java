@@ -22,20 +22,6 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
-  /*  @Override
-  public String getUserId(Request reqObj) {
-
-    if (StringUtils.isBlank(userId)) {
-      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
-      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-
-      userId = getUserIdByExternalId(extId, provider, idType);
-    }
-
-    return userId;
-  }*/
-
   @Override
   public String getUserIdByExternalId(String extId, String provider, String idType) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);

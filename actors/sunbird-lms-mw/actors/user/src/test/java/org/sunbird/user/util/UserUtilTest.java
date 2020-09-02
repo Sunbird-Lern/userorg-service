@@ -70,11 +70,17 @@ public class UserUtilTest {
     Map<String, String> settingMap = new HashMap<String, String>();
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.TYPE, JsonKey.EMAIL);
+    reqMap.put(JsonKey.VALUE, "test@test.com");
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_LOOK_UP, reqMap))
         .thenReturn(response);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400"))
+    Map<String, Object> reqMapPhone = new HashMap<>();
+    reqMap.put(JsonKey.TYPE, JsonKey.PHONE);
+    reqMap.put(JsonKey.VALUE, "9663890400");
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_LOOK_UP, reqMapPhone))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
@@ -146,7 +152,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      UserUtil.checkPhoneUniqueness("9663890400");
+      new UserLookUp().getRecordByPhone("9663890400");
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -159,7 +165,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      UserUtil.checkEmailUniqueness("test@test.com");
+      new UserLookUp().getRecordByEmail("test@test.com");
       response = true;
     } catch (ProjectCommonException e) {
 

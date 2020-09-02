@@ -171,6 +171,8 @@ public final class Util {
         getDbInfoObject(KEY_SPACE_NAME, JsonKey.USR_DECLARATION_TABLE));
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_V2, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference_v2"));
+
+    dbInfoMap.put(JsonKey.USER_LOOK_UP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
   }
 
   /**

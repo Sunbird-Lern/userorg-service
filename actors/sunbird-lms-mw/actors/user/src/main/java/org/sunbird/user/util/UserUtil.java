@@ -77,6 +77,7 @@ public class UserUtil {
 
   private static String stripChars = "0";
   private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
+  private static DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOK_UP);
 
   private UserUtil() {}
 
@@ -114,30 +115,30 @@ public class UserUtil {
 
   // Todo create a new private method to reduce the repeatation of code checkPhoneUniqueness
 
-  @SuppressWarnings("unchecked")
-  public static void checkPhoneUniqueness(String phone) {
-    // Get Phone configuration if not found , by default phone will be unique across
-    // the application
-    String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);
-    if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
-      if (StringUtils.isNotBlank(phone)) {
-        try {
-          phone = encryptionService.encryptData(phone);
-        } catch (Exception e) {
-          ProjectLogger.log("Exception occurred while encrypting phone number ", e);
-        }
-        // look up table
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
-        }
-      }
-    }
-  }
+  //  @SuppressWarnings("unchecked")
+  //  public static void checkPhoneUniqueness(String phone) {
+  //    // Get Phone configuration if not found , by default phone will be unique across
+  //    // the application
+  //    String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);
+  //    if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
+  //      if (StringUtils.isNotBlank(phone)) {
+  //        try {
+  //          phone = encryptionService.encryptData(phone);
+  //        } catch (Exception e) {
+  //          ProjectLogger.log("Exception occurred while encrypting phone number ", e);
+  //        }
+  //        // look up table
+  //        Response result =
+  //            cassandraOperation.getRecordsByIndexedProperty(
+  //                userLookUp.getKeySpace(), userLookUp.getTableName(), (JsonKey.PHONE), phone);
+  //        List<Map<String, Object>> userMapList =
+  //            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+  //        if (!userMapList.isEmpty()) {
+  //          ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+  //        }
+  //      }
+  //    }
+  //  }
 
   public static boolean identifierExists(String type, String value) {
 
@@ -150,7 +151,7 @@ public class UserUtil {
       // todo new lookup table
       Response result =
           cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), type, value);
+              userLookUp.getKeySpace(), userLookUp.getTableName(), type, value);
       @SuppressWarnings("unchecked")
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
@@ -198,30 +199,30 @@ public class UserUtil {
       }
     }
   }
-
-  public static void checkEmailUniqueness(String email) {
-    // Get Phone configuration if not found , by default phone will be unique across
-    // the application
-    String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
-    if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
-      if (StringUtils.isNotBlank(email)) {
-        try {
-          email = encryptionService.encryptData(email);
-        } catch (Exception e) {
-          ProjectLogger.log("Exception occurred while encrypting phone number ", e);
-        }
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.emailAlreadyExistError, null);
-        }
-      }
-    }
-  }
+  //
+  //  public static void checkEmailUniqueness(String email) {
+  //    // Get Phone configuration if not found , by default phone will be unique across
+  //    // the application
+  //    String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
+  //    if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
+  //      if (StringUtils.isNotBlank(email)) {
+  //        try {
+  //          email = encryptionService.encryptData(email);
+  //        } catch (Exception e) {
+  //          ProjectLogger.log("Exception occurred while encrypting phone number ", e);
+  //        }
+  //        Response result =
+  //            cassandraOperation.getRecordsByIndexedProperty(
+  //                userLookUp.getKeySpace(), userLookUp.getTableName(), (JsonKey.EMAIL), email);
+  //        List<Map<String, Object>> userMapList =
+  //            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+  //        if (!userMapList.isEmpty()) {
+  //          ProjectCommonException.throwClientErrorException(
+  //              ResponseCode.emailAlreadyExistError, null);
+  //        }
+  //      }
+  //    }
+  //  }
 
   public static Map<String, Object> validateExternalIdsAndReturnActiveUser(
       Map<String, Object> userMap) {
@@ -840,18 +841,6 @@ public class UserUtil {
 
     if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
       dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
-    }
-    return dbResExternalIds;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static List<Map<String, String>> getUserExternalIds(String userId) {
-    List<Map<String, String>> dbResExternalIds = new ArrayList<>();
-    Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
-    if (null != response && null != response.getResult()) {
-      dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return dbResExternalIds;
   }
