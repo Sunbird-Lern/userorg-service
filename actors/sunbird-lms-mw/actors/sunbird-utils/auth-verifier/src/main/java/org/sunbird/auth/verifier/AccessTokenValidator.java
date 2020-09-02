@@ -26,9 +26,11 @@ public class AccessTokenValidator {
         mapper.readValue(new String(decodeFromBase64(header)), Map.class);
     String keyId = headerData.get("kid").toString();
     try {
-      ProjectLogger.log("Check for public key :: " + KeyManager.getPublicKey(keyId));
       ProjectLogger.log(
-          "Check for public key  :: " + KeyManager.getPublicKey(keyId).getPublicKey());
+          "Check for public key :: " + KeyManager.getPublicKey(keyId), LoggerEnum.INFO.name());
+      ProjectLogger.log(
+          "Check for public key  :: " + KeyManager.getPublicKey(keyId).getPublicKey(),
+          LoggerEnum.INFO.name());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
