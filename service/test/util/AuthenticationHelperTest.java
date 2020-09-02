@@ -48,4 +48,29 @@ public class AuthenticationHelperTest {
     String userId = AuthenticationHelper.verifyUserAccessToken("token");
     assertTrue("123-456-789".equalsIgnoreCase(userId));
   }
+
+  @Test
+  public void verifyClientAccessToken() {
+    List<Map<String, Object>> tokenMapList = new ArrayList<>();
+    Map<String, Object> tokenMap = new HashMap<>();
+    tokenMap.put(JsonKey.ID, "123-456-789");
+    tokenMapList.add(tokenMap);
+    Response response = new Response();
+    response.getResult().put(JsonKey.RESPONSE, tokenMapList);
+
+    PowerMockito.mockStatic(ServiceFactory.class);
+    CassandraOperationImpl cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
+    Map<String, Object> propertyMap = new HashMap<>();
+    propertyMap.put(JsonKey.ID, "clientId");
+    propertyMap.put(JsonKey.MASTER_KEY, "token");
+
+    when(cassandraOperationImpl.getRecordsByProperties(
+            clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), propertyMap))
+        .thenReturn(response);
+
+    String userId = AuthenticationHelper.verifyClientAccessToken("clientId", "token");
+    assertTrue("123-456-789".equalsIgnoreCase(userId));
+  }
 }
