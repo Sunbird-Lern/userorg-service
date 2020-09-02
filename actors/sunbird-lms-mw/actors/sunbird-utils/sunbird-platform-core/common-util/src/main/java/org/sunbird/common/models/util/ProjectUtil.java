@@ -35,9 +35,6 @@ public class ProjectUtil {
   /** format the date in YYYY-MM-DD hh:mm:ss:SSZ */
   private static AtomicInteger atomicInteger = new AtomicInteger();
 
-  public static Integer DEFAULT_BATCH_SIZE = 10;
-  public static final long BACKGROUND_ACTOR_WAIT_TIME = 30;
-  public static final String ELASTIC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   public static final String YEAR_MONTH_DATE_FORMAT = "yyyy-MM-dd";
   private static final int randomPasswordLength = 9;
 
@@ -66,7 +63,6 @@ public class ProjectUtil {
         JsonKey.USER_ID
       };
 
-  public static final String[] defaultPrivateFields = new String[] {JsonKey.EMAIL, JsonKey.PHONE};
   private static final String INDEX_NAME = "telemetry.raw";
   private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
   private static final String STARTDATE = "startDate";
@@ -78,7 +74,6 @@ public class ProjectUtil {
     propertiesCache = PropertiesCache.getInstance();
   }
 
-  /** @author Manzarul */
   public enum Environment {
     dev(1),
     qa(2),
@@ -94,7 +89,6 @@ public class ProjectUtil {
     }
   }
 
-  /** @author Amit Kumar */
   public enum Status {
     ACTIVE(1),
     INACTIVE(0);
@@ -145,7 +139,6 @@ public class ProjectUtil {
     }
   }
 
-  /** @author Amit Kumar */
   public enum ProgressStatus {
     NOT_STARTED(0),
     STARTED(1),
@@ -162,7 +155,6 @@ public class ProjectUtil {
     }
   }
 
-  /** @author Amit Kumar */
   public enum ActiveStatus {
     ACTIVE(true),
     INACTIVE(false);
@@ -178,22 +170,6 @@ public class ProjectUtil {
     }
   }
 
-  public enum Action {
-    YES(1),
-    NO(0);
-
-    private int value;
-
-    Action(int value) {
-      this.value = value;
-    }
-
-    public int getValue() {
-      return value;
-    }
-  }
-
-  /** @author Amit Kumar */
   public enum Source {
     WEB("web"),
     ANDROID("android"),
@@ -211,36 +187,6 @@ public class ProjectUtil {
     }
   }
 
-  /** @author Amit Kumar */
-  public enum UserRole {
-    PUBLIC("PUBLIC"),
-    CONTENT_CREATOR("CONTENT_CREATOR"),
-    CONTENT_REVIEWER("CONTENT_REVIEWER"),
-    ORG_ADMIN("ORG_ADMIN"),
-    ORG_MEMBER("ORG_MEMBER");
-
-    private String value;
-
-    UserRole(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return this.value;
-    }
-  }
-
-  /**
-   * This method will check incoming value is null or empty it will do empty check by doing trim
-   * method. in case of null or empty it will return true else false.
-   *
-   * @param value
-   * @return
-   */
-  public static boolean isStringNullOREmpty(String value) {
-    return (value == null || "".equals(value.trim()));
-  }
-
   /**
    * This method will provide formatted date
    *
@@ -250,15 +196,6 @@ public class ProjectUtil {
     return getDateFormatter().format(new Date());
   }
 
-  /**
-   * This method will provide formatted date
-   *
-   * @return
-   */
-  public static String formatDate(Date date) {
-    if (null != date) return getDateFormatter().format(date);
-    else return null;
-  }
   /**
    * Validate email with regular expression
    *
@@ -372,20 +309,6 @@ public class ProjectUtil {
     }
   }
 
-  public enum SectionDataType {
-    course("course"),
-    content("content");
-    private String typeName;
-
-    private SectionDataType(String name) {
-      this.typeName = name;
-    }
-
-    public String getTypeName() {
-      return typeName;
-    }
-  }
-
   public enum AddressType {
     permanent("permanent"),
     current("current"),
@@ -399,67 +322,6 @@ public class ProjectUtil {
 
     public String getTypeName() {
       return typeName;
-    }
-  }
-
-  public enum AssessmentResult {
-    gradeA("A", "Pass"),
-    gradeB("B", "Pass"),
-    gradeC("C", "Pass"),
-    gradeD("D", "Pass"),
-    gradeE("E", "Pass"),
-    gradeF("F", "Fail");
-    private String grade;
-    private String result;
-
-    private AssessmentResult(String grade, String result) {
-      this.grade = grade;
-      this.result = result;
-    }
-
-    public String getGrade() {
-      return grade;
-    }
-
-    public String getResult() {
-      return result;
-    }
-  }
-
-  /**
-   * This method will calculate the percentage
-   *
-   * @param score double
-   * @param maxScore double
-   * @return double
-   */
-  public static double calculatePercentage(double score, double maxScore) {
-    double percentage = (score * 100) / (maxScore * 1.0);
-    return Math.round(percentage);
-  }
-
-  /**
-   * This method will calculate grade based on percentage marks.
-   *
-   * @param percentage double
-   * @return AssessmentResult
-   */
-  public static AssessmentResult calcualteAssessmentResult(double percentage) {
-    switch (Math.round(Float.valueOf(String.valueOf(percentage))) / 10) {
-      case 10:
-        return AssessmentResult.gradeA;
-      case 9:
-        return AssessmentResult.gradeA;
-      case 8:
-        return AssessmentResult.gradeB;
-      case 7:
-        return AssessmentResult.gradeC;
-      case 6:
-        return AssessmentResult.gradeD;
-      case 5:
-        return AssessmentResult.gradeE;
-      default:
-        return AssessmentResult.gradeF;
     }
   }
 
@@ -479,21 +341,6 @@ public class ProjectUtil {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSZ");
     simpleDateFormat.setLenient(false);
     return simpleDateFormat;
-  }
-
-  /** @author Manzarul */
-  public enum EnrolmentType {
-    open("open"),
-    inviteOnly("invite-only");
-    private String val;
-
-    EnrolmentType(String val) {
-      this.val = val;
-    }
-
-    public String getVal() {
-      return val;
-    }
   }
 
   /** @author Manzarul */
@@ -599,27 +446,6 @@ public class ProjectUtil {
     Object value = map.get(key);
     map.remove(key);
     return value;
-  }
-
-  /** @author Arvind */
-  public enum ReportTrackingStatus {
-    NEW(0),
-    GENERATING_DATA(1),
-    UPLOADING_FILE(2),
-    UPLOADING_FILE_SUCCESS(3),
-    SENDING_MAIL(4),
-    SENDING_MAIL_SUCCESS(5),
-    FAILED(9);
-
-    private int value;
-
-    ReportTrackingStatus(int value) {
-      this.value = value;
-    }
-
-    public int getValue() {
-      return this.value;
-    }
   }
 
   public static Map<String, Object> createCheckResponse(
@@ -866,24 +692,6 @@ public class ProjectUtil {
   }
 
   /**
-   * This method will create index for Elastic search as follow "telemetry.raw.yyyy.mm"
-   *
-   * @return
-   */
-  public static String createIndex() {
-    Calendar cal = Calendar.getInstance();
-    return new StringBuffer()
-        .append(INDEX_NAME)
-        .append("." + cal.get(Calendar.YEAR))
-        .append(
-            "."
-                + ((cal.get(Calendar.MONTH) + 1) > 9
-                    ? (cal.get(Calendar.MONTH) + 1)
-                    : "0" + (cal.get(Calendar.MONTH) + 1)))
-        .toString();
-  }
-
-  /**
    * This method will check whether Array contains only empty string or not
    *
    * @param strArray String[]
@@ -925,17 +733,6 @@ public class ProjectUtil {
             x -> {
               map.remove(x);
             });
-  }
-
-  /**
-   * Method to convert Json string to Map.
-   *
-   * @param jsonString represents json string.
-   * @return map corresponding to json string.
-   * @throws IOException
-   */
-  public static Map convertJsonStringToMap(String jsonString) throws IOException {
-    return mapper.readValue(jsonString, Map.class);
   }
 
   /**
