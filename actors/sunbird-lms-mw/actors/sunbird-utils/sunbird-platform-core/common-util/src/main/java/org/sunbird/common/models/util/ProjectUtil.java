@@ -210,6 +210,24 @@ public class ProjectUtil {
     return matcher.matches();
   }
 
+  public enum UserRole {
+    PUBLIC("PUBLIC"),
+    CONTENT_CREATOR("CONTENT_CREATOR"),
+    CONTENT_REVIEWER("CONTENT_REVIEWER"),
+    ORG_ADMIN("ORG_ADMIN"),
+    ORG_MEMBER("ORG_MEMBER");
+
+    private String value;
+
+    UserRole(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return this.value;
+    }
+  }
+
   /**
    * This method will generate auth token based on name , source and timestamp
    *
@@ -597,6 +615,26 @@ public class ProjectUtil {
       return true;
     } catch (Exception ex) {
       return false;
+    }
+  }
+
+  public enum ReportTrackingStatus {
+    NEW(0),
+    GENERATING_DATA(1),
+    UPLOADING_FILE(2),
+    UPLOADING_FILE_SUCCESS(3),
+    SENDING_MAIL(4),
+    SENDING_MAIL_SUCCESS(5),
+    FAILED(9);
+
+    private int value;
+
+    ReportTrackingStatus(int value) {
+      this.value = value;
+    }
+
+    public int getValue() {
+      return this.value;
     }
   }
 

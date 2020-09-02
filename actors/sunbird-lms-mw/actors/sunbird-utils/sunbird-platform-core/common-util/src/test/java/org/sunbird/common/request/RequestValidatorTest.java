@@ -12,7 +12,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** @author Manzarul */
@@ -249,50 +248,6 @@ public class RequestValidatorTest {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
       assertEquals(ResponseCode.emailSubjectError.getErrorCode(), e.getCode());
     }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeFailureWithEmptyType() {
-    try {
-      RequestValidator.validateEnrolmentType("");
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.enrolmentTypeRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeFailureWithWrongType() {
-    try {
-      RequestValidator.validateEnrolmentType("test");
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.enrolmentIncorrectValue.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeSuccessWithOpenType() {
-    boolean response = false;
-    try {
-      RequestValidator.validateEnrolmentType(ProjectUtil.EnrolmentType.open.getVal());
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    Assert.assertTrue(response);
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeSuccessWithInviteType() {
-    boolean response = false;
-    try {
-      RequestValidator.validateEnrolmentType(ProjectUtil.EnrolmentType.inviteOnly.getVal());
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    Assert.assertTrue(response);
   }
 
   @Test
