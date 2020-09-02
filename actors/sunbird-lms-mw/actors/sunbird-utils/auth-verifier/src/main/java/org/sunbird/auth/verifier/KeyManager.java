@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 
@@ -56,6 +57,11 @@ public class KeyManager {
     String publicKey = new String(key.getBytes(), StandardCharsets.UTF_8);
     publicKey =
         publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+\\r?\\n|-+END PUBLIC KEY-+\\r?\\n?)", "");
+    ProjectLogger.log(
+        "After replacing extra char from public key :::" + publicKey, LoggerEnum.INFO.name());
+    publicKey = publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+)", "");
+    publicKey = publicKey.replaceAll("(-+END PUBLIC KEY-+)", "");
+    publicKey = publicKey.replaceAll("[\\r\\n]+", "");
     byte[] keyBytes = Base64Util.decode(publicKey.getBytes("UTF-8"), Base64Util.DEFAULT);
 
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(keyBytes);
