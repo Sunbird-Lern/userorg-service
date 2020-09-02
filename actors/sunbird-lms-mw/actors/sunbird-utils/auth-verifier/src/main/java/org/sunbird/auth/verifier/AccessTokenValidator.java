@@ -25,25 +25,12 @@ public class AccessTokenValidator {
     Map<Object, Object> headerData =
         mapper.readValue(new String(decodeFromBase64(header)), Map.class);
     String keyId = headerData.get("kid").toString();
-    try {
-      ProjectLogger.log("Check for keyId :: " + keyId, LoggerEnum.INFO.name());
-      ProjectLogger.log(
-          "Check for public key :: " + KeyManager.getPublicKey(keyId), LoggerEnum.INFO.name());
-      ProjectLogger.log(
-          "Check for public key  :: " + KeyManager.getPublicKey(keyId).getPublicKey(),
-          LoggerEnum.INFO.name());
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    ProjectLogger.log("");
     boolean isValid =
         CryptoUtil.verifyRSASign(
             payLoad,
             decodeFromBase64(signature),
             KeyManager.getPublicKey(keyId).getPublicKey(),
             JsonKey.SHA_256_WITH_RSA);
-    ProjectLogger.log("validateToken :::" + token, LoggerEnum.INFO.name());
-    ProjectLogger.log("validateToken : token validated :::" + isValid, LoggerEnum.INFO.name());
     if (isValid) {
       Map<String, Object> tokenBody =
           mapper.readValue(new String(decodeFromBase64(body)), Map.class);

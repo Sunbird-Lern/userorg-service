@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 
@@ -42,10 +41,6 @@ public class KeyManager {
                   new KeyData(
                       path.getFileName().toString(), loadPublicKey(contentBuilder.toString()));
               keyMap.put(path.getFileName().toString(), keyData);
-              ProjectLogger.log(
-                  "Complete keyMap " + keyData.getKeyId() + " --------- " + keyData.getPublicKey(),
-                  LoggerEnum.INFO.name());
-              ProjectLogger.log("Complete keyMap " + keyMap, LoggerEnum.INFO.name());
             } catch (Exception e) {
               ProjectLogger.log("KeyManager:init: exception in reading public keys ", e);
             }
@@ -61,16 +56,9 @@ public class KeyManager {
 
   private static PublicKey loadPublicKey(String key) throws Exception {
     String publicKey = new String(key.getBytes(), StandardCharsets.UTF_8);
-    publicKey =
-        publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+\\r?\\n|-+END PUBLIC KEY-+\\r?\\n?)", "");
-    ProjectLogger.log(
-        "After replacing extra char from public key using regex :::" + publicKey,
-        LoggerEnum.INFO.name());
     publicKey = publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+)", "");
     publicKey = publicKey.replaceAll("(-+END PUBLIC KEY-+)", "");
     publicKey = publicKey.replaceAll("[\\r\\n]+", "");
-    ProjectLogger.log(
-        "After replacing extra char from public key :::" + publicKey, LoggerEnum.INFO.name());
     byte[] keyBytes = Base64Util.decode(publicKey.getBytes("UTF-8"), Base64Util.DEFAULT);
 
     X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(keyBytes);
