@@ -152,7 +152,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      new UserLookUp().getRecordByPhone("9663890400");
+      new UserLookUp().checkPhoneUniqueness("9663890400");
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -165,7 +165,7 @@ public class UserUtilTest {
     beforeEachTest();
     boolean response = false;
     try {
-      new UserLookUp().getRecordByEmail("test@test.com");
+      new UserLookUp().checkEmailUniqueness("test@test.com");
       response = true;
     } catch (ProjectCommonException e) {
 

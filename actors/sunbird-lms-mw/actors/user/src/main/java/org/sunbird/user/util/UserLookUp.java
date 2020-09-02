@@ -23,9 +23,9 @@ public class UserLookUp {
           null);
   private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOK_UP);
 
-  public Response add(String type, String value, String userId, boolean isEncrypted) {
+  public Response add(String type, String value, String userId, boolean encrypt) {
     try {
-      if (isEncrypted) {
+      if (encrypt) {
         value = encryptionService.encryptData(value);
       }
     } catch (Exception e) {
@@ -41,9 +41,9 @@ public class UserLookUp {
     return result;
   }
 
-  public Response getRecordByType(String type, String value, boolean isEncrypted) {
+  public Response getRecordByType(String type, String value, boolean encrypt) {
     try {
-      if (isEncrypted) {
+      if (encrypt) {
         value = encryptionService.encryptData(value);
       }
     } catch (Exception e) {
@@ -58,7 +58,7 @@ public class UserLookUp {
     return response;
   }
 
-  public void getRecordByEmail(String email) {
+  public void checkEmailUniqueness(String email) {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
     String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
@@ -75,7 +75,7 @@ public class UserLookUp {
     }
   }
 
-  public void getRecordByPhone(String phone) {
+  public void checkPhoneUniqueness(String phone) {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
     String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);

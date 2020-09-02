@@ -807,8 +807,8 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isEmpty(managedBy)) {
       UserLookUp userLookUp = new UserLookUp();
       // check phone and uniqueness using user look table
-      userLookUp.getRecordByPhone((String) userMap.get(JsonKey.PHONE));
-      userLookUp.getRecordByEmail((String) userMap.get(JsonKey.EMAIL));
+      userLookUp.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE));
+      userLookUp.checkEmailUniqueness((String) userMap.get(JsonKey.EMAIL));
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
       String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);

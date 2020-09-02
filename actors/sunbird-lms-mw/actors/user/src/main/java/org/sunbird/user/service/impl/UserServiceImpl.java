@@ -39,6 +39,7 @@ import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserService {
   private static UserService userService = null;
   private UserExternalIdentityDao userExtIdentityDao = new UserExternalIdentityDaoImpl();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
+  private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOK_UP);
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -417,23 +419,10 @@ public class UserServiceImpl implements UserService {
   @SuppressWarnings("unchecked")
   @Override
   public boolean checkUsernameUniqueness(String username, boolean isEncrypted) {
-    try {
-      if (!isEncrypted) username = encryptionService.encryptData(username);
-    } catch (Exception e) {
-      ProjectLogger.log(
-          "UserServiceImpl:checkUsernameUniqueness: Exception occurred with error message = "
-              + e.getMessage(),
-          e);
-      ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
-    }
-
-    Response result =
-        cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username);
-
+    UserLookUp userLookUp = new UserLookUp();
+    Response result = userLookUp.getRecordByType(JsonKey.USERNAME, username, !isEncrypted);
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-
     if (CollectionUtils.isNotEmpty(userMapList)) {
       return false;
     }
