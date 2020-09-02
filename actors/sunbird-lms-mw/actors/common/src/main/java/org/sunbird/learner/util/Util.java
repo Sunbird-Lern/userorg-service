@@ -77,15 +77,7 @@ public final class Util {
     initializeDBProperty(); // EkStep HttpClient headers init
     headers.put("content-type", "application/json");
     headers.put("accept", "application/json");
-    new Thread(
-            new Runnable() {
-
-              @Override
-              public void run() {
-                SchedulerManager.getInstance();
-              }
-            })
-        .start();
+    new Thread(() -> SchedulerManager.getInstance()).start();
   }
 
   private Util() {}
@@ -212,12 +204,9 @@ public final class Util {
   }
 
   private static DbInfo getDbInfoObject(String keySpace, String table) {
-
     DbInfo dbInfo = new DbInfo();
-
     dbInfo.setKeySpace(keySpace);
     dbInfo.setTableName(table);
-
     return dbInfo;
   }
 
@@ -225,31 +214,9 @@ public final class Util {
   public static class DbInfo {
     private String keySpace;
     private String tableName;
-    private String userName;
-    private String password;
-    private String ip;
-    private String port;
 
     /** No-arg constructor */
     DbInfo() {}
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj instanceof DbInfo) {
-        DbInfo ob = (DbInfo) obj;
-        if (this.ip.equals(ob.getIp())
-            && this.port.equals(ob.getPort())
-            && this.keySpace.equals(ob.getKeySpace())) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return 1;
-    }
 
     public String getKeySpace() {
       return keySpace;
@@ -265,30 +232,6 @@ public final class Util {
 
     public void setTableName(String tableName) {
       this.tableName = tableName;
-    }
-
-    public String getUserName() {
-      return userName;
-    }
-
-    public void setUserName(String userName) {
-      this.userName = userName;
-    }
-
-    public String getPassword() {
-      return password;
-    }
-
-    public void setPassword(String password) {
-      this.password = password;
-    }
-
-    public String getIp() {
-      return ip;
-    }
-
-    public String getPort() {
-      return port;
     }
   }
 

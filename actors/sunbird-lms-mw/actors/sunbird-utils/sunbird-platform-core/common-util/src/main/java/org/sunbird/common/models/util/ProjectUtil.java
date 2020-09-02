@@ -63,7 +63,6 @@ public class ProjectUtil {
         JsonKey.USER_ID
       };
 
-  private static final String INDEX_NAME = "telemetry.raw";
   private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
   private static final String STARTDATE = "startDate";
   private static final String ENDDATE = "endDate";
@@ -80,7 +79,7 @@ public class ProjectUtil {
     prod(3);
     int value;
 
-    private Environment(int value) {
+    Environment(int value) {
       this.value = value;
     }
 
@@ -318,7 +317,7 @@ public class ProjectUtil {
 
     private String typeName;
 
-    private EsType(String name) {
+    EsType(String name) {
       this.typeName = name;
     }
 
