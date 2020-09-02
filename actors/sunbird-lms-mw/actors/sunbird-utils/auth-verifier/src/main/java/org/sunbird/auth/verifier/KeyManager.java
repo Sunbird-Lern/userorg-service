@@ -39,7 +39,12 @@ public class KeyManager {
                         contentBuilder.append(x);
                       });
               String key = file.replace(basePath + "/", "");
-              keyMap.put(key, new KeyData(key, loadPublicKey(contentBuilder.toString())));
+              KeyData keyData = new KeyData(key, loadPublicKey(contentBuilder.toString()));
+              keyMap.put(key, keyData);
+              ProjectLogger.log(
+                  "Complete keyMap " + keyData.getKeyId() + " " + keyData.getPublicKey(),
+                  LoggerEnum.INFO.name());
+              ProjectLogger.log("Complete keyMap " + keyMap, LoggerEnum.INFO.name());
             } catch (Exception e) {
               ProjectLogger.log("KeyManager:init: exception in reading public keys ", e);
             }
