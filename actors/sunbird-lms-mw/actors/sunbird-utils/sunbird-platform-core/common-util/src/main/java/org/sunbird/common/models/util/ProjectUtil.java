@@ -277,9 +277,8 @@ public class ProjectUtil {
    * @author Manzarul
    */
   public enum EsIndex {
-    sunbird("searchindex"),
-    sunbirdPlugin("sunbirdplugin"),
-    courseBatchStats("cbatchstats");
+    sunbird("searchindex");
+
     private String indexName;
 
     private EsIndex(String name) {

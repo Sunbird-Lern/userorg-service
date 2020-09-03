@@ -359,7 +359,6 @@ public final class JsonKey {
   public static final String SUNBIRD_PG_PASSWORD = "sunbird_pg_password";
   public static final String SUNBIRD_PG_PORT = "sunbird_pg_port";
   public static final String SUNBIRD_PG_USER = "sunbird_pg_user";
-  public static final String SUNBIRD_PLUGIN = "sunbirdplugin";
   public static final String SUNBIRD_QUARTZ_MODE = "sunbird_quartz_mode";
   public static final String SUNBIRD_SSO_CLIENT_ID = "sunbird_sso_client_id";
   public static final String SUNBIRD_SSO_CLIENT_SECRET = "sunbird_sso_client_secret";

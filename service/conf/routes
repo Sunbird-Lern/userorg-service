@@ -106,15 +106,6 @@ POST  /v2/org/preferences/create 						@controllers.tenantpreference.TenantPrefe
 PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
 POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
 
-#DB Operation API
-POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll(request: play.mvc.Http.Request)
-POST   /v1/object/read                   @controllers.datapersistence.DbOperationController.read(request: play.mvc.Http.Request)
-POST   /v1/object/create                 @controllers.datapersistence.DbOperationController.create(request: play.mvc.Http.Request)
-POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update(request: play.mvc.Http.Request)
-POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete(request: play.mvc.Http.Request)
-POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search(request: play.mvc.Http.Request)
-POST   /v1/object/metrics                @controllers.datapersistence.DbOperationController.getMetrics(request: play.mvc.Http.Request)
-
 #Master Key API
 POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient(request: play.mvc.Http.Request)
 PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey(request: play.mvc.Http.Request)
