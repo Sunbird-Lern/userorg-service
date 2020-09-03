@@ -1033,12 +1033,12 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void checkUserExistence(Request request) {
-    Future<Response> userResponse = checkUserExists(request, false);
+    Future<Response> userResponse = checkUserExists(request, true);
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
   }
 
   private void checkUserExistenceV2(Request request) {
-    Future<Response> userResponse = checkUserExists(request, true);
+    Future<Response> userResponse = checkUserExists(request, false);
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
   }
 
