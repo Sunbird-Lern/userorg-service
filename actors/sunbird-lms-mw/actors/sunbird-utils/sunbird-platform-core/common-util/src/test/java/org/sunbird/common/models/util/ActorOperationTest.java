@@ -25,9 +25,6 @@ public class ActorOperationTest {
     Assert.assertEquals("getUserCount", ActorOperations.GET_USER_COUNT.getValue());
     Assert.assertEquals("updateGeoLocation", ActorOperations.UPDATE_GEO_LOCATION.getValue());
     Assert.assertEquals("getGeoLocation", ActorOperations.GET_GEO_LOCATION.getValue());
-    Assert.assertEquals("registerClient", ActorOperations.REGISTER_CLIENT.getValue());
-    Assert.assertEquals("updateClientKey", ActorOperations.UPDATE_CLIENT_KEY.getValue());
-    Assert.assertEquals("getClientKey", ActorOperations.GET_CLIENT_KEY.getValue());
     Assert.assertEquals("createGeoLocation", ActorOperations.CREATE_GEO_LOCATION.getValue());
     Assert.assertEquals(
         "updateTenantPreference", ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
