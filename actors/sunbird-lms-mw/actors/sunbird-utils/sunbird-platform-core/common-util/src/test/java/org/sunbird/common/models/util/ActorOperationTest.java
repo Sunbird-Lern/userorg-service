@@ -125,7 +125,6 @@ public class ActorOperationTest {
     Assert.assertEquals(
         "orgConsumptionMetricsReport", ActorOperations.ORG_CONSUMPTION_METRICS_REPORT.getValue());
     Assert.assertEquals("fileStorageService", ActorOperations.FILE_STORAGE_SERVICE.getValue());
-    Assert.assertEquals("addUserBadgebackground", ActorOperations.ADD_USER_BADGE_BKG.getValue());
     Assert.assertEquals(
         "fileGenerationAndUpload", ActorOperations.FILE_GENERATION_AND_UPLOAD.getValue());
     Assert.assertEquals("healthCheck", ActorOperations.HEALTH_CHECK.getValue());

@@ -225,10 +225,6 @@ public class EsSyncBackgroundActor extends BaseActor {
       return Util.dbInfoMap.get(JsonKey.USER_DB);
     } else if (objectType.equals(JsonKey.ORGANISATION)) {
       return Util.dbInfoMap.get(JsonKey.ORG_DB);
-    } else if (objectType.equals(JsonKey.BATCH)) {
-      return Util.dbInfoMap.get(JsonKey.COURSE_BATCH_DB);
-    } else if (objectType.equals(JsonKey.USER_COURSE)) {
-      return Util.dbInfoMap.get(JsonKey.LEARNER_COURSE_DB);
     }
 
     return null;

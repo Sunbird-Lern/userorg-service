@@ -90,23 +90,6 @@ POST /v1/notification/email					@controllers.notificationservice.EmailServiceCon
 POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
 POST /v2/notification					    @controllers.notificationservice.EmailServiceController.sendNotification(request: play.mvc.Http.Request)
 
-# Badging APIs
-POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer(request: play.mvc.Http.Request)
-GET /v1/issuer/read/:issuerId                 @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String, request: play.mvc.Http.Request)
-GET /v1/issuer/list                           @controllers.badging.BadgeIssuerController.getAllIssuer(request: play.mvc.Http.Request)
-DELETE /v1/issuer/delete/:issuerId            @controllers.badging.BadgeIssuerController.deleteBadgeIssuer(issuerId:String, request: play.mvc.Http.Request)
-
-POST   /v1/issuer/badge/create                @controllers.badging.BadgeClassController.createBadgeClass(request: play.mvc.Http.Request)
-GET    /v1/issuer/badge/read/:badgeId         @controllers.badging.BadgeClassController.getBadgeClass(badgeId:String, request: play.mvc.Http.Request)
-POST   /v1/issuer/badge/search                @controllers.badging.BadgeClassController.searchBadgeClass(request: play.mvc.Http.Request)
-DELETE /v1/issuer/badge/delete/:badgeId       @controllers.badging.BadgeClassController.deleteBadgeClass(badgeId:String, request: play.mvc.Http.Request)
-
-POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge(request: play.mvc.Http.Request)
-GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String, request: play.mvc.Http.Request)
-POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList(request: play.mvc.Http.Request)
-DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion(request: play.mvc.Http.Request)
-
-
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)
 GET  /:service/health                      @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String, request: play.mvc.Http.Request)

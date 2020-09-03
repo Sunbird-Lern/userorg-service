@@ -286,7 +286,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
 
   private String getReportResourceName(Map<String, Object> reportDbInfo) {
 
-    String resource = (String) reportDbInfo.get(JsonKey.RESOURCE_NAME);
+    String resource = (String) reportDbInfo.get("resourceName");
     if (StringUtils.isEmpty(resource)) {
       resource = (String) reportDbInfo.get(JsonKey.RESOURCE_ID);
     }

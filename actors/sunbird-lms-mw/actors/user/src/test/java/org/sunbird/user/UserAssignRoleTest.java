@@ -69,8 +69,6 @@ public class UserAssignRoleTest {
           "COURSE_MENTOR",
           "BOOK_CREATOR",
           "BOOK_REVIEWER",
-          "OFFICIAL_TEXTBOOK_BADGE_ISSUER",
-          "TEACHER_BADGE_ISSUER",
           "ANNOUNCEMENT_SENDER",
           "CONTENT_REVIEWER",
           "FLAG_REVIEWER",

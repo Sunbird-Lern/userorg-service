@@ -56,8 +56,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/data/decrypt", var);
     apiHeaderIgnoreMap.put("/v1/file/upload", var);
     apiHeaderIgnoreMap.put("/v1/user/forgotpassword", var);
-    apiHeaderIgnoreMap.put("/v1/user/login", var);
-    apiHeaderIgnoreMap.put("/v1/user/logout", var);
     apiHeaderIgnoreMap.put("/v1/object/read/list", var);
     apiHeaderIgnoreMap.put("/v1/object/read", var);
     apiHeaderIgnoreMap.put("/v1/object/create", var);
@@ -70,20 +68,6 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
     apiHeaderIgnoreMap.put("/v1/notification/audience", var);
-    apiHeaderIgnoreMap.put("/v1/telemetry", var);
-    // making badging api's as public access
-    apiHeaderIgnoreMap.put("/v1/issuer/create", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/read", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/list", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/delete", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/create", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/read", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/search", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/delete", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/create", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/read", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/search", var);
-    apiHeaderIgnoreMap.put("/v1/issuer/badge/assertion/delete", var);
     // making org read as public access
     apiHeaderIgnoreMap.put("/v1/org/read", var);
     // making location APIs public access

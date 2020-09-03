@@ -248,16 +248,10 @@ public class OnRequestHandler implements ActionCreator {
       env = JsonKey.ORGANISATION;
     } else if (uri.startsWith("/v1/object")) {
       env = JsonKey.ANNOUNCEMENT;
-    } else if (uri.startsWith("/v1/page")) {
-      env = JsonKey.PAGE;
     } else if (uri.startsWith("/v1/notification") || uri.startsWith("/v2/notification")) {
       env = JsonKey.NOTIFICATION;
     } else if (uri.startsWith("/v1/dashboard")) {
       env = JsonKey.DASHBOARD;
-    } else if (uri.startsWith("/v1/badges")) {
-      env = JsonKey.BADGES;
-    } else if (uri.startsWith("/v1/issuer")) {
-      env = BadgingJsonKey.BADGES;
     } else if (uri.startsWith("/v1/role")) {
       env = JsonKey.ROLE;
     } else if (uri.startsWith("/v1/note")) {

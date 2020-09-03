@@ -66,11 +66,7 @@ public final class RequestValidator {
             ERROR_CODE);
       }
       List<String> list =
-          new ArrayList<>(
-              Arrays.asList(
-                  new String[] {
-                    JsonKey.USER, JsonKey.ORGANISATION, JsonKey.BATCH, JsonKey.USER_COURSE
-                  }));
+          new ArrayList<>(Arrays.asList(new String[] {JsonKey.USER, JsonKey.ORGANISATION}));
       if (!list.contains(request.getRequest().get(JsonKey.OBJECT_TYPE))) {
         throw new ProjectCommonException(
             ResponseCode.invalidObjectType.getErrorCode(),
