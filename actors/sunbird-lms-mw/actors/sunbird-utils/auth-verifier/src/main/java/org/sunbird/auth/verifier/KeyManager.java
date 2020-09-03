@@ -54,7 +54,7 @@ public class KeyManager {
     return keyMap.get(keyId);
   }
 
-  private static PublicKey loadPublicKey(String key) throws Exception {
+  public static PublicKey loadPublicKey(String key) throws Exception {
     String publicKey = new String(key.getBytes(), StandardCharsets.UTF_8);
     publicKey = publicKey.replaceAll("(-+BEGIN PUBLIC KEY-+)", "");
     publicKey = publicKey.replaceAll("(-+END PUBLIC KEY-+)", "");
