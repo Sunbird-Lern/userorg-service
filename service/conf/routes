@@ -106,11 +106,6 @@ POST  /v2/org/preferences/create 						@controllers.tenantpreference.TenantPrefe
 PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
 POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
 
-#Master Key API
-POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient(request: play.mvc.Http.Request)
-PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey(request: play.mvc.Http.Request)
-GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String, request: play.mvc.Http.Request)
-
 #GEO LOCATION API
 POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation(request: play.mvc.Http.Request)
 GET  /v1/notification/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String, request: play.mvc.Http.Request)
