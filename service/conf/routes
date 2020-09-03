@@ -73,18 +73,6 @@ POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEnc
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService(request: play.mvc.Http.Request)
 
-
-#metrics APIs for dashboard
-GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String, request: play.mvc.Http.Request)
-
-GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String, request: play.mvc.Http.Request)
-
-GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String, request: play.mvc.Http.Request)
-
-
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
 POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
