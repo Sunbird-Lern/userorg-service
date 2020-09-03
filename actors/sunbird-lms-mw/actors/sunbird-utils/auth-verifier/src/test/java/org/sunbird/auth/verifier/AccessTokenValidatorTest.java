@@ -17,7 +17,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CryptoUtil.class, KeyManager.class, Base64Util.class, AccessTokenValidator.class})
+@PrepareForTest({CryptoUtil.class, KeyManager.class, Base64Util.class})
 @PowerMockIgnore({"javax.management.*"})
 public class AccessTokenValidatorTest {
   @Test
