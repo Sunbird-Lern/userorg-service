@@ -1,8 +1,6 @@
 package org.sunbird.learner.util;
 
-import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.typesafe.config.Config;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -10,8 +8,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
-import org.sunbird.actorutil.systemsettings.SystemSettingClient;
-import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -31,13 +27,11 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
-import org.sunbird.common.util.ConfigUtil;
 import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
@@ -1050,86 +1044,6 @@ public final class Util {
         logger.info("Welcome Message failed for ." + (String) userMap.get(JsonKey.PHONE));
       }
     }
-  }
-
-  /*
-   * Get user profile configuration from system settings
-   *
-   * @param getSystemSetting actor reference
-   * @return user profile configuration
-   */
-  public static Config getUserProfileConfig(ActorRef actorRef) {
-    SystemSetting userProfileConfigSetting =
-        getSystemSettingByField(JsonKey.USER_PROFILE_CONFIG, actorRef, null);
-    String userProfileConfigString = userProfileConfigSetting.getValue();
-    Config userProfileConfig =
-        ConfigUtil.getConfigFromJsonString(userProfileConfigString, JsonKey.USER_PROFILE_CONFIG);
-    validateUserProfileConfig(userProfileConfig);
-    return userProfileConfig;
-  }
-
-  private static void validateUserProfileConfig(Config userProfileConfig) {
-    if (CollectionUtils.isEmpty(userProfileConfig.getStringList(JsonKey.FIELDS))) {
-      logger.info("Util:validateUserProfileConfig: User profile fields is not configured.");
-      ProjectCommonException.throwServerErrorException(ResponseCode.invaidConfiguration, "");
-    }
-    List<String> publicFields = null;
-    List<String> privateFields = null;
-    try {
-      publicFields = userProfileConfig.getStringList(JsonKey.PUBLIC_FIELDS);
-      privateFields = userProfileConfig.getStringList(JsonKey.PRIVATE_FIELDS);
-    } catch (Exception e) {
-      logger.error(
-          "Util:validateUserProfileConfig: Invalid configuration for public / private fields.", e);
-    }
-
-    if (CollectionUtils.isNotEmpty(privateFields) && CollectionUtils.isNotEmpty(publicFields)) {
-      for (String field : publicFields) {
-        if (privateFields.contains(field)) {
-          logger.info(
-              "Field "
-                  + field
-                  + " in user configuration is conflicting in publicFields and privateFields.");
-          ProjectCommonException.throwServerErrorException(
-              ResponseCode.errorConflictingFieldConfiguration,
-              ProjectUtil.formatMessage(
-                  ResponseCode.errorConflictingFieldConfiguration.getErrorMessage(),
-                  field,
-                  JsonKey.USER,
-                  JsonKey.PUBLIC_FIELDS,
-                  JsonKey.PRIVATE_FIELDS));
-        }
-      }
-    }
-  }
-
-  /*
-   * Method to fetch a system setting based on given system setting field
-   *
-   * @param system setting field
-   * @param getSystemSetting actor reference
-   * @return system setting
-   */
-  public static SystemSetting getSystemSettingByField(
-      String systemSettingField, ActorRef actorRef, RequestContext context) {
-    SystemSetting systemSetting = null;
-    try {
-      SystemSettingClient client = SystemSettingClientImpl.getInstance();
-      systemSetting = client.getSystemSettingByField(actorRef, systemSettingField, context);
-      if (null == systemSetting || null == systemSetting.getValue()) {
-        throw new Exception();
-      }
-    } catch (Exception e) {
-      logger.error(
-          "Util:getSystemSettingByField: System setting not found for field - "
-              + systemSettingField,
-          e);
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.errorSystemSettingNotFound,
-          ProjectUtil.formatMessage(
-              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), systemSettingField));
-    }
-    return systemSetting;
   }
 
   public static Request sendResetPassMail(Map<String, Object> emailTemplateMap) {
