@@ -995,25 +995,6 @@ public class UserProfileReadActor extends BaseActor {
     return new ArrayList<>();
   }
 
-  private void checkUserExistences(Request request) {
-
-    String value = (String) request.get(JsonKey.VALUE);
-    String type = (String) request.get(JsonKey.KEY);
-    try {
-      boolean exists = UserUtil.identifierExists(type, value);
-      Response response = new Response();
-      response.put(JsonKey.EXISTS, exists);
-      sender().tell(response, self());
-    } catch (Exception var11) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.userDataEncryptionError.getErrorCode(),
-              ResponseCode.userDataEncryptionError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-      sender().tell(exception, self());
-    }
-  }
-
   private void checkUserExistence(Request request) {
     Future<Map<String, Object>> esFuture = userSearchDetails(request);
     Future<Response> userResponse =

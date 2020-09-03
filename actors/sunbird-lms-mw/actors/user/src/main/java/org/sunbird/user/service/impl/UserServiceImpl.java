@@ -2,7 +2,6 @@ package org.sunbird.user.service.impl;
 
 import akka.actor.ActorRef;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,50 +10,38 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.logging.Logger;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserService;
-import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
 public class UserServiceImpl implements UserService {
 
-  private static DecryptionService decryptionService = new DefaultDecryptionServiceImpl();
+  private static Logger logger = Logger.getLogger(UserServiceImpl.class);
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
-  private UserExternalIdentityDao userExtIdentityDao = new UserExternalIdentityDaoImpl();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOK_UP);
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -63,28 +50,6 @@ public class UserServiceImpl implements UserService {
       userService = new UserServiceImpl();
     }
     return userService;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Map<String, Object> esGetUserOrg(String userId, String orgId) {
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(StringFormatter.joinByDot(JsonKey.ORGANISATIONS, JsonKey.ORGANISATION_ID), orgId);
-    filters.put(StringFormatter.joinByDot(JsonKey.ORGANISATIONS, JsonKey.USER_ID), userId);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.FILTERS, filters);
-    SearchDTO searchDto = Util.createSearchDto(map);
-    Future<Map<String, Object>> resultF =
-        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    if (CollectionUtils.isNotEmpty(userMapList)) {
-      Map<String, Object> userMap = userMapList.get(0);
-      return decryptionService.decryptData(userMap);
-    } else {
-      return Collections.EMPTY_MAP;
-    }
   }
 
   @Override
@@ -112,7 +77,7 @@ public class UserServiceImpl implements UserService {
     } else {
       userId = UserUtil.getUserId(request.getRequest());
     }
-    ProjectLogger.log(
+    logger.info(
         "validateUserId :: ctxtUserId : "
             + ctxtUserId
             + " userId: "
@@ -120,8 +85,7 @@ public class UserServiceImpl implements UserService {
             + " managedById: "
             + managedById
             + " managedForId: "
-            + managedForId,
-        LoggerEnum.INFO);
+            + managedForId);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
     if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
@@ -162,60 +126,6 @@ public class UserServiceImpl implements UserService {
     Future<Map<String, Object>> resultF =
         esUtil.getDataByIdentifier(ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-  }
-
-  @Override
-  public String getValidatedCustodianOrgId(Map<String, Object> userMap, ActorRef actorRef) {
-    String custodianOrgId = "";
-    try {
-      SystemSettingClient client = SystemSettingClientImpl.getInstance();
-      SystemSetting systemSetting =
-          client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID);
-      if (null != systemSetting && StringUtils.isNotBlank(systemSetting.getValue())) {
-        custodianOrgId = systemSetting.getValue();
-      }
-    } catch (Exception ex) {
-      ProjectLogger.log(
-          "UserUtil:getValidatedCustodianOrgId: Exception occurred with error message = "
-              + ex.getMessage(),
-          ex);
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.errorSystemSettingNotFound,
-          ProjectUtil.formatMessage(
-              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
-    }
-    Map<String, Object> custodianOrg = null;
-    if (StringUtils.isNotBlank(custodianOrgId)) {
-      Future<Map<String, Object>> custodianOrgF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), custodianOrgId);
-      custodianOrg = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(custodianOrgF);
-      if (MapUtils.isNotEmpty(custodianOrg)) {
-
-        if (null != custodianOrg.get(JsonKey.STATUS)) {
-          int status = (int) custodianOrg.get(JsonKey.STATUS);
-          if (1 != status) {
-            ProjectCommonException.throwClientErrorException(
-                ResponseCode.errorInactiveCustodianOrg);
-          }
-        } else {
-          ProjectCommonException.throwClientErrorException(ResponseCode.errorInactiveCustodianOrg);
-        }
-      } else {
-        ProjectCommonException.throwServerErrorException(
-            ResponseCode.errorSystemSettingNotFound,
-            ProjectUtil.formatMessage(
-                ResponseCode.errorSystemSettingNotFound.getErrorMessage(),
-                JsonKey.CUSTODIAN_ORG_ID));
-      }
-    } else {
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.errorSystemSettingNotFound,
-          ProjectUtil.formatMessage(
-              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
-    }
-    userMap.put(JsonKey.ROOT_ORG_ID, custodianOrgId);
-    userMap.put(JsonKey.CHANNEL, custodianOrg.get(JsonKey.CHANNEL));
-    return custodianOrgId;
   }
 
   @Override
@@ -299,7 +209,7 @@ public class UserServiceImpl implements UserService {
           }
         }
       } catch (Exception ex) {
-        ProjectLogger.log(
+        logger.error(
             "Util:getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
             ex);
       }
@@ -332,20 +242,6 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public Map<String, Object> getUserByUsername(String userName) {
-    Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, userName);
-    List<Map<String, Object>> userList =
-        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(userList)) {
-      return userList.get(0);
-    }
-    return null;
-  }
-
   @Override
   public List<String> getEncryptedList(List<String> dataList) {
     List<String> encryptedDataList = new ArrayList<>();
@@ -354,7 +250,7 @@ public class UserServiceImpl implements UserService {
       try {
         encData = encryptionService.encryptData(data);
       } catch (Exception e) {
-        ProjectLogger.log(
+        logger.error(
             "UserServiceImpl:getEncryptedDataList: Exception occurred with error message = "
                 + e.getMessage());
       }
@@ -416,19 +312,6 @@ public class UserServiceImpl implements UserService {
     return (List<Map<String, Object>>) esResult.get(JsonKey.CONTENT);
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public boolean checkUsernameUniqueness(String username, boolean isEncrypted) {
-    UserLookUp userLookUp = new UserLookUp();
-    Response result = userLookUp.getRecordByType(JsonKey.USERNAME, username, !isEncrypted);
-    List<Map<String, Object>> userMapList =
-        (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(userMapList)) {
-      return false;
-    }
-    return true;
-  }
-
   @Override
   public String getCustodianOrgId(ActorRef actorRef) {
     String custodianOrgId = "";
@@ -440,7 +323,7 @@ public class UserServiceImpl implements UserService {
         custodianOrgId = systemSetting.getValue();
       }
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
           "UserServiceImpl:getCustodianOrgId: Exception occurred with error message = "
               + ex.getMessage(),
           ex);
