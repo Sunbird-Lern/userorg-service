@@ -35,7 +35,6 @@ import scala.concurrent.Future;
     "mergeUserToElastic",
     "updateUserInfoToElastic",
     "updateUserRoles",
-    "addUserBadgebackground",
     "insertOrgInfoToElastic",
     "updateOrgInfoToElastic",
     "updateUserOrgES",
