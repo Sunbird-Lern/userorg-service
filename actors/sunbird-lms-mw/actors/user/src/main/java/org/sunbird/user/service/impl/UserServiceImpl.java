@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.logging.Logger;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
@@ -36,7 +35,6 @@ import scala.concurrent.Future;
 
 public class UserServiceImpl implements UserService {
 
-  private static Logger logger = Logger.getLogger(UserServiceImpl.class);
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
@@ -77,7 +75,7 @@ public class UserServiceImpl implements UserService {
     } else {
       userId = UserUtil.getUserId(request.getRequest());
     }
-    logger.info(
+    ProjectLogger.log(
         "validateUserId :: ctxtUserId : "
             + ctxtUserId
             + " userId: "
@@ -85,7 +83,7 @@ public class UserServiceImpl implements UserService {
             + " managedById: "
             + managedById
             + " managedForId: "
-            + managedForId);
+            + managedForId,LoggerEnum.INFO);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
     if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
@@ -209,7 +207,7 @@ public class UserServiceImpl implements UserService {
           }
         }
       } catch (Exception ex) {
-        logger.error(
+        ProjectLogger.log(
             "Util:getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
             ex);
       }
@@ -250,7 +248,7 @@ public class UserServiceImpl implements UserService {
       try {
         encData = encryptionService.encryptData(data);
       } catch (Exception e) {
-        logger.error(
+        ProjectLogger.log(
             "UserServiceImpl:getEncryptedDataList: Exception occurred with error message = "
                 + e.getMessage());
       }
@@ -323,7 +321,7 @@ public class UserServiceImpl implements UserService {
         custodianOrgId = systemSetting.getValue();
       }
     } catch (Exception ex) {
-      logger.error(
+      ProjectLogger.log(
           "UserServiceImpl:getCustodianOrgId: Exception occurred with error message = "
               + ex.getMessage(),
           ex);

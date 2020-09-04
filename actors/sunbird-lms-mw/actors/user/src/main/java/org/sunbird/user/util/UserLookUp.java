@@ -6,11 +6,11 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.logging.Logger;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -19,7 +19,6 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 
 public class UserLookUp {
-  private static Logger logger = Logger.getLogger(UserLookUp.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
@@ -31,7 +30,7 @@ public class UserLookUp {
       try {
         value = encryptionService.encryptData(value);
       } catch (Exception e) {
-        logger.error("Exception occurred while encrypting email/phone", e);
+        ProjectLogger.log("Exception occurred while encrypting email/phone", e);
       }
     }
     Map<String, Object> reqMap = new HashMap<>();
@@ -49,7 +48,7 @@ public class UserLookUp {
       try {
         value = encryptionService.encryptData(value);
       } catch (Exception e) {
-        logger.error("Exception occurred while encrypting email/phone", e);
+        ProjectLogger.log("Exception occurred while encrypting email/phone", e);
       }
     }
     Map<String, Object> reqMap = new HashMap<>();

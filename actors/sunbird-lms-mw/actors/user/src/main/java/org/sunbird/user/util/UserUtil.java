@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jboss.logging.Logger;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -26,21 +25,15 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
-import org.sunbird.common.services.ProfileCompletenessService;
-import org.sunbird.common.services.impl.ProfileCompletenessFactory;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.SocialMediaType;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.user.dao.UserExternalIdentityDao;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
@@ -48,7 +41,6 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
 public class UserUtil {
-  private static Logger logger = Logger.getLogger(UserUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
@@ -613,7 +605,7 @@ public class UserUtil {
         try {
           encEmail = encryptionService.encryptData((String) userRequestMap.get(JsonKey.EMAIL));
         } catch (Exception ex) {
-          logger.error("Exception occurred while encrypting user email.");
+          ProjectLogger.log("Exception occurred while encrypting user email.");
         }
         if ((encEmail).equalsIgnoreCase(email)) {
           userRequestMap.remove(JsonKey.EMAIL);
@@ -718,7 +710,7 @@ public class UserUtil {
         }
       }
     } catch (Exception e) {
-      logger.error(e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
     return organisations;
   }
@@ -859,7 +851,7 @@ public class UserUtil {
         }
       }
     } catch (Exception ex) {
-      logger.error(ex.getMessage(), ex);
+      ProjectLogger.log(ex.getMessage(), ex);
     }
     return "";
   }
@@ -889,7 +881,7 @@ public class UserUtil {
         }
 
       } catch (Exception ex) {
-        logger.error(ex.getMessage(), ex);
+        ProjectLogger.log(ex.getMessage(), ex);
       }
     }
     return providerOrgMap;
