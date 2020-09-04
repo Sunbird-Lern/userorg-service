@@ -399,7 +399,7 @@ public class ProjectUtilTest extends BaseHttpTest {
     if (StringUtils.isBlank(ekStepBaseUrl)) {
       ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
     }
-    String response = HttpUtil.sendGetRequest(ekStepBaseUrl + "/search/health", headers);
+    String response = HttpClientUtil.get(ekStepBaseUrl + "/search/health", headers);
     assertNotNull(response);
   }
 
