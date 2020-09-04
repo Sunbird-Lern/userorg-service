@@ -40,6 +40,7 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.MigrationUtils;
 import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
@@ -367,6 +368,10 @@ public class TenantMigrationActor extends BaseActor {
               interServiceCommunication.getResponse(
                   getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue()),
                   userequest);
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.insertExternalIdIntoUserLookup(
+          (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
+          (String) request.getRequest().get(JsonKey.USER_ID));
       ProjectLogger.log(
           "TenantMigrationActor:updateUserExternalIds user externalIds got updated.",
           LoggerEnum.INFO.name());

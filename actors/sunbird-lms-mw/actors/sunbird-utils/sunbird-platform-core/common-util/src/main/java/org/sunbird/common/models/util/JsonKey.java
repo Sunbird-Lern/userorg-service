@@ -1078,6 +1078,8 @@ public final class JsonKey {
   public static final String TEACHER_PERSONA = "teacher";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
   public static final String USER_LOOK_UP = "user_lookup";
+  public static final String USER_NAME_LOWER_CASE = "username";
+  public static final String EXTERNAL_ID_LOWER_CASE = "externalid";
 
   private JsonKey() {}
 }

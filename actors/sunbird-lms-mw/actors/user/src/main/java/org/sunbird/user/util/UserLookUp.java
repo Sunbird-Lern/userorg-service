@@ -3,7 +3,6 @@ package org.sunbird.user.util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
@@ -44,6 +43,44 @@ public class UserLookUp {
     return result;
   }
 
+  public Response insertRecords(List<Map<String, Object>> reqMap) {
+    Response result =
+        cassandraOperation.batchInsert(userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap);
+    return result;
+  }
+
+  public Response insertIntoLookUp(Map<String, Object> reqMap) {
+    Response result =
+        cassandraOperation.insertRecord(
+            userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap);
+    return result;
+  }
+
+  public Response insertExternalIdIntoUserLookup(List<Map<String, Object>> reqMap, String userId) {
+    Response result = null;
+    if (CollectionUtils.isNotEmpty(reqMap)) {
+      Map<String, Object> lookUp = new HashMap<>();
+      Map<String, Object> externalId =
+          reqMap
+              .stream()
+              .filter(
+                  x -> ((String) x.get(JsonKey.ID_TYPE)).equals((String) x.get(JsonKey.PROVIDER)))
+              .findFirst()
+              .orElse(null);
+      if (org.apache.commons.collections.MapUtils.isNotEmpty(externalId)) {
+        lookUp.put(JsonKey.TYPE, JsonKey.EXTERNAL_ID_LOWER_CASE);
+        lookUp.put(JsonKey.USER_ID, userId);
+        // provider is the orgId, not the channel
+        lookUp.put(
+            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
+      }
+      result =
+          cassandraOperation.insertRecord(
+              userLookUp.getKeySpace(), userLookUp.getTableName(), lookUp);
+    }
+    return result;
+  }
+
   public List<Map<String, Object>> getRecordByType(String type, String value, boolean encrypt) {
     if (encrypt) {
       try {
@@ -59,11 +96,11 @@ public class UserLookUp {
         cassandraOperation.getRecordsByCompositeKey(
             userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap);
     List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     return userMapList;
   }
 
-  public  List<Map<String, Object>> getEmailByType(String email){
+  public List<Map<String, Object>> getEmailByType(String email) {
     String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
     List<Map<String, Object>> userMapList = null;
     if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
@@ -77,9 +114,8 @@ public class UserLookUp {
     // the application
     if (StringUtils.isNotBlank(email)) {
       List<Map<String, Object>> userMapList = getEmailByType(email);
-      if (!userMapList.isEmpty()) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.emailAlreadyExistError, null);
+      if (CollectionUtils.isNotEmpty(userMapList)) {
+        ProjectCommonException.throwClientErrorException(ResponseCode.emailAlreadyExistError, null);
       }
     }
   }
@@ -101,7 +137,7 @@ public class UserLookUp {
     }
   }
 
-  public  List<Map<String, Object>> getPhoneByType(String phone){
+  public List<Map<String, Object>> getPhoneByType(String phone) {
     String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);
     List<Map<String, Object>> userMapList = null;
     if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
@@ -115,7 +151,7 @@ public class UserLookUp {
     // the application
     if (StringUtils.isNotBlank(phone)) {
       List<Map<String, Object>> userMapList = getPhoneByType(phone);
-      if (!userMapList.isEmpty()) {
+      if (CollectionUtils.isNotEmpty(userMapList)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
       }
     }
@@ -125,21 +161,24 @@ public class UserLookUp {
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
     String phone = user.getPhone();
-    List<Map<String, Object>> userMapList = getPhoneByType(phone);
-    if (!userMapList.isEmpty()) {
-      if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
-      } else {
-        Map<String, Object> userMap = userMapList.get(0);
-        if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+    if (StringUtils.isNotBlank(phone)) {
+      List<Map<String, Object>> userMapList = getPhoneByType(phone);
+      if (!userMapList.isEmpty()) {
+        if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
           ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+        } else {
+          Map<String, Object> userMap = userMapList.get(0);
+          if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+            ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+          }
         }
       }
     }
   }
 
   public boolean checkUsernameUniqueness(String username, boolean isEncrypted) {
-    List<Map<String, Object>> userMapList = getRecordByType(JsonKey.USERNAME, username, !isEncrypted);
+    List<Map<String, Object>> userMapList =
+        getRecordByType(JsonKey.USER_NAME_LOWER_CASE, username, !isEncrypted);
     if (CollectionUtils.isNotEmpty(userMapList)) {
       return false;
     }

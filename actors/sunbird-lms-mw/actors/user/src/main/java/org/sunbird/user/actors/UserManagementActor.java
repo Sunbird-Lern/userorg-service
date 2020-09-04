@@ -282,6 +282,7 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> requestMap = UserUtil.encryptUserData(userMap);
     validateRecoveryEmailPhone(userDbRecord, userMap);
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     if (requestMap.containsKey(JsonKey.TNC_ACCEPTED_ON)) {
       requestMap.put(
@@ -310,7 +311,7 @@ public class UserManagementActor extends BaseActor {
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap);
-
+    insertIntoUserLookUp(userLookUpData);
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
@@ -850,6 +851,7 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.PASSWORD);
     Response response =
         cassandraOperation.insertRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+    insertIntoUserLookUp(userMap);
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -953,6 +955,55 @@ public class UserManagementActor extends BaseActor {
     return userOrgMap;
   }
 
+  private Response insertIntoUserLookUp(Map<String, Object> userMap) {
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> lookUp = new HashMap<>();
+    if (userMap.get(JsonKey.PHONE) != null) {
+      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
+      list.add(lookUp);
+    }
+    if (userMap.get(JsonKey.EMAIL) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
+      list.add(lookUp);
+    }
+    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
+      Map<String, Object> externalId =
+          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
+              .stream()
+              .filter(
+                  x -> ((String) x.get(JsonKey.ID_TYPE)).equals((String) x.get(JsonKey.PROVIDER)))
+              .findFirst()
+              .orElse(null);
+      if (MapUtils.isNotEmpty(externalId)) {
+        lookUp = new HashMap<>();
+        lookUp.put(JsonKey.TYPE, JsonKey.EXTERNAL_ID_LOWER_CASE);
+        lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+        // provider is the orgId, not the channel
+        lookUp.put(
+            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
+        list.add(lookUp);
+      }
+    }
+    if (userMap.get(JsonKey.USERNAME) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.USER_NAME_LOWER_CASE);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
+      list.add(lookUp);
+    }
+    Response response = null;
+    if (CollectionUtils.isNotEmpty(list)) {
+      UserLookUp userLookUp = new UserLookUp();
+      response = userLookUp.insertRecords(list);
+    }
+    return response;
+  }
+
   private Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
     Map<String, Object> userOrgMap = new HashMap<String, Object>();
     userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
@@ -984,6 +1035,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.USER_ID, userId);
     requestMap = UserUtil.encryptUserData(userMap);
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     requestMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
@@ -999,6 +1051,7 @@ public class UserManagementActor extends BaseActor {
       response =
           cassandraOperation.insertRecord(
               usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), requestMap);
+      insertIntoUserLookUp(userLookUpData);
       isPasswordUpdated = UserUtil.updatePassword(userMap);
 
     } finally {
