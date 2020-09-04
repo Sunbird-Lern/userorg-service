@@ -113,9 +113,7 @@ public final class JsonKey {
   public static final String EKSTEP_CONCEPT_URL = "ekstep_concept_base_url";
   public static final String EKSTEP_CONTENT_SEARCH_URL = "ekstep_content_search_url";
   public static final String EKSTEP_DOMAIN_URL = "ekstep_domain_url";
-  public static final String EKSTEP_ES_METRICS_API_URL = "ekstep_es_metrics_api_url";
   public static final String EKSTEP_GET_CHANNEL_LIST = "ekstep.channel.list.api.url";
-  public static final String EKSTEP_METRICS_API_URL = "ekstep_metrics_api_url";
   public static final String EKSTEP_SERVICE = "EkStep service";
   public static final String EKSTEP_TAG_API_URL = "ekstep.tag.api.url";
   public static final String EMAIL = "email";
