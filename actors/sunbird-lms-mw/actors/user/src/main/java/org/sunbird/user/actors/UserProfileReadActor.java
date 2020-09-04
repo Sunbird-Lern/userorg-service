@@ -995,26 +995,7 @@ public class UserProfileReadActor extends BaseActor {
     return new ArrayList<>();
   }
 
-  private void checkUserExistences(Request request) {
-
-    String value = (String) request.get(JsonKey.VALUE);
-    String type = (String) request.get(JsonKey.KEY);
-    try {
-      boolean exists = UserUtil.identifierExists(type, value);
-      Response response = new Response();
-      response.put(JsonKey.EXISTS, exists);
-      sender().tell(response, self());
-    } catch (Exception var11) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.userDataEncryptionError.getErrorCode(),
-              ResponseCode.userDataEncryptionError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-      sender().tell(exception, self());
-    }
-  }
-
-  private void checkUserExistence(Request request) {
+  Future<Response> checkUserExists(Request request, boolean isV1) {
     Future<Map<String, Object>> esFuture = userSearchDetails(request);
     Future<Response> userResponse =
         esFuture.map(
@@ -1023,32 +1004,12 @@ public class UserProfileReadActor extends BaseActor {
               public Response apply(Map<String, Object> responseMap) {
                 List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
                 long size = respList.size();
-                Response resp = new Response();
-                resp.put(JsonKey.EXISTS, true);
-                if (size <= 0) {
-                  resp.put(JsonKey.EXISTS, false);
-                }
-                return resp;
-              }
-            },
-            getContext().dispatcher());
+                boolean isExists = (size > 0);
 
-    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
-  }
-
-  private void checkUserExistenceV2(Request request) {
-    Future<Map<String, Object>> esFuture = userSearchDetails(request);
-    Future<Response> userResponse =
-        esFuture.map(
-            new Mapper<Map<String, Object>, Response>() {
-              @Override
-              public Response apply(Map<String, Object> responseMap) {
-                List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
-                long size = respList.size();
                 Response resp = new Response();
-                if (size <= 0) {
-                  resp.put(JsonKey.EXISTS, false);
-                } else {
+                resp.put(JsonKey.EXISTS, isExists);
+
+                if (isExists && !isV1) {
                   Map<String, Object> response = respList.get(0);
                   resp.put(JsonKey.EXISTS, true);
                   resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
@@ -1058,11 +1019,26 @@ public class UserProfileReadActor extends BaseActor {
                   }
                   resp.put(JsonKey.NAME, name);
                 }
+
+                String logMsg =
+                    String.format(
+                        "userExists %s results size = %d", request.get(JsonKey.VALUE), size);
+                ProjectLogger.log(logMsg, LoggerEnum.INFO);
                 return resp;
               }
             },
             getContext().dispatcher());
 
+    return userResponse;
+  }
+
+  private void checkUserExistence(Request request) {
+    Future<Response> userResponse = checkUserExists(request, true);
+    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
+  }
+
+  private void checkUserExistenceV2(Request request) {
+    Future<Response> userResponse = checkUserExists(request, false);
     Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
   }
 
