@@ -1004,7 +1004,7 @@ public class UserProfileReadActor extends BaseActor {
               public Response apply(Map<String, Object> responseMap) {
                 List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
                 long size = respList.size();
-                boolean isExists = size >= 0;
+                boolean isExists = (size > 0);
 
                 Response resp = new Response();
                 resp.put(JsonKey.EXISTS, isExists);
