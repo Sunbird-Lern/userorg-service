@@ -240,7 +240,7 @@ public class BulkMigrationUser {
     private String encryptData(String decryptedData) {
       long encStartTime = System.currentTimeMillis();
       try {
-        String encryptedData = encryptionService.encryptData(decryptedData);
+        String encryptedData = encryptionService.encryptData(decryptedData, null);
         ProjectLogger.log(
             "BulkMigrationUser:encryptData:TIME TAKEN TO ENCRYPT DATA in(ms):"
                 .concat((System.currentTimeMillis() - encStartTime) + ""),

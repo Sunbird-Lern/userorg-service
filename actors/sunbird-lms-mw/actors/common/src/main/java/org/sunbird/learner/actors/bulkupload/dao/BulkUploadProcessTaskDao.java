@@ -2,6 +2,7 @@ package org.sunbird.learner.actors.bulkupload.dao;
 
 import java.util.List;
 import java.util.Map;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 
 /**
@@ -16,52 +17,59 @@ public interface BulkUploadProcessTaskDao {
    * database.
    *
    * @param bulkUploadProcessTasks Pojo representing the table.
+   * @param context
    * @return String success if record inserted successfully. Response string got from underlying
    *     database implementation layer.
    */
-  String create(BulkUploadProcessTask bulkUploadProcessTasks);
+  String create(BulkUploadProcessTask bulkUploadProcessTasks, RequestContext context);
 
   /**
    * Method to update bulk upload process task entry in database.
    *
    * @param bulkUploadProcessTasks Pojo representing the table.
+   * @param context
    * @return String success if record inserted successfully. Response string got from underlying
    *     database implementation layer.
    */
-  String update(BulkUploadProcessTask bulkUploadProcessTasks);
+  String update(BulkUploadProcessTask bulkUploadProcessTasks, RequestContext context);
 
   /**
    * Method to read the record from database on basis of primary key represented by Pojo.
    *
    * @param BulkUploadProcessTask Pojo representing the table.
+   * @param context
    * @return BulkUploadProcessTask
    */
-  BulkUploadProcessTask read(BulkUploadProcessTask BulkUploadProcessTask);
+  BulkUploadProcessTask read(BulkUploadProcessTask BulkUploadProcessTask, RequestContext context);
 
   /**
    * Method to read from database on basis of primary key.Here map represents the primary
    * keys(composite key).
    *
    * @param compositeKey Composite key.
+   * @param context
    * @return List of records.
    */
-  List<BulkUploadProcessTask> readByPrimaryKeys(Map<String, Object> compositeKey);
+  List<BulkUploadProcessTask> readByPrimaryKeys(
+      Map<String, Object> compositeKey, RequestContext context);
 
   /**
    * Method to perform the batch insert.
    *
    * @param records List of records to be insert into database.
+   * @param context
    * @return String success if record inserted successfully. Response string got from underlying
    *     database implementation layer.
    */
-  String insertBatchRecord(List<BulkUploadProcessTask> records);
+  String insertBatchRecord(List<BulkUploadProcessTask> records, RequestContext context);
 
   /**
    * Method to perform the batch update.
    *
    * @param records List of records to be update into database.
+   * @param context
    * @return String success if record inserted successfully. Response string got from underlying
    *     database implementation layer.
    */
-  String updateBatchRecord(List<BulkUploadProcessTask> records);
+  String updateBatchRecord(List<BulkUploadProcessTask> records, RequestContext context);
 }

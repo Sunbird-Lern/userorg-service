@@ -149,9 +149,9 @@ public class RequestInterceptor {
    *     is returned release-3.0.0 on-wards validating managedBy token.
    */
   public static Map verifyRequestData(Http.Request request) {
-    Map userAuthentication = new HashMap<String,String>();
-    userAuthentication.put(JsonKey.USER_ID,null);
-    userAuthentication.put(JsonKey.MANAGED_FOR,null);
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, null);
+    userAuthentication.put(JsonKey.MANAGED_FOR, null);
 
     String clientId = JsonKey.UNAUTHORIZED;
     String managedForId = null;
@@ -207,10 +207,10 @@ public class RequestInterceptor {
           ProjectLogger.log(ex.getMessage(), ex);
           clientAccessTokenId = null;
         }
-        userAuthentication.put(JsonKey.USER_ID, StringUtils.isNotBlank(clientAccessTokenId)
-            ? clientAccessTokenId
-            : JsonKey.ANONYMOUS);
-      }else {
+        userAuthentication.put(
+            JsonKey.USER_ID,
+            StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId : JsonKey.ANONYMOUS);
+      } else {
         userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
       }
     }

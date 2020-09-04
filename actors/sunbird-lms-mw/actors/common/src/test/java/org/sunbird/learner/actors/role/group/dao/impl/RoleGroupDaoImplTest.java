@@ -55,7 +55,8 @@ public class RoleGroupDaoImplTest {
       cassandraOperation = PowerMockito.mock(CassandraOperation.class);
       PowerMockito.mockStatic(ServiceFactory.class);
       when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-      when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME)).thenReturn(response);
+      when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null))
+          .thenReturn(response);
       List<RoleGroup> roleGroups = roleGroupDao.getRoleGroups();
       Assert.assertEquals("Flag Reviewer", roleGroups.get(0).getName());
 

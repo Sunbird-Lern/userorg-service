@@ -9,7 +9,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
-import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
@@ -29,7 +28,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -49,7 +50,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -69,7 +72,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.DELETE_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -89,7 +94,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -109,7 +116,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.READ_ALL_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -129,7 +138,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.SEARCH_DATA.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -149,7 +160,9 @@ public class DbOperationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.GET_METRICS.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {

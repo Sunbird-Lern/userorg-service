@@ -1,5 +1,7 @@
 package org.sunbird.user.dao.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -26,30 +28,32 @@ public class JobProfileDaoImpl implements JobProfileDao {
   @Override
   public void createJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.insertRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void updateJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.updateRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void upsertJobProfile(Map<String, Object> jobProfile) {
     cassandraOperation.upsertRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfile, null);
   }
 
   @Override
   public void deleteJobProfile(String jobProfileId) {
     cassandraOperation.deleteRecord(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfileId);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), jobProfileId, null);
   }
 
   @Override
   public Response getPropertiesValueById(String propertyName, String identifier) {
+    List<String> properties = new ArrayList<>(2);
+    properties.add(JsonKey.ADDRESS_ID);
     return cassandraOperation.getPropertiesValueById(
-        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, JsonKey.ADDRESS_ID);
+        jobProDbInfo.getKeySpace(), jobProDbInfo.getTableName(), identifier, properties, null);
   }
 }

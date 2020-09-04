@@ -37,6 +37,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -112,23 +113,27 @@ public class UserProfileReadActorTest {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(new HashMap<>());
 
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("anyId");
-    when(userService.getCustodianChannel(Mockito.anyMap(), Mockito.any(ActorRef.class)))
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyId");
+    when(userService.getCustodianChannel(
+            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any()))
         .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("rootOrgId");
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId");
 
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(Util.class);
     Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);
@@ -164,7 +169,7 @@ public class UserProfileReadActorTest {
     Map<String, Object> propertyMap = new HashMap<>();
     propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -186,10 +191,14 @@ public class UserProfileReadActorTest {
     List<Map<String, Object>> responseList = new ArrayList<>();
     response1.getResult().put(JsonKey.RESPONSE, responseList);
     when(cassandraOperation.getRecordsByPrimaryKeys(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(response1);
     when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -281,7 +290,9 @@ public class UserProfileReadActorTest {
   public void setEsSearchResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
+    when(esService.search(
+            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
   }
 
   private static Map<String, Object> getUserExistsSearchResponseMap() {
@@ -296,7 +307,7 @@ public class UserProfileReadActorTest {
 
   private void setCassandraResponse(Response cassandraResponse) {
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(cassandraResponse);
   }
 
@@ -361,13 +372,16 @@ public class UserProfileReadActorTest {
   public void setEsResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
   }
 
   public void setEsResponseForSearch(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString())).thenReturn(promise.future());
+    when(esService.search(
+            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
   }
 }

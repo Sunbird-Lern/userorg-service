@@ -91,7 +91,7 @@ public class ClientManagementActor extends BaseActor {
     Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     Response result =
         cassandraOperation.insertRecord(
-            clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req);
+            clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req, null);
     ProjectLogger.log("Client data saved into cassandra.");
     result.getResult().put(JsonKey.CLIENT_ID, uniqueId);
     result.getResult().put(JsonKey.MASTER_KEY, masterKey);
@@ -183,7 +183,7 @@ public class ClientManagementActor extends BaseActor {
     Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     Response result =
         cassandraOperation.updateRecord(
-            clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req);
+            clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), req, null);
     ProjectLogger.log("Client data updated into cassandra.");
     result.getResult().put(JsonKey.CLIENT_ID, clientId);
     result.getResult().put(JsonKey.MASTER_KEY, newMasterKey);
@@ -246,22 +246,28 @@ public class ClientManagementActor extends BaseActor {
     Util.DbInfo clientDbInfo = Util.dbInfoMap.get(JsonKey.CLIENT_INFO_DB);
     if (StringUtils.equalsIgnoreCase(JsonKey.CLIENT_NAME, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               clientDbInfo.getKeySpace(),
               clientDbInfo.getTableName(),
               JsonKey.CLIENT_NAME,
-              propertyValue.toLowerCase());
+              propertyValue.toLowerCase(),
+              null);
     } else if (StringUtils.equalsIgnoreCase(JsonKey.ID, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
-              clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), JsonKey.ID, propertyValue);
+          cassandraOperation.getRecordsByIndexedProperty(
+              clientDbInfo.getKeySpace(),
+              clientDbInfo.getTableName(),
+              JsonKey.ID,
+              propertyValue,
+              null);
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CHANNEL, propertyName)) {
       result =
-          cassandraOperation.getRecordsByProperty(
+          cassandraOperation.getRecordsByIndexedProperty(
               clientDbInfo.getKeySpace(),
               clientDbInfo.getTableName(),
               JsonKey.CHANNEL,
-              propertyValue);
+              propertyValue,
+              null);
     }
     if (null == result || result.getResult().isEmpty()) {
       throw new ProjectCommonException(

@@ -21,6 +21,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /**
@@ -29,6 +30,7 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Manzarul
  */
 public class ProjectUtil {
+  private static LoggerUtil logger = new LoggerUtil(ProjectUtil.class);
 
   /** format the date in YYYY-MM-DD hh:mm:ss:SSZ */
   private static AtomicInteger atomicInteger = new AtomicInteger();
@@ -651,23 +653,25 @@ public class ProjectUtil {
    * @return String
    * @throws IOException
    */
-  public static String registertag(String tagId, String body, Map<String, String> header)
+  public static String registertag(
+      String tagId, String body, Map<String, String> header, RequestContext context)
       throws IOException {
     String tagStatus = "";
     try {
-      ProjectLogger.log("start call for registering the tag ==" + tagId);
+      logger.info(context, "start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
       tagStatus =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               analyticsBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_TAG_API_URL)
                   + "/"
                   + tagId,
               body,
               header);
-      ProjectLogger.log(
-          "end call for tag registration id and status  ==" + tagId + " " + tagStatus);
+      logger.info(
+          context, "end call for tag registration id and status  ==" + tagId + " " + tagStatus);
     } catch (Exception e) {
+      logger.error(context, e.getMessage(), e);
       throw e;
     }
     return tagStatus;

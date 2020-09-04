@@ -22,12 +22,8 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.KeyCloakConnectionProvider;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.services.sso.SSOManager;
@@ -38,7 +34,7 @@ import org.sunbird.services.sso.SSOManager;
  * @author Manzarul
  */
 public class KeyCloakServiceImpl implements SSOManager {
-
+  private LoggerUtil logger = new LoggerUtil(KeyCloakServiceImpl.class);
   private Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
   private static final String URL =
       KeyCloakConnectionProvider.SSO_URL
@@ -56,8 +52,8 @@ public class KeyCloakServiceImpl implements SSOManager {
   }
 
   @Override
-  public String verifyToken(String accessToken) {
-    return verifyToken(accessToken, null);
+  public String verifyToken(String accessToken, RequestContext context) {
+    return verifyToken(accessToken, null, context);
   }
 
   /**
@@ -78,7 +74,7 @@ public class KeyCloakServiceImpl implements SSOManager {
   }
 
   @Override
-  public boolean updatePassword(String userId, String password) {
+  public boolean updatePassword(String userId, String password, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
       UserResource ur = keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
@@ -88,15 +84,13 @@ public class KeyCloakServiceImpl implements SSOManager {
       ur.resetPassword(cr);
       return true;
     } catch (Exception e) {
-      ProjectLogger.log(
-          "KeyCloakServiceImpl:updatePassword: Exception occurred with error message = " + e,
-          LoggerEnum.ERROR.name());
+      logger.error(context, "updatePassword: Exception occurred: ", e);
     }
     return false;
   }
 
   @Override
-  public String updateUser(Map<String, Object> request) {
+  public String updateUser(Map<String, Object> request, RequestContext context) {
     String userId = (String) request.get(JsonKey.USER_ID);
     String fedUserId = getFederatedUserId(userId);
     UserRepresentation ur = null;
@@ -199,7 +193,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       needTobeUpdate = true;
       ur.setEmail((String) request.get(JsonKey.EMAIL));
     }
-    ProjectLogger.log(
+    logger.info(
         "check user email is verified or not ,resource.toRepresentation().isEmailVerified() :"
             + resource.toRepresentation().isEmailVerified()
             + " for userId :"
@@ -270,10 +264,11 @@ public class KeyCloakServiceImpl implements SSOManager {
    * Method to remove the user on basis of user id.
    *
    * @param request Map
+   * @param context
    * @return boolean true if success otherwise false .
    */
   @Override
-  public String removeUser(Map<String, Object> request) {
+  public String removeUser(Map<String, Object> request, RequestContext context) {
     Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
     String userId = (String) request.get(JsonKey.USER_ID);
     try {
@@ -284,6 +279,7 @@ public class KeyCloakServiceImpl implements SSOManager {
         resource.remove();
       }
     } catch (Exception ex) {
+      logger.error(context, "Error occurred : ", ex);
       ProjectUtil.createAndThrowInvalidUserDataException();
     }
     return JsonKey.SUCCESS;
@@ -293,12 +289,13 @@ public class KeyCloakServiceImpl implements SSOManager {
    * Method to deactivate the user on basis of user id.
    *
    * @param request Map
+   * @param context
    * @return boolean true if success otherwise false .
    */
   @Override
-  public String deactivateUser(Map<String, Object> request) {
+  public String deactivateUser(Map<String, Object> request, RequestContext context) {
     String userId = (String) request.get(JsonKey.USER_ID);
-    makeUserActiveOrInactive(userId, false);
+    makeUserActiveOrInactive(userId, false, context);
     return JsonKey.SUCCESS;
   }
 
@@ -306,12 +303,13 @@ public class KeyCloakServiceImpl implements SSOManager {
    * Method to activate the user on basis of user id.
    *
    * @param request Map
+   * @param context
    * @return boolean true if success otherwise false .
    */
   @Override
-  public String activateUser(Map<String, Object> request) {
+  public String activateUser(Map<String, Object> request, RequestContext context) {
     String userId = (String) request.get(JsonKey.USER_ID);
-    makeUserActiveOrInactive(userId, true);
+    makeUserActiveOrInactive(userId, true, context);
     return JsonKey.SUCCESS;
   }
 
@@ -322,12 +320,10 @@ public class KeyCloakServiceImpl implements SSOManager {
    * @param status boolean
    * @throws ProjectCommonException
    */
-  private void makeUserActiveOrInactive(String userId, boolean status) {
+  private void makeUserActiveOrInactive(String userId, boolean status, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
-      ProjectLogger.log(
-          "KeyCloakServiceImpl:makeUserActiveOrInactive: fedration id formed: " + fedUserId,
-          LoggerEnum.INFO.name());
+      logger.info("makeUserActiveOrInactive: fedration id formed: " + fedUserId);
       validateUserId(fedUserId);
       Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
       UserResource resource =
@@ -338,9 +334,8 @@ public class KeyCloakServiceImpl implements SSOManager {
         resource.update(ur);
       }
     } catch (Exception e) {
-      ProjectLogger.log(
-          "KeyCloakServiceImpl:makeUserActiveOrInactive:error occurred while blocking user: " + e,
-          LoggerEnum.ERROR.name());
+      logger.error(
+          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ", e);
       ProjectUtil.createAndThrowInvalidUserDataException();
     }
   }
@@ -425,7 +420,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       resource.resetPassword(newCredential);
       response = true;
     } catch (Exception ex) {
-      ProjectLogger.log(ex.getMessage(), ex);
+      logger.error(ex.getMessage(), ex);
     }
     return response;
   }
@@ -447,7 +442,7 @@ public class KeyCloakServiceImpl implements SSOManager {
         lastLoginTime = list.get(0);
       }
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     return lastLoginTime;
   }
@@ -479,7 +474,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       ur.setAttributes(map);
       resource.update(ur);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
       response = false;
     }
     return response;
@@ -523,7 +518,7 @@ public class KeyCloakServiceImpl implements SSOManager {
         resource.update(ur);
       }
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
       ProjectUtil.createAndThrowInvalidUserDataException();
     }
   }
@@ -551,21 +546,14 @@ public class KeyCloakServiceImpl implements SSOManager {
       UserRepresentation ur = resource.toRepresentation();
       return ur.getUsername();
     } catch (Exception e) {
-      ProjectLogger.log(
-          "KeyCloakServiceImpl:getUsernameById: User not found for userId = "
-              + userId
-              + " error message = "
-              + e.getMessage(),
-          e);
+      logger.error("KeyCloakServiceImpl:getUsernameById: User not found for userId = " + userId, e);
     }
-    ProjectLogger.log(
-        "KeyCloakServiceImpl:getUsernameById: User not found for userId = " + userId,
-        LoggerEnum.INFO.name());
+    logger.info("getUsernameById: User not found for userId = " + userId);
     return "";
   }
 
   @Override
-  public String verifyToken(String accessToken, String url) {
+  public String verifyToken(String accessToken, String url, RequestContext context) {
 
     try {
       PublicKey publicKey = getPublicKey();
@@ -578,7 +566,8 @@ public class KeyCloakServiceImpl implements SSOManager {
                 ssoUrl + "realms/" + KeyCloakConnectionProvider.SSO_REALM,
                 true,
                 true);
-        ProjectLogger.log(
+        logger.info(
+            context,
             token.getId()
                 + " "
                 + token.issuedFor
@@ -591,8 +580,7 @@ public class KeyCloakServiceImpl implements SSOManager {
                 + "  isExpired: "
                 + token.isExpired()
                 + " "
-                + token.issuedNow().getExpiration(),
-            LoggerEnum.INFO.name());
+                + token.issuedNow().getExpiration());
         String tokenSubject = token.getSubject();
         if (StringUtils.isNotBlank(tokenSubject)) {
           int pos = tokenSubject.lastIndexOf(":");
@@ -600,17 +588,14 @@ public class KeyCloakServiceImpl implements SSOManager {
         }
         return token.getSubject();
       } else {
-        ProjectLogger.log(
-            "KeyCloakServiceImpl:verifyToken: SSO_PUBLIC_KEY is NULL.", LoggerEnum.ERROR);
+        logger.info(context, "verifyToken: SSO_PUBLIC_KEY is NULL.");
         throw new ProjectCommonException(
             ResponseCode.keyCloakDefaultError.getErrorCode(),
             ResponseCode.keyCloakDefaultError.getErrorMessage(),
             ResponseCode.keyCloakDefaultError.getResponseCode());
       }
     } catch (Exception e) {
-      ProjectLogger.log(
-          "KeyCloakServiceImpl:verifyToken: Exception occurred with message = " + e.getMessage(),
-          LoggerEnum.ERROR);
+      logger.error(context, "verifyToken: Exception occurred: ", e);
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
           ResponseCode.unAuthorized.getErrorMessage(),

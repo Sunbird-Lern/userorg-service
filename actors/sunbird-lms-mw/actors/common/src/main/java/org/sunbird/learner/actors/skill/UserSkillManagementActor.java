@@ -200,7 +200,8 @@ public class UserSkillManagementActor extends BaseActor {
     fields.add(JsonKey.SKILLS);
     esDtoMap.put(JsonKey.FIELDS, fields);
     Future<Map<String, Object>> resultF =
-        esService.search(ElasticSearchHelper.createSearchDTO(esDtoMap), EsType.user.getTypeName());
+        esService.search(
+            ElasticSearchHelper.createSearchDTO(esDtoMap), EsType.user.getTypeName(), null);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
@@ -211,7 +212,10 @@ public class UserSkillManagementActor extends BaseActor {
     Map<String, Object> skills = new HashMap<>();
     Response skilldbresponse =
         cassandraOperation.getRecordById(
-            skillsListDbInfo.getKeySpace(), skillsListDbInfo.getTableName(), REF_SKILLS_DB_ID);
+            skillsListDbInfo.getKeySpace(),
+            skillsListDbInfo.getTableName(),
+            REF_SKILLS_DB_ID,
+            null);
     List<Map<String, Object>> skillList =
         (List<Map<String, Object>>) skilldbresponse.get(JsonKey.RESPONSE);
 
@@ -287,10 +291,10 @@ public class UserSkillManagementActor extends BaseActor {
         LoggerEnum.INFO.name());
     Response response1 =
         cassandraOperation.getRecordById(
-            userDbInfo.getKeySpace(), userDbInfo.getTableName(), endoresedUserId);
+            userDbInfo.getKeySpace(), userDbInfo.getTableName(), endoresedUserId, null);
     Response response2 =
         cassandraOperation.getRecordById(
-            userDbInfo.getKeySpace(), userDbInfo.getTableName(), requestedByUserId);
+            userDbInfo.getKeySpace(), userDbInfo.getTableName(), requestedByUserId, null);
     List<Map<String, Object>> endoresedList =
         (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
     List<Map<String, Object>> requestedUserList =
@@ -335,7 +339,7 @@ public class UserSkillManagementActor extends BaseActor {
                 endoresedUserId + JsonKey.PRIMARY_KEY_DELIMETER + skillName.toLowerCase());
         Response response =
             cassandraOperation.getRecordById(
-                userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), id);
+                userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), id, null);
         List<Map<String, Object>> responseList =
             (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
@@ -374,7 +378,7 @@ public class UserSkillManagementActor extends BaseActor {
             ProjectLogger.log("Exception while converting", LoggerEnum.INFO);
           }
           cassandraOperation.insertRecord(
-              userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), skillMap);
+              userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), skillMap, null);
 
           updateES(endoresedUserId);
         } else {
@@ -429,7 +433,7 @@ public class UserSkillManagementActor extends BaseActor {
             }
 
             cassandraOperation.updateRecord(
-                userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), responseMap);
+                userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), responseMap, null);
             updateES(endoresedUserId);
           }
         }
@@ -521,7 +525,10 @@ public class UserSkillManagementActor extends BaseActor {
     List<String> skillsList = null;
     Response skilldbresponse =
         cassandraOperation.getRecordById(
-            skillsListDbInfo.getKeySpace(), skillsListDbInfo.getTableName(), REF_SKILLS_DB_ID);
+            skillsListDbInfo.getKeySpace(),
+            skillsListDbInfo.getTableName(),
+            REF_SKILLS_DB_ID,
+            null);
     List<Map<String, Object>> list =
         (List<Map<String, Object>>) skilldbresponse.get(JsonKey.RESPONSE);
 
@@ -543,7 +550,7 @@ public class UserSkillManagementActor extends BaseActor {
     skills.put(JsonKey.ID, REF_SKILLS_DB_ID);
     skills.put(JsonKey.SKILLS, skillsList);
     cassandraOperation.upsertRecord(
-        skillsListDbInfo.getKeySpace(), skillsListDbInfo.getTableName(), skills);
+        skillsListDbInfo.getKeySpace(), skillsListDbInfo.getTableName(), skills, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -553,14 +560,18 @@ public class UserSkillManagementActor extends BaseActor {
     // ElasticSearch ...
     Util.DbInfo userSkillDbInfo = Util.dbInfoMap.get(JsonKey.USER_SKILL_DB);
     Response response =
-        cassandraOperation.getRecordsByProperty(
-            userSkillDbInfo.getKeySpace(), userSkillDbInfo.getTableName(), JsonKey.USER_ID, userId);
+        cassandraOperation.getRecordsByIndexedProperty(
+            userSkillDbInfo.getKeySpace(),
+            userSkillDbInfo.getTableName(),
+            JsonKey.USER_ID,
+            userId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> esMap = new HashMap<>();
     esMap.put(JsonKey.SKILLS, responseList);
     Future<Map<String, Object>> profileF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(EsType.user.getTypeName(), userId, null);
     Map<String, Object> profile =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(profileF);
     if (MapUtils.isNotEmpty(profile)) {
@@ -573,15 +584,15 @@ public class UserSkillManagementActor extends BaseActor {
       if (MapUtils.isNotEmpty(privateVisibilityMap)
           && privateVisibilityMap.containsKey(JsonKey.SKILLS)) {
         Future<Map<String, Object>> visibilityMapF =
-            esService.getDataByIdentifier(EsType.userprofilevisibility.getTypeName(), userId);
+            esService.getDataByIdentifier(EsType.userprofilevisibility.getTypeName(), userId, null);
         Map<String, Object> visibilityMap =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(visibilityMapF);
         if (MapUtils.isNotEmpty(visibilityMap)) {
           visibilityMap.putAll(esMap);
-          esService.save(EsType.userprofilevisibility.getTypeName(), userId, visibilityMap);
+          esService.save(EsType.userprofilevisibility.getTypeName(), userId, visibilityMap, null);
         }
       } else {
-        esService.update(EsType.user.getTypeName(), userId, esMap);
+        esService.update(EsType.user.getTypeName(), userId, esMap, null);
       }
     }
   }
@@ -638,7 +649,8 @@ public class UserSkillManagementActor extends BaseActor {
   private Map<String, Object> getUser(String id, String parameter) {
     Util.DbInfo userDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
-        cassandraOperation.getRecordById(userDbInfo.getKeySpace(), userDbInfo.getTableName(), id);
+        cassandraOperation.getRecordById(
+            userDbInfo.getKeySpace(), userDbInfo.getTableName(), id, null);
     List<Map<String, Object>> responseUserList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 

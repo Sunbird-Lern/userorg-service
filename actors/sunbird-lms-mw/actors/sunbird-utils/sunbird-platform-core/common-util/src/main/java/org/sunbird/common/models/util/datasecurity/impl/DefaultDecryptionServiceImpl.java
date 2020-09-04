@@ -10,14 +10,14 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class DefaultDecryptionServiceImpl implements DecryptionService {
+  private static LoggerUtil logger = new LoggerUtil(DefaultDecryptionServiceImpl.class);
+
   private static String sunbird_encryption = "";
 
   private String sunbirdEncryption = "";
@@ -31,7 +31,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       c = Cipher.getInstance(ALGORITHM);
       c.init(Cipher.DECRYPT_MODE, key);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
   }
 
@@ -43,7 +43,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
   }
 
   @Override
-  public Map<String, Object> decryptData(Map<String, Object> data) {
+  public Map<String, Object> decryptData(Map<String, Object> data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null) {
         return data;
@@ -53,7 +53,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
         Entry<String, Object> entry = itr.next();
         if (!(entry.getValue() instanceof Map || entry.getValue() instanceof List)
             && null != entry.getValue()) {
-          data.put(entry.getKey(), decrypt(entry.getValue() + "", false));
+          data.put(entry.getKey(), decrypt(entry.getValue() + "", false, context));
         }
       }
     }
@@ -61,38 +61,40 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
   }
 
   @Override
-  public List<Map<String, Object>> decryptData(List<Map<String, Object>> data) {
+  public List<Map<String, Object>> decryptData(
+      List<Map<String, Object>> data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null || data.isEmpty()) {
         return data;
       }
 
       for (Map<String, Object> map : data) {
-        decryptData(map);
+        decryptData(map, context);
       }
     }
     return data;
   }
 
   @Override
-  public String decryptData(String data) {
-    return decryptData(data, false);
+  public String decryptData(String data, RequestContext context) {
+    return decryptData(data, false, context);
   }
 
   @Override
-  public String decryptData(String data, boolean throwExceptionOnFailure) {
+  public String decryptData(String data, boolean throwExceptionOnFailure, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (StringUtils.isBlank(data)) {
         return data;
       } else {
-        return decrypt(data, throwExceptionOnFailure);
+        return decrypt(data, throwExceptionOnFailure, context);
       }
     } else {
       return data;
     }
   }
 
-  public static String decrypt(String value, boolean throwExceptionOnFailure) {
+  public static String decrypt(
+      String value, boolean throwExceptionOnFailure, RequestContext context) {
     try {
       String dValue = null;
       String valueToDecrypt = value.trim();
@@ -106,13 +108,10 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       return dValue;
     } catch (Exception ex) {
       // This could happen with masked email and phone number. Not others.
-      ProjectLogger.log(
-          "DefaultDecryptionServiceImpl:decrypt: ignorable errorMsg = " + ex.getMessage(),
-          LoggerEnum.ERROR.name());
+      logger.error(context, "DefaultDecryptionServiceImpl:decrypt: ignorable errorMsg = ", ex);
       if (throwExceptionOnFailure) {
-        ProjectLogger.log(
-            "Throwing exception error upon explicit ask by callers for value " + value,
-            LoggerEnum.ERROR.name());
+        logger.info(
+            context, "Throwing exception error upon explicit ask by callers for value " + value);
         ProjectCommonException.throwClientErrorException(ResponseCode.userDataEncryptionError);
       }
     }

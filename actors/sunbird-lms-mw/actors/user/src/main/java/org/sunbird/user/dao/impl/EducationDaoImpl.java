@@ -1,5 +1,7 @@
 package org.sunbird.user.dao.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
@@ -25,27 +27,33 @@ public class EducationDaoImpl implements EducationDao {
 
   @Override
   public void createEducation(Map<String, Object> education) {
-    cassandraOperation.insertRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.insertRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override
   public void updateEducation(Map<String, Object> education) {
-    cassandraOperation.updateRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.updateRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override
   public void deleteEducation(String educationId) {
-    cassandraOperation.deleteRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), educationId);
+    cassandraOperation.deleteRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), educationId, null);
   }
 
   @Override
   public void upsertEducation(Map<String, Object> education) {
-    cassandraOperation.upsertRecord(eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education);
+    cassandraOperation.upsertRecord(
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), education, null);
   }
 
   @Override
   public Response getPropertiesValueById(String propertyName, String identifier) {
+    List<String> properties = new ArrayList<>(2);
+    properties.add(JsonKey.ADDRESS_ID);
     return cassandraOperation.getPropertiesValueById(
-        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), identifier, JsonKey.ADDRESS_ID);
+        eduDbInfo.getKeySpace(), eduDbInfo.getTableName(), identifier, properties, null);
   }
 }

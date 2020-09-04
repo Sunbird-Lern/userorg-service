@@ -50,7 +50,7 @@ public class BackGroundServiceActor extends BaseActor {
     ProjectLogger.log("operation for updating UserCount" + operation);
     Response response =
         cassandraOperation.getRecordsByProperty(
-            locDbInfo.getKeySpace(), locDbInfo.getTableName(), JsonKey.ID, locationIds);
+            locDbInfo.getKeySpace(), locDbInfo.getTableName(), JsonKey.ID, locationIds, null);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != list && !list.isEmpty()) {
       for (Map<String, Object> map : list) {
@@ -70,7 +70,7 @@ public class BackGroundServiceActor extends BaseActor {
           reqMap.put(JsonKey.USER_COUNT, count);
           reqMap.put(JsonKey.USER_COUNT_TTL, String.valueOf(System.currentTimeMillis()));
           cassandraOperation.updateRecord(
-              locDbInfo.getKeySpace(), locDbInfo.getTableName(), reqMap);
+              locDbInfo.getKeySpace(), locDbInfo.getTableName(), reqMap, null);
         } else if (!StringUtils.isBlank(operation)
             && operation.equalsIgnoreCase("GeoLocationManagementActor")) {
           ProjectLogger.log(
@@ -97,7 +97,7 @@ public class BackGroundServiceActor extends BaseActor {
             reqMap.put(JsonKey.USER_COUNT, usrCount);
             reqMap.put(JsonKey.USER_COUNT_TTL, String.valueOf(System.currentTimeMillis()));
             cassandraOperation.updateRecord(
-                locDbInfo.getKeySpace(), locDbInfo.getTableName(), reqMap);
+                locDbInfo.getKeySpace(), locDbInfo.getTableName(), reqMap, null);
           }
         }
       }
@@ -115,7 +115,7 @@ public class BackGroundServiceActor extends BaseActor {
     filter.put(JsonKey.LOCATION_ID, locationId);
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     Future<Map<String, Object>> esResponseF =
-        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName());
+        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), null);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> orgList = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
@@ -137,7 +137,7 @@ public class BackGroundServiceActor extends BaseActor {
       ProjectLogger.log("filter2.get(JsonKey.ORGANISATIONS.JsonKey.ORGANISATION_ID) " + orgIdList);
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter2);
       Future<Map<String, Object>> esResponse2F =
-          esService.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+          esService.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
       Map<String, Object> esResponse2 =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponse2F);
       long userCount = (long) esResponse2.get(JsonKey.COUNT);

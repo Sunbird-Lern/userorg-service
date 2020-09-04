@@ -113,7 +113,9 @@ public class UserController extends BaseController {
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          request.getContext().put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          request
+              .getContext()
+              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
           request.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRequestValidator().validateUpdateUserRequest(request);
           request

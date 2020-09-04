@@ -53,10 +53,10 @@ public class ClientManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     request.clear();
     orgMap.clear();
@@ -219,8 +219,12 @@ public class ClientManagementActorTest {
     Request actorMessage = new Request();
     actorMessage.setRequest(request);
     actorMessage.setOperation(actorOperations.getValue());
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getRecordsByIndexedProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(getCassandraResponse(orgMap));
     subject.tell(actorMessage, probe.getRef());
     if (errorResponse == null) {

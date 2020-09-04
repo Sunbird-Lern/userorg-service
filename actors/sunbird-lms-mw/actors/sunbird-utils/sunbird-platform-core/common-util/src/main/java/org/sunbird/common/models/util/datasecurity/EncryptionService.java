@@ -3,6 +3,7 @@ package org.sunbird.common.models.util.datasecurity;
 
 import java.util.List;
 import java.util.Map;
+import org.sunbird.common.request.RequestContext;
 
 /**
  * This service will have the data encryption logic. these logic will differ based on implementation
@@ -22,10 +23,12 @@ public interface EncryptionService {
    * can have another map as values. inner map will also have values as primitive or String or both
    *
    * @param data Map<String,Object>
+   * @param context
    * @return Map<String,Object>
    * @throws Exception
    */
-  Map<String, Object> encryptData(Map<String, Object> data) throws Exception;
+  Map<String, Object> encryptData(Map<String, Object> data, RequestContext context)
+      throws Exception;
 
   /**
    * This method will take list of map as an input to encrypt the data, after encryption it will
@@ -33,17 +36,20 @@ public interface EncryptionService {
    * another map have primitive , String values.
    *
    * @param data List<Map<String,Object>>
+   * @param context
    * @return List<Map<String,Object>>
    * @throws Exception
    */
-  List<Map<String, Object>> encryptData(List<Map<String, Object>> data) throws Exception;
+  List<Map<String, Object>> encryptData(List<Map<String, Object>> data, RequestContext context)
+      throws Exception;
 
   /**
    * This method will take String as an input and encrypt the String and return back.
    *
    * @param data String
+   * @param context
    * @return String
    * @throws Exception
    */
-  String encryptData(String data) throws Exception;
+  String encryptData(String data, RequestContext context) throws Exception;
 }

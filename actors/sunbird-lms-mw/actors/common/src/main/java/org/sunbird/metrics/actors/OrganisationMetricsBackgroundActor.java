@@ -242,7 +242,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
       try {
         Future<Map<String, Object>> resultF =
             esService.search(
-                createESRequest(filter, null, coursefields), EsType.user.getTypeName());
+                createESRequest(filter, null, coursefields), EsType.user.getTypeName(), null);
         Map<String, Object> result =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
         if (null != result && !result.isEmpty()) {
@@ -264,7 +264,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
       }
     }
     // decrypt the userdata and return
-    return decryptionService.decryptData(userResult);
+    return decryptionService.decryptData(userResult, null);
   }
 
   private String getRequestObject(String operation, String requestId) {
@@ -460,7 +460,8 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
     filter.put("organisations.organisationId", orgId);
     try {
       Future<Map<String, Object>> resultF =
-          esService.search(createESRequest(filter, null, coursefields), EsType.user.getTypeName());
+          esService.search(
+              createESRequest(filter, null, coursefields), EsType.user.getTypeName(), null);
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
 
@@ -474,7 +475,7 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
         }
       }
       // decrypt the userdata
-      userResult = decryptionService.decryptData(userResult);
+      userResult = decryptionService.decryptData(userResult, null);
       return userResult;
     } catch (Exception e) {
       throw new ProjectCommonException(
@@ -516,14 +517,17 @@ public class OrganisationMetricsBackgroundActor extends BaseMetricsActor {
     dbReqMap.put(JsonKey.UPDATED_DATE, format.format(new Date()));
     dbReqMap.put(JsonKey.TYPE, type);
     cassandraOperation.updateRecord(
-        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap, null);
   }
 
   @SuppressWarnings("unchecked")
   private Map<String, Object> getData(String requestId) {
     Response response =
         cassandraOperation.getRecordById(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), requestId);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            requestId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (responseList.isEmpty()) {

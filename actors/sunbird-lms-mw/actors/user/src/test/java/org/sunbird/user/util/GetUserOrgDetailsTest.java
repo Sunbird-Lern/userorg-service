@@ -43,9 +43,9 @@ public class GetUserOrgDetailsTest {
     ids.add("123-456-789");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID))
+            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
         .thenReturn(response1);
-    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789");
+    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
 }

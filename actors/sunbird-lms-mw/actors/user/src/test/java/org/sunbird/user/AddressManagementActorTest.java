@@ -27,6 +27,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.actors.AddressManagementActor;
 import org.sunbird.user.util.UserActorOperations;
@@ -54,7 +55,8 @@ public class AddressManagementActorTest {
         .thenReturn(encryptionService);
 
     try {
-      Mockito.when(encryptionService.encryptData(Mockito.anyString())).thenReturn("encrptUserId");
+      Mockito.when(encryptionService.encryptData(Mockito.anyString(), Mockito.any()))
+          .thenReturn("encrptUserId");
     } catch (Exception e) {
       fail(
           "AddressManagementActorTest initialization failed, with exception message: "
@@ -63,10 +65,16 @@ public class AddressManagementActorTest {
     CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.deleteRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
   }
 

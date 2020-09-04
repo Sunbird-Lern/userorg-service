@@ -74,16 +74,16 @@ public class EmailServiceController extends BaseController {
 
       JsonNode reqObjJson = omapper.convertValue(reqObj, JsonNode.class);
       return handleRequest(
-        ActorOperations.V2_NOTIFICATION.getValue(),
-        reqObjJson,
-        req -> {
-          // We have validated earlier.
-          return null;
-        },
-        null,
-        null,
-        true,
-        httpRequest);
+          ActorOperations.V2_NOTIFICATION.getValue(),
+          reqObjJson,
+          req -> {
+            // We have validated earlier.
+            return null;
+          },
+          null,
+          null,
+          true,
+          httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }

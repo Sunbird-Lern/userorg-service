@@ -43,7 +43,7 @@ public class BadgeClassExtensionServiceImpl implements BadgeClassExtensionServic
     request.put(JsonKey.SUBTYPE, badgeClassExtension.getSubtype());
     request.put(JsonKey.ROLES, badgeClassExtension.getRoles());
 
-    cassandraOperation.upsertRecord(Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, request);
+    cassandraOperation.upsertRecord(Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, request, null);
   }
 
   @Override
@@ -70,7 +70,7 @@ public class BadgeClassExtensionServiceImpl implements BadgeClassExtensionServic
 
     Response response =
         cassandraOperation.getRecordsByProperties(
-            Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, propertyMap);
+            Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, propertyMap, null);
     List<Map<String, Object>> badgeClassExtList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
@@ -96,7 +96,8 @@ public class BadgeClassExtensionServiceImpl implements BadgeClassExtensionServic
   @Override
   public BadgeClassExtension get(String badgeId) throws ProjectCommonException {
     Response response =
-        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, badgeId);
+        cassandraOperation.getRecordById(
+            Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, badgeId, null);
     List<Map<String, Object>> badgeList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
@@ -115,6 +116,6 @@ public class BadgeClassExtensionServiceImpl implements BadgeClassExtensionServic
 
   @Override
   public void delete(String badgeId) {
-    cassandraOperation.deleteRecord(Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, badgeId);
+    cassandraOperation.deleteRecord(Util.KEY_SPACE_NAME, BADGE_CLASS_EXT_TABLE_NAME, badgeId, null);
   }
 }

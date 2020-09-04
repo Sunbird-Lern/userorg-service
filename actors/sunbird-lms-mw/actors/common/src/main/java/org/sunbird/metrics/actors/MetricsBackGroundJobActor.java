@@ -87,7 +87,10 @@ public class MetricsBackGroundJobActor extends BaseActor {
     // fetch the DB details from database on basis of requestId ....
     Response response =
         cassandraOperation.getRecordById(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), requestId);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            requestId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (responseList.isEmpty()) {
@@ -106,19 +109,25 @@ public class MetricsBackGroundJobActor extends BaseActor {
       dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.SENDING_MAIL_SUCCESS.getValue());
       dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
       cassandraOperation.updateRecord(
-          reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+          reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap, null);
     } else {
       increasetryCount(reportDbInfo);
       if ((Integer) reportDbInfo.get(JsonKey.TRY_COUNT) > 3) {
         dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.FAILED.getValue());
         dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
         cassandraOperation.updateRecord(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            dbReqMap,
+            null);
       } else {
         dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.SENDING_MAIL.getValue());
         dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
         cassandraOperation.updateRecord(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            dbReqMap,
+            null);
       }
     }
   }
@@ -142,7 +151,10 @@ public class MetricsBackGroundJobActor extends BaseActor {
 
     Response response =
         cassandraOperation.getRecordById(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), requestId);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            requestId,
+            null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (responseList.isEmpty()) {
@@ -173,7 +185,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
       dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
       dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.FAILED.getValue());
       cassandraOperation.updateRecord(
-          reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+          reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap, null);
       throw ex;
     }
 
@@ -189,12 +201,18 @@ public class MetricsBackGroundJobActor extends BaseActor {
         dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.FAILED.getValue());
         dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
         cassandraOperation.updateRecord(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            dbReqMap,
+            null);
       } else {
         dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.UPLOADING_FILE.getValue());
         dbReqMap.put(JsonKey.UPDATED_DATE, simpleDateFormat.format(new Date()));
         cassandraOperation.updateRecord(
-            reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+            reportTrackingdbInfo.getKeySpace(),
+            reportTrackingdbInfo.getTableName(),
+            dbReqMap,
+            null);
       }
       throw e;
     } finally {
@@ -209,7 +227,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
     dbReqMap.put(JsonKey.DATA, null);
     dbReqMap.put(JsonKey.STATUS, ReportTrackingStatus.UPLOADING_FILE_SUCCESS.getValue());
     cassandraOperation.updateRecord(
-        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap);
+        reportTrackingdbInfo.getKeySpace(), reportTrackingdbInfo.getTableName(), dbReqMap, null);
 
     Request backGroundRequest = new Request();
     backGroundRequest.setOperation(ActorOperations.SEND_MAIL.getValue());
@@ -243,7 +261,8 @@ public class MetricsBackGroundJobActor extends BaseActor {
           cassandraOperation.getRecordById(
               organisationDbInfo.getKeySpace(),
               organisationDbInfo.getTableName(),
-              (String) requestMap.get(JsonKey.ROOT_ORG_ID));
+              (String) requestMap.get(JsonKey.ROOT_ORG_ID),
+              null);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (!responseList.isEmpty() && MapUtils.isNotEmpty(responseList.get(0))) {
@@ -257,7 +276,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
     templateMap.put(JsonKey.ACTION_NAME, "DOWNLOAD REPORT");
     VelocityContext context = ProjectUtil.getContext(templateMap);
     String courseProgressMailTemplate =
-        emailTemplateDao.getTemplate(JsonKey.COURSE_PROGRESS_MAIL_TEMPLATE);
+        emailTemplateDao.getTemplate(JsonKey.COURSE_PROGRESS_MAIL_TEMPLATE, null);
     return SendMail.sendMailWithBody(
         new String[] {(String) reportDbInfo.get(JsonKey.EMAIL)},
         reportDbInfo.get(JsonKey.TYPE) + " for " + resource,
@@ -300,7 +319,7 @@ public class MetricsBackGroundJobActor extends BaseActor {
             ResponseCode.invalidRequestData.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
-      storageUrl = service.uploadFile(container, file);
+      storageUrl = service.uploadFile(container, file, null);
     } catch (Exception e) {
       ProjectLogger.log("Exception Occurred while reading file in FileUploadServiceActor", e);
       throw e;

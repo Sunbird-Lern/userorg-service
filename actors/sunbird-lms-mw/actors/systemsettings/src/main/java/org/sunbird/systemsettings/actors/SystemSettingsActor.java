@@ -12,9 +12,8 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -38,7 +37,7 @@ public class SystemSettingsActor extends BaseActor {
         getSystemSetting(request);
         break;
       case "getAllSystemSettings":
-        getAllSystemSettings();
+        getAllSystemSettings(request.getRequestContext());
         break;
       case "setSystemSetting":
         setSystemSetting(request);
@@ -52,9 +51,9 @@ public class SystemSettingsActor extends BaseActor {
   private void getSystemSetting(Request actorMessage) {
     String value =
         DataCacheHandler.getConfigSettings().get(actorMessage.getContext().get(JsonKey.FIELD));
-    ProjectLogger.log(
-        "SystemSettingsActor:getSystemSetting: got field value from cache.",
-        LoggerEnum.INFO.name());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "SystemSettingsActor:getSystemSetting: got field value from cache.");
     SystemSetting setting = null;
     if (value != null) {
       setting =
@@ -64,9 +63,12 @@ public class SystemSettingsActor extends BaseActor {
               value);
     } else {
       setting =
-          systemSettingDaoImpl.readByField((String) actorMessage.getContext().get(JsonKey.FIELD));
-      ProjectLogger.log(
-          "SystemSettingsActor:getSystemSetting:got field value from db", LoggerEnum.INFO.name());
+          systemSettingDaoImpl.readByField(
+              (String) actorMessage.getContext().get(JsonKey.FIELD),
+              actorMessage.getRequestContext());
+      logger.info(
+          actorMessage.getRequestContext(),
+          "SystemSettingsActor:getSystemSetting:got field value from db");
       if (null == setting) {
         throw new ProjectCommonException(
             ResponseCode.resourceNotFound.getErrorCode(),
@@ -81,8 +83,8 @@ public class SystemSettingsActor extends BaseActor {
     sender().tell(response, self());
   }
 
-  private void getAllSystemSettings() {
-    ProjectLogger.log("SystemSettingsActor: getAllSystemSettings called", LoggerEnum.DEBUG.name());
+  private void getAllSystemSettings(RequestContext context) {
+    logger.info(context, "SystemSettingsActor: getAllSystemSettings called");
     Map<String, String> systemSettings = DataCacheHandler.getConfigSettings();
     Response response = new Response();
     List<SystemSetting> allSystemSettings = null;
@@ -94,14 +96,14 @@ public class SystemSettingsActor extends BaseActor {
                 (String) setting.getKey(), (String) setting.getKey(), (String) setting.getValue()));
       }
     } else {
-      allSystemSettings = systemSettingDaoImpl.readAll();
+      allSystemSettings = systemSettingDaoImpl.readAll(context);
     }
     response.put(JsonKey.RESPONSE, allSystemSettings);
     sender().tell(response, self());
   }
 
   private void setSystemSetting(Request actorMessage) {
-    ProjectLogger.log("SystemSettingsActor: setSystemSetting called", LoggerEnum.DEBUG.name());
+    logger.info(actorMessage.getRequestContext(), "SystemSettingsActor: setSystemSetting called");
 
     Map<String, Object> request = actorMessage.getRequest();
     String id = (String) request.get(JsonKey.ID);
@@ -116,7 +118,7 @@ public class SystemSettingsActor extends BaseActor {
     }
     ObjectMapper mapper = new ObjectMapper();
     SystemSetting systemSetting = mapper.convertValue(request, SystemSetting.class);
-    Response response = systemSettingDaoImpl.write(systemSetting);
+    Response response = systemSettingDaoImpl.write(systemSetting, actorMessage.getRequestContext());
     sender().tell(response, self());
   }
 }

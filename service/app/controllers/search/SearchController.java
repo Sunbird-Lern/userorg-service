@@ -38,7 +38,9 @@ public class SearchController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -61,7 +63,9 @@ public class SearchController extends BaseController {
       if ("keycloak".equalsIgnoreCase(operation)) {
         reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
         reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-        reqObj.getRequest().put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+        reqObj
+            .getRequest()
+            .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
         reqObj.setEnv(getEnvironment());
         HashMap<String, Object> map = new HashMap<>();
         map.put(JsonKey.DATA, reqObj.getRequest());
@@ -70,7 +74,9 @@ public class SearchController extends BaseController {
       } else {
         reqObj.setOperation(ActorOperations.SYNC.getValue());
         reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-        reqObj.getRequest().put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+        reqObj
+            .getRequest()
+            .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
         reqObj.setEnv(getEnvironment());
         HashMap<String, Object> map = new HashMap<>();
         map.put(JsonKey.DATA, reqObj.getRequest());

@@ -3,8 +3,6 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.sunbird.auth.verifier.ManagedTokenValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -50,11 +48,11 @@ public class AuthenticationHelper {
     String userId = JsonKey.UNAUTHORIZED;
     try {
       if (ssoEnabled) {
-        userId = ssoManager.verifyToken(token);
+        userId = ssoManager.verifyToken(token, null);
       } else {
         Response authResponse =
             cassandraOperation.getRecordById(
-                userAuth.getKeySpace(), userAuth.getTableName(), token);
+                userAuth.getKeySpace(), userAuth.getTableName(), token, null);
         if (authResponse != null && authResponse.get(JsonKey.RESPONSE) != null) {
           List<Map<String, Object>> authList =
               (List<Map<String, Object>>) authResponse.get(JsonKey.RESPONSE);
@@ -80,7 +78,7 @@ public class AuthenticationHelper {
     try {
       Response clientResponse =
           cassandraOperation.getRecordsByProperties(
-              clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), propertyMap);
+              clientDbInfo.getKeySpace(), clientDbInfo.getTableName(), propertyMap, null);
       if (null != clientResponse && !clientResponse.getResult().isEmpty()) {
         List<Map<String, Object>> dataList =
             (List<Map<String, Object>>) clientResponse.getResult().get(JsonKey.RESPONSE);
@@ -91,5 +89,4 @@ public class AuthenticationHelper {
     }
     return validClientId;
   }
-  
 }

@@ -28,7 +28,8 @@ public class RoleDaoImpl implements RoleDao {
   @SuppressWarnings("unchecked")
   @Override
   public List<Role> getRoles() {
-    Response roleResults = getCassandraOperation().getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME);
+    Response roleResults =
+        getCassandraOperation().getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null);
     TypeReference<List<Role>> roleMapType = new TypeReference<List<Role>>() {};
     List<Map<String, Object>> roleMapList =
         (List<Map<String, Object>>) roleResults.get(JsonKey.RESPONSE);

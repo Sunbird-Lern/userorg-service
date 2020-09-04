@@ -2,6 +2,7 @@
 package org.sunbird.services.sso;
 
 import java.util.Map;
+import org.sunbird.common.request.RequestContext;
 
 /** @author Manzarul This interface will handle all call related to single sign out. */
 public interface SSOManager {
@@ -11,28 +12,31 @@ public interface SSOManager {
    * invalid access token it will throw ProjectCommon exception with 401.
    *
    * @param token String JWT access token
+   * @param context
    * @return String
    */
-  String verifyToken(String token);
+  String verifyToken(String token, RequestContext context);
 
   /** Update password in SSO server (keycloak). */
-  boolean updatePassword(String userId, String password);
+  boolean updatePassword(String userId, String password, RequestContext context);
 
   /**
    * Method to update user account in keycloak on basis of userId.
    *
    * @param request
+   * @param context
    * @return
    */
-  String updateUser(Map<String, Object> request);
+  String updateUser(Map<String, Object> request, RequestContext context);
 
   /**
    * Method to remove user from keycloak account on basis of userId .
    *
    * @param request
+   * @param context
    * @return
    */
-  String removeUser(Map<String, Object> request);
+  String removeUser(Map<String, Object> request, RequestContext context);
 
   /**
    * This method will check email is verified by user or not.
@@ -46,17 +50,19 @@ public interface SSOManager {
    * Method to deactivate user from keycloak , it is like soft delete .
    *
    * @param request
+   * @param context
    * @return
    */
-  String deactivateUser(Map<String, Object> request);
+  String deactivateUser(Map<String, Object> request, RequestContext context);
 
   /**
    * Method to activate user from keycloak , it is like soft delete .
    *
    * @param request
+   * @param context
    * @return
    */
-  String activateUser(Map<String, Object> request);
+  String activateUser(Map<String, Object> request, RequestContext context);
 
   /**
    * This method will read user last login time from key claok.
@@ -125,7 +131,8 @@ public interface SSOManager {
    *
    * @param token String JWT access token
    * @param url token will be validated against this url
+   * @param context
    * @return String
    */
-  String verifyToken(String token, String url);
+  String verifyToken(String token, String url, RequestContext context);
 }

@@ -71,7 +71,7 @@ public class UserEncryptionServiceImpl implements UserEncryptionService {
     for (String field : userEncryptedFieldList) {
       try {
         if (StringUtils.isNotBlank((String) userMap.get(field))) {
-          decryptionService.decryptData((String) userMap.get(field), true);
+          decryptionService.decryptData((String) userMap.get(field), true, null);
           decryptedFields.add(field);
         }
       } catch (ProjectCommonException e) {
@@ -89,7 +89,7 @@ public class UserEncryptionServiceImpl implements UserEncryptionService {
       try {
         if (StringUtils.isNotBlank((String) userMap.get(field))
             && ((String) userMap.get(field))
-                .equals(decryptionService.decryptData((String) userMap.get(field)))) {
+                .equals(decryptionService.decryptData((String) userMap.get(field), null))) {
           decryptedFields.add(field);
         }
       } catch (Exception e) {

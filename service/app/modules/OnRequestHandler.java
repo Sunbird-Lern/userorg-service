@@ -50,14 +50,19 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
-        //From 3.0.0 checking user access-token and managed-by from the request header
+        // From 3.0.0 checking user access-token and managed-by from the request header
         Map userAuthentication = RequestInterceptor.verifyRequestData(request);
-        String message = (String)userAuthentication.get(JsonKey.USER_ID);
-        if(userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
-          request = request.addAttr(Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
+        String message = (String) userAuthentication.get(JsonKey.USER_ID);
+        if (userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
+          request =
+              request.addAttr(
+                  Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
         }
-        if(userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY) != null) {
-          request = request.addAttr(Attrs.AUTH_WITH_MASTER_KEY, (String) userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY));
+        if (userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY) != null) {
+          request =
+              request.addAttr(
+                  Attrs.AUTH_WITH_MASTER_KEY,
+                  (String) userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY));
         }
 
         // call method to set all the required params for the telemetry event(log)...
@@ -71,7 +76,7 @@ public class OnRequestHandler implements ActionCreator {
               break;
             }
           }
-            result = delegate.call(request);
+          result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
               onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
@@ -113,7 +118,7 @@ public class OnRequestHandler implements ActionCreator {
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
- Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
@@ -157,6 +162,28 @@ public class OnRequestHandler implements ActionCreator {
       if (optionalDeviceId.isPresent()) {
         reqContext.put(JsonKey.DEVICE_ID, optionalDeviceId.get());
       }
+
+      Optional<String> optionalSessionId = request.header(HeaderParam.X_Session_ID.getName());
+      if (optionalSessionId.isPresent()) {
+        reqContext.put(JsonKey.X_Session_ID, optionalSessionId.get());
+      }
+
+      Optional<String> optionalAppVersion = request.header(HeaderParam.X_APP_VERSION.getName());
+      if (optionalAppVersion.isPresent()) {
+        reqContext.put(JsonKey.X_APP_VERSION, optionalAppVersion.get());
+      }
+
+      Optional<String> optionalTraceEnabled = request.header(HeaderParam.X_TRACE_ENABLED.getName());
+      if (optionalTraceEnabled.isPresent()) {
+        reqContext.put(JsonKey.X_TRACE_ENABLED, optionalTraceEnabled.get());
+      }
+
+      Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
+      if (optionalTraceId.isPresent()) {
+        reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+      } else {
+        reqContext.put(JsonKey.X_REQUEST_ID, requestId);
+      }
       if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);
         reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
@@ -199,7 +226,8 @@ public class OnRequestHandler implements ActionCreator {
               orgClient
                   .getOrgById(
                       orgActorRef,
-                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID))
+                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID),
+                      null)
                   .getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";

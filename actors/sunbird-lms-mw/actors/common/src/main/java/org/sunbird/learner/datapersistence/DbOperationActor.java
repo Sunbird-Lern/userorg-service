@@ -114,7 +114,7 @@ public class DbOperationActor extends BaseActor {
           validateRequestData((Map<String, Object>) reqObj.getRequest().get(JsonKey.FILTERS));
         }
         searchDto = Util.createSearchDto(reqObj.getRequest());
-        Future<Map<String, Object>> resultF = esService.search(searchDto, ES_INDEX_NAME);
+        Future<Map<String, Object>> resultF = esService.search(searchDto, ES_INDEX_NAME, null);
         Map<String, Object> result =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
         Map<String, Object> finalResult = new HashMap<>();
@@ -165,7 +165,7 @@ public class DbOperationActor extends BaseActor {
       if (!StringUtils.isBlank((String) reqObj.getRequest().get(ENTITY_NAME))) {
         response =
             cassandraOperation.getAllRecords(
-                JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME));
+                JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), null);
       } else {
         throw new ProjectCommonException(
             ResponseCode.tableOrDocNameError.getErrorCode(),
@@ -189,7 +189,8 @@ public class DbOperationActor extends BaseActor {
             cassandraOperation.getRecordById(
                 JsonKey.SUNBIRD_PLUGIN,
                 (String) reqObj.getRequest().get(ENTITY_NAME),
-                (String) reqObj.getRequest().get(JsonKey.ID));
+                (String) reqObj.getRequest().get(JsonKey.ID),
+                null);
       } else {
         throw new ProjectCommonException(
             ResponseCode.tableOrDocNameError.getErrorCode(),
@@ -213,7 +214,8 @@ public class DbOperationActor extends BaseActor {
           cassandraOperation.deleteRecord(
               JsonKey.SUNBIRD_PLUGIN,
               (String) reqObj.getRequest().get(ENTITY_NAME),
-              (String) reqObj.getRequest().get(JsonKey.ID));
+              (String) reqObj.getRequest().get(JsonKey.ID),
+              null);
       if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)
           && ((boolean) reqObj.getRequest().get(INDEXED))) {
         deleteDataFromElastic(
@@ -251,7 +253,10 @@ public class DbOperationActor extends BaseActor {
         if (esResult) {
           response =
               cassandraOperation.updateRecord(
-                  JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+                  JsonKey.SUNBIRD_PLUGIN,
+                  (String) reqObj.getRequest().get(ENTITY_NAME),
+                  payload,
+                  null);
           if (!((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)) {
             deleteDataFromElastic(
                 ES_INDEX_NAME,
@@ -270,13 +275,16 @@ public class DbOperationActor extends BaseActor {
         }
       } else {
         Future<Map<String, Object>> dataF =
-            esService.getDataByIdentifier(ES_INDEX_NAME, (String) payload.get(JsonKey.ID));
+            esService.getDataByIdentifier(ES_INDEX_NAME, (String) payload.get(JsonKey.ID), null);
         Map<String, Object> data =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(dataF);
         if (data.isEmpty() || ((boolean) reqObj.getRequest().get(INDEXED))) {
           response =
               cassandraOperation.updateRecord(
-                  JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+                  JsonKey.SUNBIRD_PLUGIN,
+                  (String) reqObj.getRequest().get(ENTITY_NAME),
+                  payload,
+                  null);
         } else {
           throw new ProjectCommonException(
               ResponseCode.updateFailed.getErrorCode(),
@@ -303,7 +311,7 @@ public class DbOperationActor extends BaseActor {
       validateRequestData(payload);
       Response response =
           cassandraOperation.insertRecord(
-              JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload);
+              JsonKey.SUNBIRD_PLUGIN, (String) reqObj.getRequest().get(ENTITY_NAME), payload, null);
       if (((String) response.get(JsonKey.RESPONSE)).equals(JsonKey.SUCCESS)
           && ((boolean) reqObj.getRequest().get(INDEXED))) {
         boolean esResult = false;
@@ -367,7 +375,7 @@ public class DbOperationActor extends BaseActor {
       String index, String type, String identifier, Map<String, Object> data) {
     ProjectLogger.log(
         "making call to ES for index ,identifier ,data==" + type + " " + identifier + data);
-    Future<String> responseF = esService.save(index, identifier, data);
+    Future<String> responseF = esService.save(index, identifier, data, null);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     ProjectLogger.log(
         "Getting ES save response for type , identifier=="
@@ -396,7 +404,7 @@ public class DbOperationActor extends BaseActor {
    */
   private boolean updateDataToElastic(
       String indexName, String typeName, String identifier, Map<String, Object> data) {
-    Future<Boolean> responseF = esService.update(indexName, identifier, data);
+    Future<Boolean> responseF = esService.update(indexName, identifier, data, null);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (response) {
       return true;
@@ -415,7 +423,7 @@ public class DbOperationActor extends BaseActor {
    * @return
    */
   private boolean deleteDataFromElastic(String indexName, String typeName, String identifier) {
-    Future<Boolean> responseF = esService.delete(indexName, identifier);
+    Future<Boolean> responseF = esService.delete(indexName, identifier, null);
     boolean response = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
     if (response) {
       return true;
@@ -426,7 +434,7 @@ public class DbOperationActor extends BaseActor {
   }
 
   private void deleteRecord(String keyspaceName, String tableName, String identifier) {
-    cassandraOperation.deleteRecord(keyspaceName, tableName, identifier);
+    cassandraOperation.deleteRecord(keyspaceName, tableName, identifier, null);
   }
 
   private void generateSearchTelemetryEvent(

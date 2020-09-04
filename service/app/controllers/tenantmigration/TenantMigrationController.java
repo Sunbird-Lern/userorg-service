@@ -4,7 +4,6 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.ShadowUserMigrateReqValidator;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;

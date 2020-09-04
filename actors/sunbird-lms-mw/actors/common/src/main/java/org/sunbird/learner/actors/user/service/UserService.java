@@ -7,31 +7,37 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
 
 public class UserService {
+  private static LoggerUtil logger = new LoggerUtil(UserService.class);
 
   private DbInfo userDb = Util.dbInfoMap.get(JsonKey.USER_DB);
 
-  public void checkKeyUniqueness(String key, String value, boolean isEncrypted) {
+  public void checkKeyUniqueness(
+      String key, String value, boolean isEncrypted, RequestContext context) {
     if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
-      ProjectLogger.log(
-          "UserService:checkKeyUniqueness: Key or value is null. key = " + key + " value= " + value,
-          LoggerEnum.ERROR.name());
+      logger.info(
+          context,
+          "UserService:checkKeyUniqueness: Key or value is null. key = "
+              + key
+              + " value= "
+              + value);
       return;
     }
     String val = value;
     if (isEncrypted) {
       try {
-        val = getEncryptionService().encryptData(val);
+        val = getEncryptionService().encryptData(val, context);
       } catch (Exception e) {
-        ProjectLogger.log(
+        logger.error(
+            context,
             "UserService:checkKeyUniqueness: Exception occurred with error message = "
                 + e.getMessage(),
             e);
@@ -40,7 +46,8 @@ public class UserService {
 
     Response result =
         getCassandraOperation()
-            .getRecordsByIndexedProperty(userDb.getKeySpace(), userDb.getTableName(), key, val);
+            .getRecordsByIndexedProperty(
+                userDb.getKeySpace(), userDb.getTableName(), key, val, context);
 
     List<Map<String, Object>> userMapList =
         (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);

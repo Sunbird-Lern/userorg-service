@@ -60,7 +60,7 @@ public class DeclaredExternalIdActorTest {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateData(true));
   }
 
@@ -103,9 +103,9 @@ public class DeclaredExternalIdActorTest {
   @Test
   public void testUploadDeclaredUser() {
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
-    when(decryptionService.decryptData(Mockito.anyString()))
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
@@ -116,9 +116,9 @@ public class DeclaredExternalIdActorTest {
   @Test
   public void testUploadDeclaredUserOFErrorStatus() {
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
-    when(decryptionService.decryptData(Mockito.anyString()))
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
@@ -129,9 +129,9 @@ public class DeclaredExternalIdActorTest {
   @Test
   public void testUploadDeclaredUserOfRejectedStatus() {
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
-    when(decryptionService.decryptData(Mockito.anyString()))
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =

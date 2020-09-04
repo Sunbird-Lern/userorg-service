@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.EmailTemplateDao;
 
@@ -27,7 +28,7 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
   }
 
   @Override
-  public String getTemplate(String templateName) {
+  public String getTemplate(String templateName, RequestContext context) {
 
     List<String> idList = new ArrayList<>();
     if (StringUtils.isBlank(templateName)) {
@@ -37,7 +38,8 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
     }
     Response response =
         getCassandraOperation()
-            .getRecordsByPrimaryKeys(JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME);
+            .getRecordsByPrimaryKeys(
+                JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME, context);
     List<Map<String, Object>> emailTemplateList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> map = Collections.emptyMap();

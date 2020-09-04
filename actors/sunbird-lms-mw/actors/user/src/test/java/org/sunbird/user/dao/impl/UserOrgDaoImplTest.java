@@ -39,14 +39,18 @@ public class UserOrgDaoImplTest {
     Response response = new Response();
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.anyMap(),
+            Mockito.any()))
         .thenReturn(response);
     UserOrg userOrg = new UserOrg();
     userOrg.setUserId("123-456-789");
     userOrg.setOrganisationId("1234567890");
     userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.updateUserOrg(userOrg);
+    Response res = userOrgDao.updateUserOrg(userOrg, null);
     Assert.assertNotNull(res);
   }
 }

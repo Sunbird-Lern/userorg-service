@@ -68,7 +68,7 @@ public class FeedServiceImplTest {
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
+    when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     initCassandraForSuccess();
@@ -80,31 +80,34 @@ public class FeedServiceImplTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
-    PowerMockito.when(cassandraOperation.upsertRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.deleteRecord(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(upsertResponse);
   }
 
   @Test
   public void testInsert() {
-    Response res = feedService.insert(getFeed(false));
+    Response res = feedService.insert(getFeed(false), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
 
   @Test
   public void testUpdate() {
-    Response res = feedService.update(getFeed(true));
+    Response res = feedService.update(getFeed(true), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
@@ -113,7 +116,7 @@ public class FeedServiceImplTest {
   public void testDelete() {
     boolean response = false;
     try {
-      feedService.delete("123-456-789");
+      feedService.delete("123-456-789", null);
       response = true;
     } catch (Exception ex) {
       Assert.assertTrue(response);
@@ -125,15 +128,15 @@ public class FeedServiceImplTest {
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getRecordsByProperties(props);
+    List<Feed> res = feedService.getRecordsByProperties(props, null);
     Assert.assertTrue(res != null);
   }
 
   @Test
   public void testSearch() {
-    Response response = feedService.search(search);
+    Response response = feedService.search(search, null);
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
-    PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
+    PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
     Assert.assertTrue(esResponse != null);
   }

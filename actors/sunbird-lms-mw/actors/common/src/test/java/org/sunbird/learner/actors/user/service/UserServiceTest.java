@@ -56,9 +56,9 @@ public class UserServiceTest {
   public void testCheckKeyUniquenessWhenKeyBlank() {
     try {
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "", ""))
+              userDb.getKeySpace(), userDb.getTableName(), "", "", null))
           .thenReturn(new Response());
-      userService.checkKeyUniqueness("", "", false);
+      userService.checkKeyUniqueness("", "", false, null);
     } catch (Exception e) {
       Assert.assertTrue(false);
     }
@@ -71,9 +71,9 @@ public class UserServiceTest {
       List<Map<String, Object>> userMapList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "key", "value"))
+              userDb.getKeySpace(), userDb.getTableName(), "key", "value", null))
           .thenReturn(response);
-      userService.checkKeyUniqueness("key", "value", false);
+      userService.checkKeyUniqueness("key", "value", false, null);
     } catch (Exception e) {
       Assert.assertTrue(false);
     }
@@ -89,9 +89,9 @@ public class UserServiceTest {
       userMapList.add(map);
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "email", "valueNotUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "email", "valueNotUnique", null))
           .thenReturn(response);
-      userService.checkKeyUniqueness("email", "valueNotUnique", false);
+      userService.checkKeyUniqueness("email", "valueNotUnique", false, null);
     } catch (Exception e) {
       Assert.assertEquals("Email already exists.", e.getMessage());
     }
@@ -107,9 +107,9 @@ public class UserServiceTest {
       userMapList.add(map);
       response.put(JsonKey.RESPONSE, userMapList);
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueNotUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueNotUnique", null))
           .thenReturn(response);
-      userService.checkKeyUniqueness("phone", "valueNotUnique", false);
+      userService.checkKeyUniqueness("phone", "valueNotUnique", false, null);
     } catch (Exception e) {
       Assert.assertEquals(
           "Phone already in use. Please provide different phone number.", e.getMessage());
@@ -122,11 +122,11 @@ public class UserServiceTest {
       Response response = new Response();
       List<Map<String, Object>> userMapList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, userMapList);
-      when(encryptionService.encryptData("valueUnique")).thenReturn("valueUnique");
+      when(encryptionService.encryptData("valueUnique", null)).thenReturn("valueUnique");
       when(cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueUnique"))
+              userDb.getKeySpace(), userDb.getTableName(), "phone", "valueUnique", null))
           .thenReturn(response);
-      userService.checkKeyUniqueness("phone", "valueUnique", true);
+      userService.checkKeyUniqueness("phone", "valueUnique", true, null);
     } catch (Exception e) {
       Assert.assertTrue(false);
     }

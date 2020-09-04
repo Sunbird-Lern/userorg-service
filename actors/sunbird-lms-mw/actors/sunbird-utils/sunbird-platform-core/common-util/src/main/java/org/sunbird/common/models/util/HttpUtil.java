@@ -830,7 +830,7 @@ public class HttpUtil {
         put("Content-Type", "application/json");
         put(
             JsonKey.X_AUTHENTICATED_USER_TOKEN,
-            KeycloakRequiredActionLinkUtil.getAdminAccessToken());
+            KeycloakRequiredActionLinkUtil.getAdminAccessToken(null));
         if (MapUtils.isNotEmpty(input)) putAll(input);
       }
     };

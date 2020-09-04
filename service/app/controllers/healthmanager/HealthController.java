@@ -45,7 +45,9 @@ public class HealthController extends BaseController {
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -71,7 +73,9 @@ public class HealthController extends BaseController {
           Request reqObj = new Request();
           reqObj.setOperation(val);
           reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
-          reqObj.getRequest().put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          reqObj
+              .getRequest()
+              .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
           reqObj.setEnv(getEnvironment());
           return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
         } catch (Exception e) {
@@ -127,7 +131,7 @@ public class HealthController extends BaseController {
       headers.put("Content-Type", "application/json");
       String ekStepBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
       String response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               body,

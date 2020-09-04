@@ -137,7 +137,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     request.put(JsonKey.EMAIL, userName.substring(0, 10));
     request.put(JsonKey.USERNAME, userName);
     request.put(JsonKey.PROVIDER, "ntp");
-    String result = keyCloakService.updateUser(request);
+    String result = keyCloakService.updateUser(request, null);
     Assert.assertNotNull(result);
   }
 
@@ -150,7 +150,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     request.put(JsonKey.COUNTRY_CODE, "+91");
     request.put(JsonKey.EMAIL, userName.substring(0, 10));
     request.put(JsonKey.USERNAME, userName);
-    String result = keyCloakService.updateUser(request);
+    String result = keyCloakService.updateUser(request, null);
     Assert.assertNotNull(result);
   }
 
@@ -162,7 +162,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     request.put(JsonKey.PHONE, "9870060000");
     request.put(JsonKey.EMAIL, userName.substring(0, 10));
     request.put(JsonKey.USERNAME, userName);
-    String result = keyCloakService.updateUser(request);
+    String result = keyCloakService.updateUser(request, null);
     Assert.assertNotNull(result);
   }
 
@@ -171,7 +171,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
     Map<String, Object> request = new HashMap<String, Object>();
     request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String result = keyCloakService.updateUser(request);
+    String result = keyCloakService.updateUser(request, null);
     Assert.assertNotNull(result);
   }
 
@@ -181,7 +181,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Map<String, Object> request = new HashMap<String, Object>();
     request.put(JsonKey.USER_ID, "123");
     request.put(JsonKey.FIRST_NAME, userName);
-    keyCloakService.deactivateUser(request);
+    keyCloakService.deactivateUser(request, null);
   }
 
   @Test(expected = ProjectCommonException.class)
@@ -189,13 +189,14 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
     Map<String, Object> request = new HashMap<String, Object>();
     request.put(JsonKey.USER_ID, "123");
-    keyCloakService.removeUser(request);
+    keyCloakService.removeUser(request, null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testVerifyTokenSuccess() {
     keyCloakService.verifyToken(
-        "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5emhhVnZDbl81OEtheHpldHBzYXNZQ2lEallkemJIX3U2LV93SDk4SEc0In0.eyJqdGkiOiI5ZmQzNzgzYy01YjZmLTQ3OWQtYmMzYy0yZWEzOGUzZmRmYzgiLCJleHAiOjE1MDUxMTQyNDYsIm5iZiI6MCwiaWF0IjoxNTA1MTEzNjQ2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwiYXVkIjoic2VjdXJpdHktYWRtaW4tY29uc29sZSIsInN1YiI6ImIzYTZkMTY4LWJjZmQtNDE2MS1hYzVmLTljZjYyODIyNzlmMyIsInR5cCI6IkJlYXJlciIsImF6cCI6InNlY3VyaXR5LWFkbWluLWNvbnNvbGUiLCJub25jZSI6ImMxOGVlMDM2LTAyMWItNGVlZC04NWVhLTc0MjMyYzg2ZmI4ZSIsImF1dGhfdGltZSI6MTUwNTExMzY0Niwic2Vzc2lvbl9zdGF0ZSI6ImRiZTU2NDlmLTY4MDktNDA3NS05Njk5LTVhYjIyNWMwZTkyMiIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOltdLCJyZXNvdXJjZV9hY2Nlc3MiOnt9LCJuYW1lIjoiTWFuemFydWwgaGFxdWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0MTIzNDU2NyIsImdpdmVuX25hbWUiOiJNYW56YXJ1bCBoYXF1ZSIsImVtYWlsIjoidGVzdDEyM0B0LmNvbSJ9.Xdjqe16MSkiR94g-Uj_pVZ2L3gnIdKpkJ6aB82W_w_c3yEmx1mXYBdkxe4zMz3ks4OX_PWwSFEbJECHcnujUwF6Ula0xtXTfuESB9hFyiWHtVAhuh5UlCCwPnsihv5EqK6u-Qzo0aa6qZOiQK3Zo7FLpnPUDxn4yHyo3mRZUiWf76KTl8PhSMoXoWxcR2vGW0b-cPixILTZPV0xXUZoozCui70QnvTgOJDWqr7y80EWDkS4Ptn-QM3q2nJlw63mZreOG3XTdraOlcKIP5vFK992dyyHlYGqWVzigortS9Ah4cprFVuLlX8mu1cQvqHBtW-0Dq_JlcTMaztEnqvJ6XA");
+        "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5emhhVnZDbl81OEtheHpldHBzYXNZQ2lEallkemJIX3U2LV93SDk4SEc0In0.eyJqdGkiOiI5ZmQzNzgzYy01YjZmLTQ3OWQtYmMzYy0yZWEzOGUzZmRmYzgiLCJleHAiOjE1MDUxMTQyNDYsIm5iZiI6MCwiaWF0IjoxNTA1MTEzNjQ2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbWFzdGVyIiwiYXVkIjoic2VjdXJpdHktYWRtaW4tY29uc29sZSIsInN1YiI6ImIzYTZkMTY4LWJjZmQtNDE2MS1hYzVmLTljZjYyODIyNzlmMyIsInR5cCI6IkJlYXJlciIsImF6cCI6InNlY3VyaXR5LWFkbWluLWNvbnNvbGUiLCJub25jZSI6ImMxOGVlMDM2LTAyMWItNGVlZC04NWVhLTc0MjMyYzg2ZmI4ZSIsImF1dGhfdGltZSI6MTUwNTExMzY0Niwic2Vzc2lvbl9zdGF0ZSI6ImRiZTU2NDlmLTY4MDktNDA3NS05Njk5LTVhYjIyNWMwZTkyMiIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOltdLCJyZXNvdXJjZV9hY2Nlc3MiOnt9LCJuYW1lIjoiTWFuemFydWwgaGFxdWUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ0ZXN0MTIzNDU2NyIsImdpdmVuX25hbWUiOiJNYW56YXJ1bCBoYXF1ZSIsImVtYWlsIjoidGVzdDEyM0B0LmNvbSJ9.Xdjqe16MSkiR94g-Uj_pVZ2L3gnIdKpkJ6aB82W_w_c3yEmx1mXYBdkxe4zMz3ks4OX_PWwSFEbJECHcnujUwF6Ula0xtXTfuESB9hFyiWHtVAhuh5UlCCwPnsihv5EqK6u-Qzo0aa6qZOiQK3Zo7FLpnPUDxn4yHyo3mRZUiWf76KTl8PhSMoXoWxcR2vGW0b-cPixILTZPV0xXUZoozCui70QnvTgOJDWqr7y80EWDkS4Ptn-QM3q2nJlw63mZreOG3XTdraOlcKIP5vFK992dyyHlYGqWVzigortS9Ah4cprFVuLlX8mu1cQvqHBtW-0Dq_JlcTMaztEnqvJ6XA",
+        null);
   }
 
   @Test
@@ -214,7 +215,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   public void testActiveUserSuccess() {
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.activateUser(reqMap);
+    String response = keyCloakService.activateUser(reqMap, null);
     Assert.assertEquals(JsonKey.SUCCESS, response);
   }
 
@@ -223,7 +224,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.USER_ID, "");
     try {
-      keyCloakService.activateUser(reqMap);
+      keyCloakService.activateUser(reqMap, null);
     } catch (ProjectCommonException e) {
       Assert.assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
       Assert.assertEquals(ResponseCode.invalidUsrData.getErrorMessage(), e.getMessage());
@@ -352,7 +353,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @Test
   public void testUpdatePassword() throws Exception {
-    boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password");
+    boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password", null);
     Assert.assertTrue(updated);
   }
 }

@@ -17,11 +17,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /**
@@ -30,6 +28,7 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Manzarul
  */
 public class DefaultEncryptionServivceImpl implements EncryptionService {
+  private static LoggerUtil logger = new LoggerUtil(DefaultEncryptionServivceImpl.class);
 
   private static String encryption_key = "";
 
@@ -44,7 +43,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
       c = Cipher.getInstance(ALGORITHM);
       c.init(Cipher.ENCRYPT_MODE, key);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
   }
 
@@ -56,7 +55,8 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
   }
 
   @Override
-  public Map<String, Object> encryptData(Map<String, Object> data) throws Exception {
+  public Map<String, Object> encryptData(Map<String, Object> data, RequestContext context)
+      throws Exception {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null) {
         return data;
@@ -74,20 +74,21 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
   }
 
   @Override
-  public List<Map<String, Object>> encryptData(List<Map<String, Object>> data) throws Exception {
+  public List<Map<String, Object>> encryptData(
+      List<Map<String, Object>> data, RequestContext context) throws Exception {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null || data.isEmpty()) {
         return data;
       }
       for (Map<String, Object> map : data) {
-        encryptData(map);
+        encryptData(map, null);
       }
     }
     return data;
   }
 
   @Override
-  public String encryptData(String data) throws Exception {
+  public String encryptData(String data, RequestContext context) throws Exception {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (StringUtils.isBlank(data)) {
         return data;
@@ -106,7 +107,6 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
    * this method is used to encrypt the password.
    *
    * @param value String password
-   * @param encryption_key
    * @return encrypted password.
    * @throws NoSuchPaddingException
    * @throws NoSuchAlgorithmException
@@ -140,12 +140,12 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
     } else {
       encryption_key = System.getenv(JsonKey.ENCRYPTION_KEY);
       if (StringUtils.isBlank(encryption_key)) {
-        ProjectLogger.log("Salt value is not provided by Env");
+        logger.info("Salt value is not provided by Env");
         encryption_key = PropertiesCache.getInstance().getProperty(JsonKey.ENCRYPTION_KEY);
       }
     }
     if (StringUtils.isBlank(encryption_key)) {
-      ProjectLogger.log("throwing exception for invalid salt==", LoggerEnum.INFO.name());
+      logger.info("throwing exception for invalid salt==");
       throw new ProjectCommonException(
           ResponseCode.saltValue.getErrorCode(),
           ResponseCode.saltValue.getErrorMessage(),

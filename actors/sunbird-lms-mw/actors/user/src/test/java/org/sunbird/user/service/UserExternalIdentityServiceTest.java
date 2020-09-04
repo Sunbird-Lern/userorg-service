@@ -52,15 +52,17 @@ public class UserExternalIdentityServiceTest {
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Map<String, String> orgProviderMap = new HashMap<>();
     orgProviderMap.put("channel1004", "01234567687");
     PowerMockito.mockStatic(UserUtil.class);
-    when(UserUtil.fetchOrgIdByProvider(Mockito.anyList())).thenReturn(orgProviderMap);
+    when(UserUtil.fetchOrgIdByProvider(Mockito.anyList(), Mockito.any()))
+        .thenReturn(orgProviderMap);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
-    String userId = userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004");
+    String userId =
+        userExternalIdentityService.getUserV1("1234", "channel1004", "channel1004", null);
     Assert.assertTrue(true);
   }
 
@@ -74,11 +76,12 @@ public class UserExternalIdentityServiceTest {
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
-    String userId = userExternalIdentityService.getUserV2("1234", "channel1004", "channel1004");
+    String userId =
+        userExternalIdentityService.getUserV2("1234", "channel1004", "channel1004", null);
     Assert.assertTrue(true);
   }
 }

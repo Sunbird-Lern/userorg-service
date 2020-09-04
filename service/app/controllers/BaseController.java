@@ -23,17 +23,13 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.HeaderParam;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import play.libs.Json;
-import play.libs.typedmap.TypedKey;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -49,17 +45,21 @@ import util.Common;
  */
 public class BaseController extends Controller {
 
+  private static LoggerUtil logger = new LoggerUtil(BaseController.class);
+
   private static ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
   private static final String version = "v1";
   private static Object actorRef = null;
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
+  private static final String debugEnabled = "false";
 
   static {
     try {
       actorRef = SunbirdMWService.getRequestRouter();
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occured while getting actor ref in base controller " + ex);
+      logger.error(
+          "Exception occured while getting actor ref in base controller " + ex.getMessage(), ex);
     }
   }
 
@@ -71,8 +71,12 @@ public class BaseController extends Controller {
     request.setRequestId(requestId);
     request.getParams().setMsgid(requestId);
     request.setEnv(getEnvironment());
-    request.getContext().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
-    request.getContext().put(JsonKey.MANAGED_FOR, Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR));
+    request
+        .getContext()
+        .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+    request
+        .getContext()
+        .put(JsonKey.MANAGED_FOR, Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR));
     Optional<String> manageToken = httpRequest.header(HeaderParam.X_Authenticated_For.getName());
     String managedToken = manageToken.isPresent() ? manageToken.get() : "";
     request.getContext().put(JsonKey.MANAGED_TOKEN, managedToken);
@@ -224,15 +228,14 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
-      ProjectLogger.log(
+      logger.info(
           "BaseController:handleRequest for operation: "
               + operation
               + " requestId: "
-              + request.getRequestId(),
-          LoggerEnum.INFO.name());
+              + request.getRequestId());
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
           "BaseController:handleRequest for operation: "
               + operation
               + " Exception occurred with error message = "
@@ -270,10 +273,12 @@ public class BaseController extends Controller {
         ((Map) (request.getRequest().get(JsonKey.FILTERS)))
             .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
       }
-      request.getRequest().put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      request
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
           "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
           e);
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -306,7 +311,8 @@ public class BaseController extends Controller {
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
-    response.setParams(createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
+    response.setParams(
+        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
     return response;
   }
 
@@ -341,7 +347,8 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
-    response.setParams(createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
+    response.setParams(
+        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
     String value = null;
     try {
       if (response.getResult() != null) {
@@ -376,7 +383,8 @@ public class BaseController extends Controller {
    */
   public static Response createResponseOnException(
       Request request, ProjectCommonException exception) {
-    ProjectLogger.log(
+    logger.error(
+        null,
         exception != null ? exception.getMessage() : "Message is not coming",
         exception,
         generateTelemetryInfoForError(request));
@@ -535,16 +543,16 @@ public class BaseController extends Controller {
       ex.printStackTrace();
     }
   }
+
   private static void logTelemetry(Response response, Request request) {
     if (null != request.path()
-            && !(request.path().contains("/health")
-            || request.path().contains("/service/health"))) {
+        && !(request.path().contains("/health") || request.path().contains("/service/health"))) {
       try {
         String reqContext = Common.getFromRequest(request, Attrs.CONTEXT);
         Map<String, Object> requestInfo =
-                objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+            objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
         Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
-        if(MapUtils.isEmpty(params )){
+        if (MapUtils.isEmpty(params)) {
           params = new WeakHashMap<>();
         }
         long startTime = System.currentTimeMillis();
@@ -558,18 +566,18 @@ public class BaseController extends Controller {
         params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
         params.put(JsonKey.MESSAGE, "");
         params.put(JsonKey.METHOD, request.method());
-        params.put(JsonKey.STATUS, response.getResponseCode());//result.status()
+        params.put(JsonKey.STATUS, response.getResponseCode()); // result.status()
         params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
 
         org.sunbird.common.request.Request req = new org.sunbird.common.request.Request();
         req.setRequest(
-                generateTelemetryRequestForController(
-                        TelemetryEvents.LOG.getName(),
-                        params,
-                        (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
+            generateTelemetryRequestForController(
+                TelemetryEvents.LOG.getName(),
+                params,
+                (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
         TelemetryWriter.write(req);
       } catch (Exception ex) {
-        ProjectLogger.log("BaseController:apply Exception in writing telemetry", ex);
+        logger.error("BaseController:apply Exception in writing telemetry", ex);
       }
     }
   }
@@ -599,21 +607,26 @@ public class BaseController extends Controller {
       String responseKey,
       Request httpReq) {
     setContextData(httpReq, request);
+    logger.info(
+        request.getRequestContext(),
+        "actorResponseHandler: called for actor operation :" + request.getOperation());
     Function<Object, Result> function =
         result -> {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
             setGlobalHealthFlag(result);
           }
-
           if (result instanceof Response) {
             Response response = (Response) result;
             if (ResponseCode.OK.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got response");
               return createCommonResponse(response, responseKey, httpReq);
             } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got client error");
               return createClientErrorResponse(httpReq, (ClientErrorResponse) response);
             } else if (result instanceof ProjectCommonException) {
+              logger.info(request.getRequestContext(), "actorResponseHandler:got exception");
               return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
             } else if (result instanceof File) {
               logTelemetry(response, httpReq);
@@ -801,15 +814,33 @@ public class BaseController extends Controller {
 
   public void setContextData(Http.Request httpReq, org.sunbird.common.request.Request reqObj) {
     try {
-      String reqContext = Common.getFromRequest(httpReq, Attrs.CONTEXT);;
+      String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
+      reqObj.setRequestContext(
+          getRequestContext(
+              (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT), reqObj.getOperation()));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
+  }
+
+  private RequestContext getRequestContext(Map<String, Object> context, String actorOperation) {
+    return new RequestContext(
+        (String) context.get(JsonKey.ACTOR_ID),
+        (String) context.get(JsonKey.DEVICE_ID),
+        (String) context.get(JsonKey.X_Session_ID),
+        (String) context.get(JsonKey.APP_ID),
+        (String) context.get(JsonKey.X_APP_VERSION),
+        (String) context.get(JsonKey.X_REQUEST_ID),
+        (String)
+            ((context.get(JsonKey.X_TRACE_ENABLED) != null)
+                ? context.get(JsonKey.X_TRACE_ENABLED)
+                : debugEnabled),
+        actorOperation);
   }
 
   /**
@@ -861,10 +892,9 @@ public class BaseController extends Controller {
     } else {
       OnRequestHandler.isServiceHealthy = false;
     }
-    ProjectLogger.log(
+    logger.info(
         "BaseController:setGlobalHealthFlag: isServiceHealthy = "
-            + OnRequestHandler.isServiceHealthy,
-        LoggerEnum.INFO.name());
+            + OnRequestHandler.isServiceHealthy);
   }
 
   public static String getResponseSize(String response) throws UnsupportedEncodingException {

@@ -51,7 +51,7 @@ public final class OrganisationMetricsUtil {
   public static Map<String, Object> validateOrg(String orgId) {
     try {
       Future<Map<String, Object>> resultF =
-          esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+          esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId, null);
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
       if (null == result || result.isEmpty()) {

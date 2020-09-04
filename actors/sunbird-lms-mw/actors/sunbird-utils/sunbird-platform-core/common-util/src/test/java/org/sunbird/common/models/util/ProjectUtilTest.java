@@ -222,7 +222,7 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testRegisterTagSuccess() {
     String response = null;
     try {
-      response = ProjectUtil.registertag("testTag", "{}", ProjectUtil.getEkstepHeader());
+      response = ProjectUtil.registertag("testTag", "{}", ProjectUtil.getEkstepHeader(), null);
     } catch (IOException e) {
 
     }

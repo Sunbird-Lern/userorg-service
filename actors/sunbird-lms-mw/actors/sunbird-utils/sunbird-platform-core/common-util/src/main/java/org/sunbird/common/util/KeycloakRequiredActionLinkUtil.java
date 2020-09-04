@@ -7,6 +7,7 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 
 /**
  * Keycloak utility to create required action links.
@@ -14,7 +15,7 @@ import org.sunbird.common.models.util.*;
  * @author Amit Kumar
  */
 public class KeycloakRequiredActionLinkUtil {
-
+  private static LoggerUtil logger = new LoggerUtil(KeycloakRequiredActionLinkUtil.class);
   public static final String VERIFY_EMAIL = "VERIFY_EMAIL";
   public static final String UPDATE_PASSWORD = "UPDATE_PASSWORD";
   private static final String CLIENT_ID = "clientId";
@@ -38,7 +39,8 @@ public class KeycloakRequiredActionLinkUtil {
    *     VERIFY_EMAIL.
    * @return Generated link from Keycloak service
    */
-  public static String getLink(String userName, String redirectUri, String requiredAction) {
+  public static String getLink(
+      String userName, String redirectUri, String requiredAction, RequestContext context) {
     Map<String, String> request = new HashMap<>();
 
     request.put(CLIENT_ID, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_CLIENT_ID));
@@ -54,9 +56,10 @@ public class KeycloakRequiredActionLinkUtil {
     try {
       Thread.sleep(
           Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SYNC_READ_WAIT_TIME)));
-      return generateLink(request);
+      return generateLink(request, context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "KeycloakRequiredActionLinkUtil:getLink: Exception occurred with error message = "
               + ex.getMessage(),
           ex);
@@ -64,46 +67,45 @@ public class KeycloakRequiredActionLinkUtil {
     return null;
   }
 
-  private static String generateLink(Map<String, String> request) throws Exception {
+  private static String generateLink(Map<String, String> request, RequestContext context)
+      throws Exception {
     Map<String, String> headers = new HashMap<>();
 
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + getAdminAccessToken());
+    headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + getAdminAccessToken(context));
 
-    ProjectLogger.log(
+    logger.info(
+        context,
         "KeycloakRequiredActionLinkUtil:generateLink: complete URL "
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
             + "realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
-            + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK,
-        LoggerEnum.INFO.name());
-    ProjectLogger.log(
+            + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK);
+    logger.info(
+        context,
         "KeycloakRequiredActionLinkUtil:generateLink: request body "
-            + mapper.writeValueAsString(request),
-        LoggerEnum.INFO.name());
+            + mapper.writeValueAsString(request));
     String url =
-      ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
-        + "realms/"
-        + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
-        + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK;
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
+            + "realms/"
+            + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
+            + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK;
     String response = HttpClientUtil.post(url, mapper.writeValueAsString(request), headers);
 
-    ProjectLogger.log(
-      "KeycloakRequiredActionLinkUtil:generateLink: Response = " + response,
-      LoggerEnum.INFO.name());
+    logger.info(context, "KeycloakRequiredActionLinkUtil:generateLink: Response = " + response);
 
     Map<String, Object> responseMap = new ObjectMapper().readValue(response, Map.class);
     return (String) responseMap.get(LINK);
   }
 
-  public static String getAdminAccessToken() throws Exception {
+  public static String getAdminAccessToken(RequestContext context) throws Exception {
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
     String url =
-      ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
-        + "realms/"
-        + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
-        + "/protocol/openid-connect/token";
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
+            + "realms/"
+            + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
+            + "/protocol/openid-connect/token";
 
     Map<String, String> fields = new HashMap<>();
     fields.put("client_id", ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_CLIENT_ID));
@@ -112,9 +114,8 @@ public class KeycloakRequiredActionLinkUtil {
 
     String response = HttpClientUtil.postFormData(url, fields, headers);
 
-    ProjectLogger.log(
-      "KeycloakRequiredActionLinkUtil:getAdminAccessToken: Response = " + response,
-      LoggerEnum.INFO.name());
+    logger.info(
+        context, "KeycloakRequiredActionLinkUtil:getAdminAccessToken: Response = " + response);
     Map<String, Object> responseMap = new ObjectMapper().readValue(response, Map.class);
     return (String) responseMap.get(ACCESS_TOKEN);
   }

@@ -26,6 +26,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -70,10 +71,10 @@ public class SystemSettingsActorTest {
     list.add(getOrgData());
     resp.put(JsonKey.RESPONSE, list);
     when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID))
+            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID, null))
         .thenReturn(resp);
     when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, KEYSPACE_NAME))
+            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, KEYSPACE_NAME, null))
         .thenReturn(new Response());
   }
 
@@ -88,7 +89,10 @@ public class SystemSettingsActorTest {
   @Test
   public void testSetSystemSettingSuccess() {
     when(cassandraOperation.upsertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
     actorMessage.setOperation(ActorOperations.SET_SYSTEM_SETTING.getValue());
     actorMessage.getRequest().putAll(getSystemSettingMap());
@@ -124,7 +128,8 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetAllSystemSettingsSuccess() {
-    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingResponse());
     actorMessage.setOperation(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
     subject.tell(actorMessage, probe.getRef());
@@ -134,7 +139,8 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetAllSystemSettingsSuccessWithEmptyResponse() {
-    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingEmptyResponse());
     actorMessage.setOperation(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
     subject.tell(actorMessage, probe.getRef());

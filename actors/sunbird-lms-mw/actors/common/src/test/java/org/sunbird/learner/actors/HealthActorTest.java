@@ -104,7 +104,8 @@ public class HealthActorTest {
   public void getCASSANDRAHealthCheck() {
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName()))
+    when(cassandraOperation.getAllRecords(
+            badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null))
         .thenReturn(new Response());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

@@ -88,7 +88,7 @@ public class UserFeedActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
-    PowerMockito.when(esService.search(search, ProjectUtil.EsType.userfeed.getTypeName()))
+    PowerMockito.when(esService.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
   }
 

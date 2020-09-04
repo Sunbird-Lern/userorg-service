@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.telemetry.collector.TelemetryAssemblerFactory;
@@ -19,6 +20,7 @@ public class TelemetryWriter {
   private static TelemetryDataAssembler telemetryDataAssembler = TelemetryAssemblerFactory.get();
   private static TelemetryObjectValidator telemetryObjectValidator =
       new TelemetryObjectValidatorV3();
+  private static LoggerUtil logger = new LoggerUtil(TelemetryWriter.class);
   private static Logger telemetryEventLogger = LoggerFactory.getLogger("TelemetryEventLogger");
 
   public static void write(Request request) {
@@ -35,11 +37,7 @@ public class TelemetryWriter {
         processLogEvent(request);
       }
     } catch (Exception ex) {
-      ProjectLogger.log(
-          "TelemetryWriter:write: Exception occurred while writting telemetry: "
-              + " exception = "
-              + ex,
-          LoggerEnum.ERROR.name());
+      logger.info("Exception occurred while writing telemetry");
     }
   }
 
@@ -63,11 +61,6 @@ public class TelemetryWriter {
     String telemetry = telemetryDataAssembler.error(context, params);
     if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateError(telemetry)) {
       telemetryEventLogger.info(telemetry);
-    } else {
-      ProjectLogger.log(
-          "TelemetryWriter:processLogEvent: Error Telemetry validation failed: ",
-          telemetry,
-          LoggerEnum.ERROR.name());
     }
   }
 
@@ -77,11 +70,6 @@ public class TelemetryWriter {
     String telemetry = telemetryDataAssembler.search(context, params);
     if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateSearch(telemetry)) {
       telemetryEventLogger.info(telemetry);
-    } else {
-      ProjectLogger.log(
-          "TelemetryWriter:processLogEvent: Search Telemetry validation failed: ",
-          telemetry,
-          LoggerEnum.ERROR.name());
     }
   }
 
@@ -96,11 +84,6 @@ public class TelemetryWriter {
     String telemetry = telemetryDataAssembler.audit(context, params);
     if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateAudit(telemetry)) {
       telemetryEventLogger.info(telemetry);
-    } else {
-      ProjectLogger.log(
-          "TelemetryWriter:processLogEvent: Audit Telemetry validation failed: ",
-          telemetry,
-          LoggerEnum.ERROR.name());
     }
   }
 }

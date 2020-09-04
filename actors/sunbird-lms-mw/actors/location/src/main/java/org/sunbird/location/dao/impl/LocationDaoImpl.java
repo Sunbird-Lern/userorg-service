@@ -10,11 +10,8 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -25,6 +22,8 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
 
+  private static LoggerUtil logger = new LoggerUtil(LocationDaoImpl.class);
+
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
@@ -33,31 +32,32 @@ public class LocationDaoImpl implements LocationDao {
   private static final String DEFAULT_SORT_BY = "ASC";
 
   @Override
-  public Response create(Location location) {
+  public Response create(Location location, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(location, Map.class);
-    Response response = cassandraOperation.insertRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map);
+    Response response =
+        cassandraOperation.insertRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map, context);
     // need to send ID along with success msg
     response.put(JsonKey.ID, map.get(JsonKey.ID));
     return response;
   }
 
   @Override
-  public Response update(Location location) {
+  public Response update(Location location, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(location, Map.class);
-    return cassandraOperation.updateRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map);
+    return cassandraOperation.updateRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, map, context);
   }
 
   @Override
-  public Response delete(String locationId) {
-    return cassandraOperation.deleteRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId);
+  public Response delete(String locationId, RequestContext context) {
+    return cassandraOperation.deleteRecord(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, context);
   }
 
   @Override
-  public Response search(Map<String, Object> searchQueryMap) {
+  public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     addSortBy(searchDto);
     String type = ProjectUtil.EsType.location.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type);
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
@@ -73,17 +73,19 @@ public class LocationDaoImpl implements LocationDao {
   }
 
   @Override
-  public Response read(String locationId) {
-    return cassandraOperation.getRecordById(KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId);
+  public Response read(String locationId, RequestContext context) {
+    return cassandraOperation.getRecordById(
+        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, context);
   }
 
   @Override
-  public Response getRecordByProperty(Map<String, Object> queryMap) {
-    return cassandraOperation.getRecordsByProperty(
+  public Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context) {
+    return cassandraOperation.getRecordsByIndexedProperty(
         KEYSPACE_NAME,
         LOCATION_TABLE_NAME,
         (String) queryMap.get(GeoLocationJsonKey.PROPERTY_NAME),
-        queryMap.get(GeoLocationJsonKey.PROPERTY_VALUE));
+        queryMap.get(GeoLocationJsonKey.PROPERTY_VALUE),
+        context);
   }
 
   public SearchDTO addSortBy(SearchDTO searchDtO) {
@@ -93,9 +95,7 @@ public class LocationDaoImpl implements LocationDao {
         && ((Map<String, Object>) searchDtO.getAdditionalProperties().get(JsonKey.FILTERS))
             .containsKey(JsonKey.TYPE)) {
       if (MapUtils.isEmpty(searchDtO.getSortBy())) {
-        ProjectLogger.log(
-            "LocationDaoImpl:search:addSortBy added sort type name attribute.",
-            LoggerEnum.INFO.name());
+        logger.info("search:addSortBy added sort type name attribute.");
         searchDtO.getSortBy().put(JsonKey.NAME, DEFAULT_SORT_BY);
       }
     }

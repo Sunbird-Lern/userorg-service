@@ -4,44 +4,49 @@ import akka.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.user.User;
 
 public interface UserService {
 
-  Map<String, Object> esGetUserOrg(String userId, String orgId);
+  User getUserById(String userId, RequestContext context);
 
-  User getUserById(String userId);
+  void validateUserId(Request request, String managedById, RequestContext context);
 
-  void validateUserId(Request request, String managedById);
+  void validateUploader(Request request, RequestContext context);
 
-  void validateUploader(Request request);
+  Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context);
 
-  Map<String, Object> esGetPublicUserProfileById(String userId);
-
-  Map<String, Object> esGetPrivateUserProfileById(String userId);
+  Map<String, Object> esGetPrivateUserProfileById(String userId, RequestContext context);
 
   void syncUserProfile(
-      String userId, Map<String, Object> userDataMap, Map<String, Object> userPrivateDataMap);
+      String userId,
+      Map<String, Object> userDataMap,
+      Map<String, Object> userPrivateDataMap,
+      RequestContext context);
 
-  String getValidatedCustodianOrgId(Map<String, Object> userMap, ActorRef actorRef);
+  String getRootOrgIdFromChannel(String channel, RequestContext context);
 
-  String getRootOrgIdFromChannel(String channel);
+  String getCustodianChannel(
+      Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
 
-  String getCustodianChannel(Map<String, Object> userMap, ActorRef actorRef);
+  List<Map<String, Object>> esSearchUserByFilters(
+      Map<String, Object> filters, RequestContext context);
 
-  Map<String, Object> getUserByUsername(String userName);
+  List<String> generateUsernames(
+      String name, List<String> excludedUsernames, RequestContext context);
 
-  List<Map<String, Object>> esSearchUserByFilters(Map<String, Object> filters);
+  List<String> getEncryptedList(List<String> dataList, RequestContext context);
 
-  List<String> generateUsernames(String name, List<String> excludedUsernames);
+  boolean checkUsernameUniqueness(String username, boolean isEncrypted, RequestContext context);
 
-  List<String> getEncryptedList(List<String> dataList);
+  String getCustodianOrgId(ActorRef actorRef, RequestContext context);
 
-  boolean checkUsernameUniqueness(String username, boolean isEncrypted);
+  Map<String, Object> fetchEncryptedToken(
+      String parentId, List<Map<String, Object>> respList, RequestContext context);
 
-  String getCustodianOrgId(ActorRef actorRef);
-
-  Map<String, Object> fetchEncryptedToken(String parentId, List<Map<String, Object>> respList);
-
-  void appendEncryptedToken(Map<String, Object> encryptedTokenList, List<Map<String, Object>> respList);
+  void appendEncryptedToken(
+      Map<String, Object> encryptedTokenList,
+      List<Map<String, Object>> respList,
+      RequestContext context);
 }

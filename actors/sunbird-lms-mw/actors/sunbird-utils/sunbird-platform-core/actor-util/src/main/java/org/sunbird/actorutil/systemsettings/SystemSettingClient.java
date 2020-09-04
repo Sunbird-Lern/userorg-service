@@ -2,6 +2,7 @@ package org.sunbird.actorutil.systemsettings;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.systemsetting.SystemSetting;
 
 /**
@@ -16,9 +17,10 @@ public interface SystemSettingClient {
    *
    * @param actorRef Actor reference
    * @param field System setting field name
+   * @param context
    * @return System setting details
    */
-  SystemSetting getSystemSettingByField(ActorRef actorRef, String field);
+  SystemSetting getSystemSettingByField(ActorRef actorRef, String field, RequestContext context);
 
   /**
    * Get system setting information for given field (setting) and key name.
@@ -27,8 +29,13 @@ public interface SystemSettingClient {
    * @param field System setting field name
    * @param key Key (e.g. csv.mandatoryColumns) within system setting information
    * @param typeReference Type reference for value corresponding to specified key
+   * @param context
    * @return System setting value corresponding to given field and key name
    */
   <T> T getSystemSettingByFieldAndKey(
-      ActorRef actorRef, String field, String key, TypeReference typeReference);
+      ActorRef actorRef,
+      String field,
+      String key,
+      TypeReference typeReference,
+      RequestContext context);
 }

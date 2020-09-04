@@ -126,15 +126,16 @@ public class UserAssignRoleTest {
     promise.success(userOrg);
     Promise<Map<String, Object>> promise_es = Futures.promise();
     promise_es.success(esRespone);
-    PowerMockito.when(esService.getDataByIdentifier(Mockito.any(), Mockito.any()))
+    PowerMockito.when(esService.getDataByIdentifier(Mockito.any(), Mockito.any(), null))
         .thenReturn(promise.future());
-    PowerMockito.when(esService.search(Mockito.any(), Mockito.any()))
+    PowerMockito.when(esService.search(Mockito.any(), Mockito.any(), null))
         .thenReturn(promise_es.future());
   }
 
   private static void initCassandraForSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByProperties(
+                Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(response);
 
     Response updateResponse = new Response();
@@ -142,7 +143,8 @@ public class UserAssignRoleTest {
     responseMap.put(Constants.RESPONSE, Constants.SUCCESS);
     updateResponse.getResult().putAll(responseMap);
 
-    PowerMockito.when(cassandraOperation.updateRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.updateRecord(Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(updateResponse);
   }
 

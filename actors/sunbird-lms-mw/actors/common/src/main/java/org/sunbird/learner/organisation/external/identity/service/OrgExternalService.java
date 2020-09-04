@@ -8,6 +8,7 @@ import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 
 public class OrgExternalService {
@@ -15,13 +16,14 @@ public class OrgExternalService {
   private final String KEYSPACE_NAME = "sunbird";
   private final String ORG_EXTERNAL_IDENTITY = "org_external_identity";
 
-  public String getOrgIdFromOrgExternalIdAndProvider(String externalId, String provider) {
+  public String getOrgIdFromOrgExternalIdAndProvider(
+      String externalId, String provider, RequestContext context) {
     Map<String, Object> dbRequestMap = new HashMap<>();
     dbRequestMap.put(JsonKey.EXTERNAL_ID, externalId.toLowerCase());
     dbRequestMap.put(JsonKey.PROVIDER, provider.toLowerCase());
     Response response =
         getCassandraOperation()
-            .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap);
+            .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap, context);
     List<Map<String, Object>> orgList =
         (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(orgList)) {
