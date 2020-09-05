@@ -192,7 +192,7 @@ public class RequestInterceptor {
       if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
         try {
-          clientAccessTokenId = AuthenticationHelper.verifyUserAccessToken(accessToken.get());
+          clientAccessTokenId = AccessTokenValidator.verifyUserToken(accessToken.get());
           if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }
