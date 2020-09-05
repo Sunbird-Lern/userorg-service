@@ -30,6 +30,7 @@ import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
 
+  private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
   private ObjectMapper mapper = new ObjectMapper();
   private static String custodianOrgHashTagId;
   public static boolean isServiceHealthy = true;
@@ -111,7 +112,7 @@ public class OnRequestHandler implements ActionCreator {
    */
   public CompletionStage<Result> onDataValidationError(
       Http.Request request, String errorMessage, int responseCode) {
-    ProjectLogger.log("Data error found--" + errorMessage);
+    logger.info("Data error found--" + errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
