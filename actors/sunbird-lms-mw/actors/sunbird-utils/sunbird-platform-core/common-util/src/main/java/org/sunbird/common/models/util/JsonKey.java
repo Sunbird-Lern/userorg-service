@@ -162,6 +162,7 @@ public final class JsonKey {
   public static final String EVENTS = "events";
   public static final String EXISTS = "exists";
   public static final String EXTERNAL_ID = "externalId";
+  public static final String EXTERNALID = "externalid";
   public static final String FACETS = "facets";
   public static final String FAILED = "FAILED";
   public static final String FAILURE = "failure";
