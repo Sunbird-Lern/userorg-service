@@ -80,11 +80,11 @@ public class UserExternalIdManagementActorTest {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(cassandraUpsertRecord());
-    when(cassandraOperation.getRecordsByIndexedProperty(
+    when(cassandraOperation.getRecordById(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.any(),
+            Mockito.anyString(),
             Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraRecordsByIndexedProperty());
     cassandraOperation.deleteRecord(

@@ -29,34 +29,9 @@ public class UserLookUp {
                     null);
     private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOK_UP);
 
-    public Response add(String type, String value, String userId, boolean encrypt, RequestContext context) {
-        if (encrypt) {
-            try {
-                value = encryptionService.encryptData(value, context);
-            } catch (Exception e) {
-                logger.info(context, "Exception occurred while encrypting email/phone " + e);
-            }
-        }
-        Map<String, Object> reqMap = new HashMap<>();
-        reqMap.put(JsonKey.TYPE, type);
-        reqMap.put(JsonKey.VALUE, value);
-        reqMap.put(JsonKey.USER_ID, userId);
-        Response result =
-                cassandraOperation.insertRecord(
-                        userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap, context);
-        return result;
-    }
-
     public Response insertRecords(List<Map<String, Object>> reqMap, RequestContext context) {
         Response result =
                 cassandraOperation.batchInsert(userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap, context);
-        return result;
-    }
-
-    public Response insertIntoLookUp(Map<String, Object> reqMap, RequestContext context) {
-        Response result =
-                cassandraOperation.insertRecord(
-                        userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap, context);
         return result;
     }
 

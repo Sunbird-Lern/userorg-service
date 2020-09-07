@@ -256,6 +256,55 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
+  public Response getRecordsByKeys(
+          String keyspaceName,
+          String tableName,
+          Map<String, Object> propertyMap,
+          RequestContext context) {
+    long startTime = System.currentTimeMillis();
+    logger.info(
+            context, "Cassandra Service getRecordsByKeys method started at ==" + startTime);
+    Response response;
+    Select selectQuery = null;
+    try {
+      Builder selectBuilder;
+        selectBuilder = QueryBuilder.select().all();
+      selectQuery = selectBuilder.from(keyspaceName, tableName);
+      if (MapUtils.isNotEmpty(propertyMap)) {
+        Where selectWhere = selectQuery.where();
+        for (Entry<String, Object> entry : propertyMap.entrySet()) {
+          if (entry.getValue() instanceof List) {
+            List<Object> list = (List) entry.getValue();
+            if (null != list) {
+              Object[] propertyValues = list.toArray(new Object[list.size()]);
+              Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
+              selectWhere.and(clause);
+            }
+          } else {
+            Clause clause = eq(entry.getKey(), entry.getValue());
+            selectWhere.and(clause);
+          }
+        }
+      }
+      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+      response = CassandraUtil.createResponse(results);
+    } catch (Exception e) {
+      logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != selectQuery) {
+        logQueryElapseTime(
+                "getRecordsByKeys", startTime, selectQuery.getQueryString(), context);
+      }
+    }
+    return response;
+  }
+
+
+  @Override
   public Response getPropertiesValueById(
       String keyspaceName,
       String tableName,

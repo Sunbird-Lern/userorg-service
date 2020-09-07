@@ -375,6 +375,13 @@ public interface CassandraOperation {
       String primaryKeyColumnName,
       RequestContext context);
 
+
+  Response getRecordsByKeys(
+          String keyspaceName,
+          String tableName,
+          Map<String, Object> propertyMap,
+          RequestContext context);
+
   /**
    * Insert record with TTL expiration
    *

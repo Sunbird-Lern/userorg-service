@@ -163,6 +163,17 @@ public abstract class UserManagementActorTestBase {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);
+    requestMap.put(JsonKey.USERNAME, "username");
+    requestMap.put(JsonKey.EMAIL, "username@gmail.com");
+    requestMap.put(JsonKey.PHONE, "4346345377");
+    List externalIds = new ArrayList();
+    Map externalId = new HashMap();
+    externalId.put(JsonKey.ID, "extid1e2d");
+    externalId.put(JsonKey.ID_TYPE, "channel1003");
+    externalId.put(JsonKey.PROVIDER, "channel1003");
+    externalId.put(JsonKey.OPERATION, "add");
+    externalIds.add(externalId);
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
