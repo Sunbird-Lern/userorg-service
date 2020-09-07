@@ -30,7 +30,6 @@ import org.sunbird.common.quartz.scheduler.SchedulerManager;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.services.ProfileCompletenessService;
 import org.sunbird.common.services.impl.ProfileCompletenessFactory;
 import org.sunbird.common.util.ConfigUtil;
@@ -642,70 +641,6 @@ public final class Util {
     return Collections.emptyMap();
   }
 
-  /**
-   * This method will check the uniqueness for externalId and provider combination.
-   *
-   * @param user
-   */
-  public static void checkExternalIdUniqueness(
-      User user, String operation, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
-      for (Map<String, String> externalId : user.getExternalIds()) {
-        if (StringUtils.isNotBlank(externalId.get(JsonKey.ID))
-            && StringUtils.isNotBlank(externalId.get(JsonKey.PROVIDER))
-            && StringUtils.isNotBlank(externalId.get(JsonKey.ID_TYPE))) {
-          Map<String, Object> externalIdReq = new HashMap<>();
-          externalIdReq.put(JsonKey.PROVIDER, externalId.get(JsonKey.PROVIDER));
-          externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
-          externalIdReq.put(JsonKey.EXTERNAL_ID, encryptData(externalId.get(JsonKey.ID)));
-          Response response =
-              cassandraOperation.getRecordsByProperties(
-                  KEY_SPACE_NAME, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, context);
-          List<Map<String, Object>> externalIdsRecord =
-              (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-          if (CollectionUtils.isNotEmpty(externalIdsRecord)) {
-            if (JsonKey.CREATE.equalsIgnoreCase(operation)) {
-              throwUserAlreadyExistsException(
-                  externalId.get(JsonKey.ID),
-                  externalId.get(JsonKey.ID_TYPE),
-                  externalId.get(JsonKey.PROVIDER));
-            } else if (JsonKey.UPDATE.equalsIgnoreCase(operation)) {
-              // If end user will try to add,edit or remove other user extIds throw exception
-              String userId = (String) externalIdsRecord.get(0).get(JsonKey.USER_ID);
-              if (!(user.getUserId().equalsIgnoreCase(userId))) {
-                if (JsonKey.ADD.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))
-                    || StringUtils.isBlank(externalId.get(JsonKey.OPERATION))) {
-                  throw new ProjectCommonException(
-                      ResponseCode.externalIdAssignedToOtherUser.getErrorCode(),
-                      ProjectUtil.formatMessage(
-                          ResponseCode.externalIdAssignedToOtherUser.getErrorMessage(),
-                          externalId.get(JsonKey.ID),
-                          externalId.get(JsonKey.ID_TYPE),
-                          externalId.get(JsonKey.PROVIDER)),
-                      ResponseCode.CLIENT_ERROR.getResponseCode());
-                } else {
-                  throwExternalIDNotFoundException(
-                      externalId.get(JsonKey.ID),
-                      externalId.get(JsonKey.ID_TYPE),
-                      externalId.get(JsonKey.PROVIDER));
-                }
-              }
-            }
-          } else {
-            // if user will try to delete non existing extIds
-            if (JsonKey.UPDATE.equalsIgnoreCase(operation)
-                && JsonKey.REMOVE.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))) {
-              throwExternalIDNotFoundException(
-                  externalId.get(JsonKey.ID),
-                  externalId.get(JsonKey.ID_TYPE),
-                  externalId.get(JsonKey.PROVIDER));
-            }
-          }
-        }
-      }
-    }
-  }
-
   public static String encryptData(String value) {
     try {
       return encryptionService.encryptData(value, null);
@@ -715,26 +650,6 @@ public final class Util {
           ResponseCode.userDataEncryptionError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
-  }
-
-  private static void throwExternalIDNotFoundException(
-      String externalId, String idType, String provider) {
-    throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound.getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
-  }
-
-  private static void throwUserAlreadyExistsException(
-      String externalId, String idType, String provider) {
-    throw new ProjectCommonException(
-        ResponseCode.userAlreadyExists.getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.userAlreadyExists.getErrorMessage(),
-            ProjectUtil.formatMessage(
-                ResponseMessage.Message.EXTERNAL_ID_FORMAT, externalId, idType, provider)),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   /**
