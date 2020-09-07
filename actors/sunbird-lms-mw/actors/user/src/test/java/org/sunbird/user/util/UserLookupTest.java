@@ -48,7 +48,6 @@ import scala.concurrent.Promise;
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserLookupTest {
-    private static Response response;
     public static CassandraOperation cassandraOperation;
     private static User user;
     private static EncryptionService encryptionService;
