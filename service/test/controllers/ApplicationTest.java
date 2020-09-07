@@ -3,12 +3,8 @@ package controllers;
 import static org.junit.Assert.assertEquals;
 
 import modules.OnRequestHandler;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -18,14 +14,8 @@ import play.mvc.Result;
  * Simple (JUnit) tests that can call all parts of a play app. If you are interested in mocking a
  * whole application, see the wiki for more details. extends WithApplication
  */
-@PrepareForTest({SunbirdMWService.class, OnRequestHandler.class})
+@PrepareForTest({OnRequestHandler.class})
 public class ApplicationTest {
-
-  @Before
-  public void before() {
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-  }
 
   @Test
   public void testGetApiVersionSuccess() {
