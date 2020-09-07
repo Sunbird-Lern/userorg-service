@@ -4,13 +4,10 @@ import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,30 +18,21 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserDeclareEntity;
-import scala.concurrent.Future;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
         ServiceFactory.class,
         CassandraOperationImpl.class,
-        DataCacheHandler.class
+        DataCacheHandler.class,
+        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserLookupTest {
@@ -52,6 +40,7 @@ public class UserLookupTest {
     private static User user;
     private static EncryptionService encryptionService;
 
+    @Before
     public void beforeEachTest() {
         PowerMockito.mockStatic(DataCacheHandler.class);
         Map<String, String> settingMap = new HashMap<String, String>();
@@ -59,6 +48,7 @@ public class UserLookupTest {
         settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
         when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
         encryptionService = PowerMockito.mock(EncryptionService.class);
+        PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
         when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
                 .getEncryptionServiceInstance(null))
                 .thenReturn(encryptionService);
@@ -88,8 +78,6 @@ public class UserLookupTest {
 
     @Test
     public void checkPhoneUniquenessExist() throws Exception {
-        beforeEachTest();
-
         when(cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
@@ -108,8 +96,6 @@ public class UserLookupTest {
 
     @Test
     public void checkPhoneExist() {
-        beforeEachTest();
-
         when(cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
@@ -126,8 +112,6 @@ public class UserLookupTest {
 
     @Test
     public void checkEmailExist() throws Exception{
-        beforeEachTest();
-
         when(cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
@@ -154,7 +138,6 @@ public class UserLookupTest {
 
     @Test
     public void testCheckExternalIdUniquenessSuccessForCreate() {
-        beforeEachTest();
         try {
             new UserLookUp().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
         } catch (ProjectCommonException e) {
@@ -164,7 +147,6 @@ public class UserLookupTest {
 
     @Test
     public void testCheckExternalIdUniquenessSuccessWithUpdateOperation() {
-        beforeEachTest();
         try {
             user.setUserId("someUserId2");
             user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
@@ -188,7 +170,6 @@ public class UserLookupTest {
 
     @Test
     public void testCheckExternalIdUniquenessSuccessWithRemoveOperation() {
-        beforeEachTest();
         try {
             user.setUserId("someUserId2");
             user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
