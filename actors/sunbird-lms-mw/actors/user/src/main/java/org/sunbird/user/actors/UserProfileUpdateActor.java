@@ -99,22 +99,6 @@ public class UserProfileUpdateActor extends BaseActor {
       Map<String, Object> userMap, String operationType, RequestContext context) {
     List<Future<Object>> futures = new ArrayList<>();
 
-    if (userMap.containsKey(JsonKey.ADDRESS)
-        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) userMap.get(JsonKey.ADDRESS))) {
-      futures.add(saveAddress(userMap, operationType, context));
-    }
-
-    if (userMap.containsKey(JsonKey.EDUCATION)
-        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) userMap.get(JsonKey.EDUCATION))) {
-      futures.add(saveEducation(userMap, operationType, context));
-    }
-
-    if (userMap.containsKey(JsonKey.JOB_PROFILE)
-        && CollectionUtils.isNotEmpty(
-            (List<Map<String, Object>>) userMap.get(JsonKey.JOB_PROFILE))) {
-      futures.add(saveJobProfile(userMap, operationType, context));
-    }
-
     if (CollectionUtils.isNotEmpty((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
       List<Map<String, String>> externalIds =
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
@@ -151,39 +135,6 @@ public class UserProfileUpdateActor extends BaseActor {
     userMap.put(JsonKey.DECLARATIONS, selfDeclaredFields);
     return saveUserAttributes(
         userMap, UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue(), context);
-  }
-
-  private Future<Object> saveAddress(
-      Map<String, Object> userMap, String operationType, RequestContext context) {
-    String actorOperation = UserActorOperations.UPDATE_USER_ADDRESS.getValue();
-
-    if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
-      actorOperation = UserActorOperations.INSERT_USER_ADDRESS.getValue();
-    }
-
-    return saveUserAttributes(userMap, actorOperation, context);
-  }
-
-  private Future<Object> saveEducation(
-      Map<String, Object> userMap, String operationType, RequestContext context) {
-    String actorOperation = UserActorOperations.UPDATE_USER_EDUCATION.getValue();
-
-    if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
-      actorOperation = UserActorOperations.INSERT_USER_EDUCATION.getValue();
-    }
-
-    return saveUserAttributes(userMap, actorOperation, context);
-  }
-
-  private Future<Object> saveJobProfile(
-      Map<String, Object> userMap, String operationType, RequestContext context) {
-    String actorOperation = UserActorOperations.UPDATE_USER_JOB_PROFILE.getValue();
-
-    if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
-      actorOperation = UserActorOperations.INSERT_USER_JOB_PROFILE.getValue();
-    }
-
-    return saveUserAttributes(userMap, actorOperation, context);
   }
 
   private Future<Object> saveUserExternalIds(

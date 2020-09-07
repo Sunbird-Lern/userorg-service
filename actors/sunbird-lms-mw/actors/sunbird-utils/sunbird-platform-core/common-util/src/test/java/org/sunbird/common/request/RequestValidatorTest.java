@@ -12,106 +12,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** @author Manzarul */
 public class RequestValidatorTest {
-
-  @Test
-  public void testValidateUpdateContentSuccess() {
-    Request request = new Request();
-    boolean response = false;
-    List<Map<String, Object>> listOfMap = new ArrayList<>();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.CONTENT_ID, "do_1233343");
-    requestObj.put(JsonKey.STATUS, "Completed");
-    listOfMap.add(requestObj);
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTENTS, listOfMap);
-    request.setRequest(innerMap);
-    try {
-      RequestValidator.validateUpdateContent(request);
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    assertEquals(true, response);
-  }
-
-  @Test
-  public void testValdateUpdateContentFailureWithNullContentId() {
-    Request request = new Request();
-    boolean response = false;
-    List<Map<String, Object>> listOfMap = new ArrayList<>();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.CONTENT_ID, null);
-    requestObj.put(JsonKey.STATUS, "Completed");
-    listOfMap.add(requestObj);
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTENTS, listOfMap);
-    request.setRequest(innerMap);
-    try {
-      RequestValidator.validateUpdateContent(request);
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNotNull(e);
-    }
-    assertEquals(false, response);
-  }
-
-  @Test
-  public void testValidteUpdateContentFailureWithoutContentId() {
-    Request request = new Request();
-    List<Map<String, Object>> listOfMap = new ArrayList<>();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.STATUS, "Completed");
-    listOfMap.add(requestObj);
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTENTS, listOfMap);
-    request.setRequest(innerMap);
-    try {
-      RequestValidator.validateUpdateContent(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.contentIdRequiredError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidteUpdateContentFailureWithoutStatus() {
-    Request request = new Request();
-    List<Map<String, Object>> listOfMap = new ArrayList<>();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.CONTENT_ID, "do_1233343");
-    listOfMap.add(requestObj);
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTENTS, listOfMap);
-    request.setRequest(innerMap);
-    try {
-      RequestValidator.validateUpdateContent(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.contentStatusRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidteUpdateContentFailureWithEmptyContents() {
-    Request request = new Request();
-    List<Map<String, Object>> listOfMap = new ArrayList<>();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.CONTENT_ID, "do_1233343");
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTENTS, listOfMap);
-    request.setRequest(innerMap);
-    try {
-      RequestValidator.validateUpdateContent(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.contentIdRequiredError.getErrorCode(), e.getCode());
-    }
-  }
 
   @Test
   public void testValidateRegisterClientFailureWithEmptyClientName() {
@@ -249,50 +153,6 @@ public class RequestValidatorTest {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
       assertEquals(ResponseCode.emailSubjectError.getErrorCode(), e.getCode());
     }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeFailureWithEmptyType() {
-    try {
-      RequestValidator.validateEnrolmentType("");
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.enrolmentTypeRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeFailureWithWrongType() {
-    try {
-      RequestValidator.validateEnrolmentType("test");
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.enrolmentIncorrectValue.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeSuccessWithOpenType() {
-    boolean response = false;
-    try {
-      RequestValidator.validateEnrolmentType(ProjectUtil.EnrolmentType.open.getVal());
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    Assert.assertTrue(response);
-  }
-
-  @Test
-  public void testValidateEnrolmentTypeSuccessWithInviteType() {
-    boolean response = false;
-    try {
-      RequestValidator.validateEnrolmentType(ProjectUtil.EnrolmentType.inviteOnly.getVal());
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    Assert.assertTrue(response);
   }
 
   @Test

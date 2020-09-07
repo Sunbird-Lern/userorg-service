@@ -248,22 +248,6 @@ public class UserProfileReadActor extends BaseActor {
         logger.info(
             actorMessage.getRequestContext(),
             "Response with externalIds and complete profile details");
-        // These values are set to ensure backward compatibility post introduction of global
-        // settings in user profile visibility
-        setCompleteProfileVisibilityMap(result);
-        setDefaultUserProfileVisibility(result);
-
-        // If the user requests his data then we are fetching the private data from
-        // userprofilevisibility index
-        // and merge it with user index data
-        Future<Map<String, Object>> privateResultF =
-            esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.userprofilevisibility.getTypeName(),
-                userId,
-                actorMessage.getRequestContext());
-        Map<String, Object> privateResult =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
-
         // if version is 3 , then read declarations from user_declarations table
         String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
         if (StringUtils.isNotEmpty(version) && version.equals(JsonKey.VERSION_3)) {
@@ -296,7 +280,6 @@ public class UserProfileReadActor extends BaseActor {
               fetchUserExternalIdentity(userId, actorMessage.getRequestContext());
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
-        result.putAll(privateResult);
       }
     } catch (Exception e) {
       logger.error(
@@ -469,14 +452,6 @@ public class UserProfileReadActor extends BaseActor {
                 s.remove(JsonKey.SLUG);
               });
     }
-  }
-
-  private void setCompleteProfileVisibilityMap(Map<String, Object> userMap) {
-    Map<String, String> profileVisibilityMap =
-        (Map<String, String>) userMap.get(JsonKey.PROFILE_VISIBILITY);
-    Map<String, String> completeProfileVisibilityMap =
-        Util.getCompleteProfileVisibilityMap(profileVisibilityMap, systemSettingActorRef);
-    userMap.put(JsonKey.PROFILE_VISIBILITY, completeProfileVisibilityMap);
   }
 
   private void setDefaultUserProfileVisibility(Map<String, Object> userMap) {
@@ -910,26 +885,10 @@ public class UserProfileReadActor extends BaseActor {
       if (!(((String) result.get(JsonKey.USER_ID)).equalsIgnoreCase(requestedById))) {
         result = removeUserPrivateField(result);
       } else {
-        // These values are set to ensure backward compatibility post introduction of
-        // global
-        // settings in user profile visibility
-        setCompleteProfileVisibilityMap(result);
-        setDefaultUserProfileVisibility(result);
-        // If the user requests his data then we are fetching the private data from
-        // userprofilevisibility index
-        // and merge it with user index data
-        Future<Map<String, Object>> privateResultF =
-            esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.userprofilevisibility.getTypeName(),
-                (String) result.get(JsonKey.USER_ID),
-                actorMessage.getRequestContext());
-        Map<String, Object> privateResult =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(privateResultF);
         // fetch user external identity
         List<Map<String, String>> dbResExternalIds =
             fetchUserExternalIdentity(requestedById, actorMessage.getRequestContext());
         result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
-        result.putAll(privateResult);
       }
     } catch (Exception e) {
       logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
