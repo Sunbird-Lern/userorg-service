@@ -49,6 +49,7 @@ import scala.concurrent.Promise;
 public class UserLookupTest {
     private static Response response;
     public static CassandraOperation cassandraOperation;
+    private static User user;
 
     public void beforeEachTest() {
         PowerMockito.mockStatic(DataCacheHandler.class);
@@ -60,6 +61,24 @@ public class UserLookupTest {
         PowerMockito.mockStatic(ServiceFactory.class);
         cassandraOperation = mock(CassandraOperationImpl.class);
         when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+
+        List<Map<String, String>> externalIds = new ArrayList<>();
+        Map<String, String> externalIdReqMap = new HashMap<>();
+        externalIdReqMap.put(JsonKey.ID, "userId");
+        externalIdReqMap.put(JsonKey.PROVIDER, "someProvider");
+        externalIdReqMap.put(JsonKey.ID_TYPE, "someIdType");
+        externalIdReqMap.put(JsonKey.USER_ID, "reqUserId");
+        externalIdReqMap.put(JsonKey.EXTERNAL_ID, "someExternalId");
+
+        externalIds.add(externalIdReqMap);
+        user = new User();
+        user.setExternalIds(externalIds);
+
+        Map<String, String> externalIdResMap = new HashMap<>();
+        externalIdResMap.put(JsonKey.PROVIDER, "someProvider");
+        externalIdResMap.put(JsonKey.ID_TYPE, "someIdType");
+        externalIdResMap.put(JsonKey.USER_ID, "someUserId");
+        externalIdResMap.put(JsonKey.EXTERNAL_ID, "someExternalId");
 
     }
 
@@ -127,5 +146,51 @@ public class UserLookupTest {
         response1.getResult().put(JsonKey.RESPONSE, responseList);
 
         return response1;
+    }
+
+    @Test
+    public void testCheckExternalIdUniquenessSuccessForCreate() {
+        beforeEachTest();
+        try {
+            new UserLookUp().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
+        } catch (ProjectCommonException e) {
+            assertEquals(ResponseCode.userAlreadyExists.getErrorCode(), e.getCode());
+        }
+    }
+
+    @Test
+    public void testCheckExternalIdUniquenessSuccessWithUpdateOperation() {
+        beforeEachTest();
+        try {
+            user.setUserId("someUserId2");
+            user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
+            new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+        } catch (ProjectCommonException e) {
+            assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
+        }
+    }
+
+    @Test
+    public void testCheckExternalIdUniquenessSuccessForUpdate() {
+
+        try {
+            user.setUserId("someUserId2");
+            user.getExternalIds().get(0).remove(JsonKey.OPERATION);
+            new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+        } catch (ProjectCommonException e) {
+            assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getCode());
+        }
+    }
+
+    @Test
+    public void testCheckExternalIdUniquenessSuccessWithRemoveOperation() {
+        beforeEachTest();
+        try {
+            user.setUserId("someUserId2");
+            user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
+            new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+        } catch (ProjectCommonException e) {
+            assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
+        }
     }
 }
