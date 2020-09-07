@@ -108,10 +108,10 @@ public class TenantMigrationActor extends BaseActor {
     Map compositeKeyMap = new HashMap<String, Object>();
     compositeKeyMap.put(JsonKey.USER_ID, userId);
     Response existingRecord =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordById(
             usrDecDbInfo.getKeySpace(),
             usrDecDbInfo.getTableName(),
-            compositeKeyMap,
+            userId, JsonKey.USER_ID_LOWERCASE,
             request.getRequestContext());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);

@@ -721,6 +721,7 @@ public final class JsonKey {
   public static final String USER_LOOK_UP = "user_lookup";
   public static final String USER_NAME_LOWER_CASE = "username";
   public static final String EXTERNAL_ID_LOWER_CASE = "externalid";
+  public static final String USER_ID_LOWERCASE = "userid";
 
   private JsonKey() {}
 }
