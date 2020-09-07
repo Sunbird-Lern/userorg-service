@@ -68,7 +68,7 @@ public class UserLookupTest {
         beforeEachTest();
 
         when(cassandraOperation.getRecordsByCompositeKey(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), null))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
 
         User user = new User();
@@ -88,7 +88,7 @@ public class UserLookupTest {
         beforeEachTest();
 
         when(cassandraOperation.getRecordsByCompositeKey(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), null))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
 
         boolean response = false;
@@ -106,7 +106,7 @@ public class UserLookupTest {
         beforeEachTest();
 
         when(cassandraOperation.getRecordsByCompositeKey(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), null))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
                 .thenReturn(getRecordsByCompositeKeyResponse());
         boolean response = false;
         try {
