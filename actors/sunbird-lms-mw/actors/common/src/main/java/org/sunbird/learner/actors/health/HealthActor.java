@@ -108,9 +108,9 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
+      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null);
+          .getAllRecords(orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));
@@ -150,9 +150,9 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
+      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       getCassandraOperation()
-          .getAllRecords(badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null);
+          .getAllRecords(orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, true, e));

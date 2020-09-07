@@ -21,7 +21,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.learner.util.Util.DbInfo;
 import scala.concurrent.Future;
 
 /**
@@ -36,7 +35,6 @@ import scala.concurrent.Future;
     "mergeUserToElastic",
     "updateUserInfoToElastic",
     "updateUserRoles",
-    "addUserBadgebackground",
     "insertOrgInfoToElastic",
     "updateOrgInfoToElastic",
     "updateUserOrgES",
@@ -70,8 +68,6 @@ public class BackgroundJobManager extends BaseActor {
       removeUserOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ROLES_ES.getValue())) {
       updateUserRoleToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.ADD_USER_BADGE_BKG.getValue())) {
-      addBadgeToUserprofile(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
       insertUserNotesToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_NOTES_ES.getValue())) {
@@ -87,55 +83,6 @@ public class BackgroundJobManager extends BaseActor {
               ResponseCode.CLIENT_ERROR.getResponseCode());
       ProjectLogger.log("UnSupported operation in Background Job Manager", exception);
     }
-  }
-
-  /** @param actorMessage */
-  private void addBadgeToUserprofile(Request actorMessage) {
-    Map<String, Object> userBadgeMap = actorMessage.getRequest();
-    userBadgeMap.remove(JsonKey.OPERATION);
-    DbInfo userbadge = Util.dbInfoMap.get(JsonKey.USER_BADGES_DB);
-    Response response =
-        cassandraOperation.getRecordsByProperties(
-            userbadge.getKeySpace(),
-            userbadge.getTableName(),
-            userBadgeMap,
-            actorMessage.getRequestContext());
-    if (response != null && response.get(JsonKey.RESPONSE) != null) {
-      @SuppressWarnings("unchecked")
-      List<Map<String, Object>> badgesList =
-          (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-      if (badgesList != null && !badgesList.isEmpty()) {
-        badgesList = removeDataFromMap(badgesList);
-        Map<String, Object> map = new HashMap<>();
-        map.put(JsonKey.BADGES, badgesList);
-        boolean updateResponse =
-            updateDataToElastic(
-                ProjectUtil.EsIndex.sunbird.getIndexName(),
-                ProjectUtil.EsType.user.getTypeName(),
-                (String) userBadgeMap.get(JsonKey.RECEIVER_ID),
-                map,
-                actorMessage.getRequestContext());
-        logger.info(
-            actorMessage.getRequestContext(), "User badge update response==" + updateResponse);
-      }
-    } else {
-      logger.info(
-          actorMessage.getRequestContext(), "No data found user badges to sync with user===");
-    }
-  }
-
-  public static List<Map<String, Object>> removeDataFromMap(List<Map<String, Object>> listOfMap) {
-    List<Map<String, Object>> list = new ArrayList<>();
-    for (Map<String, Object> map : listOfMap) {
-      Map<String, Object> innermap = new HashMap<>();
-      innermap.put(JsonKey.ID, map.get(JsonKey.ID));
-      innermap.put(JsonKey.BADGE_TYPE_ID, map.get(JsonKey.BADGE_TYPE_ID));
-      innermap.put(JsonKey.RECEIVER_ID, map.get(JsonKey.RECEIVER_ID));
-      innermap.put(JsonKey.CREATED_DATE, map.get(JsonKey.CREATED_DATE));
-      innermap.put(JsonKey.CREATED_BY, map.get(JsonKey.CREATED_BY));
-      list.add(innermap);
-    }
-    return list;
   }
 
   @SuppressWarnings("unchecked")
@@ -311,11 +258,7 @@ public class BackgroundJobManager extends BaseActor {
 
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
-    Map<String, Object> userDetails =
-        Util.getUserDetails(
-            userId,
-            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-            actorMessage.getRequestContext());
+    Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
     logger.info(
         actorMessage.getRequestContext(),
         "BackGroundJobManager:updateUserInfoToEs userRootOrgId "

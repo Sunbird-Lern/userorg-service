@@ -43,7 +43,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ConnectionManager;
@@ -62,7 +61,6 @@ import scala.concurrent.Future;
   RestHighLevelClient.class,
   AcknowledgedResponse.class,
   GetRequestBuilder.class,
-  HttpUtil.class,
   BulkProcessor.class,
   FutureUtils.class,
   SearchHit.class,

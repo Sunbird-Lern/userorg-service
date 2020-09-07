@@ -686,34 +686,6 @@ public class UserRequestValidatorTest {
     assertEquals(true, response);
   }
 
-  @Test
-  public void testValidateWebPagesFailureWithEmptyWebPages() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.WEB_PAGES, new ArrayList<>());
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateWebPages(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidWebPageData.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateWebPagesFailureWithNullWebPages() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.WEB_PAGES, null);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateWebPages(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidWebPageData.getErrorCode(), e.getCode());
-    }
-  }
-
   @Ignore
   public void testCreateUserBasicValidationFailureWithEmptyFirstName() {
     Request request = new Request();

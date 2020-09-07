@@ -155,7 +155,6 @@ public abstract class UserManagementActorTestBase {
             Mockito.any(RequestContext.class)))
         .thenReturn(esPromise.future());
     PowerMockito.mockStatic(Util.class);
-    Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
     UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());

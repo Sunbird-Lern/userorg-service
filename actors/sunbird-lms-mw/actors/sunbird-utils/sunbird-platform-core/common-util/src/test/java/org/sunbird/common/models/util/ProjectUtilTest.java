@@ -200,6 +200,15 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
+  public void testUserRoleSuccess() {
+    assertEquals("PUBLIC", ProjectUtil.UserRole.PUBLIC.getValue());
+    assertEquals("CONTENT_CREATOR", ProjectUtil.UserRole.CONTENT_CREATOR.getValue());
+    assertEquals("CONTENT_REVIEWER", ProjectUtil.UserRole.CONTENT_REVIEWER.getValue());
+    assertEquals("ORG_ADMIN", ProjectUtil.UserRole.ORG_ADMIN.getValue());
+    assertEquals("ORG_MEMBER", ProjectUtil.UserRole.ORG_MEMBER.getValue());
+  }
+
+  @Test
   public void testIsDateValidFormatFailureWithInvalidDate() {
     boolean bool = ProjectUtil.isDateValidFormat("yyyy-MM-dd", "2017-12-18");
     assertTrue(bool);
@@ -258,15 +267,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testUserRoleSuccess() {
-    assertEquals("PUBLIC", ProjectUtil.UserRole.PUBLIC.getValue());
-    assertEquals("CONTENT_CREATOR", ProjectUtil.UserRole.CONTENT_CREATOR.getValue());
-    assertEquals("CONTENT_REVIEWER", ProjectUtil.UserRole.CONTENT_REVIEWER.getValue());
-    assertEquals("ORG_ADMIN", ProjectUtil.UserRole.ORG_ADMIN.getValue());
-    assertEquals("ORG_MEMBER", ProjectUtil.UserRole.ORG_MEMBER.getValue());
-  }
-
-  @Test
   public void testBulkProcessStatusSuccess() {
     assertEquals(0, ProjectUtil.BulkProcessStatus.NEW.getValue());
     assertEquals(1, ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());
@@ -309,12 +309,6 @@ public class ProjectUtilTest extends BaseHttpTest {
     assertEquals("web", ProjectUtil.Source.WEB.getValue());
     assertEquals("android", ProjectUtil.Source.ANDROID.getValue());
     assertEquals("ios", ProjectUtil.Source.IOS.getValue());
-  }
-
-  @Test
-  public void testSectionDataTypeSuccess() {
-    assertEquals("course", ProjectUtil.SectionDataType.course.getTypeName());
-    assertEquals("content", ProjectUtil.SectionDataType.content.getTypeName());
   }
 
   @Test
@@ -405,7 +399,7 @@ public class ProjectUtilTest extends BaseHttpTest {
     if (StringUtils.isBlank(ekStepBaseUrl)) {
       ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
     }
-    String response = HttpUtil.sendGetRequest(ekStepBaseUrl + "/search/health", headers);
+    String response = HttpClientUtil.get(ekStepBaseUrl + "/search/health", headers);
     assertNotNull(response);
   }
 

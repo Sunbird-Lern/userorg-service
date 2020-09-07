@@ -246,7 +246,6 @@ public class UserManagementActor extends BaseActor {
   private void updateUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    // Util.getUserProfileConfig(systemSettingActorRef);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
@@ -1134,11 +1133,7 @@ public class UserManagementActor extends BaseActor {
     syncResponse.putAll(response.getResult());
 
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
-      Map<String, Object> userDetails =
-          Util.getUserDetails(
-              userId,
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              request.getRequestContext());
+      Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
       Future<Response> future =
           saveUserToES(userDetails, request.getRequestContext())
               .map(

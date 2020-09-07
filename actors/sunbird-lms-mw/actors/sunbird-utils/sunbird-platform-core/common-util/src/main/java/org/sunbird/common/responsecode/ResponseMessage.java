@@ -134,7 +134,6 @@ public interface ResponseMessage {
         "User (ID = {0}) not associated to course batch creator root org.";
     String SLUG_IS_NOT_UNIQUE =
         "Please provide different channel value. This channel value already exist.";
-    String INVALID_CREATE_BADGE_ISSUER_DATA = "{0}";
     String INVALID_DATE_FORMAT =
         "Invalid Date format . Date format should be : yyyy-MM-dd hh:mm:ss:SSSZ";
     String SRC_EXTERNAL_ID_ALREADY_EXIST = "PROVIDER WITH EXTERNAL ID ALREADY EXIST .";
@@ -195,10 +194,8 @@ public interface ResponseMessage {
     String RECIPIENT_ADDRESS_ERROR = "Please send recipientEmails or recipientUserIds.";
     String STORAGE_CONTAINER_NAME_MANDATORY = " Container name can not be null or empty.";
     String CLOUD_SERVICE_ERROR = "Cloud storage service error.";
-    String BADGE_TYPE_ID_ERROR = "Badge type id is mandatory.";
     String RECEIVER_ID_ERROR = "Receiver id is mandatory.";
     String INVALID_RECEIVER_ID = "Receiver id is invalid.";
-    String INVALID_BADGE_ID = "Invalid badge type id.";
     String USER_ORG_ASSOCIATION_ERROR = "User is already associated with another organization.";
     String INVALID_ROLE = "Invalid role value provided in request.";
     String INVALID_SALT = "Please provide salt value.";
@@ -257,19 +254,6 @@ public interface ResponseMessage {
     String LOCATION_ID_REQUIRED = "Please provide Location Id.";
     String NOT_SUPPORTED = "Not Supported.";
     String USERNAME_USERID_MISSING = "Please provide either userName or userId.";
-    String ISSUER_ID_REQUIRED = "Please provide issuer ID.";
-    String ISSUER_LIST_REQUIRED = "Please provide issuer list.";
-    String BADGE_ID_REQUIRED = "Please provide badge class ID.";
-    String BADGE_TYPE_REQUIRED = "Please provide badge class type.";
-    String INVALID_BADGE_TYPE = "Please provide valid badge class type.";
-    String INVALID_BADGE_SUBTYPE = "Please provide valid badge class subtype.";
-    String INVALID_BADGE_ROLE = "Please provide valid badge class role(s).";
-    String BADGE_ROLES_REQUIRED = "Please provide authorised roles for badge class.";
-    String ROOT_ORG_ID_REQUIRED = "Please provide root organisation ID.";
-    String BADGE_NAME_REQUIRED = "Please provide badge class name.";
-    String BADGE_DESCRIPTION_REQUIRED = "Please provide badge class description.";
-    String BADGE_CRITERIA_REQUIRED = "Please provide badge class criteria.";
-    String BADGE_IMAGE_REQUIRED = "Please provide badge class image.";
     String RECIPIENT_EMAIL_REQUIRED = "Please provide recipient email.";
     String ASSERTION_EVIDENCE_REQUIRED = "Please provide valid assertion url as an evidence.";
     String ASSERTION_ID_REQUIRED = "Please provide assertion ID.";
@@ -294,7 +278,6 @@ public interface ResponseMessage {
     String SECTION_NOT_EXIST = "Requested section does not exist.";
     String ORG_NOT_EXIST = "Requested organisation does not exist.";
     String INVALID_PAGE_SOURCE = "Invalid page source.";
-    String BADGE_SUBTYPE_REQUIRED = "Please provide badge class subtype.";
     String LOCATION_TYPE_REQUIRED = "Location type required.";
     String INVALID_REQUEST_DATA_FOR_LOCATION = "{0} field required.";
     String ALREADY_EXISTS = "A {0} with {1} already exists. Please retry with a unique value.";
@@ -645,29 +628,14 @@ public interface ResponseMessage {
     String EMAIL_SUBJECT_ERROR = "EMAIL_SUBJECT_ERROR";
     String EMAIL_BODY_ERROR = "EMAIL_BODY_ERROR";
     String RECIPIENT_ADDRESS_ERROR = "RECIPIENT_ADDRESS_ERROR";
-    String ISSUER_ID_REQUIRED = "ISSUER_ID_REQUIRED";
-    String ISSUER_LIST_REQUIRED = "ISSUER_LIST_REQUIRED";
-    String BADGE_ID_REQUIRED = "BADGE_ID_REQUIRED";
-    String ROOT_ORG_ID_REQUIRED = "BADGE_ROOT_ORG_ID_REQUIRED";
-    String BADGE_TYPE_REQUIRED = "BADGE_TYPE_REQUIRED";
-    String INVALID_BADGE_TYPE = "INVALID_BADGE_TYPE";
-    String INVALID_BADGE_SUBTYPE = "INVALID_BADGE_SUBTYPE";
-    String INVALID_BADGE_ROLE = "INVALID_BADGE_ROLE";
-    String BADGE_ROLES_REQUIRED = "BADGE_ROLES_REQUIRED";
-    String BADGE_NAME_REQUIRED = "BADGE_NAME_REQUIRED";
-    String BADGE_DESCRIPTION_REQUIRED = "BADGE_DESCRIPTION_REQUIRED";
-    String BADGE_CRITERIA_REQUIRED = "BADGE_CRITERIA_REQUIRED";
-    String BADGE_IMAGE_REQUIRED = "BADGE_IMAGE_REQUIRED";
     String RECIPIENT_EMAIL_REQUIRED = "RECIPIENT_EMAIL_REQUIRED";
     String ASSERTION_EVIDENCE_REQUIRED = "ASSERTION_EVIDENCE_REQUIRED";
     String ASSERTION_ID_REQUIRED = "ASSERTION_ID_REQUIRED";
     String STORAGE_CONTAINER_NAME_MANDATORY = "STORAGE_CONTAINER_NAME_MANDATORY";
     String USER_ORG_ASSOCIATION_ERROR = "USER_ORG_ASSOCIATION_ERROR";
     String CLOUD_SERVICE_ERROR = "CLOUD_SERVICE_ERROR";
-    String BADGE_TYPE_ID_ERROR = "BADGE_TYPE_ID_ERROR";
     String RECEIVER_ID_ERROR = "RECEIVER_ID_ERROR";
     String INVALID_RECEIVER_ID = "INVALID_RECEIVER_ID";
-    String INVALID_BADGE_ID = "INVALID_BADGE_ID";
     String INVALID_ROLE = "INVALID_ROLE";
     String INVALID_SALT = "INVALID_SALT";
     String ORG_TYPE_MANDATORY = "ORG_TYPE_MANDATORY";
@@ -723,7 +691,6 @@ public interface ResponseMessage {
     String INVALID_COURSE_CREATOR_ID = "INVALID_COURSE_CREATOR_ID";
     String USER_NOT_ASSOCIATED_TO_ROOT_ORG = "USER_NOT_ASSOCIATED_TO_ROOT_ORG";
     String SLUG_IS_NOT_UNIQUE = "SLUG_IS_NOT_UNIQUE";
-    String INVALID_CREATE_BADGE_ISSUER_DATA = "INVALID_CREATE_BADGE_ISSUER_DATA";
     String RECIPIENT_ID_REQUIRED = "RECIPIENT_ID_REQUIRED";
     String RECIPIENT_TYPE_REQUIRED = "RECIPIENT_TYPE_REQUIRED";
     String BADGING_SERVER_ERROR = "BADGING_SERVER_ERROR";
@@ -745,7 +712,6 @@ public interface ResponseMessage {
     String SECTION_NOT_EXIST = "SECTION_NOT_EXIST";
     String ORG_NOT_EXIST = "ORG_NOT_EXIST";
     String INVALID_PAGE_SOURCE = "INVALID_PAGE_SOURCE";
-    String BADGE_SUBTYPE_REQUIRED = "BADGE_SUBTYPE_REQUIRED";
     String LOCATION_TYPE_REQUIRED = "LOCATION_TYPE_REQUIRED";
     String INVALID_REQUEST_DATA_FOR_LOCATION = "INVALID_REQUEST_DATA_CREATE_LOCATION";
     String ALREADY_EXISTS = "ALREADY_EXISTS";

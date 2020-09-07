@@ -130,7 +130,6 @@ public class UserProfileReadActorTest {
 
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(Util.class);
-    Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
     UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());

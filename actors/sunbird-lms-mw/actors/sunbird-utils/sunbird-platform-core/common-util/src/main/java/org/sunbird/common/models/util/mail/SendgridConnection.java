@@ -73,10 +73,6 @@ public class SendgridConnection {
     return transport;
   }
 
-  public void setTransport(Transport transport) {
-    this.transport = transport;
-  }
-
   public void initialiseFromProperty() {
     host = PropertiesCache.getInstance().getProperty(JsonKey.EMAIL_SERVER_HOST);
     port = PropertiesCache.getInstance().getProperty(JsonKey.EMAIL_SERVER_PORT);

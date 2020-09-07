@@ -48,8 +48,7 @@ import scala.concurrent.Promise;
 public class HealthActorTest {
 
   private static ActorSystem system;
-  private Util.DbInfo badgesDbInfo = Util.dbInfoMap.get(JsonKey.BADGES_DB);
-
+  Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
   private CassandraOperation cassandraOperation;
   private static final Props props = Props.create(HealthActor.class);
 
@@ -105,7 +104,7 @@ public class HealthActorTest {
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.getAllRecords(
-            badgesDbInfo.getKeySpace(), badgesDbInfo.getTableName(), null))
+            orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null))
         .thenReturn(new Response());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
