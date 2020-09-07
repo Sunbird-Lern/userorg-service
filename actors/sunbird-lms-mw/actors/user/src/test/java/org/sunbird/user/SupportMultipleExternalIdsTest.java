@@ -29,6 +29,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
+import org.sunbird.user.util.UserLookUp;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -96,7 +97,7 @@ public class SupportMultipleExternalIdsTest {
     resMapList.add(externalIdResMap);
     response1.put(JsonKey.RESPONSE, resMapList);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.anyMap(),
@@ -108,7 +109,7 @@ public class SupportMultipleExternalIdsTest {
   public void testCheckExternalIdUniquenessSuccessForCreate() {
 
     try {
-      Util.checkExternalIdUniqueness(user, JsonKey.CREATE, null);
+      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.userAlreadyExists.getErrorCode(), e.getCode());
     }
@@ -120,7 +121,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }
@@ -132,7 +133,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).remove(JsonKey.OPERATION);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getCode());
     }
@@ -144,7 +145,7 @@ public class SupportMultipleExternalIdsTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
-      Util.checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }
