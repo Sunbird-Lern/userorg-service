@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import modules.OnRequestHandler;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -20,6 +22,8 @@ public class ApplicationTest {
 
   @Test
   public void testGetApiVersionSuccess() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     String apiPath = "/v1/learner/getenrolledcoures";
     String version = BaseController.getApiVersion(apiPath);
     assertEquals("v1", version);
@@ -27,6 +31,8 @@ public class ApplicationTest {
 
   @Test
   public void testCreateResponseOnExceptionSuccess() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     ProjectCommonException exception =
         new ProjectCommonException(
             ResponseCode.courseIdRequiredError.getErrorCode(),
@@ -39,6 +45,8 @@ public class ApplicationTest {
 
   @Test(expected = RuntimeException.class)
   public void testCreateCommonExceptionResponseSuccess() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
     code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
     Result result = new BaseController().createCommonExceptionResponse(new Exception(), null);
