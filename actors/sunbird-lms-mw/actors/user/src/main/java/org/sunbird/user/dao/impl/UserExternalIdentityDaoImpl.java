@@ -23,20 +23,6 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
-  /*  @Override
-  public String getUserId(Request reqObj) {
-
-    if (StringUtils.isBlank(userId)) {
-      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
-      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-
-      userId = getUserIdByExternalId(extId, provider, idType);
-    }
-
-    return userId;
-  }*/
-
   @Override
   public String getUserIdByExternalId(
       String extId, String provider, String idType, RequestContext context) {
@@ -61,6 +47,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   @Override
   public List<Map<String, String>> getUserExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    // todo change to getRecordByPrimary key
     Response response =
         cassandraOperation.getRecordsByIndexedProperty(
             JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId, context);

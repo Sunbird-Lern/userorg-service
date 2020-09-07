@@ -772,6 +772,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     logger.info(context, mf.format(new Object[] {operation, startTime, stopTime, elapsedTime}));
   }
 
+  // todo overload this method, getRecordsByIndexedProperty -> getRecordsById or PrimaryKey
   @Override
   public Response getRecordsByIndexedProperty(
       String keyspaceName,

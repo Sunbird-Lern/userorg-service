@@ -20,10 +20,7 @@ public interface UserService {
   Map<String, Object> esGetPrivateUserProfileById(String userId, RequestContext context);
 
   void syncUserProfile(
-      String userId,
-      Map<String, Object> userDataMap,
-      Map<String, Object> userPrivateDataMap,
-      RequestContext context);
+      String userId, Map<String, Object> userDataMap, Map<String, Object> userPrivateDataMap, RequestContext context);
 
   String getRootOrgIdFromChannel(String channel, RequestContext context);
 
@@ -37,9 +34,7 @@ public interface UserService {
       String name, List<String> excludedUsernames, RequestContext context);
 
   List<String> getEncryptedList(List<String> dataList, RequestContext context);
-
-  boolean checkUsernameUniqueness(String username, boolean isEncrypted, RequestContext context);
-
+  
   String getCustodianOrgId(ActorRef actorRef, RequestContext context);
 
   Map<String, Object> fetchEncryptedToken(
