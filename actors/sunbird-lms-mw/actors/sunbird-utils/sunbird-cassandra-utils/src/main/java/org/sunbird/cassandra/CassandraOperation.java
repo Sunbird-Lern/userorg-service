@@ -179,6 +179,17 @@ public interface CassandraOperation {
   public Response getAllRecords(String keyspaceName, String tableName, RequestContext context);
 
   /**
+   * @desc This method is used to fetch all records for table(i.e Select * from tableName)
+   * @param keyspaceName String (data base keyspace name)
+   * @param tableName String
+   * @param context
+   * @param fields List of columns to be returned in each record
+   * @return Response Response
+   */
+  public Response getAllRecords(String keyspaceName, String tableName, List<String> fields, RequestContext context);
+
+
+  /**
    * Method to update the record on basis of composite primary key.
    *
    * @param keyspaceName Keyspace name
@@ -253,6 +264,12 @@ public interface CassandraOperation {
       List<String> fields,
       RequestContext context);
 
+   Response getRecordById(
+          String keyspaceName,
+          String tableName,
+          String key,
+          String keyColumnName,
+          RequestContext context);
   /**
    * Method to get record by primary key consisting of only specified fields (return all if null).
    *

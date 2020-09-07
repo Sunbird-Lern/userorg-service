@@ -253,8 +253,8 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     Map<String, Object> properties = new HashMap<>();
     properties.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
+        cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, userId, JsonKey.USER_ID_LOWERCASE, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
