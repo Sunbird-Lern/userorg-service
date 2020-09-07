@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -50,6 +51,7 @@ public class UserLookupTest {
     private static Response response;
     public static CassandraOperation cassandraOperation;
     private static User user;
+    private static EncryptionService encryptionService;
 
     public void beforeEachTest() {
         PowerMockito.mockStatic(DataCacheHandler.class);
@@ -57,7 +59,10 @@ public class UserLookupTest {
         settingMap.put(JsonKey.PHONE_UNIQUE, "True");
         settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
         when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
-
+        encryptionService = PowerMockito.mock(EncryptionService.class);
+        when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+                .getEncryptionServiceInstance(null))
+                .thenReturn(encryptionService);
         PowerMockito.mockStatic(ServiceFactory.class);
         cassandraOperation = mock(CassandraOperationImpl.class);
         when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
