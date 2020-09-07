@@ -273,17 +273,6 @@ public class UserUtil {
     return externalIds.stream().map(s -> mapper.convertToLowerCase(s)).collect(Collectors.toList());
   }
 
-  public static String encryptData(String value) {
-    try {
-      return encryptionService.encryptData(value, null);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-  }
-
   public static boolean updatePassword(Map<String, Object> userMap, RequestContext context) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PASSWORD))) {
       return ssoManager.updatePassword(
