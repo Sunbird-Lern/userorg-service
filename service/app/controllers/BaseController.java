@@ -358,7 +358,7 @@ public class BaseController extends Controller {
     } catch (Exception e) {
       value = "0.0";
     }
-    // logTelemetry(response, request);
+    logTelemetry(response, request);
     return Results.ok(Json.toJson(response))
         .withHeader(HeaderParam.X_Response_Length.getName(), value);
   }
@@ -629,7 +629,7 @@ public class BaseController extends Controller {
               logger.info(request.getRequestContext(), "actorResponseHandler:got exception");
               return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
             } else if (result instanceof File) {
-              // logTelemetry(response, httpReq);
+              logTelemetry(response, httpReq);
               return createFileDownloadResponse((File) result);
             } else {
               if (StringUtils.isNotEmpty((String) response.getResult().get(JsonKey.MESSAGE))
