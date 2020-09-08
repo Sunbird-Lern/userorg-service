@@ -165,8 +165,10 @@ public class UserProfileReadActorTest {
   @Test
   public void testGetUserProfileV3SuccessWithFieldDeclaration() {
     Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.DECLARATIONS);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, VALID_USER_ID, JsonKey.USER_ID_LOWERCASE, null))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -192,8 +194,10 @@ public class UserProfileReadActorTest {
             Mockito.anyString(),
             Mockito.any()))
         .thenReturn(response1);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, VALID_USER_ID, JsonKey.USER_ID_LOWERCASE, null))
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);

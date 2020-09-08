@@ -32,7 +32,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     externalIdReq.put(JsonKey.ID_TYPE, idType.toLowerCase());
     externalIdReq.put(JsonKey.EXTERNAL_ID, extId.toLowerCase());
     Response response =
-        cassandraOperation.getRecordsByKeys(
+        cassandraOperation.getRecordsByProperties(
             usrDbInfo.getKeySpace(), JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, context);
 
     List<Map<String, Object>> userRecordList =
@@ -47,9 +47,10 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   @Override
   public List<Map<String, String>> getUserExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, userId, JsonKey.USER_ID_LOWERCASE, context);
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -60,9 +61,11 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   public List<Map<String, Object>> getUserSelfDeclaredDetails(
       String userId, RequestContext context) {
     List<Map<String, Object>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, userId, JsonKey.USER_ID_LOWERCASE, context);
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }

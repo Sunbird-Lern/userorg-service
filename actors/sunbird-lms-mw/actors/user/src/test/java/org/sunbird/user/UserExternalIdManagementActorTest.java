@@ -83,8 +83,7 @@ public class UserExternalIdManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
+            Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraRecordsByIndexedProperty());
     cassandraOperation.deleteRecord(

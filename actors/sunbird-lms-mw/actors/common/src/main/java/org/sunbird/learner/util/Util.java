@@ -150,7 +150,7 @@ public final class Util {
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_V2, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference_v2"));
 
-    dbInfoMap.put(JsonKey.USER_LOOK_UP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
+    dbInfoMap.put(JsonKey.USER_LOOKUP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
   }
 
   /**
@@ -666,7 +666,7 @@ public final class Util {
     map.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     Response response =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByPropertiesWithFiltering(
             usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map, context);
     List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (!resList.isEmpty()) {

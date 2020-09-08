@@ -302,7 +302,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
       map.put(JsonKey.EXTERNAL_ID, ((String) req.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
       map.put(JsonKey.PROVIDER, ((String) req.get(JsonKey.ORG_PROVIDER)).toLowerCase());
       response =
-          cassandraOperation.getRecordsByProperties(
+          cassandraOperation.getRecordsByPropertiesWithFiltering(
               orgDb.getKeySpace(), orgDb.getTableName(), map, context);
     }
     List<Map<String, Object>> responseList =

@@ -86,7 +86,7 @@ public class OrgManagementActorTest {
             Mockito.anyString(),
             Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
     when(cassandraOperation.insertRecord(
@@ -208,7 +208,7 @@ public class OrgManagementActorTest {
 
   @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserExtId() {
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
 
@@ -242,7 +242,7 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -267,7 +267,7 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();

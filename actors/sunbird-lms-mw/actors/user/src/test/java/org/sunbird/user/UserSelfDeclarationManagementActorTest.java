@@ -83,7 +83,7 @@ public class UserSelfDeclarationManagementActorTest {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(cassandraInsertRecord());
-    when(cassandraOperation.getRecordsByKeys(
+    when(cassandraOperation.getRecordsByProperties(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyMap(),

@@ -156,8 +156,8 @@ public class EsSyncBackgroundActor extends BaseActor {
   private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
     if (CollectionUtils.isEmpty(objectIds)) {
       Response response =
-          cassandraOperation.getRecordsByProperties(
-              JsonKey.SUNBIRD, JsonKey.USER, null, Arrays.asList(JsonKey.ID), context);
+          cassandraOperation.getAllRecords(
+              JsonKey.SUNBIRD, JsonKey.USER, Arrays.asList(JsonKey.ID), context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       objectIds = responseList.stream().map(i -> i.get(JsonKey.ID)).collect(Collectors.toList());

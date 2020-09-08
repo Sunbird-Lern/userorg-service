@@ -80,7 +80,7 @@ public class FeedServiceImplTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordsByPropertiesWithFiltering(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(response);
 

@@ -207,7 +207,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     propertiesMap.put("userExtId", userExtId);
     Map<String, Object> result = new HashMap<>();
     Response response =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByPropertiesWithFiltering(
             JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((Map) ((List) response.getResult().get(JsonKey.RESPONSE)).get(0));

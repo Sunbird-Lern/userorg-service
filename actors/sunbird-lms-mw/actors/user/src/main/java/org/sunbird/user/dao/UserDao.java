@@ -58,11 +58,4 @@ public interface UserDao {
    * @return User User Details.
    */
   User getUserById(String userId, RequestContext context);
-
-  /**
-   * @param propertyMap Map of user property and its value
-   * @param context
-   * @return List<User> List of user.
-   */
-  List<User> getUsersByProperties(Map<String, Object> propertyMap, RequestContext context);
 }

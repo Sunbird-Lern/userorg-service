@@ -192,12 +192,12 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getRecordsByProperties(
+  public Response getRecordsByPropertiesWithFiltering(
       String keyspaceName,
       String tableName,
       Map<String, Object> propertyMap,
       RequestContext context) {
-    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, context);
+    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, true, context);
   }
 
   @Override
@@ -206,6 +206,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> propertyMap,
       List<String> fields,
+      boolean allowFilter,
       RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(
@@ -237,7 +238,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           }
         }
       }
-      selectQuery = selectQuery.allowFiltering();
+      if (allowFilter) {
+        selectQuery = selectQuery.allowFiltering();
+      }
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
@@ -256,53 +259,13 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getRecordsByKeys(
-          String keyspaceName,
-          String tableName,
-          Map<String, Object> propertyMap,
-          RequestContext context) {
-    long startTime = System.currentTimeMillis();
-    logger.info(
-            context, "Cassandra Service getRecordsByKeys method started at ==" + startTime);
-    Response response;
-    Select selectQuery = null;
-    try {
-      Builder selectBuilder;
-        selectBuilder = QueryBuilder.select().all();
-      selectQuery = selectBuilder.from(keyspaceName, tableName);
-      if (MapUtils.isNotEmpty(propertyMap)) {
-        Where selectWhere = selectQuery.where();
-        for (Entry<String, Object> entry : propertyMap.entrySet()) {
-          if (entry.getValue() instanceof List) {
-            List<Object> list = (List) entry.getValue();
-            if (null != list) {
-              Object[] propertyValues = list.toArray(new Object[list.size()]);
-              Clause clause = QueryBuilder.in(entry.getKey(), propertyValues);
-              selectWhere.and(clause);
-            }
-          } else {
-            Clause clause = eq(entry.getKey(), entry.getValue());
-            selectWhere.and(clause);
-          }
-        }
-      }
-      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-      response = CassandraUtil.createResponse(results);
-    } catch (Exception e) {
-      logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-      throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-    } finally {
-      if (null != selectQuery) {
-        logQueryElapseTime(
-                "getRecordsByKeys", startTime, selectQuery.getQueryString(), context);
-      }
-    }
-    return response;
+  public Response getRecordsByProperties(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      RequestContext context) {
+    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, false, context);
   }
-
 
   @Override
   public Response getPropertiesValueById(
@@ -362,7 +325,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getAllRecords(String keyspaceName, String tableName, List<String> fields, RequestContext context) {
+  public Response getAllRecords(
+      String keyspaceName, String tableName, List<String> fields, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service getAllRecords method started at ==" + startTime);
     Response response;
@@ -381,9 +345,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != selectQuery) {
         logQueryElapseTime("getAllRecords", startTime, selectQuery.getQueryString(), context);
@@ -492,7 +456,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName,
       String tableName,
       Object key,
-      String keyColumnName,
       List<String> fields,
       RequestContext context) {
     long startTime = System.currentTimeMillis();
@@ -510,11 +473,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       Select selectQuery = selectBuilder.from(keyspaceName, tableName);
       Where selectWhere = selectQuery.where();
       if (key instanceof String) {
-        if(StringUtils.isNotEmpty(keyColumnName)){
-          selectWhere.and(eq(keyColumnName, key));
-        } else {
-          selectWhere.and(eq(Constants.IDENTIFIER, key));
-        }
+        selectWhere.and(eq(Constants.IDENTIFIER, key));
       } else if (key instanceof Map) {
         Map<String, Object> compositeKey = (Map<String, Object>) key;
         compositeKey
@@ -546,13 +505,13 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   @Override
   public Response getRecordById(
       String keyspaceName, String tableName, String key, RequestContext context) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, null,null, context);
+    return getRecordByIdentifier(keyspaceName, tableName, key, null, context);
   }
 
   @Override
   public Response getRecordById(
       String keyspaceName, String tableName, Map<String, Object> key, RequestContext context) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, null,null, context);
+    return getRecordByIdentifier(keyspaceName, tableName, key, null, context);
   }
 
   @Override
@@ -562,19 +521,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String key,
       List<String> fields,
       RequestContext context) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, null, fields, context);
+    return getRecordByIdentifier(keyspaceName, tableName, key, fields, context);
   }
-
-  @Override
-  public Response getRecordById(
-          String keyspaceName,
-          String tableName,
-          String key,
-          String keyColumnName,
-          RequestContext context) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, keyColumnName, null, context);
-  }
-
 
   @Override
   public Response getRecordById(
@@ -583,7 +531,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       Map<String, Object> key,
       List<String> fields,
       RequestContext context) {
-    return getRecordByIdentifier(keyspaceName, tableName, key, null,fields, context);
+    return getRecordByIdentifier(keyspaceName, tableName, key, fields, context);
   }
 
   @Override

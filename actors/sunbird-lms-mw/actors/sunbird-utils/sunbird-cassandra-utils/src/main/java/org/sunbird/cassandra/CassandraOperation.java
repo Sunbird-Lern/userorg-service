@@ -129,7 +129,7 @@ public interface CassandraOperation {
    * @param context
    * @return Response Response
    */
-  public Response getRecordsByProperties(
+  public Response getRecordsByPropertiesWithFiltering(
       String keyspaceName,
       String tableName,
       Map<String, Object> propertyMap,
@@ -143,6 +143,7 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param propertyMap Map describing columns to be used in where clause of select query.
    * @param fields List of columns to be returned in each record
+   * @param allowFiltering
    * @param context
    * @return Response consisting of fetched records
    */
@@ -151,6 +152,22 @@ public interface CassandraOperation {
       String tableName,
       Map<String, Object> propertyMap,
       List<String> fields,
+      boolean allowFiltering,
+      RequestContext context);
+
+  /**
+   * @desc This method is used to fetch record based on given parameter list and their values
+   *     pairs). without using allow filtering
+   * @param keyspaceName
+   * @param tableName
+   * @param propertyMap
+   * @param context
+   * @return
+   */
+  Response getRecordsByProperties(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
       RequestContext context);
 
   /**
@@ -186,8 +203,8 @@ public interface CassandraOperation {
    * @param fields List of columns to be returned in each record
    * @return Response Response
    */
-  public Response getAllRecords(String keyspaceName, String tableName, List<String> fields, RequestContext context);
-
+  public Response getAllRecords(
+      String keyspaceName, String tableName, List<String> fields, RequestContext context);
 
   /**
    * Method to update the record on basis of composite primary key.
@@ -264,12 +281,6 @@ public interface CassandraOperation {
       List<String> fields,
       RequestContext context);
 
-   Response getRecordById(
-          String keyspaceName,
-          String tableName,
-          String key,
-          String keyColumnName,
-          RequestContext context);
   /**
    * Method to get record by primary key consisting of only specified fields (return all if null).
    *
@@ -374,13 +385,6 @@ public interface CassandraOperation {
       List<String> primaryKeys,
       String primaryKeyColumnName,
       RequestContext context);
-
-
-  Response getRecordsByKeys(
-          String keyspaceName,
-          String tableName,
-          Map<String, Object> propertyMap,
-          RequestContext context);
 
   /**
    * Insert record with TTL expiration

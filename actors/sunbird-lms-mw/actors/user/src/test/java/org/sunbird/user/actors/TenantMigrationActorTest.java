@@ -102,7 +102,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordsByPropertiesWithFiltering(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
@@ -288,7 +288,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
             cassandraOperation.getRecordById(
-                Mockito.any(), Mockito.any(), Mockito.anyString(),Mockito.anyString(), Mockito.any()))
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
     boolean result =
         testScenario(
@@ -304,7 +304,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
             cassandraOperation.getRecordById(
-                    Mockito.any(), Mockito.any(), Mockito.anyString(),Mockito.anyString(), Mockito.any()))
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSelfDeclarationResponse());
     Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");

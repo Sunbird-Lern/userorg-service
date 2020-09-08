@@ -74,13 +74,13 @@ public class UserUtilTest {
     reqMap.put(JsonKey.TYPE, JsonKey.EMAIL);
     reqMap.put(JsonKey.VALUE, "test@test.com");
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_LOOK_UP, reqMap, null))
+            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMap, null))
         .thenReturn(response);
     Map<String, Object> reqMapPhone = new HashMap<>();
     reqMap.put(JsonKey.TYPE, JsonKey.PHONE);
     reqMap.put(JsonKey.VALUE, "9663890400");
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_LOOK_UP, reqMapPhone, null))
+            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMapPhone, null))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 

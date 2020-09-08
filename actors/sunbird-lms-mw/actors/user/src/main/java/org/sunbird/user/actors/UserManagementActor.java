@@ -842,8 +842,10 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isEmpty(managedBy)) {
       UserLookUp userLookUp = new UserLookUp();
       // check phone and uniqueness using user look table
-      userLookUp.checkPhoneUniqueness((String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      userLookUp.checkEmailUniqueness((String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
+      userLookUp.checkPhoneUniqueness(
+          (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
+      userLookUp.checkEmailUniqueness(
+          (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
       String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
@@ -890,8 +892,8 @@ public class UserManagementActor extends BaseActor {
             usrDbInfo.getTableName(),
             userMap,
             actorMessage.getRequestContext());
-      insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
-      response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
+    response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
       Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
@@ -1025,7 +1027,7 @@ public class UserManagementActor extends BaseActor {
               .orElse(null);
       if (MapUtils.isNotEmpty(externalId)) {
         lookUp = new HashMap<>();
-        lookUp.put(JsonKey.TYPE, JsonKey.EXTERNAL_ID_LOWER_CASE);
+        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
         lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
         // provider is the orgId, not the channel
         lookUp.put(
@@ -1035,7 +1037,7 @@ public class UserManagementActor extends BaseActor {
     }
     if (userMap.get(JsonKey.USERNAME) != null) {
       lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.USER_NAME_LOWER_CASE);
+      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
       lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
       lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
       list.add(lookUp);
@@ -1097,8 +1099,8 @@ public class UserManagementActor extends BaseActor {
               usrDbInfo.getTableName(),
               requestMap,
               request.getRequestContext());
-        insertIntoUserLookUp(userLookUpData, request.getRequestContext());
-        isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
+      insertIntoUserLookUp(userLookUpData, request.getRequestContext());
+      isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
     } finally {
       if (response == null) {

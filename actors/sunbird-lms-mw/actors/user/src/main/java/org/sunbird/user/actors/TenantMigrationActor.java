@@ -111,7 +111,7 @@ public class TenantMigrationActor extends BaseActor {
         cassandraOperation.getRecordById(
             usrDecDbInfo.getKeySpace(),
             usrDecDbInfo.getTableName(),
-            userId, JsonKey.USER_ID_LOWERCASE,
+            compositeKeyMap,
             request.getRequestContext());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
@@ -388,10 +388,11 @@ public class TenantMigrationActor extends BaseActor {
               interServiceCommunication.getResponse(
                   getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue()),
                   userequest);
-        UserLookUp userLookUp = new UserLookUp();
-        userLookUp.insertExternalIdIntoUserLookup(
-                (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
-                (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.insertExternalIdIntoUserLookup(
+          (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
+          (String) request.getRequest().get(JsonKey.USER_ID),
+          request.getRequestContext());
       logger.info(
           request.getRequestContext(),
           "TenantMigrationActor:updateUserExternalIds user externalIds got updated.");
