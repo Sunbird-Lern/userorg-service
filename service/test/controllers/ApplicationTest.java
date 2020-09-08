@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import modules.OnRequestHandler;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -14,7 +15,7 @@ import play.mvc.Result;
  * Simple (JUnit) tests that can call all parts of a play app. If you are interested in mocking a
  * whole application, see the wiki for more details. extends WithApplication
  */
-@PrepareForTest({OnRequestHandler.class})
+@PrepareForTest({SunbirdMWService.class, OnRequestHandler.class})
 public class ApplicationTest {
 
   @Test
