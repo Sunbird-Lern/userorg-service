@@ -11,10 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.auth.verifier.ManagedTokenValidator;
+import org.sunbird.auth.verifier.AccessTokenValidator;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.request.HeaderParam;
 import play.mvc.Http;
 
@@ -25,6 +24,7 @@ import play.mvc.Http;
  */
 public class RequestInterceptor {
 
+  private static LoggerUtil logger = new LoggerUtil(RequestInterceptor.class);
   public static List<String> restrictedUriList = null;
   private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
 
@@ -115,12 +115,12 @@ public class RequestInterceptor {
         try {
           requestedForUserID = UUID.fromString(uuidSegment).toString();
         } catch (IllegalArgumentException iae) {
-          ProjectLogger.log("Perhaps this is another API, like search that doesn't carry user id.");
+          logger.error("Perhaps this is another API, like search that doesn't carry user id.", iae);
         }
       }
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage() + e.getStackTrace());
-      ProjectLogger.log("Likely a possibility? " + request.uri(), LoggerEnum.INFO.name());
+      logger.error(e.getMessage(), e);
+      logger.error("Likely a possibility? " + request.uri(), e);
     }
     return requestedForUserID;
   }
@@ -140,13 +140,10 @@ public class RequestInterceptor {
     String clientId = JsonKey.UNAUTHORIZED;
     String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
-    Optional<String> authClientToken =
-        request.header(HeaderParam.X_Authenticated_Client_Token.getName());
-    Optional<String> authClientId = request.header(HeaderParam.X_Authenticated_Client_Id.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
-        clientId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+        clientId = AccessTokenValidator.verifyUserToken(accessToken.get());
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
@@ -157,7 +154,8 @@ public class RequestInterceptor {
             String managedAccessToken = forTokenHeader.isPresent() ? forTokenHeader.get() : "";
             if (StringUtils.isNotEmpty(managedAccessToken)) {
               String managedFor =
-                  ManagedTokenValidator.verify(managedAccessToken, clientId, requestedForUserID);
+                  AccessTokenValidator.verifyManagedUserToken(
+                      managedAccessToken, clientId, requestedForUserID);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 managedForId = managedFor;
               } else {
@@ -165,30 +163,22 @@ public class RequestInterceptor {
               }
             }
           } else {
-            ProjectLogger.log("Ignoring x-authenticated-for token...", LoggerEnum.INFO.name());
+            logger.info("Ignoring x-authenticated-for token...");
           }
         }
         userAuthentication.put(JsonKey.USER_ID, clientId);
         userAuthentication.put(JsonKey.MANAGED_FOR, managedForId);
-      } else if (authClientToken.isPresent() && authClientId.isPresent()) {
-        // Client token is present
-        clientId =
-            AuthenticationHelper.verifyClientAccessToken(authClientId.get(), authClientToken.get());
-        if (!JsonKey.UNAUTHORIZED.equals(clientId)) {
-          userAuthentication.put(JsonKey.AUTH_WITH_MASTER_KEY, Boolean.toString(true));
-        }
       }
-      userAuthentication.put(JsonKey.USER_ID, clientId);
     } else {
       if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
         try {
-          clientAccessTokenId = AuthenticationHelper.verifyUserAccesToken(accessToken.get());
+          clientAccessTokenId = AccessTokenValidator.verifyUserToken(accessToken.get());
           if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }
         } catch (Exception ex) {
-          ProjectLogger.log(ex.getMessage(), ex);
+          logger.error(ex.getMessage(), ex);
           clientAccessTokenId = null;
         }
         userAuthentication.put(
