@@ -39,8 +39,8 @@ node('build-slave') {
                 sh 'mvn clean install -U -DskipTests=true '
 
             }
-            stage('Unit Tests') {	
-                sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"	
+            stage('Unit Tests') {
+                sh "mvn test '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
             }
             stage('Package') {
                 dir('service') {
