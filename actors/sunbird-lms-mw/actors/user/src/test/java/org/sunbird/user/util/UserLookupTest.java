@@ -25,7 +25,6 @@ import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 
 @RunWith(PowerMockRunner.class)
@@ -56,9 +55,6 @@ public class UserLookupTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(new Response());
 
     List<Map<String, String>> externalIds = new ArrayList<>();
     Map<String, String> externalIdReqMap = new HashMap<>();
@@ -224,28 +220,5 @@ public class UserLookupTest {
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }
-  }
-
-  @Test
-  public void insertExternalIdIntoUserLookup() {
-    Response response = new Response();
-    response.put(JsonKey.SUCCESS, "success");
-    Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-    map.put(JsonKey.USER_ID, "someUserId2");
-    map.put(JsonKey.VALUE, "extid1e2d@channel1003");
-    when(cassandraOperation.insertRecord(
-            userLookUp.getKeySpace(), userLookUp.getTableName(), map, null))
-        .thenReturn(new Response());
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.PROVIDER, "channel1003");
-    req.put(JsonKey.ID_TYPE, "channel1003");
-    req.put(JsonKey.ID, "extid1e2d");
-    list.add(req);
-    Response response1 = new UserLookUp().insertExternalIdIntoUserLookup(list, "someUserId2", null);
-    System.out.println(response1);
-    assertNotNull(response1);
   }
 }
