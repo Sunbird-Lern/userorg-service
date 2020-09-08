@@ -302,26 +302,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getAllRecords(String keyspaceName, String tableName, RequestContext context) {
-    long startTime = System.currentTimeMillis();
-    logger.info(context, "Cassandra Service getAllRecords method started at ==" + startTime);
-    Response response;
-    Select selectQuery = null;
-    try {
-      selectQuery = QueryBuilder.select().all().from(keyspaceName, tableName);
-      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-      response = CassandraUtil.createResponse(results);
-    } catch (Exception e) {
-      logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    } finally {
-      if (null != selectQuery) {
-        logQueryElapseTime("getAllRecords", startTime, selectQuery.getQueryString(), context);
-      }
-    }
-    return response;
+    return getAllRecords(keyspaceName, tableName, null, context);
   }
 
   @Override
