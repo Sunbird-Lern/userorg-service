@@ -22,7 +22,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -50,14 +49,11 @@ public class SearchHandlerActorTest {
 
   private static ActorSystem system;
   private static final Props props = Props.create(SearchHandlerActor.class);
-  private static CassandraOperationImpl cassandraOperation;
   private static ElasticSearchService esService;
 
   @BeforeClass
   public static void setUp() {
     system = ActorSystem.create("system");
-    PowerMockito.mockStatic(ServiceFactory.class);
-    cassandraOperation = mock(CassandraOperationImpl.class);
   }
 
   @Before
@@ -70,28 +66,6 @@ public class SearchHandlerActorTest {
     when(esService.search(
             Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
-
-    PowerMockito.mockStatic(ServiceFactory.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.anyList(),
-            Mockito.any()))
-        .thenReturn(getRecordByPropertyResponse());
-  }
-
-  private static Response getRecordByPropertyResponse() {
-
-    Response response = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> courseMap = new HashMap<>();
-    courseMap.put(JsonKey.ACTIVE, true);
-    courseMap.put(JsonKey.USER_ID, "anyUserId");
-    list.add(courseMap);
-    response.put(JsonKey.RESPONSE, list);
-    return response;
   }
 
   private static Map<String, Object> createResponseGet(boolean isResponseRequired) {

@@ -684,6 +684,10 @@ public final class JsonKey {
   public static final String X_APP_VERSION = "x-app-ver";
   public static final String X_TRACE_ENABLED = "x-trace-enabled";
   public static final String X_REQUEST_ID = "x-request-id";
+  public static final String USER_LOOKUP = "user_lookup";
+  // this fields are being stored in type column in user_lookup table
+  public static final String USER_LOOKUP_FILED_USER_NAME = "username";
+  public static final String USER_LOOKUP_FILED_EXTERNAL_ID = "externalid";
 
   private JsonKey() {}
 }

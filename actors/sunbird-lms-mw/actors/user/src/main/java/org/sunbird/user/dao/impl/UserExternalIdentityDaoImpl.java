@@ -23,20 +23,6 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
-  /*  @Override
-  public String getUserId(Request reqObj) {
-
-    if (StringUtils.isBlank(userId)) {
-      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
-      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-
-      userId = getUserIdByExternalId(extId, provider, idType);
-    }
-
-    return userId;
-  }*/
-
   @Override
   public String getUserIdByExternalId(
       String extId, String provider, String idType, RequestContext context) {
@@ -61,9 +47,10 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   @Override
   public List<Map<String, String>> getUserExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId, context);
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -74,9 +61,11 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   public List<Map<String, Object>> getUserSelfDeclaredDetails(
       String userId, RequestContext context) {
     List<Map<String, Object>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, JsonKey.USER_ID, userId, context);
+        cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }

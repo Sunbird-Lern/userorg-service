@@ -192,12 +192,12 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getRecordsByProperties(
+  public Response getRecordsByPropertiesWithFiltering(
       String keyspaceName,
       String tableName,
       Map<String, Object> propertyMap,
       RequestContext context) {
-    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, context);
+    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, true, context);
   }
 
   @Override
@@ -206,6 +206,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> propertyMap,
       List<String> fields,
+      boolean allowFilter,
       RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(
@@ -237,7 +238,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           }
         }
       }
-      selectQuery = selectQuery.allowFiltering();
+      if (allowFilter) {
+        selectQuery = selectQuery.allowFiltering();
+      }
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
@@ -253,6 +256,15 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
     }
     return response;
+  }
+
+  @Override
+  public Response getRecordsByProperties(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      RequestContext context) {
+    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, false, context);
   }
 
   @Override
@@ -290,12 +302,25 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
 
   @Override
   public Response getAllRecords(String keyspaceName, String tableName, RequestContext context) {
+    return getAllRecords(keyspaceName, tableName, null, context);
+  }
+
+  @Override
+  public Response getAllRecords(
+      String keyspaceName, String tableName, List<String> fields, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service getAllRecords method started at ==" + startTime);
     Response response;
     Select selectQuery = null;
     try {
-      selectQuery = QueryBuilder.select().all().from(keyspaceName, tableName);
+      Builder selectBuilder;
+      if (CollectionUtils.isNotEmpty(fields)) {
+        String[] dbFields = fields.toArray(new String[fields.size()]);
+        selectBuilder = QueryBuilder.select(dbFields);
+      } else {
+        selectBuilder = QueryBuilder.select().all();
+      }
+      selectQuery = selectBuilder.from(keyspaceName, tableName);
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
@@ -772,6 +797,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     logger.info(context, mf.format(new Object[] {operation, startTime, stopTime, elapsedTime}));
   }
 
+  // todo overload this method, getRecordsByIndexedProperty -> getRecordsById or PrimaryKey
   @Override
   public Response getRecordsByIndexedProperty(
       String keyspaceName,

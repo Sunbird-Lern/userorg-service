@@ -89,7 +89,7 @@ public class FeedUtilTest {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordsByPropertiesWithFiltering(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(response);
     Response upsertResponse = new Response();

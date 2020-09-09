@@ -161,13 +161,10 @@ public class UserExternalIdManagementActor extends BaseActor {
 
   private List<Map<String, String>> getUserExternalIds(Map<String, Object> requestMap) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD,
-            JsonKey.USR_EXT_IDNT_TABLE,
-            JsonKey.USER_ID,
-            requestMap.get(JsonKey.USER_ID),
-            null);
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, null);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }

@@ -12,12 +12,10 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -25,10 +23,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
@@ -44,10 +40,8 @@ public class UserServiceImpl implements UserService {
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -330,34 +324,6 @@ public class UserServiceImpl implements UserService {
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
 
     return (List<Map<String, Object>>) esResult.get(JsonKey.CONTENT);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public boolean checkUsernameUniqueness(
-      String username, boolean isEncrypted, RequestContext context) {
-    try {
-      if (!isEncrypted) username = encryptionService.encryptData(username, context);
-    } catch (Exception e) {
-      logger.error(
-          context,
-          "UserServiceImpl:checkUsernameUniqueness: Exception occurred with error message = "
-              + e.getMessage(),
-          e);
-      ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError);
-    }
-
-    Response result =
-        cassandraOperation.getRecordsByIndexedProperty(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), JsonKey.USERNAME, username, context);
-
-    List<Map<String, Object>> userMapList =
-        (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-
-    if (CollectionUtils.isNotEmpty(userMapList)) {
-      return false;
-    }
-    return true;
   }
 
   @Override

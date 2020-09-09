@@ -345,11 +345,11 @@ public class UserProfileReadActor extends BaseActor {
    * @return
    */
   private List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
-    Map<String, Object> propertyMap = new HashMap<>();
-    propertyMap.put(JsonKey.USER_ID, userId);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, context);
+        cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, context);
     List<Map<String, Object>> resExternalIds;
     List<Map<String, Object>> finalRes = new ArrayList<>();
     if (null != response && null != response.getResult()) {

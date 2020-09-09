@@ -165,10 +165,10 @@ public class UserProfileReadActorTest {
   @Test
   public void testGetUserProfileV3SuccessWithFieldDeclaration() {
     Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.DECLARATIONS);
-    Map<String, Object> propertyMap = new HashMap<>();
-    propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
-    when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -184,8 +184,6 @@ public class UserProfileReadActorTest {
                 .concat(JsonKey.EXTERNAL_IDS)
                 .concat(",")
                 .concat(JsonKey.TOPIC));
-    Map<String, Object> propertyMap = new HashMap<>();
-    propertyMap.put(JsonKey.USER_ID, VALID_USER_ID);
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     response1.getResult().put(JsonKey.RESPONSE, responseList);
@@ -196,8 +194,10 @@ public class UserProfileReadActorTest {
             Mockito.anyString(),
             Mockito.any()))
         .thenReturn(response1);
-    when(cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, propertyMap, null))
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);

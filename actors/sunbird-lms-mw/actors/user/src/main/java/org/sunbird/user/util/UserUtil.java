@@ -22,14 +22,11 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.SocialMediaType;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.learner.util.Util.DbInfo;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
@@ -46,7 +43,6 @@ public class UserUtil {
   private static EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private static DbInfo userDb = Util.dbInfoMap.get(JsonKey.USER_DB);
   private static ObjectMapper mapper = new ObjectMapper();
   private static SSOManager ssoManager = SSOServiceFactory.getInstance();
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
@@ -71,82 +67,6 @@ public class UserUtil {
   private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
 
   private UserUtil() {}
-
-  @SuppressWarnings("unchecked")
-  public static void checkPhoneUniqueness(User user, String opType, RequestContext context) {
-    // Get Phone configuration if not found , by default phone will be unique across
-    // the application
-    String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);
-    if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
-      String phone = user.getPhone();
-      if (StringUtils.isNotBlank(phone)) {
-        try {
-          phone = encryptionService.encryptData(phone, context);
-        } catch (Exception e) {
-          logger.error(context, "Exception occurred while encrypting phone number ", e);
-        }
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, context);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
-          } else {
-            Map<String, Object> userMap = userMapList.get(0);
-            if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
-              ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public static void checkPhoneUniqueness(String phone, RequestContext context) {
-    // Get Phone configuration if not found , by default phone will be unique across
-    // the application
-    String phoneSetting = DataCacheHandler.getConfigSettings().get(JsonKey.PHONE_UNIQUE);
-    if (StringUtils.isNotBlank(phoneSetting) && Boolean.parseBoolean(phoneSetting)) {
-      if (StringUtils.isNotBlank(phone)) {
-        try {
-          phone = encryptionService.encryptData(phone, context);
-        } catch (Exception e) {
-          logger.error(context, "Exception occurred while encrypting phone number ", e);
-        }
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.PHONE), phone, context);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
-        }
-      }
-    }
-  }
-
-  public static boolean identifierExists(String type, String value, RequestContext context) {
-
-    if (StringUtils.isNotBlank(value)) {
-      try {
-        value = encryptionService.encryptData(value, context);
-      } catch (Exception e) {
-        logger.error(context, "Exception occurred while encrypting email/phone", e);
-      }
-      Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
-              userDb.getKeySpace(), userDb.getTableName(), type, value, context);
-      @SuppressWarnings("unchecked")
-      List<Map<String, Object>> userMapList =
-          (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      return !userMapList.isEmpty();
-    } else {
-      return false;
-    }
-  }
 
   // Update channel info with orgId info
   public static void updateExternalIdsProviderWithOrgId(
@@ -183,30 +103,6 @@ public class UserUtil {
             externalId.put(JsonKey.ID_TYPE, orgId);
           }
           externalId.put(JsonKey.PROVIDER, orgId);
-        }
-      }
-    }
-  }
-
-  public static void checkEmailUniqueness(String email, RequestContext context) {
-    // Get Phone configuration if not found , by default phone will be unique across
-    // the application
-    String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
-    if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
-      if (StringUtils.isNotBlank(email)) {
-        try {
-          email = encryptionService.encryptData(email, context);
-        } catch (Exception e) {
-          logger.error(context, "Exception occurred while encrypting phone number ", e);
-        }
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, context);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.emailAlreadyExistError, null);
         }
       }
     }
@@ -301,41 +197,10 @@ public class UserUtil {
     return userId;
   }
 
-  @SuppressWarnings("unchecked")
-  public static void checkEmailUniqueness(User user, String opType, RequestContext context) {
-
-    String emailSetting = DataCacheHandler.getConfigSettings().get(JsonKey.EMAIL_UNIQUE);
-    if (StringUtils.isNotBlank(emailSetting) && Boolean.parseBoolean(emailSetting)) {
-      String email = user.getEmail();
-      if (StringUtils.isNotBlank(email)) {
-        try {
-          email = encryptionService.encryptData(email, context);
-        } catch (Exception e) {
-          logger.error(context, "Exception occurred while encrypting email:", e);
-        }
-        Response result =
-            cassandraOperation.getRecordsByIndexedProperty(
-                userDb.getKeySpace(), userDb.getTableName(), (JsonKey.EMAIL), email, context);
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-        if (!userMapList.isEmpty()) {
-          if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
-          } else {
-            Map<String, Object> userMap = userMapList.get(0);
-            if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
-              ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  public static void validateUserPhoneEmailAndWebPages(
-      User user, String operationType, RequestContext context) {
-    checkPhoneUniqueness(user, operationType, context);
-    checkEmailUniqueness(user, operationType, context);
+  public static void validateUserPhoneEmailAndWebPages(User user, String operationType, RequestContext context) {
+    UserLookUp userLookUp = new UserLookUp();
+    userLookUp.checkPhoneUniqueness(user, operationType, context);
+    userLookUp.checkEmailUniqueness(user, operationType, context);
     if (CollectionUtils.isNotEmpty(user.getWebPages())) {
       SocialMediaType.validateSocialMedia(user.getWebPages());
     }
@@ -408,97 +273,6 @@ public class UserUtil {
     return externalIds.stream().map(s -> mapper.convertToLowerCase(s)).collect(Collectors.toList());
   }
 
-  @SuppressWarnings("unchecked")
-  public static void checkExternalIdUniqueness(
-      User user, String operation, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
-      for (Map<String, String> externalId : user.getExternalIds()) {
-        if (StringUtils.isNotBlank(externalId.get(JsonKey.ID))
-            && StringUtils.isNotBlank(externalId.get(JsonKey.PROVIDER))
-            && StringUtils.isNotBlank(externalId.get(JsonKey.ID_TYPE))) {
-          Map<String, Object> externalIdReq = new HashMap<>();
-          externalIdReq.put(JsonKey.PROVIDER, externalId.get(JsonKey.PROVIDER));
-          externalIdReq.put(JsonKey.ID_TYPE, externalId.get(JsonKey.ID_TYPE));
-          externalIdReq.put(JsonKey.EXTERNAL_ID, externalId.get(JsonKey.ID));
-          Response response =
-              cassandraOperation.getRecordsByProperties(
-                  JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, externalIdReq, null);
-          List<Map<String, Object>> externalIdsRecord =
-              (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-          if (CollectionUtils.isNotEmpty(externalIdsRecord)) {
-            if (JsonKey.CREATE.equalsIgnoreCase(operation)) {
-              throwUserAlreadyExistsException(
-                  externalId.get(JsonKey.ID),
-                  externalId.get(JsonKey.ID_TYPE),
-                  externalId.get(JsonKey.PROVIDER));
-            } else if (JsonKey.UPDATE.equalsIgnoreCase(operation)) {
-              // If end user will try to add,edit or remove other user extIds throw exception
-              String userId = (String) externalIdsRecord.get(0).get(JsonKey.USER_ID);
-              if (!(user.getUserId().equalsIgnoreCase(userId))) {
-                if (JsonKey.ADD.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))
-                    || StringUtils.isBlank(externalId.get(JsonKey.OPERATION))) {
-                  throw new ProjectCommonException(
-                      ResponseCode.externalIdAssignedToOtherUser.getErrorCode(),
-                      ProjectUtil.formatMessage(
-                          ResponseCode.externalIdAssignedToOtherUser.getErrorMessage(),
-                          externalId.get(JsonKey.ID),
-                          externalId.get(JsonKey.ID_TYPE),
-                          externalId.get(JsonKey.PROVIDER)),
-                      ResponseCode.CLIENT_ERROR.getResponseCode());
-                } else {
-                  throwExternalIDNotFoundException(
-                      externalId.get(JsonKey.ID),
-                      externalId.get(JsonKey.ID_TYPE),
-                      externalId.get(JsonKey.PROVIDER));
-                }
-              }
-            }
-          } else {
-            // if user will try to delete non existing extIds
-            if (JsonKey.UPDATE.equalsIgnoreCase(operation)
-                && JsonKey.REMOVE.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))) {
-              throwExternalIDNotFoundException(
-                  externalId.get(JsonKey.ID),
-                  externalId.get(JsonKey.ID_TYPE),
-                  externalId.get(JsonKey.PROVIDER));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private static void throwUserAlreadyExistsException(
-      String externalId, String idType, String provider) {
-    throw new ProjectCommonException(
-        ResponseCode.userAlreadyExists.getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.userAlreadyExists.getErrorMessage(),
-            ProjectUtil.formatMessage(
-                ResponseMessage.Message.EXTERNAL_ID_FORMAT, externalId, idType, provider)),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
-  }
-
-  private static void throwExternalIDNotFoundException(
-      String externalId, String idType, String provider) {
-    throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound.getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
-  }
-
-  public static String encryptData(String value) {
-    try {
-      return encryptionService.encryptData(value, null);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-  }
-
   public static boolean updatePassword(Map<String, Object> userMap, RequestContext context) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PASSWORD))) {
       return ssoManager.updatePassword(
@@ -533,7 +307,7 @@ public class UserUtil {
     return requestMap;
   }
 
-  public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
+  public static void setUserDefaultValueForV3(Map<String, Object> userMap,  RequestContext context) {
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
     userMap.put(JsonKey.ROLES, roles);
@@ -554,7 +328,8 @@ public class UserUtil {
     } else {
       String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
       userMap.put(JsonKey.USERNAME, userName);
-      if (!userService.checkUsernameUniqueness(userName, false, context)) {
+      UserLookUp userLookUp = new UserLookUp();
+      if (!userLookUp.checkUsernameUniqueness(userName, false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -636,8 +411,8 @@ public class UserUtil {
       }
     } else {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
-      if (!userService.checkUsernameUniqueness(
-          (String) userMap.get(JsonKey.USERNAME), false, context)) {
+      UserLookUp userLookUp = new UserLookUp();
+      if (!userLookUp.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -696,7 +471,8 @@ public class UserUtil {
               .filter(
                   value -> {
                     if (!esUserNameList.contains(value)) {
-                      return userService.checkUsernameUniqueness(value, true, context);
+                      UserLookUp userLookUp = new UserLookUp();
+                      return userLookUp.checkUsernameUniqueness(value, true, context);
                     }
                     return false;
                   })
@@ -715,7 +491,7 @@ public class UserUtil {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
-    checkExternalIdUniqueness(user, operationType, context);
+    new UserLookUp().checkExternalIdUniqueness(user, operationType, context);
   }
   // validateExternalIds For UPDATE USER
   public static void validateExternalIdsForUpdateUser(
@@ -726,7 +502,7 @@ public class UserUtil {
     }
     // If operation is update and user is custodian org, ignore uniqueness check
     if (!isCustodianOrg) {
-      checkExternalIdUniqueness(user, JsonKey.UPDATE, context);
+      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, context);
     }
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user, context);
@@ -803,6 +579,15 @@ public class UserUtil {
     }
   }
 
+  private static void throwExternalIDNotFoundException(
+          String externalId, String idType, String provider) {
+    throw new ProjectCommonException(
+            ResponseCode.externalIdNotFound.getErrorCode(),
+            ProjectUtil.formatMessage(
+                    ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
+
   public static List<Map<String, String>> getExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds =
         userExternalIdentityService.getUserExternalIds(userId, context);
@@ -815,10 +600,10 @@ public class UserUtil {
     return dbResExternalIds;
   }
 
-  public static List<Map<String, Object>> getActiveUserOrgDetails(
-      String userId, RequestContext context) {
-    return getUserOrgDetails(false, userId, context);
-  }
+    public static List<Map<String, Object>> getActiveUserOrgDetails(
+            String userId, RequestContext context) {
+        return getUserOrgDetails(false, userId, context);
+    }
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(

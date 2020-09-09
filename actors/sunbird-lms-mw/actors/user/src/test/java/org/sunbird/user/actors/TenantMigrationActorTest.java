@@ -102,7 +102,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordsByPropertiesWithFiltering(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
@@ -287,7 +287,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordById(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
     boolean result =
@@ -303,7 +303,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(
+            cassandraOperation.getRecordById(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSelfDeclarationResponse());
     Response updateResponse = new Response();

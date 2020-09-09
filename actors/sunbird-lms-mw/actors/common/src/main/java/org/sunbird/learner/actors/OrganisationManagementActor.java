@@ -1286,7 +1286,7 @@ public class OrganisationManagementActor extends BaseActor {
       requestDbMap.put(JsonKey.PROVIDER, req.get(JsonKey.PROVIDER));
       requestDbMap.put(JsonKey.EXTERNAL_ID, req.get(JsonKey.EXTERNAL_ID));
       Response result =
-          cassandraOperation.getRecordsByProperties(
+          cassandraOperation.getRecordsByPropertiesWithFiltering(
               userdbInfo.getKeySpace(), userdbInfo.getTableName(), requestDbMap, context);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
 
@@ -1420,7 +1420,7 @@ public class OrganisationManagementActor extends BaseActor {
           JsonKey.EXTERNAL_ID, Util.encryptData((String) data.get(JsonKey.USER_EXTERNAL_ID)));
 
       result =
-          cassandraOperation.getRecordsByProperties(
+          cassandraOperation.getRecordsByPropertiesWithFiltering(
               JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap, context);
       fromExtId = true;
     } else {
@@ -1479,7 +1479,7 @@ public class OrganisationManagementActor extends BaseActor {
     requestData.put(JsonKey.CHANNEL, channel);
     requestData.put(JsonKey.IS_ROOT_ORG, true);
     Response result =
-        cassandraOperation.getRecordsByProperties(
+        cassandraOperation.getRecordsByPropertiesWithFiltering(
             orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), requestData, context);
     logger.info(context, "OrganisationManagementActor:getOrg: result = " + result.toString());
     logger.info(

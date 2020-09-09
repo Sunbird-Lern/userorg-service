@@ -56,6 +56,7 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
@@ -291,6 +292,7 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> requestMap = UserUtil.encryptUserData(userMap);
     validateRecoveryEmailPhone(userDbRecord, userMap);
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     if (requestMap.containsKey(JsonKey.TNC_ACCEPTED_ON)) {
       requestMap.put(
@@ -323,7 +325,7 @@ public class UserManagementActor extends BaseActor {
             usrDbInfo.getTableName(),
             requestMap,
             actorMessage.getRequestContext());
-
+    insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
@@ -838,9 +840,11 @@ public class UserManagementActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserUtil.checkPhoneUniqueness(
+      UserLookUp userLookUp = new UserLookUp();
+      // check phone and uniqueness using user look table
+      userLookUp.checkPhoneUniqueness(
           (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      UserUtil.checkEmailUniqueness(
+      userLookUp.checkEmailUniqueness(
           (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
@@ -888,6 +892,7 @@ public class UserManagementActor extends BaseActor {
             usrDbInfo.getTableName(),
             userMap,
             actorMessage.getRequestContext());
+    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
@@ -996,6 +1001,55 @@ public class UserManagementActor extends BaseActor {
     return userOrgMap;
   }
 
+  private Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> lookUp = new HashMap<>();
+    if (userMap.get(JsonKey.PHONE) != null) {
+      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
+      list.add(lookUp);
+    }
+    if (userMap.get(JsonKey.EMAIL) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
+      list.add(lookUp);
+    }
+    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
+      Map<String, Object> externalId =
+          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
+              .stream()
+              .filter(
+                  x -> ((String) x.get(JsonKey.ID_TYPE)).equals((String) x.get(JsonKey.PROVIDER)))
+              .findFirst()
+              .orElse(null);
+      if (MapUtils.isNotEmpty(externalId)) {
+        lookUp = new HashMap<>();
+        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
+        lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+        // provider is the orgId, not the channel
+        lookUp.put(
+            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
+        list.add(lookUp);
+      }
+    }
+    if (userMap.get(JsonKey.USERNAME) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
+      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
+      list.add(lookUp);
+    }
+    Response response = null;
+    if (CollectionUtils.isNotEmpty(list)) {
+      UserLookUp userLookUp = new UserLookUp();
+      response = userLookUp.insertRecords(list, context);
+    }
+    return response;
+  }
+
   private Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
     Map<String, Object> userOrgMap = new HashMap<String, Object>();
     userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
@@ -1026,6 +1080,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.USER_ID, userId);
     requestMap = UserUtil.encryptUserData(userMap);
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     requestMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
@@ -1044,6 +1099,7 @@ public class UserManagementActor extends BaseActor {
               usrDbInfo.getTableName(),
               requestMap,
               request.getRequestContext());
+      insertIntoUserLookUp(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
     } finally {

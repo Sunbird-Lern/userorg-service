@@ -85,7 +85,7 @@ public class FeedServiceImpl implements IFeedService {
     logger.info(context, "FeedServiceImpl:getRecordsByProperties method called : ");
     Response dbResponse =
         getCassandraInstance()
-            .getRecordsByProperties(
+            .getRecordsByPropertiesWithFiltering(
                 usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties, context);
     List<Map<String, Object>> responseList = null;
     List<Feed> feedList = new ArrayList<>();
