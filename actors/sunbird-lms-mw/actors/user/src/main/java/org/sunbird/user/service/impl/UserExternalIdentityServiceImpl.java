@@ -52,10 +52,7 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
     Map<String, String> providerOrgMap =
         UserUtil.fetchOrgIdByProvider(Arrays.asList(provider), context);
     return userExternalIdentityDao.getUserIdByExternalId(
-        extId,
-        providerOrgMap.get(provider),
-        provider.equals(idType) ? providerOrgMap.get(idType) : idType,
-        context);
+        extId, providerOrgMap.get(provider), context);
   }
 
   /**
@@ -69,6 +66,6 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
    */
   @Override
   public String getUserV2(String extId, String orgId, String idType, RequestContext context) {
-    return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, idType, context);
+    return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, context);
   }
 }
