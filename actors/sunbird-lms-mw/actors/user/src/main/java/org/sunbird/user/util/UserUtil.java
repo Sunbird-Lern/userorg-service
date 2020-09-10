@@ -88,7 +88,8 @@ public class UserUtil {
         for (Map<String, String> externalId :
             (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS)) {
 
-          String orgId = orgProviderMap.get(externalId.get(JsonKey.PROVIDER));
+          String orgId =
+              getCaseInsensitiveOrgFromProvider(externalId.get(JsonKey.PROVIDER), orgProviderMap);
           if (StringUtils.isBlank(orgId)) {
             ProjectCommonException.throwClientErrorException(
                 ResponseCode.invalidParameterValue,
@@ -106,6 +107,21 @@ public class UserUtil {
         }
       }
     }
+  }
+
+  public static String getCaseInsensitiveOrgFromProvider(
+      String provider, Map<String, String> providerOrgMap) {
+    // In some cases channel is provided in smaller case
+    String orgId = providerOrgMap.get(provider);
+    if (null == orgId && StringUtils.isNotBlank(provider)) {
+      Map<String, String> providerOrgCaseInsensitiveMap =
+          new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+      providerOrgCaseInsensitiveMap.putAll(providerOrgMap);
+      ProjectLogger.log(
+          String.format("Checking channel: %s as with any case", provider), LoggerEnum.INFO);
+      orgId = providerOrgCaseInsensitiveMap.get(provider);
+    }
+    return orgId;
   }
 
   public static Map<String, Object> validateExternalIdsAndReturnActiveUser(
@@ -197,7 +213,8 @@ public class UserUtil {
     return userId;
   }
 
-  public static void validateUserPhoneEmailAndWebPages(User user, String operationType, RequestContext context) {
+  public static void validateUserPhoneEmailAndWebPages(
+      User user, String operationType, RequestContext context) {
     UserLookUp userLookUp = new UserLookUp();
     userLookUp.checkPhoneUniqueness(user, operationType, context);
     userLookUp.checkEmailUniqueness(user, operationType, context);
@@ -307,7 +324,7 @@ public class UserUtil {
     return requestMap;
   }
 
-  public static void setUserDefaultValueForV3(Map<String, Object> userMap,  RequestContext context) {
+  public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
     userMap.put(JsonKey.ROLES, roles);
@@ -412,7 +429,8 @@ public class UserUtil {
     } else {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness((String) userMap.get(JsonKey.USERNAME), false, context)) {
+      if (!userLookUp.checkUsernameUniqueness(
+          (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -580,12 +598,12 @@ public class UserUtil {
   }
 
   private static void throwExternalIDNotFoundException(
-          String externalId, String idType, String provider) {
+      String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-            ResponseCode.externalIdNotFound.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ResponseCode.externalIdNotFound.getErrorCode(),
+        ProjectUtil.formatMessage(
+            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   public static List<Map<String, String>> getExternalIds(String userId, RequestContext context) {
@@ -600,10 +618,10 @@ public class UserUtil {
     return dbResExternalIds;
   }
 
-    public static List<Map<String, Object>> getActiveUserOrgDetails(
-            String userId, RequestContext context) {
-        return getUserOrgDetails(false, userId, context);
-    }
+  public static List<Map<String, Object>> getActiveUserOrgDetails(
+      String userId, RequestContext context) {
+    return getUserOrgDetails(false, userId, context);
+  }
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getUserOrgDetails(

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -27,21 +28,20 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
   @Override
   public String getUserIdByExternalId(String extId, String provider, RequestContext context) {
-    UserLookUp userLookUp = new UserLookUp();
-    List<Map<String, Object>> userRecordList =
-        userLookUp.getRecordByType(
-            JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID,
-            extId.toLowerCase() + "@" + provider.toLowerCase(),
-            false,
-            context);
-    if (CollectionUtils.isNotEmpty(userRecordList)) {
-      logger.info(
-          context,
-          "getUserIdByExternalId: got userId from user_lookup for extId "
-              + extId
-              + " "
-              + (String) userRecordList.get(0).get(JsonKey.USER_ID));
-      return (String) userRecordList.get(0).get(JsonKey.USER_ID);
+    if (StringUtils.isNotEmpty((provider))) {
+      UserLookUp userLookUp = new UserLookUp();
+      List<Map<String, Object>> userRecordList =
+          userLookUp.getRecordByType(
+              JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID, extId + "@" + provider, false, context);
+      if (CollectionUtils.isNotEmpty(userRecordList)) {
+        logger.info(
+            context,
+            "getUserIdByExternalId: got userId from user_lookup for extId "
+                + extId
+                + " "
+                + (String) userRecordList.get(0).get(JsonKey.USER_ID));
+        return (String) userRecordList.get(0).get(JsonKey.USER_ID);
+      }
     }
     logger.info(
         context,
