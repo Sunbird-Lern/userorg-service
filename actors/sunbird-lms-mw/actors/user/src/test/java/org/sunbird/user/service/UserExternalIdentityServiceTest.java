@@ -70,7 +70,7 @@ public class UserExternalIdentityServiceTest {
 
   @Test
   public void getUserV2Test() {
-    PowerMockito.mockStatic(ServiceFactory.class);
+    Map<String, Object> propertyMap = new HashMap<>();
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
