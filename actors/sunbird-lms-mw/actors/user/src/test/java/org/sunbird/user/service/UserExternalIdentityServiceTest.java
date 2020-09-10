@@ -68,7 +68,10 @@ public class UserExternalIdentityServiceTest {
 
   @Test
   public void getUserV2Test() {
-    Map<String, Object> propertyMap = new HashMap<>();
+    PowerMockito.mockStatic(ServiceFactory.class);
+    CassandraOperation cassandraOperationImpl;
+    cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
