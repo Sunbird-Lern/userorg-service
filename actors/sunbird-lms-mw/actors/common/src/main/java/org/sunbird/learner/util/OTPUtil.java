@@ -34,6 +34,7 @@ public final class OTPUtil {
 
   private static final int MINIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
+  private static final int MAX_OTP_GENERATE_RETRY_COUNT = 3;
 
   private OTPUtil() {}
 
@@ -49,7 +50,25 @@ public final class OTPUtil {
     GoogleAuthenticatorKey key = gAuth.createCredentials();
     String secret = key.getKey();
     int code = gAuth.getTotpPassword(secret);
-    return String.valueOf(code);
+    return checkOtpCodeLength(code);
+  }
+
+  /**
+   * if otp length is less than 4 , regenerate otp upto 3 times max
+   *
+   * @param code
+   * @return
+   */
+  private static String checkOtpCodeLength(int code) {
+    String otp = String.valueOf(code);
+    if (otp.length() < 4) {
+      int noOfAttempts = 0;
+      do {
+        otp = generateOTP();
+        noOfAttempts++;
+      } while (otp.length() < 4 && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
+    }
+    return otp;
   }
 
   public static void sendOTPViaSMS(Map<String, Object> otpMap, RequestContext context) {
