@@ -87,6 +87,7 @@ public class OTPActor extends BaseActor {
 
     if (MapUtils.isEmpty(details)) {
       otp = OTPUtil.generateOTP();
+      otp = OTPUtil.checkOtpCodeLength(otp);
       logger.info(
           request.getRequestContext(),
           "OTPActor:generateOTP: inserting otp Key = "

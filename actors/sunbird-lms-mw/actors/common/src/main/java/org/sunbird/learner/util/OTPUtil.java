@@ -50,17 +50,16 @@ public final class OTPUtil {
     GoogleAuthenticatorKey key = gAuth.createCredentials();
     String secret = key.getKey();
     int code = gAuth.getTotpPassword(secret);
-    return checkOtpCodeLength(code);
+    return String.valueOf(code);
   }
 
   /**
-   * if otp length is less than 4 , regenerate otp upto 3 times max
+   * if otp length is less than 4 , regenerate otp (max retry 3)
    *
-   * @param code
+   * @param otp
    * @return
    */
-  private static String checkOtpCodeLength(int code) {
-    String otp = String.valueOf(code);
+  public static String checkOtpCodeLength(String otp) {
     if (otp.length() < 4) {
       int noOfAttempts = 0;
       do {
