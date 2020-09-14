@@ -137,10 +137,10 @@ public class DeclaredExternalIdActor extends BaseActor {
     request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
     logger.info(request.getRequestContext(), "DeclaredExternalIdActor:migrateDeclaredUser ");
     try {
-      if (StringUtils.isNotEmpty(declaredUser.getOrgExternalId())) {
+      if (StringUtils.isNotEmpty(declaredUser.getSubOrgExternalId())) {
         Organisation org =
             getOrgDetails(
-                declaredUser.getOrgExternalId(),
+                declaredUser.getSubOrgExternalId(),
                 declaredUser.getChannel(),
                 request.getRequestContext());
         if (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId())) {
@@ -156,7 +156,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       List<Map<String, String>> externalIdLst = new ArrayList();
       requestMap.put(JsonKey.USER_ID, declaredUser.getUserId());
       requestMap.put(JsonKey.CHANNEL, declaredUser.getChannel());
-      requestMap.put(JsonKey.ORG_EXTERNAL_ID, declaredUser.getOrgExternalId());
+      requestMap.put(JsonKey.ORG_EXTERNAL_ID, declaredUser.getSubOrgExternalId());
       externalIdMap.put(JsonKey.ID, declaredUser.getUserExternalId());
       externalIdMap.put(JsonKey.ID_TYPE, declaredUser.getChannel());
       externalIdMap.put(JsonKey.PROVIDER, declaredUser.getChannel());

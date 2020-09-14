@@ -112,7 +112,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -125,7 +125,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -138,7 +138,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -154,7 +154,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":\"anyOrgExternalId\",\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"subOrgExternalId\":\"anyOrgExternalId\",\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"userId\":\"\",\"persona\":\"teacher\"}]");
     organisationClient = mock(OrganisationClient.class);
     mockStatic(OrganisationClientImpl.class);
     when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
