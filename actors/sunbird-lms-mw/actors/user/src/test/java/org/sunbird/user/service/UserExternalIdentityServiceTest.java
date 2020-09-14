@@ -51,7 +51,7 @@ public class UserExternalIdentityServiceTest {
     userList.put(JsonKey.USER_ID, "1234");
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
-    when(cassandraOperationImpl.getRecordsByProperties(
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Map<String, String> orgProviderMap = new HashMap<>();
@@ -59,6 +59,8 @@ public class UserExternalIdentityServiceTest {
     PowerMockito.mockStatic(UserUtil.class);
     when(UserUtil.fetchOrgIdByProvider(Mockito.anyList(), Mockito.any()))
         .thenReturn(orgProviderMap);
+    when(UserUtil.getCaseInsensitiveOrgFromProvider(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("01234567687");
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
 
     String userId =
@@ -75,7 +77,7 @@ public class UserExternalIdentityServiceTest {
     userList.put(JsonKey.USER_ID, "1234");
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
-    when(cassandraOperationImpl.getRecordsByProperties(
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
@@ -101,7 +103,7 @@ public class UserExternalIdentityServiceTest {
     Map user = new HashMap();
     user.put(JsonKey.USER_ID, "1234");
     when(cassandraOperationImpl.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, user, null))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
     List selfDeclareExternalId = userExternalIdentityService.getSelfDeclaredDetails("1234", null);
