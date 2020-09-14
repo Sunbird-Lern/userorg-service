@@ -59,13 +59,15 @@ public final class OTPUtil {
    * @param otp
    * @return
    */
-  public static String checkOtpCodeLength(String otp) {
+  public static String ensureOtpLength(String otp, RequestContext context) {
     if (otp.length() < 4) {
       int noOfAttempts = 0;
       do {
         otp = generateOTP();
         noOfAttempts++;
       } while (otp.length() < 4 && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
+      logger.info(
+          context, "OTPUtil: ensureOtpLength: otp generated in " + noOfAttempts + " attempts");
     }
     return otp;
   }

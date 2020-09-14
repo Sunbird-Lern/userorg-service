@@ -8,7 +8,7 @@ public class OTPUtilTest {
   @Test
   public void otpLengthTest() {
     String code = OTPUtil.generateOTP();
-    code = OTPUtil.checkOtpCodeLength(code);
+    code = OTPUtil.ensureOtpLength(code, null);
     Assert.assertTrue(code.length() >= 4);
   }
 
@@ -16,7 +16,7 @@ public class OTPUtilTest {
   public void generateOtpTest() {
     for (int i = 0; i < 1000; i++) {
       String code = OTPUtil.generateOTP();
-      code = OTPUtil.checkOtpCodeLength(code);
+      code = OTPUtil.ensureOtpLength(code, null);
       Assert.assertTrue(code.length() >= 4);
     }
   }
