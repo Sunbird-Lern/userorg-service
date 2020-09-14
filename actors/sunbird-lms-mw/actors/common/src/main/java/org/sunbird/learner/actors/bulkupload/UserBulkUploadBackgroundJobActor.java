@@ -141,6 +141,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
                   x -> {
                     roleList.add(x.trim());
                   });
+          if (!roleList.contains(ProjectUtil.UserRole.PUBLIC.getValue())) {
+            roleList.add(ProjectUtil.UserRole.PUBLIC.getValue());
+          }
           userMap.put(JsonKey.ROLES, roleList);
           RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
         }
