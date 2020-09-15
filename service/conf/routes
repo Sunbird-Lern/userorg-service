@@ -141,3 +141,7 @@ GET   /v1/user/feed/:userId       @controllers.feed.FeedController.getUserFeed(u
 POST /private/user/v1/scheduler @controllers.scheduler.SchedulerController.startScheduler(request: play.mvc.Http.Request)
 
 PATCH  /v1/user/declarations      @controllers.usermanagement.UserController.updateUserDeclarations(request: play.mvc.Http.Request)
+
+# User Consent APIs
+POST /v1/user/consent/update @controllers.usermanagement.UserConsentController.updateUserConsent(request: play.mvc.Http.Request)
+POST /v1/user/consent/read @controllers.usermanagement.UserConsentController.getUserConsent(request: play.mvc.Http.Request)

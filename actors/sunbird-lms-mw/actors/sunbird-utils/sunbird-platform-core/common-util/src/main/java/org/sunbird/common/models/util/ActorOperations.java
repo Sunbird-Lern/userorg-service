@@ -109,7 +109,9 @@ public enum ActorOperations {
   V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers"),
   CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
-  UPDATE_USER_DECLARATIONS("updateUserDeclarations");
+  UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
+  UPDATE_USER_CONSENT("updateUserConsent"),
+  GET_USER_CONSENT("getUserConsent");
 
   private String value;
 
