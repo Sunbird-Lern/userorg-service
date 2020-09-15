@@ -21,6 +21,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -31,13 +33,15 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.Organisation;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  SunbirdMWService.class
+  SunbirdMWService.class,
+  OrganisationClientImpl.class
 })
 @PowerMockIgnore("javax.management.*")
 public class DeclaredExternalIdActorTest {
@@ -46,6 +50,7 @@ public class DeclaredExternalIdActorTest {
   private static CassandraOperationImpl cassandraOperation;
   private static DecryptionService decryptionService;
   private static SunbirdMWService SunbirdMWService;
+  private static OrganisationClient organisationClient;
 
   @BeforeClass
   public static void beforeEachTest() {
@@ -107,7 +112,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -120,7 +125,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -133,7 +138,31 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"schoolId\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+    boolean result =
+        testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUploadDeclaredUserOfWrongSubOrg() {
+    Organisation org = new Organisation();
+    org.setRootOrgId("anyOrgId");
+    org.setId("anyOrgId");
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
+        .thenReturn(
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"subOrgExternalId\":\"anyOrgExternalId\",\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"userId\":\"\",\"persona\":\"teacher\"}]");
+    organisationClient = mock(OrganisationClient.class);
+    mockStatic(OrganisationClientImpl.class);
+    when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
+    when(organisationClient.esGetOrgByExternalId(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(org);
+    Request request = createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED);
+    request.getRequest().put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
