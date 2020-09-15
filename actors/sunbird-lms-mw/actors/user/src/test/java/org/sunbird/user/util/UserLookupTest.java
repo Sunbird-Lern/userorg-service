@@ -36,9 +36,9 @@ import org.sunbird.models.user.User;
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserLookupTest {
-  public static CassandraOperation cassandraOperation;
+  public CassandraOperation cassandraOperation;
   private static User user;
-  private static EncryptionService encryptionService;
+  private EncryptionService encryptionService;
 
   @Before
   public void beforeEachTest() {
@@ -73,13 +73,13 @@ public class UserLookupTest {
     externalIdResMap.put(JsonKey.ID_TYPE, "someIdType");
     externalIdResMap.put(JsonKey.USER_ID, "someUserId");
     externalIdResMap.put(JsonKey.EXTERNAL_ID, "someExternalId");
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
+        .thenReturn(getRecordsByCompositeKeyResponse());
   }
 
   @Test
   public void checkUsernameUniqueness() throws Exception {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
 
     boolean response = new UserLookUp().checkUsernameUniqueness("userName", true, null);
     assertFalse(response);
@@ -87,9 +87,6 @@ public class UserLookupTest {
 
   @Test
   public void checkPhoneUniquenessExist() throws Exception {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
 
     User user = new User();
     user.setPhone("9663890400");
@@ -105,10 +102,6 @@ public class UserLookupTest {
 
   @Test
   public void checkPhoneUniqueness() throws Exception {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
-
     User user = new User();
     user.setPhone("9663890400");
     boolean response = false;
@@ -123,10 +116,6 @@ public class UserLookupTest {
 
   @Test
   public void checkPhoneExist() {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
-
     boolean response = false;
     try {
       new UserLookUp().checkPhoneUniqueness("9663890400", null);
@@ -139,9 +128,6 @@ public class UserLookupTest {
 
   @Test
   public void checkEmailUniqueness() throws Exception {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
     boolean response = false;
     try {
       new UserLookUp().checkEmailUniqueness("test@test.com", null);
@@ -154,9 +140,6 @@ public class UserLookupTest {
 
   @Test
   public void checkEmailUniquenessWithOpType() throws Exception {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn(getRecordsByCompositeKeyResponse());
     User user = new User();
     user.setEmail("test@test.com");
     boolean response = false;
