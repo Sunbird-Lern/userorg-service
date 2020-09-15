@@ -35,6 +35,7 @@ public final class OTPUtil {
   private static final int MINIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
   private static final int MAX_OTP_GENERATE_RETRY_COUNT = 3;
+  private static final int MAX_OTP_LENGTH = 4;
 
   private OTPUtil() {}
 
@@ -54,20 +55,26 @@ public final class OTPUtil {
   }
 
   /**
-   * if otp length is less than 4 , regenerate otp (max retry 3)
+   * generates otp and ensures otp length is greater than or equal to 4 if otp length is less than 4
+   * , regenerate otp (max retry 3)
    *
-   * @param otp
    * @return
    */
-  public static String ensureOtpLength(String otp, RequestContext context) {
-    if (otp.length() < 4) {
+  public static String generateOtpAndEnsureOtpLength(RequestContext context) {
+    String otp = generateOTP();
+    if (otp.length() < MAX_OTP_LENGTH) {
       int noOfAttempts = 0;
       do {
         otp = generateOTP();
         noOfAttempts++;
-      } while (otp.length() < 4 && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
+      } while (otp.length() < MAX_OTP_LENGTH && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
       logger.info(
-          context, "OTPUtil: ensureOtpLength: otp generated in " + noOfAttempts + " attempts");
+          context,
+          "OTPUtil: generateOtpAndEnsureOtpLength: otp generated in " + noOfAttempts + " attempts");
+    }
+    // After 3 attempts, still otp length less that 4 multiply otp with 1000,
+    if (otp.length() < MAX_OTP_LENGTH) {
+      otp = String.valueOf(Integer.valueOf(otp) * 1000);
     }
     return otp;
   }
