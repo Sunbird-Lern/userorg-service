@@ -32,16 +32,16 @@ public final class OTPUtil {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
 
-  private static final int MINIMUM_OTP_LENGTH = 6;
+  private static final int MAXIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
-  private static final int MAX_OTP_GENERATE_RETRY_COUNT = 3;
-  private static final int MAX_OTP_LENGTH = 4;
+  private static final int RETRY_COUNT = 2;
+  private static final int MIN_OTP_LENGTH = 4;
 
   private OTPUtil() {}
 
   private static String generateOTP() {
     String otpSize = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_OTP_LENGTH);
-    int codeDigits = StringUtils.isBlank(otpSize) ? MINIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
+    int codeDigits = StringUtils.isBlank(otpSize) ? MAXIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
     GoogleAuthenticatorConfig config =
         new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder()
             .setCodeDigits(codeDigits)
@@ -62,17 +62,25 @@ public final class OTPUtil {
    */
   public static String generateOtp(RequestContext context) {
     String otp = generateOTP();
-    if (otp.length() < MAX_OTP_LENGTH) {
-      int noOfAttempts = 0;
-      do {
-        otp = generateOTP();
-        noOfAttempts++;
-      } while (otp.length() < MAX_OTP_LENGTH && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
-      logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
+    int noOfAttempts = 0;
+    while (otp.length() < MIN_OTP_LENGTH && noOfAttempts < RETRY_COUNT) {
+      otp = generateOTP();
+      noOfAttempts++;
     }
-    // After 3 attempts, still otp length less that 4 multiply otp with 1000,
-    if (otp.length() < MAX_OTP_LENGTH) {
-      otp = String.valueOf(Integer.valueOf(otp) * 1000);
+    logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
+    return ensureOtpLength(otp);
+  }
+
+  /**
+   * After 3 attempts, still otp length less that 4 multiply otp with 1000,
+   *
+   * @param otp
+   * @return
+   */
+  private static String ensureOtpLength(String otp) {
+    if (otp.length() < MIN_OTP_LENGTH) {
+      int multiplier = (int) Math.pow(10, MAXIMUM_OTP_LENGTH - MIN_OTP_LENGTH + 1);
+      otp = String.valueOf(Integer.valueOf(otp) * multiplier);
     }
     return otp;
   }
