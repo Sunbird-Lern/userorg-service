@@ -39,7 +39,7 @@ public final class OTPUtil {
 
   private OTPUtil() {}
 
-  public static String generateOTP() {
+  private static String generateOTP() {
     String otpSize = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_OTP_LENGTH);
     int codeDigits = StringUtils.isBlank(otpSize) ? MINIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
     GoogleAuthenticatorConfig config =
@@ -60,7 +60,7 @@ public final class OTPUtil {
    *
    * @return
    */
-  public static String generateOtpAndEnsureOtpLength(RequestContext context) {
+  public static String generateOtp(RequestContext context) {
     String otp = generateOTP();
     if (otp.length() < MAX_OTP_LENGTH) {
       int noOfAttempts = 0;
@@ -68,9 +68,7 @@ public final class OTPUtil {
         otp = generateOTP();
         noOfAttempts++;
       } while (otp.length() < MAX_OTP_LENGTH && noOfAttempts < MAX_OTP_GENERATE_RETRY_COUNT);
-      logger.info(
-          context,
-          "OTPUtil: generateOtpAndEnsureOtpLength: otp generated in " + noOfAttempts + " attempts");
+      logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
     }
     // After 3 attempts, still otp length less that 4 multiply otp with 1000,
     if (otp.length() < MAX_OTP_LENGTH) {
