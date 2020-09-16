@@ -843,29 +843,6 @@ public class BaseController extends Controller {
         actorOperation);
   }
 
-  /**
-   * This method will set extra param to request body which is required for actor layer.
-   *
-   * @param request Request
-   * @param requestId String
-   * @param actorOpName String
-   * @param requestedUserId String
-   * @param env int
-   * @return Request
-   */
-  public org.sunbird.common.request.Request setExtraParam(
-      org.sunbird.common.request.Request request,
-      String requestId,
-      String actorOpName,
-      String requestedUserId,
-      int env) {
-    request.setRequestId(requestId);
-    request.setOperation(actorOpName);
-    request.getRequest().put(JsonKey.CREATED_BY, requestedUserId);
-    request.setEnv(env);
-    return request;
-  }
-
   public Map<String, String> getAllRequestHeaders(Request request) {
     Map<String, String> map = new HashMap<>();
     Map<String, List<String>> headers = request.getHeaders().toMap();

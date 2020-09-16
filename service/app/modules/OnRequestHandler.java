@@ -153,7 +153,6 @@ public class OnRequestHandler implements ActionCreator {
       }
       reqContext.put(JsonKey.CHANNEL, channel);
       reqContext.put(JsonKey.ENV, getEnv(request));
-      reqContext.put(JsonKey.REQUEST_ID, requestId);
       reqContext.putAll(DataCacheHandler.getTelemetryPdata());
       Optional<String> optionalAppId = request.header(HeaderParam.X_APP_ID.getName());
       if (optionalAppId.isPresent()) {
@@ -182,8 +181,12 @@ public class OnRequestHandler implements ActionCreator {
       Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
       if (optionalTraceId.isPresent()) {
         reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+        reqContext.put(JsonKey.REQUEST_ID, optionalTraceId.get());
+        request = request.addAttr(Attrs.REQUEST_ID, optionalTraceId.get());
       } else {
+        request = request.addAttr(Attrs.REQUEST_ID, requestId);
         reqContext.put(JsonKey.X_REQUEST_ID, requestId);
+        reqContext.put(JsonKey.REQUEST_ID, requestId);
       }
       if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);
@@ -205,7 +208,7 @@ public class OnRequestHandler implements ActionCreator {
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
       map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-      request = request.addAttr(Attrs.REQUEST_ID, requestId);
+
       request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(map));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
