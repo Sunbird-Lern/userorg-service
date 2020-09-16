@@ -8,6 +8,10 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.util.Util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @ActorConfig(
         tasks = {"updateUserConsent", "getUserConsent" },
@@ -33,14 +37,19 @@ public class UserConsentActor extends BaseActor {
         }
     }
 
-    private Response getUserConsent(Request request) {
+    private void getUserConsent(Request request) {
         Response response = new Response();
-        return response;
+        response.put("consents", new ArrayList<>());
+        sender().tell(response, self());
     }
 
-    private Response updateUserConsent(Request request) {
+    private void updateUserConsent(Request request) {
         Response response = new Response();
-        return response;
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
+        String userId = (String) consent.getOrDefault("userId", "");
+        response.put("consent", new HashMap<String, Object>() {{ put("userId", userId)}});
+        response.put("message", "User Consent updated successfully.");
+        sender().tell(response, self());
     }
 
 }
