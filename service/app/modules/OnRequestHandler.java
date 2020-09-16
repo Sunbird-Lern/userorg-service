@@ -181,12 +181,10 @@ public class OnRequestHandler implements ActionCreator {
       Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
       if (optionalTraceId.isPresent()) {
         reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
-        reqContext.put(JsonKey.REQUEST_ID, optionalTraceId.get());
-        request = request.addAttr(Attrs.REQUEST_ID, optionalTraceId.get());
+        request = request.addAttr(Attrs.X_REQUEST_ID, optionalTraceId.get());
       } else {
-        request = request.addAttr(Attrs.REQUEST_ID, requestId);
+        request = request.addAttr(Attrs.X_REQUEST_ID, requestId);
         reqContext.put(JsonKey.X_REQUEST_ID, requestId);
-        reqContext.put(JsonKey.REQUEST_ID, requestId);
       }
       if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);

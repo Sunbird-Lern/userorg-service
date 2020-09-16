@@ -26,7 +26,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("create geo location" + requestData, LoggerEnum.DEBUG.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.CREATE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -43,7 +43,7 @@ public class GeoLocationController extends BaseController {
       String type = httpRequest.getQueryString(JsonKey.TYPE);
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.GET_GEO_LOCATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -62,7 +62,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("update geo location" + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.UPDATE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -79,7 +79,7 @@ public class GeoLocationController extends BaseController {
       ProjectLogger.log("delete geo location");
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.DELETE_GEO_LOCATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -98,7 +98,7 @@ public class GeoLocationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendNotification(reqObj);
       reqObj.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -116,7 +116,7 @@ public class GeoLocationController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateGetUserCount(reqObj);
       reqObj.setOperation(ActorOperations.GET_USER_COUNT.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       Map<String, Object> innerMap = reqObj.getRequest();
       innerMap.put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));

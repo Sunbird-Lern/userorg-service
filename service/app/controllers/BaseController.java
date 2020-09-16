@@ -67,7 +67,7 @@ public class BaseController extends Controller {
       org.sunbird.common.request.Request request, String operation, Request httpRequest) {
     request.setOperation(operation);
 
-    String requestId = Common.getFromRequest(httpRequest, Attrs.REQUEST_ID);
+    String requestId = Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID);
     request.setRequestId(requestId);
     request.getParams().setMsgid(requestId);
     request.setEnv(getEnvironment());
@@ -312,7 +312,7 @@ public class BaseController extends Controller {
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
     response.setParams(
-        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
+        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     return response;
   }
 
@@ -348,7 +348,7 @@ public class BaseController extends Controller {
     ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(
-        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.REQUEST_ID)));
+        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     String value = null;
     try {
       if (response.getResult() != null) {
@@ -402,7 +402,7 @@ public class BaseController extends Controller {
     }
     response.setParams(
         createResponseParamObj(
-            code, exception.getMessage(), Common.getFromRequest(request, Attrs.REQUEST_ID)));
+            code, exception.getMessage(), Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     if (response.getParams() != null) {
       response.getParams().setStatus(response.getParams().getStatus());
       if (exception.getCode() != null) {
@@ -817,7 +817,7 @@ public class BaseController extends Controller {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
       Map<String, Object> requestInfo =
           objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
-      reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
       reqObj.setRequestContext(
