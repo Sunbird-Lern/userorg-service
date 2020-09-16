@@ -40,6 +40,7 @@ public class HealthControllerTest extends BaseApplicationTest {
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap.put(HeaderParam.X_REQUEST_ID.getName(), new String[] {"123-456-789"});
     headerMap.put(
         HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
