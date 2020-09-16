@@ -28,6 +28,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -195,16 +196,37 @@ public class UserUtilTest {
     List<Map<String, Object>> declarations = new ArrayList<>();
     Map<String, Object> declareFieldMap = new HashMap<>();
     Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
     userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
     declareFieldMap.put(JsonKey.INFO, userInfo);
     declarations.add(declareFieldMap);
+    Map<String, Object> dbRecords = new HashMap<>();
+    RequestContext context = new RequestContext();
     try {
-      UserUtil.encryptDeclarationFields(declarations);
+      UserUtil.encryptDeclarationFields(declarations, dbRecords, context);
     } catch (Exception ex) {
 
     }
     Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testCreateSelfDeclaredObject() {
+    Map<String, Object> declareFieldMap = new HashMap<>();
+    declareFieldMap.put(JsonKey.USER_ID, "1234");
+    declareFieldMap.put(JsonKey.ORG_ID, "012345678");
+    declareFieldMap.put(JsonKey.PERSONA, "teacher");
+    declareFieldMap.put(JsonKey.OPERATION, "add");
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
+    userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
+    declareFieldMap.put(JsonKey.INFO, userInfo);
+
+    UserDeclareEntity userDeclareEntity =
+        UserUtil.createUserDeclaredObject(declareFieldMap, "01245444444");
+    Assert.assertEquals("PENDING", userDeclareEntity.getStatus());
   }
 
   private List<Map<String, String>> getExternalIds() {
