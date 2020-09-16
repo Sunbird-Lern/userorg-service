@@ -211,6 +211,24 @@ public class UserUtilTest {
     Assert.assertTrue(true);
   }
 
+  @Test
+  public void testCreateSelfDeclaredObject() {
+    Map<String, Object> declareFieldMap = new HashMap<>();
+    declareFieldMap.put(JsonKey.USER_ID, "1234");
+    declareFieldMap.put(JsonKey.ORG_ID, "012345678");
+    declareFieldMap.put(JsonKey.PERSONA, "teacher");
+    declareFieldMap.put(JsonKey.OPERATION, "add");
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
+    userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
+    declareFieldMap.put(JsonKey.INFO, userInfo);
+
+    UserDeclareEntity userDeclareEntity =
+        UserUtil.createUserDeclaredObject(declareFieldMap, "01245444444");
+    Assert.assertEquals("PENDING", userDeclareEntity.getStatus());
+  }
+
   private List<Map<String, String>> getExternalIds() {
     beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<>();
