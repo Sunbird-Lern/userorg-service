@@ -47,7 +47,7 @@ public class UserConsentActor extends BaseActor {
         Response response = new Response();
         Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
         String userId = (String) consent.getOrDefault("userId", "");
-        response.put("consent", new HashMap<String, Object>() {{ put("userId", userId)}});
+        response.put("consent", new HashMap<String, Object>() {{ put("userId", userId);}});
         response.put("message", "User Consent updated successfully.");
         sender().tell(response, self());
     }
