@@ -2,6 +2,7 @@ package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
@@ -115,6 +116,9 @@ public class IdentifierFreeUpActorTest {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
+    doNothing()
+        .when(cassandraOperation)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(elasticSearchService.update(
@@ -158,6 +162,10 @@ public class IdentifierFreeUpActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
+
+    doNothing()
+        .when(cassandraOperation)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(elasticSearchService.update(
