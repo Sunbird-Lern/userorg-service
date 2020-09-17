@@ -103,7 +103,7 @@ public class BaseBulkUploadController extends BaseController {
     } else {
       reqObj.setOperation(operation);
     }
-    reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+    reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
     reqObj.setEnv(getEnvironment());
     map.put(JsonKey.OBJECT_TYPE, objectType);
     map.put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));

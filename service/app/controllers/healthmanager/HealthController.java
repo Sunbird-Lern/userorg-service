@@ -44,7 +44,7 @@ public class HealthController extends BaseController {
       handleSigTerm();
       Request reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj
           .getRequest()
           .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -72,7 +72,7 @@ public class HealthController extends BaseController {
           handleSigTerm();
           Request reqObj = new Request();
           reqObj.setOperation(val);
-          reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+          reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
           reqObj
               .getRequest()
               .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -93,7 +93,7 @@ public class HealthController extends BaseController {
         response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
         response.setId("learner.service.health.api");
         response.setVer(getApiVersion(httpRequest.path()));
-        response.setTs(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+        response.setTs(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
       } catch (Exception e) {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -153,7 +153,7 @@ public class HealthController extends BaseController {
     response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
     response.setId("Ekstep.service.health.api");
     response.setVer(getApiVersion(request.path()));
-    response.setTs(Common.getFromRequest(request, Attrs.REQUEST_ID));
+    response.setTs(Common.getFromRequest(request, Attrs.X_REQUEST_ID));
     return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
 }

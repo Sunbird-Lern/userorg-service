@@ -297,7 +297,6 @@ public final class JsonKey {
   public static final String REPLACE_WITH_ASTERISK = "*";
   public static final String REPORT_TRACKING_DB = "reportTrackingDb";
   public static final String REQUEST = "request";
-  public static final String REQUEST_ID = "requestId";
   public static final String REQUEST_TYPE = "requestType";
   public static final String REQUESTED_BY = "requestedBy";
   public static final String RES_MSG_ID = "resmsgId";
