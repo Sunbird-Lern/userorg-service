@@ -45,6 +45,7 @@ public class SearchControllerTest extends BaseApplicationTest {
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap.put(HeaderParam.X_REQUEST_ID.getName(), new String[] {"123-456-789"});
     headerMap.put(
         HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
@@ -69,6 +70,27 @@ public class SearchControllerTest extends BaseApplicationTest {
     // req.headers(headerMap);
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testcompositeSearchUnAuthorized() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.ORG_NAME, "org123");
+    innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/search/compositesearch").method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(401, result.status());
   }
 
   @Test
