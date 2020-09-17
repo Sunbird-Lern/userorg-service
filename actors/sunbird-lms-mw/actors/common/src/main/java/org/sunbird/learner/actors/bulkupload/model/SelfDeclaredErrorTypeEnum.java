@@ -7,7 +7,8 @@ public enum SelfDeclaredErrorTypeEnum {
   ERROR_SCHOOL_ORG_NAME("ERROR-SCHOOL ORG NAME"),
   ERROR_SCHOOL_ORG_ID("ERROR-SCHOOL ORG ID"),
   ERROR_ID("ERROR-ID"),
-  ERROR_NAME("ERROR-NAME");
+  ERROR_NAME("ERROR-NAME"),
+  ERROR_STATE("ERROR-STATE");
 
   public final String errorType;
 

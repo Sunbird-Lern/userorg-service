@@ -17,6 +17,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -35,54 +36,62 @@ public class ChannelRegistrationActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     if (request.getOperation().equalsIgnoreCase(BackgroundOperations.registerChannel.name())) {
-      registerChannel();
+      registerChannel(request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
   }
 
-  private void registerChannel() {
-    List<String> ekstepChannelList = getEkstepChannelList();
+  private void registerChannel(Request request) {
+    List<String> ekstepChannelList = getEkstepChannelList(request.getRequestContext());
     List<Map<String, Object>> sunbirdChannelList = null;
     if (null != ekstepChannelList) {
-      ProjectLogger.log("channel list size from ekstep : " + ekstepChannelList.size());
-      sunbirdChannelList = getSunbirdChannelList();
-      ProjectLogger.log("channel list size from sunbird : " + sunbirdChannelList.size());
+      logger.info(
+          request.getRequestContext(),
+          "channel list size from ekstep : " + ekstepChannelList.size());
+      sunbirdChannelList = getSunbirdChannelList(request.getRequestContext());
+      logger.info(
+          request.getRequestContext(),
+          "channel list size from sunbird : " + sunbirdChannelList.size());
       if (!ekstepChannelList.isEmpty()) {
-        processChannelReg(ekstepChannelList, sunbirdChannelList);
+        processChannelReg(ekstepChannelList, sunbirdChannelList, request.getRequestContext());
       }
     }
   }
 
   private void processChannelReg(
-      List<String> ekstepChannelList, List<Map<String, Object>> sunbirdChannelList) {
+      List<String> ekstepChannelList,
+      List<Map<String, Object>> sunbirdChannelList,
+      RequestContext context) {
     Boolean bool = true;
     for (Map<String, Object> map : sunbirdChannelList) {
-      ProjectLogger.log("processing start for hashTagId " + map.get(JsonKey.HASHTAGID));
+      logger.info(context, "processing start for hashTagId " + map.get(JsonKey.HASHTAGID));
       if (!StringUtils.isBlank((String) map.get(JsonKey.HASHTAGID))
           && (!ekstepChannelList.contains(map.get(JsonKey.HASHTAGID)))
-          && (!Util.registerChannel(map))) {
+          && (!Util.registerChannel(map, context))) {
         bool = false;
       }
     }
     if (bool) {
-      updateSystemSettingTable(bool);
+      updateSystemSettingTable(bool, context);
     }
   }
 
-  private void updateSystemSettingTable(Boolean bool) {
+  private void updateSystemSettingTable(Boolean bool, RequestContext context) {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ID, JsonKey.CHANNEL_REG_STATUS_ID);
     map.put(JsonKey.FIELD, JsonKey.CHANNEL_REG_STATUS);
     map.put(JsonKey.VALUE, String.valueOf(bool));
-    Response response = cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map);
-    ProjectLogger.log(
+    Response response =
+        cassandraOperation.upsertRecord("sunbird", JsonKey.SYSTEM_SETTINGS_DB, map, context);
+    logger.info(
+        context,
         "Upsert operation result for channel reg status =  "
             + response.getResult().get(JsonKey.RESPONSE));
   }
 
-  private List<Map<String, Object>> getSunbirdChannelList() {
-    ProjectLogger.log("start call for getting List of channel from sunbird ES");
+  private List<Map<String, Object>> getSunbirdChannelList(RequestContext context) {
+    logger.info(context, "start call for getting List of channel from sunbird ES");
     SearchDTO searchDto = new SearchDTO();
     List<String> list = new ArrayList<>();
     list.add(JsonKey.HASHTAGID);
@@ -93,15 +102,15 @@ public class ChannelRegistrationActor extends BaseActor {
     filter.put(JsonKey.IS_ROOT_ORG, true);
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     Future<Map<String, Object>> esResponseF =
-        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName());
+        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> orgList = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
-    ProjectLogger.log("End call for getting List of channel from sunbird ES");
+    logger.info(context, "End call for getting List of channel from sunbird ES");
     return orgList;
   }
 
-  private List<String> getEkstepChannelList() {
+  private List<String> getEkstepChannelList(RequestContext context) {
     List<String> channelList = new ArrayList<>();
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
@@ -119,7 +128,7 @@ public class ChannelRegistrationActor extends BaseActor {
     JSONObject jObject;
     Object[] result = null;
     try {
-      ProjectLogger.log("start call for getting List of channel from Ekstep");
+      logger.info(context, "start call for getting List of channel from Ekstep");
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -131,14 +140,15 @@ public class ChannelRegistrationActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       reqString = mapper.writeValueAsString(map);
       response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_GET_CHANNEL_LIST)),
               reqString,
               headerMap);
       jObject = new JSONObject(response);
       data = jObject.getJSONObject(JsonKey.RESULT);
-      ProjectLogger.log(
+      logger.info(
+          context,
           "Total number of content fetched from Ekstep while getting List of channel : "
               + data.get("count"));
       JSONArray contentArray = data.getJSONArray(JsonKey.CHANNELS);
@@ -147,9 +157,9 @@ public class ChannelRegistrationActor extends BaseActor {
         Map<String, Object> tempMap = (Map<String, Object>) object;
         channelList.add((String) tempMap.get(JsonKey.CODE));
       }
-      ProjectLogger.log("end call for getting List of channel from Ekstep");
+      logger.info(context, "end call for getting List of channel from Ekstep");
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
       channelList = null;
     }
     return channelList;

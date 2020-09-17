@@ -20,7 +20,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.actor.service.BaseMWService;
+import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -29,26 +30,30 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.search.SearchHandlerActor;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class})
+@PrepareForTest({
+  ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class,
+  SunbirdMWService.class,
+  BaseMWService.class
+})
 @PowerMockIgnore({"javax.management.*"})
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;
   private static final Props props = Props.create(SearchHandlerActor.class);
-  private static CassandraOperationImpl cassandraOperation;
   private static ElasticSearchService esService;
 
   @BeforeClass
   public static void setUp() {
     system = ActorSystem.create("system");
-    PowerMockito.mockStatic(ServiceFactory.class);
-    cassandraOperation = mock(CassandraOperationImpl.class);
   }
 
   @Before
@@ -58,26 +63,9 @@ public class SearchHandlerActorTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(true));
-    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg()))
+    when(esService.search(
+            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
-
-    PowerMockito.mockStatic(ServiceFactory.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyList()))
-        .thenReturn(getRecordByPropertyResponse());
-  }
-
-  private static Response getRecordByPropertyResponse() {
-
-    Response response = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> courseMap = new HashMap<>();
-    courseMap.put(JsonKey.ACTIVE, true);
-    courseMap.put(JsonKey.USER_ID, "anyUserId");
-    list.add(courseMap);
-    response.put(JsonKey.RESPONSE, list);
-    return response;
   }
 
   private static Map<String, Object> createResponseGet(boolean isResponseRequired) {
@@ -98,6 +86,10 @@ public class SearchHandlerActorTest {
 
   @Test
   public void searchUser() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
+    BaseMWService.getRemoteRouter(Mockito.anyString());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 
@@ -123,6 +115,10 @@ public class SearchHandlerActorTest {
 
   @Test
   public void searchUserWithObjectTypeAsOrg() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
+    BaseMWService.getRemoteRouter(Mockito.anyString());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 
@@ -149,6 +145,10 @@ public class SearchHandlerActorTest {
 
   @Test
   public void testInvalidOperation() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
+    BaseMWService.getRemoteRouter(Mockito.anyString());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 

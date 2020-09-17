@@ -13,10 +13,9 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
@@ -38,45 +37,46 @@ public class IdentifierFreeUpActor extends BaseActor {
   public void onReceive(Request request) {
     String id = (String) request.get(JsonKey.ID);
     List<String> identifiers = (List) request.get(JsonKey.IDENTIFIER);
-    freeUpUserIdentifier(id, identifiers);
+    RequestContext context = request.getRequestContext();
+    freeUpUserIdentifier(id, identifiers, context);
   }
 
-  private Map<String, Object> getUserById(String id) {
+  private Map<String, Object> getUserById(String id, RequestContext context) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
         getCassandraOperation()
-            .getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id);
+            .getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, context);
     List<Map<String, Object>> responseList = (List) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(responseList)) {
-      ProjectLogger.log(
+      logger.info(
+          context,
           String.format(
               "%s:%s:User not found with provided Id:%s",
-              this.getClass().getSimpleName(), "getById", id),
-          LoggerEnum.ERROR.name());
+              this.getClass().getSimpleName(), "getById", id));
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
     }
     return responseList.get(0);
   }
 
-  private Response processUserAttribute(Map<String, Object> userDbMap, List<String> identifiers) {
-
+  private Response processUserAttribute(
+      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
     if (identifiers.contains(JsonKey.EMAIL)) {
       nullifyEmail(userDbMap);
-      ProjectLogger.log(
+      logger.info(
+          context,
           String.format(
               "%s:%s:Nullified Email. WITH ID  %s",
-              this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)),
-          LoggerEnum.INFO.name());
+              this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)));
     }
     if (identifiers.contains(JsonKey.PHONE)) {
       nullifyPhone(userDbMap);
-      ProjectLogger.log(
+      logger.info(
+          context,
           String.format(
               "%s:%s:Nullified Phone. WITH ID  %s",
-              this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)),
-          LoggerEnum.INFO.name());
+              this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)));
     }
-    return updateUser(userDbMap);
+    return updateUser(userDbMap, context);
   }
 
   private void nullifyEmail(Map<String, Object> userDbMap) {
@@ -112,35 +112,36 @@ public class IdentifierFreeUpActor extends BaseActor {
     return flagsValue;
   }
 
-  private Response updateUser(Map<String, Object> userDbMap) {
+  private Response updateUser(Map<String, Object> userDbMap, RequestContext context) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     return getCassandraOperation()
-        .updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userDbMap);
+        .updateRecord(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userDbMap, context);
   }
 
-  private void freeUpUserIdentifier(String id, List<String> identifiers) {
-    Map<String, Object> userDbMap = getUserById(id);
-    Response response = processUserAttribute(userDbMap, identifiers);
-    boolean esResponse = saveUserDetailsToEs(userDbMap);
-    ProjectLogger.log(
+  private void freeUpUserIdentifier(String id, List<String> identifiers, RequestContext context) {
+    Map<String, Object> userDbMap = getUserById(id, context);
+    Response response = processUserAttribute(userDbMap, identifiers, context);
+    boolean esResponse = saveUserDetailsToEs(userDbMap, context);
+    logger.info(
+        context,
         "IdentifierFreeUpActor:freeUpUserIdentifier response got from ES for identifier freeup api :"
-            + esResponse,
-        LoggerEnum.INFO.name());
+            + esResponse);
     sender().tell(response, self());
-    ProjectLogger.log(
+    logger.info(
+        context,
         String.format(
             "%s:%s:USER MAP SUCCESSFULLY UPDATED IN CASSANDRA. WITH ID  %s",
-            this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)),
-        LoggerEnum.INFO.name());
+            this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)));
   }
 
-  private boolean saveUserDetailsToEs(Map<String, Object> userDbMap) {
+  private boolean saveUserDetailsToEs(Map<String, Object> userDbMap, RequestContext context) {
     Future<Boolean> future =
         getEsUtil()
             .update(
                 ProjectUtil.EsType.user.getTypeName(),
                 (String) userDbMap.get(JsonKey.ID),
-                userDbMap);
+                userDbMap,
+                context);
     return (boolean) ElasticSearchHelper.getResponseFromFuture(future);
   }
 

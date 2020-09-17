@@ -29,6 +29,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
@@ -77,14 +78,28 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(cassandraInsertRecord());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraRecordsByProperties());
-    cassandraOperation.deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap());
+    cassandraOperation.deleteRecord(
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyMap(),
+        Mockito.any(RequestContext.class));
     cassandraOperation.updateRecord(
-        Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap());
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyMap(),
+        Mockito.anyMap(),
+        Mockito.any(RequestContext.class));
 
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
@@ -104,7 +119,7 @@ public class UserSelfDeclarationManagementActorTest {
     map.put(JsonKey.PROVIDER, "anyProvider");
     map.put(JsonKey.USER_ID, "userid1");
     map.put(JsonKey.ORG_ID, "org1");
-    map.put(JsonKey.PERSONA, "teacher");
+    map.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -192,7 +207,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity addUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("01234848481");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -205,7 +220,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity removeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("018329328293892");
-    userDeclareEntity.setPersona(JsonKey.TEACHER.toLowerCase());
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -231,7 +246,7 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity editOrgChangeUserDeclaredEntity() {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setStatus(JsonKey.PENDING);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
@@ -282,10 +297,10 @@ public class UserSelfDeclarationManagementActorTest {
   private UserDeclareEntity userDeclaredEntityWithErrorStatus(boolean errorStatus) {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     userDeclareEntity.setUserId("someUserID");
     if (errorStatus) {
-      userDeclareEntity.setStatus(JsonKey.ERROR);
+      userDeclareEntity.setStatus(JsonKey.SELF_DECLARED_ERROR);
     } else {
       userDeclareEntity.setStatus(JsonKey.VALIDATED);
     }

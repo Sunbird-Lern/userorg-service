@@ -11,11 +11,11 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.azure.CloudService;
 import org.sunbird.common.models.util.azure.CloudServiceFactory;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** Class to upload the file on cloud storage. Created by arvind on 28/8/17. */
@@ -35,6 +35,7 @@ public class FileUploadServiceActor extends BaseActor {
   }
 
   private void processFileUpload(Request actorMessage) throws IOException {
+    RequestContext context = actorMessage.getRequestContext();
     String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
     Map<String, Object> req = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.DATA);
 
@@ -50,7 +51,7 @@ public class FileUploadServiceActor extends BaseActor {
     String fName = "File-" + processId;
     if (!StringUtils.isBlank(fileExtension)) {
       fName = fName + "." + fileExtension.toLowerCase();
-      ProjectLogger.log("File - " + fName + " Extension is " + fileExtension);
+      logger.info(context, "File - " + fName + " Extension is " + fileExtension);
     }
 
     File file = new File(fName);
@@ -62,7 +63,7 @@ public class FileUploadServiceActor extends BaseActor {
 
       CloudService service = (CloudService) CloudServiceFactory.get("Azure");
       if (null == service) {
-        ProjectLogger.log("The cloud service is not available");
+        logger.info(context, "The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
                 ResponseCode.invalidRequestData.getErrorCode(),
@@ -71,9 +72,9 @@ public class FileUploadServiceActor extends BaseActor {
         sender().tell(exception, self());
       }
       String container = (String) req.get(JsonKey.CONTAINER);
-      avatarUrl = service.uploadFile(container, file);
+      avatarUrl = service.uploadFile(container, file, context);
     } catch (IOException e) {
-      ProjectLogger.log("Exception Occurred while reading file in FileUploadServiceActor", e);
+      logger.error(context, "Exception Occurred while reading file in FileUploadServiceActor", e);
       throw e;
     } finally {
       try {
@@ -84,8 +85,10 @@ public class FileUploadServiceActor extends BaseActor {
           file.delete();
         }
       } catch (IOException e) {
-        ProjectLogger.log(
-            "Exception Occurred while closing fileInputStream in FileUploadServiceActor", e);
+        logger.error(
+            context,
+            "Exception Occurred while closing fileInputStream in FileUploadServiceActor",
+            e);
       }
     }
     response.put(JsonKey.URL, avatarUrl);

@@ -5,63 +5,57 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.Util;
 import org.sunbird.user.dao.UserExternalIdentityDao;
+import org.sunbird.user.util.UserLookUp;
 
 public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
+  private static LoggerUtil logger = new LoggerUtil(UserExternalIdentityDaoImpl.class);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
-  /*  @Override
-  public String getUserId(Request reqObj) {
-
-    if (StringUtils.isBlank(userId)) {
-      String extId = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID);
-      String provider = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
-      String idType = (String) reqObj.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-
-      userId = getUserIdByExternalId(extId, provider, idType);
-    }
-
-    return userId;
-  }*/
-
   @Override
-  public String getUserIdByExternalId(String extId, String provider, String idType) {
-    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Map<String, Object> externalIdReq = new HashMap<>();
-    externalIdReq.put(JsonKey.PROVIDER, provider.toLowerCase());
-    externalIdReq.put(JsonKey.ID_TYPE, idType.toLowerCase());
-    externalIdReq.put(JsonKey.EXTERNAL_ID, extId.toLowerCase());
-    Response response =
-        cassandraOperation.getRecordsByProperties(
-            usrDbInfo.getKeySpace(), JsonKey.USR_EXT_IDNT_TABLE, externalIdReq);
-
-    List<Map<String, Object>> userRecordList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(userRecordList)) {
-      return (String) userRecordList.get(0).get(JsonKey.USER_ID);
+  public String getUserIdByExternalId(String extId, String provider, RequestContext context) {
+    if (StringUtils.isNotEmpty((provider))) {
+      UserLookUp userLookUp = new UserLookUp();
+      List<Map<String, Object>> userRecordList =
+          userLookUp.getRecordByType(
+              JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID, extId + "@" + provider, false, context);
+      if (CollectionUtils.isNotEmpty(userRecordList)) {
+        logger.info(
+            context,
+            "getUserIdByExternalId: got userId from user_lookup for extId "
+                + extId
+                + " "
+                + (String) userRecordList.get(0).get(JsonKey.USER_ID));
+        return (String) userRecordList.get(0).get(JsonKey.USER_ID);
+      }
     }
-
+    logger.info(
+        context,
+        "getUserIdByExternalId: got userId from user_lookup for extId " + extId + " is null");
     return null;
   }
 
   @Override
-  public List<Map<String, String>> getUserExternalIds(String userId) {
+  public List<Map<String, String>> getUserExternalIds(String userId, RequestContext context) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, JsonKey.USER_ID, userId);
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -69,11 +63,14 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   }
 
   @Override
-  public List<Map<String, Object>> getUserSelfDeclaredDetails(String userId) {
+  public List<Map<String, Object>> getUserSelfDeclaredDetails(
+      String userId, RequestContext context) {
     List<Map<String, Object>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, JsonKey.USER_ID, userId);
+        cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -82,7 +79,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
   private String getEncryptedData(String value) {
     try {
-      return encryptionService.encryptData(value);
+      return encryptionService.encryptData(value, null);
     } catch (Exception e) {
       throw new ProjectCommonException(
           ResponseCode.userDataEncryptionError.getErrorCode(),

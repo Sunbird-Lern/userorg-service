@@ -14,6 +14,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /**
  * This controller will handle all the request related user and organization search.
@@ -35,8 +37,10 @@ public class SearchController extends BaseController {
       ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-      reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj
+          .getRequest()
+          .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -58,8 +62,10 @@ public class SearchController extends BaseController {
       String operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
       if ("keycloak".equalsIgnoreCase(operation)) {
         reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
-        reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-        reqObj.getRequest().put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+        reqObj
+            .getRequest()
+            .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
         reqObj.setEnv(getEnvironment());
         HashMap<String, Object> map = new HashMap<>();
         map.put(JsonKey.DATA, reqObj.getRequest());
@@ -67,8 +73,10 @@ public class SearchController extends BaseController {
         return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
       } else {
         reqObj.setOperation(ActorOperations.SYNC.getValue());
-        reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
-        reqObj.getRequest().put(JsonKey.CREATED_BY, ctx().flash().get(JsonKey.USER_ID));
+        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+        reqObj
+            .getRequest()
+            .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
         reqObj.setEnv(getEnvironment());
         HashMap<String, Object> map = new HashMap<>();
         map.put(JsonKey.DATA, reqObj.getRequest());

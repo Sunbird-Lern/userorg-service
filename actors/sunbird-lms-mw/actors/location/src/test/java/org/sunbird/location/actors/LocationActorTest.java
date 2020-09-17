@@ -33,6 +33,7 @@ import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -63,13 +64,22 @@ public class LocationActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.deleteRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
   }
 
@@ -82,9 +92,11 @@ public class LocationActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 
-    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString()))
+    when(esSearch.search(
+            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
-    when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esSearch.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     data = getDataMap();
   }
@@ -156,7 +168,8 @@ public class LocationActorTest {
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getContentMapFromES());
-    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString()))
+    when(esSearch.search(
+            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     boolean result =
         testScenario(

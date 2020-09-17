@@ -36,12 +36,13 @@ public class UserOnboardingNotificationActor extends BaseActor {
     UserUtility.decryptUserData(requestMap);
     requestMap.put(JsonKey.USERNAME, requestMap.get(JsonKey.USERNAME));
     requestMap.put(JsonKey.REDIRECT_URI, Util.getSunbirdWebUrlPerTenent(requestMap));
-    Util.getUserRequiredActionLink(requestMap);
+    Util.getUserRequiredActionLink(requestMap, request.getRequestContext());
     if (request
         .getOperation()
         .equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
       // user created successfully send the onboarding mail
       Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
+      welcomeMailReqObj.setRequestContext(request.getRequestContext());
       if (null != welcomeMailReqObj) {
         tellToAnother(welcomeMailReqObj);
       }
@@ -49,6 +50,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
         .getOperation()
         .equals(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue())) {
       Request resetMailReqObj = Util.sendResetPassMail(requestMap);
+      resetMailReqObj.setRequestContext(request.getRequestContext());
       if (null != resetMailReqObj) {
         tellToAnother(resetMailReqObj);
       }

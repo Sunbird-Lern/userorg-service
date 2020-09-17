@@ -36,6 +36,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.EmailServiceActor;
@@ -96,12 +97,17 @@ public class EmailServiceActorTest {
             .getEncryptionServiceInstance(null))
         .thenReturn(defaultEncryptionServivce);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(cassandraGetRecordById());
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("templateName");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+        .thenReturn("templateName");
 
     Map<String, Object> recipientSearchQuery = new HashMap<>();
     recipientSearchQuery.put(JsonKey.FILTERS, "anyName");
@@ -112,19 +118,24 @@ public class EmailServiceActorTest {
     promise.success(createGetSkillResponse());
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(recipientSearchQuery)),
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName())))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     Promise<Map<String, Object>> promise_recipientSearchQuery = Futures.promise();
 
     promise_recipientSearchQuery.trySuccess(recipientSearchQuery);
     when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName()), Mockito.eq("001")))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.eq("001"),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise_recipientSearchQuery.future());
 
     Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
     promise_esOrgResult.trySuccess(esOrgResult);
     when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()), Mockito.eq("anyRootId")))
+            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
+            Mockito.eq("anyRootId"),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise_esOrgResult.future());
   }
 
@@ -270,7 +281,8 @@ public class EmailServiceActorTest {
 
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(new HashMap<>())),
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName())))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
 
     subject.tell(reqObj, probe.getRef());
@@ -304,7 +316,7 @@ public class EmailServiceActorTest {
     innerMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     innerMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
     reqObj.setRequest(innerMap);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn("");
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
@@ -371,7 +383,8 @@ public class EmailServiceActorTest {
     reqObj.setRequest(innerMap);
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(new HashMap<>())),
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName())))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
+            Mockito.any(RequestContext.class)))
         .thenThrow(new ProjectCommonException("", "", 0));
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any()))
         .thenThrow(new ProjectCommonException("", "", 0));

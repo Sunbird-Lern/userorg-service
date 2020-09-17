@@ -10,15 +10,14 @@ import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
 
 public class SystemSettingClientImpl implements SystemSettingClient {
+  private static LoggerUtil logger = new LoggerUtil(SystemSettingClientImpl.class);
 
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
@@ -32,18 +31,21 @@ public class SystemSettingClientImpl implements SystemSettingClient {
   }
 
   @Override
-  public SystemSetting getSystemSettingByField(ActorRef actorRef, String field) {
-    ProjectLogger.log(
-        "SystemSettingClientImpl:getSystemSettingByField: field is " + field,
-        LoggerEnum.INFO.name());
-    SystemSetting systemSetting = getSystemSetting(actorRef, JsonKey.FIELD, field);
+  public SystemSetting getSystemSettingByField(
+      ActorRef actorRef, String field, RequestContext context) {
+    logger.info(context, "SystemSettingClientImpl:getSystemSettingByField: field is " + field);
+    SystemSetting systemSetting = getSystemSetting(actorRef, JsonKey.FIELD, field, context);
     return systemSetting;
   }
 
   @Override
   public <T> T getSystemSettingByFieldAndKey(
-      ActorRef actorRef, String field, String key, TypeReference typeReference) {
-    SystemSetting systemSetting = getSystemSettingByField(actorRef, field);
+      ActorRef actorRef,
+      String field,
+      String key,
+      TypeReference typeReference,
+      RequestContext context) {
+    SystemSetting systemSetting = getSystemSettingByField(actorRef, field, context);
     ObjectMapper objectMapper = new ObjectMapper();
     if (systemSetting != null) {
       try {
@@ -55,18 +57,21 @@ public class SystemSettingClientImpl implements SystemSettingClient {
         }
         return (T) objectMapper.convertValue(valueMap.get(keys[numKeys - 1]), typeReference);
       } catch (Exception e) {
-        ProjectLogger.log(
+        logger.error(
+            context,
             "SystemSettingClientImpl:getSystemSettingByFieldAndKey: Exception occurred with error message = "
                 + e.getMessage(),
-            LoggerEnum.ERROR.name());
+            e);
       }
     }
     return null;
   }
 
-  private SystemSetting getSystemSetting(ActorRef actorRef, String param, Object value) {
+  private SystemSetting getSystemSetting(
+      ActorRef actorRef, String param, Object value, RequestContext context) {
     ProjectLogger.log("SystemSettingClientImpl: getSystemSetting called", LoggerEnum.DEBUG);
     Request request = new Request();
+    request.setRequestContext(context);
     Map<String, Object> map = new HashMap<>();
     map.put(param, value);
     request.setContext(map);

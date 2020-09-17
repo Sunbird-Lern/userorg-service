@@ -8,37 +8,40 @@ import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.actors.notificationservice.dao.EmailTemplateDao;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.actors.otp.dao.OTPDao;
 import org.sunbird.learner.actors.otp.dao.impl.OTPDaoImpl;
 
 public class OTPService {
+  private static LoggerUtil logger = new LoggerUtil(OTPService.class);
 
   private static OTPDao otpDao = OTPDaoImpl.getInstance();
   private static EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
 
-  public static String getOTPSMSTemplate(String templateName) {
-    return emailTemplateDao.getTemplate(templateName);
+  public static String getOTPSMSTemplate(String templateName, RequestContext context) {
+    return emailTemplateDao.getTemplate(templateName, context);
   }
 
-  public Map<String, Object> getOTPDetails(String type, String key) {
-    return otpDao.getOTPDetails(type, key);
+  public Map<String, Object> getOTPDetails(String type, String key, RequestContext context) {
+    return otpDao.getOTPDetails(type, key, context);
   }
 
-  public void insertOTPDetails(String type, String key, String otp) {
-    otpDao.insertOTPDetails(type, key, otp);
+  public void insertOTPDetails(String type, String key, String otp, RequestContext context) {
+    otpDao.insertOTPDetails(type, key, otp, context);
   }
 
-  public void deleteOtp(String type, String key) {
-    otpDao.deleteOtp(type, key);
+  public void deleteOtp(String type, String key, RequestContext context) {
+    otpDao.deleteOtp(type, key, context);
   }
 
-  public static String getSmsBody(String templateFile, Map<String, String> smsTemplate) {
+  public static String getSmsBody(
+      String templateFile, Map<String, String> smsTemplate, RequestContext requestContext) {
     try {
-      String sms = getOTPSMSTemplate(templateFile);
+      String sms = getOTPSMSTemplate(templateFile, requestContext);
       RuntimeServices rs = RuntimeSingleton.getRuntimeServices();
       SimpleNode sn = rs.parse(sms, "Sms Information");
       Template t = new Template();
@@ -57,13 +60,15 @@ public class OTPService {
       t.merge(context, writer);
       return writer.toString();
     } catch (Exception ex) {
-      ProjectLogger.log(
-          "OTPService:getSmsBody: Exception occurred with error message = " + ex.getMessage(), ex);
+      logger.error(
+          requestContext,
+          "OTPService:getSmsBody: Exception occurred with error message = " + ex.getMessage(),
+          ex);
     }
     return "";
   }
 
-  public void updateAttemptCount(Map<String, Object> otpDetails) {
-    otpDao.updateAttemptCount(otpDetails);
+  public void updateAttemptCount(Map<String, Object> otpDetails, RequestContext context) {
+    otpDao.updateAttemptCount(otpDetails, context);
   }
 }

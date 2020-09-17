@@ -15,6 +15,7 @@ import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
@@ -46,7 +47,8 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             "userProfileConfig",
             "csv",
-            new TypeReference<Map>() {});
+            new TypeReference<Map>() {},
+            request.getRequestContext());
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {
@@ -86,28 +88,36 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
       validateFileHeaderFields(req, DataCacheHandler.bulkUserAllowedFields, false);
     }
     BulkUploadProcess bulkUploadProcess =
-        handleUpload(JsonKey.USER, (String) req.get(JsonKey.CREATED_BY));
+        handleUpload(
+            JsonKey.USER, (String) req.get(JsonKey.CREATED_BY), request.getRequestContext());
     processUserBulkUpload(
-        req, bulkUploadProcess.getId(), bulkUploadProcess, supportedColumnsLowerCaseMap);
+        req,
+        bulkUploadProcess.getId(),
+        bulkUploadProcess,
+        supportedColumnsLowerCaseMap,
+        request.getRequestContext());
   }
 
   private void processUserBulkUpload(
       Map<String, Object> req,
       String processId,
       BulkUploadProcess bulkUploadProcess,
-      Map<String, Object> supportedColumnsMap)
+      Map<String, Object> supportedColumnsMap,
+      RequestContext context)
       throws IOException {
     byte[] fileByteArray = null;
     if (null != req.get(JsonKey.FILE)) {
       fileByteArray = (byte[]) req.get(JsonKey.FILE);
     }
     Integer recordCount =
-        validateAndParseRecords(fileByteArray, processId, new HashMap(), supportedColumnsMap, true);
+        validateAndParseRecords(
+            fileByteArray, processId, new HashMap(), supportedColumnsMap, true, context);
     processBulkUpload(
         recordCount,
         processId,
         bulkUploadProcess,
         BulkUploadActorOperation.USER_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
-        DataCacheHandler.bulkUserAllowedFields);
+        DataCacheHandler.bulkUserAllowedFields,
+        context);
   }
 }

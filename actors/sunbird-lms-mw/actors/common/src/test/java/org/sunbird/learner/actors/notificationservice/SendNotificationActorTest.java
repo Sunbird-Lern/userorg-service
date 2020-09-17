@@ -23,6 +23,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -34,6 +35,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
@@ -49,7 +51,8 @@ import org.sunbird.learner.util.Util;
   EmailTemplateDaoImpl.class,
   SunbirdMWService.class,
   HttpClientUtil.class,
-  ProjectUtil.class
+  ProjectUtil.class,
+  BaseMWService.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class SendNotificationActorTest {
@@ -88,12 +91,17 @@ public class SendNotificationActorTest {
             .getDecryptionServiceInstance(null))
         .thenReturn(defaultDecryptionService);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(cassandraGetRecordById());
 
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("templateName");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+        .thenReturn("templateName");
   }
 
   private static Response cassandraGetRecordById() {
@@ -120,6 +128,10 @@ public class SendNotificationActorTest {
 
   @Test
   public void testSendEmailSuccess() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
+    BaseMWService.getRemoteRouter(Mockito.anyString());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -145,8 +157,13 @@ public class SendNotificationActorTest {
   public void testSendEmailFailureWithInvalidParameterValue() {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -183,7 +200,7 @@ public class SendNotificationActorTest {
     innerMap.put(JsonKey.EMAIL_REQUEST, reqMap);
     reqObj.setRequest(innerMap);
 
-    when(emailTemplateDao.getTemplate(Mockito.anyString())).thenReturn("");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any())).thenReturn("");
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
@@ -195,7 +212,11 @@ public class SendNotificationActorTest {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

@@ -30,6 +30,10 @@ public enum HeaderParam {
   X_Authenticated_Client_Id("x-authenticated-client-id"),
   X_APP_ID("x-app-id"),
   CHANNEL_ID("x-channel-id"),
+  X_Trace_ID("x-trace-id"),
+  X_REQUEST_ID("x-request-id"),
+  X_TRACE_ENABLED("x-trace-enabled"),
+  X_APP_VERSION("x-app-ver"),
   X_Response_Length("x-response-length");
   /** name of the parameter */
   private String name;

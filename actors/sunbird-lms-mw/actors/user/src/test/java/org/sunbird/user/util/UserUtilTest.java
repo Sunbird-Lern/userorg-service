@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -27,6 +26,9 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -44,7 +46,10 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  Util.class
+  DefaultEncryptionServivceImpl.class,
+  Util.class,
+  EncryptionService.class,
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -52,7 +57,6 @@ public class UserUtilTest {
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
 
-  @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(DataCacheHandler.class);
     response = new Response();
@@ -63,14 +67,21 @@ public class UserUtilTest {
     existResponse.put(JsonKey.RESPONSE, userMapList);
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Map<String, String> settingMap = new HashMap<String, String>();
     settingMap.put(JsonKey.PHONE_UNIQUE, "True");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.EMAIL, "test@test.com"))
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.TYPE, JsonKey.EMAIL);
+    reqMap.put(JsonKey.VALUE, "test@test.com");
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMap, null))
         .thenReturn(response);
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD, "user", JsonKey.PHONE, "9663890400"))
+    Map<String, Object> reqMapPhone = new HashMap<>();
+    reqMap.put(JsonKey.TYPE, JsonKey.PHONE);
+    reqMap.put(JsonKey.VALUE, "9663890400");
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMapPhone, null))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 
@@ -83,12 +94,14 @@ public class UserUtilTest {
 
   @Test
   public void generateUniqueStringSuccess() {
+    beforeEachTest();
     String val = UserUtil.generateUniqueString(4);
     assertTrue(val.length() == 4);
   }
 
   @Test
   public void generateUniqueStringSecondCharCheck() {
+    beforeEachTest();
     String val = UserUtil.generateUniqueString(5);
     assertTrue(val.length() == 5);
     assertTrue(
@@ -96,45 +109,8 @@ public class UserUtilTest {
   }
 
   @Test
-  public void checkPhoneUniquenessExist() {
-    User user = new User();
-    user.setPhone("9663890400");
-    boolean response = false;
-    try {
-      UserUtil.checkPhoneUniqueness(user, "create");
-      response = true;
-    } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
-    }
-    assertFalse(response);
-  }
-
-  @Test
-  public void checkPhoneExist() {
-    boolean response = false;
-    try {
-      UserUtil.checkPhoneUniqueness("9663890400");
-      response = true;
-    } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
-    }
-    assertFalse(response);
-  }
-
-  @Test
-  public void checkEmailExist() {
-    boolean response = false;
-    try {
-      UserUtil.checkEmailUniqueness("test@test.com");
-      response = true;
-    } catch (ProjectCommonException e) {
-
-    }
-    assertTrue(response);
-  }
-
-  @Test
   public void copyAndConvertExternalIdsToLower() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<Map<String, String>>();
     Map<String, String> userExternalIdMap = new HashMap<String, String>();
     userExternalIdMap.put(JsonKey.ID, "test123");
@@ -149,9 +125,10 @@ public class UserUtilTest {
 
   @Test
   public void setUserDefaultValueForV3() {
+    beforeEachTest();
     Map<String, Object> userMap = new HashMap<String, Object>();
     userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap);
+    UserUtil.setUserDefaultValueForV3(userMap, null);
     assertNotNull(userMap.get(JsonKey.USERNAME));
     assertNotNull(userMap.get(JsonKey.STATUS));
     assertNotNull(userMap.get(JsonKey.ROLES));
@@ -159,16 +136,16 @@ public class UserUtilTest {
 
   @Test
   public void testValidateManagedUserLimit() {
-
+    beforeEachTest();
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
     List managedUserList = new ArrayList<User>();
     while (managedUserList.size() <= 31) {
       managedUserList.add(new User());
     }
-    when(Util.searchUser(req)).thenReturn(managedUserList);
+    when(Util.searchUser(req, null)).thenReturn(managedUserList);
     try {
-      UserUtil.validateManagedUserLimit("ManagedBy");
+      UserUtil.validateManagedUserLimit("ManagedBy", null);
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
       assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());
@@ -177,6 +154,7 @@ public class UserUtilTest {
 
   @Test
   public void testTransformExternalIdsToSelfDeclaredRequest() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = getExternalIds();
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.USER_ID, "user1");
@@ -188,6 +166,7 @@ public class UserUtilTest {
 
   @Test
   public void testfetchOrgIdByProvider() {
+    beforeEachTest();
     List<String> providers = new ArrayList<>();
     providers.add("channel004");
 
@@ -205,30 +184,53 @@ public class UserUtilTest {
     Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName()))
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
-    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers);
+    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers, null);
     Assert.assertTrue(true);
   }
 
   @Test
   public void testEncryptDeclareFields() throws Exception {
+    beforeEachTest();
     List<Map<String, Object>> declarations = new ArrayList<>();
     Map<String, Object> declareFieldMap = new HashMap<>();
     Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@gmail.com");
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
     userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
     declareFieldMap.put(JsonKey.INFO, userInfo);
     declarations.add(declareFieldMap);
+    Map<String, Object> dbRecords = new HashMap<>();
+    RequestContext context = new RequestContext();
     try {
-      UserUtil.encryptDeclarationFields(declarations);
+      UserUtil.encryptDeclarationFields(declarations, dbRecords, context);
     } catch (Exception ex) {
 
     }
     Assert.assertTrue(true);
   }
 
+  @Test
+  public void testCreateSelfDeclaredObject() {
+    Map<String, Object> declareFieldMap = new HashMap<>();
+    declareFieldMap.put(JsonKey.USER_ID, "1234");
+    declareFieldMap.put(JsonKey.ORG_ID, "012345678");
+    declareFieldMap.put(JsonKey.PERSONA, "teacher");
+    declareFieldMap.put(JsonKey.OPERATION, "add");
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "a**.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9****90");
+    userInfo.put(JsonKey.DECLARED_DISTRICT, "Karnataka");
+    declareFieldMap.put(JsonKey.INFO, userInfo);
+
+    UserDeclareEntity userDeclareEntity =
+        UserUtil.createUserDeclaredObject(declareFieldMap, "01245444444");
+    Assert.assertEquals("PENDING", userDeclareEntity.getStatus());
+  }
+
   private List<Map<String, String>> getExternalIds() {
+    beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<>();
     Map<String, String> extId1 = new HashMap<>();
     extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
@@ -245,5 +247,95 @@ public class UserUtilTest {
     externalIds.add(extId2);
 
     return externalIds;
+  }
+
+  @Test
+  public void testgetUserOrgDetailsDeActive() {
+    beforeEachTest();
+    Response response1 = new Response();
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.IS_DELETED, true);
+    result.put(JsonKey.USER_ID, "123-456-789");
+    responseList.add(result);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    List<String> ids = new ArrayList<>();
+    ids.add("123-456-789");
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
+            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
+        .thenReturn(response1);
+    List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
+    Assert.assertNotNull(res);
+  }
+
+  @Test
+  public void testupdateExternalIdsWithProvider() {
+    beforeEachTest();
+    List<String> providers = new ArrayList<>();
+    providers.add("channel004");
+
+    Map<String, Object> orgMap = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+
+    orgMap.put("id", "1234");
+    orgMap.put("channel", "channel004");
+    orgList.add(orgMap);
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, orgList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    Future<Map<String, Object>> test = promise.future();
+    SearchDTO searchDTO = new SearchDTO();
+    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+        .thenReturn(promise.future());
+    Map<String, String> externalIds = new HashMap<>();
+    externalIds.put(JsonKey.PROVIDER, "1234");
+    externalIds.put(JsonKey.USER_ID, "w131-2323-323-232-3232");
+    List<Map<String, String>> externalIdList = new ArrayList<>();
+    externalIdList.add(externalIds);
+    UserUtil.updateExternalIdsWithProvider(externalIdList, null);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testupdateExternalIdsProviderWithOrgId() {
+    beforeEachTest();
+    List<String> providers = new ArrayList<>();
+    providers.add("channel004");
+
+    Map<String, Object> orgMap = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+
+    orgMap.put("id", "1234");
+    orgMap.put("channel", "channel004");
+    orgList.add(orgMap);
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, orgList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    Future<Map<String, Object>> test = promise.future();
+    SearchDTO searchDTO = new SearchDTO();
+    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+        .thenReturn(promise.future());
+    Map<String, String> externalIds = new HashMap<>();
+    externalIds.put(JsonKey.PROVIDER, "channel1004");
+    externalIds.put(JsonKey.USER_ID, "w131-2323-323-232-3232");
+    List<Map<String, String>> externalIdList = new ArrayList<>();
+    externalIdList.add(externalIds);
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.EXTERNAL_IDS, externalIdList);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(userMap, null);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertEquals(
+          "Invalid value provider for parameter channel1004. Please provide a valid value.",
+          ex.getMessage());
+    }
   }
 }

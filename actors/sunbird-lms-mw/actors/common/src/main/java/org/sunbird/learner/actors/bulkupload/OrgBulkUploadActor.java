@@ -16,6 +16,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
@@ -52,7 +53,8 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             "orgProfileConfig",
             "csv",
-            new TypeReference<Map>() {});
+            new TypeReference<Map>() {},
+            request.getRequestContext());
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {
@@ -90,26 +92,34 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
       validateFileHeaderFields(req, DataCacheHandler.bulkOrgAllowedFields, false, false);
     }
     BulkUploadProcess bulkUploadProcess =
-        handleUpload(JsonKey.ORGANISATION, (String) req.get(JsonKey.CREATED_BY));
+        handleUpload(
+            JsonKey.ORGANISATION,
+            (String) req.get(JsonKey.CREATED_BY),
+            request.getRequestContext());
     processOrgBulkUpload(
-        req, bulkUploadProcess.getId(), bulkUploadProcess, supportedColumnsLowerCaseMap);
+        req,
+        bulkUploadProcess.getId(),
+        bulkUploadProcess,
+        supportedColumnsLowerCaseMap,
+        request.getRequestContext());
   }
 
   private void processOrgBulkUpload(
       Map<String, Object> req,
       String processId,
       BulkUploadProcess bulkUploadProcess,
-      Map<String, Object> supportedColumnsMap)
+      Map<String, Object> supportedColumnsMap,
+      RequestContext context)
       throws IOException {
     byte[] fileByteArray = null;
     if (null != req.get(JsonKey.FILE)) {
       fileByteArray = (byte[]) req.get(JsonKey.FILE);
     }
     HashMap<String, Object> additionalInfo = new HashMap<>();
-    Map<String, Object> user = getUser((String) req.get(JsonKey.CREATED_BY));
+    Map<String, Object> user = getUser((String) req.get(JsonKey.CREATED_BY), context);
     if (user != null) {
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      Map<String, Object> org = getOrg(rootOrgId);
+      Map<String, Object> org = getOrg(rootOrgId, context);
       if (org != null) {
         if (org.get(JsonKey.STATUS) == null
             || (int) org.get(JsonKey.STATUS) == ProjectUtil.OrgStatus.ACTIVE.getValue()) {
@@ -121,25 +131,26 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
       bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
       bulkUploadProcess.setFailureResult(ResponseCode.errorNoRootOrgAssociated.getErrorMessage());
       BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
-      bulkUploadDao.update(bulkUploadProcess);
+      bulkUploadDao.update(bulkUploadProcess, context);
       ProjectCommonException.throwClientErrorException(
           ResponseCode.errorNoRootOrgAssociated,
           ResponseCode.errorNoRootOrgAssociated.getErrorMessage());
     }
     Integer recordCount =
         validateAndParseRecords(
-            fileByteArray, processId, additionalInfo, supportedColumnsMap, true);
+            fileByteArray, processId, additionalInfo, supportedColumnsMap, true, context);
     processBulkUpload(
         recordCount,
         processId,
         bulkUploadProcess,
         BulkUploadActorOperation.ORG_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
-        DataCacheHandler.bulkOrgAllowedFields);
+        DataCacheHandler.bulkOrgAllowedFields,
+        context);
   }
 
-  Map<String, Object> getUser(String userId) {
+  Map<String, Object> getUser(String userId, RequestContext context) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null || result.size() > 0) {
@@ -148,9 +159,10 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
     return null;
   }
 
-  Map<String, Object> getOrg(String orgId) {
+  Map<String, Object> getOrg(String orgId, RequestContext context) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.organisation.getTypeName(), orgId);
+        esService.getDataByIdentifier(
+            ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null && result.size() > 0) {

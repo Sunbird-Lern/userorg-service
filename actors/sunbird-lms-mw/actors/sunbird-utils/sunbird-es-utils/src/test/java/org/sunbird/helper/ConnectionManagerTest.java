@@ -15,7 +15,6 @@ import org.junit.runners.MethodSorters;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.HttpUtil;
 
 /** @author manzarul */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -25,7 +24,6 @@ import org.sunbird.common.models.util.HttpUtil;
   ConnectionManager.class,
   AcknowledgedResponse.class,
   GetRequestBuilder.class,
-  HttpUtil.class,
   BulkProcessor.class,
   FutureUtils.class,
   SearchHit.class,

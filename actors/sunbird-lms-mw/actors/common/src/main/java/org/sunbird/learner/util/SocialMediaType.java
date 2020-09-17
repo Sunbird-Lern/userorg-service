@@ -38,14 +38,15 @@ public class SocialMediaType {
     queryMap.put(JsonKey.NAME, name);
     Response response =
         cassandraOperation.insertRecord(
-            mediaTypeDB.getKeySpace(), mediaTypeDB.getTableName(), queryMap);
+            mediaTypeDB.getKeySpace(), mediaTypeDB.getTableName(), queryMap, null);
     if (ResponseCode.success.getResponseCode() == response.getResponseCode().getResponseCode()) {
       mediaTypes.put(id, name);
     }
   }
 
   public static Response getMediaTypeFromDB() {
-    return cassandraOperation.getAllRecords(mediaTypeDB.getKeySpace(), mediaTypeDB.getTableName());
+    return cassandraOperation.getAllRecords(
+        mediaTypeDB.getKeySpace(), mediaTypeDB.getTableName(), null);
   }
 
   @SuppressWarnings("unchecked")

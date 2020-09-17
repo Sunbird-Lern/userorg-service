@@ -17,18 +17,24 @@ import org.sunbird.common.CassandraUtil;
 import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class CassandraDACImpl extends CassandraOperationImpl {
+  private LoggerUtil logger = new LoggerUtil(CassandraDACImpl.class);
 
   public Response getRecords(
-      String keySpace, String table, Map<String, Object> filters, List<String> fields) {
-    Response response = new Response();
+      String keySpace,
+      String table,
+      Map<String, Object> filters,
+      List<String> fields,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
+    Response response;
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -51,11 +57,15 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       results = session.execute(select);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
-      ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
+      logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != select) {
+        logQueryElapseTime("getRecords", startTime, select.getQueryString(), context);
+      }
     }
     return response;
   }
@@ -65,10 +75,12 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String table,
       Map<String, Object> filters,
       List<String> fields,
-      FutureCallback<ResultSet> callback) {
+      FutureCallback<ResultSet> callback,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
     Session session = connectionManager.getSession(keySpace);
+    Select select = null;
     try {
-      Select select;
       if (CollectionUtils.isNotEmpty(fields)) {
         select = QueryBuilder.select((String[]) fields.toArray()).from(keySpace, table);
       } else {
@@ -89,11 +101,16 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       ResultSetFuture future = session.executeAsync(select);
       Futures.addCallback(future, callback, Executors.newFixedThreadPool(1));
     } catch (Exception e) {
-      ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
+      logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != select) {
+        logQueryElapseTime(
+            "applyOperationOnRecordsAsync", startTime, select.getQueryString(), context);
+      }
     }
   }
 
@@ -103,13 +120,19 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       Map<String, Object> primaryKey,
       String column,
       String key,
-      Object value) {
-    return updateMapRecord(keySpace, table, primaryKey, column, key, value, true);
+      Object value,
+      RequestContext context) {
+    return updateMapRecord(keySpace, table, primaryKey, column, key, value, true, context);
   }
 
   public Response updateRemoveMapRecord(
-      String keySpace, String table, Map<String, Object> primaryKey, String column, String key) {
-    return updateMapRecord(keySpace, table, primaryKey, column, key, null, false);
+      String keySpace,
+      String table,
+      Map<String, Object> primaryKey,
+      String column,
+      String key,
+      RequestContext context) {
+    return updateMapRecord(keySpace, table, primaryKey, column, key, null, false, context);
   }
 
   public Response updateMapRecord(
@@ -119,7 +142,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       String column,
       String key,
       Object value,
-      boolean add) {
+      boolean add,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
     Update update = QueryBuilder.update(keySpace, table);
     if (add) {
       update.with(QueryBuilder.put(column, key, value));
@@ -127,9 +152,9 @@ public class CassandraDACImpl extends CassandraOperationImpl {
       update.with(QueryBuilder.remove(column, key));
     }
     if (MapUtils.isEmpty(primaryKey)) {
-      ProjectLogger.log(
-          Constants.EXCEPTION_MSG_FETCH + table + " : primary key is a must for update call",
-          LoggerEnum.ERROR.name());
+      logger.info(
+          context,
+          Constants.EXCEPTION_MSG_FETCH + table + " : primary key is a must for update call");
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -146,17 +171,19 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     }
     try {
       Response response = new Response();
-      ProjectLogger.log("Remove Map-Key Query: " + update.toString(), LoggerEnum.INFO);
       connectionManager.getSession(keySpace).execute(update);
       response.put(Constants.RESPONSE, Constants.SUCCESS);
       return response;
     } catch (Exception e) {
-      e.printStackTrace();
-      ProjectLogger.log(Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
+      logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != update) {
+        logQueryElapseTime("updateMapRecord", startTime, update.getQueryString(), context);
+      }
     }
   }
 }

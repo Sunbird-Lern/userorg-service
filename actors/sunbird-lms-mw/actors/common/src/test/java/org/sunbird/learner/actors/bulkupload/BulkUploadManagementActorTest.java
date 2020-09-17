@@ -33,6 +33,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -83,7 +84,10 @@ public class BulkUploadManagementActorTest {
 
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -106,7 +110,7 @@ public class BulkUploadManagementActorTest {
 
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -128,7 +132,7 @@ public class BulkUploadManagementActorTest {
     byte[] bytes = getFileAsBytes("BulkOrgUploadEmptyFile.csv");
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -157,7 +161,7 @@ public class BulkUploadManagementActorTest {
 
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -176,7 +180,11 @@ public class BulkUploadManagementActorTest {
   public void testBulkUploadGetStatus() {
     Response response = getCassandraRecordByIdForBulkUploadResponse();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(response);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -200,15 +208,15 @@ public class BulkUploadManagementActorTest {
     byte[] bytes = getFileAsBytes("BulkUploadUserSample.csv");
     Response response = getCassandraRecordByIdForOrgResponse();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), null))
         .thenReturn(response);
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
     when(cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), refOrgId))
+            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), refOrgId, null))
         .thenReturn(response);
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(insertResponse);
 
     Request reqObj = new Request();
@@ -231,14 +239,14 @@ public class BulkUploadManagementActorTest {
     ActorRef subject = system.actorOf(props);
     byte[] bytes = getFileAsBytes("BulkUploadUserSample.csv");
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), null))
         .thenReturn(getCassandraRecordByIdForOrgResponse());
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(getCassandraRecordByIdForOrgResponse());
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(insertResponse);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
@@ -262,11 +270,11 @@ public class BulkUploadManagementActorTest {
     byte[] bytes = getFileAsBytes("BulkUploadUserWithInvalidHeaders.csv");
     Response response = getCassandraRecordByIdForOrgResponse();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(insertResponse);
 
     Request reqObj = new Request();
@@ -299,11 +307,11 @@ public class BulkUploadManagementActorTest {
 
     Response response = getCassandraRecordByIdForOrgResponse();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(insertResponse);
 
     Request reqObj = new Request();

@@ -2,19 +2,22 @@ package org.sunbird.common.models.util.azure;
 
 import java.io.File;
 import java.util.List;
+import org.sunbird.common.request.RequestContext;
 
 /** Created by arvind on 24/8/17. */
 public interface CloudService {
 
-  String uploadFile(String containerName, String filName, String fileLocation);
+  String uploadFile(
+      String containerName, String filName, String fileLocation, RequestContext context);
 
-  boolean downLoadFile(String containerName, String fileName, String downloadFolder);
+  boolean downLoadFile(
+      String containerName, String fileName, String downloadFolder, RequestContext context);
 
-  String uploadFile(String containerName, File file);
+  String uploadFile(String containerName, File file, RequestContext context);
 
-  boolean deleteFile(String containerName, String fileName);
+  boolean deleteFile(String containerName, String fileName, RequestContext context);
 
-  List<String> listAllFiles(String containerName);
+  List<String> listAllFiles(String containerName, RequestContext context);
 
-  boolean deleteContainer(String containerName);
+  boolean deleteContainer(String containerName, RequestContext context);
 }

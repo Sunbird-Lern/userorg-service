@@ -41,7 +41,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
         LoggerEnum.INFO.name());
     processRecords(unprocessedRecordIds);
     ShadowUserProcessor processorObject = new ShadowUserProcessor();
-    processorObject.process();
+    processorObject.process(null);
     unprocessedRecordIds.clear();
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:execute:Scheduler Job ended for shadow user migration",
@@ -134,7 +134,8 @@ public class ShadowUserMigrationScheduler extends BaseJob {
             JsonKey.ID,
             JsonKey.STATUS,
             ProjectUtil.BulkProcessStatus.INTERRUPT.getValue(),
-            JsonKey.MIGRATION_USER_OBJECT);
+            JsonKey.MIGRATION_USER_OBJECT,
+            null);
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
@@ -158,7 +159,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     int FIRST_RECORD = 0;
     Response response =
         cassandraOperation.getRecordById(
-            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId);
+            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), processId, null);
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
@@ -187,7 +188,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
   private List<MigrationUser> getMigrationUserAsList(BulkMigrationUser bulkMigrationUser) {
     List<MigrationUser> migrationUserList = new ArrayList<>();
     try {
-      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData());
+      String decryptedData = decryptionService.decryptData(bulkMigrationUser.getData(), null);
       migrationUserList =
           mapper.readValue(decryptedData, new TypeReference<List<MigrationUser>>() {});
     } catch (Exception e) {
@@ -206,8 +207,8 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     propertiesMap.put("userExtId", userExtId);
     Map<String, Object> result = new HashMap<>();
     Response response =
-        cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap);
+        cassandraOperation.getRecordsByPropertiesWithFiltering(
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((Map) ((List) response.getResult().get(JsonKey.RESPONSE)).get(0));
     }
@@ -246,7 +247,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
       dbMap.put(JsonKey.CLAIM_STATUS, ClaimStatus.ORGEXTERNALIDMISMATCH.getValue());
     }
     Response response =
-        cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.SHADOW_USER, dbMap);
+        cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.SHADOW_USER, dbMap, null);
     dbMap.clear();
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:insertShadowUser: record status in cassandra "
@@ -297,14 +298,14 @@ public class ShadowUserMigrationScheduler extends BaseJob {
       compositeKeysMap.put(JsonKey.USER_EXT_ID, migrationUser.getUserExternalId());
 
       cassandraOperation.updateRecord(
-          JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap);
+          JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, null);
 
       if (isClaimed) {
         ProjectLogger.log(
             "ShadowUserMigrationScheduler:updateUserInShadowDb: isClaimed ",
             LoggerEnum.INFO.name());
         ShadowUser newShadowUser = getUpdatedShadowUser(compositeKeysMap);
-        new ShadowUserProcessor().processClaimedUser(newShadowUser);
+        new ShadowUserProcessor().processClaimedUser(newShadowUser, null);
       }
     }
 
@@ -341,7 +342,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
   private ShadowUser getUpdatedShadowUser(Map<String, Object> compositeKeysMap) {
     Response response =
         cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, compositeKeysMap);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, compositeKeysMap, null);
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:getUpdatedShadowUser: record status in cassandra for getting the updated shawdow user object "
             .concat(response.getResult() + ""),
@@ -377,7 +378,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
   private void updateBulkUserTable(Map<String, Object> propertiesMap) {
     Response response =
         cassandraOperation.updateRecord(
-            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), propertiesMap);
+            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), propertiesMap, null);
     ProjectLogger.log(
         "ShadowUserMigrationScheduler:updateBulkUserTable: status update result"
             .concat(response + ""),
@@ -461,7 +462,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
         (Map<String, Object>)
             ElasticSearchHelper.getResponseFromFuture(
                 elasticSearchService.search(
-                    searchDTO, ProjectUtil.EsType.organisation.getTypeName()));
+                    searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null));
     if (CollectionUtils.isNotEmpty((List<Map<String, Object>>) response.get(JsonKey.CONTENT))) {
       verifiedChannelOrgExternalIdSet.add(
           migrationUser.getChannel() + ":" + migrationUser.getOrgExternalId());
@@ -474,7 +475,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
 
   private String encryptValue(String key) {
     try {
-      return encryptionService.encryptData(key);
+      return encryptionService.encryptData(key, null);
     } catch (Exception e) {
       ProjectLogger.log(
           "ShadowUserMigrationScheduler:getEncryptedValue: error occurred in encrypting value "

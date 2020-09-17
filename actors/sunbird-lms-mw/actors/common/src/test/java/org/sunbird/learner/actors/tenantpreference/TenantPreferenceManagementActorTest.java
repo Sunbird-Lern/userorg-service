@@ -68,12 +68,16 @@ public class TenantPreferenceManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     cassandraOperation.deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap());
     try {
       when(cassandraOperation.updateRecord(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.anyMap(),
+              Mockito.anyMap(),
+              Mockito.any()))
           .thenReturn(createCassandraInsertSuccessResponse());
     } catch (Exception e) {
     }
@@ -98,7 +102,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
@@ -118,7 +122,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -137,7 +141,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -156,7 +160,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
@@ -177,7 +181,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
@@ -197,7 +201,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -253,7 +257,7 @@ public class TenantPreferenceManagementActorTest {
     actorMessage.setRequest(map);
     actorMessage.setOperation(ActorOperations.GET_TENANT_PREFERENCE.getValue());
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =

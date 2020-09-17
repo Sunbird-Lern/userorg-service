@@ -38,6 +38,7 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -86,6 +87,7 @@ public class UserRoleActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.IS_DELETED, false);
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -108,7 +110,8 @@ public class UserRoleActorTest {
     when(RoleDaoImpl.getInstance()).thenReturn(roleDao);
     UserOrgDao userOrgDao = Mockito.mock(UserOrgDaoImpl.class);
     when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
-    when(userOrgDao.updateUserOrg(Mockito.anyObject())).thenReturn(getSuccessResponse());
+    when(userOrgDao.updateUserOrg(Mockito.anyObject(), Mockito.any()))
+        .thenReturn(getSuccessResponse());
     CompletionStage completionStage = Mockito.mock(CompletionStage.class);
     ActorSelection actorSelection = Mockito.mock(ActorSelection.class);
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(actorSelection);
@@ -120,10 +123,14 @@ public class UserRoleActorTest {
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString()))
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraResponse());
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getRecordByPropertyResponse());
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -171,7 +178,8 @@ public class UserRoleActorTest {
       subject.tell(reqObj, probe.getRef());
     } else {
       DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
-      when(decryptionService.decryptData(Mockito.anyMap())).thenReturn(getOrganisationsMap());
+      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
+          .thenReturn(getOrganisationsMap());
       when(interServiceCommunication.getResponse(Mockito.anyObject(), Mockito.anyObject()))
           .thenReturn(response);
       if (errorResponse == null) {
@@ -241,7 +249,8 @@ public class UserRoleActorTest {
   private void mockGetOrgResponse(boolean isResponseRequired) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(isResponseRequired));
-    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg()))
+    when(esService.search(
+            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
   }
 

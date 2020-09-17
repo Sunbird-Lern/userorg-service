@@ -15,32 +15,37 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.request.RequestContext;
 
 /** @author Manzarul */
 public class AzureFileUtility {
+
+  private static LoggerUtil logger = new LoggerUtil(AzureFileUtility.class);
 
   private static final String DEFAULT_CONTAINER = "default";
 
   /**
    * This method will remove the file from Azure Storage.
    *
-   * @param fileName
    * @param containerName
+   * @param fileName
+   * @param context
    * @return boolean
    */
-  public static boolean deleteFile(String containerName, String fileName) {
+  public static boolean deleteFile(String containerName, String fileName, RequestContext context) {
     if (fileName == null) {
-      ProjectLogger.log("File name can not be null");
+      logger.info(context, "File name can not be null");
       return false;
     }
     if (StringUtils.isBlank(containerName)) {
-      ProjectLogger.log("Container name can't be null or empty");
+      logger.info(context, "Container name can't be null or empty");
       return false;
     }
     CloudBlobContainer container = AzureConnectionManager.getContainer(containerName, true);
     if (container == null) {
-      ProjectLogger.log("Unable to get Azure contains object");
+      logger.info(context, "Unable to get Azure contains object");
       return false;
     }
     try {
@@ -49,11 +54,11 @@ public class AzureFileUtility {
       // Delete the blob.
       boolean response = blob.deleteIfExists();
       if (!response) {
-        ProjectLogger.log("Provided file not found to delete.");
+        logger.info(context, "Provided file not found to delete.");
       }
       return true;
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     }
     return false;
   }
@@ -62,33 +67,35 @@ public class AzureFileUtility {
    * This method will remove the container from Azure Storage.
    *
    * @param containerName
+   * @param context
    * @return boolean
    */
-  public static boolean deleteContainer(String containerName) {
+  public static boolean deleteContainer(String containerName, RequestContext context) {
     if (StringUtils.isBlank(containerName)) {
-      ProjectLogger.log("Container name can't be null or empty");
+      logger.info(context, "Container name can't be null or empty");
       return false;
     }
     CloudBlobContainer container = AzureConnectionManager.getContainer(containerName, true);
     if (container == null) {
-      ProjectLogger.log("Unable to get Azure contains object");
+      logger.info(context, "Unable to get Azure contains object");
       return false;
     }
     try {
       boolean response = container.deleteIfExists();
       if (!response) {
-        ProjectLogger.log("Container not found..");
+        logger.info(context, "Container not found..");
       } else {
-        ProjectLogger.log("Container is deleted===");
+        logger.info(context, "Container is deleted===");
       }
       return true;
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     }
     return false;
   }
 
-  public static String uploadFile(String containerName, String blobName, String fileName) {
+  public static String uploadFile(
+      String containerName, String blobName, String fileName, RequestContext context) {
 
     CloudBlobContainer container = AzureConnectionManager.getContainer(containerName, true);
     // Create or overwrite the "myimage.jpg" blob with contents from a local file.
@@ -101,13 +108,13 @@ public class AzureFileUtility {
       File source = new File(fileName);
       fis = new FileInputStream(source);
       String mimeType = tika.detect(source);
-      ProjectLogger.log("File - " + source.getName() + " mimeType " + mimeType);
+      logger.info(context, "File - " + source.getName() + " mimeType " + mimeType);
       blob.getProperties().setContentType(mimeType);
       blob.upload(fis, source.length());
       // fileUrl = blob.getStorageUri().getPrimaryUri().getPath();
       fileUrl = blob.getUri().toString();
     } catch (URISyntaxException | IOException e) {
-      ProjectLogger.log("Unable to upload file :" + fileName, e);
+      logger.error(context, "Unable to upload file :" + fileName, e);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     } finally {
@@ -115,7 +122,7 @@ public class AzureFileUtility {
         try {
           fis.close();
         } catch (IOException e) {
-          ProjectLogger.log(e.getMessage(), e);
+          logger.error(context, e.getMessage(), e);
         }
       }
     }
@@ -123,7 +130,7 @@ public class AzureFileUtility {
     return fileUrl;
   }
 
-  public static String uploadFile(String containerName, File source) {
+  public static String uploadFile(String containerName, File source, RequestContext context) {
 
     String containerPath = "";
     String filePath = "";
@@ -160,28 +167,29 @@ public class AzureFileUtility {
       // File source = new File(fileName);
       fis = new FileInputStream(source);
       String mimeType = tika.detect(source);
-      ProjectLogger.log("File - " + source.getName() + " mimeType " + mimeType);
+      logger.info(context, "File - " + source.getName() + " mimeType " + mimeType);
       blob.getProperties().setContentType(mimeType);
       blob.upload(fis, source.length());
       // fileUrl = blob.getStorageUri().getPrimaryUri().getPath();
       fileUrl = blob.getUri().toString();
     } catch (URISyntaxException | IOException e) {
-      ProjectLogger.log("Unable to upload file :" + source.getName(), e);
+      logger.error(context, "Unable to upload file :" + source.getName(), e);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     } finally {
       if (null != fis) {
         try {
           fis.close();
         } catch (IOException e) {
-          ProjectLogger.log(e.getMessage(), e);
+          logger.error(context, e.getMessage(), e);
         }
       }
     }
     return fileUrl;
   }
 
-  public static boolean downloadFile(String containerName, String blobName, String downloadFolder) {
+  public static boolean downloadFile(
+      String containerName, String blobName, String downloadFolder, RequestContext context) {
 
     String dwnldFolder = "";
     boolean flag = false;
@@ -201,26 +209,27 @@ public class AzureFileUtility {
         blob.download(fos);
       }
     } catch (URISyntaxException | StorageException | FileNotFoundException e) {
-      ProjectLogger.log("Unable to upload blobfile :" + blobName, e);
+      logger.error(context, "Unable to upload blobfile :" + blobName, e);
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     } finally {
       if (null != fos) {
         try {
           fos.close();
         } catch (IOException e) {
-          ProjectLogger.log(e.getMessage(), e);
+          logger.error(context, e.getMessage(), e);
         }
       }
     }
     return flag;
   }
 
-  public static List<String> listAllBlobbs(String containerName) {
+  public static List<String> listAllBlobbs(String containerName, RequestContext context) {
 
     List<String> blobsList = new ArrayList<>();
     CloudBlobContainer container = AzureConnectionManager.getContainer(containerName, true);
     // Loop over blobs within the container and output the URI to each of them.
+    logger.info(context, "get all blobs details");
     if (container != null) {
       for (ListBlobItem blobItem : container.listBlobs()) {
         blobsList.add(blobItem.getUri().toString());

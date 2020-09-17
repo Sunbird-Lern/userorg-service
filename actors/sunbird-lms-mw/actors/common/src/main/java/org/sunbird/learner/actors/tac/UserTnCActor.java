@@ -17,6 +17,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -45,6 +46,7 @@ public class UserTnCActor extends BaseActor {
 
   private void acceptTNC(Request request) {
     Util.initializeContext(request, JsonKey.USER);
+    RequestContext context = request.getRequestContext();
     String acceptedTnC = (String) request.getRequest().get(JsonKey.VERSION);
     Map<String, Object> userMap = new HashMap();
     String userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
@@ -62,7 +64,8 @@ public class UserTnCActor extends BaseActor {
             getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
             JsonKey.TNC_CONFIG,
             JsonKey.LATEST_VERSION,
-            new TypeReference<String>() {});
+            new TypeReference<String>() {},
+            context);
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
@@ -71,7 +74,7 @@ public class UserTnCActor extends BaseActor {
     }
     // Search user account in ES
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId);
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result == null || result.size() == 0) {
@@ -104,18 +107,23 @@ public class UserTnCActor extends BaseActor {
     if (StringUtils.isEmpty(lastAcceptedVersion)
         || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)
         || StringUtils.isEmpty((String) result.get(JsonKey.TNC_ACCEPTED_ON))) {
-      ProjectLogger.log(
-        "UserTnCActor:acceptTNC: tc accepted version= " +acceptedTnC+ " accepted on= "+userMap.get(JsonKey.TNC_ACCEPTED_ON)+
-          " for userId:" +userId, LoggerEnum.INFO.name());
+      logger.info(
+          context,
+          "UserTnCActor:acceptTNC: tc accepted version= "
+              + acceptedTnC
+              + " accepted on= "
+              + userMap.get(JsonKey.TNC_ACCEPTED_ON)
+              + " for userId:"
+              + userId);
       userMap.put(JsonKey.ID, userId);
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
           JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
       response =
           cassandraOperation.updateRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap);
+              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, context);
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-        syncUserDetails(userMap);
+        syncUserDetails(userMap, context);
       }
       sender().tell(response, self());
       generateTelemetry(userMap, lastAcceptedVersion, request.getContext());
@@ -140,12 +148,12 @@ public class UserTnCActor extends BaseActor {
         "UserTnCActor:syncUserDetails: Telemetry generation call ended ", LoggerEnum.INFO.name());
   }
 
-  private void syncUserDetails(Map<String, Object> completeUserMap) {
+  private void syncUserDetails(Map<String, Object> completeUserMap, RequestContext context) {
     Request userRequest = new Request();
+    userRequest.setRequestContext(context);
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
-    ProjectLogger.log(
-        "UserTnCActor:syncUserDetails: Trigger sync of user details to ES", LoggerEnum.INFO.name());
+    logger.info(context, "UserTnCActor:syncUserDetails: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
 }

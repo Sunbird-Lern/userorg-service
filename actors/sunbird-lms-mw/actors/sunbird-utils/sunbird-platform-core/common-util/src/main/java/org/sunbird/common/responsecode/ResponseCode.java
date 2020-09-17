@@ -340,14 +340,10 @@ public enum ResponseCode {
       ResponseMessage.Message.USER_ORG_ASSOCIATION_ERROR),
   cloudServiceError(
       ResponseMessage.Key.CLOUD_SERVICE_ERROR, ResponseMessage.Message.CLOUD_SERVICE_ERROR),
-  badgeTypeIdMandatory(
-      ResponseMessage.Key.BADGE_TYPE_ID_ERROR, ResponseMessage.Message.BADGE_TYPE_ID_ERROR),
   receiverIdMandatory(
       ResponseMessage.Key.RECEIVER_ID_ERROR, ResponseMessage.Message.RECEIVER_ID_ERROR),
   invalidReceiverId(
       ResponseMessage.Key.INVALID_RECEIVER_ID, ResponseMessage.Message.INVALID_RECEIVER_ID),
-  invalidBadgeTypeId(
-      ResponseMessage.Key.INVALID_BADGE_ID, ResponseMessage.Message.INVALID_BADGE_ID),
   invalidRole(ResponseMessage.Key.INVALID_ROLE, ResponseMessage.Message.INVALID_ROLE),
   saltValue(ResponseMessage.Key.INVALID_SALT, ResponseMessage.Message.INVALID_SALT),
   orgTypeMandatory(
@@ -462,33 +458,6 @@ public enum ResponseCode {
       ResponseMessage.Message.USER_NOT_ASSOCIATED_TO_ROOT_ORG),
   slugIsNotUnique(
       ResponseMessage.Key.SLUG_IS_NOT_UNIQUE, ResponseMessage.Message.SLUG_IS_NOT_UNIQUE),
-  invalidDataForCreateBadgeIssuer(
-      ResponseMessage.Key.INVALID_CREATE_BADGE_ISSUER_DATA,
-      ResponseMessage.Message.INVALID_CREATE_BADGE_ISSUER_DATA),
-  issuerIdRequired(
-      ResponseMessage.Key.ISSUER_ID_REQUIRED, ResponseMessage.Message.ISSUER_ID_REQUIRED),
-  badgeIdRequired(ResponseMessage.Key.BADGE_ID_REQUIRED, ResponseMessage.Message.BADGE_ID_REQUIRED),
-  badgeNameRequired(
-      ResponseMessage.Key.BADGE_NAME_REQUIRED, ResponseMessage.Message.BADGE_NAME_REQUIRED),
-  badgeDescriptionRequired(
-      ResponseMessage.Key.BADGE_DESCRIPTION_REQUIRED,
-      ResponseMessage.Message.BADGE_DESCRIPTION_REQUIRED),
-  badgeCriteriaRequired(
-      ResponseMessage.Key.BADGE_CRITERIA_REQUIRED, ResponseMessage.Message.BADGE_CRITERIA_REQUIRED),
-  rootOrgIdRequired(
-      ResponseMessage.Key.ROOT_ORG_ID_REQUIRED, ResponseMessage.Message.ROOT_ORG_ID_REQUIRED),
-  badgeTypeRequired(
-      ResponseMessage.Key.BADGE_TYPE_REQUIRED, ResponseMessage.Message.BADGE_TYPE_REQUIRED),
-  invalidBadgeType(
-      ResponseMessage.Key.INVALID_BADGE_TYPE, ResponseMessage.Message.INVALID_BADGE_TYPE),
-  invalidBadgeSubtype(
-      ResponseMessage.Key.INVALID_BADGE_SUBTYPE, ResponseMessage.Message.INVALID_BADGE_SUBTYPE),
-  invalidBadgeRole(
-      ResponseMessage.Key.INVALID_BADGE_ROLE, ResponseMessage.Message.INVALID_BADGE_ROLE),
-  badgeRolesRequired(
-      ResponseMessage.Key.BADGE_ROLES_REQUIRED, ResponseMessage.Message.BADGE_ROLES_REQUIRED),
-  badgeImageRequired(
-      ResponseMessage.Key.BADGE_IMAGE_REQUIRED, ResponseMessage.Message.BADGE_IMAGE_REQUIRED),
   recipientEmailRequired(
       ResponseMessage.Key.RECIPIENT_EMAIL_REQUIRED,
       ResponseMessage.Message.RECIPIENT_EMAIL_REQUIRED),
@@ -513,8 +482,6 @@ public enum ResponseCode {
   revocationReasonRequired(
       ResponseMessage.Key.REVOCATION_REASON_REQUIRED,
       ResponseMessage.Message.REVOCATION_REASON_REQUIRED),
-  badgeAssertionAlreadyRevoked(
-      ResponseMessage.Key.ALREADY_REVOKED, ResponseMessage.Message.ALREADY_REVOKED),
   invalidRecipientType(
       ResponseMessage.Key.INVALID_RECIPIENT_TYPE, ResponseMessage.Message.INVALID_RECIPIENT_TYPE),
   customClientError(
@@ -540,8 +507,6 @@ public enum ResponseCode {
   orgDoesNotExist(ResponseMessage.Key.ORG_NOT_EXIST, ResponseMessage.Message.ORG_NOT_EXIST),
   invalidPageSource(
       ResponseMessage.Key.INVALID_PAGE_SOURCE, ResponseMessage.Message.INVALID_PAGE_SOURCE),
-  badgeSubTypeRequired(
-      ResponseMessage.Key.BADGE_SUBTYPE_REQUIRED, ResponseMessage.Message.BADGE_SUBTYPE_REQUIRED),
   locationTypeRequired(
       ResponseMessage.Key.LOCATION_TYPE_REQUIRED, ResponseMessage.Message.LOCATION_TYPE_REQUIRED),
   invalidRequestDataForLocation(
@@ -879,8 +844,13 @@ public enum ResponseCode {
   declaredUserErrorStatusNotUpdated(
       ResponseMessage.Key.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED,
       ResponseMessage.Message.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED),
+  declaredUserValidatedStatusNotUpdated(
+      ResponseMessage.Key.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED,
+      ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
   preferenceNotFound(
       ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
+  InvalidUserInfoValue(
+      ResponseMessage.Key.INVALID_USER_INFO_VALUE, ResponseMessage.Message.INVALID_USER_INFO_VALUE),
 
   OK(200),
   CLIENT_ERROR(400),

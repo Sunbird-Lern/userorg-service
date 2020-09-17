@@ -39,8 +39,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.sort.SortOrder;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.util.ConfigUtil;
 import org.sunbird.dto.SearchDTO;
 import scala.concurrent.Await;
@@ -54,7 +53,7 @@ import scala.concurrent.Future;
  * @author mayank:github.com/iostream04
  */
 public class ElasticSearchHelper {
-
+  private static LoggerUtil logger = new LoggerUtil(ElasticSearchHelper.class);
   public static final String LTE = "<=";
   public static final String LT = "<";
   public static final String GTE = ">=";
@@ -88,8 +87,7 @@ public class ElasticSearchHelper {
       Object result = Await.result(future, timeout.duration());
       return result;
     } catch (Exception e) {
-      ProjectLogger.log(
-          "ElasticSearchHelper:getResponseFromFuture: error occured " + e, LoggerEnum.ERROR.name());
+      logger.error("getResponseFromFuture: error occured ", e);
     }
     return null;
   }
@@ -104,9 +102,7 @@ public class ElasticSearchHelper {
   public static SearchRequestBuilder addAggregations(
       SearchRequestBuilder searchRequestBuilder, List<Map<String, String>> facets) {
     long startTime = System.currentTimeMillis();
-    ProjectLogger.log(
-        "ElasticSearchHelper:addAggregations: method started at ==" + startTime,
-        LoggerEnum.PERF_LOG.name());
+    logger.info("addAggregations: method started at ==" + startTime);
     if (facets != null && !facets.isEmpty()) {
       Map<String, String> map = facets.get(0);
       if (!MapUtils.isEmpty(map)) {
@@ -127,11 +123,10 @@ public class ElasticSearchHelper {
         }
       }
       long elapsedTime = calculateEndTime(startTime);
-      ProjectLogger.log(
+      logger.info(
           "ElasticSearchHelper:addAggregations method end =="
               + " ,Total time elapsed = "
-              + elapsedTime,
-          LoggerEnum.PERF_LOG.name());
+              + elapsedTime);
     }
 
     return searchRequestBuilder;
@@ -177,9 +172,7 @@ public class ElasticSearchHelper {
   public static void addAdditionalProperties(
       BoolQueryBuilder query, Entry<String, Object> entry, Map<String, Float> constraintsMap) {
     long startTime = System.currentTimeMillis();
-    ProjectLogger.log(
-        "ElasticSearchHelper:addAdditionalProperties: method started at ==" + startTime,
-        LoggerEnum.PERF_LOG.name());
+    logger.info("ElasticSearchHelper:addAdditionalProperties: method started at ==" + startTime);
     String key = entry.getKey();
     if (JsonKey.FILTERS.equalsIgnoreCase(key)) {
 
@@ -199,11 +192,10 @@ public class ElasticSearchHelper {
       }
     }
     long elapsedTime = calculateEndTime(startTime);
-    ProjectLogger.log(
+    logger.info(
         "ElasticSearchHelper:addAdditionalProperties: method end =="
             + " ,Total time elapsed = "
-            + elapsedTime,
-        LoggerEnum.PERF_LOG.name());
+            + elapsedTime);
   }
 
   /**
@@ -631,8 +623,8 @@ public class ElasticSearchHelper {
   /**
    * This method add any softconstraints present in seach query to search DTo
    *
-   * @param SearchDTO search which contains the search parameters for elastic search.
-   * @param Map searchQueryMap which contains soft_constraints
+   * @param search search which contains the search parameters for elastic search.
+   * @param searchQueryMap searchQueryMap which contains soft_constraints
    * @return SearchDTO updated searchDTO which contains soft_constraits
    */
   private static SearchDTO getSoftConstraints(
@@ -647,8 +639,8 @@ public class ElasticSearchHelper {
   /**
    * This method adds any limits present in the search query
    *
-   * @param SearchDTO search which contains the search parameters for elastic search.
-   * @param Map searchQueryMap which contain limit
+   * @param search search which contains the search parameters for elastic search.
+   * @param searchQueryMap searchQueryMap which contain limit
    * @return SearchDTO updated searchDTO which contains limit
    */
   private static SearchDTO getLimits(SearchDTO search, Map<String, Object> searchQueryMap) {
@@ -665,8 +657,8 @@ public class ElasticSearchHelper {
   /**
    * This method adds offset if any present in the searchQuery
    *
-   * @param SearchDTO search which contains the search parameters for elastic search.
-   * @param map searchQueryMap which contains offset
+   * @param search search which contains the search parameters for elastic search.
+   * @param searchQueryMap searchQueryMap which contains offset
    * @return SearchDTO updated searchDTO which contain offset
    */
   private static SearchDTO setOffset(SearchDTO search, Map<String, Object> searchQueryMap) {
@@ -683,8 +675,8 @@ public class ElasticSearchHelper {
   /**
    * This method adds basic query parameter to SearchDTO if any provided
    *
-   * @param SearchDTO search
-   * @param Map searchQueryMap
+   * @param search search
+   * @param searchQueryMap searchQueryMap
    * @return SearchDTO
    */
   private static SearchDTO getBasicBuiders(SearchDTO search, Map<String, Object> searchQueryMap) {
@@ -722,7 +714,7 @@ public class ElasticSearchHelper {
   /**
    * Method returns map which contains all the request data from elasticsearch
    *
-   * @param SearchResponse response from elastic search
+   * @param response response from elastic search
    * @param searchDTO searchDTO which was used to search data
    * @param finalFacetList Facets provide aggregated data based on a search query
    * @return Map which will have all the requested data

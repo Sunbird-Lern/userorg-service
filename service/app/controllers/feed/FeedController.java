@@ -7,11 +7,13 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class FeedController extends BaseController {
 
   public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
-    String callerId = httpRequest.flash().get(JsonKey.USER_ID);
+    String callerId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
 
     return handleRequest(
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),

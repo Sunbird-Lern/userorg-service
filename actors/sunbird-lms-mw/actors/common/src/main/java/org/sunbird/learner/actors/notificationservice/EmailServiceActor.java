@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.notificationservice;
 
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +11,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -20,14 +23,15 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.mail.SendMail;
+import org.sunbird.common.models.util.mail.SendEmail;
+import org.sunbird.common.models.util.mail.SendgridConnection;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -52,9 +56,13 @@ public class EmailServiceActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private SendgridConnection connection = new SendgridConnection();
 
   @Override
   public void onReceive(Request request) throws Throwable {
+    if (null == connection.getTransport()) {
+      connection.createConnection();
+    }
     if (request.getOperation().equalsIgnoreCase(BackgroundOperations.emailService.name())) {
       sendMail(request);
     } else {
@@ -81,14 +89,15 @@ public class EmailServiceActor extends BaseActor {
         while (itr.hasNext()) {
           String phone = itr.next();
           if (!ProjectUtil.validatePhone(phone, "")) {
-            ProjectLogger.log(
-                "EmailServiceActor:sendMail: Removing invalid phone number =" + phone,
-                LoggerEnum.INFO.name());
+            logger.info(
+                actorMessage.getRequestContext(),
+                "EmailServiceActor:sendMail: Removing invalid phone number =" + phone);
             itr.remove();
           }
         }
       }
-      sendSMS(phones, userIds, (String) request.get(JsonKey.BODY));
+      sendSMS(
+          phones, userIds, (String) request.get(JsonKey.BODY), actorMessage.getRequestContext());
     } else {
       // Sending email
       List<String> emails = (List<String>) request.get(JsonKey.RECIPIENT_EMAILS);
@@ -99,14 +108,14 @@ public class EmailServiceActor extends BaseActor {
       }
       // Fetch public user emails from Elastic Search based on recipient search query given in
       // request.
-      getUserEmailsFromSearchQuery(request, emails, userIds);
+      getUserEmailsFromSearchQuery(request, emails, userIds, actorMessage.getRequestContext());
 
-      validateUserIds(userIds, emails);
+      validateUserIds(userIds, emails, actorMessage.getRequestContext());
       validateRecipientsLimit(emails);
 
-      Map<String, Object> user = null;
+      Map<String, Object> user = Collections.EMPTY_MAP;
       if (CollectionUtils.isNotEmpty(emails)) {
-        user = getUserInfo(emails.get(0));
+        user = getUserInfo(emails.get(0), actorMessage.getRequestContext());
       }
 
       String name = "";
@@ -118,40 +127,64 @@ public class EmailServiceActor extends BaseActor {
       }
 
       // fetch orgname inorder to set in the Template context
-      String orgName = getOrgName(request, (String) user.get(JsonKey.USER_ID));
+      String orgName =
+          getOrgName(request, (String) user.get(JsonKey.USER_ID), actorMessage.getRequestContext());
 
       request.put(JsonKey.NAME, name);
       if (orgName != null) {
         request.put(JsonKey.ORG_NAME, orgName);
       }
 
-      String template = getEmailTemplateFile((String) request.get(JsonKey.EMAIL_TEMPLATE_TYPE));
+      String template =
+          getEmailTemplateFile(
+              (String) request.get(JsonKey.EMAIL_TEMPLATE_TYPE), actorMessage.getRequestContext());
 
       if (1 == emails.size()) {
-        ProjectLogger.log(
-            "EmailServiceActor:sendMail: Sending email to = " + emails + " emails",
-            LoggerEnum.INFO.name());
+        logger.info(
+            actorMessage.getRequestContext(),
+            "EmailServiceActor:sendMail: Sending email to = " + emails + " emails");
       } else {
-        ProjectLogger.log(
-            "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails",
-            LoggerEnum.INFO.name());
+        logger.info(
+            actorMessage.getRequestContext(),
+            "EmailServiceActor:sendMail: Sending email to = " + emails.size() + " emails");
       }
-
-      try {
-        SendMail.sendMailWithBody(
-            emails.toArray(new String[emails.size()]),
-            (String) request.get(JsonKey.SUBJECT),
-            ProjectUtil.getContext(request),
-            template);
-      } catch (Exception e) {
-        ProjectLogger.log(
-            "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(), e);
-      }
+      sendMail(request, emails, template, actorMessage.getRequestContext());
     }
 
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());
+  }
+
+  private void sendMail(
+      Map<String, Object> request,
+      List<String> emails,
+      String template,
+      RequestContext requestContext) {
+    try {
+      SendEmail sendEmail = new SendEmail();
+      Velocity.init();
+      VelocityContext context = ProjectUtil.getContext(request);
+      StringWriter writer = new StringWriter();
+      Velocity.evaluate(context, writer, "SimpleVelocity", template);
+      if ((!connection.getTransport().isConnected())) {
+        logger.info(
+            requestContext, "SMTP Transport client connection is closed. Create new connection.");
+        connection.createConnection();
+      }
+      sendEmail.send(
+          emails.toArray(new String[emails.size()]),
+          (String) request.get(JsonKey.SUBJECT),
+          context,
+          writer,
+          connection.getSession(),
+          connection.getTransport());
+    } catch (Exception e) {
+      logger.error(
+          requestContext,
+          "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(),
+          e);
+    }
   }
 
   /**
@@ -161,21 +194,21 @@ public class EmailServiceActor extends BaseActor {
    * @param userIds list of userIds
    * @param smsText message
    */
-  private void sendSMS(List<String> phones, List<String> userIds, String smsText) {
-    ProjectLogger.log(
-        "EmailServiceActor:sendSMS: method started  = " + smsText, LoggerEnum.INFO.name());
+  private void sendSMS(
+      List<String> phones, List<String> userIds, String smsText, RequestContext context) {
+    logger.info(context, "EmailServiceActor:sendSMS: method started  = " + smsText);
     if (CollectionUtils.isEmpty(phones)) {
       phones = new ArrayList<String>();
     }
     if (CollectionUtils.isNotEmpty(userIds)) {
-      List<Map<String, Object>> userList = getUsersFromDB(userIds);
+      List<Map<String, Object>> userList = getUsersFromDB(userIds, context);
       if (userIds.size() != userList.size()) {
         findMissingUserIds(userIds, userList);
       } else {
         for (Map<String, Object> userMap : userList) {
           String phone = (String) userMap.get(JsonKey.PHONE);
           if (StringUtils.isNotBlank(phone)) {
-            String decryptedPhone = decryptionService.decryptData(phone);
+            String decryptedPhone = decryptionService.decryptData(phone, context);
             if (!phones.contains(decryptedPhone)) {
               phones.add(decryptedPhone);
             }
@@ -186,15 +219,16 @@ public class EmailServiceActor extends BaseActor {
 
     validateRecipientsLimit(phones);
 
-    ProjectLogger.log(
-        "EmailServiceActor:sendSMS: Sending sendSMS to = " + phones.size() + " phones",
-        LoggerEnum.INFO.name());
+    logger.info(
+        context, "EmailServiceActor:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
     try {
       ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
       smsProvider.send(phones, smsText);
     } catch (Exception e) {
-      ProjectLogger.log(
-          "EmailServiceActor:sendSMS: Exception occurred with message = " + e.getMessage(), e);
+      logger.error(
+          context,
+          "EmailServiceActor:sendSMS: Exception occurred with message = " + e.getMessage(),
+          e);
     }
   }
 
@@ -209,10 +243,10 @@ public class EmailServiceActor extends BaseActor {
       maxLimit =
           Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT));
     } catch (Exception exception) {
-      ProjectLogger.log(
+      logger.error(
           "EmailServiceActor:validateEmailRecipientsLimit: Exception occurred with error message = "
               + exception.getMessage(),
-          LoggerEnum.INFO);
+          exception);
       maxLimit = 100;
     }
     if (recipients.size() > maxLimit) {
@@ -223,17 +257,17 @@ public class EmailServiceActor extends BaseActor {
     }
   }
 
-  private void validateUserIds(List<String> userIds, List<String> emails) {
+  private void validateUserIds(List<String> userIds, List<String> emails, RequestContext context) {
     // Fetch private (masked in Elastic Search) user emails from Cassandra DB
     if (CollectionUtils.isNotEmpty(userIds)) {
-      List<Map<String, Object>> userList = getUsersFromDB(userIds);
+      List<Map<String, Object>> userList = getUsersFromDB(userIds, context);
       if (userIds.size() != userList.size()) {
         findMissingUserIds(userIds, userList);
       } else {
         for (Map<String, Object> userMap : userList) {
           String email = (String) userMap.get(JsonKey.EMAIL);
           if (StringUtils.isNotBlank(email)) {
-            String decryptedEmail = decryptionService.decryptData(email);
+            String decryptedEmail = decryptionService.decryptData(email, context);
             emails.add(decryptedEmail);
           }
         }
@@ -266,9 +300,9 @@ public class EmailServiceActor extends BaseActor {
         });
   }
 
-  private String getEmailTemplateFile(String templateName) {
+  private String getEmailTemplateFile(String templateName, RequestContext context) {
     EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
-    String template = emailTemplateDao.getTemplate(templateName);
+    String template = emailTemplateDao.getTemplate(templateName, context);
     if (StringUtils.isBlank(template)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
@@ -280,7 +314,7 @@ public class EmailServiceActor extends BaseActor {
     return template;
   }
 
-  private List<Map<String, Object>> getUsersFromDB(List<String> userIds) {
+  private List<Map<String, Object>> getUsersFromDB(List<String> userIds, RequestContext context) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     List<String> userIdList = new ArrayList<>(userIds);
     List<String> fields = new ArrayList<>();
@@ -290,13 +324,16 @@ public class EmailServiceActor extends BaseActor {
     fields.add(JsonKey.PHONE);
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIdList);
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIdList, context);
     List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     return userList;
   }
 
   private void getUserEmailsFromSearchQuery(
-      Map<String, Object> request, List<String> emails, List<String> userIds) {
+      Map<String, Object> request,
+      List<String> emails,
+      List<String> userIds,
+      RequestContext context) {
     Map<String, Object> recipientSearchQuery =
         (Map<String, Object>) request.get(JsonKey.RECIPIENT_SEARCH_QUERY);
     if (MapUtils.isNotEmpty(recipientSearchQuery)) {
@@ -320,7 +357,8 @@ public class EmailServiceActor extends BaseActor {
         Future<Map<String, Object>> esResultF =
             esService.search(
                 ElasticSearchHelper.createSearchDTO(recipientSearchQuery),
-                EsType.user.getTypeName());
+                EsType.user.getTypeName(),
+                context);
         esResult = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
       } catch (Exception ex) {
         ProjectLogger.log(
@@ -342,7 +380,8 @@ public class EmailServiceActor extends BaseActor {
         usersList.forEach(
             user -> {
               if (StringUtils.isNotBlank((String) user.get(JsonKey.EMAIL))) {
-                String email = decryptionService.decryptData((String) user.get(JsonKey.EMAIL));
+                String email =
+                    decryptionService.decryptData((String) user.get(JsonKey.EMAIL), context);
                 if (ProjectUtil.isEmailvalid(email)) {
                   emails.add(email);
                 } else {
@@ -359,13 +398,13 @@ public class EmailServiceActor extends BaseActor {
     }
   }
 
-  private String getOrgName(Map<String, Object> request, String usrId) {
+  private String getOrgName(Map<String, Object> request, String usrId, RequestContext context) {
     String orgName = (String) request.get(JsonKey.ORG_NAME);
     if (StringUtils.isNotBlank(orgName)) {
       return orgName;
     }
     Future<Map<String, Object>> esUserResultF =
-        esService.getDataByIdentifier(EsType.user.getTypeName(), usrId);
+        esService.getDataByIdentifier(EsType.user.getTypeName(), usrId, context);
     Map<String, Object> esUserResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esUserResultF);
     if (null != esUserResult) {
@@ -373,7 +412,7 @@ public class EmailServiceActor extends BaseActor {
       if (!(StringUtils.isBlank(rootOrgId))) {
 
         Future<Map<String, Object>> esOrgResultF =
-            esService.getDataByIdentifier(EsType.organisation.getTypeName(), rootOrgId);
+            esService.getDataByIdentifier(EsType.organisation.getTypeName(), rootOrgId, context);
         Map<String, Object> esOrgResult =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResultF);
         if (null != esOrgResult) {
@@ -388,10 +427,10 @@ public class EmailServiceActor extends BaseActor {
   }
 
   @SuppressWarnings("unchecked")
-  private Map<String, Object> getUserInfo(String email) {
+  private Map<String, Object> getUserInfo(String email, RequestContext context) {
     String encryptedMail = "";
     try {
-      encryptedMail = encryptionService.encryptData(email);
+      encryptedMail = encryptionService.encryptData(email, context);
     } catch (Exception e) {
       ProjectLogger.log(e.getMessage(), e);
     }
@@ -399,7 +438,8 @@ public class EmailServiceActor extends BaseActor {
     Map<String, Object> additionalProperties = new HashMap<>();
     additionalProperties.put(JsonKey.EMAIL, encryptedMail);
     searchDTO.addAdditionalProperty(JsonKey.FILTERS, additionalProperties);
-    Future<Map<String, Object>> esResultF = esService.search(searchDTO, EsType.user.getTypeName());
+    Future<Map<String, Object>> esResultF =
+        esService.search(searchDTO, EsType.user.getTypeName(), context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isNotEmpty(esResult)

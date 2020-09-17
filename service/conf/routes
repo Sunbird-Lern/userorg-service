@@ -23,9 +23,6 @@ GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserControll
 GET  /v1/user/managed/:lua_uuid           @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
 GET  /v2/user/exists/:key/:value        @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
 
-GET   /v1/user/mediatype/list     @controllers.usermanagement.UserProfileController.getProfileSupportedSocialMediaTypes(request: play.mvc.Http.Request)
-POST  /v1/user/profile/visibility @controllers.usermanagement.UserProfileController.setProfileVisibility(request: play.mvc.Http.Request)
-
 POST  /v1/user/block			        @controllers.usermanagement.UserStatusController.blockUser(request: play.mvc.Http.Request)
 POST  /v1/user/unblock			      @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)
 
@@ -76,39 +73,10 @@ POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEnc
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService(request: play.mvc.Http.Request)
 
-
-#metrics APIs for dashboard
-GET  /v1/dashboard/creation/org/:orgId            @controllers.metrics.OrganisationMetricsController.orgCreation(orgId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/org/:orgId         @controllers.metrics.OrganisationMetricsController.orgConsumption(orgId:String, request: play.mvc.Http.Request)
-
-GET  /v1/dashboard/creation/user/:userId          @controllers.metrics.UserMetricsController.userCreation(userId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/user/:userId       @controllers.metrics.UserMetricsController.userConsumption(userId:String, request: play.mvc.Http.Request)
-
-GET  /v1/dashboard/creation/org/:orgId/export            @controllers.metrics.OrganisationMetricsController.orgCreationReport(orgId:String, request: play.mvc.Http.Request)
-GET  /v1/dashboard/consumption/org/:orgId/export         @controllers.metrics.OrganisationMetricsController.orgConsumptionReport(orgId:String, request: play.mvc.Http.Request)
-
-
 #Email
 POST /v1/notification/email					@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
 POST /private/user/v1/notification/email	@controllers.notificationservice.EmailServiceController.sendMail(request: play.mvc.Http.Request)
 POST /v2/notification					    @controllers.notificationservice.EmailServiceController.sendNotification(request: play.mvc.Http.Request)
-
-# Badging APIs
-POST /v1/issuer/create                        @controllers.badging.BadgeIssuerController.createBadgeIssuer(request: play.mvc.Http.Request)
-GET /v1/issuer/read/:issuerId                 @controllers.badging.BadgeIssuerController.getBadgeIssuer(issuerId:String, request: play.mvc.Http.Request)
-GET /v1/issuer/list                           @controllers.badging.BadgeIssuerController.getAllIssuer(request: play.mvc.Http.Request)
-DELETE /v1/issuer/delete/:issuerId            @controllers.badging.BadgeIssuerController.deleteBadgeIssuer(issuerId:String, request: play.mvc.Http.Request)
-
-POST   /v1/issuer/badge/create                @controllers.badging.BadgeClassController.createBadgeClass(request: play.mvc.Http.Request)
-GET    /v1/issuer/badge/read/:badgeId         @controllers.badging.BadgeClassController.getBadgeClass(badgeId:String, request: play.mvc.Http.Request)
-POST   /v1/issuer/badge/search                @controllers.badging.BadgeClassController.searchBadgeClass(request: play.mvc.Http.Request)
-DELETE /v1/issuer/badge/delete/:badgeId       @controllers.badging.BadgeClassController.deleteBadgeClass(badgeId:String, request: play.mvc.Http.Request)
-
-POST  /v1/issuer/badge/assertion/create       @controllers.badging.BadgeAssertionController.issueBadge(request: play.mvc.Http.Request)
-GET  /v1/issuer/badge/assertion/read/:assertionId  @controllers.badging.BadgeAssertionController.getAssertionDetails(assertionId:String, request: play.mvc.Http.Request)
-POST  /v1/issuer/badge/assertion/search      @controllers.badging.BadgeAssertionController.getAssertionList(request: play.mvc.Http.Request)
-DELETE /v1/issuer/badge/assertion/delete      @controllers.badging.BadgeAssertionController.revokeAssertion(request: play.mvc.Http.Request)
-
 
 #Health check
 GET  /health                                  @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)
@@ -121,32 +89,11 @@ PATCH  /v1/note/update/:noteId                 @controllers.notesmanagement.Note
 POST   /v1/note/search                         @controllers.notesmanagement.NotesController.searchNote(request: play.mvc.Http.Request)
 DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.NotesController.deleteNote(noteId:String, request: play.mvc.Http.Request)
 
-# Skill tag and endorsement
-POST /v1/user/skill/add                        @controllers.skills.UserSkillController.addSkill(request: play.mvc.Http.Request)
-POST /v1/user/skill/read                       @controllers.skills.UserSkillController.getSkill(request: play.mvc.Http.Request)
-GET  /v1/skills                                @controllers.skills.UserSkillController.getSkillsList(request: play.mvc.Http.Request)
-POST /v1/user/skill/update                     @controllers.skills.UserSkillController.updateSkill(request: play.mvc.Http.Request)
-POST /v1/user/skill/endorse/add                @controllers.skills.UserSkillEndorsementController.addEndorsement(request: play.mvc.Http.Request)
-
 #T&C
 POST  /v2/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference(request: play.mvc.Http.Request)
 PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
 POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
 DELETE /v1/org/preferences/delete               @controllers.tenantpreference.TenantPreferenceController.deleteTenantPreference(request: play.mvc.Http.Request)
-
-#DB Operation API
-POST   /v1/object/read/list                 @controllers.datapersistence.DbOperationController.readAll(request: play.mvc.Http.Request)
-POST   /v1/object/read                   @controllers.datapersistence.DbOperationController.read(request: play.mvc.Http.Request)
-POST   /v1/object/create                 @controllers.datapersistence.DbOperationController.create(request: play.mvc.Http.Request)
-POST   /v1/object/update                 @controllers.datapersistence.DbOperationController.update(request: play.mvc.Http.Request)
-POST   /v1/object/delete                 @controllers.datapersistence.DbOperationController.delete(request: play.mvc.Http.Request)
-POST   /v1/object/search                 @controllers.datapersistence.DbOperationController.search(request: play.mvc.Http.Request)
-POST   /v1/object/metrics                @controllers.datapersistence.DbOperationController.getMetrics(request: play.mvc.Http.Request)
-
-#Master Key API
-POST   /v1/client/register              @controllers.clientmanagement.ClientController.registerClient(request: play.mvc.Http.Request)
-PATCH  /v1/client/key/update            @controllers.clientmanagement.ClientController.updateClientKey(request: play.mvc.Http.Request)
-GET    /v1/client/key/read/:clientId    @controllers.clientmanagement.ClientController.getClientKey(clientId:String, request: play.mvc.Http.Request)
 
 #GEO LOCATION API
 POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation(request: play.mvc.Http.Request)

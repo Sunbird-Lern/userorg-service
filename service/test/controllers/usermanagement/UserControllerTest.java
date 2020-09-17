@@ -305,7 +305,7 @@ public class UserControllerTest extends BaseApplicationTest {
     userInfo.put(JsonKey.DECLARED_PHONE, "abc@tenant.com");
     userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
     UserDeclareEntity userDeclareEntity =
-        new UserDeclareEntity("userid", "orgid", "teacher", userInfo);
+        new UserDeclareEntity("userid", "orgid", JsonKey.TEACHER_PERSONA, userInfo);
     List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
     userDeclareEntityList.add(userDeclareEntity);
     innerMap.put(JsonKey.DECLARATIONS, userDeclareEntityList);

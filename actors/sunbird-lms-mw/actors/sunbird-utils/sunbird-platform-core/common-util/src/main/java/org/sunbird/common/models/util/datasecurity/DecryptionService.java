@@ -2,6 +2,7 @@ package org.sunbird.common.models.util.datasecurity;
 
 import java.util.List;
 import java.util.Map;
+import org.sunbird.common.request.RequestContext;
 
 /**
  * This service will have data decryption methods. decryption logic will differ based on imp
@@ -21,10 +22,11 @@ public interface DecryptionService {
    * can have another map as values. inner map will also have values as primitive or String or both
    *
    * @param data Map<String,Object>
+   * @param context
    * @return Map<String,Object>
    * @throws Exception
    */
-  Map<String, Object> decryptData(Map<String, Object> data);
+  Map<String, Object> decryptData(Map<String, Object> data, RequestContext context);
 
   /**
    * This method will take list of map as an input to decrypt the data, after decryption it will
@@ -32,25 +34,27 @@ public interface DecryptionService {
    * another map have primitive , String values.
    *
    * @param data List<Map<String,Object>>
+   * @param context
    * @return List<Map<String,Object>>
    * @throws Exception
    */
-  List<Map<String, Object>> decryptData(List<Map<String, Object>> data);
+  List<Map<String, Object>> decryptData(List<Map<String, Object>> data, RequestContext context);
 
   /**
    * Decrypt given data.
    *
    * @param data Input data
+   * @param context
    * @return Decrypted data
    */
-  String decryptData(String data);
+  String decryptData(String data, RequestContext context);
 
   /**
    * Decrypt given data.
    *
    * @param data Input data
+   * @param context
    * @return Decrypted data
-   * @throws ProjectCommonException in case of an error during decryption.
    */
-  String decryptData(String data, boolean throwExceptionOnFailure);
+  String decryptData(String data, boolean throwExceptionOnFailure, RequestContext context);
 }

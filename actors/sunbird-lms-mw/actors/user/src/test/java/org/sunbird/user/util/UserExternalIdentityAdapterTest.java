@@ -51,7 +51,7 @@ public class UserExternalIdentityAdapterTest {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setUserId("userid");
     userDeclareEntity.setOrgId("org");
-    userDeclareEntity.setPersona("teacher");
+    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
     userInfo.put(JsonKey.DECLARED_PHONE, "999999999");

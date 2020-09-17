@@ -56,7 +56,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
   public List<String> getValidatedLocationIds(ActorRef actorRef, List<String> codeList) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(codeList);
-    List<Location> locationList = locationClient.getLocationsByCodes(actorRef, codeList);
+    List<Location> locationList = locationClient.getLocationsByCodes(actorRef, codeList, null);
     List<String> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
@@ -86,7 +86,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
   public List<String> getHierarchyLocationIds(ActorRef actorRef, List<String> locationIdsList) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(locationIdsList);
-    List<Location> locationList = locationClient.getLocationByIds(actorRef, locationIdsList);
+    List<Location> locationList = locationClient.getLocationByIds(actorRef, locationIdsList, null);
     List<String> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
@@ -161,9 +161,9 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     while (count > 0) {
       Location parent = null;
       if (getOrder(location.getType()) == 0 && StringUtils.isNotEmpty(location.getId())) {
-        parent = locationClient.getLocationById(actorRef, location.getId());
+        parent = locationClient.getLocationById(actorRef, location.getId(), null);
       } else if (StringUtils.isNotEmpty(location.getParentId())) {
-        parent = locationClient.getLocationById(actorRef, location.getParentId());
+        parent = locationClient.getLocationById(actorRef, location.getParentId(), null);
       }
       if (null != parent) {
         locationSet.add(parent);

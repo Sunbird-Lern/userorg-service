@@ -21,6 +21,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
@@ -45,6 +46,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   public void onReceive(Request request) throws Throwable {
     String env = null;
     String operation = request.getOperation();
+    logger.info(request.getRequestContext(), "OnReceive Upload csv processing " + operation);
     if (operation.equals("userBulkSelfDeclared")) {
       env = "SelfDeclaredUserUpload";
     } else {
@@ -65,7 +67,9 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     systemSetting =
         systemSettingClient.getSystemSettingByField(
-            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()), "shadowdbmandatorycolumn");
+            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+            "shadowdbmandatorycolumn",
+            request.getRequestContext());
     processCsvBytes(req, request);
   }
 
@@ -82,7 +86,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
     long validationStartTime = System.currentTimeMillis();
     String userId = getCreatedBy(request);
-    Map<String, Object> result = getUserById(userId);
+    Map<String, Object> result = getUserById(userId, request.getRequestContext());
     String channel = getChannel(result);
     String rootOrgId = getRootOrgId(result);
 
@@ -98,33 +102,33 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
       fieldsMap.put("mandatoryFields", Arrays.asList(mandatoryFields.split(",")));
       fieldsMap.put("optionalFields", Arrays.asList(optionalFields.split(",")));
       List<SelfDeclaredUser> selfDeclaredUserList =
-          getUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
-      ProjectLogger.log(
+          getUsers(processId, (byte[]) data.get(JsonKey.FILE), fieldsMap);
+      logger.info(
+          request.getRequestContext(),
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(selfDeclaredUserList.size() + "")
-              + "is(ms): ".concat((System.currentTimeMillis() - validationStartTime) + ""),
-          LoggerEnum.INFO.name());
+              + "is(ms): ".concat((System.currentTimeMillis() - validationStartTime) + ""));
       migrationUser = prepareSelfDeclaredRecord(request, processId, selfDeclaredUserList);
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "UserBulkMigrationActor:processRecord:processing record for number of users "
-              .concat(selfDeclaredUserList.size() + ""),
-          LoggerEnum.INFO.name());
+              .concat(selfDeclaredUserList.size() + ""));
     } else {
       values = mapper.readValue(systemSetting.getValue(), Map.class);
       List<MigrationUser> migrationUserList =
           getMigrationUsers(channel, processId, (byte[]) data.get(JsonKey.FILE), values);
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "UserBulkMigrationActor:processRecord: time taken to validate records of size "
                   .concat(migrationUserList.size() + "")
-              + "is(ms): ".concat((System.currentTimeMillis() - validationStartTime) + ""),
-          LoggerEnum.INFO.name());
+              + "is(ms): ".concat((System.currentTimeMillis() - validationStartTime) + ""));
       migrationUser = prepareRecord(request, processId, migrationUserList);
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "UserBulkMigrationActor:processRecord:processing record for number of users "
-              .concat(migrationUserList.size() + ""),
-          LoggerEnum.INFO.name());
+              .concat(migrationUserList.size() + ""));
     }
-    insertRecord(migrationUser);
+    insertRecord(migrationUser, request.getRequestContext());
     if (request
         .getOperation()
         .equals(BulkUploadActorOperation.USER_BULK_SELF_DECLARED.getValue())) {
@@ -148,22 +152,24 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
         request.getContext());
   }
 
-  private void insertRecord(BulkMigrationUser bulkMigrationUser) {
+  private void insertRecord(BulkMigrationUser bulkMigrationUser, RequestContext context) {
     long insertStartTime = System.currentTimeMillis();
     ObjectMapper mapper = new ObjectMapper();
-    ProjectLogger.log(
+    logger.info(
+        context,
         "UserBulkMigrationActor:insertRecord:record started inserting with "
-            .concat(bulkMigrationUser.getId() + ""),
-        LoggerEnum.INFO.name());
+            .concat(bulkMigrationUser.getId() + ""));
     Map<String, Object> record = mapper.convertValue(bulkMigrationUser, Map.class);
     long createdOn = System.currentTimeMillis();
     record.put(JsonKey.CREATED_ON, new Timestamp(createdOn));
     record.put(JsonKey.LAST_UPDATED_ON, new Timestamp(createdOn));
     Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     Response response =
-        cassandraOperation.insertRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), record);
+        cassandraOperation.insertRecord(
+            dbInfo.getKeySpace(), dbInfo.getTableName(), record, context);
     response.put(JsonKey.PROCESS_ID, bulkMigrationUser.getId());
-    ProjectLogger.log(
+    logger.info(
+        context,
         "UserBulkMigrationActor:insertRecord:time taken by cassandra to insert record of size "
                 .concat(record.size() + "")
             + "is(ms):".concat((System.currentTimeMillis() - insertStartTime) + ""));
@@ -189,11 +195,11 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               .build();
       return migrationUser;
     } catch (Exception e) {
-      e.printStackTrace();
-      ProjectLogger.log(
+      logger.error(
+          request.getRequestContext(),
           "UserBulkMigrationActor:prepareRecord:error occurred while getting preparing record with processId"
               .concat(processID + ""),
-          LoggerEnum.ERROR.name());
+          e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -220,11 +226,10 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               .build();
       return migrationUser;
     } catch (Exception e) {
-      e.printStackTrace();
-      ProjectLogger.log(
+      logger.error(
           "UserBulkMigrationActor:prepareRecord:error occurred while getting preparing record with processId"
               .concat(processID + ""),
-          LoggerEnum.ERROR.name());
+          e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -234,12 +239,12 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
 
   private Map<String, String> getContextMap(String processId, Request request) {
     Map<String, String> contextMap = (Map) request.getContext();
-    ProjectLogger.log(
+    logger.info(
+        request.getRequestContext(),
         "UserBulkMigrationActor:getContextMap:started preparing record for processId:"
             + processId
             + "with request context:"
-            + contextMap,
-        LoggerEnum.INFO.name());
+            + contextMap);
     contextMap.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.SYSTEM));
     contextMap.put(JsonKey.ACTOR_ID, ProjectUtil.getUniqueIdFromTimestamp(0));
     Iterables.removeIf(contextMap.values(), value -> StringUtils.isBlank(value));
@@ -276,15 +281,14 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
             .setSupportedFields(columnsMap.get(JsonKey.SUPPORTED_COlUMNS))
             .setValues(migrationUserList)
             .validate();
-    ProjectLogger.log(
+    logger.info(
         "UserBulkMigrationActor:validateRequestAndReturnMigrationUsers: the migration object formed "
-            .concat(migration.toString()),
-        LoggerEnum.INFO.name());
+            .concat(migration.toString()));
     return migrationUserList;
   }
 
   private List<SelfDeclaredUser> getUsers(
-      String channel, String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
+      String processId, byte[] fileData, Map<String, List<String>> columnsMap) {
     List<String[]> csvData = readCsv(fileData);
     List<String> csvHeaders = getCsvHeadersAsList(csvData);
     List<String> mandatoryHeaders = columnsMap.get(JsonKey.MANDATORY_FIELDS);
@@ -294,7 +298,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
     List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders);
     List<SelfDeclaredUser> selfDeclaredUserList =
-        parseSelfDeclaredCsvRows(channel, getCsvRowsAsList(csvData), mappedCsvHeaders);
+        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
     ShadowUserUpload migration =
         new ShadowUserUpload.ShadowUserUploadBuilder()
             .setHeaders(csvHeaders)
@@ -306,10 +310,9 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
             .setSupportedFields(supportedHeaders)
             .setUserValues(selfDeclaredUserList)
             .validateDeclaredUsers();
-    ProjectLogger.log(
+    logger.info(
         "UserBulkMigrationActor:validateRequestAndReturnDeclaredUsers: the migration object formed "
-            .concat(migration.toString()),
-        LoggerEnum.INFO.name());
+            .concat(migration.toString()));
     return selfDeclaredUserList;
   }
 
@@ -317,14 +320,11 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     List<String[]> values = new ArrayList<>();
     try {
       csvReader = getCsvReader(fileData, ',', '"', 0);
-      ProjectLogger.log(
-          "UserBulkMigrationActor:readCsv:csvReader initialized ".concat(csvReader.toString()),
-          LoggerEnum.INFO.name());
+      logger.info(
+          "UserBulkMigrationActor:readCsv:csvReader initialized ".concat(csvReader.toString()));
       values = csvReader.readAll();
     } catch (Exception ex) {
-      ProjectLogger.log(
-          "UserBulkMigrationActor:readCsv:error occurred while getting csvReader",
-          LoggerEnum.ERROR.name());
+      logger.error("UserBulkMigrationActor:readCsv:error occurred while getting csvReader", ex);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -408,12 +408,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
             case "school udise id":
               mappedColumns.add("schoolUdiseId");
               break;
-            case "diksha sub-org id":
-              mappedColumns.add("subOrgId");
-              break;
-            case "org id":
-              mappedColumns.add(JsonKey.ORG_ID);
-              break;
             case "persona":
               mappedColumns.add(column);
               break;
@@ -453,7 +447,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> parseSelfDeclaredCsvRows(
-      String channel, List<String[]> values, List<String> mappedHeaders) {
+      List<String[]> values, List<String> mappedHeaders) {
     List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
     values
         .stream()
@@ -472,8 +466,6 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
                 String columnName = getColumnNameByIndex(mappedHeaders, i);
                 setFieldToDeclaredUserObject(selfDeclaredUser, columnName, trimValue(row[i]));
               }
-              // channel to be added here
-              selfDeclaredUser.setChannel(channel);
               declaredUserList.add(selfDeclaredUser);
             });
     return declaredUserList;
@@ -535,23 +527,18 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     if (columnAttribute.equalsIgnoreCase("schoolName")) {
       migrationUser.setSchoolName((String) value);
     }
+    // Assigning sub-org externalid
     if (columnAttribute.equalsIgnoreCase("schoolUdiseId")) {
-      migrationUser.setSchoolId((String) value);
+      migrationUser.setSubOrgExternalId((String) value);
     }
     if (columnAttribute.equalsIgnoreCase(JsonKey.USER_ID)) {
       migrationUser.setUserId((String) value);
-    }
-    if (columnAttribute.equalsIgnoreCase("subOrgId")) {
-      migrationUser.setSubOrgId((String) value);
     }
     if (columnAttribute.equalsIgnoreCase(JsonKey.PERSONA)) {
       migrationUser.setPersona((String) value);
     }
     if (columnAttribute.equalsIgnoreCase(JsonKey.ERROR_TYPE)) {
       migrationUser.setErrorType((String) value);
-    }
-    if (columnAttribute.equalsIgnoreCase(JsonKey.ORG_ID)) {
-      migrationUser.setOrgId((String) value);
     }
   }
 
@@ -567,9 +554,8 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
    */
   private String getChannel(Map<String, Object> result) {
     String channel = (String) result.get(JsonKey.CHANNEL);
-    ProjectLogger.log(
-        "UserBulkMigrationActor:getChannel: the channel of admin user ".concat(channel + ""),
-        LoggerEnum.INFO.name());
+    logger.info(
+        "UserBulkMigrationActor:getChannel: the channel of admin user ".concat(channel + ""));
     return channel;
   }
   /**
@@ -580,10 +566,9 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
    */
   private String getRootOrgId(Map<String, Object> result) {
     String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-    ProjectLogger.log(
+    logger.info(
         "UserBulkMigrationActor:getRootOrgId:the root org id  of admin user "
-            .concat(rootOrgId + ""),
-        LoggerEnum.INFO.name());
+            .concat(rootOrgId + ""));
     return rootOrgId;
   }
 
@@ -593,10 +578,11 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
    * @param userId
    * @return result
    */
-  private Map<String, Object> getUserById(String userId) {
+  private Map<String, Object> getUserById(String userId, RequestContext context) {
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
-        cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId);
+        cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, context);
     if (((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
@@ -614,17 +600,15 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private void checkMandatoryColumns(List<String> csvHeaders, List<String> mandatoryHeaders) {
-    ProjectLogger.log(
+    logger.info(
         "UserBulkMigrationRequestValidator:checkMandatoryColumns:mandatory columns got "
-            + mandatoryHeaders,
-        LoggerEnum.INFO.name());
+            + mandatoryHeaders);
     mandatoryHeaders.forEach(
         column -> {
           if (!csvHeaders.contains(column)) {
-            ProjectLogger.log(
+            logger.info(
                 "UserBulkMigrationRequestValidator:mandatoryColumns: mandatory column is not present"
-                    .concat(column + ""),
-                LoggerEnum.ERROR.name());
+                    .concat(column + ""));
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing.getErrorCode(),
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(),
@@ -635,17 +619,15 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private void checkSupportedColumns(List<String> csvHeaders, List<String> supportedHeaders) {
-    ProjectLogger.log(
+    logger.info(
         "UserBulkMigrationRequestValidator:checkSupportedColumns:mandatory columns got "
-            + supportedHeaders,
-        LoggerEnum.INFO.name());
+            + supportedHeaders);
     supportedHeaders.forEach(
         suppColumn -> {
           if (!csvHeaders.contains(suppColumn)) {
-            ProjectLogger.log(
+            logger.info(
                 "UserBulkMigrationRequestValidator:supportedColumns: supported column is not present"
-                    .concat(suppColumn + ""),
-                LoggerEnum.ERROR.name());
+                    .concat(suppColumn + ""));
             throw new ProjectCommonException(
                 ResponseCode.errorUnsupportedField.getErrorCode(),
                 ResponseCode.errorUnsupportedField.getErrorMessage(),

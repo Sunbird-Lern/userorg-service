@@ -686,34 +686,6 @@ public class UserRequestValidatorTest {
     assertEquals(true, response);
   }
 
-  @Test
-  public void testValidateWebPagesFailureWithEmptyWebPages() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.WEB_PAGES, new ArrayList<>());
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateWebPages(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidWebPageData.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateWebPagesFailureWithNullWebPages() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.WEB_PAGES, null);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateWebPages(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidWebPageData.getErrorCode(), e.getCode());
-    }
-  }
-
   @Ignore
   public void testCreateUserBasicValidationFailureWithEmptyFirstName() {
     Request request = new Request();
@@ -1454,6 +1426,20 @@ public class UserRequestValidatorTest {
     Assert.assertTrue(response);
   }
 
+  @Test
+  public void testValidateUserMissingInfoDeclarationsFieldRequest() {
+    Request request = initailizeRequest();
+    List<Map<String, Object>> declarations = createUpdateUserDeclarationMissingUserInfoIdRequests();
+    request.getRequest().put(JsonKey.DECLARATIONS, declarations);
+    boolean response = false;
+    try {
+      new UserRequestValidator().validateUserDeclarationRequest(request);
+    } catch (ProjectCommonException e) {
+      response = true;
+    }
+    Assert.assertTrue(response);
+  }
+
   private List createUpdateUserDeclarationRequests() {
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
@@ -1461,7 +1447,7 @@ public class UserRequestValidatorTest {
     declarationMap.put(JsonKey.ORG_ID, "1234");
     declarationMap.put(JsonKey.USER_ID, "userid");
 
-    declarationMap.put(JsonKey.PERSONA, "teacher");
+    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     List<Map<String, Object>> declarations = new ArrayList<>();
     declarations.add(declarationMap);
     return declarations;
@@ -1470,9 +1456,27 @@ public class UserRequestValidatorTest {
   private List createUpdateUserDeclarationMissingUserIdRequests() {
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> info = new HashMap<>();
+    info.put(JsonKey.DECLARED_EMAIL, "email");
     Map<String, Object> declarationMap = new HashMap<>();
     declarationMap.put(JsonKey.ORG_ID, "1234");
-    declarationMap.put(JsonKey.PERSONA, "teacher");
+    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
+    declarationMap.put(JsonKey.INFO, info);
+    List<Map<String, Object>> declarations = new ArrayList<>();
+    declarations.add(declarationMap);
+    return declarations;
+  }
+
+  private List createUpdateUserDeclarationMissingUserInfoIdRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> info = new HashMap<>();
+    info.put(JsonKey.DECLARED_EMAIL, null);
+    Map<String, Object> declarationMap = new HashMap<>();
+    declarationMap.put(JsonKey.ORG_ID, "1234");
+    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
+    declarationMap.put(JsonKey.USER_ID, "1234");
+    declarationMap.put(JsonKey.INFO, info);
     List<Map<String, Object>> declarations = new ArrayList<>();
     declarations.add(declarationMap);
     return declarations;
@@ -1500,20 +1504,5 @@ public class UserRequestValidatorTest {
     List<String> frameworkMandatoryFields = new ArrayList<String>(1);
     frameworkMandatoryFields.add("id");
     return frameworkMandatoryFields;
-  }
-
-  @Test
-  public void testTransliterateUserName() {
-    Request request = initailizeRequest();
-    Map<String, Object> requestObj = request.getRequest();
-    requestObj.put(JsonKey.USERNAME, "हिन्दी");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserV1Request(request);
-      assertEquals((String) request.getRequest().get(JsonKey.USERNAME), "hindii");
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
-    }
   }
 }

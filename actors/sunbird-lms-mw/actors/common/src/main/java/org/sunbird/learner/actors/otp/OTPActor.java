@@ -12,6 +12,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.otp.service.OTPService;
 import org.sunbird.learner.util.OTPUtil;
@@ -60,45 +61,52 @@ public class OTPActor extends BaseActor {
   }
 
   private void generateOTP(Request request) {
-    ProjectLogger.log("OTPActor:generateOTP method call start.", LoggerEnum.INFO.name());
+    logger.info(request.getRequestContext(), "OTPActor:generateOTP method call start.");
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = getKey(type, request);
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
-      key = OTPUtil.getEmailPhoneByUserId(userId, type);
+      key = OTPUtil.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
-      ProjectLogger.log("OTPActor:OTPUtil.getEmailPhoneByUserId: called for userId = "+userId+" ,key = "+maskId(key,type),LoggerEnum.INFO.name());
+      logger.info(
+          request.getRequestContext(),
+          "OTPActor:OTPUtil.getEmailPhoneByUserId: called for userId = "
+              + userId
+              + " ,key = "
+              + maskId(key, type));
     }
 
     rateLimitService.throttleByKey(
-        key, new RateLimiter[] {OtpRateLimiter.HOUR, OtpRateLimiter.DAY});
+        key,
+        new RateLimiter[] {OtpRateLimiter.HOUR, OtpRateLimiter.DAY},
+        request.getRequestContext());
 
     String otp = null;
-    Map<String, Object> details = otpService.getOTPDetails(type, key);
+    Map<String, Object> details = otpService.getOTPDetails(type, key, request.getRequestContext());
 
     if (MapUtils.isEmpty(details)) {
-      otp = OTPUtil.generateOTP();
-      ProjectLogger.log(
+      otp = OTPUtil.generateOtp(request.getRequestContext());
+      logger.info(
+          request.getRequestContext(),
           "OTPActor:generateOTP: inserting otp Key = "
               + maskId(key, type)
               + " OTP = "
-              + maskOTP(otp),
-          LoggerEnum.INFO.name());
-      otpService.insertOTPDetails(type, key, otp);
+              + maskOTP(otp));
+      otpService.insertOTPDetails(type, key, otp, request.getRequestContext());
     } else {
       otp = (String) details.get(JsonKey.OTP);
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "OTPActor:generateOTP: Re-issuing otp Key = "
               + maskId(key, type)
               + " OTP = "
-              + maskOTP(otp),
-          LoggerEnum.INFO.name());
+              + maskOTP(otp));
     }
-    ProjectLogger.log(
-        "OTPActor:sendOTP : Calling SendOTPActor for Key = " + maskId(key, type),
-        LoggerEnum.INFO.name());
-    sendOTP(request, otp, key);
+    logger.info(
+        request.getRequestContext(),
+        "OTPActor:sendOTP : Calling SendOTPActor for Key = " + maskId(key, type));
+    sendOTP(request, otp, key, request.getRequestContext());
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -131,68 +139,70 @@ public class OTPActor extends BaseActor {
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
-      key = OTPUtil.getEmailPhoneByUserId(userId, type);
+      key = OTPUtil.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
     }
-    Map<String, Object> otpDetails = otpService.getOTPDetails(type, key);
+    Map<String, Object> otpDetails =
+        otpService.getOTPDetails(type, key, request.getRequestContext());
 
     if (MapUtils.isEmpty(otpDetails)) {
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "OTPActor:verifyOTP: Details not found for Key = "
               + maskId(key, type)
               + " type = "
-              + type,
-          LoggerEnum.INFO.name());
+              + type);
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
     }
     String otpInDB = (String) otpDetails.get(JsonKey.OTP);
     if (StringUtils.isBlank(otpInDB) || StringUtils.isBlank(otpInRequest)) {
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "OTPActor:verifyOTP: Mismatch for Key = "
               + maskId(key, type)
               + " otpInRequest = "
               + maskOTP(otpInRequest)
               + " otpInDB = "
-              + maskOTP(otpInDB),
-          LoggerEnum.DEBUG);
+              + maskOTP(otpInDB));
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
     }
 
     if (otpInRequest.equals(otpInDB)) {
-      ProjectLogger.log(
-          "OTPActor:verifyOTP: Verified successfully Key = " + maskId(key, type),
-          LoggerEnum.INFO.name());
-      otpService.deleteOtp(type, key);
+      logger.info(
+          request.getRequestContext(),
+          "OTPActor:verifyOTP: Verified successfully Key = " + maskId(key, type));
+      otpService.deleteOtp(type, key, request.getRequestContext());
       Response response = new Response();
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
       sender().tell(response, self());
     } else {
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "OTPActor:verifyOTP: Incorrect OTP Key = "
               + maskId(key, type)
               + " otpInRequest = "
               + maskOTP(otpInRequest)
               + " otpInDB = "
-              + maskOTP(otpInDB),
-          LoggerEnum.INFO.name());
-      handleMismatchOtp(type, key, otpDetails);
+              + maskOTP(otpInDB));
+      handleMismatchOtp(type, key, otpDetails, request.getRequestContext());
     }
   }
 
-  private void handleMismatchOtp(String type, String key, Map<String, Object> otpDetails) {
+  private void handleMismatchOtp(
+      String type, String key, Map<String, Object> otpDetails, RequestContext context) {
     int remainingCount = getRemainingAttemptedCount(otpDetails);
-    ProjectLogger.log(
+    logger.info(
+        context,
         "OTPActor:handleMismatchOtp: Key = "
             + maskId(key, type)
             + ",remaining attempt is "
-            + remainingCount,
-        LoggerEnum.INFO.name());
+            + remainingCount);
     int attemptedCount = (int) otpDetails.get(JsonKey.ATTEMPTED_COUNT);
     if (remainingCount <= 0) {
-      otpService.deleteOtp(type, key);
+      otpService.deleteOtp(type, key, context);
     } else {
       otpDetails.put(JsonKey.ATTEMPTED_COUNT, attemptedCount + 1);
-      otpService.updateAttemptCount(otpDetails);
+      otpService.updateAttemptCount(otpDetails, context);
     }
     ProjectCommonException ex =
         new ProjectCommonException(
@@ -218,8 +228,9 @@ public class OTPActor extends BaseActor {
     return (allowedAttempt - (attemptedCount + 1));
   }
 
-  private void sendOTP(Request request, String otp, String key) {
+  private void sendOTP(Request request, String otp, String key, RequestContext context) {
     Request sendOtpRequest = new Request();
+    sendOtpRequest.setRequestContext(context);
     sendOtpRequest.getRequest().putAll(request.getRequest());
     sendOtpRequest.getRequest().put(JsonKey.KEY, key);
     sendOtpRequest.getRequest().put(JsonKey.OTP, otp);
