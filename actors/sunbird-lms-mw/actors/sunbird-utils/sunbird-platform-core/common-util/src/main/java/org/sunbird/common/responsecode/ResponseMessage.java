@@ -468,6 +468,7 @@ public interface ResponseMessage {
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
         "Declared user validated status is not updated";
     String USER_CONSENT_NOT_FOUND = "User consent not found.";
+    String INVALID_USER_INFO_VALUE = "Null value is not allowed";
   }
 
   interface Key {
@@ -860,5 +861,6 @@ public interface ResponseMessage {
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
         "DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED";
     String USER_CONSENT_NOT_FOUND = "USER_CONSENT_NOT_FOUND";
+    String INVALID_USER_INFO_VALUE = "INVALID_USER_INFO_VALUE";
   }
 }

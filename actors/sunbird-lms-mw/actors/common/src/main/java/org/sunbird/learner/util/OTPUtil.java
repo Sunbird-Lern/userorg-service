@@ -32,14 +32,16 @@ public final class OTPUtil {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
 
-  private static final int MINIMUM_OTP_LENGTH = 6;
+  private static final int MAXIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
+  private static final int RETRY_COUNT = 2;
+  private static final int MIN_OTP_LENGTH = 4;
 
   private OTPUtil() {}
 
-  public static String generateOTP() {
+  private static String generateOTP() {
     String otpSize = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_OTP_LENGTH);
-    int codeDigits = StringUtils.isBlank(otpSize) ? MINIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
+    int codeDigits = StringUtils.isBlank(otpSize) ? MAXIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
     GoogleAuthenticatorConfig config =
         new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder()
             .setCodeDigits(codeDigits)
@@ -50,6 +52,37 @@ public final class OTPUtil {
     String secret = key.getKey();
     int code = gAuth.getTotpPassword(secret);
     return String.valueOf(code);
+  }
+
+  /**
+   * generates otp and ensures otp length is greater than or equal to 4 if otp length is less than 4
+   * , regenerate otp (max retry 3)
+   *
+   * @return
+   */
+  public static String generateOtp(RequestContext context) {
+    String otp = generateOTP();
+    int noOfAttempts = 0;
+    while (otp.length() < MIN_OTP_LENGTH && noOfAttempts < RETRY_COUNT) {
+      otp = generateOTP();
+      noOfAttempts++;
+    }
+    logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
+    return ensureOtpLength(otp);
+  }
+
+  /**
+   * After 3 attempts, still otp length less that 4 multiply otp with 1000,
+   *
+   * @param otp
+   * @return
+   */
+  private static String ensureOtpLength(String otp) {
+    if (otp.length() < MIN_OTP_LENGTH) {
+      int multiplier = (int) Math.pow(10, MAXIMUM_OTP_LENGTH - MIN_OTP_LENGTH + 1);
+      otp = String.valueOf(Integer.valueOf(otp) * multiplier);
+    }
+    return otp;
   }
 
   public static void sendOTPViaSMS(Map<String, Object> otpMap, RequestContext context) {

@@ -2,28 +2,18 @@ package org.sunbird.bean;
 
 public class SelfDeclaredUser extends MigrationUser {
   private String schoolName;
-  private String schoolId;
+  private String subOrgExternalId;
   private String userId;
-  private String subOrgId;
   private String orgId;
   private String persona;
-
   private String errorType;
 
-  public String getSubOrgId() {
-    return subOrgId;
+  public String getSubOrgExternalId() {
+    return subOrgExternalId;
   }
 
-  public void setSubOrgId(String subOrgId) {
-    this.subOrgId = subOrgId;
-  }
-
-  public String getSchoolId() {
-    return schoolId;
-  }
-
-  public void setSchoolId(String schoolId) {
-    this.schoolId = schoolId;
+  public void setSubOrgExternalId(String subOrgExternalId) {
+    this.subOrgExternalId = subOrgExternalId;
   }
 
   public String getSchoolName() {
