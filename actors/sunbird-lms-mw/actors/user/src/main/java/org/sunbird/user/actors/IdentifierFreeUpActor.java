@@ -1,5 +1,7 @@
 package org.sunbird.user.actors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
@@ -20,6 +22,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
+import org.sunbird.user.util.UserLookUp;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -120,7 +123,9 @@ public class IdentifierFreeUpActor extends BaseActor {
 
   private void freeUpUserIdentifier(String id, List<String> identifiers, RequestContext context) {
     Map<String, Object> userDbMap = getUserById(id, context);
+    Map<String, Object> userLookUpData = new HashMap<>(userDbMap);
     Response response = processUserAttribute(userDbMap, identifiers, context);
+    removeEntryFromUserLookUp(userLookUpData, identifiers, context);
     boolean esResponse = saveUserDetailsToEs(userDbMap, context);
     logger.info(
         context,
@@ -132,6 +137,40 @@ public class IdentifierFreeUpActor extends BaseActor {
         String.format(
             "%s:%s:USER MAP SUCCESSFULLY UPDATED IN CASSANDRA. WITH ID  %s",
             this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)));
+  }
+
+  /**
+   * removing entry from user_lookup table
+   *
+   * @param userDbMap
+   * @param identifiers
+   * @param context
+   */
+  private void removeEntryFromUserLookUp(
+      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
+    logger.info(
+        context,
+        "IdentifierFreeUpActor:removeEntryFromUserLookUp remove following identifiers from lookUp table "
+            + identifiers);
+    List<Map<String, String>> reqMap = new ArrayList<>();
+    Map<String, String> deleteLookUp = new HashMap<>();
+    if (identifiers.contains(JsonKey.EMAIL)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EMAIL));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.PHONE)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.PHONE));
+      reqMap.add(deleteLookUp);
+    }
+    if (CollectionUtils.isNotEmpty(reqMap)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqMap, context);
+    }
   }
 
   private boolean saveUserDetailsToEs(Map<String, Object> userDbMap, RequestContext context) {
