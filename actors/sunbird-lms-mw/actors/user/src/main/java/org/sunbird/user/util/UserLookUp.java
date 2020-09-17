@@ -35,6 +35,15 @@ public class UserLookUp {
     return result;
   }
 
+  public void deleteRecords(List<Map<String, String>> reqMap, RequestContext context) {
+    logger.info(
+        context, "UserLookUp:deleteRecords removing " + reqMap.size() + " lookups from table");
+    for (Map<String, String> dataMap : reqMap) {
+      cassandraOperation.deleteRecord(
+          userLookUp.getKeySpace(), userLookUp.getTableName(), dataMap, context);
+    }
+  }
+
   public Response insertExternalIdIntoUserLookup(
       List<Map<String, Object>> reqMap, String userId, RequestContext context) {
     Response result = null;
