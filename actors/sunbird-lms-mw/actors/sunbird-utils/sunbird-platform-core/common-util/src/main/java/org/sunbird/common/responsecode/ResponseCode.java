@@ -849,6 +849,7 @@ public enum ResponseCode {
       ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
   preferenceNotFound(
       ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
+    userConsentNotFound(ResponseMessage.Key.USER_CONSENT_NOT_FOUND, ResponseMessage.Message.USER_CONSENT_NOT_FOUND),
   InvalidUserInfoValue(
       ResponseMessage.Key.INVALID_USER_INFO_VALUE, ResponseMessage.Message.INVALID_USER_INFO_VALUE),
 
