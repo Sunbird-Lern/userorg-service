@@ -73,6 +73,27 @@ public class SearchControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testcompositeSearchUnAuthorized() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.ORG_NAME, "org123");
+    innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+        new RequestBuilder().bodyJson(json).uri("/v1/search/compositesearch").method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(401, result.status());
+  }
+
+  @Test
   public void testsync() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
