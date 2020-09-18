@@ -25,7 +25,7 @@ public class UserConsentServiceImpl implements UserConsentService {
         return userConsentDao.updateConsent(consent, context);
     }
 
-    public Map<String, Object> getConsent(String consentId, RequestContext context){
-        return userConsentDao.getConsent(consentId, context);
+    public Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context){
+        return userConsentDao.getConsent(consentReq, context);
     }
 }

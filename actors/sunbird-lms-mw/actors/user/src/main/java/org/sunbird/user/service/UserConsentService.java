@@ -9,5 +9,5 @@ public interface UserConsentService {
 
     Response updateConsent(Map<String, Object> consent, RequestContext context);
 
-    Map<String, Object> getConsent(String consentId, RequestContext context);
+    Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context);
 }

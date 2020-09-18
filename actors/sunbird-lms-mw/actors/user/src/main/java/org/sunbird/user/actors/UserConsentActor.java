@@ -66,9 +66,12 @@ public class UserConsentActor extends BaseActor {
         String consumerId = (String) filters.getOrDefault(JsonKey.CONSUMERID, "");
         String objectId = (String) filters.getOrDefault(JsonKey.OBJECTID, "");
 
-        String key = getKey(userId, consumerId, objectId);
+        Map<String, Object> getConsentFromDBReq = new HashMap<String, Object>();
+        getConsentFromDBReq.put(JsonKey.CONSENT_USER_ID, userId);
+        getConsentFromDBReq.put(JsonKey.CONSUMER_ID, consumerId);
+        getConsentFromDBReq.put(JsonKey.OBJECT_ID, objectId);
 
-        Map<String, Object> consentMap = userConsentService.getConsent(key, request.getRequestContext());
+        Map<String, Object> consentMap = userConsentService.getConsent(getConsentFromDBReq, request.getRequestContext());
 
         Response response = new Response();
         if (MapUtils.isNotEmpty(consentMap))
@@ -134,14 +137,18 @@ public class UserConsentActor extends BaseActor {
         consentReq.put(JsonKey.ID, key);
         consentReq.put(JsonKey.CONSENT_USER_ID, userId);
         consentReq.put(JsonKey.CONSUMER_ID, consumerId);
-        consentReq.put(JsonKey.CONSUMER_TYPE, consumerType);
         consentReq.put(JsonKey.OBJECT_ID, objectId);
+        consentReq.put(JsonKey.CONSUMER_TYPE, consumerType);
         consentReq.put(JsonKey.CONSENT_OBJECT_TYPE, objectType);
         consentReq.put(JsonKey.STATUS, status);
         consentReq.put(JsonKey.EXPIRY, new Timestamp(calculateConsentExpiryDate()));
 
+        Map<String, Object> getConsentFromDBReq = new HashMap<String, Object>();
+        getConsentFromDBReq.put(JsonKey.CONSENT_USER_ID, userId);
+        getConsentFromDBReq.put(JsonKey.CONSUMER_ID, consumerId);
+        getConsentFromDBReq.put(JsonKey.OBJECT_ID, objectId);
         //Check if consent is already existing
-        Map<String, Object> dbCconsentMap = userConsentService.getConsent((String)consentReq.get(JsonKey.ID), context);
+        Map<String, Object> dbCconsentMap = userConsentService.getConsent(getConsentFromDBReq, context);
         if (MapUtils.isNotEmpty(dbCconsentMap)){
             consentReq.put(JsonKey.CONSENT_LAST_UPDATED_ON, DateUtil.getCurrentDateTimestamp());
         } else {

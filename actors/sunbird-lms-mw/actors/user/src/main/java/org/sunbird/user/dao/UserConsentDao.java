@@ -19,10 +19,10 @@ public interface UserConsentDao {
      * This method will get UserConsent based on userId and return UserConsent if found else throw
      * ProjectCommonException.
      *
-     * @param consentId consent id.
+     * @param consentReq consent id.
      * @param context
      * @return UserConsent UserConsent Details.
      */
-    Map<String, Object> getConsent(String consentId, RequestContext context);
+    Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context);
 
 }
