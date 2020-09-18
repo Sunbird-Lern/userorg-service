@@ -24,16 +24,17 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
      */
     public void validateReadConsentRequest(Request request){
         Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT, new HashMap<String, Object>());
+        Map<String, Object> filters = (Map<String, Object>) consent.getOrDefault(JsonKey.FILTERS, new HashMap<String, Object>());
         validateParam(
-                (String) consent.get(JsonKey.USER_ID),
+                (String) filters.get(JsonKey.USER_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.USER_ID);
         validateParam(
-                (String) consent.get(JsonKey.CONSUMERID),
+                (String) filters.get(JsonKey.CONSUMERID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.CONSUMERID);
         validateParam(
-                (String) consent.get(JsonKey.OBJECTID),
+                (String) filters.get(JsonKey.OBJECTID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.OBJECTID);
     }
