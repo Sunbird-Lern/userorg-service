@@ -6,6 +6,7 @@ import org.sunbird.user.dao.UserConsentDao;
 import org.sunbird.user.dao.impl.UserConsentDaoImpl;
 import org.sunbird.user.service.UserConsentService;
 
+import java.util.List;
 import java.util.Map;
 
 public class UserConsentServiceImpl implements UserConsentService {
@@ -25,7 +26,7 @@ public class UserConsentServiceImpl implements UserConsentService {
         return userConsentDao.updateConsent(consent, context);
     }
 
-    public Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context){
+    public List<Map<String, Object>> getConsent(Map<String, Object> consentReq, RequestContext context){
         return userConsentDao.getConsent(consentReq, context);
     }
 }

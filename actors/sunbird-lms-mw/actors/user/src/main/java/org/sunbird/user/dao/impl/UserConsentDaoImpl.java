@@ -33,16 +33,12 @@ public class UserConsentDaoImpl implements UserConsentDao {
     }
 
     @Override
-    public Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context) {
+    public List<Map<String, Object>> getConsent(Map<String, Object> consentReq, RequestContext context) {
         Map<String, Object> consentMap = null;
         Response response =
                 cassandraOperation.getRecordsByProperties(Util.KEY_SPACE_NAME, TABLE_NAME, consentReq, context);
         List<Map<String, Object>> responseList =
                 (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-        if (CollectionUtils.isNotEmpty(responseList)) {
-            consentMap = responseList.get(0);
-
-        }
-        return consentMap;
+        return responseList;
     }
 }

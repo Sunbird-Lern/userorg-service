@@ -3,6 +3,7 @@ package org.sunbird.user.dao;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.request.RequestContext;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UserConsentDao {
@@ -23,6 +24,6 @@ public interface UserConsentDao {
      * @param context
      * @return UserConsent UserConsent Details.
      */
-    Map<String, Object> getConsent(Map<String, Object> consentReq, RequestContext context);
+    List<Map<String, Object>> getConsent(Map<String, Object> consentReq, RequestContext context);
 
 }

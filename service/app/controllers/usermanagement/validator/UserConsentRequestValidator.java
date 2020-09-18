@@ -23,20 +23,20 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
      * @param request
      */
     public void validateReadConsentRequest(Request request){
-        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT, new HashMap<String, Object>());
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT_BODY, new HashMap<String, Object>());
         Map<String, Object> filters = (Map<String, Object>) consent.getOrDefault(JsonKey.FILTERS, new HashMap<String, Object>());
         validateParam(
                 (String) filters.get(JsonKey.USER_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.USER_ID);
         validateParam(
-                (String) filters.get(JsonKey.CONSUMERID),
+                (String) filters.get(JsonKey.CONSENT_CONSUMERID),
                 ResponseCode.mandatoryParamsMissing,
-                JsonKey.CONSUMERID);
+                JsonKey.CONSENT_CONSUMERID);
         validateParam(
-                (String) filters.get(JsonKey.OBJECTID),
+                (String) filters.get(JsonKey.CONSENT_OBJECTID),
                 ResponseCode.mandatoryParamsMissing,
-                JsonKey.OBJECTID);
+                JsonKey.CONSENT_OBJECTID);
     }
 
     /**
@@ -44,19 +44,19 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
      * @param request
      */
     public void validateUpdateConsentRequest(Request request){
-        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT, new HashMap<String, Object>());
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT_BODY, new HashMap<String, Object>());
         validateParam(
-                (String) consent.get(JsonKey.CONSUMERID),
+                (String) consent.get(JsonKey.CONSENT_CONSUMERID),
                 ResponseCode.mandatoryParamsMissing,
-                JsonKey.CONSUMERID);
+                JsonKey.CONSENT_CONSUMERID);
         validateParam(
                 (String) consent.get(JsonKey.OBJECT_TYPE),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.OBJECT_TYPE);
         validateParam(
-                (String) consent.get(JsonKey.OBJECTID),
+                (String) consent.get(JsonKey.CONSENT_OBJECTID),
                 ResponseCode.mandatoryParamsMissing,
-                JsonKey.OBJECTID);
+                JsonKey.CONSENT_OBJECTID);
         String status = (String) consent.get(JsonKey.STATUS);
         validateParam(
                 status,
