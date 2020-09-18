@@ -1,11 +1,9 @@
 /** */
 package org.sunbird.learner.util;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
@@ -31,7 +29,8 @@ public class DataCacheHandler implements Runnable {
   private static Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap =
       new ConcurrentHashMap<>();
   private static Map<String, List<String>> frameworkFieldsConfig = new ConcurrentHashMap<>();
-  private static Map<String, List<String>> hashtagIdFrameworkIdMap = new HashMap<>();
+  private static Map<String, List<String>> hashtagIdFrameworkIdMap = new ConcurrentHashMap<>();
+  private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
   private static Response roleCacheResponse;
@@ -188,10 +187,27 @@ public class DataCacheHandler implements Runnable {
         roleMap.put((String) resultMap2.get(JsonKey.ID), resultMap2.get(JsonKey.NAME));
       }
     }
+
+    roleMap
+        .entrySet()
+        .parallelStream()
+        .forEach(
+            (roleSetItem) -> {
+              Map<String, String> role = new HashMap<>();
+              role.put(JsonKey.ID, roleSetItem.getKey());
+              role.put(JsonKey.NAME, (String) roleSetItem.getValue());
+              roleList.add(role);
+            });
   }
+
   /** @return the roleMap */
   public static Map<String, Object> getRoleMap() {
     return roleMap;
+  }
+
+  /** @return the roleList */
+  public static List<Map<String, String>> getUserReadRoleList() {
+    return roleList;
   }
 
   /** @return the orgTypeMap */
