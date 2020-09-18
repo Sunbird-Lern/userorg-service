@@ -7,7 +7,6 @@ import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.Map.Entry;
@@ -39,12 +38,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
-import org.sunbird.models.user.User;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
@@ -72,10 +65,8 @@ public class UserProfileReadActor extends BaseActor {
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
   private ActorRef systemSettingActorRef = null;
-  private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserService userService = UserServiceImpl.getInstance();
   private static UserExternalIdentityService userExternalIdentityService =
@@ -164,40 +155,25 @@ public class UserProfileReadActor extends BaseActor {
       userId = id;
       showMaskedData = false;
     }
-    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     Map<String, Object> result = null;
-    if (!isPrivate) {
-      Future<Map<String, Object>> resultF =
-          esUtil.getDataByIdentifier(
-              ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
-      try {
-        Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
-        if (object != null) {
-          result = (Map<String, Object>) object;
-        }
-      } catch (Exception e) {
-        logger.error(
-            actorMessage.getRequestContext(),
-            String.format(
-                "%s:%s:User not found with provided id == %s and error %s",
-                this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
-            e);
+
+    Future<Map<String, Object>> resultF =
+        esUtil.getDataByIdentifier(
+            ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
+    try {
+      Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
+      if (object != null) {
+        result = (Map<String, Object>) object;
       }
-    } else {
-      UserDao userDao = new UserDaoImpl();
-      User foundUser = userDao.getUserById(userId, actorMessage.getRequestContext());
-      if (foundUser == null) {
-        throw new ProjectCommonException(
-            ResponseCode.userNotFound.getErrorCode(),
-            ResponseCode.userNotFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-      }
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-      result = objectMapper.convertValue(foundUser, Map.class);
-      result.put(
-          JsonKey.ORGANISATIONS, Util.getUserOrgDetails(userId, actorMessage.getRequestContext()));
+    } catch (Exception e) {
+      logger.error(
+          actorMessage.getRequestContext(),
+          String.format(
+              "%s:%s:User not found with provided id == %s and error %s",
+              this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
+          e);
     }
+
     // check user found or not
     if (result == null || result.size() == 0) {
       throw new ProjectCommonException(
@@ -301,7 +277,6 @@ public class UserProfileReadActor extends BaseActor {
 
     if (null != result) {
       UserUtility.decryptUserDataFrmES(result);
-      updateSkillWithEndoresmentCount(result);
       updateTnc(result);
       // loginId is used internally for checking the duplicate user
       result.remove(JsonKey.LOGIN_ID);
@@ -491,18 +466,12 @@ public class UserProfileReadActor extends BaseActor {
   private void addExtraFieldsInUserProfileResponse(
       Map<String, Object> result, String fields, String userId, RequestContext context) {
     if (!StringUtils.isBlank(fields)) {
+      result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (!fields.contains(JsonKey.COMPLETENESS)) {
         result.remove(JsonKey.COMPLETENESS);
       }
       if (!fields.contains(JsonKey.MISSING_FIELDS)) {
         result.remove(JsonKey.MISSING_FIELDS);
-      }
-      if (fields.contains(JsonKey.LAST_LOGIN_TIME)) {
-        result.put(
-            JsonKey.LAST_LOGIN_TIME,
-            Long.parseLong(getLastLoginTime(userId, (String) result.get(JsonKey.LAST_LOGIN_TIME))));
-      } else {
-        result.remove(JsonKey.LAST_LOGIN_TIME);
       }
       if (fields.contains(JsonKey.TOPIC)) {
         // fetch the topic details of all user associated orgs and append in the result
@@ -523,52 +492,12 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  private void updateSkillWithEndoresmentCount(Map<String, Object> result) {
-    if (MapUtils.isNotEmpty(result) && result.containsKey(JsonKey.SKILLS)) {
-      List<Map<String, Object>> skillList = (List<Map<String, Object>>) result.get(JsonKey.SKILLS);
-      if (CollectionUtils.isEmpty(skillList)) {
-        return;
-      }
-      for (Map<String, Object> skill : skillList) {
-        skill.put(
-            JsonKey.ENDORSEMENT_COUNT.toLowerCase(),
-            (int) skill.getOrDefault(JsonKey.ENDORSEMENT_COUNT, 0));
-      }
-    }
-  }
-
-  private String getLastLoginTime(String userId, String time) {
-    String lastLoginTime = "";
-    if (Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
-      SSOManager manager = SSOServiceFactory.getInstance();
-      lastLoginTime = manager.getLastLoginTime(userId);
-    } else {
-      lastLoginTime = time;
-    }
-    if (StringUtils.isBlank(lastLoginTime)) {
-      return "0";
-    }
-    return lastLoginTime;
-  }
-
   private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
 
     String userId = (String) result.get(JsonKey.ID);
     Map<String, Object> locationCache = new HashMap<>();
     Set<String> topicSet = new HashSet<>();
-
-    // fetch all associated user orgs
-    List<String> ids = new ArrayList<>();
-    ids.add(userId);
-    Response response1 =
-        cassandraOperation.getRecordsByPrimaryKeys(
-            userOrgDbInfo.getKeySpace(),
-            userOrgDbInfo.getTableName(),
-            ids,
-            JsonKey.USER_ID,
-            context);
-
-    List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
 
     List<String> orgIdsList = new ArrayList<>();
     if (!list.isEmpty()) {
