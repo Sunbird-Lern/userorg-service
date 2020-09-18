@@ -688,6 +688,8 @@ public final class JsonKey {
   // this fields are being stored in type column in user_lookup table
   public static final String USER_LOOKUP_FILED_USER_NAME = "username";
   public static final String USER_LOOKUP_FILED_EXTERNAL_ID = "externalid";
-
+  public static final String CONSUMER_ID = "consumerId";
+  public static final String OBJECT_ID = "objectId";
+  public static final String CONSENT_EXPIRY_IN_DAYS = "consent_expiry_in_days";
   private JsonKey() {}
 }

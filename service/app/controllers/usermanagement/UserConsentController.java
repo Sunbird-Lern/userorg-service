@@ -1,6 +1,8 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
+import controllers.usermanagement.validator.ResetPasswordRequestValidator;
+import controllers.usermanagement.validator.UserConsentRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
@@ -16,6 +18,7 @@ public class UserConsentController extends BaseController {
                 httpRequest.body().asJson(),
                 req -> {
                     Request request = (Request) req;
+                    new UserConsentRequestValidator().validateUpdateConsentRequest((Request) request);
                     return null;
                 },
                 null,
@@ -30,6 +33,7 @@ public class UserConsentController extends BaseController {
                 httpRequest.body().asJson(),
                 req -> {
                     Request request = (Request) req;
+                    new UserConsentRequestValidator().validateReadConsentRequest((Request) request);
                     return null;
                 },
                 null,
