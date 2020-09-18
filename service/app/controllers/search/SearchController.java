@@ -37,7 +37,7 @@ public class SearchController extends BaseController {
       ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj
           .getRequest()
           .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -62,7 +62,7 @@ public class SearchController extends BaseController {
       String operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
       if ("keycloak".equalsIgnoreCase(operation)) {
         reqObj.setOperation(ActorOperations.SYNC_KEYCLOAK.getValue());
-        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         reqObj
             .getRequest()
             .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -73,7 +73,7 @@ public class SearchController extends BaseController {
         return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
       } else {
         reqObj.setOperation(ActorOperations.SYNC.getValue());
-        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         reqObj
             .getRequest()
             .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));

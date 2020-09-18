@@ -34,7 +34,7 @@ public class EmailServiceController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
       reqObj.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());
@@ -65,7 +65,7 @@ public class EmailServiceController extends BaseController {
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSendMail(reqObj);
       reqObj.setOperation(ActorOperations.V2_NOTIFICATION.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.EMAIL_REQUEST, reqObj.getRequest());

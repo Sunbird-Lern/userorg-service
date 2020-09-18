@@ -54,7 +54,7 @@ public class TelemetryGenerator {
     }
 
     // assign request id into context cdata ...
-    String reqId = (String) context.get(JsonKey.REQUEST_ID);
+    String reqId = (String) context.get(JsonKey.X_REQUEST_ID);
     if (!StringUtils.isBlank(reqId)) {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ID, reqId);
@@ -208,7 +208,7 @@ public class TelemetryGenerator {
 
     Context eventContext = getContext(context);
 
-    String reqId = (String) context.get(JsonKey.REQUEST_ID);
+    String reqId = (String) context.get(JsonKey.X_REQUEST_ID);
     if (!StringUtils.isBlank(reqId)) {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ID, reqId);
@@ -262,7 +262,7 @@ public class TelemetryGenerator {
     Context eventContext = getContext(context);
 
     // assign request id into context cdata ...
-    String reqId = (String) context.get(JsonKey.REQUEST_ID);
+    String reqId = (String) context.get(JsonKey.X_REQUEST_ID);
     if (!StringUtils.isBlank(reqId)) {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ID, reqId);
@@ -327,7 +327,7 @@ public class TelemetryGenerator {
     Context eventContext = getContext(context);
 
     // assign request id into context cdata ...
-    String reqId = (String) context.get(JsonKey.REQUEST_ID);
+    String reqId = (String) context.get(JsonKey.X_REQUEST_ID);
     if (!StringUtils.isBlank(reqId)) {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ID, reqId);
