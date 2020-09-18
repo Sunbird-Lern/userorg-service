@@ -8,6 +8,9 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import views.html.defaultpages.error;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class UserConsentRequestValidator extends BaseRequestValidator {
 
@@ -20,16 +23,17 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
      * @param request
      */
     public void validateReadConsentRequest(Request request){
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
         validateParam(
-                (String) request.getRequest().get(JsonKey.USER_ID),
+                (String) consent.get(JsonKey.USER_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.USER_ID);
         validateParam(
-                (String) request.getRequest().get(JsonKey.CONSUMER_ID),
+                (String) consent.get(JsonKey.CONSUMER_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.CONSUMER_ID);
         validateParam(
-                (String) request.getRequest().get(JsonKey.OBJECT_ID),
+                (String) consent.get(JsonKey.OBJECT_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.OBJECT_ID);
     }
@@ -39,23 +43,24 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
      * @param request
      */
     public void validateUpdateConsentRequest(Request request){
-        String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-        if (StringUtils.isNotEmpty(userId)) {
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
+        String userId = (String) consent.get(JsonKey.USER_ID);
+        /*if (StringUtils.isNotEmpty(userId)) {
             validateUserId(request, userId);
-        }
+        }*/
         validateParam(
-                (String) request.getRequest().get(JsonKey.CONSUMER_ID),
+                (String) consent.get(JsonKey.CONSUMER_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.CONSUMER_ID);
         validateParam(
-                (String) request.getRequest().get(JsonKey.OBJECT_TYPE),
+                (String) consent.get(JsonKey.OBJECT_TYPE),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.OBJECT_TYPE);
         validateParam(
-                (String) request.getRequest().get(JsonKey.OBJECT_ID),
+                (String) consent.get(JsonKey.OBJECT_ID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.OBJECT_ID);
-        String status = (String) request.getRequest().get(JsonKey.STATUS);
+        String status = (String) consent.get(JsonKey.STATUS);
         validateParam(
                 status,
                 ResponseCode.mandatoryParamsMissing,
@@ -68,6 +73,6 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
                     ResponseCode.invalidConsentStatus.getErrorMessage(),
                     ResponseCode.CLIENT_ERROR.getResponseCode());
         }
-        request.getRequest().put(JsonKey.STATUS,status.toUpperCase()); //Store status in capital
+        consent.put(JsonKey.STATUS,status.toUpperCase()); //Store status in capital
     }
 }
