@@ -174,7 +174,7 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testGetUserProfileSuccessV3WithFieldDeclarationAndExternalIds() {
     Request reqObj =
         getProfileReadV3request(
