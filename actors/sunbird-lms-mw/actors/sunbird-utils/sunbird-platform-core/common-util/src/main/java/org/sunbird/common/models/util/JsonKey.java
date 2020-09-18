@@ -687,8 +687,20 @@ public final class JsonKey {
   // this fields are being stored in type column in user_lookup table
   public static final String USER_LOOKUP_FILED_USER_NAME = "username";
   public static final String USER_LOOKUP_FILED_EXTERNAL_ID = "externalid";
-  public static final String CONSUMER_ID = "consumerId";
-  public static final String OBJECT_ID = "objectId";
+  public static final String CONSUMERID = "consumerId";
+  public static final String OBJECTID = "objectId";
+  public static final String CONSUMERTYPE = "consumerType";
+  public static final String OBJECTTYPE = "objectType";
   public static final String CONSENT_EXPIRY_IN_DAYS = "consent_expiry_in_days";
+  public static final String EXPIRY = "expiry";
+  public static final String CONSENT = "consent";
+  public static final String CONSENTS = "consents";
+  public static final String CONSUMER_ID = "consumer_id";
+  public static final String OBJECT_ID = "object_id";
+  public static final String CONSENT_USER_ID = "user_id";
+  public static final String CONSUMER_TYPE = "consumer_type";
+  public static final String CONSENT_OBJECT_TYPE = "object_type";
+  public static final String CONSENT_LAST_UPDATED_ON = "last_updated_on";
+  public static final String CONSENT_CREATED_ON = "created_on";
   private JsonKey() {}
 }

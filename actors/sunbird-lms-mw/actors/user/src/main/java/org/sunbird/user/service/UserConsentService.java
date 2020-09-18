@@ -2,11 +2,12 @@ package org.sunbird.user.service;
 
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.models.UserConsent;
+
+import java.util.Map;
 
 public interface UserConsentService {
 
-    Response updateConsent(UserConsent consent, RequestContext context);
+    Response updateConsent(Map<String, Object> consent, RequestContext context);
 
-    UserConsent getConsent(String consentId, RequestContext context);
+    Map<String, Object> getConsent(String consentId, RequestContext context);
 }

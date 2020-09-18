@@ -8,10 +8,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.UserConsent;
-import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserConsentDao;
-import org.sunbird.user.dao.UserDao;
 
 import java.util.List;
 import java.util.Map;
@@ -31,22 +28,21 @@ public class UserConsentDaoImpl implements UserConsentDao {
     }
 
     @Override
-    public Response updateConsent(UserConsent consent, RequestContext context){
-        Map<String, Object> map = mapper.convertValue(consent, Map.class);
-        return cassandraOperation.upsertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, context);
+    public Response updateConsent(Map<String, Object> consent, RequestContext context){
+        return cassandraOperation.upsertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, consent, context);
     }
 
     @Override
-    public UserConsent getConsent(String consentId, RequestContext context) {
-        UserConsent consentObj = null;
+    public Map<String, Object> getConsent(String consentId, RequestContext context) {
+        Map<String, Object> consentMap = null;
         Response response =
                 cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, consentId, context);
         List<Map<String, Object>> responseList =
                 (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
         if (CollectionUtils.isNotEmpty(responseList)) {
-            Map<String, Object> userMap = responseList.get(0);
-            consentObj = mapper.convertValue(userMap, UserConsent.class);
+            consentMap = responseList.get(0);
+
         }
-        return consentObj;
+        return consentMap;
     }
 }

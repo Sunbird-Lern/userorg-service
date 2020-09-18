@@ -1,5 +1,6 @@
 package org.sunbird.user.actors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -7,13 +8,11 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.UserConsent;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.UserConsentService;
 import org.sunbird.user.service.UserService;
@@ -22,11 +21,8 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.DateUtil;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +35,6 @@ import java.util.Map;
 )
 public class UserConsentActor extends BaseActor {
 
-    Map<String, Object> consentCache = new HashMap<String, Object>();
     private UserService userService = UserServiceImpl.getInstance();
     private UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
 
@@ -50,7 +45,6 @@ public class UserConsentActor extends BaseActor {
     @Override
     public void onReceive(Request request) throws Throwable {
         Util.initializeContext(request, TelemetryEnvKey.USER);
-        RequestContext context = request.getRequestContext();
         String operation = request.getOperation();
         switch (operation) {
             case "updateUserConsent":
@@ -66,20 +60,19 @@ public class UserConsentActor extends BaseActor {
     }
 
     private void getUserConsent(Request request) {
-        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
-        Map<String, Object> filters = (Map<String, Object>) consent.getOrDefault("filters", new HashMap<String, Object>());
-        String userId = (String) filters.getOrDefault("userId", "");
-        String consumerId = (String) filters.getOrDefault("consumerId", "");
-        String objectId = (String) filters.getOrDefault("objectId", "");
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT, new HashMap<String, Object>());
+        Map<String, Object> filters = (Map<String, Object>) consent.getOrDefault(JsonKey.FILTERS, new HashMap<String, Object>());
+        String userId = (String) filters.getOrDefault(JsonKey.USER_ID, "");
+        String consumerId = (String) filters.getOrDefault(JsonKey.CONSUMERID, "");
+        String objectId = (String) filters.getOrDefault(JsonKey.OBJECTID, "");
 
         String key = getKey(userId, consumerId, objectId);
-        //Object cacheData = consentCache.get(key);
 
-        UserConsent consentObj = userConsentService.getConsent(key, request.getRequestContext());
+        Map<String, Object> consentMap = userConsentService.getConsent(key, request.getRequestContext());
 
         Response response = new Response();
-        if (consentObj != null)
-            response.put("consents", Arrays.asList(consentObj));
+        if (MapUtils.isNotEmpty(consentMap))
+            response.put(JsonKey.CONSENTS, Arrays.asList(consentMap));
         else {
             throw new ProjectCommonException(
                     ResponseCode.userConsentNotFound.getErrorCode(),
@@ -90,8 +83,8 @@ public class UserConsentActor extends BaseActor {
     }
 
     private void updateUserConsent(Request request) {
-        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault("consent", new HashMap<String, Object>());
-        String userId = (String) consent.getOrDefault("userId", "");
+        Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT, new HashMap<String, Object>());
+        String userId = (String) consent.getOrDefault(JsonKey.USER_ID, "");
         if(StringUtils.isEmpty(userId)){
             userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
         }
@@ -99,15 +92,18 @@ public class UserConsentActor extends BaseActor {
         if(StringUtils.isNotEmpty(managedFor)){
             userId = managedFor;
         }
+        consent.put(JsonKey.USER_ID,userId);
         userService.validateUserId(request, null, request.getRequestContext());
 
-        userConsentService.updateConsent(createConsentRequestObj(consent), request.getRequestContext());
+        Map consentReq = createConsentRequest(consent, request.getRequestContext());
+
+        userConsentService.updateConsent(consentReq, request.getRequestContext());
 
         Response response = new Response();
-        Map consentMap = new HashMap<String, Object>();
-        consentMap.put("userId", userId);
-        response.put("consent", consentMap);
-        response.put("message", "User Consent updated successfully.");
+        Map consentResponse = new HashMap<String, Object>();
+        consentResponse.put(JsonKey.USER_ID, userId);
+        response.put(JsonKey.CONSENT, consentResponse);
+        response.put(JsonKey.MESSAGE, "User Consent updated successfully.");
 
         sender().tell(response, self());
 
@@ -124,29 +120,36 @@ public class UserConsentActor extends BaseActor {
         return "usr-consent:" + userId + ":" + consumerId + ":" + objectId;
     }
 
-    private UserConsent createConsentRequestObj(Map<String, Object> consent){
-        String userId = (String) consent.getOrDefault("userId", "");
-        String consumerId = (String) consent.getOrDefault("consumerId", "");
-        String consumerType = (String) consent.getOrDefault("consumerType", CONSENT_CONSUMER_TYPE.ORGANISATION.toString());
-        String objectId = (String) consent.getOrDefault("objectId", "");
-        String objectType = (String) consent.getOrDefault("objectType", "");
-        String status = (String) consent.getOrDefault("status", "");
+    private Map<String, Object> createConsentRequest(Map<String, Object> consent, RequestContext context){
+        String userId = (String) consent.getOrDefault(JsonKey.USER_ID, "");
+        String consumerId = (String) consent.getOrDefault(JsonKey.CONSUMERID, "");
+        String consumerType = (String) consent.getOrDefault(JsonKey.CONSUMERTYPE, CONSENT_CONSUMER_TYPE.ORGANISATION.toString());
+        String objectId = (String) consent.getOrDefault(JsonKey.OBJECTID, "");
+        String objectType = (String) consent.getOrDefault(JsonKey.OBJECTTYPE, "");
+        String status = (String) consent.getOrDefault(JsonKey.STATUS, "");
+
 
         String key = getKey(userId, consumerId, objectId);
-        //consentCache.put(key, consent);
+        Map<String, Object> consentReq = new HashMap<String, Object>();
+        consentReq.put(JsonKey.ID, key);
+        consentReq.put(JsonKey.CONSENT_USER_ID, userId);
+        consentReq.put(JsonKey.CONSUMER_ID, consumerId);
+        consentReq.put(JsonKey.CONSUMER_TYPE, consumerType);
+        consentReq.put(JsonKey.OBJECT_ID, objectId);
+        consentReq.put(JsonKey.CONSENT_OBJECT_TYPE, objectType);
+        consentReq.put(JsonKey.STATUS, status);
+        consentReq.put(JsonKey.EXPIRY, new Timestamp(calculateConsentExpiryDate()));
 
-        UserConsent consentObj = new UserConsent();
-        consentObj.setId(key);
-        consentObj.setUserId(userId);
-        consentObj.setConsumerId(consumerId);
-        consentObj.setConsumerType(consumerType);
-        consentObj.setObjectId(objectId);
-        consentObj.setObjectType(objectType);
-        consentObj.setStatus(status);
-        consentObj.setCreatedOn(DateUtil.getCurrentDateTimestamp());
-        consentObj.setLastUpdatedOn(DateUtil.getCurrentDateTimestamp());
-        consentObj.setExpiry(new Timestamp(calculateConsentExpiryDate()));
-        return consentObj;
+        //Check if consent is already existing
+        Map<String, Object> dbCconsentMap = userConsentService.getConsent((String)consentReq.get(JsonKey.ID), context);
+        if (MapUtils.isNotEmpty(dbCconsentMap)){
+            consentReq.put(JsonKey.CONSENT_LAST_UPDATED_ON, DateUtil.getCurrentDateTimestamp());
+        } else {
+            consentReq.put(JsonKey.CONSENT_CREATED_ON, DateUtil.getCurrentDateTimestamp());
+            consentReq.put(JsonKey.CONSENT_LAST_UPDATED_ON, DateUtil.getCurrentDateTimestamp());
+        }
+
+        return consentReq;
     }
 
     private long calculateConsentExpiryDate(){
