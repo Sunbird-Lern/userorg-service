@@ -7,13 +7,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
-    public static Date addDaysToDate(Date dateObj){
-        final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-        // convert date to calendar
+    public static Date addDaysToDate(Date dateObj, int days){
         Calendar c = Calendar.getInstance();
         c.setTime(dateObj);
         // manipulate date
-        c.add(Calendar.DATE, 1);
+        c.add(Calendar.DATE, days);
         // convert calendar to date
         return c.getTime();
     }

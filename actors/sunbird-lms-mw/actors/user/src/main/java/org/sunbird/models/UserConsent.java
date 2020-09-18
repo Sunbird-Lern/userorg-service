@@ -16,8 +16,8 @@ public class UserConsent  implements Serializable {
     private static final long serialVersionUID = 7529802960267784945L;
 
     private String id;
-    private String userId;
-    private String consumerId;
+    private String user_id;
+    private String consumer_id;
     private String consumerType;
     private String objectId;
     private String objectType;

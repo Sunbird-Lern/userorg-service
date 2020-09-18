@@ -6,6 +6,7 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
@@ -126,7 +127,7 @@ public class UserConsentActor extends BaseActor {
     private UserConsent createConsentRequestObj(Map<String, Object> consent){
         String userId = (String) consent.getOrDefault("userId", "");
         String consumerId = (String) consent.getOrDefault("consumerId", "");
-        String consumerType = (String) consent.getOrDefault("consumerType", CONSENT_CONSUMER_TYPE.ORGANISATION);
+        String consumerType = (String) consent.getOrDefault("consumerType", CONSENT_CONSUMER_TYPE.ORGANISATION.toString());
         String objectId = (String) consent.getOrDefault("objectId", "");
         String objectType = (String) consent.getOrDefault("objectType", "");
         String status = (String) consent.getOrDefault("status", "");
@@ -149,7 +150,7 @@ public class UserConsentActor extends BaseActor {
     }
 
     private long calculateConsentExpiryDate(){
-        int consentExpiry = Integer.parseInt(PropertiesCache.getInstance().getProperty("CONSENT_EXPIRY_IN_DAYS"));
-        return DateUtil.addDaysToDate(new Date()).getTime();
+        int consentExpiry = Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.CONSENT_EXPIRY_IN_DAYS));
+        return DateUtil.addDaysToDate(new Date(), consentExpiry).getTime();
     }
 }
