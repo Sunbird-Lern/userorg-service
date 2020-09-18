@@ -188,11 +188,9 @@ public class UserProfileReadActor extends BaseActor {
         && (Boolean) result.get(JsonKey.IS_DELETED)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-    Future<Map<String, Object>> esResultF =
-        fetchRootAndRegisterOrganisation(result, actorMessage.getRequestContext());
-    Map<String, Object> esResult =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
-    result.put(JsonKey.ROOT_ORG, esResult);
+    Map<String, Object> rootOrgResult =
+        fetchRootOrganisation(result, actorMessage.getRequestContext());
+    result.put(JsonKey.ROOT_ORG, rootOrgResult);
     // having check for removing private filed from user , if call user and response
     // user data id is not same.
     String requestedById =
@@ -429,12 +427,6 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  private void setDefaultUserProfileVisibility(Map<String, Object> userMap) {
-    userMap.put(
-        JsonKey.DEFAULT_PROFILE_FIELD_VISIBILITY,
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_USER_PROFILE_FIELD_DEFAULT_VISIBILITY));
-  }
-
   /**
    * This method will remove user private field from response map
    *
@@ -447,6 +439,27 @@ public class UserProfileReadActor extends BaseActor {
     }
     logger.info("All private filed removed=");
     return responseMap;
+  }
+
+  private Map<String, Object> fetchRootOrganisation(
+      Map<String, Object> result, RequestContext context) {
+    try {
+      if (isNotNull(result.get(JsonKey.ROOT_ORG_ID))) {
+        String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
+        Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+        Response response =
+            cassandraOperation.getRecordById(
+                userOrgDb.getKeySpace(), userOrgDb.getTableName(), rootOrgId, context);
+        List<Map<String, Object>> responseList =
+            (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        if (CollectionUtils.isNotEmpty(responseList)) {
+          return responseList.get(0);
+        }
+      }
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return null;
   }
 
   private Future<Map<String, Object>> fetchRootAndRegisterOrganisation(
