@@ -80,9 +80,18 @@ public class UserUtil {
           providerSet.add(extId.get(JsonKey.PROVIDER));
         }
       }
-      Map<String, String> orgProviderMap =
-          fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
-
+      Map<String, String> orgProviderMap;
+      if (CollectionUtils.isNotEmpty(providerSet) && providerSet.size() == 1) {
+        String channel = providerSet.stream().findFirst().orElse("");
+        orgProviderMap = new HashMap<>();
+        if (channel.equalsIgnoreCase((String) userMap.get(JsonKey.CHANNEL))) {
+          orgProviderMap.put(channel, (String) userMap.get(JsonKey.ROOT_ORG_ID));
+        } else {
+          orgProviderMap = fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
+        }
+      } else {
+        orgProviderMap = fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
+      }
       if (CollectionUtils.isNotEmpty(
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
         for (Map<String, String> externalId :
@@ -302,12 +311,10 @@ public class UserUtil {
     String phone = (String) userMap.get(JsonKey.PHONE);
     String email = (String) userMap.get(JsonKey.EMAIL);
     if (!StringUtils.isBlank(phone)) {
-      userMap.put(
-          JsonKey.MASKED_PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
+      userMap.put(JsonKey.MASKED_PHONE, maskingService.maskPhone(phone));
     }
     if (!StringUtils.isBlank(email)) {
-      userMap.put(
-          JsonKey.MASKED_EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
+      userMap.put(JsonKey.MASKED_EMAIL, maskingService.maskEmail(email));
     }
   }
 

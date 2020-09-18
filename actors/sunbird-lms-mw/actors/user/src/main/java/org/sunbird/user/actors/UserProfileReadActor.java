@@ -446,10 +446,10 @@ public class UserProfileReadActor extends BaseActor {
     try {
       if (isNotNull(result.get(JsonKey.ROOT_ORG_ID))) {
         String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-        Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+        Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
         Response response =
             cassandraOperation.getRecordById(
-                userOrgDb.getKeySpace(), userOrgDb.getTableName(), rootOrgId, context);
+                OrgDb.getKeySpace(), OrgDb.getTableName(), rootOrgId, context);
         List<Map<String, Object>> responseList =
             (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
         if (CollectionUtils.isNotEmpty(responseList)) {
