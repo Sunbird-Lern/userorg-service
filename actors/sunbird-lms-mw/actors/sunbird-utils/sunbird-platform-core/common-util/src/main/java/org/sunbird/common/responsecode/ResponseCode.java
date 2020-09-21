@@ -852,7 +852,7 @@ public enum ResponseCode {
     userConsentNotFound(ResponseMessage.Key.USER_CONSENT_NOT_FOUND, ResponseMessage.Message.USER_CONSENT_NOT_FOUND),
   InvalidUserInfoValue(
       ResponseMessage.Key.INVALID_USER_INFO_VALUE, ResponseMessage.Message.INVALID_USER_INFO_VALUE),
-
+  invalidConsentStatus(ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
