@@ -102,7 +102,7 @@ public class UserConsentActorTest {
         consent.put(JsonKey.STATUS, "ACTIVE");
 
         Request reqObj = new Request();
-        reqObj.setOperation(ActorOperations.GET_USER_CONSENT.getValue());
+        reqObj.setOperation(ActorOperations.UPDATE_USER_CONSENT.getValue());
         reqObj.put("consent",consent);
 
         return reqObj;
