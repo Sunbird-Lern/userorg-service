@@ -236,11 +236,7 @@ public class UserProfileReadActor extends BaseActor {
                   actorMessage.getRequestContext(),
                   "Get external Ids explicitly from usr_external_identity for v3");
               List<Map<String, String>> resExternalIds =
-                  userExternalIdentityService.getUserExternalIds(
-                      userId, actorMessage.getRequestContext());
-              decryptUserExternalIds(resExternalIds, actorMessage.getRequestContext());
-              UserUtil.updateExternalIdsWithProvider(
-                  resExternalIds, actorMessage.getRequestContext());
+                  fetchExternalIds(userId, result, actorMessage.getRequestContext());
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
@@ -250,7 +246,7 @@ public class UserProfileReadActor extends BaseActor {
               actorMessage.getRequestContext(),
               "Get external Ids from both declarations and usr_external_identity for merge them");
           List<Map<String, String>> dbResExternalIds =
-              fetchUserExternalIdentity(userId, actorMessage.getRequestContext());
+              fetchUserExternalIdentity(userId, result, actorMessage.getRequestContext());
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
       }
@@ -263,8 +259,7 @@ public class UserProfileReadActor extends BaseActor {
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
       String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
-      addExtraFieldsInUserProfileResponse(
-          result, requestFields, userId, actorMessage.getRequestContext());
+      addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     } else {
       result.remove(JsonKey.MISSING_FIELDS);
       result.remove(JsonKey.COMPLETENESS);
@@ -279,8 +274,6 @@ public class UserProfileReadActor extends BaseActor {
       result.remove(JsonKey.LOGIN_ID);
       result.remove(JsonKey.ENC_EMAIL);
       result.remove(JsonKey.ENC_PHONE);
-      // String username = ssoManager.getUsernameById(userId);
-      //  result.put(JsonKey.USERNAME, username);
 
       if (withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
         if (StringUtils.isEmpty(managedToken)) {
@@ -308,6 +301,43 @@ public class UserProfileReadActor extends BaseActor {
       response.put(JsonKey.RESPONSE, result);
     }
     return response;
+  }
+
+  private List<Map<String, String>> fetchExternalIds(
+      String userId, Map<String, Object> user, RequestContext context) {
+    try {
+      logger.info(context, "Get external Ids explicitly from usr_external_identity for v3");
+      List<Map<String, String>> resExternalIds =
+          userExternalIdentityService.getUserExternalIds(userId, context);
+      decryptUserExternalIds(resExternalIds, context);
+      if (CollectionUtils.isNotEmpty(resExternalIds)) {
+        String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
+        if (StringUtils.isNotBlank(rootOrgId)) {
+          String orgId = resExternalIds.get(0).get(JsonKey.PROVIDER);
+          if (orgId.equalsIgnoreCase(rootOrgId)) {
+            String provider = (String) user.get(JsonKey.CHANNEL);
+            resExternalIds
+                .stream()
+                .forEach(
+                    s -> {
+                      if (s.get(JsonKey.PROVIDER) != null
+                          && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                        s.put(JsonKey.ID_TYPE, provider);
+                      }
+                      s.put(JsonKey.PROVIDER, provider);
+                    });
+          } else {
+            UserUtil.updateExternalIdsWithProvider(resExternalIds, context);
+          }
+        } else {
+          UserUtil.updateExternalIdsWithProvider(resExternalIds, context);
+        }
+      }
+      return resExternalIds;
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return new ArrayList<>();
   }
 
   /**
@@ -363,14 +393,38 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private List<Map<String, String>> fetchUserExternalIdentity(
-      String userId, RequestContext context) {
+      String userId, Map<String, Object> user, RequestContext context) {
+    try {
+      List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
 
-    List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
-
-    decryptUserExternalIds(dbResExternalIds, context);
-    // update orgId to provider in externalIds
-    UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-    return dbResExternalIds;
+      decryptUserExternalIds(dbResExternalIds, context);
+      // update orgId to provider in externalIds
+      String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
+      if (CollectionUtils.isNotEmpty(dbResExternalIds) && StringUtils.isNotBlank(rootOrgId)) {
+        String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+        if (orgId.equalsIgnoreCase(rootOrgId)) {
+          String provider = (String) user.get(JsonKey.CHANNEL);
+          dbResExternalIds
+              .stream()
+              .forEach(
+                  s -> {
+                    if (s.get(JsonKey.PROVIDER) != null
+                        && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                      s.put(JsonKey.ID_TYPE, provider);
+                    }
+                    s.put(JsonKey.PROVIDER, provider);
+                  });
+        } else {
+          UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+        }
+      } else {
+        UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+      }
+      return dbResExternalIds;
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return new ArrayList<>();
   }
 
   private void decryptUserExternalIds(
@@ -476,7 +530,7 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void addExtraFieldsInUserProfileResponse(
-      Map<String, Object> result, String fields, String userId, RequestContext context) {
+      Map<String, Object> result, String fields, RequestContext context) {
     if (!StringUtils.isBlank(fields)) {
       result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (!fields.contains(JsonKey.COMPLETENESS)) {
@@ -508,7 +562,7 @@ public class UserProfileReadActor extends BaseActor {
     Set<String> topicSet = new HashSet<>();
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-    if (!userOrgList.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(userOrgList)) {
       List<String> orgIdList =
           userOrgList
               .stream()
@@ -516,8 +570,8 @@ public class UserProfileReadActor extends BaseActor {
               .distinct()
               .collect(Collectors.toList());
 
-      // fetch all org details from elasticsearch ...
-      if (!orgIdList.isEmpty()) {
+      // fetch all org details from cassandra ...
+      if (CollectionUtils.isNotEmpty(orgIdList)) {
         Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
         List<String> orgfields = new ArrayList<>();
         orgfields.add(JsonKey.ID);
@@ -576,23 +630,31 @@ public class UserProfileReadActor extends BaseActor {
             .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
             .distinct()
             .collect(Collectors.toList());
-    List<String> fields =
-        Arrays.asList(
-            JsonKey.ORG_NAME, JsonKey.CHANNEL, JsonKey.HASHTAGID, JsonKey.LOCATION_IDS, JsonKey.ID);
-    Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Response userOrgResponse =
-        cassandraOperation.getPropertiesValueById(
-            OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
-    List<Map<String, Object>> userOrgResponseList =
-        (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-    return userOrgResponseList
-        .stream()
-        .collect(
-            Collectors.toMap(
-                obj -> {
-                  return (String) obj.get("id");
-                },
-                val -> val));
+    if (CollectionUtils.isNotEmpty(orgIds)) {
+      List<String> fields =
+          Arrays.asList(
+              JsonKey.ORG_NAME,
+              JsonKey.CHANNEL,
+              JsonKey.HASHTAGID,
+              JsonKey.LOCATION_IDS,
+              JsonKey.ID);
+      Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
+      Response userOrgResponse =
+          cassandraOperation.getPropertiesValueById(
+              OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
+      List<Map<String, Object>> userOrgResponseList =
+          (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
+      return userOrgResponseList
+          .stream()
+          .collect(
+              Collectors.toMap(
+                  obj -> {
+                    return (String) obj.get("id");
+                  },
+                  val -> val));
+    } else {
+      return new HashMap<>();
+    }
   }
 
   private Map<String, Map<String, Object>> fetchAllLocationsById(
@@ -610,26 +672,30 @@ public class UserProfileReadActor extends BaseActor {
             });
       }
     }
-    List<String> locList = new ArrayList<>(locationSet);
-    List<String> locationFields =
-        Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
+    if (CollectionUtils.isNotEmpty(locationSet)) {
+      List<String> locList = new ArrayList<>(locationSet);
+      List<String> locationFields =
+          Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
 
-    Response locationResponse =
-        cassandraOperation.getPropertiesValueById(
-            "sunbird", "location", locList, locationFields, context);
-    List<Map<String, Object>> locationResponseList =
-        (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+      Response locationResponse =
+          cassandraOperation.getPropertiesValueById(
+              "sunbird", "location", locList, locationFields, context);
+      List<Map<String, Object>> locationResponseList =
+          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
 
-    Map<String, Map<String, Object>> locationInfoMap =
-        locationResponseList
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    obj -> {
-                      return (String) obj.get("id");
-                    },
-                    val -> val));
-    return locationInfoMap;
+      Map<String, Map<String, Object>> locationInfoMap =
+          locationResponseList
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      obj -> {
+                        return (String) obj.get("id");
+                      },
+                      val -> val));
+      return locationInfoMap;
+    } else {
+      return new HashMap<>();
+    }
   }
 
   private void prepUserOrgInfoWithAdditionalData(
@@ -642,9 +708,11 @@ public class UserProfileReadActor extends BaseActor {
       usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
       usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
       usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
-      usrOrg.put(
-          JsonKey.LOCATIONS,
-          prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      if (MapUtils.isNotEmpty(locationInfoMap)) {
+        usrOrg.put(
+            JsonKey.LOCATIONS,
+            prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      }
     }
   }
 
@@ -806,7 +874,7 @@ public class UserProfileReadActor extends BaseActor {
       } else {
         // fetch user external identity
         List<Map<String, String>> dbResExternalIds =
-            fetchUserExternalIdentity(requestedById, actorMessage.getRequestContext());
+            fetchUserExternalIdentity(requestedById, result, actorMessage.getRequestContext());
         result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
       }
     } catch (Exception e) {
@@ -829,10 +897,7 @@ public class UserProfileReadActor extends BaseActor {
         List<String> requestFields = (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
         if (requestFields != null) {
           addExtraFieldsInUserProfileResponse(
-              result,
-              String.join(",", requestFields),
-              (String) result.get(JsonKey.USER_ID),
-              actorMessage.getRequestContext());
+              result, String.join(",", requestFields), actorMessage.getRequestContext());
         } else {
           result.remove(JsonKey.MISSING_FIELDS);
           result.remove(JsonKey.COMPLETENESS);
@@ -1084,7 +1149,9 @@ public class UserProfileReadActor extends BaseActor {
                 if (((String) result.get(JsonKey.USER_ID)).equalsIgnoreCase(requestedById)) {
                   List<Map<String, String>> dbResExternalIds =
                       fetchUserExternalIdentity(
-                          (String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext());
+                          (String) result.get(JsonKey.USER_ID),
+                          result,
+                          actorMessage.getRequestContext());
                   extIdMap.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
                   return extIdMap;
                 }
@@ -1104,10 +1171,7 @@ public class UserProfileReadActor extends BaseActor {
                       (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
                   if (requestFields != null) {
                     addExtraFieldsInUserProfileResponse(
-                        result,
-                        String.join(",", requestFields),
-                        (String) result.get(JsonKey.USER_ID),
-                        actorMessage.getRequestContext());
+                        result, String.join(",", requestFields), actorMessage.getRequestContext());
                   } else {
                     result.remove(JsonKey.MISSING_FIELDS);
                     result.remove(JsonKey.COMPLETENESS);
