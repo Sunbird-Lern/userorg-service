@@ -42,7 +42,7 @@ public class UserExternalIdentityServiceTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
   }
 
-  // @Test
+  @Test
   public void getUserV1Test() {
     Map<String, Object> propertyMap = new HashMap<>();
     Response response = new Response();
@@ -68,7 +68,7 @@ public class UserExternalIdentityServiceTest {
     Assert.assertTrue(true);
   }
 
-  // @Test
+  @Test
   public void getUserV2Test() {
     Map<String, Object> propertyMap = new HashMap<>();
     Response response = new Response();

@@ -27,10 +27,14 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     mockForUpdateTest();
   }
 
-  // @Test
+  @Test
   public void testUpdateUserFrameworkSuccess() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Request reqObj = getRequest(null, null);
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean res = testScenario(reqObj, null);
     assertTrue(res);
   }
