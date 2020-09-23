@@ -338,4 +338,27 @@ public class UserUtilTest {
           ex.getMessage());
     }
   }
+
+  @Test
+  public void testUpdateExternalIdsProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId1 = new HashMap<>();
+    extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.ORIGINAL_PROVIDER, "0123");
+    extId1.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.PROVIDER, "0123");
+    extId1.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId1);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    Assert.assertTrue(true);
+  }
 }
