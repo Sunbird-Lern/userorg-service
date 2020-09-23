@@ -66,8 +66,7 @@ import scala.concurrent.Promise;
   LocationClientImpl.class,
   DataCacheHandler.class,
   UserExternalIdentityService.class,
-  UserExternalIdentityServiceImpl.class,
-  UserProfileReadActor.class
+  UserExternalIdentityServiceImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserProfileReadActorTest {
