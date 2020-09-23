@@ -848,18 +848,20 @@ public class UserUtil {
       throws Exception {
     for (Map<String, Object> declareFields : declarations) {
       Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
-      for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
-        String key = userInfo.getKey();
-        String value = (String) userInfo.getValue();
-        if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
-          if (UserUtility.isMasked(value)) {
-            if (JsonKey.DECLARED_EMAIL.equals(key)) {
-              userInfoMap.put(key, userDbRecords.get(JsonKey.EMAIL));
+      if (MapUtils.isNotEmpty(userInfoMap)) {
+        for (Map.Entry<String, Object> userInfo : userInfoMap.entrySet()) {
+          String key = userInfo.getKey();
+          String value = (String) userInfo.getValue();
+          if (JsonKey.DECLARED_EMAIL.equals(key) || JsonKey.DECLARED_PHONE.equals(key)) {
+            if (UserUtility.isMasked(value)) {
+              if (JsonKey.DECLARED_EMAIL.equals(key)) {
+                userInfoMap.put(key, userDbRecords.get(JsonKey.EMAIL));
+              } else {
+                userInfoMap.put(key, userDbRecords.get(JsonKey.PHONE));
+              }
             } else {
-              userInfoMap.put(key, userDbRecords.get(JsonKey.PHONE));
+              userInfoMap.put(key, encryptionService.encryptData(value, context));
             }
-          } else {
-            userInfoMap.put(key, encryptionService.encryptData(value, context));
           }
         }
       }
