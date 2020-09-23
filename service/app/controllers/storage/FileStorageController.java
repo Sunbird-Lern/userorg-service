@@ -85,7 +85,7 @@ public class FileStorageController extends BaseController {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);

@@ -86,7 +86,7 @@ public class OTPActor extends BaseActor {
     Map<String, Object> details = otpService.getOTPDetails(type, key, request.getRequestContext());
 
     if (MapUtils.isEmpty(details)) {
-      otp = OTPUtil.generateOTP();
+      otp = OTPUtil.generateOtp(request.getRequestContext());
       logger.info(
           request.getRequestContext(),
           "OTPActor:generateOTP: inserting otp Key = "

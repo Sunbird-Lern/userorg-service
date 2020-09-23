@@ -134,7 +134,7 @@ public class RequestInterceptor {
    */
   public static Map verifyRequestData(Http.Request request) {
     Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, null);
+    userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
     userAuthentication.put(JsonKey.MANAGED_FOR, null);
 
     String clientId = JsonKey.UNAUTHORIZED;

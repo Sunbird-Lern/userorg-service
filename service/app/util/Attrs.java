@@ -11,5 +11,5 @@ public class Attrs {
   public static final TypedKey<String> AUTH_WITH_MASTER_KEY =
       TypedKey.<String>create(JsonKey.AUTH_WITH_MASTER_KEY);
   public static final TypedKey<String> IS_AUTH_REQ = TypedKey.<String>create(JsonKey.IS_AUTH_REQ);
-  public static final TypedKey<String> REQUEST_ID = TypedKey.<String>create(JsonKey.REQUEST_ID);
+  public static final TypedKey<String> X_REQUEST_ID = TypedKey.<String>create(JsonKey.X_REQUEST_ID);
 }
