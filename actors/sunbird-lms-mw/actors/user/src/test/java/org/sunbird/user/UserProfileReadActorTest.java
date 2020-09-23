@@ -89,7 +89,7 @@ public class UserProfileReadActorTest {
   private static ElasticSearchService esService;
 
   @Before
-  public void beforeEachTest() throws Exception {
+  public void beforeEachTest() {
 
     ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
@@ -169,7 +169,7 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  public void testGetUserProfileV1SuccessWithFieldExternalIds() throws Exception {
+  public void testGetUserProfileV1SuccessWithFieldExternalIds() {
     PowerMockito.mockStatic(UserUtil.class);
     List<Map<String, String>> extIdList = new ArrayList<>();
     Map<String, String> extId = new HashMap<>();
@@ -187,6 +187,64 @@ public class UserProfileReadActorTest {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, VALID_USER_ID);
     boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  // @Test
+  public void testGetUserProfileV1SuccessWithExternalIds() throws Exception {
+    UserExternalIdentityServiceImpl externalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+        .withNoArguments()
+        .thenReturn(externalIdentityService);
+    when(externalIdentityService.getUserV1(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(VALID_USER_ID);
+
+    Request reqObj = getProfileReadV1request(VALID_USER_ID);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetUserProfileV1FailureWithExternalIds() throws Exception {
+    UserExternalIdentityServiceImpl externalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+        .withNoArguments()
+        .thenReturn(externalIdentityService);
+    when(externalIdentityService.getUserV1(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(null);
+
+    Request reqObj = getProfileReadV1request(VALID_USER_ID);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    boolean result = testScenario(reqObj, ResponseCode.externalIdNotFound);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetUserProfileV1Failure() {
+    Request reqObj = new Request();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, VALID_USER_ID);
+    innerMap.put(JsonKey.PRIVATE, false);
+    innerMap.put(JsonKey.VERSION, JsonKey.VERSION_2);
+    innerMap.put(JsonKey.PROVIDER, JsonKey.VERSION_2);
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.USER_ID, VALID_USER_ID);
+    reqMap.put(JsonKey.ROOT_ORG_ID, "validRootOrgId");
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(ActorOperations.GET_USER_PROFILE.getValue());
+    setEsResponse(getUserResponseMap());
+
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    boolean result = testScenario(reqObj, ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
 
@@ -368,7 +426,7 @@ public class UserProfileReadActorTest {
 
   private void setCassandraResponse(Response cassandraResponse) {
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraResponse);
   }
 
@@ -404,6 +462,24 @@ public class UserProfileReadActorTest {
     reqMap.put(JsonKey.USER_ID, userId);
     reqMap.put(JsonKey.ROOT_ORG_ID, "validRootOrgId");
     return reqMap;
+  }
+
+  private Request getProfileReadV1request(String userId) {
+    Request reqObj = new Request();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, VALID_USER_ID);
+    innerMap.put(JsonKey.PRIVATE, false);
+    innerMap.put(JsonKey.VERSION, JsonKey.VERSION_2);
+    innerMap.put(JsonKey.ID_TYPE, JsonKey.VERSION_2);
+    innerMap.put(JsonKey.PROVIDER, JsonKey.VERSION_2);
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.USER_ID, userId);
+    reqMap.put(JsonKey.ROOT_ORG_ID, "validRootOrgId");
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(ActorOperations.GET_USER_PROFILE.getValue());
+    setEsResponse(getUserResponseMap());
+    return reqObj;
   }
 
   private Request getProfileReadV2request(String userId, String fields) {
