@@ -37,7 +37,7 @@ public interface IFeedService {
    * @param context
    * @return List<Feed>
    */
-  List<Feed> getRecordsByProperties(Map<String, Object> properties, RequestContext context);
+  List<Feed> getRecordsByUserId(Map<String, Object> properties, RequestContext context);
 
   /**
    * this method will be holding responsibility to get and search the feed.
@@ -54,5 +54,5 @@ public interface IFeedService {
    * @param id
    * @param context
    */
-  void delete(String id, RequestContext context);
+  void delete(String id, String userId, String action, RequestContext context);
 }

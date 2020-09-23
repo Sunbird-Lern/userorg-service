@@ -84,7 +84,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(feedService.getRecordsByProperties(Mockito.anyMap(), Mockito.any()))
+    when(feedService.getRecordsByUserId(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
 
