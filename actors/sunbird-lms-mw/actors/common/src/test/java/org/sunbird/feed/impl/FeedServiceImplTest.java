@@ -80,8 +80,8 @@ public class FeedServiceImplTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordById(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
@@ -116,7 +116,7 @@ public class FeedServiceImplTest {
   public void testDelete() {
     boolean response = false;
     try {
-      feedService.delete("123-456-789", null);
+      feedService.delete("123-456-789", null, null, null);
       response = true;
     } catch (Exception ex) {
       Assert.assertTrue(response);
@@ -128,7 +128,7 @@ public class FeedServiceImplTest {
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getRecordsByProperties(props, null);
+    List<Feed> res = feedService.getRecordsByUserId(props, null);
     Assert.assertTrue(res != null);
   }
 

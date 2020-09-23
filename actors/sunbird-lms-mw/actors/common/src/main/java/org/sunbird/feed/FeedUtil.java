@@ -36,7 +36,7 @@ public class FeedUtil {
     reqMap.put(JsonKey.USER_ID, userId);
     reqMap.put(JsonKey.CATEGORY, FeedAction.ORG_MIGRATION_ACTION.getfeedAction());
     logger.info(context, "FeedUtil:saveFeed:fetching feed for userId ." + userId);
-    List<Feed> feedList = feedService.getRecordsByProperties(reqMap, context);
+    List<Feed> feedList = feedService.getRecordsByUserId(reqMap, context);
     logger.info(
         context,
         "FeedUtil:saveFeed total no. of feed fetched for user id ."
