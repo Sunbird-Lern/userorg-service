@@ -361,4 +361,13 @@ public class UserUtilTest {
     UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
     Assert.assertTrue(true);
   }
+
+  @Test
+  public void testAddMaskEmailAndMaskPhone() {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.PHONE, "9999999999");
+    requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
+    UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Assert.assertTrue(true);
+  }
 }
