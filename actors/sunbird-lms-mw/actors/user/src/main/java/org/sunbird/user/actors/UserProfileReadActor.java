@@ -68,7 +68,7 @@ public class UserProfileReadActor extends BaseActor {
   private ActorRef systemSettingActorRef = null;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserService userService = UserServiceImpl.getInstance();
-  private static UserExternalIdentityService userExternalIdentityService =
+  private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
 
   @Override
@@ -497,7 +497,7 @@ public class UserProfileReadActor extends BaseActor {
   private Map<String, Object> fetchRootOrganisation(
       Map<String, Object> result, RequestContext context) {
     try {
-      if (isNotNull(result.get(JsonKey.ROOT_ORG_ID))) {
+      if (StringUtils.isNotBlank((String) result.get(JsonKey.ROOT_ORG_ID))) {
         String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
         Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
         Response response =

@@ -45,6 +45,8 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.user.actors.UserProfileReadActor;
+import org.sunbird.user.service.UserExternalIdentityService;
+import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
@@ -62,7 +64,10 @@ import scala.concurrent.Promise;
   UserServiceImpl.class,
   UserUtil.class,
   LocationClientImpl.class,
-  DataCacheHandler.class
+  DataCacheHandler.class,
+  UserExternalIdentityService.class,
+  UserExternalIdentityServiceImpl.class,
+  UserProfileReadActor.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserProfileReadActorTest {
@@ -85,7 +90,7 @@ public class UserProfileReadActorTest {
   private static ElasticSearchService esService;
 
   @Before
-  public void beforeEachTest() {
+  public void beforeEachTest() throws Exception {
 
     ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
@@ -158,24 +163,70 @@ public class UserProfileReadActorTest {
   public void testGetUserProfileSuccessWithValidUserId() {
     reqMap = getUserProfileRequest(VALID_USER_ID);
     setEsResponse(getUserResponseMap());
+    when(cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.ORGANISATION, "rootOrgId", null))
+        .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_PROFILE), null);
     assertTrue(result);
   }
 
   @Test
-  public void testGetUserProfileV3SuccessWithFieldDeclaration() {
-    Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.DECLARATIONS);
+  public void testGetUserProfileV1SuccessWithFieldExternalIds() throws Exception {
+    PowerMockito.mockStatic(UserUtil.class);
+    List<Map<String, String>> extIdList = new ArrayList<>();
+    Map<String, String> extId = new HashMap<>();
+    extId.put(JsonKey.USER_ID, "userId");
+    extId.put(JsonKey.EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.PROVIDER, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ORIGINAL_ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_PROVIDER, "rootOrgId");
+    extIdList.add(extId);
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.any())).thenReturn(extIdList);
+
+    Request reqObj = getProfileReadV2request(VALID_USER_ID, JsonKey.DECLARATIONS);
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, VALID_USER_ID);
-    when(cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
-        .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
   }
 
   @Test
-  public void testGetUserProfileSuccessV3WithFieldDeclarationAndExternalIds() {
+  public void testGetUserProfileV3SuccessWithFieldDeclaration() {
+    Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.EXTERNAL_IDS);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetUserProfileSuccessV3WithFieldDeclarationAndExternalIds() throws Exception {
+    UserExternalIdentityServiceImpl externalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+        .withNoArguments()
+        .thenReturn(externalIdentityService);
+    List<Map<String, String>> extIdList = new ArrayList<>();
+    Map<String, String> extId = new HashMap<>();
+    extId.put(JsonKey.USER_ID, "userId");
+    extId.put(JsonKey.EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.PROVIDER, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ORIGINAL_ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_PROVIDER, "rootOrgId");
+    extIdList.add(extId);
+    when(externalIdentityService.getUserExternalIds(Mockito.anyString(), Mockito.any()))
+        .thenReturn(extIdList);
+    when(cassandraOperation.getPropertiesValueById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(getUserDeclarationResponse(true));
     Request reqObj =
         getProfileReadV3request(
             VALID_USER_ID,
@@ -183,7 +234,13 @@ public class UserProfileReadActorTest {
                 .concat(",")
                 .concat(JsonKey.EXTERNAL_IDS)
                 .concat(",")
-                .concat(JsonKey.TOPIC));
+                .concat(JsonKey.TOPIC)
+                .concat(",")
+                .concat(JsonKey.ORGANISATIONS)
+                .concat(",")
+                .concat(JsonKey.ROLES)
+                .concat(",")
+                .concat(JsonKey.LOCATIONS));
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     response1.getResult().put(JsonKey.RESPONSE, responseList);
@@ -224,6 +281,12 @@ public class UserProfileReadActorTest {
       List<Map<String, Object>> userList = new ArrayList<>();
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.USER_ID, VALID_USER_ID);
+      List<String> locIds = new ArrayList<>();
+      locIds.add("13213");
+      map.put(JsonKey.LOCATION_IDS, locIds);
+      map.put(JsonKey.LOCATION_ID, "1216564");
+      map.put(JsonKey.TOPIC, "1216564");
+      map.put(JsonKey.ID, "123165464");
       // todo This can be a role(persona) id/name Needs sync up with portal team
       map.put(JsonKey.ROLE, "teacher");
       Map<String, Object> userInfo = new HashMap<>();
@@ -340,7 +403,23 @@ public class UserProfileReadActorTest {
   private Map<String, Object> getUserProfileRequest(String userId) {
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.USER_ID, userId);
+    reqMap.put(JsonKey.ROOT_ORG_ID, "validRootOrgId");
     return reqMap;
+  }
+
+  private Request getProfileReadV2request(String userId, String fields) {
+    Request reqObj = new Request();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, VALID_USER_ID);
+    innerMap.put(JsonKey.PRIVATE, false);
+    innerMap.put(JsonKey.VERSION, JsonKey.VERSION_2);
+    innerMap.put(JsonKey.FIELDS, fields);
+    reqMap = getUserProfileRequest(userId);
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(ActorOperations.GET_USER_PROFILE.getValue());
+    setEsResponse(getUserResponseMap());
+    return reqObj;
   }
 
   private Map<String, Object> getUserProfileByKeyRequest(String key, String value) {
@@ -365,6 +444,17 @@ public class UserProfileReadActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.USER_ID, VALID_USER_ID);
     map.put(JsonKey.CHANNEL, "anyChannel");
+    map.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    List<String> locIds = new ArrayList<>();
+    locIds.add("12346578900");
+    map.put(JsonKey.LOCATION_IDS, locIds);
+    map.put(JsonKey.LOCATION_ID, "1216564");
+    map.put(JsonKey.TOPIC, "1216564");
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    Map<String, Object> organisations = new HashMap<>();
+    orgList.add(organisations);
+    organisations.put(JsonKey.ORGANISATION_ID, "123165464");
+    map.put(JsonKey.ORGANISATIONS, orgList);
     return map;
   }
 
