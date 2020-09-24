@@ -34,6 +34,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.FeedAction;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
@@ -535,7 +536,11 @@ public class TenantMigrationActor extends BaseActor {
     response.put(JsonKey.USER_ID, userId);
     if (StringUtils.equalsIgnoreCase(action, JsonKey.REJECT)) {
       rejectMigration(userId, request.getRequestContext());
-      deleteUserFeed(feedId, request.getRequestContext());
+      deleteUserFeed(
+          feedId,
+          userId,
+          FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
+          request.getRequestContext());
     } else if (StringUtils.equalsIgnoreCase(action, JsonKey.ACCEPT)) {
       logger.info(
           request.getRequestContext(),
@@ -550,7 +555,11 @@ public class TenantMigrationActor extends BaseActor {
             request.getRequestContext(),
             "TenantMigrationActor: processShadowUserMigrate: user entered invalid externalId ");
         if (getRemainingAttempt(shadowUserList) <= 0) {
-          deleteUserFeed(feedId, request.getRequestContext());
+          deleteUserFeed(
+              feedId,
+              userId,
+              FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
+              request.getRequestContext());
         }
         response =
             modifyAttemptCount(response, shadowUserList, extUserId, request.getRequestContext());
@@ -677,14 +686,18 @@ public class TenantMigrationActor extends BaseActor {
         shadowUser.getChannel(),
         shadowUser.getUserExtId(),
         request.getRequestContext());
-    deleteUserFeed(feedId, request.getRequestContext());
+    deleteUserFeed(
+        feedId,
+        userId,
+        FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
+        request.getRequestContext());
   }
 
-  private void deleteUserFeed(String feedId, RequestContext context) {
+  private void deleteUserFeed(String feedId, String userId, String action, RequestContext context) {
     if (StringUtils.isNotBlank(feedId)) {
       logger.info(
           context, "TenantMigrationActor:deleteUserFeed method called for feedId : " + feedId);
-      feedService.delete(feedId, context);
+      feedService.delete(feedId, userId, action, context);
     }
   }
 

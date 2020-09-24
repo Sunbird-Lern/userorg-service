@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -170,7 +171,9 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     compositeKey.put(JsonKey.ORG_ID, userDeclareEntity.getOrgId());
     compositeKey.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
     Map<String, Object> updateFieldsMap = new HashMap<>();
-    updateFieldsMap.put(JsonKey.USER_INFO, userDeclareEntity.getUserInfo());
+    if (MapUtils.isNotEmpty(userDeclareEntity.getUserInfo())) {
+      updateFieldsMap.put(JsonKey.USER_INFO, userDeclareEntity.getUserInfo());
+    }
     updateFieldsMap.put(JsonKey.STATUS, userDeclareEntity.getStatus());
     updateFieldsMap.put(JsonKey.ERROR_TYPE, userDeclareEntity.getErrorType());
     updateFieldsMap.put(JsonKey.UPDATED_BY, userDeclareEntity.getUpdatedBy());

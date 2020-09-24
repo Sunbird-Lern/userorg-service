@@ -81,11 +81,11 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public List<Feed> getRecordsByProperties(Map<String, Object> properties, RequestContext context) {
-    logger.info(context, "FeedServiceImpl:getRecordsByProperties method called : ");
+  public List<Feed> getRecordsByUserId(Map<String, Object> properties, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:getRecordsByUserId method called : ");
     Response dbResponse =
         getCassandraInstance()
-            .getRecordsByPropertiesWithFiltering(
+            .getRecordById(
                 usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties, context);
     List<Map<String, Object>> responseList = null;
     List<Feed> feedList = new ArrayList<>();
@@ -107,7 +107,7 @@ public class FeedServiceImpl implements IFeedService {
               } catch (Exception ex) {
                 logger.error(
                     context,
-                    "FeedServiceImpl:getRecordsByProperties :Exception occurred while mapping feed data.",
+                    "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
                     ex);
               }
             });
@@ -129,10 +129,15 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public void delete(String id, RequestContext context) {
+  public void delete(String id, String userId, String category, RequestContext context) {
     logger.info(context, "FeedServiceImpl:delete method called for feedId : " + id);
+    Map<String, String> compositeKey = new HashMap();
+    compositeKey.put("userid", userId);
+    compositeKey.put("id", id);
+    compositeKey.put("category", category);
     getCassandraInstance()
-        .deleteRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), id, context);
+        .deleteRecord(
+            usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), compositeKey, context);
     getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id, context);
   }
 

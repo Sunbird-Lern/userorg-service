@@ -65,7 +65,7 @@ public class FeedUtilTest {
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(feedService.getRecordsByProperties(Mockito.anyMap(), Mockito.any()))
+    when(feedService.getRecordsByUserId(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
     when(feedService.insert(Mockito.any(), Mockito.any())).thenReturn(new Response());
