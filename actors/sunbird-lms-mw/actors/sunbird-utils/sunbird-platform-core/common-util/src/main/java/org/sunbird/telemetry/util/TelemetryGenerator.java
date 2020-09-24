@@ -105,7 +105,6 @@ public class TelemetryGenerator {
       edata.put(JsonKey.PROPS, getProps(props));
     }
     String type = (String) params.get(JsonKey.TYPE);
-    // TODO: need to rethink about this one .. if map is null then what to do
     if (null != type) {
       edata.put(JsonKey.TYPE, type);
     }
