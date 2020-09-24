@@ -69,6 +69,21 @@ public final class TelemetryUtil {
     generateTelemetry(req);
   }
 
+  public static void telemetryProcessingCall(String type,
+          Map<String, Object> request,
+          Map<String, Object> targetObject,
+          List<Map<String, Object>> correlatedObject,
+          Map<String, Object> context) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(JsonKey.PROPS, request);
+    params.put(JsonKey.TYPE, type);
+    Request req = new Request();
+    req.setRequest(
+            TelemetryUtil.genarateTelemetryRequest(
+                    targetObject, correlatedObject, TelemetryEvents.AUDIT.getName(), params, context));
+    generateTelemetry(req);
+  }
+
   private static void generateTelemetry(Request request) {
     TelemetryWriter.write(request);
   }

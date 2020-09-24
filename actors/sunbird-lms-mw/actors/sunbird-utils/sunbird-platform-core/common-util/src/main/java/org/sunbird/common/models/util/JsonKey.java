@@ -697,7 +697,6 @@ public final class JsonKey {
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
-  public static final String CONSENTDATA = "consentData";
   //user consent req-response attributes listing - ended
   //user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
@@ -707,7 +706,7 @@ public final class JsonKey {
   public static final String CONSENT_OBJECT_TYPE = "object_type";
   public static final String CONSENT_LAST_UPDATED_ON = "last_updated_on";
   public static final String CONSENT_CREATED_ON = "created_on";
-  public static final String CONSENT_DATA = "consent_data";
+  public static final String CONSENT_OBJECT = "object";
   //user consent table columns listing - ended
   private JsonKey() {}
 }

@@ -46,6 +46,10 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
     public void validateUpdateConsentRequest(Request request){
         Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT_BODY, new HashMap<String, Object>());
         validateParam(
+                (String) consent.get(JsonKey.USER_ID),
+                ResponseCode.mandatoryParamsMissing,
+                JsonKey.USER_ID);
+        validateParam(
                 (String) consent.get(JsonKey.CONSENT_CONSUMERID),
                 ResponseCode.mandatoryParamsMissing,
                 JsonKey.CONSENT_CONSUMERID);

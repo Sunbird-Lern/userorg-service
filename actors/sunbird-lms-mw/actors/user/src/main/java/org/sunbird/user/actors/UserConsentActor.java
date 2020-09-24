@@ -86,21 +86,16 @@ public class UserConsentActor extends BaseActor {
     }
 
     private void updateUserConsent(Request request) {
+        RequestContext context = request.getRequestContext();
         Map<String, Object> consent = (Map<String, Object>) request.getRequest().getOrDefault(JsonKey.CONSENT_BODY, new HashMap<String, Object>());
-        String userId = (String) consent.getOrDefault(JsonKey.USER_ID, "");
-        if(StringUtils.isEmpty(userId)){
-            userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
-        }
-        String managedFor = (String)request.getContext().get(JsonKey.MANAGED_FOR);
-        if(StringUtils.isNotEmpty(managedFor)){
-            userId = managedFor;
-        }
-        consent.put(JsonKey.USER_ID,userId);
-        userService.validateUserId(request, null, request.getRequestContext());
+        String userId = (String) consent.get(JsonKey.USER_ID);
 
-        Map consentReq = constructConsentRequest(consent, request.getRequestContext());
+        request.getRequest().put(JsonKey.USER_ID,userId); //Important for userid validation
+        userService.validateUserId(request, null, context);
 
-        userConsentService.updateConsent(consentReq, request.getRequestContext());
+        Map consentReq = constructConsentRequest(consent, context);
+
+        userConsentService.updateConsent(consentReq, context);
 
         Response response = new Response();
         Map consentResponse = new HashMap<String, Object>();
@@ -110,13 +105,30 @@ public class UserConsentActor extends BaseActor {
 
         sender().tell(response, self());
 
-        Map<String, Object> targetObject = null;
+        logAuditTelemetry((String) consentReq.get(JsonKey.ID),consent, request.getContext());
+    }
+
+    private void logAuditTelemetry(String consentId, Map<String, Object> consent, Map<String, Object> contextMap){
+        Map cdata1 = new HashMap<>();
+        cdata1.put(JsonKey.ID,consent.get(JsonKey.CONSENT_CONSUMERID));
+        cdata1.put(JsonKey.TYPE, JsonKey.CONSUMER);
+        Map cdata2 = new HashMap<>();
+        cdata2.put(JsonKey.ID,consent.get(JsonKey.CONSENT_OBJECTID));
+        cdata2.put(JsonKey.TYPE, JsonKey.CONSENT_OBJECT);
+
         List<Map<String, Object>> correlatedObject = new ArrayList<>();
-        targetObject =
+        correlatedObject.add(cdata1);
+        correlatedObject.add(cdata2);
+
+        Map<String, String> rollUp = new HashMap<>();
+        rollUp.put("l1", (String) contextMap.get(JsonKey.CHANNEL));
+        TelemetryUtil.addTargetObjectRollUp(rollUp, contextMap);
+
+        Map<String, Object> targetObject =
                 TelemetryUtil.generateTargetObject(
-                        userId, TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-        TelemetryUtil.telemetryProcessingCall(
-                consent, targetObject, correlatedObject, request.getContext());
+                        consentId, TelemetryEnvKey.USER_CONSENT, (String)consent.get(JsonKey.STATUS), null);
+        TelemetryUtil.telemetryProcessingCall(TelemetryEnvKey.EDATA_TYPE_USER_CONSENT,
+                consent, targetObject, correlatedObject, contextMap);
     }
 
     private String getKey (String userId, String consumerId, String objectId) {
