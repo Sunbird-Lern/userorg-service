@@ -301,6 +301,46 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
+  public Response getPropertiesValueById(
+      String keyspaceName,
+      String tableName,
+      List<String> ids,
+      List<String> properties,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
+    logger.info(
+        context, "Cassandra Service getPropertiesValueById method started at ==" + startTime);
+    Response response;
+    Select selectQuery = null;
+    try {
+      Builder selectBuilder;
+      if (CollectionUtils.isNotEmpty(properties)) {
+        String[] dbFields = properties.toArray(new String[properties.size()]);
+        selectBuilder = QueryBuilder.select(dbFields);
+      } else {
+        selectBuilder = QueryBuilder.select().all();
+      }
+      selectQuery = selectBuilder.from(keyspaceName, tableName);
+      selectQuery.where(QueryBuilder.in(JsonKey.ID, ids));
+      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+
+      response = CassandraUtil.createResponse(results);
+    } catch (Exception e) {
+      logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
+      throw new ProjectCommonException(
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != selectQuery) {
+        logQueryElapseTime(
+            "getPropertiesValueById", startTime, selectQuery.getQueryString(), context);
+      }
+    }
+    return response;
+  }
+
+  @Override
   public Response getAllRecords(String keyspaceName, String tableName, RequestContext context) {
     return getAllRecords(keyspaceName, tableName, null, context);
   }

@@ -187,6 +187,22 @@ public interface CassandraOperation {
       RequestContext context);
 
   /**
+   * @desc This method is used to fetch properties value based on list of id
+   * @param keyspaceName String (data base keyspace name)
+   * @param tableName String
+   * @param id String
+   * @param properties String varargs
+   * @param context
+   * @return Response.
+   */
+  public Response getPropertiesValueById(
+      String keyspaceName,
+      String tableName,
+      List<String> ids,
+      List<String> properties,
+      RequestContext context);
+
+  /**
    * @desc This method is used to fetch all records for table(i.e Select * from tableName)
    * @param keyspaceName String (data base keyspace name)
    * @param tableName String

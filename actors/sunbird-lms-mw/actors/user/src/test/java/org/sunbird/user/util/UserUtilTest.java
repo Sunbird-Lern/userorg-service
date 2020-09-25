@@ -338,4 +338,101 @@ public class UserUtilTest {
           ex.getMessage());
     }
   }
+
+  @Test
+  public void testUpdateExternalIdsProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId1 = new HashMap<>();
+    extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.ORIGINAL_PROVIDER, "0123");
+    extId1.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.PROVIDER, "0123");
+    extId1.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId1);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testUpdateExternalIds2ProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId1 = new HashMap<>();
+    extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.ORIGINAL_PROVIDER, "0123");
+    extId1.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.PROVIDER, "0123");
+    extId1.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.OPERATION, "add");
+    Map<String, String> extId2 = new HashMap<>();
+    extId2.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.ORIGINAL_PROVIDER, "01234");
+    extId2.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.PROVIDER, "01234");
+    extId2.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId1);
+    externalIds.add(extId2);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
+  public void testUpdateExternalIds3ProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId2 = new HashMap<>();
+    extId2.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.ORIGINAL_PROVIDER, "01234");
+    extId2.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.PROVIDER, "01234");
+    extId2.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId2);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertEquals(
+          "Invalid value provider for parameter 01234. Please provide a valid value.",
+          ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testAddMaskEmailAndMaskPhone() {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.PHONE, "9999999999");
+    requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
+    UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Assert.assertTrue(true);
+  }
 }
