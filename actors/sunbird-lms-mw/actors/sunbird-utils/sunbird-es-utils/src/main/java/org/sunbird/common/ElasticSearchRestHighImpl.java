@@ -156,7 +156,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             + " for Index "
             + index);
     Promise<Boolean> promise = Futures.promise();
-    ;
+    data.put("identifier", identifier);
 
     if (!StringUtils.isBlank(index) && !StringUtils.isBlank(identifier) && data != null) {
       UpdateRequest updateRequest = new UpdateRequest(index, _DOC, identifier).doc(data);
@@ -542,6 +542,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     BulkRequest request = new BulkRequest();
     Promise<Boolean> promise = Futures.promise();
     for (Map<String, Object> data : dataList) {
+      data.put("identifier", data.get(JsonKey.ID));
       request.add(new IndexRequest(index, _DOC, (String) data.get(JsonKey.ID)).source(data));
     }
     ActionListener<BulkResponse> listener =
@@ -644,7 +645,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
         && !StringUtils.isBlank(identifier)
         && data != null
         && data.size() > 0) {
-
+      data.put("identifier", identifier);
       IndexRequest indexRequest = new IndexRequest(index, _DOC, identifier).source(data);
 
       UpdateRequest updateRequest = new UpdateRequest(index, _DOC, identifier).upsert(indexRequest);

@@ -70,7 +70,8 @@ import scala.concurrent.Future;
     "getManagedUsers",
     "updateUserDeclarations"
   },
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();

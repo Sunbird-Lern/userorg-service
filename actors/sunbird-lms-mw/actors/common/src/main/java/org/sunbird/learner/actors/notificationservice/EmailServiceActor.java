@@ -44,7 +44,8 @@ import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"emailService"},
-  asyncTasks = {"emailService"}
+  asyncTasks = {"emailService"},
+  dispatcher = "notification-dispatcher"
 )
 public class EmailServiceActor extends BaseActor {
 

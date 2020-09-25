@@ -56,7 +56,8 @@ import scala.concurrent.Future;
     "checkUserExistence",
     "checkUserExistenceV2"
   },
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-one-dispatcher"
 )
 public class UserProfileReadActor extends BaseActor {
 
