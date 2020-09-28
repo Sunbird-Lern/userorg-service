@@ -11,7 +11,8 @@ import org.sunbird.common.request.Request;
 
 @ActorConfig(
   tasks = {},
-  asyncTasks = {"processNotification"}
+  asyncTasks = {"processNotification"},
+  dispatcher = "notification-dispatcher"
 )
 public class BackGroundNotificationActor extends BaseActor {
   @Override

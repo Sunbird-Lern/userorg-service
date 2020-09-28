@@ -25,7 +25,8 @@ import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"saveUserAttributes"},
-  asyncTasks = {"saveUserAttributes"}
+  asyncTasks = {"saveUserAttributes"},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserProfileUpdateActor extends BaseActor {
 

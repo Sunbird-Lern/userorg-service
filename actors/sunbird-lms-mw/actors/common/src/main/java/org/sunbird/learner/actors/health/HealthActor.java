@@ -24,7 +24,8 @@ import scala.concurrent.Future;
 /** @author Manzarul */
 @ActorConfig(
   tasks = {"healthCheck", "actor", "es", "cassandra"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "health-check-dispatcher"
 )
 public class HealthActor extends BaseActor {
 

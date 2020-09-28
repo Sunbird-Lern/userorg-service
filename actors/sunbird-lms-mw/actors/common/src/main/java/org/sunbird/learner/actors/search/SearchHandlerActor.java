@@ -35,7 +35,8 @@ import scala.concurrent.Future;
  */
 @ActorConfig(
   tasks = {"compositeSearch"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-one-dispatcher"
 )
 public class SearchHandlerActor extends BaseActor {
 
