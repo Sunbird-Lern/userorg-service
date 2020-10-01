@@ -36,7 +36,6 @@ public class TenantPreferenceManagementActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo tenantPreferenceDbInfo = Util.dbInfoMap.get(JsonKey.TENANT_PREFERENCE_V2);
-  private static final String DEFAULT_WILDCARD_ORG_ID = "*";
   private ObjectMapper mapper = new ObjectMapper();
 
   @Override
