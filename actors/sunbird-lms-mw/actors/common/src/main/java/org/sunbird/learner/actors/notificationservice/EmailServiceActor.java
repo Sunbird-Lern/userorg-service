@@ -413,7 +413,7 @@ public class EmailServiceActor extends BaseActor {
       return orgName;
     }
     if (StringUtils.isNotBlank(rootOrgId)) {
-      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORGANISATION);
+      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response response =
           cassandraOperation.getRecordById(
               orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId, context);
