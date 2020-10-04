@@ -117,7 +117,7 @@ public class EmailServiceActor extends BaseActor {
 
       validateRecipientsLimit(emails);
 
-      if ((userIds.size() == 1) && (emails.size() == 1)) {
+      if ((userIds.size() == 1) && (emails.size() == 1) && (CollectionUtils.isNotEmpty(userList))) {
         Map<String, Object> user = userList.get(0);
         if (StringUtils.isNotBlank((String) request.get(JsonKey.FIRST_NAME))) {
           request.put(
