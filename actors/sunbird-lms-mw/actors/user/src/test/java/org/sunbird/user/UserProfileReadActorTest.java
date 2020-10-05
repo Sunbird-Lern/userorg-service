@@ -1,7 +1,6 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -360,7 +359,7 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  public void testGetUserByEmailKey() {
+  public void testGetUserByEmailKey() throws Exception {
     Response response1 = new Response();
     Map<String, Object> userMap = new HashMap<>();
     userMap.put(JsonKey.USER_ID, "123-456-7890");
@@ -375,14 +374,63 @@ public class UserProfileReadActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
         .thenReturn(response1);
     setEsResponse(userMap);
+    UserExternalIdentityServiceImpl externalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+        .withNoArguments()
+        .thenReturn(externalIdentityService);
+    List<Map<String, String>> extIdList = new ArrayList<>();
+    Map<String, String> extId = new HashMap<>();
+    extId.put(JsonKey.USER_ID, "userId");
+    extId.put(JsonKey.EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.PROVIDER, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ORIGINAL_ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_PROVIDER, "rootOrgId");
+    extIdList.add(extId);
+    when(externalIdentityService.getUserExternalIds(Mockito.anyString(), Mockito.any()))
+        .thenReturn(extIdList);
+    when(cassandraOperation.getPropertiesValueById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(getUserDeclarationResponse(true));
+    Request reqObj =
+        getProfileReadV3request(
+            VALID_USER_ID,
+            JsonKey.DECLARATIONS
+                .concat(",")
+                .concat(JsonKey.EXTERNAL_IDS)
+                .concat(",")
+                .concat(JsonKey.TOPIC)
+                .concat(",")
+                .concat(JsonKey.ORGANISATIONS)
+                .concat(",")
+                .concat(JsonKey.ROLES)
+                .concat(",")
+                .concat(JsonKey.LOCATIONS));
+    Response response2 = new Response();
+    List<Map<String, Object>> response2List = new ArrayList<>();
+    response2.getResult().put(JsonKey.RESPONSE, response2List);
+    when(cassandraOperation.getRecordsByPrimaryKeys(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyString(),
+            Mockito.any()))
+        .thenReturn(response1);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
+        .thenReturn(getUserDeclarationResponse(true));
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
     setCassandraResponse(getCassandraResponse(false));
-    try {
-      testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
-    } catch (Exception ex) {
-      assertNotNull(ex);
-    }
-    assertTrue(true);
+    boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
+    assertTrue(result);
   }
 
   @Test
