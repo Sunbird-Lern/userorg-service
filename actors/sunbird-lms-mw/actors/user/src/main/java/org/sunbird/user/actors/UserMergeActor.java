@@ -105,7 +105,8 @@ public class UserMergeActor extends UserBaseActor {
       UserDao userDao = UserDaoImpl.getInstance();
       Response mergeeResponse = userDao.updateUser(mergeeDBMap, userRequest.getRequestContext());
       List<String> userLookUpIdentifiers =
-          Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+          Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME.toLowerCase())
+              .collect(Collectors.toList());
       UserUtil.removeEntryFromUserLookUp(
           objectMapper.convertValue(mergee, Map.class), userLookUpIdentifiers, context);
       String mergeeResponseStr = (String) mergeeResponse.get(JsonKey.RESPONSE);
