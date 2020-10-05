@@ -927,7 +927,8 @@ public class UserUtil {
         && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.USERNAME))) {
       deleteLookUp = new HashMap<>();
       deleteLookUp.put(JsonKey.TYPE, JsonKey.USERNAME);
-      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.USERNAME));
+      deleteLookUp.put(
+          JsonKey.VALUE, transliterateUserName((String) userDbMap.get(JsonKey.USERNAME)));
       reqMap.add(deleteLookUp);
     }
     if (CollectionUtils.isNotEmpty(reqMap)) {
