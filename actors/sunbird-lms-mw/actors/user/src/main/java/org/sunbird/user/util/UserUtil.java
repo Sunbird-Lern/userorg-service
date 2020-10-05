@@ -927,8 +927,13 @@ public class UserUtil {
         && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.USERNAME))) {
       deleteLookUp = new HashMap<>();
       deleteLookUp.put(JsonKey.TYPE, JsonKey.USERNAME);
-      deleteLookUp.put(
-          JsonKey.VALUE, transliterateUserName((String) userDbMap.get(JsonKey.USERNAME)));
+      String userName = transliterateUserName((String) userDbMap.get(JsonKey.USERNAME));
+      deleteLookUp.put(JsonKey.VALUE, userName);
+      logger.info(
+          context,
+          "UserUtil:removeEntryFromUserLookUp before transliterating username: "
+              + (String) userDbMap.get(JsonKey.USERNAME));
+      logger.info(context, "UserUtil:removeEntryFromUserLookUp username: " + userName);
       reqMap.add(deleteLookUp);
     }
     if (CollectionUtils.isNotEmpty(reqMap)) {
