@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -359,8 +358,18 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  @Ignore
   public void testGetUserByEmailKeyFailureWithInvalidEmail() {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_ID, "123-456-7890");
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
     setCassandraResponse(getCassandraResponse(false));
     boolean result =
@@ -370,7 +379,6 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  @Ignore
   public void testGetUserByEmailKeySuccessWithValidEmail() {
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
     setCassandraResponse(getCassandraResponse(true));
@@ -379,7 +387,6 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  @Ignore
   public void testGetUserByPhoneKeyFailureWithInvalidPhone() {
     reqMap = getUserProfileByKeyRequest(JsonKey.PHONE, INVALID_PHONE);
     setCassandraResponse(getCassandraResponse(false));
@@ -390,7 +397,6 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  @Ignore
   public void testGetUserByPhoneKeySuccessWithValidPhone() {
     reqMap = getUserProfileByKeyRequest(JsonKey.PHONE, VALID_PHONE);
     setCassandraResponse(getCassandraResponse(true));

@@ -985,9 +985,13 @@ public class UserProfileReadActor extends BaseActor {
   private Future<Response> checkUserExists(Request request, boolean isV1) {
     Future<Map<String, Object>> userFuture;
     String key = (String) request.get(JsonKey.KEY);
-    if (JsonKey.PHONE.equalsIgnoreCase(key) || JsonKey.EMAIL.equalsIgnoreCase(key)) {
+    if (JsonKey.PHONE.equalsIgnoreCase(key)
+        || JsonKey.EMAIL.equalsIgnoreCase(key)
+        || JsonKey.USERNAME.equalsIgnoreCase(key)) {
       String value = (String) request.get(JsonKey.VALUE);
-      String userId = getUserIdByUserLookUp(key, value, request.getRequestContext());
+      String userId =
+          getUserIdByUserLookUp(
+              key.toLowerCase(), StringUtils.lowerCase(value), request.getRequestContext());
       if (StringUtils.isBlank(userId)) {
         Future<Response> userResp =
             Futures.future(
@@ -1117,15 +1121,18 @@ public class UserProfileReadActor extends BaseActor {
   private void getKey(Request actorMessage) {
     String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
     String value = (String) actorMessage.getRequest().get(JsonKey.VALUE);
-    if (JsonKey.LOGIN_ID.equalsIgnoreCase(key) || JsonKey.EMAIL.equalsIgnoreCase(key)) {
+    if (JsonKey.LOGIN_ID.equalsIgnoreCase(key)
+        || JsonKey.EMAIL.equalsIgnoreCase(key)
+        || JsonKey.USERNAME.equalsIgnoreCase(key)) {
       value = value.toLowerCase();
     }
     Future<Map<String, Object>> userResponse;
     Future<Map<String, Object>> futureResponse;
-    if (JsonKey.PHONE.equalsIgnoreCase(key) || JsonKey.EMAIL.equalsIgnoreCase(key)) {
+    if (JsonKey.PHONE.equalsIgnoreCase(key)
+        || JsonKey.EMAIL.equalsIgnoreCase(key)
+        || JsonKey.USERNAME.equalsIgnoreCase(key)) {
       String userId =
-          getUserIdByUserLookUp(
-              key, (String) actorMessage.get(JsonKey.VALUE), actorMessage.getRequestContext());
+          getUserIdByUserLookUp(key.toLowerCase(), value, actorMessage.getRequestContext());
       if (StringUtils.isBlank(userId)) {
         isUserExists(new HashMap<>());
       }
