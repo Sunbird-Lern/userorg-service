@@ -399,8 +399,46 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  public void testCheckUserExistenceV2() {
+  public void testCheckUserExistenceV1WithEmail() {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
+    boolean result = testScenario(getRequest(reqMap, "checkUserExistence"), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCheckUserExistenceV2WithEmail() {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_ID, "123456790-789456-741258");
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    responseList.add(userMap);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
+    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
+    boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCheckUserExistenceV2WithLoginid() {
+    reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, VALID_EMAIL);
     setEsSearchResponse(getUserExistsSearchResponseMap());
     boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
     assertTrue(result);
@@ -512,6 +550,17 @@ public class UserProfileReadActorTest {
     reqObj.setRequest(reqMap);
     reqObj.setContext(innerMap);
     reqObj.setOperation(actorOperation.getValue());
+    return reqObj;
+  }
+
+  private Request getRequest(Map<String, Object> reqMap, String actorOperation) {
+    Request reqObj = new Request();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    innerMap.put(JsonKey.PRIVATE, false);
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(actorOperation);
     return reqObj;
   }
 
