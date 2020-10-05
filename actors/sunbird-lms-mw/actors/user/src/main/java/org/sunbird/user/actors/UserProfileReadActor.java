@@ -993,15 +993,13 @@ public class UserProfileReadActor extends BaseActor {
           getUserIdByUserLookUp(
               key.toLowerCase(), StringUtils.lowerCase(value), request.getRequestContext());
       if (StringUtils.isBlank(userId)) {
-        Future<Response> userResp =
-            Futures.future(
-                () -> {
-                  Response resp = new Response();
-                  resp.put(JsonKey.EXISTS, false);
-                  return resp;
-                },
-                getContext().dispatcher());
-        return userResp;
+        return Futures.future(
+            () -> {
+              Response resp = new Response();
+              resp.put(JsonKey.EXISTS, false);
+              return resp;
+            },
+            getContext().dispatcher());
       }
       userFuture =
           esUtil.getDataByIdentifier(
