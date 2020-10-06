@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +51,8 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  UserLookUp.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -88,7 +91,10 @@ public class UserUtilTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-
+    PowerMockito.when(
+            cassandraOperationImpl.deleteRecord(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
     PowerMockito.mockStatic(Util.class);
   }
 
@@ -433,6 +439,19 @@ public class UserUtilTest {
     requestMap.put(JsonKey.PHONE, "9999999999");
     requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testRemoveEntryFromUserLookUp() {
+    beforeEachTest();
+    Map<String, Object> mergeeMap = new HashMap<>();
+    mergeeMap.put(JsonKey.EMAIL, "someEmail");
+    mergeeMap.put(JsonKey.PHONE, "somePhone");
+    mergeeMap.put(JsonKey.USERNAME, "someUsername");
+    List<String> userLookUpIdentifiers =
+        Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
     Assert.assertTrue(true);
   }
 }
