@@ -901,6 +901,44 @@ public class UserUtil {
 
     return userDeclareEntity;
   }
+
+  public static void removeEntryFromUserLookUp(
+      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
+    logger.info(
+        context,
+        "UserUtil:removeEntryFromUserLookUp remove following identifiers from lookUp table "
+            + identifiers);
+    List<Map<String, String>> reqMap = new ArrayList<>();
+    Map<String, String> deleteLookUp = new HashMap<>();
+    if (identifiers.contains(JsonKey.EMAIL)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EMAIL));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.PHONE)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.PHONE));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.USERNAME)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.USERNAME))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.USERNAME.toLowerCase());
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.USERNAME));
+      logger.info(
+          context,
+          "UserUtil:removeEntryFromUserLookUp before transliterating username: "
+              + (String) userDbMap.get(JsonKey.USERNAME));
+      reqMap.add(deleteLookUp);
+    }
+    if (CollectionUtils.isNotEmpty(reqMap)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqMap, context);
+    }
+  }
 }
 
 @FunctionalInterface
