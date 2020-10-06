@@ -9,6 +9,7 @@ import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.Util;
 
@@ -48,16 +49,23 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     validateFileHeaderFields(req, bulkLocationAllowedFields, true);
     BulkUploadProcess bulkUploadProcess =
-        handleUpload(JsonKey.LOCATION, (String) req.get(JsonKey.CREATED_BY));
+        handleUpload(
+            JsonKey.LOCATION, (String) req.get(JsonKey.CREATED_BY), request.getRequestContext());
     String locationType = (String) req.get(GeoLocationJsonKey.LOCATION_TYPE);
-    processLocationBulkUpload(req, bulkUploadProcess.getId(), locationType, bulkUploadProcess);
+    processLocationBulkUpload(
+        req,
+        bulkUploadProcess.getId(),
+        locationType,
+        bulkUploadProcess,
+        request.getRequestContext());
   }
 
   private void processLocationBulkUpload(
       Map<String, Object> req,
       String processId,
       String locationType,
-      BulkUploadProcess bulkUploadProcess)
+      BulkUploadProcess bulkUploadProcess,
+      RequestContext context)
       throws IOException {
     byte[] fileByteArray = null;
     if (null != req.get(JsonKey.FILE)) {
@@ -65,12 +73,14 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
     }
     Map<String, Object> additionalRowFields = new HashMap<>();
     additionalRowFields.put(GeoLocationJsonKey.LOCATION_TYPE, locationType);
-    Integer recordCount = validateAndParseRecords(fileByteArray, processId, additionalRowFields);
+    Integer recordCount =
+        validateAndParseRecords(fileByteArray, processId, additionalRowFields, context);
     processBulkUpload(
         recordCount,
         processId,
         bulkUploadProcess,
         BulkUploadActorOperation.LOCATION_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
-        bulkLocationAllowedFields);
+        bulkLocationAllowedFields,
+        context);
   }
 }

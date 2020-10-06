@@ -28,7 +28,8 @@ public class RoleGroupDaoImpl implements RoleGroupDao {
   @SuppressWarnings("unchecked")
   @Override
   public List<RoleGroup> getRoleGroups() {
-    Response roleGroupResults = getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME);
+    Response roleGroupResults =
+        getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
     TypeReference<List<RoleGroup>> roleGroupType = new TypeReference<List<RoleGroup>>() {};
     List<Map<String, Object>> roleGroupMapList =
         (List<Map<String, Object>>) roleGroupResults.get(JsonKey.RESPONSE);

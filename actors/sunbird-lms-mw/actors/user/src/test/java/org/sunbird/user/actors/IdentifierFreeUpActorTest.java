@@ -2,6 +2,7 @@ package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
@@ -30,6 +31,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -72,7 +74,8 @@ public class IdentifierFreeUpActorTest {
     String id = "wrongUserId";
     Response response = new Response();
     response.put(JsonKey.RESPONSE, new ArrayList<>());
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     boolean result =
         testScenario(
@@ -104,14 +107,25 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(new Response());
+    doNothing()
+        .when(cassandraOperation)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
-    when(elasticSearchService.update(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(elasticSearchService.update(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);
@@ -142,14 +156,23 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordById(usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id))
+    when(cassandraOperation.getRecordById(
+            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
+
+    doNothing()
+        .when(cassandraOperation)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
-    when(elasticSearchService.update(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(elasticSearchService.update(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);

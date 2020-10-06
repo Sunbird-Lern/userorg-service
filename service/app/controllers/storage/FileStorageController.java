@@ -24,6 +24,8 @@ import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /** Created by arvind on 28/8/17. */
 public class FileStorageController extends BaseController {
@@ -83,11 +85,11 @@ public class FileStorageController extends BaseController {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
       reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
-      reqObj.setRequestId(httpRequest.flash().get(JsonKey.REQUEST_ID));
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
-      map.put(JsonKey.CREATED_BY, httpRequest.flash().get(JsonKey.USER_ID));
+      map.put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
 

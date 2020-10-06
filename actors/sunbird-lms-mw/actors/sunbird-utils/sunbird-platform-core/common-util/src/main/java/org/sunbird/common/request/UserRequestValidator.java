@@ -33,10 +33,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     createUserBasicValidation(userRequest);
     validateUserType(userRequest);
     phoneValidation(userRequest);
-    addressValidation(userRequest);
-    educationValidation(userRequest);
-    jobProfileValidation(userRequest);
-    validateWebPages(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
   }
@@ -265,146 +261,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  /**
-   * Method to validate Address
-   *
-   * @param userRequest
-   */
-  @SuppressWarnings("unchecked")
-  private void addressValidation(Request userRequest) {
-    Map<String, Object> addrReqMap;
-    if (userRequest.getRequest().containsKey(JsonKey.ADDRESS)
-        && null != userRequest.getRequest().get(JsonKey.ADDRESS)) {
-      if (!(userRequest.getRequest().get(JsonKey.ADDRESS) instanceof List)) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.ADDRESS, JsonKey.LIST),
-            ERROR_CODE);
-      } else if (userRequest.getRequest().get(JsonKey.ADDRESS) instanceof List) {
-        List<Map<String, Object>> reqList =
-            (List<Map<String, Object>>) userRequest.get(JsonKey.ADDRESS);
-        for (int i = 0; i < reqList.size(); i++) {
-          addrReqMap = reqList.get(i);
-          new AddressRequestValidator().validateAddress(addrReqMap, JsonKey.ADDRESS);
-        }
-      }
-    }
-  }
-
-  /**
-   * Method to validate educational details of the user
-   *
-   * @param userRequest
-   */
-  @SuppressWarnings("unchecked")
-  private void educationValidation(Request userRequest) {
-    Map<String, Object> addrReqMap;
-    Map<String, Object> reqMap;
-    if (userRequest.getRequest().containsKey(JsonKey.EDUCATION)
-        && null != userRequest.getRequest().get(JsonKey.EDUCATION)) {
-      if (!(userRequest.getRequest().get(JsonKey.EDUCATION) instanceof List)) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.EDUCATION, JsonKey.LIST),
-            ERROR_CODE);
-      } else if (userRequest.getRequest().get(JsonKey.EDUCATION) instanceof List) {
-        List<Map<String, Object>> reqList =
-            (List<Map<String, Object>>) userRequest.get(JsonKey.EDUCATION);
-        for (int i = 0; i < reqList.size(); i++) {
-          reqMap = reqList.get(i);
-          if (StringUtils.isBlank((String) reqMap.get(JsonKey.NAME))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.educationNameError);
-          }
-          if (StringUtils.isBlank((String) reqMap.get(JsonKey.DEGREE))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.educationDegreeError);
-          }
-          if (reqMap.containsKey(JsonKey.ADDRESS) && null != reqMap.get(JsonKey.ADDRESS)) {
-            addrReqMap = (Map<String, Object>) reqMap.get(JsonKey.ADDRESS);
-            new AddressRequestValidator().validateAddress(addrReqMap, JsonKey.EDUCATION);
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * Method to validate jobProfile of a user
-   *
-   * @param userRequest
-   */
-  private void jobProfileValidation(Request userRequest) {
-    if (userRequest.getRequest().containsKey(JsonKey.JOB_PROFILE)
-        && null != userRequest.getRequest().get(JsonKey.JOB_PROFILE)) {
-      if (!(userRequest.getRequest().get(JsonKey.JOB_PROFILE) instanceof List)) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.JOB_PROFILE, JsonKey.LIST),
-            ERROR_CODE);
-      } else if (userRequest.getRequest().get(JsonKey.JOB_PROFILE) instanceof List) {
-        validateJob(userRequest);
-      }
-    }
-  }
-
-  private void validateJob(Request userRequest) {
-
-    Map<String, Object> reqMap = null;
-    List<Map<String, Object>> reqList =
-        (List<Map<String, Object>>) userRequest.get(JsonKey.JOB_PROFILE);
-    for (int i = 0; i < reqList.size(); i++) {
-      reqMap = reqList.get(i);
-      validateJoinEndDate(reqMap);
-      validateJobOrgNameAndAddress(reqMap);
-    }
-  }
-
-  private void validateJoinEndDate(Map reqMap) {
-    if (null != reqMap.get(JsonKey.JOINING_DATE)) {
-      boolean bool =
-          ProjectUtil.isDateValidFormat(
-              ProjectUtil.YEAR_MONTH_DATE_FORMAT, (String) reqMap.get(JsonKey.JOINING_DATE));
-      if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
-      }
-    }
-    if (null != reqMap.get(JsonKey.END_DATE)) {
-      boolean bool =
-          ProjectUtil.isDateValidFormat(
-              ProjectUtil.YEAR_MONTH_DATE_FORMAT, (String) reqMap.get(JsonKey.END_DATE));
-      if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
-      }
-    }
-  }
-
-  private void validateJobOrgNameAndAddress(Map reqMap) {
-    Map<String, Object> addrReqMap = null;
-    if (StringUtils.isBlank((String) reqMap.get(JsonKey.JOB_NAME))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.jobNameError);
-    }
-    if (StringUtils.isBlank((String) reqMap.get(JsonKey.ORG_NAME))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.organisationNameError);
-    }
-    if (reqMap.containsKey(JsonKey.ADDRESS) && null != reqMap.get(JsonKey.ADDRESS)) {
-      addrReqMap = (Map<String, Object>) reqMap.get(JsonKey.ADDRESS);
-      new AddressRequestValidator().validateAddress(addrReqMap, JsonKey.JOB_PROFILE);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public void validateWebPages(Request request) {
-    if (request.getRequest().containsKey(JsonKey.WEB_PAGES)) {
-      List<Map<String, String>> data =
-          (List<Map<String, String>>) request.getRequest().get(JsonKey.WEB_PAGES);
-      if (null == data || data.isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidWebPageData);
-      }
-    }
-  }
-
   private boolean validatePhoneNo(String phone, String countryCode) {
     if (phone.contains("+")) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidPhoneNumber);
@@ -429,9 +285,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
-    validateAddressField(userRequest);
-    validateJobProfileField(userRequest);
-    validateEducationField(userRequest);
     validateUserType(userRequest);
     validateUserOrgField(userRequest);
 
@@ -513,42 +366,6 @@ public class UserRequestValidator extends BaseRequestValidator {
             String.join(" ", JsonKey.LIST, " of ", JsonKey.MAP)));
   }
 
-  private void validateAddressField(Request userRequest) {
-    if (userRequest.getRequest().get(JsonKey.ADDRESS) != null
-        && ((List) userRequest.getRequest().get(JsonKey.ADDRESS)).isEmpty()) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.addressRequired);
-    }
-
-    if (userRequest.getRequest().get(JsonKey.ADDRESS) != null
-        && (!((List) userRequest.getRequest().get(JsonKey.ADDRESS)).isEmpty())) {
-      validateUpdateUserAddress(userRequest);
-    }
-  }
-
-  private void validateJobProfileField(Request userRequest) {
-    if (userRequest.getRequest().get(JsonKey.JOB_PROFILE) != null
-        && ((List) userRequest.getRequest().get(JsonKey.JOB_PROFILE)).isEmpty()) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.jobDetailsRequired);
-    }
-
-    if (userRequest.getRequest().get(JsonKey.JOB_PROFILE) != null
-        && (!((List) userRequest.getRequest().get(JsonKey.JOB_PROFILE)).isEmpty())) {
-      validateUpdateUserJobProfile(userRequest);
-    }
-  }
-
-  private void validateEducationField(Request userRequest) {
-    if (userRequest.getRequest().get(JsonKey.EDUCATION) != null
-        && ((List) userRequest.getRequest().get(JsonKey.EDUCATION)).isEmpty()) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.educationRequired);
-    }
-
-    if (userRequest.getRequest().get(JsonKey.EDUCATION) != null
-        && (!((List) userRequest.getRequest().get(JsonKey.EDUCATION)).isEmpty())) {
-      validateUpdateUserEducation(userRequest);
-    }
-  }
-
   public void externalIdsValidation(Request userRequest, String operation) {
     if (userRequest.getRequest().containsKey(JsonKey.EXTERNAL_IDS)
         && (null != userRequest.getRequest().get(JsonKey.EXTERNAL_IDS))) {
@@ -618,67 +435,6 @@ public class UserRequestValidator extends BaseRequestValidator {
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
               StringFormatter.joinByDot(JsonKey.EXTERNAL_IDS, param)),
           ERROR_CODE);
-    }
-  }
-
-  private void validateUpdateUserEducation(Request userRequest) {
-    List<Map<String, Object>> reqList =
-        (List<Map<String, Object>>) userRequest.get(JsonKey.EDUCATION);
-    for (int i = 0; i < reqList.size(); i++) {
-      Map<String, Object> reqMap = reqList.get(i);
-      if (reqMap.containsKey(JsonKey.IS_DELETED)
-          && null != reqMap.get(JsonKey.IS_DELETED)
-          && ((boolean) reqMap.get(JsonKey.IS_DELETED))
-          && StringUtils.isBlank((String) reqMap.get(JsonKey.ID))) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.idRequired);
-      }
-      if (!reqMap.containsKey(JsonKey.IS_DELETED)
-          || (reqMap.containsKey(JsonKey.IS_DELETED)
-              && (null == reqMap.get(JsonKey.IS_DELETED)
-                  || !(boolean) reqMap.get(JsonKey.IS_DELETED)))) {
-        educationValidation(userRequest);
-      }
-    }
-  }
-
-  private void validateUpdateUserJobProfile(Request userRequest) {
-    List<Map<String, Object>> reqList =
-        (List<Map<String, Object>>) userRequest.get(JsonKey.JOB_PROFILE);
-    for (int i = 0; i < reqList.size(); i++) {
-      Map<String, Object> reqMap = reqList.get(i);
-      if (reqMap.containsKey(JsonKey.IS_DELETED)
-          && null != reqMap.get(JsonKey.IS_DELETED)
-          && ((boolean) reqMap.get(JsonKey.IS_DELETED))
-          && StringUtils.isBlank((String) reqMap.get(JsonKey.ID))) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.idRequired);
-      }
-      if (!reqMap.containsKey(JsonKey.IS_DELETED)
-          || (reqMap.containsKey(JsonKey.IS_DELETED)
-              && (null == reqMap.get(JsonKey.IS_DELETED)
-                  || !(boolean) reqMap.get(JsonKey.IS_DELETED)))) {
-        jobProfileValidation(userRequest);
-      }
-    }
-  }
-
-  private void validateUpdateUserAddress(Request userRequest) {
-    List<Map<String, Object>> reqList =
-        (List<Map<String, Object>>) userRequest.get(JsonKey.ADDRESS);
-    for (int i = 0; i < reqList.size(); i++) {
-      Map<String, Object> reqMap = reqList.get(i);
-
-      if (reqMap.containsKey(JsonKey.IS_DELETED)
-          && null != reqMap.get(JsonKey.IS_DELETED)
-          && ((boolean) reqMap.get(JsonKey.IS_DELETED))
-          && StringUtils.isBlank((String) reqMap.get(JsonKey.ID))) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.idRequired);
-      }
-      if (!reqMap.containsKey(JsonKey.IS_DELETED)
-          || (reqMap.containsKey(JsonKey.IS_DELETED)
-              && (null == reqMap.get(JsonKey.IS_DELETED)
-                  || !(boolean) reqMap.get(JsonKey.IS_DELETED)))) {
-        new AddressRequestValidator().validateAddress(reqMap, JsonKey.ADDRESS);
-      }
     }
   }
 
@@ -829,35 +585,6 @@ public class UserRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.userNameRequired.getErrorCode(),
           ResponseCode.userNameRequired.getErrorMessage(),
-          ERROR_CODE);
-    }
-  }
-
-  /**
-   * This method will validate bulk api user data.
-   *
-   * @param userRequest Request
-   */
-  public void validateBulkUserData(Request userRequest) {
-    externalIdsValidation(userRequest, JsonKey.BULK_USER_UPLOAD);
-    createUserBasicValidation(userRequest);
-    phoneValidation(userRequest);
-    validateWebPages(userRequest);
-    validateExtIdTypeAndProvider(userRequest);
-    if (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.USERNAME))
-        && (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER))
-            || StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID))
-            || StringUtils.isBlank(
-                (String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID_TYPE)))) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-              (StringFormatter.joinByOr(
-                  JsonKey.USERNAME,
-                  StringFormatter.joinByAnd(
-                      StringFormatter.joinByComma(JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE),
-                      JsonKey.EXTERNAL_ID_PROVIDER)))),
           ERROR_CODE);
     }
   }
@@ -1134,6 +861,7 @@ public class UserRequestValidator extends BaseRequestValidator {
           String userId = (String) declareFields.get(JsonKey.USER_ID);
           String orgId = (String) declareFields.get(JsonKey.ORG_ID);
           String persona = (String) declareFields.get(JsonKey.PERSONA);
+          Map<String, Object> info = (Map<String, Object>) declareFields.get(JsonKey.INFO);
           if (StringUtils.isBlank(userId)
               || StringUtils.isBlank(orgId)
               || StringUtils.isBlank(persona)) {
@@ -1143,6 +871,9 @@ public class UserRequestValidator extends BaseRequestValidator {
                     ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
                     new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+          if (MapUtils.isNotEmpty(info) && info.containsValue(null)) {
+            ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
           }
         }
       }

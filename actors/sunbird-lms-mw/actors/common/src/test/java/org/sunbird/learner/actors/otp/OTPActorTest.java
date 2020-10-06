@@ -30,6 +30,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.ratelimit.dao.RateLimitDao;
@@ -139,7 +140,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -158,7 +160,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
@@ -181,7 +184,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     ClientErrorResponse errorResponse =
@@ -199,7 +203,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyMap()))
+            Mockito.anyMap(),
+            Mockito.any()))
         .thenReturn(getRateLimitRecords(5));
 
     Response mockedCassandraResponse = getCassandraRecordByIdForUserResponse();
@@ -208,10 +213,11 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -227,7 +233,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyMap()))
+            Mockito.anyMap(),
+            Mockito.any()))
         .thenReturn(getRateLimitRecords(5));
     Response mockedCassandraResponse = getCassandraRecordByIdForUserResponse();
     when(mockCassandraOperation.getRecordWithTTLById(
@@ -235,10 +242,11 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -254,7 +262,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyMap()))
+            Mockito.anyMap(),
+            Mockito.any()))
         .thenReturn(getRateLimitRecords(5));
     Response mockedCassandraResponse = getCassandraRecordByIdForUserResponse();
     when(mockCassandraOperation.getRecordWithTTLById(
@@ -262,13 +271,14 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -284,7 +294,8 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyMap()))
+            Mockito.anyMap(),
+            Mockito.any()))
         .thenReturn(getRateLimitRecords(5));
     Response mockedCassandraResponse = getCassandraRecordByIdForUserResponse();
     when(mockCassandraOperation.getRecordWithTTLById(
@@ -292,10 +303,11 @@ public class OTPActorTest {
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.anyList(),
-            Mockito.anyList()))
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);

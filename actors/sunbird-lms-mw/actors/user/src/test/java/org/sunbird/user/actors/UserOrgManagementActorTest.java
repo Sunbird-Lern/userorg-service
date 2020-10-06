@@ -37,9 +37,9 @@ public class UserOrgManagementActorTest {
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
-    PowerMockito.doNothing().when(Util.class, "registerUserToOrg", Mockito.anyMap());
-    when(Util.getHashTagIdFromOrgId(Mockito.anyString())).thenReturn("hashTagId");
-    PowerMockito.doNothing().when(Util.class, "upsertUserOrgData", Mockito.anyMap());
+    PowerMockito.doNothing().when(Util.class, "registerUserToOrg", Mockito.anyMap(), Mockito.any());
+    when(Util.getHashTagIdFromOrgId(Mockito.anyString(), Mockito.any())).thenReturn("hashTagId");
+    PowerMockito.doNothing().when(Util.class, "upsertUserOrgData", Mockito.anyMap(), Mockito.any());
   }
 
   @Test

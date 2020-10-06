@@ -4,10 +4,11 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.ShadowUserMigrateReqValidator;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 /**
  * @author Amit Kumar This controller will handle all the request related for user migration.
@@ -32,7 +33,7 @@ public class TenantMigrationController extends BaseController {
   }
 
   public CompletionStage<Result> shadowUserMigrate(Http.Request httpRequest) {
-    String callerId = httpRequest.flash().get(JsonKey.USER_ID);
+    String callerId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     return handleRequest(
         ActorOperations.MIGRATE_USER.getValue(),
         request().body().asJson(),

@@ -8,11 +8,12 @@ import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 
 public class MigrationUtils {
+  private static LoggerUtil logger = new LoggerUtil(MigrationUtils.class);
 
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static ObjectMapper mapper = new ObjectMapper();
@@ -21,13 +22,14 @@ public class MigrationUtils {
    * this method will search user in userids attribute in shadow_user table
    *
    * @param userId
+   * @param context
    * @return
    */
-  public static ShadowUser getRecordByUserId(String userId) {
+  public static ShadowUser getRecordByUserId(String userId, RequestContext context) {
     ShadowUser shadowUser = null;
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       shadowUser =
           mapper.convertValue(
@@ -42,21 +44,22 @@ public class MigrationUtils {
    * @param propertiesMap
    * @param channel
    * @param userExtId
+   * @param context
    */
   public static boolean updateRecord(
-      Map<String, Object> propertiesMap, String channel, String userExtId) {
+      Map<String, Object> propertiesMap, String channel, String userExtId, RequestContext context) {
     Map<String, Object> compositeKeysMap = new HashMap<>();
     compositeKeysMap.put(JsonKey.USER_EXT_ID, userExtId);
     compositeKeysMap.put(JsonKey.CHANNEL, channel);
     Response response =
         cassandraOperation.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap);
-    ProjectLogger.log(
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, context);
+    logger.info(
+        context,
         "MigrationUtils:updateRecord:update in cassandra  with userExtId"
             + userExtId
             + ":and response is:"
-            + response,
-        LoggerEnum.INFO.name());
+            + response);
     return true;
   }
 
@@ -65,17 +68,18 @@ public class MigrationUtils {
    * migrate
    *
    * @param shadowUser
+   * @param context
    */
-  public static boolean markUserAsRejected(ShadowUser shadowUser) {
+  public static boolean markUserAsRejected(ShadowUser shadowUser, RequestContext context) {
     Map<String, Object> propertiesMap = new HashMap<>();
     propertiesMap.put(JsonKey.CLAIM_STATUS, ClaimStatus.REJECTED.getValue());
     propertiesMap.put(JsonKey.UPDATED_ON, new Timestamp(System.currentTimeMillis()));
     boolean isRecordUpdated =
-        updateRecord(propertiesMap, shadowUser.getChannel(), shadowUser.getUserExtId());
-    ProjectLogger.log(
+        updateRecord(propertiesMap, shadowUser.getChannel(), shadowUser.getUserExtId(), context);
+    logger.info(
+        context,
         "MigrationUtils:markUserAsRejected:update in cassandra  with userExtId"
-            + shadowUser.getUserExtId(),
-        LoggerEnum.INFO.name());
+            + shadowUser.getUserExtId());
     return isRecordUpdated;
   }
   /**
@@ -83,16 +87,18 @@ public class MigrationUtils {
    * migrate
    *
    * @param shadowUser
+   * @param context
    */
-  public static boolean updateClaimStatus(ShadowUser shadowUser, int claimStatus) {
+  public static boolean updateClaimStatus(
+      ShadowUser shadowUser, int claimStatus, RequestContext context) {
     Map<String, Object> propertiesMap = new WeakHashMap<>();
     propertiesMap.put(JsonKey.CLAIM_STATUS, claimStatus);
     propertiesMap.put(JsonKey.UPDATED_ON, new Timestamp(System.currentTimeMillis()));
-    updateRecord(propertiesMap, shadowUser.getChannel(), shadowUser.getUserExtId());
-    ProjectLogger.log(
+    updateRecord(propertiesMap, shadowUser.getChannel(), shadowUser.getUserExtId(), context);
+    logger.info(
+        context,
         "MigrationUtils:markUserAsRejected:update in cassandra  with userExtId"
-            + shadowUser.getUserExtId(),
-        LoggerEnum.INFO.name());
+            + shadowUser.getUserExtId());
     return true;
   }
 
@@ -102,13 +108,15 @@ public class MigrationUtils {
    *
    * @param userId
    * @param propsMap
+   * @param context
    * @return
    */
-  public static List<ShadowUser> getEligibleUsersById(String userId, Map<String, Object> propsMap) {
+  public static List<ShadowUser> getEligibleUsersById(
+      String userId, Map<String, Object> propsMap, RequestContext context) {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()
@@ -127,13 +135,14 @@ public class MigrationUtils {
    * table
    *
    * @param userId
+   * @param context
    * @return
    */
-  public static List<ShadowUser> getEligibleUsersById(String userId) {
+  public static List<ShadowUser> getEligibleUsersById(String userId, RequestContext context) {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId);
+            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()

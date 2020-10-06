@@ -42,7 +42,11 @@ public class RateLimitDaoTest {
   public void beforeEachTest() {
     MockitoAnnotations.initMocks(this);
     when(cassandraOperation.batchInsertWithTTL(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(getSuccessResponse());
   }
 
@@ -59,14 +63,18 @@ public class RateLimitDaoTest {
                 })
         .when(cassandraOperation)
         .batchInsertWithTTL(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.anyList());
-    rateLimitdDao.insertRateLimits(getRateLimits());
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyList(),
+            Mockito.any());
+    rateLimitdDao.insertRateLimits(getRateLimits(), null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testInsertRateLimitsFailureWithInvalidData() {
     try {
-      rateLimitdDao.insertRateLimits(getInvalidRateLimits());
+      rateLimitdDao.insertRateLimits(getInvalidRateLimits(), null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getResponseCode());
       throw e;
@@ -80,6 +88,7 @@ public class RateLimitDaoTest {
             Mockito.anyString(),
             Mockito.any(),
             Mockito.anyList(),
+            Mockito.any(),
             Mockito.any()))
         .then(
             (Answer)
@@ -87,7 +96,7 @@ public class RateLimitDaoTest {
                   return getRateLimitRecords();
                 });
 
-    List<Map<String, Object>> results = rateLimitdDao.getRateLimits(KEY);
+    List<Map<String, Object>> results = rateLimitdDao.getRateLimits(KEY, null);
     assertTrue(CollectionUtils.isNotEmpty(results));
     assertSame(KEY, results.get(0).get(JsonKey.KEY));
     assertSame(5, results.get(0).get(JsonKey.COUNT));

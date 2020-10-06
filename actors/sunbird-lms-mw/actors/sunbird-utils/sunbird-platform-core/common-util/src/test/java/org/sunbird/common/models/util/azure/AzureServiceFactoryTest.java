@@ -107,63 +107,63 @@ public class AzureServiceFactoryTest {
   @Test
   public void testUploadFileSuccess() {
     CloudService service = (CloudService) obj;
-    String url = service.uploadFile(containerName, new File("test.txt"));
+    String url = service.uploadFile(containerName, new File("test.txt"), null);
     Assert.assertEquals(null, url);
   }
 
   @Test
   public void testUploadFileFailureWithoutContainerName() {
     CloudService service = (CloudService) obj;
-    String url = service.uploadFile("", new File("test.txt"));
+    String url = service.uploadFile("", new File("test.txt"), null);
     Assert.assertEquals(null, url);
   }
 
   @Test
   public void testUploadFileSuccessWithMultiplePath() {
     CloudService service = (CloudService) obj;
-    String url = service.uploadFile("/tez/po/" + containerName, new File("test.txt"));
+    String url = service.uploadFile("/tez/po/" + containerName, new File("test.txt"), null);
     Assert.assertEquals(null, url);
   }
 
   @Test
   public void testUploadFileSuccessWithFileLocation() {
     CloudService service = (CloudService) obj;
-    String url = service.uploadFile(containerName, "test.txt", "");
+    String url = service.uploadFile(containerName, "test.txt", "", null);
     Assert.assertEquals(null, url);
   }
 
   @Test
   public void testListAllFilesSuccess() {
     CloudService service = (CloudService) obj;
-    List<String> filesList = service.listAllFiles(containerName);
+    List<String> filesList = service.listAllFiles(containerName, null);
     Assert.assertEquals(1, filesList.size());
   }
 
   @Test
   public void testDownloadFileSuccess() {
     CloudService service = (CloudService) obj;
-    Boolean isFileDeleted = service.downLoadFile(containerName, "test1.txt", "");
+    Boolean isFileDeleted = service.downLoadFile(containerName, "test1.txt", "", null);
     Assert.assertFalse(isFileDeleted);
   }
 
   @Test
   public void testDeleteFileSuccess() {
     CloudService service = (CloudService) obj;
-    Boolean isFileDeleted = service.deleteFile(containerName, "test1.txt");
+    Boolean isFileDeleted = service.deleteFile(containerName, "test1.txt", null);
     Assert.assertFalse(isFileDeleted);
   }
 
   @Test
   public void testDeleteFileSuccessWithoutContainerName() {
     CloudService service = (CloudService) obj;
-    Boolean isFileDeleted = service.deleteFile("", "test.abc");
+    Boolean isFileDeleted = service.deleteFile("", "test.abc", null);
     Assert.assertFalse(isFileDeleted);
   }
 
   @Test
   public void testDeleteContainerSuccess() {
     CloudService service = (CloudService) obj;
-    boolean response = service.deleteContainer(containerName);
+    boolean response = service.deleteContainer(containerName, null);
     Assert.assertTrue(response);
   }
 

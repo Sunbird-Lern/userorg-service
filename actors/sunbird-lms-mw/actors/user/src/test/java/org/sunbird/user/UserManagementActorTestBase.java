@@ -39,6 +39,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -94,10 +95,16 @@ public abstract class UserManagementActorTestBase {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
 
     PowerMockito.mockStatic(InterServiceCommunicationFactory.class);
@@ -113,7 +120,8 @@ public abstract class UserManagementActorTestBase {
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
             Mockito.anyString(),
-            Mockito.anyObject()))
+            Mockito.anyObject(),
+            Mockito.any()))
         .thenReturn(new HashMap<>());
 
     PowerMockito.mockStatic(UserClientImpl.class);
@@ -122,43 +130,72 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("anyId");
-    when(userService.getCustodianChannel(Mockito.anyMap(), Mockito.any(ActorRef.class)))
+    when(userService.getRootOrgIdFromChannel(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("anyId");
+    when(userService.getCustodianChannel(
+            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any(RequestContext.class)))
         .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString())).thenReturn("rootOrgId");
+    when(userService.getRootOrgIdFromChannel(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("rootOrgId");
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     Map<String, Object> map = new HashMap<>();
     Promise<String> esPromise = Futures.promise();
     esPromise.success("success");
-    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(esService.save(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(esPromise.future());
     PowerMockito.mockStatic(Util.class);
-    Util.getUserProfileConfig(Mockito.any(ActorRef.class));
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);
+    requestMap.put(JsonKey.USERNAME, "username");
+    requestMap.put(JsonKey.EMAIL, "username@gmail.com");
+    requestMap.put(JsonKey.PHONE, "4346345377");
+    List externalIds = new ArrayList();
+    Map externalId = new HashMap();
+    externalId.put(JsonKey.ID, "extid1e2d");
+    externalId.put(JsonKey.ID_TYPE, "channel1003");
+    externalId.put(JsonKey.PROVIDER, "channel1003");
+    externalId.put(JsonKey.OPERATION, "add");
+    externalIds.add(externalId);
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
-    when(UserUtil.getActiveUserOrgDetails(Mockito.anyString())).thenReturn(getUserOrgDetails());
+    when(UserUtil.getActiveUserOrgDetails(Mockito.anyString(), Mockito.any()))
+        .thenReturn(getUserOrgDetails());
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     reqMap = getMapObject();
   }
 
   public void mockForUserOrgUpdate() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getListOrgResponse());
-    when(esService.search(Mockito.any(), Mockito.anyString())).thenReturn(promise.future());
-    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(null);
   }
 

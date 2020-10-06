@@ -1,11 +1,9 @@
 /** */
 package org.sunbird.learner.util;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
@@ -14,8 +12,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.helper.CassandraConnectionManager;
-import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
 
@@ -33,11 +29,11 @@ public class DataCacheHandler implements Runnable {
   private static Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap =
       new ConcurrentHashMap<>();
   private static Map<String, List<String>> frameworkFieldsConfig = new ConcurrentHashMap<>();
-  private static Map<String, List<String>> hashtagIdFrameworkIdMap = new HashMap<>();
+  private static Map<String, List<String>> hashtagIdFrameworkIdMap = new ConcurrentHashMap<>();
+  private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
   private static Response roleCacheResponse;
-  private static List<String> sunbirdPluginTableList = null;
   private static Map<String, Integer> orderMap;
   public static String[] bulkUserAllowedFields = {
     JsonKey.FIRST_NAME,
@@ -89,7 +85,6 @@ public class DataCacheHandler implements Runnable {
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
-    createSunbirdPluginTableList();
     initLocationOrderMap();
     ProjectLogger.log("DataCacheHandler:run: Cache refresh completed.", LoggerEnum.INFO.name());
   }
@@ -107,15 +102,6 @@ public class DataCacheHandler implements Runnable {
           orderMap.put(typeList.get(i), i);
         }
       }
-    }
-  }
-
-  public void createSunbirdPluginTableList() {
-    try {
-      CassandraConnectionManager manager = CassandraConnectionMngrFactory.getInstance();
-      sunbirdPluginTableList = manager.getTableList(JsonKey.SUNBIRD_PLUGIN);
-    } catch (Exception e) {
-      ProjectLogger.log("Error occurred" + e.getMessage(), e);
     }
   }
 
@@ -144,7 +130,7 @@ public class DataCacheHandler implements Runnable {
   @SuppressWarnings("unchecked")
   private void cacheSystemConfig(Map<String, String> configSettings) {
     Response response =
-        cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB);
+        cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
     ProjectLogger.log(
         "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult(),
         LoggerEnum.INFO.name());
@@ -171,7 +157,7 @@ public class DataCacheHandler implements Runnable {
 
   @SuppressWarnings("unchecked")
   private void orgTypeCache(Map<String, String> orgTypeMap) {
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB);
+    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
@@ -185,7 +171,7 @@ public class DataCacheHandler implements Runnable {
 
   @SuppressWarnings("unchecked")
   private void roleCache(Map<String, Object> roleMap) {
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP);
+    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
@@ -193,7 +179,7 @@ public class DataCacheHandler implements Runnable {
         roleMap.put((String) resultMap.get(JsonKey.ID), resultMap.get(JsonKey.NAME));
       }
     }
-    Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE);
+    Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE, null);
     List<Map<String, Object>> responseList2 =
         (List<Map<String, Object>>) response2.get(JsonKey.RESPONSE);
     if (null != responseList2 && !responseList2.isEmpty()) {
@@ -201,15 +187,27 @@ public class DataCacheHandler implements Runnable {
         roleMap.put((String) resultMap2.get(JsonKey.ID), resultMap2.get(JsonKey.NAME));
       }
     }
+
+    roleMap
+        .entrySet()
+        .parallelStream()
+        .forEach(
+            (roleSetItem) -> {
+              Map<String, String> role = new HashMap<>();
+              role.put(JsonKey.ID, roleSetItem.getKey());
+              role.put(JsonKey.NAME, (String) roleSetItem.getValue());
+              roleList.add(role);
+            });
   }
+
   /** @return the roleMap */
   public static Map<String, Object> getRoleMap() {
     return roleMap;
   }
 
-  /** @param roleMap the roleMap to set */
-  public static void setRoleMap(Map<String, Object> roleMap) {
-    DataCacheHandler.roleMap = roleMap;
+  /** @return the roleList */
+  public static List<Map<String, String>> getUserReadRoleList() {
+    return roleList;
   }
 
   /** @return the orgTypeMap */
@@ -217,28 +215,13 @@ public class DataCacheHandler implements Runnable {
     return orgTypeMap;
   }
 
-  /** @param orgTypeMap the orgTypeMap to set */
-  public static void setOrgTypeMap(Map<String, String> orgTypeMap) {
-    DataCacheHandler.orgTypeMap = orgTypeMap;
-  }
-
   /** @return the configSettings */
   public static Map<String, String> getConfigSettings() {
     return configSettings;
   }
 
-  /** @param configSettings the configSettings to set */
-  public static void setConfigSettings(Map<String, String> configSettings) {
-    DataCacheHandler.configSettings = configSettings;
-  }
-
   public static Map<String, Map<String, List<Map<String, String>>>> getFrameworkCategoriesMap() {
     return frameworkCategoriesMap;
-  }
-
-  public static void setFrameworkCategoriesMap(
-      Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap) {
-    DataCacheHandler.frameworkCategoriesMap = frameworkCategoriesMap;
   }
 
   public static void setFrameworkFieldsConfig(Map<String, List<String>> frameworkFieldsConfig) {
@@ -254,20 +237,8 @@ public class DataCacheHandler implements Runnable {
     DataCacheHandler.frameworkCategoriesMap.put(frameworkId, frameworkCacheMap);
   }
 
-  public static void setHashtagIdFrameworkIdMap(Map<String, List<String>> hashtagIdFrameworkIdMap) {
-    DataCacheHandler.hashtagIdFrameworkIdMap = hashtagIdFrameworkIdMap;
-  }
-
   public static Map<String, List<String>> getHashtagIdFrameworkIdMap() {
     return hashtagIdFrameworkIdMap;
-  }
-
-  public static void updateHashtagIdFrameworkIdMap(String hashtagId, List<String> frameworkIds) {
-    DataCacheHandler.hashtagIdFrameworkIdMap.put(hashtagId, frameworkIds);
-  }
-
-  public static List<String> getSunbirdPluginTableList() {
-    return sunbirdPluginTableList;
   }
 
   public static Map<String, Integer> getLocationOrderMap() {

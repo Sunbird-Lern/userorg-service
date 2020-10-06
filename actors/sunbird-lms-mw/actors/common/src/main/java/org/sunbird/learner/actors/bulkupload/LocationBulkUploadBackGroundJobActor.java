@@ -15,6 +15,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.BulkProcessStatus;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
@@ -44,23 +45,23 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
               processBulkUpload(
                   (BulkUploadProcess) bulkUploadProcess,
                   (tasks) -> {
-                    processTasks((List<BulkUploadProcessTask>) tasks);
+                    processTasks((List<BulkUploadProcessTask>) tasks, request.getRequestContext());
                     return null;
                   },
                   null,
-                  (String[]) request.get(JsonKey.FIELDS));
+                  (String[]) request.get(JsonKey.FIELDS),
+                  request.getRequestContext());
               return null;
             });
         break;
       default:
-        ProjectLogger.log(operation + ": unsupported message");
+        logger.info(operation + ": unsupported message");
     }
   }
 
-  private void processLocation(BulkUploadProcessTask task) {
+  private void processLocation(BulkUploadProcessTask task, RequestContext context) {
     ObjectMapper mapper = new ObjectMapper();
-    ProjectLogger.log(
-        "LocationBulkUploadBackGroundJobActor: processLocation called", LoggerEnum.INFO);
+    logger.info(context, "LocationBulkUploadBackGroundJobActor: processLocation called");
     String data = task.getData();
     try {
 
@@ -72,14 +73,15 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
           location =
               locationClient.getLocationByCode(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                  (String) row.get(GeoLocationJsonKey.CODE));
+                  (String) row.get(GeoLocationJsonKey.CODE),
+                  context);
         } catch (Exception ex) {
           setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, null);
         }
         if (null == location) {
-          callCreateLocation(row, task);
+          callCreateLocation(row, task, context);
         } else {
-          callUpdateLocation(row, mapper.convertValue(location, Map.class), task);
+          callUpdateLocation(row, mapper.convertValue(location, Map.class), task, context);
         }
       } else {
         setTaskStatus(
@@ -109,7 +111,10 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   }
 
   private void callUpdateLocation(
-      Map<String, Object> row, Map<String, Object> response, BulkUploadProcessTask task)
+      Map<String, Object> row,
+      Map<String, Object> response,
+      BulkUploadProcessTask task,
+      RequestContext context)
       throws JsonProcessingException {
 
     String id = (String) response.get(JsonKey.ID);
@@ -134,12 +139,14 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     try {
       locationClient.updateLocation(
           getActorRef(LocationActorOperation.UPDATE_LOCATION.getValue()),
-          mapper.convertValue(row, UpsertLocationRequest.class));
+          mapper.convertValue(row, UpsertLocationRequest.class),
+          context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "LocationBulkUploadBackGroundJobActor : callUpdateLocation - got exception "
               + ex.getMessage(),
-          LoggerEnum.INFO);
+          ex);
       row.put(JsonKey.ERROR_MSG, ex.getMessage());
       setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, JsonKey.UPDATE);
     }
@@ -153,31 +160,35 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     return (locationType.equalsIgnoreCase(responseType));
   }
 
-  private void callCreateLocation(Map<String, Object> row, BulkUploadProcessTask task)
+  private void callCreateLocation(
+      Map<String, Object> row, BulkUploadProcessTask task, RequestContext context)
       throws JsonProcessingException {
 
     Request request = new Request();
     request.getRequest().putAll(row);
+    request.setRequestContext(context);
     ObjectMapper mapper = new ObjectMapper();
     String locationId = "";
     try {
       locationId =
           locationClient.createLocation(
               getActorRef(LocationActorOperation.CREATE_LOCATION.getValue()),
-              mapper.convertValue(row, UpsertLocationRequest.class));
+              mapper.convertValue(row, UpsertLocationRequest.class),
+              context);
     } catch (Exception ex) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "LocationBulkUploadBackGroundJobActor : callCreateLocation - got exception "
               + ex.getMessage(),
-          LoggerEnum.INFO);
+          ex);
       setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, JsonKey.CREATE);
       return;
     }
 
     if (StringUtils.isEmpty(locationId)) {
-      ProjectLogger.log(
-          "LocationBulkUploadBackGroundJobActor : Null receive from interservice communication",
-          LoggerEnum.ERROR);
+      logger.info(
+          context,
+          "LocationBulkUploadBackGroundJobActor : Null receive from interservice communication");
       setTaskStatus(
           task,
           BulkProcessStatus.FAILED,
@@ -190,11 +201,11 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     }
   }
 
-  private void processTasks(List<BulkUploadProcessTask> tasks) {
+  private void processTasks(List<BulkUploadProcessTask> tasks, RequestContext context) {
     for (BulkUploadProcessTask task : tasks) {
       if (task.getStatus() != null
           && task.getStatus() != ProjectUtil.BulkProcessStatus.COMPLETED.getValue()) {
-        processLocation(task);
+        processLocation(task, context);
         task.setLastUpdatedOn(new Timestamp(System.currentTimeMillis()));
         task.setIterationId(task.getIterationId() + 1);
       }

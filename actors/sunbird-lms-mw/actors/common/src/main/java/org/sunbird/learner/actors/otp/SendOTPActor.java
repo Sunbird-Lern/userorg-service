@@ -9,11 +9,13 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.util.OTPUtil;
 
 @ActorConfig(
   tasks = {},
-  asyncTasks = {"sendOTP"}
+  asyncTasks = {"sendOTP"},
+  dispatcher = "notification-dispatcher"
 )
 public class SendOTPActor extends BaseActor {
   public static final String RESET_PASSWORD = "resetPassword";
@@ -37,29 +39,30 @@ public class SendOTPActor extends BaseActor {
         || JsonKey.PREV_USED_EMAIL.equalsIgnoreCase(type)
         || JsonKey.RECOVERY_EMAIL.equalsIgnoreCase(type)) {
       String userId = (String) request.get(JsonKey.USER_ID);
-      ProjectLogger.log(
+      logger.info(
+          request.getRequestContext(),
           "SendOTPActor:sendOTP : Sending OTP via email for Key = "
               + logMaskService.maskEmail(key)
               + " or userId "
-              + userId,
-          LoggerEnum.INFO.name());
-      sendOTPViaEmail(key, otp, userId, template);
+              + userId);
+      sendOTPViaEmail(key, otp, userId, template, request.getRequestContext());
     } else if (JsonKey.PHONE.equalsIgnoreCase(type)
         || JsonKey.PREV_USED_PHONE.equalsIgnoreCase(type)
         || JsonKey.RECOVERY_PHONE.equalsIgnoreCase(type)) {
-      ProjectLogger.log(
-          "SendOTPActor:sendOTP : Sending OTP via sms for Key = " + logMaskService.maskPhone(key),
-          LoggerEnum.INFO.name());
-      sendOTPViaSMS(key, otp, template);
+      logger.info(
+          request.getRequestContext(),
+          "SendOTPActor:sendOTP : Sending OTP via sms for Key = " + logMaskService.maskPhone(key));
+      sendOTPViaSMS(key, otp, template, request.getRequestContext());
     } else {
-      ProjectLogger.log("SendOTPActor:sendOTP : No Email/Phone provided.", LoggerEnum.INFO.name());
+      logger.info(request.getRequestContext(), "SendOTPActor:sendOTP : No Email/Phone provided.");
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(response, self());
   }
 
-  private void sendOTPViaEmail(String key, String otp, String otpType, String template) {
+  private void sendOTPViaEmail(
+      String key, String otp, String otpType, String template, RequestContext context) {
     Map<String, Object> emailTemplateMap = new HashMap<>();
     emailTemplateMap.put(JsonKey.EMAIL, key);
     emailTemplateMap.put(JsonKey.OTP, otp);
@@ -67,27 +70,28 @@ public class SendOTPActor extends BaseActor {
     emailTemplateMap.put(JsonKey.TEMPLATE_ID, template);
     Request emailRequest = null;
     if (StringUtils.isBlank(otpType)) {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap);
+      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, context);
     } else {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, RESET_PASSWORD);
+      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, RESET_PASSWORD, context);
     }
-    ProjectLogger.log(
+    emailRequest.setRequestContext(context);
+    logger.info(
+        context,
         "SendOTPActor:sendOTP : Calling EmailServiceActor for Key = "
-            + logMaskService.maskEmail(key),
-        LoggerEnum.INFO.name());
+            + logMaskService.maskEmail(key));
     tellToAnother(emailRequest);
   }
 
-  private void sendOTPViaSMS(String key, String otp, String template) {
+  private void sendOTPViaSMS(String key, String otp, String template, RequestContext context) {
     Map<String, Object> otpMap = new HashMap<>();
     otpMap.put(JsonKey.PHONE, key);
     otpMap.put(JsonKey.OTP, otp);
     otpMap.put(JsonKey.TEMPLATE_ID, template);
     otpMap.put(JsonKey.OTP_EXPIRATION_IN_MINUTES, OTPUtil.getOTPExpirationInMinutes());
-    ProjectLogger.log(
+    logger.info(
+        context,
         "SendOTPActor:sendOTPViaSMS : Calling OTPUtil.sendOTPViaSMS for Key = "
-            + logMaskService.maskPhone(key),
-        LoggerEnum.INFO.name());
-    OTPUtil.sendOTPViaSMS(otpMap);
+            + logMaskService.maskPhone(key));
+    OTPUtil.sendOTPViaSMS(otpMap, context);
   }
 }

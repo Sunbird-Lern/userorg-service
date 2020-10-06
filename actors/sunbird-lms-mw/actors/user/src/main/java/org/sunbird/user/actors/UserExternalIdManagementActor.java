@@ -16,9 +16,9 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.util.UserActorOperations;
@@ -59,17 +59,15 @@ public class UserExternalIdManagementActor extends BaseActor {
             if (StringUtils.isBlank(extIdsMap.get(JsonKey.OPERATION))
                 || JsonKey.ADD.equalsIgnoreCase(extIdsMap.get(JsonKey.OPERATION))) {
               responseExternalIdList.add(
-                  upsertUserExternalIdentityData(extIdsMap, requestMap, JsonKey.CREATE));
+                  upsertUserExternalIdentityData(
+                      extIdsMap, requestMap, JsonKey.CREATE, request.getRequestContext()));
             }
           } else {
-            updateUserExtId(requestMap, responseExternalIdList);
+            updateUserExtId(requestMap, responseExternalIdList, request.getRequestContext());
           }
         } catch (Exception e) {
+          logger.error(request.getRequestContext(), "Exception occurred with error message", e);
           errMsgs.add(e.getMessage());
-          ProjectLogger.log(
-              "UserExternalIdManagementActor:upsertUserExternalIdentityDetails: Exception occurred with error message = "
-                  + e.getMessage(),
-              e);
         }
         response.put(JsonKey.EXTERNAL_IDS, responseExternalIdList);
         response.put(JsonKey.KEY, JsonKey.EXTERNAL_IDS);
@@ -87,8 +85,10 @@ public class UserExternalIdManagementActor extends BaseActor {
   }
 
   public void updateUserExtId(
-      Map<String, Object> requestMap, List<Map<String, Object>> responseExternalIdList) {
-    List<Map<String, String>> dbResExternalIds = getUserExternalIds(requestMap);
+      Map<String, Object> requestMap,
+      List<Map<String, Object>> responseExternalIdList,
+      RequestContext context) {
+    List<Map<String, String>> dbResExternalIds = getUserExternalIds(requestMap, context);
     List<Map<String, String>> externalIds =
         (List<Map<String, String>>) requestMap.get(JsonKey.EXTERNAL_IDS);
     if (CollectionUtils.isNotEmpty(externalIds)) {
@@ -104,14 +104,14 @@ public class UserExternalIdManagementActor extends BaseActor {
             || StringUtils.isBlank(extIdMap.get(JsonKey.OPERATION))) {
           if (MapUtils.isEmpty(map)) {
             responseExternalIdList.add(
-                upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.CREATE));
+                upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.CREATE, context));
           } else {
             // if external Id with same provider and idType exist then delete first then update
             // to update user externalId first we need to delete the record as externalId is the
             // part of composite key
-            deleteUserExternalId(map);
+            deleteUserExternalId(map, context);
             responseExternalIdList.add(
-                upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.UPDATE));
+                upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.UPDATE, context));
           }
         } else {
           // operation is either edit or remove
@@ -120,14 +120,14 @@ public class UserExternalIdManagementActor extends BaseActor {
               if (StringUtils.isNotBlank(map.get(JsonKey.ID_TYPE))
                   && StringUtils.isNotBlank((String) requestMap.get(JsonKey.USER_ID))
                   && StringUtils.isNotBlank(map.get(JsonKey.PROVIDER))) {
-                deleteUserExternalId(map);
+                deleteUserExternalId(map, context);
               }
             } else if (JsonKey.EDIT.equalsIgnoreCase(extIdMap.get(JsonKey.OPERATION))) {
               // to update user externalId first we need to delete the record as externalId is the
               // part of composite key
-              deleteUserExternalId(map);
+              deleteUserExternalId(map, context);
               responseExternalIdList.add(
-                  upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.UPDATE));
+                  upsertUserExternalIdentityData(extIdMap, requestMap, JsonKey.UPDATE, context));
             }
           } else {
             throwExternalIDNotFoundException(
@@ -159,21 +159,20 @@ public class UserExternalIdManagementActor extends BaseActor {
     return extMap;
   }
 
-  private List<Map<String, String>> getUserExternalIds(Map<String, Object> requestMap) {
+  private List<Map<String, String>> getUserExternalIds(
+      Map<String, Object> requestMap, RequestContext context) {
     List<Map<String, String>> dbResExternalIds = new ArrayList<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
     Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            JsonKey.SUNBIRD,
-            JsonKey.USR_EXT_IDNT_TABLE,
-            JsonKey.USER_ID,
-            requestMap.get(JsonKey.USER_ID));
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return dbResExternalIds;
   }
 
-  private void deleteUserExternalId(Map<String, String> map) {
+  private void deleteUserExternalId(Map<String, String> map, RequestContext context) {
     map.remove(JsonKey.LAST_UPDATED_BY);
     map.remove(JsonKey.CREATED_BY);
     map.remove(JsonKey.LAST_UPDATED_ON);
@@ -183,7 +182,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
     // map.remove(JsonKey.STATUS);
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map);
+    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map, context);
   }
 
   private void throwExternalIDNotFoundException(String externalId, String idType, String provider) {
@@ -195,7 +194,10 @@ public class UserExternalIdManagementActor extends BaseActor {
   }
 
   private Map<String, Object> upsertUserExternalIdentityData(
-      Map<String, String> extIdsMap, Map<String, Object> requestMap, String operation) {
+      Map<String, String> extIdsMap,
+      Map<String, Object> requestMap,
+      String operation,
+      RequestContext context) {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.EXTERNAL_ID, extIdsMap.get(JsonKey.ID));
     map.put(JsonKey.ORIGINAL_EXTERNAL_ID, extIdsMap.get(JsonKey.ORIGINAL_EXTERNAL_ID));
@@ -212,7 +214,7 @@ public class UserExternalIdManagementActor extends BaseActor {
       map.put(JsonKey.LAST_UPDATED_BY, requestMap.get(JsonKey.UPDATED_BY));
       map.put(JsonKey.LAST_UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     }
-    cassandraOperation.upsertRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map);
+    cassandraOperation.upsertRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map, context);
     return map;
   }
 }

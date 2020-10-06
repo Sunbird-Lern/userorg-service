@@ -99,7 +99,7 @@ public class SendOTPActorTest {
   @Test
   public void sendOTPTestForMobile() throws Exception {
     request = createOtpRequest("phone", "anyMobileNum", "anyUserId");
-    when(emailTemplateDao.getTemplate(Mockito.anyString()))
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
@@ -111,7 +111,7 @@ public class SendOTPActorTest {
   public void sendOTPTestForEmail() throws Exception {
     PowerMockito.mockStatic(SunbirdMWService.class);
     request = createOtpRequest("email", "anyEmailId", "anyUserId");
-    when(emailTemplateDao.getTemplate(Mockito.anyString()))
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());

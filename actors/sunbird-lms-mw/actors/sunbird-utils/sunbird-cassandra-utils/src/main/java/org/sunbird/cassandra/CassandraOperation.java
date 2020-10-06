@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.request.RequestContext;
 
 /**
  * @desc this interface will hold functions for cassandra db interaction
@@ -22,45 +23,57 @@ public interface CassandraOperation {
    * @param keyspaceName String (data base keyspace name)
    * @param tableName String
    * @param request Map<String,Object>(i.e map of column name and their value)
+   * @param context
    * @return Response Response
    */
-  public Response upsertRecord(String keyspaceName, String tableName, Map<String, Object> request);
+  public Response upsertRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context);
 
   /**
    * @desc This method is used to insert record in cassandra db
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param request Map<String,Object>(i.e map of column name and their value)
+   * @param context
    * @return Response Response
    */
-  public Response insertRecord(String keyspaceName, String tableName, Map<String, Object> request);
+  public Response insertRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context);
 
   /**
    * @desc This method is used to update record in cassandra db
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param request Map<String,Object>(i.e map of column name and their value)
+   * @param context
    * @return Response Response
    */
-  public Response updateRecord(String keyspaceName, String tableName, Map<String, Object> request);
+  public Response updateRecord(
+      String keyspaceName, String tableName, Map<String, Object> request, RequestContext context);
 
   /**
    * @desc This method is used to delete record in cassandra db by their primary key(identifier)
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param identifier String
+   * @param context
    * @return Response Response
    */
-  public Response deleteRecord(String keyspaceName, String tableName, String identifier);
+  public Response deleteRecord(
+      String keyspaceName, String tableName, String identifier, RequestContext context);
 
   /**
    * @desc This method is used to delete record in cassandra db by their primary composite key
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param compositeKeyMap Column map for composite primary key
+   * @param context
    */
   public void deleteRecord(
-      String keyspaceName, String tableName, Map<String, String> compositeKeyMap);
+      String keyspaceName,
+      String tableName,
+      Map<String, String> compositeKeyMap,
+      RequestContext context);
 
   /**
    * @desc This method is used to delete one or more records from Cassandra DB corresponding to
@@ -68,38 +81,11 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param identifierList List of primary keys of records to be deleted
+   * @param context
    * @return Status of delete records operation
    */
-  public boolean deleteRecords(String keyspaceName, String tableName, List<String> identifierList);
-
-  /**
-   * @desc This method is used to fetch record based on given parameter and it's value (it only
-   *     fetch the record on indexed property or column or it will throw exception.)
-   * @param keyspaceName String (data base keyspace name)
-   * @param tableName String
-   * @param propertyName String
-   * @param propertyValue Value to be used for matching in select query
-   * @return Response Response
-   */
-  public Response getRecordsByProperty(
-      String keyspaceName, String tableName, String propertyName, Object propertyValue);
-
-  /**
-   * Fetch records with specified columns (select all if null) for given column name and value.
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Column name
-   * @param propertyValue Column value
-   * @param fields List of columns to be returned in each record
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      List<String> fields);
+  public boolean deleteRecords(
+      String keyspaceName, String tableName, List<String> identifierList, RequestContext context);
 
   /**
    * @desc This method is used to fetch record based on given parameter and it's list of value (for
@@ -108,28 +94,15 @@ public interface CassandraOperation {
    * @param tableName String
    * @param propertyName String
    * @param propertyValueList List<Object>
+   * @param context
    * @return Response Response
    */
   public Response getRecordsByProperty(
-      String keyspaceName, String tableName, String propertyName, List<Object> propertyValueList);
-
-  /**
-   * Fetch records with specified columns (select all if null) for given column name with matching
-   * value in the list.
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Column name
-   * @param propertyValueList List of values to be used for matching in select query
-   * @param fields List of columns to be returned in each record
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByProperty(
       String keyspaceName,
       String tableName,
       String propertyName,
       List<Object> propertyValueList,
-      List<String> fields);
+      RequestContext context);
 
   /**
    * Fetch records with specified indexed column
@@ -138,20 +111,29 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param propertyName Indexed Column name
    * @param propertyValue Value to be used for matching in select query
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByIndexedProperty(
-      String keyspaceName, String tableName, String propertyName, Object propertyValue);
+      String keyspaceName,
+      String tableName,
+      String propertyName,
+      Object propertyValue,
+      RequestContext context);
 
   /**
    * @desc This method is used to fetch record based on given parameter list and their values
    * @param keyspaceName String (data base keyspace name)
    * @param tableName String
    * @param propertyMap Map<String,Object> propertyMap)(i.e map of column name and their value)
+   * @param context
    * @return Response Response
    */
-  public Response getRecordsByProperties(
-      String keyspaceName, String tableName, Map<String, Object> propertyMap);
+  public Response getRecordsByPropertiesWithFiltering(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      RequestContext context);
 
   /**
    * Fetch records with specified columns (select all if null) for given column map (name, value
@@ -161,10 +143,32 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param propertyMap Map describing columns to be used in where clause of select query.
    * @param fields List of columns to be returned in each record
+   * @param allowFiltering
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByProperties(
-      String keyspaceName, String tableName, Map<String, Object> propertyMap, List<String> fields);
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      List<String> fields,
+      boolean allowFiltering,
+      RequestContext context);
+
+  /**
+   * @desc This method is used to fetch record based on given parameter list and their values
+   *     pairs). without using allow filtering
+   * @param keyspaceName
+   * @param tableName
+   * @param propertyMap
+   * @param context
+   * @return
+   */
+  Response getRecordsByProperties(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> propertyMap,
+      RequestContext context);
 
   /**
    * @desc This method is used to fetch properties value based on id
@@ -172,18 +176,51 @@ public interface CassandraOperation {
    * @param tableName String
    * @param id String
    * @param properties String varargs
+   * @param context
    * @return Response.
    */
   public Response getPropertiesValueById(
-      String keyspaceName, String tableName, String id, String... properties);
+      String keyspaceName,
+      String tableName,
+      String id,
+      List<String> properties,
+      RequestContext context);
+
+  /**
+   * @desc This method is used to fetch properties value based on list of id
+   * @param keyspaceName String (data base keyspace name)
+   * @param tableName String
+   * @param id String
+   * @param properties String varargs
+   * @param context
+   * @return Response.
+   */
+  public Response getPropertiesValueById(
+      String keyspaceName,
+      String tableName,
+      List<String> ids,
+      List<String> properties,
+      RequestContext context);
 
   /**
    * @desc This method is used to fetch all records for table(i.e Select * from tableName)
    * @param keyspaceName String (data base keyspace name)
    * @param tableName String
+   * @param context
    * @return Response Response
    */
-  public Response getAllRecords(String keyspaceName, String tableName);
+  public Response getAllRecords(String keyspaceName, String tableName, RequestContext context);
+
+  /**
+   * @desc This method is used to fetch all records for table(i.e Select * from tableName)
+   * @param keyspaceName String (data base keyspace name)
+   * @param tableName String
+   * @param context
+   * @param fields List of columns to be returned in each record
+   * @return Response Response
+   */
+  public Response getAllRecords(
+      String keyspaceName, String tableName, List<String> fields, RequestContext context);
 
   /**
    * Method to update the record on basis of composite primary key.
@@ -192,13 +229,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param updateAttributes Column map to be used in set clause of update query
    * @param compositeKey Column map for composite primary key
+   * @param context
    * @return Response consisting of update query status
    */
   Response updateRecord(
       String keyspaceName,
       String tableName,
       Map<String, Object> updateAttributes,
-      Map<String, Object> compositeKey);
+      Map<String, Object> compositeKey,
+      RequestContext context);
 
   /**
    * Method to get record by primary key.
@@ -206,9 +245,10 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param key Primary key
+   * @param context
    * @return Response consisting of matched record
    */
-  Response getRecordById(String keyspaceName, String tableName, String key);
+  Response getRecordById(String keyspaceName, String tableName, String key, RequestContext context);
 
   /**
    * Method to get record by composite primary key.
@@ -216,9 +256,11 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param key Column map representing composite primary key
+   * @param context
    * @return Response consisting of matched record
    */
-  Response getRecordById(String keyspaceName, String tableName, Map<String, Object> key);
+  Response getRecordById(
+      String keyspaceName, String tableName, Map<String, Object> key, RequestContext context);
 
   /**
    * Method to get record by primary key consisting of only specified fields (return all if null).
@@ -227,9 +269,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param key Primary key
    * @param fields List of columns to be returned in each record
+   * @param context
    * @return Response consisting of matched record
    */
-  Response getRecordById(String keyspaceName, String tableName, String key, List<String> fields);
+  Response getRecordById(
+      String keyspaceName,
+      String tableName,
+      String key,
+      List<String> fields,
+      RequestContext context);
 
   /**
    * Method to get record by composity primary key consisting of only specified fields (return all
@@ -239,10 +287,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param key Column map representing composite primary key
    * @param fields List of columns to be returned in each record
+   * @param context
    * @return Response consisting of matched record
    */
   Response getRecordById(
-      String keyspaceName, String tableName, Map<String, Object> key, List<String> fields);
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> key,
+      List<String> fields,
+      RequestContext context);
 
   /**
    * Method to get record by primary key consisting of only specified fields (return all if null).
@@ -252,6 +305,7 @@ public interface CassandraOperation {
    * @param key Primary key
    * @param ttlFields List of columns to be returned in each record with ttl
    * @param fields List of columns to be returned in each record
+   * @param context
    * @return Response consisting of matched record
    */
   Response getRecordWithTTLById(
@@ -259,7 +313,8 @@ public interface CassandraOperation {
       String tableName,
       Map<String, Object> key,
       List<String> ttlFields,
-      List<String> fields);
+      List<String> fields,
+      RequestContext context);
 
   /**
    * Method to perform batch insert operation.
@@ -267,9 +322,14 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param records List of records in the batch insert operation
+   * @param context
    * @return Response indicating status of operation
    */
-  Response batchInsert(String keyspaceName, String tableName, List<Map<String, Object>> records);
+  Response batchInsert(
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> records,
+      RequestContext context);
 
   /**
    * Method to perform batch update operation.
@@ -278,13 +338,20 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param records List of map consisting of two maps with exactly two keys: PK: Column map for
    *     primary key, NonPK: Column map for properties with new values to be updated
+   * @param context
    * @return Response indicating status of operation
    */
   Response batchUpdate(
-      String keyspaceName, String tableName, List<Map<String, Map<String, Object>>> records);
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Map<String, Object>>> records,
+      RequestContext context);
 
   Response batchUpdateById(
-      String keyspaceName, String tableName, List<Map<String, Object>> records);
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> records,
+      RequestContext context);
 
   /**
    * Fetch records with composite key.
@@ -292,10 +359,14 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param compositeKeyMap Column map for composite primary key
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByCompositeKey(
-      String keyspaceName, String tableName, Map<String, Object> compositeKeyMap);
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> compositeKeyMap,
+      RequestContext context);
 
   /**
    * Fetch records with specified columns for given identifiers.
@@ -304,10 +375,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param properties List of columns to be returned in each record
    * @param ids List of identifiers
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByIdsWithSpecifiedColumns(
-      String keyspaceName, String tableName, List<String> properties, List<String> ids);
+      String keyspaceName,
+      String tableName,
+      List<String> properties,
+      List<String> ids,
+      RequestContext context);
 
   /**
    * Fetch records for given primary keys.
@@ -316,10 +392,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param primaryKeys List of primary key values
    * @param primaryKeyColumnName Name of the primary key column
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByPrimaryKeys(
-      String keyspaceName, String tableName, List<String> primaryKeys, String primaryKeyColumnName);
+      String keyspaceName,
+      String tableName,
+      List<String> primaryKeys,
+      String primaryKeyColumnName,
+      RequestContext context);
 
   /**
    * Insert record with TTL expiration
@@ -328,10 +409,15 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param request Map consisting of column name and value
    * @param ttl Time to live after which inserted record will be auto deleted
+   * @param context
    * @return Response indicating status of operation
    */
   public Response insertRecordWithTTL(
-      String keyspaceName, String tableName, Map<String, Object> request, int ttl);
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> request,
+      int ttl,
+      RequestContext context);
 
   /**
    * Update record with TTL expiration
@@ -339,8 +425,9 @@ public interface CassandraOperation {
    * @param keyspaceName Keyspace name
    * @param tableName Table name
    * @param request Map consisting of column name and value
-   * @param ttl Time to live after which inserted record will be auto deleted
    * @param compositeKey Column map for composite primary key
+   * @param ttl Time to live after which inserted record will be auto deleted
+   * @param context
    * @return Response indicating status of operation
    */
   public Response updateRecordWithTTL(
@@ -348,7 +435,8 @@ public interface CassandraOperation {
       String tableName,
       Map<String, Object> request,
       Map<String, Object> compositeKey,
-      int ttl);
+      int ttl,
+      RequestContext context);
   /**
    * Fetch records with specified columns that match given partition / primary key. Multiple records
    * would be fetched in case partition key is specified.
@@ -358,6 +446,7 @@ public interface CassandraOperation {
    * @param primaryKeys Column and value map for partition / primary key
    * @param properties List of columns to be returned in each record
    * @param ttlPropertiesWithAlias Map containing TTL column as key and alias as value.
+   * @param context
    * @return Response consisting of fetched records
    */
   Response getRecordsByIdsWithSpecifiedColumnsAndTTL(
@@ -365,7 +454,8 @@ public interface CassandraOperation {
       String tableName,
       Map<String, Object> primaryKeys,
       List<String> properties,
-      Map<String, String> ttlPropertiesWithAlias);
+      Map<String, String> ttlPropertiesWithAlias,
+      RequestContext context);
 
   /**
    * Perform batch insert with different TTL values
@@ -375,13 +465,22 @@ public interface CassandraOperation {
    * @param records List of records in the batch insert operation
    * @param ttls TTL (in seconds) for each record to be inserted. TTL is ignored if value is not a
    *     positive number.
+   * @param context
    * @return Response indicating status of operation
    */
   Response batchInsertWithTTL(
-      String keyspaceName, String tableName, List<Map<String, Object>> records, List<Integer> ttls);
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> records,
+      List<Integer> ttls,
+      RequestContext context);
 
   public Response getRecords(
-      String keyspace, String table, Map<String, Object> filters, List<String> fields);
+      String keyspace,
+      String table,
+      Map<String, Object> filters,
+      List<String> fields,
+      RequestContext context);
 
   /**
    * Apply callback on cassandra async read call.
@@ -391,13 +490,15 @@ public interface CassandraOperation {
    * @param filters Column and value map for filtering
    * @param fields List of columns to be returned in each record
    * @param callback action callback to be applied on resultset when it is returned.
+   * @param context
    */
   public void applyOperationOnRecordsAsync(
       String keySpace,
       String table,
       Map<String, Object> filters,
       List<String> fields,
-      FutureCallback<ResultSet> callback);
+      FutureCallback<ResultSet> callback,
+      RequestContext context);
 
   public Response getRecordByObjectType(
       String keyspace,
@@ -405,10 +506,11 @@ public interface CassandraOperation {
       String columnName,
       String key,
       int value,
-      String objectType);
+      String objectType,
+      RequestContext context);
 
   public Response performBatchAction(
-      String keyspaceName, String tableName, Map<String, Object> inputData);
+      String keyspaceName, String tableName, Map<String, Object> inputData, RequestContext context);
 
   /**
    * this method will be used to do CONTAINS query in list
@@ -417,9 +519,11 @@ public interface CassandraOperation {
    * @param tableName
    * @param key
    * @param Value
+   * @param context
    * @return
    */
-  Response searchValueInList(String keyspace, String tableName, String key, String Value);
+  Response searchValueInList(
+      String keyspace, String tableName, String key, String Value, RequestContext context);
 
   /**
    * this method will be used to do CONTAINS query in list with the AND operations
@@ -429,10 +533,16 @@ public interface CassandraOperation {
    * @param key
    * @param Value
    * @param propertyMap
+   * @param context
    * @return
    */
   Response searchValueInList(
-      String keyspace, String tableName, String key, String Value, Map<String, Object> propertyMap);
+      String keyspace,
+      String tableName,
+      String key,
+      String Value,
+      Map<String, Object> propertyMap,
+      RequestContext context);
 
   /**
    * @param keySpace
@@ -441,6 +551,7 @@ public interface CassandraOperation {
    * @param column
    * @param key
    * @param value
+   * @param context
    * @return
    */
   public Response updateAddMapRecord(
@@ -449,7 +560,8 @@ public interface CassandraOperation {
       Map<String, Object> primaryKey,
       String column,
       String key,
-      Object value);
+      Object value,
+      RequestContext context);
 
   /**
    * @param keySpace
@@ -457,8 +569,14 @@ public interface CassandraOperation {
    * @param primaryKey
    * @param column
    * @param key
+   * @param context
    * @return
    */
   public Response updateRemoveMapRecord(
-      String keySpace, String table, Map<String, Object> primaryKey, String column, String key);
+      String keySpace,
+      String table,
+      Map<String, Object> primaryKey,
+      String column,
+      String key,
+      RequestContext context);
 }

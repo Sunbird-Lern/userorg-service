@@ -73,7 +73,7 @@ public class LocationRequestValidator {
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(GeoLocationJsonKey.PROPERTY_NAME, GeoLocationJsonKey.CODE);
     reqMap.put(GeoLocationJsonKey.PROPERTY_VALUE, code);
-    Response response = locationDao.getRecordByProperty(reqMap);
+    Response response = locationDao.getRecordByProperty(reqMap, null);
     List<Map<String, Object>> locationMapList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     return (!locationMapList.isEmpty());
@@ -228,7 +228,7 @@ public class LocationRequestValidator {
    */
   private static Map<String, Object> getLocationById(String id, String parameter) {
     Future<Map<String, Object>> locationF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.location.getTypeName(), id);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.location.getTypeName(), id, null);
     Map<String, Object> location =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(locationF);
     if (MapUtils.isEmpty(location)) {
@@ -307,7 +307,7 @@ public class LocationRequestValidator {
   public static List<Map<String, Object>> getESSearchResult(
       Map<String, Object> searchQueryMap, String esIndex, String esType) {
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType);
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return (List<Map<String, Object>>) result.get(JsonKey.CONTENT);

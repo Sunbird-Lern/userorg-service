@@ -63,16 +63,24 @@ public class GeoLocationManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(cassandraGetRecordById());
+    when(cassandraOperation.getRecordsByIndexedProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any()))
         .thenReturn(cassandraGetRecordById());
     when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(cassandraGetRecordById());
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyList()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
         .thenReturn(cassandraGetRecordById());
   }
 
@@ -173,7 +181,7 @@ public class GeoLocationManagementActorTest {
     actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, "invalidOrgId");
 
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getFailureResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exc =
@@ -338,7 +346,7 @@ public class GeoLocationManagementActorTest {
     actorMessage.setOperation(ActorOperations.UPDATE_GEO_LOCATION.getValue());
 
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getFailureResponse());
 
     subject.tell(actorMessage, probe.getRef());
@@ -447,7 +455,7 @@ public class GeoLocationManagementActorTest {
     actorMessage.setOperation(ActorOperations.SEND_NOTIFICATION.getValue());
 
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getFailureResponse());
 
     subject.tell(actorMessage, probe.getRef());

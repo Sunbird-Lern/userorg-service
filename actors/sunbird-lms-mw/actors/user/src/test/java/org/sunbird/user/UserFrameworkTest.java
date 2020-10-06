@@ -29,8 +29,12 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserFrameworkSuccess() {
-    when(userService.getUserById(Mockito.anyString())).thenReturn(getUser(false));
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Request reqObj = getRequest(null, null);
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean res = testScenario(reqObj, null);
     assertTrue(res);
   }
@@ -74,13 +78,13 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     Map<String, Object> rootOrgMap = new HashMap<>();
     String hashTagId = "someHashTagId";
     rootOrgMap.put(JsonKey.HASHTAGID, hashTagId);
-    when(Util.getOrgDetails(Mockito.anyString())).thenReturn(rootOrgMap);
+    when(Util.getOrgDetails(Mockito.anyString(), Mockito.any())).thenReturn(rootOrgMap);
   }
 
   private void mockContentStoreUtil() {
     Map<String, Object> contentMap = new HashMap<>();
     contentMap.put(JsonKey.RESPONSE, null);
-    when(ContentStoreUtil.readFramework("invalidFrameworkId")).thenReturn(contentMap);
+    when(ContentStoreUtil.readFramework("invalidFrameworkId", null)).thenReturn(contentMap);
   }
 
   private void mockDataCacheHandler() {

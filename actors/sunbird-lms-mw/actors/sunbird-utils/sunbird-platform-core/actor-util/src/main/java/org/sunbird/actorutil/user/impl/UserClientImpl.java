@@ -1,17 +1,14 @@
 package org.sunbird.actorutil.user.impl;
 
 import akka.actor.ActorRef;
-
-import java.io.IOException;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.actorutil.InterServiceCommunication;
@@ -24,6 +21,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import scala.concurrent.Await;
@@ -32,33 +30,36 @@ import scala.concurrent.duration.Duration;
 
 public class UserClientImpl implements UserClient {
 
+  private static LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
+
   private static InterServiceCommunication interServiceCommunication =
       InterServiceCommunicationFactory.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
-  public String createUser(ActorRef actorRef, Map<String, Object> userMap) {
-    ProjectLogger.log("UserClientImpl: createUser called", LoggerEnum.INFO);
-    return upsertUser(actorRef, userMap, ActorOperations.CREATE_USER.getValue());
+  public String createUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
+    logger.info(context, "createUser called");
+    return upsertUser(actorRef, userMap, ActorOperations.CREATE_USER.getValue(), context);
   }
 
   @Override
-  public void updateUser(ActorRef actorRef, Map<String, Object> userMap) {
-    ProjectLogger.log("UserClientImpl: updateUser called", LoggerEnum.INFO);
-    upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue());
+  public void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
+    logger.info(context, "updateUser called");
+    upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue(), context);
   }
 
   @Override
-  public void esVerifyPhoneUniqueness() {
-    esVerifyFieldUniqueness(JsonKey.ENC_PHONE, JsonKey.PHONE);
+  public void esVerifyPhoneUniqueness(RequestContext context) {
+    esVerifyFieldUniqueness(JsonKey.ENC_PHONE, JsonKey.PHONE, context);
   }
 
   @Override
-  public void esVerifyEmailUniqueness() {
-    esVerifyFieldUniqueness(JsonKey.ENC_EMAIL, JsonKey.EMAIL);
+  public void esVerifyEmailUniqueness(RequestContext context) {
+    esVerifyFieldUniqueness(JsonKey.ENC_EMAIL, JsonKey.EMAIL, context);
   }
 
-  private void esVerifyFieldUniqueness(String facetsKey, String objectType) {
+  private void esVerifyFieldUniqueness(
+      String facetsKey, String objectType, RequestContext context) {
     SearchDTO searchDto = null;
     searchDto = new SearchDTO();
     searchDto.setLimit(0);
@@ -70,7 +71,7 @@ public class UserClientImpl implements UserClient {
     searchDto.setFacets(list);
 
     Future<Map<String, Object>> esResponseF =
-        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName());
+        esUtil.search(searchDto, ProjectUtil.EsType.user.getTypeName(), context);
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
 
@@ -96,11 +97,13 @@ public class UserClientImpl implements UserClient {
     }
   }
 
-  private String upsertUser(ActorRef actorRef, Map<String, Object> userMap, String operation) {
+  private String upsertUser(
+      ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
     String userId = null;
 
     Request request = new Request();
     request.setRequest(userMap);
+    request.setRequestContext(context);
     request.setOperation(operation);
     request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_USER_UPLOAD);
@@ -124,31 +127,34 @@ public class UserClientImpl implements UserClient {
 
   /**
    * Get managed user list for LUA uuid (JsonKey.ID)
+   *
    * @param actorRef
    * @param req
-   *
+   * @param context
    * @return Map<String, Object>
    */
-  public Map<String, Object> searchManagedUser(ActorRef actorRef, Request req) {
+  public Map<String, Object> searchManagedUser(
+      ActorRef actorRef, Request req, RequestContext context) {
     ProjectLogger.log("UserServiceImpl: searchManagedUser called", LoggerEnum.DEBUG);
 
     Map<String, Object> searchRequestMap = new HashMap<>();
     Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.MANAGED_BY, (String)req.get(JsonKey.ID));
+    filters.put(JsonKey.MANAGED_BY, (String) req.get(JsonKey.ID));
     List<String> objectType = new ArrayList<String>();
     objectType.add("user");
     filters.put(JsonKey.OBJECT_TYPE, objectType);
     searchRequestMap.put(JsonKey.FILTERS, filters);
 
     String sortByField = (String) req.get(JsonKey.SORTBY);
-    if(StringUtils.isNotEmpty(sortByField)) {
+    if (StringUtils.isNotEmpty(sortByField)) {
       String order = (String) req.get(JsonKey.ORDER);
       Map<String, Object> sortby = new HashMap<>();
-      sortby.put(sortByField, StringUtils.isEmpty(order)?"asc":order);
+      sortby.put(sortByField, StringUtils.isEmpty(order) ? "asc" : order);
       searchRequestMap.put(JsonKey.SORT_BY, sortby);
     }
 
     Request request = new Request();
+    request.setRequestContext(context);
     request.getRequest().putAll(searchRequestMap);
     request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
 
@@ -156,28 +162,24 @@ public class UserClientImpl implements UserClient {
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       obj = Await.result(Patterns.ask(actorRef, request, t), t.duration());
-    }catch (Exception e) {
-      ProjectLogger.log(
-              "getFuture: Exception occured with error message = "
-                      + e.getMessage(),
-              e);
+    } catch (Exception e) {
+      ProjectLogger.log("getFuture: Exception occured with error message = " + e.getMessage(), e);
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
 
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
-      return (Map<String, Object>)responseObj.getResult().get(JsonKey.RESPONSE);
+      return (Map<String, Object>) responseObj.getResult().get(JsonKey.RESPONSE);
     } else if (obj instanceof ProjectCommonException) {
       throw (ProjectCommonException) obj;
     } else {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
-
 }

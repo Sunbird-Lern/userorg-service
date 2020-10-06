@@ -41,12 +41,13 @@ public class UserOrgManagementActor extends BaseActor {
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
       String hashTagId =
-          Util.getHashTagIdFromOrgId((String) requestMap.get(JsonKey.ORGANISATION_ID));
+          Util.getHashTagIdFromOrgId(
+              (String) requestMap.get(JsonKey.ORGANISATION_ID), request.getRequestContext());
       requestMap.put(JsonKey.HASHTAGID, hashTagId);
       if (StringUtils.isBlank(callerId)) {
         addPublicRole(requestMap);
       }
-      Util.registerUserToOrg(requestMap);
+      Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)
             && StringUtils.isNotBlank((String) requestMap.get(JsonKey.ROOT_ORG_ID))
@@ -55,9 +56,11 @@ public class UserOrgManagementActor extends BaseActor {
       // Add user to root org
       addPublicRole(requestMap);
       requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
-      String hashTagId = Util.getHashTagIdFromOrgId((String) requestMap.get(JsonKey.ROOT_ORG_ID));
+      String hashTagId =
+          Util.getHashTagIdFromOrgId(
+              (String) requestMap.get(JsonKey.ROOT_ORG_ID), request.getRequestContext());
       requestMap.put(JsonKey.HASHTAGID, hashTagId);
-      Util.registerUserToOrg(requestMap);
+      Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -74,13 +77,13 @@ public class UserOrgManagementActor extends BaseActor {
     Map<String, Object> requestMap = request.getRequest();
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
-      Util.upsertUserOrgData(requestMap);
+      Util.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)
             && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
         || StringUtils.isBlank(organisationId)) {
       addPublicRole(requestMap);
-      Util.upsertUserOrgData(requestMap);
+      Util.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);

@@ -8,10 +8,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.ratelimit.dao.RateLimitDao;
 import org.sunbird.ratelimit.dao.RateLimitDaoImpl;
@@ -19,6 +17,7 @@ import org.sunbird.ratelimit.limiter.RateLimit;
 import org.sunbird.ratelimit.limiter.RateLimiter;
 
 public class RateLimitServiceImpl implements RateLimitService {
+  private static LoggerUtil logger = new LoggerUtil(RateLimitServiceImpl.class);
 
   private RateLimitDao rateLimitDao = RateLimitDaoImpl.getInstance();
 
@@ -29,31 +28,30 @@ public class RateLimitServiceImpl implements RateLimitService {
   }
 
   @Override
-  public void throttleByKey(String key, RateLimiter[] rateLimiters) {
+  public void throttleByKey(String key, RateLimiter[] rateLimiters, RequestContext context) {
     if (!isRateLimitOn()) {
-      ProjectLogger.log(
-          "RateLimitServiceImpl:throttleByKey: Rate limiter is disabled", LoggerEnum.INFO);
+      logger.info(context, "RateLimitServiceImpl:throttleByKey: Rate limiter is disabled");
       return;
     }
     Map<String, RateLimit> entryByRate = new HashMap<>();
 
-    List<Map<String, Object>> ratesByKey = getRatesByKey(key);
+    List<Map<String, Object>> ratesByKey = getRatesByKey(key, context);
     if (CollectionUtils.isNotEmpty(ratesByKey)) {
       ratesByKey
           .stream()
           .forEach(
               rate -> {
                 if (!MapUtils.isEmpty(rate)) {
-                  ProjectLogger.log(
-                      "RateLimitServiceImpl:throttleByKey: key = " + key + " rate =" + rate,
-                      LoggerEnum.INFO);
+                  logger.info(
+                      context,
+                      "RateLimitServiceImpl:throttleByKey: key = " + key + " rate =" + rate);
                   RateLimit rateLimit = new RateLimit(key, rate);
 
                   if (rateLimit.getCount() >= rateLimit.getLimit()) {
-                    ProjectLogger.log(
+                    logger.info(
+                        context,
                         "RateLimitServiceImpl:throttleByKey: Rate limit threshold crossed for key = "
-                            + key,
-                        LoggerEnum.ERROR);
+                            + key);
                     throw new ProjectCommonException(
                         ResponseCode.errorRateLimitExceeded.getErrorCode(),
                         ResponseCode.errorRateLimitExceeded.getErrorMessage(),
@@ -74,20 +72,20 @@ public class RateLimitServiceImpl implements RateLimitService {
                 RateLimit rateLimit =
                     new RateLimit(
                         key, rateLimiter.name(), rateLimiter.getRateLimit(), rateLimiter.getTTL());
-                ProjectLogger.log(
+                logger.info(
+                    context,
                     "RateLimitServiceImpl:throttleByKey: Initialise rate limit for key = "
                         + key
                         + " rate ="
-                        + rateLimit.getLimit(),
-                    LoggerEnum.INFO);
+                        + rateLimit.getLimit());
                 entryByRate.put(rateLimiter.name(), rateLimit);
               }
             });
 
-    rateLimitDao.insertRateLimits(new ArrayList<>(entryByRate.values()));
+    rateLimitDao.insertRateLimits(new ArrayList<>(entryByRate.values()), context);
   }
 
-  private List<Map<String, Object>> getRatesByKey(String key) {
-    return rateLimitDao.getRateLimits(key);
+  private List<Map<String, Object>> getRatesByKey(String key, RequestContext context) {
+    return rateLimitDao.getRateLimits(key, context);
   }
 }

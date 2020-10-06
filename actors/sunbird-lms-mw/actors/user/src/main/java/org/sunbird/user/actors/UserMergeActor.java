@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.actor.router.ActorConfig;
@@ -18,6 +20,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.OneWayHashing;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.ConfigUtil;
@@ -38,6 +41,7 @@ import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
+import org.sunbird.user.util.UserUtil;
 
 @ActorConfig(
   tasks = {"mergeUser"},
@@ -46,6 +50,7 @@ import org.sunbird.user.util.KafkaConfigConstants;
 public class UserMergeActor extends UserBaseActor {
   String topic = null;
   Producer<String, String> producer = null;
+  ObjectMapper objectMapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
@@ -66,27 +71,29 @@ public class UserMergeActor extends UserBaseActor {
    * @throws IOException
    */
   private void updateUserMergeDetails(Request userRequest) throws IOException {
-    ProjectLogger.log("UserMergeActor:updateUserMergeDetails: starts : ", LoggerEnum.DEBUG.name());
+    logger.info(
+        userRequest.getRequestContext(), "UserMergeActor:updateUserMergeDetails: starts : ");
     Response response = new Response();
     Map mergeeDBMap = new HashMap<String, Object>();
     HashMap requestMap = (HashMap) userRequest.getRequest();
+    RequestContext context = userRequest.getRequestContext();
     Map userCertMap = (Map) requestMap.clone();
     Map headers = (Map) userRequest.getContext().get(JsonKey.HEADER);
     String mergeeId = (String) requestMap.get(JsonKey.FROM_ACCOUNT_ID);
     String mergerId = (String) requestMap.get(JsonKey.TO_ACCOUNT_ID);
     // validating tokens
-    checkTokenDetails(headers, mergeeId, mergerId);
+    checkTokenDetails(headers, mergeeId, mergerId, userRequest.getRequestContext());
     Map telemetryMap = (HashMap) requestMap.clone();
-    User mergee = userService.getUserById(mergeeId);
-    User merger = userService.getUserById(mergerId);
-    String custodianId = getCustodianValue();
+    User mergee = userService.getUserById(mergeeId, userRequest.getRequestContext());
+    User merger = userService.getUserById(mergerId, userRequest.getRequestContext());
+    String custodianId = getCustodianValue(userRequest.getRequestContext());
     if ((!custodianId.equals(mergee.getRootOrgId())) || custodianId.equals(merger.getRootOrgId())) {
-      ProjectLogger.log(
+      logger.info(
+          userRequest.getRequestContext(),
           "UserMergeActor:updateUserMergeDetails: Either custodian id is not matching with mergeeid root-org"
               + mergeeId
               + "or matching with mergerid root-org"
-              + mergerId,
-          LoggerEnum.ERROR.name());
+              + mergerId);
       throw new ProjectCommonException(
           ResponseCode.accountNotFound.getErrorCode(),
           ResponseCode.accountNotFound.getErrorMessage(),
@@ -96,18 +103,22 @@ public class UserMergeActor extends UserBaseActor {
       prepareMergeeAccountData(mergee, mergeeDBMap);
       userRequest.put(JsonKey.USER_MERGEE_ACCOUNT, mergeeDBMap);
       UserDao userDao = UserDaoImpl.getInstance();
-      Response mergeeResponse = userDao.updateUser(mergeeDBMap);
+      Response mergeeResponse = userDao.updateUser(mergeeDBMap, userRequest.getRequestContext());
+      List<String> userLookUpIdentifiers =
+          Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+      UserUtil.removeEntryFromUserLookUp(
+          objectMapper.convertValue(mergee, Map.class), userLookUpIdentifiers, context);
       String mergeeResponseStr = (String) mergeeResponse.get(JsonKey.RESPONSE);
-      ProjectLogger.log(
-          "UserMergeActor: updateUserMergeDetails: mergeeResponseStr = " + mergeeResponseStr,
-          LoggerEnum.INFO.name());
+      logger.info(
+          userRequest.getRequestContext(),
+          "UserMergeActor: updateUserMergeDetails: mergeeResponseStr = " + mergeeResponseStr);
       Map result = new HashMap<String, Object>();
       result.put(JsonKey.STATUS, JsonKey.SUCCESS);
       response.put(JsonKey.RESULT, result);
       sender().tell(response, self());
 
       // update user-course-cert details
-      mergeCertCourseDetails(mergee, merger);
+      mergeCertCourseDetails(mergee, merger, userRequest.getRequestContext());
 
       // update mergee details in ES
       mergeUserDetailsToEs(userRequest);
@@ -115,13 +126,15 @@ public class UserMergeActor extends UserBaseActor {
       // deleting User From KeyCloak
       CompletableFuture.supplyAsync(
               () -> {
-                return deactivateMergeeFromKC((String) mergeeDBMap.get(JsonKey.ID));
+                return deactivateMergeeFromKC(
+                    (String) mergeeDBMap.get(JsonKey.ID), userRequest.getRequestContext());
               })
           .thenApply(
               status -> {
-                ProjectLogger.log(
-                    "UserMergeActor: updateUserMergeDetails: user deleted from KeyCloak: " + status,
-                    LoggerEnum.INFO.name());
+                logger.info(
+                    userRequest.getRequestContext(),
+                    "UserMergeActor: updateUserMergeDetails: user deleted from KeyCloak: "
+                        + status);
                 return null;
               });
 
@@ -145,7 +158,7 @@ public class UserMergeActor extends UserBaseActor {
    *
    * @return rootCustodianValue
    */
-  private String getCustodianValue() {
+  private String getCustodianValue(RequestContext context) {
     String custodianId = null;
     try {
       Map<String, String> configSettingMap = DataCacheHandler.getConfigSettings();
@@ -154,18 +167,20 @@ public class UserMergeActor extends UserBaseActor {
         SystemSetting custodianIdSetting =
             systemSettingClient.getSystemSettingByField(
                 getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-                JsonKey.CUSTODIAN_ORG_ID);
+                JsonKey.CUSTODIAN_ORG_ID,
+                context);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();
         }
       }
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           "UserMergeActor:updateTncInfo: Exception occurred while getting system setting for"
               + JsonKey.CUSTODIAN_ORG_ID
               + e.getMessage(),
-          LoggerEnum.ERROR.name());
+          e);
     }
     return custodianId;
   }
@@ -177,21 +192,19 @@ public class UserMergeActor extends UserBaseActor {
    * @param merger
    * @throws IOException
    */
-  private void mergeCertCourseDetails(User mergee, User merger) throws IOException {
+  private void mergeCertCourseDetails(User mergee, User merger, RequestContext context)
+      throws IOException {
     String content = null;
     Telemetry userCertMergeRequest = createAccountMergeTopicData(mergee, merger);
-    ObjectMapper objectMapper = new ObjectMapper();
+
     content = objectMapper.writeValueAsString(userCertMergeRequest);
-    ProjectLogger.log(
-        "UserMergeActor:mergeCertCourseDetails: Kafka producer topic::" + content,
-        LoggerEnum.INFO.name());
+    logger.info(context, "UserMergeActor:mergeCertCourseDetails: Kafka producer topic::" + content);
     ProducerRecord<String, String> record = new ProducerRecord<>(topic, content);
     if (producer != null) {
       producer.send(record);
     } else {
-      ProjectLogger.log(
-          "UserMergeActor:mergeCertCourseDetails: Kafka producer is not initialised.",
-          LoggerEnum.INFO.name());
+      logger.info(
+          context, "UserMergeActor:mergeCertCourseDetails: Kafka producer is not initialised.");
     }
   }
 
@@ -224,8 +237,7 @@ public class UserMergeActor extends UserBaseActor {
 
   private void triggerUserMergeTelemetry(
       Map telemetryMap, User merger, Map<String, Object> context) {
-    ProjectLogger.log(
-        "UserMergeActor:triggerUserMergeTelemetry: generating telemetry event for merge");
+    logger.info("UserMergeActor:triggerUserMergeTelemetry: generating telemetry event for merge");
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, String> rollUp = new HashMap<>();
@@ -254,10 +266,10 @@ public class UserMergeActor extends UserBaseActor {
 
   private void mergeUserDetailsToEs(Request userRequest) {
     userRequest.setOperation(ActorOperations.MERGE_USER_TO_ELASTIC.getValue());
-    ProjectLogger.log(
+    logger.info(
+        userRequest.getRequestContext(),
         "UserMergeActor: mergeUserDetailsToEs: Trigger sync of user details to ES for user id"
-            + userRequest.getRequest().get(JsonKey.FROM_ACCOUNT_ID),
-        LoggerEnum.INFO.name());
+            + userRequest.getRequest().get(JsonKey.FROM_ACCOUNT_ID));
     tellToAnother(userRequest);
   }
 
@@ -273,17 +285,16 @@ public class UserMergeActor extends UserBaseActor {
     mergeeDBMap.put(JsonKey.ID, mergee.getId());
   }
 
-  private void checkTokenDetails(Map headers, String mergeeId, String mergerId) {
+  private void checkTokenDetails(
+      Map headers, String mergeeId, String mergerId, RequestContext context) {
     String userAuthToken = (String) headers.get(JsonKey.X_AUTHENTICATED_USER_TOKEN);
     String sourceUserAuthToken = (String) headers.get(JsonKey.X_SOURCE_USER_TOKEN);
     String subDomainUrl = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SUBDOMAIN_KEYCLOAK_BASE_URL);
-    ProjectLogger.log(
-        "UserMergeActor:checkTokenDetails subdomain url value " + subDomainUrl,
-        LoggerEnum.INFO.name());
-    String userId = keyCloakService.verifyToken(userAuthToken);
+    logger.info(context, "UserMergeActor:checkTokenDetails sub domain url value " + subDomainUrl);
+    String userId = keyCloakService.verifyToken(userAuthToken, context);
     // Since source token is generated from subdomain , so verification also need with
     // same subdomain.
-    String sourceUserId = keyCloakService.verifyToken(sourceUserAuthToken, subDomainUrl);
+    String sourceUserId = keyCloakService.verifyToken(sourceUserAuthToken, subDomainUrl, context);
     if (!(mergeeId.equals(sourceUserId) && mergerId.equals(userId))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
@@ -294,25 +305,24 @@ public class UserMergeActor extends UserBaseActor {
 
   /** Initialises Kafka producer required for dispatching messages on Kafka. */
   private void initKafkaClient() {
-    ProjectLogger.log("UserMergeActor:initKafkaClient: starts = ", LoggerEnum.INFO.name());
+    logger.info("UserMergeActor:initKafkaClient: starts = ");
     Config config = ConfigUtil.getConfig();
     topic = config.getString(KafkaConfigConstants.SUNBIRD_USER_CERT_KAFKA_TOPIC);
-    ProjectLogger.log("UserMergeActor:initKafkaClient: topic = " + topic, LoggerEnum.INFO.name());
+    logger.info("UserMergeActor:initKafkaClient: topic = " + topic);
     try {
       producer = KafkaClient.getProducer();
     } catch (Exception e) {
-      ProjectLogger.log(
-          "UserMergeActor:initKafkaClient: An exception occurred." + e, LoggerEnum.ERROR.name());
+      logger.error("UserMergeActor:initKafkaClient: An exception occurred." + e.getMessage(), e);
     }
   }
 
-  private String deactivateMergeeFromKC(String userId) {
+  private String deactivateMergeeFromKC(String userId, RequestContext context) {
     Map<String, Object> userMap = new HashMap<>();
     userMap.put(JsonKey.USER_ID, userId);
-    ProjectLogger.log(
+    logger.info(
+        context,
         "UserMergeActor:deactivateMergeeFromKC: request Got to deactivate mergee account from KC:"
-            + userMap,
-        LoggerEnum.INFO.name());
-    return keyCloakService.removeUser(userMap);
+            + userMap);
+    return keyCloakService.removeUser(userMap, context);
   }
 }

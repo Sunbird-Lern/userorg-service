@@ -59,7 +59,7 @@ public class UserStatusActor extends UserBaseActor {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     String logMsgPrefix =
         MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
-    User user = userService.getUserById(userId);
+    User user = userService.getUserById(userId, request.getRequestContext());
 
     if (operation.equals(ActorOperations.BLOCK_USER.getValue())
         && Boolean.TRUE.equals(user.getIsDeleted())) {
@@ -85,30 +85,33 @@ public class UserStatusActor extends UserBaseActor {
     SSOManager ssoManager = SSOServiceFactory.getInstance();
     UserDao userDao = UserDaoImpl.getInstance();
     if (isBlocked) {
-      ssoManager.deactivateUser(userMapES);
+      ssoManager.deactivateUser(userMapES, request.getRequestContext());
     } else {
-      ssoManager.activateUser(userMapES);
+      ssoManager.activateUser(userMapES, request.getRequestContext());
     }
 
-    Response response = userDao.updateUser(updatedUser);
+    Response response = userDao.updateUser(updatedUser, request.getRequestContext());
     sender().tell(response, self());
 
     // Update status in ES
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      ProjectLogger.log(logMsgPrefix + "Update user data to ES.");
+      logger.info(request.getRequestContext(), logMsgPrefix + "Update user data to ES.");
 
       Request userRequest = new Request();
+      userRequest.setRequestContext(request.getRequestContext());
       userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
       userRequest.getRequest().put(JsonKey.ID, userId);
 
       try {
         tellToAnother(userRequest);
       } catch (Exception e) {
-        ProjectLogger.log(
-            logMsgPrefix + "Exception occurred with error message = " + e.getMessage(), e);
+        logger.error(
+            request.getRequestContext(),
+            logMsgPrefix + "Exception occurred with error message = " + e.getMessage(),
+            e);
       }
     } else {
-      ProjectLogger.log(logMsgPrefix + "Update user data to ES is skipped.");
+      logger.info(request.getRequestContext(), logMsgPrefix + "Update user data to ES is skipped.");
     }
 
     generateTelemetryEvent(request.getRequest(), userId, operation, request.getContext());

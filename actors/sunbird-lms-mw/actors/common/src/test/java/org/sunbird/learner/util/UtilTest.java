@@ -63,19 +63,22 @@ public class UtilTest {
     ids.add("123-456-789");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID))
+            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
         .thenReturn(response);
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString()))
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     Promise<String> esPromise = Futures.promise();
     esPromise.success("success");
+
+    Promise<Map<String, Map<String, Object>>> promise2 = Futures.promise();
+    promise2.success(getEs2ResponseMap());
     when(esService.getEsResultByListOfIds(
-            Mockito.anyList(), Mockito.anyList(), Mockito.anyString()))
-        .thenReturn(promise.future());
-    List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789");
+            Mockito.anyList(), Mockito.anyList(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise2.future());
+    List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
 
@@ -85,5 +88,15 @@ public class UtilTest {
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     return map;
+  }
+
+  public static Map<String, Map<String, Object>> getEs2ResponseMap() {
+    Map<String, Map<String, Object>> map2 = new HashMap<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.ID, "rootOrgId");
+    map.put(JsonKey.CHANNEL, "anyChannel");
+    map2.put(JsonKey.RESPONSE, map);
+    return map2;
   }
 }

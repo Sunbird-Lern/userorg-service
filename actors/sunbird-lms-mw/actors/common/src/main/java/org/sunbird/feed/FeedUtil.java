@@ -9,8 +9,8 @@ import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.Feed;
@@ -19,32 +19,33 @@ import org.sunbird.models.user.FeedStatus;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
+  private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
+
   private static IFeedService feedService = FeedFactory.getInstance();
   private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
-  public static Response saveFeed(ShadowUser shadowUser, List<String> userIds) {
-    return saveFeed(shadowUser, userIds.get(0));
+  public static Response saveFeed(
+      ShadowUser shadowUser, List<String> userIds, RequestContext context) {
+    return saveFeed(shadowUser, userIds.get(0), context);
   }
 
-  public static Response saveFeed(ShadowUser shadowUser, String userId) {
-    ProjectLogger.log("FeedUtil:saveFeed method called.", LoggerEnum.INFO.name());
+  public static Response saveFeed(ShadowUser shadowUser, String userId, RequestContext context) {
     Response response = null;
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.USER_ID, userId);
     reqMap.put(JsonKey.CATEGORY, FeedAction.ORG_MIGRATION_ACTION.getfeedAction());
-    ProjectLogger.log(
-        "FeedUtil:saveFeed:fetching feed for userId ." + userId, LoggerEnum.INFO.name());
-    List<Feed> feedList = feedService.getRecordsByProperties(reqMap);
-    ProjectLogger.log(
+    logger.info(context, "FeedUtil:saveFeed:fetching feed for userId ." + userId);
+    List<Feed> feedList = feedService.getRecordsByUserId(reqMap, context);
+    logger.info(
+        context,
         "FeedUtil:saveFeed total no. of feed fetched for user id ."
             + userId
             + " ,feed count = "
-            + feedList.size(),
-        LoggerEnum.INFO.name());
+            + feedList.size());
     int index = getIndexOfMatchingFeed(feedList);
     if (index == -1) {
-      response = feedService.insert(createFeedObj(shadowUser, userId));
+      response = feedService.insert(createFeedObj(shadowUser, userId, context), context);
     } else {
       Map<String, Object> data = feedList.get(index).getData();
       List<String> channelList = (List<String>) data.get(JsonKey.PROSPECT_CHANNELS);
@@ -52,14 +53,14 @@ public class FeedUtil {
         channelList.add(shadowUser.getChannel());
         List<Map<String, String>> orgList =
             (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
-        orgList.addAll(getOrgDetails(shadowUser.getChannel()));
+        orgList.addAll(getOrgDetails(shadowUser.getChannel(), context));
       }
-      response = feedService.update(feedList.get(index));
+      response = feedService.update(feedList.get(index), context);
     }
     return response;
   }
 
-  private static Feed createFeedObj(ShadowUser shadowUser, String userId) {
+  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());
@@ -69,13 +70,14 @@ public class FeedUtil {
     List<String> channelList = new ArrayList<>();
     channelList.add(shadowUser.getChannel());
     prospectsChannel.put(JsonKey.PROSPECT_CHANNELS, channelList);
-    prospectsChannel.put(JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel()));
+    prospectsChannel.put(
+        JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel(), context));
     feed.setData(prospectsChannel);
     feed.setUserId(userId);
     return feed;
   }
 
-  private static List<Map<String, String>> getOrgDetails(String channel) {
+  private static List<Map<String, String>> getOrgDetails(String channel, RequestContext context) {
     Map<String, Object> filters = new HashMap<>();
     List<Map<String, String>> orgList = new CopyOnWriteArrayList<>();
     Map<String, String> orgMap = new HashMap<>();
@@ -84,7 +86,7 @@ public class FeedUtil {
     if (!orgIdMap.isEmpty() && orgIdMap.containsKey(channel)) {
       orgMap = (Map<String, String>) orgIdMap.get(channel);
     } else {
-      Organisation org = organisationClient.esSearchOrgByFilter(filters).get(0);
+      Organisation org = organisationClient.esSearchOrgByFilter(filters, context).get(0);
       orgMap.put("id", org.getRootOrgId());
       orgMap.put("name", org.getChannel());
       orgIdMap.put(channel, orgMap);

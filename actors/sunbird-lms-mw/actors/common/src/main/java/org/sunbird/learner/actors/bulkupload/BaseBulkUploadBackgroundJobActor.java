@@ -8,12 +8,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -22,10 +17,9 @@ import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BulkUploadJsonKey;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
@@ -77,11 +71,12 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:handleBulkUploadBackground:{0}: ", processId);
 
-    ProjectLogger.log(logMessagePrefix + "called", LoggerEnum.INFO);
+    logger.info(request.getRequestContext(), logMessagePrefix + "called");
 
-    BulkUploadProcess bulkUploadProcess = bulkUploadDao.read(processId);
+    BulkUploadProcess bulkUploadProcess =
+        bulkUploadDao.read(processId, request.getRequestContext());
     if (null == bulkUploadProcess) {
-      ProjectLogger.log(logMessagePrefix + "Invalid process ID.", LoggerEnum.ERROR);
+      logger.info(request.getRequestContext(), logMessagePrefix + "Invalid process ID.");
       return;
     }
 
@@ -93,23 +88,24 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       } catch (Exception e) {
         bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
         bulkUploadProcess.setFailureResult(e.getMessage());
-        bulkUploadDao.update(bulkUploadProcess);
-        ProjectLogger.log(
+        bulkUploadDao.update(bulkUploadProcess, null);
+        logger.error(
+            request.getRequestContext(),
             logMessagePrefix + "Exception occurred with error message = " + e.getMessage(),
-            LoggerEnum.INFO,
             e);
       }
     }
 
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
-    bulkUploadDao.update(bulkUploadProcess);
+    bulkUploadDao.update(bulkUploadProcess, request.getRequestContext());
   }
 
   public void processBulkUpload(
       BulkUploadProcess bulkUploadProcess,
       Function function,
       Map<String, String> outputColumnMap,
-      String[] outputColumnsOrder) {
+      String[] outputColumnsOrder,
+      RequestContext context) {
     BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
     String logMessagePrefix =
         MessageFormat.format(
@@ -126,17 +122,18 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       sequenceRange.put(Constants.GT, sequence);
       sequenceRange.put(Constants.LTE, nextSequence);
       queryMap.put(BulkUploadJsonKey.SEQUENCE_ID, sequenceRange);
-      List<BulkUploadProcessTask> tasks = bulkUploadProcessTaskDao.readByPrimaryKeys(queryMap);
+      List<BulkUploadProcessTask> tasks =
+          bulkUploadProcessTaskDao.readByPrimaryKeys(queryMap, context);
       if (tasks == null) {
-        ProjectLogger.log(
+        logger.info(
+            context,
             logMessagePrefix
                 + "No bulkUploadProcessTask found for process id: "
                 + bulkUploadProcess.getId()
                 + " and range "
                 + sequence
                 + ":"
-                + nextSequence,
-            LoggerEnum.INFO);
+                + nextSequence);
         sequence = nextSequence;
         continue;
       }
@@ -158,16 +155,16 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
         }
 
       } catch (IOException e) {
-        ProjectLogger.log(
+        logger.error(
+            context,
             logMessagePrefix + "Exception occurred with error message = " + e.getMessage(),
-            LoggerEnum.INFO,
             e);
       }
-      performBatchUpdate(tasks);
+      performBatchUpdate(tasks, context);
       sequence = nextSequence;
     }
     setCompletionStatus(
-        bulkUploadProcess, successList, failureList, outputColumnMap, outputColumnsOrder);
+        bulkUploadProcess, successList, failureList, outputColumnMap, outputColumnsOrder, context);
   }
 
   private void setCompletionStatus(
@@ -175,30 +172,36 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       List successList,
       List failureList,
       Map<String, String> outputColumnsMap,
-      String[] outputColumnsOrder) {
+      String[] outputColumnsOrder,
+      RequestContext context) {
     String logMessagePrefix =
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:processBulkUpload:{0}: ", bulkUploadProcess.getId());
     try {
 
-      ProjectLogger.log(logMessagePrefix + "completed", LoggerEnum.INFO);
+      logger.info(context, logMessagePrefix + "completed");
       bulkUploadProcess.setSuccessResult(ProjectUtil.convertMapToJsonString(successList));
       bulkUploadProcess.setFailureResult(ProjectUtil.convertMapToJsonString(failureList));
       bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
       StorageDetails storageDetails =
           uploadResultToCloud(
-              bulkUploadProcess, successList, failureList, outputColumnsMap, outputColumnsOrder);
+              bulkUploadProcess,
+              successList,
+              failureList,
+              outputColumnsMap,
+              outputColumnsOrder,
+              context);
       if (null != storageDetails) {
         bulkUploadProcess.setEncryptedStorageDetails(storageDetails);
       }
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           logMessagePrefix + "Exception occurred with error message := " + e.getMessage(),
-          LoggerEnum.INFO,
           e);
     }
     BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
-    bulkUploadDao.update(bulkUploadProcess);
+    bulkUploadDao.update(bulkUploadProcess, context);
   }
 
   protected void validateMandatoryFields(
@@ -226,13 +229,14 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       List<Map<String, Object>> successList,
       List<Map<String, Object>> failureList,
       Map<String, String> outputColumnsMap,
-      String[] outputColumnsOrder)
+      String[] outputColumnsOrder,
+      RequestContext context)
       throws IOException {
 
     String objKey = generateObjectKey(bulkUploadProcess);
     File file = null;
     try {
-      file = getFileHandle(bulkUploadProcess.getObjectType(), bulkUploadProcess.getId());
+      file = getFileHandle(bulkUploadProcess.getObjectType(), bulkUploadProcess.getId(), context);
       writeResultsToFile(file, successList, failureList, outputColumnsMap, outputColumnsOrder);
       CloudStorageUtil.upload(
           CloudStorageType.AZURE,
@@ -242,24 +246,24 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       return new StorageDetails(
           CloudStorageType.AZURE.getType(), bulkUploadProcess.getObjectType(), objKey);
     } catch (Exception ex) {
-      ProjectLogger.log(
-          "Exception occurred while uploading file to cloud.:: " + ex.getMessage(), ex);
+      logger.error(
+          context, "Exception occurred while uploading file to cloud.:: " + ex.getMessage(), ex);
     } finally {
       FileUtils.deleteQuietly(file);
     }
     return null;
   }
 
-  private File getFileHandle(String objType, String processId) {
+  private File getFileHandle(String objType, String processId, RequestContext context) {
     String logMessagePrefix =
         MessageFormat.format("BaseBulkUploadBackGroundJobActor:getFileHandle:{0}: ", processId);
     File file = null;
     try {
       file = File.createTempFile(objType, "upload");
     } catch (IOException e) {
-      ProjectLogger.log(
+      logger.error(
+          context,
           logMessagePrefix + "Exception occurred with error message = " + e.getMessage(),
-          LoggerEnum.INFO,
           e);
     }
     return file;
@@ -278,7 +282,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       Map<String, String> outputColumnsMap,
       String[] outputColumnsOrder)
       throws IOException {
-    try (CSVWriter csvWriter = new CSVWriter(new FileWriter(file)); ) {
+    try (CSVWriter csvWriter = new CSVWriter(new FileWriter(file))) {
       List<String> headerRowWithInternalNames = new ArrayList<>(Arrays.asList(outputColumnsOrder));
 
       headerRowWithInternalNames.add(JsonKey.BULK_UPLOAD_STATUS);

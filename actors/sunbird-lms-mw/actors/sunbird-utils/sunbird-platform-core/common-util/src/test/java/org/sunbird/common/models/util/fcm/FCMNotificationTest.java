@@ -1,20 +1,12 @@
 /** */
 package org.sunbird.common.models.util.fcm;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -41,7 +33,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.HttpUtil;
 import org.sunbird.common.models.util.JsonKey;
 
 /**
@@ -88,6 +79,7 @@ public class FCMNotificationTest {
     List<Object> list = new ArrayList<>();
     list.add("test12");
     list.add("test45");
+
     map.put("extra", list);
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put("title", "some value");
@@ -95,7 +87,6 @@ public class FCMNotificationTest {
     map.put("map", innerMap);
 
     String val = Notification.sendNotification("nameOFTopic", map, Notification.FCM_URL);
-    System.out.println("sdfdsfsd "+val);
     Assert.assertEquals(JsonKey.FAILURE, val);
   }
 
@@ -152,7 +143,8 @@ public class FCMNotificationTest {
       byte[] bytes = "{JsonKey.MESSAGE_Id:123}".getBytes();
       PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
       PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
-      String res = HttpClientUtil.post(Notification.FCM_URL,"{\"message\":\"success\"}",new HashMap<>());
+      String res =
+          HttpClientUtil.post(Notification.FCM_URL, "{\"message\":\"success\"}", new HashMap<>());
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("Mock rules addition failed " + e.getMessage());

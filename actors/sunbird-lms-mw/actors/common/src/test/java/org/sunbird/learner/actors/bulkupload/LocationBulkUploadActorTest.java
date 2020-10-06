@@ -72,10 +72,10 @@ public class LocationBulkUploadActorTest {
   @Ignore
   public void testLocationBulkUploadWithProperData() throws Exception {
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), null))
         .thenReturn(getCassandraRecordByIdForUserResponse());
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(createCassandraInsertSuccessResponse());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

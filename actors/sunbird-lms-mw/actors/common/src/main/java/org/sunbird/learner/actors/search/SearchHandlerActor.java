@@ -18,6 +18,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
@@ -34,7 +35,8 @@ import scala.concurrent.Future;
  */
 @ActorConfig(
   tasks = {"compositeSearch"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-one-dispatcher"
 )
 public class SearchHandlerActor extends BaseActor {
 
@@ -57,8 +59,7 @@ public class SearchHandlerActor extends BaseActor {
       }
       if (EsType.organisation.getTypeName().equalsIgnoreCase(filterObjectType)) {
         SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-        handleOrgSearchAsyncRequest(
-            EsType.organisation.getTypeName(), searchDto, request.getContext());
+        handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
       } else if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
         handleUserSearch(request, searchQueryMap, filterObjectType);
       }
@@ -74,7 +75,8 @@ public class SearchHandlerActor extends BaseActor {
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
-    Future<Map<String, Object>> resultF = esService.search(searchDto, filterObjectType);
+    Future<Map<String, Object>> resultF =
+        esService.search(searchDto, filterObjectType, request.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
@@ -105,7 +107,7 @@ public class SearchHandlerActor extends BaseActor {
         userMap.remove(JsonKey.ENC_PHONE);
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-      updateUserDetailsWithOrgName(requestedFields, userMapList);
+      updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
     }
     if (result == null) {
       result = new HashMap<>();
@@ -115,17 +117,17 @@ public class SearchHandlerActor extends BaseActor {
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
-  private void handleOrgSearchAsyncRequest(
-      String indexType, SearchDTO searchDto, Map<String, Object> context) {
-    Future<Map<String, Object>> futureResponse = esService.search(searchDto, indexType);
+  private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
+    Future<Map<String, Object>> futureResponse =
+        esService.search(searchDto, indexType, request.getRequestContext());
     Future<Response> response =
         futureResponse.map(
             new Mapper<Map<String, Object>, Response>() {
               @Override
               public Response apply(Map<String, Object> responseMap) {
-                ProjectLogger.log(
-                    "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ",
-                    LoggerEnum.INFO);
+                logger.info(
+                    request.getRequestContext(),
+                    "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
@@ -134,7 +136,7 @@ public class SearchHandlerActor extends BaseActor {
             getContext().dispatcher());
     Patterns.pipe(response, getContext().dispatcher()).to(sender());
     Request telemetryReq = new Request();
-    telemetryReq.getRequest().put("context", context);
+    telemetryReq.getRequest().put("context", request.getContext());
     telemetryReq.getRequest().put("searchFResponse", response);
     telemetryReq.getRequest().put("indexType", indexType);
     telemetryReq.getRequest().put("searchDto", searchDto);
@@ -144,7 +146,7 @@ public class SearchHandlerActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserDetailsWithOrgName(
-      String requestedFields, List<Map<String, Object>> userMapList) {
+      String requestedFields, List<Map<String, Object>> userMapList, RequestContext context) {
     Map<String, Organisation> orgMap = null;
     if (StringUtils.isNotBlank(requestedFields)) {
       try {
@@ -168,7 +170,7 @@ public class SearchHandlerActor extends BaseActor {
         if (!filteredRequestedFields.contains(JsonKey.ID)) {
           filteredRequestedFields.add(JsonKey.ID);
         }
-        orgMap = fetchOrgDetails(userMapList, filteredRequestedFields);
+        orgMap = fetchOrgDetails(userMapList, filteredRequestedFields, context);
         if (fields.contains(JsonKey.ORG_NAME.toLowerCase())) {
           Map<String, Organisation> filteredOrg = new HashMap<>(orgMap);
           userMapList
@@ -201,7 +203,8 @@ public class SearchHandlerActor extends BaseActor {
                   });
         }
       } catch (Exception ex) {
-        ProjectLogger.log(
+        logger.error(
+            context,
             "SearchHandlerActor:updateUserDetailsWithOrgName: Exception occurred with error message = "
                 + ex.getMessage(),
             ex);
@@ -211,7 +214,9 @@ public class SearchHandlerActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private Map<String, Organisation> fetchOrgDetails(
-      List<Map<String, Object>> userMapList, List<String> filteredRequestedFileds) {
+      List<Map<String, Object>> userMapList,
+      List<String> filteredRequestedFileds,
+      RequestContext context) {
     Set<String> orgIdList = new HashSet<>();
     userMapList
         .stream()
@@ -237,7 +242,8 @@ public class SearchHandlerActor extends BaseActor {
             });
 
     List<String> orgIds = new ArrayList<>(orgIdList);
-    List<Organisation> organisations = orgClient.esSearchOrgByIds(orgIds, filteredRequestedFileds);
+    List<Organisation> organisations =
+        orgClient.esSearchOrgByIds(orgIds, filteredRequestedFileds, context);
     Map<String, Organisation> orgMap = new HashMap<>();
     organisations
         .stream()

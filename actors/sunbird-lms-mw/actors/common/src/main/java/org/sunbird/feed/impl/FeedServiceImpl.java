@@ -12,10 +12,8 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.helper.ServiceFactory;
@@ -24,6 +22,8 @@ import org.sunbird.models.user.Feed;
 import scala.concurrent.Future;
 
 public class FeedServiceImpl implements IFeedService {
+  private static LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
+
   private Util.DbInfo usrFeedDbInfo = Util.dbInfoMap.get(JsonKey.USER_FEED_DB);
   private ObjectMapper mapper = new ObjectMapper();
 
@@ -36,8 +36,8 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public Response insert(Feed feed) {
-    ProjectLogger.log("FeedServiceImpl:insert method called : ", LoggerEnum.INFO.name());
+  public Response insert(Feed feed, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:insert method called : ");
     Map<String, Object> feedData = feed.getData();
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
     String feedId = ProjectUtil.generateUniqueId();
@@ -48,19 +48,19 @@ public class FeedServiceImpl implements IFeedService {
         dbMap.put(JsonKey.FEED_DATA, mapper.writeValueAsString(feed.getData()));
       }
     } catch (Exception ex) {
-      ProjectLogger.log("FeedServiceImpl:insert Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:insert Exception occurred while mapping.", ex);
     }
-    Response response = saveFeed(dbMap);
+    Response response = saveFeed(dbMap, context);
     // save data to ES
     dbMap.put(JsonKey.FEED_DATA, feedData);
     dbMap.put(JsonKey.CREATED_ON, Calendar.getInstance().getTimeInMillis());
-    getESInstance().save(ProjectUtil.EsType.userfeed.getTypeName(), feedId, dbMap);
+    getESInstance().save(ProjectUtil.EsType.userfeed.getTypeName(), feedId, dbMap, context);
     return response;
   }
 
   @Override
-  public Response update(Feed feed) {
-    ProjectLogger.log("FeedServiceImpl:update method called : ", LoggerEnum.INFO.name());
+  public Response update(Feed feed, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:update method called : ");
     Map<String, Object> feedData = feed.getData();
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
     try {
@@ -68,26 +68,25 @@ public class FeedServiceImpl implements IFeedService {
         dbMap.put(JsonKey.FEED_DATA, mapper.writeValueAsString(feed.getData()));
       }
     } catch (Exception ex) {
-      ProjectLogger.log("FeedServiceImpl:update Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:update Exception occurred while mapping.", ex);
     }
     dbMap.remove(JsonKey.CREATED_ON);
     dbMap.put(JsonKey.UPDATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-    Response response = saveFeed(dbMap);
+    Response response = saveFeed(dbMap, context);
     // update data to ES
     dbMap.put(JsonKey.FEED_DATA, feedData);
     dbMap.put(JsonKey.UPDATED_ON, Calendar.getInstance().getTimeInMillis());
-    getESInstance().update(ProjectUtil.EsType.userfeed.getTypeName(), feed.getId(), dbMap);
+    getESInstance().update(ProjectUtil.EsType.userfeed.getTypeName(), feed.getId(), dbMap, context);
     return response;
   }
 
   @Override
-  public List<Feed> getRecordsByProperties(Map<String, Object> properties) {
-    ProjectLogger.log(
-        "FeedServiceImpl:getRecordsByProperties method called : ", LoggerEnum.INFO.name());
+  public List<Feed> getRecordsByUserId(Map<String, Object> properties, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:getRecordsByUserId method called : ");
     Response dbResponse =
         getCassandraInstance()
-            .getRecordsByProperties(
-                usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties);
+            .getRecordById(
+                usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties, context);
     List<Map<String, Object>> responseList = null;
     List<Feed> feedList = new ArrayList<>();
     if (null != dbResponse && null != dbResponse.getResult()) {
@@ -106,8 +105,9 @@ public class FeedServiceImpl implements IFeedService {
                 }
                 feedList.add(mapper.convertValue(s, Feed.class));
               } catch (Exception ex) {
-                ProjectLogger.log(
-                    "FeedServiceImpl:getRecordsByProperties :Exception occurred while mapping feed data.",
+                logger.error(
+                    context,
+                    "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
                     ex);
               }
             });
@@ -117,10 +117,10 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public Response search(SearchDTO searchDTO) {
-    ProjectLogger.log("FeedServiceImpl:search method called : ", LoggerEnum.INFO.name());
+  public Response search(SearchDTO searchDTO, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:search method called : ");
     Future<Map<String, Object>> resultF =
-        getESInstance().search(searchDTO, ProjectUtil.EsType.userfeed.getTypeName());
+        getESInstance().search(searchDTO, ProjectUtil.EsType.userfeed.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
@@ -129,16 +129,20 @@ public class FeedServiceImpl implements IFeedService {
   }
 
   @Override
-  public void delete(String id) {
-    ProjectLogger.log(
-        "FeedServiceImpl:delete method called for feedId : " + id, LoggerEnum.INFO.name());
+  public void delete(String id, String userId, String category, RequestContext context) {
+    logger.info(context, "FeedServiceImpl:delete method called for feedId : " + id);
+    Map<String, String> compositeKey = new HashMap();
+    compositeKey.put("userid", userId);
+    compositeKey.put("id", id);
+    compositeKey.put("category", category);
     getCassandraInstance()
-        .deleteRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), id);
-    getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id);
+        .deleteRecord(
+            usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), compositeKey, context);
+    getESInstance().delete(ProjectUtil.EsType.userfeed.getTypeName(), id, context);
   }
 
-  private Response saveFeed(Map<String, Object> feed) {
+  private Response saveFeed(Map<String, Object> feed, RequestContext context) {
     return getCassandraInstance()
-        .upsertRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feed);
+        .upsertRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feed, context);
   }
 }

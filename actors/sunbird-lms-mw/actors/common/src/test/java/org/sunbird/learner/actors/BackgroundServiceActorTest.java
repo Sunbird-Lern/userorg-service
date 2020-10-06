@@ -38,7 +38,7 @@ public class BackgroundServiceActorTest {
     Map<String, Object> locnMap = new HashMap<String, Object>();
     locnMap.put(JsonKey.ID, locnId);
     cassandraOperation.insertRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap, null);
   }
 
   @Test
@@ -48,7 +48,7 @@ public class BackgroundServiceActorTest {
     locnMap.put(JsonKey.ID, locnId);
     locnMap.put(JsonKey.USER_COUNT, 0);
     cassandraOperation.updateRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap, null);
     List<Object> locnIdList = new ArrayList<>();
     locnIdList.add(locnId);
 
@@ -68,7 +68,7 @@ public class BackgroundServiceActorTest {
     }
     Response response =
         cassandraOperation.getRecordById(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId, null);
     // probe.expectMsgClass(duration("300 second"),Response.class);
     List<Map<String, Object>> reslist = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> map = reslist.get(0);
@@ -85,7 +85,7 @@ public class BackgroundServiceActorTest {
     locnMap.put(JsonKey.ID, locnId);
     locnMap.put(JsonKey.USER_COUNT, 0);
     cassandraOperation.updateRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap, null);
 
     List<Object> locnIdList = new ArrayList<>();
     locnIdList.add(locnId);
@@ -106,7 +106,7 @@ public class BackgroundServiceActorTest {
     }
     Response response =
         cassandraOperation.getRecordById(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId, null);
     // probe.expectMsgClass(duration("300 second"),Response.class);
     List<Map<String, Object>> reslist = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> map = reslist.get(0);
@@ -124,7 +124,7 @@ public class BackgroundServiceActorTest {
     locnMap.put(JsonKey.USER_COUNT, 0);
     locnMap.put(JsonKey.USER_COUNT_TTL, "abc");
     cassandraOperation.updateRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnMap, null);
 
     List<Object> locnIdList = new ArrayList<>();
     locnIdList.add(locnId);
@@ -145,7 +145,7 @@ public class BackgroundServiceActorTest {
     }
     Response response =
         cassandraOperation.getRecordById(
-            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId);
+            geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId, null);
     // probe.expectMsgClass(duration("300 second"),Response.class);
     List<Map<String, Object>> reslist = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Map<String, Object> map = reslist.get(0);
@@ -157,6 +157,6 @@ public class BackgroundServiceActorTest {
   @AfterClass
   public static void destroy() {
     cassandraOperation.deleteRecord(
-        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId);
+        geoLocationDbInfo.getKeySpace(), geoLocationDbInfo.getTableName(), locnId, null);
   }
 }

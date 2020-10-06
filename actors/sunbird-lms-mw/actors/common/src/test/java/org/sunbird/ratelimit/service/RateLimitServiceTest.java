@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -45,42 +46,45 @@ public class RateLimitServiceTest {
   @Before
   public void beforeEachTest() {
     MockitoAnnotations.initMocks(this);
-    doNothing().when(rateLimitdDao).insertRateLimits(anyList());
+    doNothing().when(rateLimitdDao).insertRateLimits(anyList(), Mockito.any());
   }
 
   @Test
   public void testThrottleByKeyOnGoingSuccess() {
-    when(rateLimitdDao.getRateLimits(anyString())).thenReturn(getRateLimitRecords(5));
+    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
+        .thenReturn(getRateLimitRecords(5));
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     assertRateLimitsOnInsert(countsByRateLimiter);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter});
+    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
   }
 
   @Test
   public void testThrottleByKeyNew() {
-    when(rateLimitdDao.getRateLimits(anyString())).thenReturn(null);
+    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any())).thenReturn(null);
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 1);
     assertRateLimitsOnInsert(countsByRateLimiter);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter});
+    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
   }
 
   @Test
   public void testThrottleByKeyMultipleLimit() {
-    when(rateLimitdDao.getRateLimits(anyString())).thenReturn(getRateLimitRecords(5));
+    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
+        .thenReturn(getRateLimitRecords(5));
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     countsByRateLimiter.put(dayRateLimiter.name(), 1);
     assertRateLimitsOnInsert(countsByRateLimiter);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter, dayRateLimiter});
+    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter, dayRateLimiter}, null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testThrottleByKeyFailure() {
-    when(rateLimitdDao.getRateLimits(anyString())).thenReturn(getRateLimitRecords(HOUR_LIMIT));
+    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
+        .thenReturn(getRateLimitRecords(HOUR_LIMIT));
     try {
-      rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter});
+      rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.TOO_MANY_REQUESTS.getResponseCode(), e.getResponseCode());
       throw e;
@@ -114,6 +118,6 @@ public class RateLimitServiceTest {
                   return null;
                 })
         .when(rateLimitdDao)
-        .insertRateLimits(anyList());
+        .insertRateLimits(anyList(), Mockito.any());
   }
 }

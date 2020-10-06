@@ -65,15 +65,16 @@ public class FeedUtilTest {
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(feedService.getRecordsByProperties(Mockito.anyMap()))
+    when(feedService.getRecordsByUserId(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
-    when(feedService.insert(Mockito.any())).thenReturn(new Response());
-    when(feedService.update(Mockito.any())).thenReturn(new Response());
+    when(feedService.insert(Mockito.any(), Mockito.any())).thenReturn(new Response());
+    when(feedService.update(Mockito.any(), Mockito.any())).thenReturn(new Response());
 
     // whenNew(OrganisationClientImpl.class).withNoArguments().thenReturn(organisationClient);
     when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
-    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap())).thenReturn(getFeedOrgs());
+    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getFeedOrgs());
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -88,13 +89,16 @@ public class FeedUtilTest {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByProperties(Mockito.any(), Mockito.any(), Mockito.any()))
+            cassandraOperation.getRecordsByPropertiesWithFiltering(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(response);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
-    PowerMockito.when(cassandraOperation.upsertRecord(Mockito.any(), Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(upsertResponse);
   }
 
@@ -127,7 +131,7 @@ public class FeedUtilTest {
   public void saveFeedInsertTest() {
     List<String> userIds = new ArrayList<>();
     userIds.add("123-456-7890");
-    Response response = FeedUtil.saveFeed(getShadowUser(), userIds);
+    Response response = FeedUtil.saveFeed(getShadowUser(), userIds, null);
     Assert.assertNotNull(response);
   }
 

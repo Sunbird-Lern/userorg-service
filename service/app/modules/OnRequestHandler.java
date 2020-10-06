@@ -25,10 +25,12 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
+import util.Attrs;
 import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
 
+  private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
   private ObjectMapper mapper = new ObjectMapper();
   private static String custodianOrgHashTagId;
   public static boolean isServiceHealthy = true;
@@ -49,20 +51,33 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
-        //From 3.0.0 checking user access-token and managed-by from the request header
-        String message = RequestInterceptor.verifyRequestData(request);
+        // From 3.0.0 checking user access-token and managed-by from the request header
+        Map userAuthentication = RequestInterceptor.verifyRequestData(request);
+        String message = (String) userAuthentication.get(JsonKey.USER_ID);
+        if (userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
+          request =
+              request.addAttr(
+                  Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
+        }
+        if (userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY) != null) {
+          request =
+              request.addAttr(
+                  Attrs.AUTH_WITH_MASTER_KEY,
+                  (String) userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY));
+        }
+
         // call method to set all the required params for the telemetry event(log)...
-        initializeRequestInfo(request, message, requestId);
+        request = initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
-          request.flash().put(JsonKey.USER_ID, message);
-          request.flash().put(JsonKey.IS_AUTH_REQ, "false");
+          request = request.addAttr(Attrs.USER_ID, message);
+          request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
           for (String uri : RequestInterceptor.restrictedUriList) {
             if (request.path().contains(uri)) {
-              request.flash().put(JsonKey.IS_AUTH_REQ, "true");
+              request = request.addAttr(Attrs.IS_AUTH_REQ, "true");
               break;
             }
           }
-            result = delegate.call(request);
+          result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result =
               onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
@@ -97,14 +112,14 @@ public class OnRequestHandler implements ActionCreator {
    */
   public CompletionStage<Result> onDataValidationError(
       Http.Request request, String errorMessage, int responseCode) {
-    ProjectLogger.log("Data error found--" + errorMessage);
+    logger.info("Data error found--" + errorMessage);
     ResponseCode code = ResponseCode.getResponse(errorMessage);
     ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
     Response resp = BaseController.createFailureResponse(request, code, headerCode);
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  public void initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
@@ -138,7 +153,6 @@ public class OnRequestHandler implements ActionCreator {
       }
       reqContext.put(JsonKey.CHANNEL, channel);
       reqContext.put(JsonKey.ENV, getEnv(request));
-      reqContext.put(JsonKey.REQUEST_ID, requestId);
       reqContext.putAll(DataCacheHandler.getTelemetryPdata());
       Optional<String> optionalAppId = request.header(HeaderParam.X_APP_ID.getName());
       if (optionalAppId.isPresent()) {
@@ -147,6 +161,30 @@ public class OnRequestHandler implements ActionCreator {
       Optional<String> optionalDeviceId = request.header(HeaderParam.X_Device_ID.getName());
       if (optionalDeviceId.isPresent()) {
         reqContext.put(JsonKey.DEVICE_ID, optionalDeviceId.get());
+      }
+
+      Optional<String> optionalSessionId = request.header(HeaderParam.X_Session_ID.getName());
+      if (optionalSessionId.isPresent()) {
+        reqContext.put(JsonKey.X_Session_ID, optionalSessionId.get());
+      }
+
+      Optional<String> optionalAppVersion = request.header(HeaderParam.X_APP_VERSION.getName());
+      if (optionalAppVersion.isPresent()) {
+        reqContext.put(JsonKey.X_APP_VERSION, optionalAppVersion.get());
+      }
+
+      Optional<String> optionalTraceEnabled = request.header(HeaderParam.X_TRACE_ENABLED.getName());
+      if (optionalTraceEnabled.isPresent()) {
+        reqContext.put(JsonKey.X_TRACE_ENABLED, optionalTraceEnabled.get());
+      }
+
+      Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
+      if (optionalTraceId.isPresent()) {
+        reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+        request = request.addAttr(Attrs.X_REQUEST_ID, optionalTraceId.get());
+      } else {
+        request = request.addAttr(Attrs.X_REQUEST_ID, requestId);
+        reqContext.put(JsonKey.X_REQUEST_ID, requestId);
       }
       if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
         reqContext.put(JsonKey.ACTOR_ID, userId);
@@ -168,11 +206,12 @@ public class OnRequestHandler implements ActionCreator {
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
       map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-      request.flash().put(JsonKey.REQUEST_ID, requestId);
-      request.flash().put(JsonKey.CONTEXT, mapper.writeValueAsString(map));
+
+      request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(map));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
+    return request;
   }
 
   private static String getCustodianOrgHashTagId() {
@@ -189,7 +228,8 @@ public class OnRequestHandler implements ActionCreator {
               orgClient
                   .getOrgById(
                       orgActorRef,
-                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID))
+                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID),
+                      null)
                   .getHashTagId();
         } catch (ProjectCommonException e) {
           if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
@@ -210,16 +250,10 @@ public class OnRequestHandler implements ActionCreator {
       env = JsonKey.ORGANISATION;
     } else if (uri.startsWith("/v1/object")) {
       env = JsonKey.ANNOUNCEMENT;
-    } else if (uri.startsWith("/v1/page")) {
-      env = JsonKey.PAGE;
     } else if (uri.startsWith("/v1/notification") || uri.startsWith("/v2/notification")) {
       env = JsonKey.NOTIFICATION;
     } else if (uri.startsWith("/v1/dashboard")) {
       env = JsonKey.DASHBOARD;
-    } else if (uri.startsWith("/v1/badges")) {
-      env = JsonKey.BADGES;
-    } else if (uri.startsWith("/v1/issuer")) {
-      env = BadgingJsonKey.BADGES;
     } else if (uri.startsWith("/v1/role")) {
       env = JsonKey.ROLE;
     } else if (uri.startsWith("/v1/note")) {
