@@ -77,18 +77,21 @@ public class UserTnCActor extends BaseActor {
     Map<String, Object> user;
     if (CollectionUtils.isNotEmpty(userList)) {
       user = userList.get(0);
+      if (MapUtils.isEmpty(user)) {
+        new ProjectCommonException(
+            ResponseCode.userNotFound.getErrorCode(),
+            ResponseCode.userNotFound.getErrorMessage(),
+            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+      }
       // Check whether user account is locked or not
-      if (MapUtils.isNotEmpty(user)
-          && user.containsKey(JsonKey.IS_DELETED)
+      if (user.containsKey(JsonKey.IS_DELETED)
           && ProjectUtil.isNotNull(user.get(JsonKey.IS_DELETED))
           && (Boolean) user.get(JsonKey.IS_DELETED)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
       }
       // If user account isManagedUser(passed in request) and managedBy is empty, not a valid
       // scenario
-      if (isManagedUser
-          && MapUtils.isNotEmpty(user)
-          && ProjectUtil.isNull(user.containsKey(JsonKey.MANAGED_BY))) {
+      if (isManagedUser && ProjectUtil.isNull(user.get(JsonKey.MANAGED_BY))) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(

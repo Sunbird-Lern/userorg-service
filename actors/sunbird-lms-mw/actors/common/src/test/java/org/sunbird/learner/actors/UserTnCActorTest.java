@@ -97,6 +97,22 @@ public class UserTnCActorTest {
   }
 
   @Test
+  public void testAcceptUserTncSuccessManagedUser() {
+    Response userResponse = new Response();
+    List<Map<String, Object>> userList = new ArrayList<>();
+    userList.add(getUser(LATEST_VERSION));
+    userResponse.put(JsonKey.RESPONSE, userList);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(userResponse);
+
+    ProjectCommonException response =
+        setManagedUSerRequest(ACCEPTED_CORRECT_VERSION)
+            .expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), response.getCode());
+  }
+
+  @Test
   public void testAcceptUserTncSuccessAlreadyAccepted() {
     Response userResponse = new Response();
     List<Map<String, Object>> userList = new ArrayList<>();
@@ -142,6 +158,21 @@ public class UserTnCActorTest {
             && exception
                 .getCode()
                 .equalsIgnoreCase(ResponseCode.invalidParameterValue.getErrorCode()));
+  }
+
+  private TestKit setManagedUSerRequest(String version) {
+    mockCassandraOperation();
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.VERSION, version);
+    innerMap.put(JsonKey.USER_ID, version);
+    innerMap.put(JsonKey.MANAGED_BY, null);
+    reqObj.setRequest(innerMap);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+    return probe;
   }
 
   private TestKit setRequest(String version) {
