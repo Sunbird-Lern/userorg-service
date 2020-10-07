@@ -560,7 +560,7 @@ public class UserUtil {
     externalIds.forEach(
         externalIdMap -> {
           // Needed in 3.2
-          // externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
+          // externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
         });
   }
 
@@ -895,7 +895,7 @@ public class UserUtil {
       userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
     }
     if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.STATUS))) {
-      userDeclareEntity.setStatus(JsonKey.PENDING);
+      userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     }
     userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
 
