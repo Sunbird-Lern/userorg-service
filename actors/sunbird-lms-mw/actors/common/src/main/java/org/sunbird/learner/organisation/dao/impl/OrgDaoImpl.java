@@ -46,7 +46,7 @@ public class OrgDaoImpl implements OrgDao {
       orgMap.remove(JsonKey.CONTACT_DETAILS);
       return orgMap;
     }
-    return Collections.EMPTY_MAP;
+    return Collections.emptyMap();
   }
 
   @Override
