@@ -178,9 +178,11 @@ public class UserTnCActor extends BaseActor {
   }
 
   private void syncUserDetails(Map<String, Object> userMap, RequestContext context) {
+    Request userRequest = new Request();
+    userRequest.setRequestContext(context);
+    userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
+    userRequest.getRequest().put(JsonKey.ID, userMap.get(JsonKey.ID));
     logger.info(context, "UserTnCActor:syncUserDetails: Trigger sync of user details to ES");
-    userMap.put(JsonKey.TNC_ACCEPTED_ON, Calendar.getInstance().getTimeInMillis());
-    esService.update(
-        ProjectUtil.EsType.user.getTypeName(), (String) userMap.get(JsonKey.ID), userMap, context);
+    tellToAnother(userRequest);
   }
 }
