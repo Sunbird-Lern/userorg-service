@@ -85,7 +85,7 @@ public class UserTnCActorTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTcnSuccessWithAcceptFirstTime() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getUser(null));
@@ -97,7 +97,7 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTncSuccessAlreadyAccepted() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getUser(LATEST_VERSION));
@@ -109,7 +109,7 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTncForBlockedUser() {
     Promise<Map<String, Object>> promise_recipientSearchQuery = Futures.promise();
     Map<String, Object> recipientSearchQuery = new HashMap<>();
