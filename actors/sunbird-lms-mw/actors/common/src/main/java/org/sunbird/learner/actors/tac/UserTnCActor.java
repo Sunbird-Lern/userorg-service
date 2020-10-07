@@ -107,8 +107,7 @@ public class UserTnCActor extends BaseActor {
     String lastAcceptedVersion = (String) user.get(JsonKey.TNC_ACCEPTED_VERSION);
     Response response = new Response();
     if (StringUtils.isEmpty(lastAcceptedVersion)
-        || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)
-        || StringUtils.isEmpty((String) user.get(JsonKey.TNC_ACCEPTED_ON))) {
+        || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)) {
 
       Map<String, Object> userMap = new HashMap();
       userMap.put(JsonKey.ID, userId);
@@ -180,6 +179,7 @@ public class UserTnCActor extends BaseActor {
 
   private void syncUserDetails(Map<String, Object> userMap, RequestContext context) {
     logger.info(context, "UserTnCActor:syncUserDetails: Trigger sync of user details to ES");
+    userMap.put(JsonKey.TNC_ACCEPTED_ON, Calendar.getInstance().getTimeInMillis());
     esService.update(
         ProjectUtil.EsType.user.getTypeName(), (String) userMap.get(JsonKey.ID), userMap, context);
   }

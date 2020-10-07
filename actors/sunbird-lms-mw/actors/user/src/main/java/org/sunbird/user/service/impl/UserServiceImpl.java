@@ -100,20 +100,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void syncUserProfile(
-      String userId,
-      Map<String, Object> userDataMap,
-      Map<String, Object> userPrivateDataMap,
-      RequestContext context) {
-    esUtil.save(
-        ProjectUtil.EsType.userprofilevisibility.getTypeName(),
-        userId,
-        userPrivateDataMap,
-        context);
-    esUtil.save(ProjectUtil.EsType.user.getTypeName(), userId, userDataMap, context);
-  }
-
-  @Override
   public Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context) {
     Future<Map<String, Object>> esResultF =
         esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
@@ -126,14 +112,6 @@ public class UserServiceImpl implements UserService {
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return esResult;
-  }
-
-  @Override
-  public Map<String, Object> esGetPrivateUserProfileById(String userId, RequestContext context) {
-    Future<Map<String, Object>> resultF =
-        esUtil.getDataByIdentifier(
-            ProjectUtil.EsType.userprofilevisibility.getTypeName(), userId, context);
-    return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
   @Override

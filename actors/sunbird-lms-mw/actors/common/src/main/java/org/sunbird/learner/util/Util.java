@@ -502,22 +502,25 @@ public final class Util {
     requestContext.put(JsonKey.REQUEST_TYPE, JsonKey.API_CALL);
 
     if (JsonKey.USER.equalsIgnoreCase((String) request.getContext().get(JsonKey.ACTOR_TYPE))) {
-      Future<Map<String, Object>> resultF =
-          esService.getDataByIdentifier(
-              EsType.user.getTypeName(),
+      Util.DbInfo usrDbInfo = dbInfoMap.get(JsonKey.USER_DB);
+      Response userResponse =
+          cassandraOperation.getRecordById(
+              usrDbInfo.getKeySpace(),
+              usrDbInfo.getTableName(),
               (String) request.getContext().get(JsonKey.REQUESTED_BY),
-              null);
-      Map<String, Object> result =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+              request.getRequestContext());
+      List<Map<String, Object>> userList =
+          (List<Map<String, Object>>) userResponse.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(userList)) {
+        Map<String, Object> result = userList.get(0);
+        if (result != null) {
+          String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
+          if (StringUtils.isNotBlank(rootOrgId)) {
+            Map<String, String> rollup = new HashMap<>();
 
-      if (result != null) {
-        String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-
-        if (StringUtils.isNotBlank(rootOrgId)) {
-          Map<String, String> rollup = new HashMap<>();
-
-          rollup.put("l1", rootOrgId);
-          requestContext.put(JsonKey.ROLLUP, rollup);
+            rollup.put("l1", rootOrgId);
+            requestContext.put(JsonKey.ROLLUP, rollup);
+          }
         }
       }
     }
