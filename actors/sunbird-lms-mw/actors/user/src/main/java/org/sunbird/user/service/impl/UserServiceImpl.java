@@ -245,8 +245,8 @@ public class UserServiceImpl implements UserService {
     Map<String, Object> userMap = request.getRequest();
     String userId = (String) userMap.get(JsonKey.USER_ID);
     String uploaderUserId = (String) userMap.get(JsonKey.UPDATED_BY);
-    User uploader = userService.getUserById(uploaderUserId, context);
-    User user = userService.getUserById(userId, context);
+    User uploader = getUserById(uploaderUserId, context);
+    User user = getUserById(userId, context);
     if (!user.getRootOrgId().equalsIgnoreCase(uploader.getRootOrgId())) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
