@@ -175,7 +175,6 @@ public class UserTnCActorTest {
     if (lastAcceptedVersion != null) {
       user.put(JsonKey.TNC_ACCEPTED_VERSION, lastAcceptedVersion);
     }
-
     return user;
   }
 }
