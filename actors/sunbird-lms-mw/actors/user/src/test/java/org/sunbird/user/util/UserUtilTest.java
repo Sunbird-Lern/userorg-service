@@ -49,7 +49,8 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  UserLookUp.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -88,7 +89,10 @@ public class UserUtilTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-
+    PowerMockito.when(
+            cassandraOperationImpl.deleteRecord(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
     PowerMockito.mockStatic(Util.class);
   }
 
