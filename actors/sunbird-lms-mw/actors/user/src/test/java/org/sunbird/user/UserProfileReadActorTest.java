@@ -27,6 +27,7 @@ import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -57,6 +58,7 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SSOServiceFactory.class,
   ElasticSearchRestHighImpl.class,
+  ElasticSearchHelper.class,
   EsClientFactory.class,
   Util.class,
   RequestRouter.class,
@@ -429,6 +431,10 @@ public class UserProfileReadActorTest {
         .thenReturn(getUserDeclarationResponse(true));
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
     setCassandraResponse(getCassandraResponse(false));
+    PowerMockito.mockStatic(ElasticSearchHelper.class);
+    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(req);
+    PowerMockito.mockStatic(UserUtil.class);
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.any())).thenReturn(new ArrayList<>());
     boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
     assertTrue(result);
   }
