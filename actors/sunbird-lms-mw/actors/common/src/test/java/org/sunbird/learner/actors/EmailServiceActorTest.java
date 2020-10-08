@@ -104,6 +104,10 @@ public class EmailServiceActorTest {
             Mockito.any()))
         .thenReturn(cassandraGetRecordById());
 
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(cassandraGetRecordById());
+
     emailTemplateDao = mock(EmailTemplateDaoImpl.class);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
     when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
@@ -145,6 +149,9 @@ public class EmailServiceActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ID, "anyId");
     map.put(JsonKey.EMAIL, "anyEmailId");
+    map.put(JsonKey.ROOT_ORG_ID, "1234567890");
+    map.put(JsonKey.FIRST_NAME, "firstName");
+    map.put(JsonKey.ORG_NAME, "orgName");
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -183,6 +190,27 @@ public class EmailServiceActorTest {
     innerMap.put(JsonKey.EMAIL_REQUEST, pageMap);
     innerMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     innerMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
+    reqObj.setRequest(innerMap);
+    subject.tell(reqObj, probe.getRef());
+    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    assertTrue(response != null);
+  }
+
+  @Test
+  public void testEmailSuccess() {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(BackgroundOperations.emailService.name());
+
+    Map<String, Object> innerMap = new HashMap<>();
+    Map<String, Object> pageMap = new HashMap<String, Object>();
+    List<String> userIdList = new ArrayList<>();
+    userIdList.add("001");
+    innerMap.put(JsonKey.EMAIL_REQUEST, pageMap);
+    pageMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
+    pageMap.put(JsonKey.FIRST_NAME, "Name");
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);

@@ -1,18 +1,19 @@
 package org.sunbird.user.actors;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import akka.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -22,6 +23,7 @@ import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 @ActorConfig(
   tasks = {"saveUserAttributes"},
@@ -29,9 +31,6 @@ import scala.concurrent.Future;
   dispatcher = "most-used-two-dispatcher"
 )
 public class UserProfileUpdateActor extends BaseActor {
-
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -163,7 +162,9 @@ public class UserProfileUpdateActor extends BaseActor {
       request.setRequestContext(context);
       request.getRequest().putAll(userMap);
       request.setOperation(actorOperation);
-      return interServiceCommunication.getFuture(getActorRef(actorOperation), request);
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      ActorRef actorRef = getActorRef(actorOperation);
+      return Patterns.ask(actorRef, request, t);
     } catch (Exception ex) {
       logger.error(
           context,
