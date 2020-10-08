@@ -190,7 +190,6 @@ public class UserRoleActor extends UserBaseActor {
       logger.info(context, "UserRoleActor: syncUserRoles called");
       Map<String, Object> searchMap = new LinkedHashMap<>(2);
       searchMap.put(JsonKey.USER_ID, userId);
-      searchMap.put(JsonKey.ORGANISATION_ID, orgId);
       Response res =
           cassandraOperation.getRecordsByCompositeKey(
               JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
