@@ -267,8 +267,6 @@ public final class JsonKey {
   public static final String PASSWORD = "password";
   public static final String PDATA = "pdata";
 
-  public static final String PERCENTAGE = "percentage";
-  public static final String PERIOD = "period";
   public static final String PHONE = "phone";
   public static final String PHONE_UNIQUE = "phoneUnique";
   public static final String PHONE_VERIFIED = "phoneVerified";
@@ -288,7 +286,6 @@ public final class JsonKey {
   public static final String PUBLIC = "public";
   public static final String QUERY = "query";
   public static final String QUERY_FIELDS = "queryFields";
-  public static final String RECEIVER_ID = "receiverId";
   public static final String RECIPIENT_EMAILS = "recipientEmails";
   public static final String RECIPIENT_USERIDS = "recipientUserIds";
   public static final String REGISTERED_ORG = "registeredOrg";
@@ -300,7 +297,6 @@ public final class JsonKey {
   public static final String REQUEST_TYPE = "requestType";
   public static final String REQUESTED_BY = "requestedBy";
   public static final String RES_MSG_ID = "resmsgId";
-  public static final String RESOURCE_ID = "resourceId";
   public static final String RESPONSE = "response";
   public static final String RESULT = "result";
   public static final String RETRY_COUNT = "retryCount";
@@ -312,16 +308,13 @@ public final class JsonKey {
   public static final String ROOT_ORG_ID = "rootOrgId";
   public static final String SEARCH = "search";
   public static final String SEARCH_TOP_N = "searchTopN";
-  public static final String SERIES = "series";
   public static final String SIZE = "size";
-  public static final String SKILLS = "skills";
   public static final String SKILLS_LIST_DB = "skillsListDb";
   public static final String SLUG = "slug";
   public static final String SNAPSHOT = "snapshot";
   public static final String SORT = "sort";
   public static final String SORT_BY = "sort_by";
   public static final String SOURCE = "source";
-  public static final String SPLIT = "split";
   public static final String SSO_CLIENT_ID = "sso.client.id";
   public static final String SSO_CLIENT_SECRET = "sso.client.secret";
   public static final String SSO_PASSWORD = "sso.password";
@@ -338,7 +331,6 @@ public final class JsonKey {
   public static final String SUBJECT = "subject";
   public static final String SUCCESS = "SUCCESS";
   public static final String SUCCESS_RESULT = "successResult";
-  public static final String SUMMARY = "summary";
   public static final String SUNBIRD = "sunbird";
   public static final String SUNBIRD_ALLOWED_LOGIN = "sunbird_allowed_login";
   public static final String SUNBIRD_API_BASE_URL = "sunbird_api_base_url";
@@ -367,7 +359,6 @@ public final class JsonKey {
   public static final String SUNBIRD_USERNAME_NUM_DIGITS = "sunbird_username_num_digits";
   public static final String SYSTEM = "system";
   public static final String SYSTEM_SETTINGS_DB = "system_settings";
-  public static final String TAG = "tag";
   public static final String TAGS = "tags";
   public static final String TARGET_OBJECT = "targetObject";
   public static final String TELEMETRY_EVENT_TYPE = "telemetryEventType";
@@ -377,14 +368,12 @@ public final class JsonKey {
   public static final String TERM_AND_CONDITION_STATUS = "tcStatus";
   public static final String TERMS = "terms";
   public static final String THEME = "theme";
-  public static final String TIME_UNIT = "time_unit";
   public static final String TITLE = "title";
   public static final String TO = "to";
   public static final String TOKEN = "token";
   public static final String TOPIC = "topic";
   public static final String TOPICS = "topics";
   public static final String TOPN = "topn";
-  public static final String TRY_COUNT = "tryCount";
   public static final String TYPE = "type";
   public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
   public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
@@ -401,7 +390,6 @@ public final class JsonKey {
   public static final String USER_AUTH_DB = "userAuth_db";
   public static final String USER_COUNT = "userCount";
   public static final String USER_COUNT_TTL = "userCountTTL";
-  public static final String USER_COURSE = "user_course";
   public static final String USER_DB = "user_db";
   public static final String USER_ID = "userId";
   public static final String USER_IDs = "userIds";
@@ -477,9 +465,6 @@ public final class JsonKey {
   public static final String USER_PROFILE_CONFIG = "userProfileConfig";
   public static final String PUBLIC_FIELDS = "publicFields";
   public static final String PRIVATE_FIELDS = "privateFields";
-  public static final String SUNBIRD_USER_PROFILE_FIELD_DEFAULT_VISIBILITY =
-      "sunbird_user_profile_field_default_visibility";
-  public static final String DEFAULT_PROFILE_FIELD_VISIBILITY = "defaultProfileFieldVisibility";
   public static final String BATCH_START_DATE = "batchStartDate";
   public static final String BATCH_END_DATE = "batchEndDate";
   public static final String BATCH_NAME = "batchName";
@@ -527,9 +512,6 @@ public final class JsonKey {
   public static final String USER_PROVIDER = "userProvider";
   public static final String SORTBY = "sortBy";
   public static final String TERM = "term";
-  public static final String COURSE_PROGRESS_MAIL_TEMPLATE = "courseProgressMailTemplate";
-  public static final String SUNBIRD_TIMEZONE = "sunbird_time_zone";
-  public static final String COURSE_STAT_MAIL_DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
   public static final String SUNBIRD_KEYCLOAK_USER_FEDERATION_PROVIDER_ID =
       "sunbird_keycloak_user_federation_provider_id";
   public static final String DEVICE_ID = "did";
@@ -637,8 +619,6 @@ public final class JsonKey {
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
   public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
-  public static final String ACCESS_TOKEN_PUBLICKEY_KEYPREFIX = "accesstoken.publickey.keyprefix";
-  public static final String ACCESS_TOKEN_PUBLICKEY_KEYCOUNT = "accesstoken.publickey.keycount";
   public static final String SHA_256_WITH_RSA = "SHA256withRSA";
   public static final String SUB = "sub";
   public static final String DOT_SEPARATOR = ".";
@@ -692,14 +672,14 @@ public final class JsonKey {
   public static final String CONSENT_BODY = "consent";
   public static final String CONSENT_RESPONSE = "consents";
   public static final String CONSENT_SUCCESS_MESSAGE = "User Consent updated successfully.";
-  //user consent req-response attributes listing - started
+  // user consent req-response attributes listing - started
   public static final String CONSENT_CONSUMERID = "consumerId";
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
   public static final String CONSENTDATA = "consentData";
-  //user consent req-response attributes listing - ended
-  //user consent table columns listing - started
+  // user consent req-response attributes listing - ended
+  // user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
   public static final String CONSENT_OBJECT_ID = "object_id";
   public static final String CONSENT_USER_ID = "user_id";
@@ -708,6 +688,6 @@ public final class JsonKey {
   public static final String CONSENT_LAST_UPDATED_ON = "last_updated_on";
   public static final String CONSENT_CREATED_ON = "created_on";
   public static final String CONSENT_DATA = "consent_data";
-  //user consent table columns listing - ended
+  // user consent table columns listing - ended
   private JsonKey() {}
 }

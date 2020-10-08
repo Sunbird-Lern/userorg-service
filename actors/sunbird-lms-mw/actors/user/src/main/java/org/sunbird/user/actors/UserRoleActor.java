@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
@@ -31,6 +33,7 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 public class UserRoleActor extends UserBaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
@@ -107,12 +110,7 @@ public class UserRoleActor extends UserBaseActor {
     Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(
-          requestMap,
-          JsonKey.ORGANISATION,
-          userId,
-          organisationId,
-          actorMessage.getRequestContext());
+      syncUserRoles(userId, organisationId, actorMessage.getRequestContext());
     } else {
       logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
     }
@@ -187,24 +185,20 @@ public class UserRoleActor extends UserBaseActor {
     return userOrg;
   }
 
-  private void syncUserRoles(
-      Map<String, Object> tempMap,
-      String type,
-      String userid,
-      String orgId,
-      RequestContext context) {
-    logger.info(context, "UserRoleActor: syncUserRoles called");
-
-    Request request = new Request();
-    request.setRequestContext(context);
-    request.setOperation(ActorOperations.UPDATE_USER_ROLES_ES.getValue());
-    request.getRequest().put(JsonKey.ROLES, tempMap.get(JsonKey.ROLES));
-    request.getRequest().put(JsonKey.TYPE, type);
-    request.getRequest().put(JsonKey.USER_ID, userid);
-    request.getRequest().put(JsonKey.ORGANISATION_ID, orgId);
-    logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
+  private void syncUserRoles(String userId, String orgId, RequestContext context) {
     try {
-      tellToAnother(request);
+      logger.info(context, "UserRoleActor: syncUserRoles called");
+      Map<String, Object> searchMap = new LinkedHashMap<>(2);
+      searchMap.put(JsonKey.USER_ID, userId);
+      searchMap.put(JsonKey.ORGANISATION_ID, orgId);
+      Response res =
+          cassandraOperation.getRecordsByCompositeKey(
+              JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
+      List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+      Map<String, Object> userMap = new HashMap<>();
+      userMap.put(JsonKey.ORGANISATIONS, dataList);
+      esService.update(ProjectUtil.EsType.user.getTypeName(), userId, userMap, context);
+      logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     } catch (Exception ex) {
       logger.error(
           context,
