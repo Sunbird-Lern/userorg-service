@@ -1,6 +1,6 @@
 package org.sunbird.learner.organisation.external.identity.service;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
@@ -18,9 +18,9 @@ public class OrgExternalService {
 
   public String getOrgIdFromOrgExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
-    Map<String, Object> dbRequestMap = new HashMap<>();
-    dbRequestMap.put(JsonKey.EXTERNAL_ID, externalId.toLowerCase());
+    Map<String, Object> dbRequestMap = new LinkedHashMap<>(3);
     dbRequestMap.put(JsonKey.PROVIDER, provider.toLowerCase());
+    dbRequestMap.put(JsonKey.EXTERNAL_ID, externalId.toLowerCase());
     Response response =
         getCassandraOperation()
             .getRecordsByCompositeKey(KEYSPACE_NAME, ORG_EXTERNAL_IDENTITY, dbRequestMap, context);

@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -23,7 +22,6 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
 import org.sunbird.user.util.UserLookUp;
-import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"freeUpUserIdentity"},
@@ -83,23 +81,23 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private void nullifyEmail(Map<String, Object> userDbMap) {
-    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.EMAIL))) {
-      userDbMap.replace(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
-      userDbMap.replace(JsonKey.EMAIL, null);
-      userDbMap.replace(JsonKey.MASKED_EMAIL, null);
-      userDbMap.replace(JsonKey.EMAIL_VERIFIED, false);
+    if (StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
+      userDbMap.put(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
+      userDbMap.put(JsonKey.EMAIL, null);
+      userDbMap.put(JsonKey.MASKED_EMAIL, null);
+      userDbMap.put(JsonKey.EMAIL_VERIFIED, false);
       userDbMap.put(
           JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.EMAIL_VERIFIED, userDbMap));
     }
   }
 
   private void nullifyPhone(Map<String, Object> userDbMap) {
-    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.PHONE))) {
-      userDbMap.replace(JsonKey.PREV_USED_PHONE, userDbMap.get(JsonKey.PHONE));
-      userDbMap.replace(JsonKey.PHONE, null);
-      userDbMap.replace(JsonKey.MASKED_PHONE, null);
-      userDbMap.replace(JsonKey.PHONE_VERIFIED, false);
-      userDbMap.replace(JsonKey.COUNTRY_CODE, null);
+    if (StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
+      userDbMap.put(JsonKey.PREV_USED_PHONE, userDbMap.get(JsonKey.PHONE));
+      userDbMap.put(JsonKey.PHONE, null);
+      userDbMap.put(JsonKey.MASKED_PHONE, null);
+      userDbMap.put(JsonKey.PHONE_VERIFIED, false);
+      userDbMap.put(JsonKey.COUNTRY_CODE, null);
       userDbMap.put(
           JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.PHONE_VERIFIED, userDbMap));
     }
@@ -126,11 +124,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     Map<String, Object> userLookUpData = new HashMap<>(userDbMap);
     Response response = processUserAttribute(userDbMap, identifiers, context);
     removeEntryFromUserLookUp(userLookUpData, identifiers, context);
-    boolean esResponse = saveUserDetailsToEs(userDbMap, context);
-    logger.info(
-        context,
-        "IdentifierFreeUpActor:freeUpUserIdentifier response got from ES for identifier freeup api :"
-            + esResponse);
+    saveUserDetailsToEs(userDbMap, context);
     sender().tell(response, self());
     logger.info(
         context,
@@ -173,19 +167,13 @@ public class IdentifierFreeUpActor extends BaseActor {
     }
   }
 
-  private boolean saveUserDetailsToEs(Map<String, Object> userDbMap, RequestContext context) {
-    Future<Boolean> future =
-        getEsUtil()
-            .update(
-                ProjectUtil.EsType.user.getTypeName(),
-                (String) userDbMap.get(JsonKey.ID),
-                userDbMap,
-                context);
-    return (boolean) ElasticSearchHelper.getResponseFromFuture(future);
-  }
-
-  private boolean isNullifyOperationValid(String identifier) {
-    return StringUtils.isNotBlank(identifier);
+  private void saveUserDetailsToEs(Map<String, Object> userDbMap, RequestContext context) {
+    getEsUtil()
+        .update(
+            ProjectUtil.EsType.user.getTypeName(),
+            (String) userDbMap.get(JsonKey.ID),
+            userDbMap,
+            context);
   }
 
   private CassandraOperation getCassandraOperation() {
