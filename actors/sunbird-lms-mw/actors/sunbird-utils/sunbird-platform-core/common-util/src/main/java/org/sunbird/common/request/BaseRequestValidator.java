@@ -495,4 +495,11 @@ public class BaseRequestValidator {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
+
+  public static void createClientError(ResponseCode responseCode, String field) {
+    throw new ProjectCommonException(
+        responseCode.getErrorCode(),
+        ProjectUtil.formatMessage(responseCode.getErrorMessage(), field),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
 }

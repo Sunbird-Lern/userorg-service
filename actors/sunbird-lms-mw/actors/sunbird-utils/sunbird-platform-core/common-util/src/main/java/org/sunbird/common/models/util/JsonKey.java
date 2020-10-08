@@ -636,7 +636,6 @@ public final class JsonKey {
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
-  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
   public static final String ACCESS_TOKEN_PUBLICKEY_KEYPREFIX = "accesstoken.publickey.keyprefix";
   public static final String ACCESS_TOKEN_PUBLICKEY_KEYCOUNT = "accesstoken.publickey.keycount";
   public static final String SHA_256_WITH_RSA = "SHA256withRSA";
@@ -692,14 +691,14 @@ public final class JsonKey {
   public static final String CONSENT_BODY = "consent";
   public static final String CONSENT_RESPONSE = "consents";
   public static final String CONSENT_SUCCESS_MESSAGE = "User Consent updated successfully.";
-  //user consent req-response attributes listing - started
+  // user consent req-response attributes listing - started
   public static final String CONSENT_CONSUMERID = "consumerId";
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
   public static final String CONSENTDATA = "consentData";
-  //user consent req-response attributes listing - ended
-  //user consent table columns listing - started
+  // user consent req-response attributes listing - ended
+  // user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
   public static final String CONSENT_OBJECT_ID = "object_id";
   public static final String CONSENT_USER_ID = "user_id";
@@ -708,6 +707,8 @@ public final class JsonKey {
   public static final String CONSENT_LAST_UPDATED_ON = "last_updated_on";
   public static final String CONSENT_CREATED_ON = "created_on";
   public static final String CONSENT_DATA = "consent_data";
-  //user consent table columns listing - ended
+  public static final String PRIORITY = "priority";
+
+  // user consent table columns listing - ended
   private JsonKey() {}
 }

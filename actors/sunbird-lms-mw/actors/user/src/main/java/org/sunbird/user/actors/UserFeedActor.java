@@ -1,5 +1,6 @@
 package org.sunbird.user.actors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +14,17 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.Feed;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
-  tasks = {"getUserFeedById"},
+  tasks = {"getUserFeedById", "createUserFeed"},
   asyncTasks = {}
 )
 public class UserFeedActor extends BaseActor {
+
+  IFeedService feedService = FeedFactory.getInstance();
+  ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -30,13 +35,21 @@ public class UserFeedActor extends BaseActor {
       logger.info(context, "UserFeedActor:onReceive getUserFeed method called");
       String userId = (String) request.getRequest().get(JsonKey.USER_ID);
       getUserFeed(userId, context);
+    } else if (ActorOperations.CREATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
+      logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
+      createUserFeed(request, context);
     } else {
       onReceiveUnsupportedOperation("UserFeedActor");
     }
   }
 
+  private void createUserFeed(Request request, RequestContext context) {
+    Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
+    Response feedCreateResponse = feedService.insert(feed, context);
+    sender().tell(feedCreateResponse, self());
+  }
+
   private void getUserFeed(String userId, RequestContext context) {
-    IFeedService feedService = FeedFactory.getInstance();
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.USER_ID, userId);
     SearchDTO search = new SearchDTO();
