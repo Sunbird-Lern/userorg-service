@@ -94,7 +94,7 @@ public class UserExternalIdentityServiceTest {
     Map<String, Object> userList = new HashMap<>();
     userList.put(JsonKey.USER_ID, "1234");
     userList.put(JsonKey.PERSONA, "Teacher");
-    userList.put(JsonKey.STATUS, "PENDING");
+    userList.put(JsonKey.STATUS, "SUBMITTED");
     Map userInfo = new HashMap();
     userInfo.put(JsonKey.DECLARED_EMAIL, "demo@gmail.com");
     userList.put(JsonKey.USER_INFO, userInfo);
