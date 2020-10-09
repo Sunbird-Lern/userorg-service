@@ -106,7 +106,7 @@ public class BackgroundJobManager extends BaseActor {
     updateDataToElastic(
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.IDENTIFIER),
+        (String) result.get(JsonKey.USER_ID),
         result,
         actorMessage.getRequestContext());
   }
