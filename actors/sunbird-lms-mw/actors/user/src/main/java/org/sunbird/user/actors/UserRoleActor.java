@@ -110,7 +110,7 @@ public class UserRoleActor extends UserBaseActor {
     Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(userId, organisationId, actorMessage.getRequestContext());
+      syncUserRoles(JsonKey.ORGANISATION, userId, actorMessage.getRequestContext());
     } else {
       logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
     }
@@ -185,19 +185,15 @@ public class UserRoleActor extends UserBaseActor {
     return userOrg;
   }
 
-  private void syncUserRoles(String userId, String orgId, RequestContext context) {
+  private void syncUserRoles(String type, String userId, RequestContext context) {
+    Request request = new Request();
+    request.setRequestContext(context);
+    request.setOperation(ActorOperations.UPDATE_USER_ROLES_ES.getValue());
+    request.getRequest().put(JsonKey.TYPE, type);
+    request.getRequest().put(JsonKey.USER_ID, userId);
+    logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     try {
-      logger.info(context, "UserRoleActor: syncUserRoles called");
-      Map<String, Object> searchMap = new LinkedHashMap<>(2);
-      searchMap.put(JsonKey.USER_ID, userId);
-      Response res =
-          cassandraOperation.getRecordsByCompositeKey(
-              JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
-      List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-      Map<String, Object> userMap = new HashMap<>();
-      userMap.put(JsonKey.ORGANISATIONS, dataList);
-      esService.update(ProjectUtil.EsType.user.getTypeName(), userId, userMap, context);
-      logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
+      tellToAnother(request);
     } catch (Exception ex) {
       logger.error(
           context,
