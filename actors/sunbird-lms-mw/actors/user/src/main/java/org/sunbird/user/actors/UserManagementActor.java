@@ -73,7 +73,7 @@ import scala.concurrent.duration.Duration;
     "updateUserDeclarations"
   },
   asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
+  dispatcher = "most-used-one-dispatcher"
 )
 public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();

@@ -27,7 +27,8 @@ import org.sunbird.user.util.UserLookUp;
 
 @ActorConfig(
   tasks = {"freeUpUserIdentity"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 
 /**

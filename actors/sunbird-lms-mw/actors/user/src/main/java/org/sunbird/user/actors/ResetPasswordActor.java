@@ -22,7 +22,8 @@ import org.sunbird.user.dao.impl.UserDaoImpl;
 /** This actor process the request for reset password. */
 @ActorConfig(
   tasks = {"resetPassword"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-one-dispatcher"
 )
 public class ResetPasswordActor extends BaseActor {
 

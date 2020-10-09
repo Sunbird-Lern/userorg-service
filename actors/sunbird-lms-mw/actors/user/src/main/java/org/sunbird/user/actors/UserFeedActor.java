@@ -17,7 +17,8 @@ import org.sunbird.learner.util.Util;
 /** This class contains API related to user feed. */
 @ActorConfig(
   tasks = {"getUserFeedById"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserFeedActor extends BaseActor {
 
