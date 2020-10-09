@@ -27,7 +27,8 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 
 @ActorConfig(
   tasks = {"userTnCAccept"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserTnCActor extends BaseActor {
 

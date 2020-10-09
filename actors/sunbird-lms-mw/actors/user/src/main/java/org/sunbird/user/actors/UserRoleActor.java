@@ -28,7 +28,8 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserRoleActor extends UserBaseActor {
 
