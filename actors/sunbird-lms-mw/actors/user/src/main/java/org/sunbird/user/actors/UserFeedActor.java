@@ -18,7 +18,7 @@ import org.sunbird.models.user.Feed;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
-  tasks = {"getUserFeedById", "createUserFeed"},
+  tasks = {"getUserFeedById", "createUserFeed", "updateUserFeed"},
   asyncTasks = {}
 )
 public class UserFeedActor extends BaseActor {
@@ -38,9 +38,18 @@ public class UserFeedActor extends BaseActor {
     } else if (ActorOperations.CREATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
       logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
       createUserFeed(request, context);
+    } else if (ActorOperations.UPDATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
+      logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
+      updateUserFeed(request, context);
     } else {
       onReceiveUnsupportedOperation("UserFeedActor");
     }
+  }
+
+  private void updateUserFeed(Request request, RequestContext context) {
+    Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
+    Response feedUpdateResponse = feedService.update(feed, context);
+    sender().tell(feedUpdateResponse, self());
   }
 
   private void createUserFeed(Request request, RequestContext context) {

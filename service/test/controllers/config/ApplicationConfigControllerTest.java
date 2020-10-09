@@ -4,10 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import java.io.IOException;
 import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.Before;
@@ -21,7 +19,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
@@ -70,16 +67,5 @@ public class ApplicationConfigControllerTest extends BaseApplicationTest {
       Result result = Helpers.route(application, req);
       assertEquals(400, result.status());
     }
-  }
-
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 }

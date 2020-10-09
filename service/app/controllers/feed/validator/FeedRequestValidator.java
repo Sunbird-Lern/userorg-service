@@ -29,4 +29,20 @@ public class FeedRequestValidator extends BaseRequestValidator {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.PRIORITY);
     }
   }
+
+  public static void validateFeedUpdateRequest(Request request) {
+    Map<String, Object> feedReq = request.getRequest();
+    if (StringUtils.isBlank((String) feedReq.get(JsonKey.USER_ID))) {
+      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
+    }
+    if (StringUtils.isBlank((String) feedReq.get(JsonKey.CATEGORY))) {
+      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.CATEGORY);
+    }
+    if (StringUtils.isBlank((String) feedReq.get(JsonKey.STATUS))) {
+      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.STATUS);
+    }
+    if (StringUtils.isBlank((String) feedReq.get(JsonKey.FEED_ID))) {
+      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.FEED_ID);
+    }
+  }
 }

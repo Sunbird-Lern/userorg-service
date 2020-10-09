@@ -43,4 +43,19 @@ public class FeedController extends BaseController {
         true,
         httpRequest);
   }
+
+  public CompletionStage<Result> updateUserFeed(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_FEED.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          FeedRequestValidator.validateFeedUpdateRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 }
