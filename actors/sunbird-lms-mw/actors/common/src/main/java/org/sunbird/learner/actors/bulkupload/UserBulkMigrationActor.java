@@ -298,7 +298,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
     List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders);
     List<SelfDeclaredUser> selfDeclaredUserList =
-        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
+        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders, csvHeaders.size());
     ShadowUserUpload migration =
         new ShadowUserUpload.ShadowUserUploadBuilder()
             .setHeaders(csvHeaders)
@@ -447,7 +447,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> parseSelfDeclaredCsvRows(
-      List<String[]> values, List<String> mappedHeaders) {
+      List<String[]> values, List<String> mappedHeaders, int csvHeaderSize) {
     List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
     values
         .stream()
@@ -456,7 +456,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               int index = values.indexOf(row);
               SelfDeclaredUser selfDeclaredUser = new SelfDeclaredUser();
               for (int i = 0; i < row.length; i++) {
-                if (row.length > mappedHeaders.size()) {
+                if (row.length > csvHeaderSize) {
                   throw new ProjectCommonException(
                       ResponseCode.errorUnsupportedField.getErrorCode(),
                       ResponseCode.errorUnsupportedField.getErrorMessage(),
