@@ -83,13 +83,15 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private void nullifyEmail(Map<String, Object> userDbMap) {
-    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.EMAIL))) {
+    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.EMAIL)) && (boolean) userDbMap.get(JsonKey.PHONE_VERIFIED)) {
       userDbMap.replace(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
       userDbMap.replace(JsonKey.EMAIL, null);
       userDbMap.replace(JsonKey.MASKED_EMAIL, null);
-      userDbMap.replace(JsonKey.EMAIL_VERIFIED, false);
-      userDbMap.put(
-          JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.EMAIL_VERIFIED, userDbMap));
+      if((boolean) userDbMap.get(JsonKey.EMAIL_VERIFIED)) {
+        userDbMap.replace(JsonKey.EMAIL_VERIFIED, false);
+        userDbMap.put(
+                JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.EMAIL_VERIFIED, userDbMap));
+      }
     }
   }
 
@@ -98,10 +100,12 @@ public class IdentifierFreeUpActor extends BaseActor {
       userDbMap.replace(JsonKey.PREV_USED_PHONE, userDbMap.get(JsonKey.PHONE));
       userDbMap.replace(JsonKey.PHONE, null);
       userDbMap.replace(JsonKey.MASKED_PHONE, null);
-      userDbMap.replace(JsonKey.PHONE_VERIFIED, false);
       userDbMap.replace(JsonKey.COUNTRY_CODE, null);
-      userDbMap.put(
-          JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.PHONE_VERIFIED, userDbMap));
+      if((boolean) userDbMap.get(JsonKey.PHONE_VERIFIED)) {
+        userDbMap.replace(JsonKey.PHONE_VERIFIED, false);
+        userDbMap.put(
+                JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.PHONE_VERIFIED, userDbMap));
+      }
     }
   }
 
