@@ -298,7 +298,7 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
     checkCsvHeader(csvHeaders, mandatoryHeaders, supportedHeaders);
     List<String> mappedCsvHeaders = mapSelfDeclaredCsvColumn(csvHeaders);
     List<SelfDeclaredUser> selfDeclaredUserList =
-        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders, csvHeaders.size());
+        parseSelfDeclaredCsvRows(getCsvRowsAsList(csvData), mappedCsvHeaders);
     ShadowUserUpload migration =
         new ShadowUserUpload.ShadowUserUploadBuilder()
             .setHeaders(csvHeaders)
@@ -413,6 +413,16 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
               break;
             case "error type":
               mappedColumns.add(JsonKey.ERROR_TYPE);
+              break;
+            case "state":
+              mappedColumns.add(JsonKey.STATE);
+              break;
+            case "district":
+              mappedColumns.add("district");
+              break;
+            case "name":
+              mappedColumns.add(JsonKey.NAME);
+              break;
             default:
           }
         });
@@ -447,24 +457,28 @@ public class UserBulkMigrationActor extends BaseBulkUploadActor {
   }
 
   private List<SelfDeclaredUser> parseSelfDeclaredCsvRows(
-      List<String[]> values, List<String> mappedHeaders, int csvHeaderSize) {
+      List<String[]> values, List<String> mappedHeaders) {
     List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    List<String> skipColumns =
+        new ArrayList<>(Arrays.asList(JsonKey.NAME, JsonKey.STATE, "district"));
     values
         .stream()
         .forEach(
             row -> {
               int index = values.indexOf(row);
+              if (row.length > mappedHeaders.size()) {
+                throw new ProjectCommonException(
+                    ResponseCode.errorUnsupportedField.getErrorCode(),
+                    ResponseCode.errorUnsupportedField.getErrorMessage(),
+                    ResponseCode.CLIENT_ERROR.getResponseCode(),
+                    "Invalid provided ROW:" + (index + 1));
+              }
               SelfDeclaredUser selfDeclaredUser = new SelfDeclaredUser();
               for (int i = 0; i < row.length; i++) {
-                if (row.length > csvHeaderSize) {
-                  throw new ProjectCommonException(
-                      ResponseCode.errorUnsupportedField.getErrorCode(),
-                      ResponseCode.errorUnsupportedField.getErrorMessage(),
-                      ResponseCode.CLIENT_ERROR.getResponseCode(),
-                      "Invalid provided ROW:" + (index + 1));
-                }
                 String columnName = getColumnNameByIndex(mappedHeaders, i);
-                setFieldToDeclaredUserObject(selfDeclaredUser, columnName, trimValue(row[i]));
+                if (!skipColumns.contains(columnName)) {
+                  setFieldToDeclaredUserObject(selfDeclaredUser, columnName, trimValue(row[i]));
+                }
               }
               declaredUserList.add(selfDeclaredUser);
             });
