@@ -83,7 +83,7 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private void nullifyEmail(Map<String, Object> userDbMap) {
-    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.EMAIL)) && (boolean) userDbMap.get(JsonKey.PHONE_VERIFIED)) {
+    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.EMAIL)) && (boolean) userDbMap.get(JsonKey.EMAIL_VERIFIED)) {
       userDbMap.replace(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
       userDbMap.replace(JsonKey.EMAIL, null);
       userDbMap.replace(JsonKey.MASKED_EMAIL, null);
@@ -96,7 +96,7 @@ public class IdentifierFreeUpActor extends BaseActor {
   }
 
   private void nullifyPhone(Map<String, Object> userDbMap) {
-    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.PHONE))) {
+    if (isNullifyOperationValid((String) userDbMap.get(JsonKey.PHONE)) && (boolean) userDbMap.get(JsonKey.PHONE_VERIFIED)) {
       userDbMap.replace(JsonKey.PREV_USED_PHONE, userDbMap.get(JsonKey.PHONE));
       userDbMap.replace(JsonKey.PHONE, null);
       userDbMap.replace(JsonKey.MASKED_PHONE, null);
