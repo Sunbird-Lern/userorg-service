@@ -1,16 +1,18 @@
 package org.sunbird.actorutil.org.impl;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -23,7 +25,9 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.models.organisation.Organisation;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class OrganisationClientImpl implements OrganisationClient {
 
@@ -41,8 +45,6 @@ public class OrganisationClientImpl implements OrganisationClient {
     return organisationClient;
   }
 
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   ObjectMapper objectMapper = new ObjectMapper();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -67,20 +69,27 @@ public class OrganisationClientImpl implements OrganisationClient {
     request.setRequest(orgMap);
     request.setOperation(operation);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      Object obj = Await.result(future, t.duration());
 
-    if (obj instanceof Response) {
-      Response response = (Response) obj;
-      orgId = (String) response.get(JsonKey.ORGANISATION_ID);
-    } else if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      if (obj instanceof Response) {
+        Response response = (Response) obj;
+        orgId = (String) response.get(JsonKey.ORGANISATION_ID);
+      } else if (obj instanceof ProjectCommonException) {
+        throw (ProjectCommonException) obj;
+      } else if (obj instanceof Exception) {
+        throw new ProjectCommonException(
+            ResponseCode.SERVER_ERROR.getErrorCode(),
+            ResponseCode.SERVER_ERROR.getErrorMessage(),
+            ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+    } catch (Exception e) {
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
-
     return orgId;
   }
 
@@ -96,26 +105,33 @@ public class OrganisationClientImpl implements OrganisationClient {
     request.setRequest(requestMap);
     request.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
 
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      Object obj = Await.result(future, t.duration());
 
-    if (obj instanceof Response) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      Response response = (Response) obj;
+      if (obj instanceof Response) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Response response = (Response) obj;
 
-      // Convert contact details (received from ES) format from map to
-      // JSON string (as in Cassandra contact details are stored as text)
-      Map<String, Object> map = (Map) response.get(JsonKey.RESPONSE);
-      map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
-      organisation = objectMapper.convertValue(map, Organisation.class);
-    } else if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+        // Convert contact details (received from ES) format from map to
+        // JSON string (as in Cassandra contact details are stored as text)
+        Map<String, Object> map = (Map) response.get(JsonKey.RESPONSE);
+        map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
+        organisation = objectMapper.convertValue(map, Organisation.class);
+      } else if (obj instanceof ProjectCommonException) {
+        throw (ProjectCommonException) obj;
+      } else if (obj instanceof Exception) {
+        throw new ProjectCommonException(
+            ResponseCode.SERVER_ERROR.getErrorCode(),
+            ResponseCode.SERVER_ERROR.getErrorMessage(),
+            ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+    } catch (Exception e) {
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
-
     return organisation;
   }
 

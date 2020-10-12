@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.user.UserClient;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -32,8 +30,6 @@ public class UserClientImpl implements UserClient {
 
   private static LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
 
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
@@ -109,19 +105,29 @@ public class UserClientImpl implements UserClient {
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_USER_UPLOAD);
     request.getContext().put(JsonKey.ROOT_ORG_ID, userMap.get(JsonKey.ROOT_ORG_ID));
     userMap.remove(JsonKey.ROOT_ORG_ID);
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
-    if (obj instanceof Response) {
-      Response response = (Response) obj;
-      userId = (String) response.get(JsonKey.USER_ID);
-    } else if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
 
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      Object obj = Await.result(future, t.duration());
+
+      if (obj instanceof Response) {
+        Response response = (Response) obj;
+        userId = (String) response.get(JsonKey.USER_ID);
+      } else if (obj instanceof ProjectCommonException) {
+        throw (ProjectCommonException) obj;
+      } else if (obj instanceof Exception) {
+        throw new ProjectCommonException(
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+    }catch(Exception e){
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
     return userId;
   }
 
