@@ -1237,7 +1237,7 @@ public class UserManagementActor extends BaseActor {
   public Map<String, Object> setUserFlagValue(
       Map<String, Object> userDbRecord, String flagType, String verifiedFlagType) {
     if (userDbRecord.get(flagType) != null
-        && (userDbRecord.get(verifiedFlagType) == null  //TODO if email or phone verified is null setting it as true, correct or not
+        && (userDbRecord.get(verifiedFlagType) == null
             || (boolean) userDbRecord.get(verifiedFlagType))) {
       userDbRecord.put(verifiedFlagType, true);
     } else {
