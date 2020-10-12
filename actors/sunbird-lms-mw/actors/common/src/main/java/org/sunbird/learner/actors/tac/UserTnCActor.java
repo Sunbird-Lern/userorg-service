@@ -65,23 +65,17 @@ public class UserTnCActor extends BaseActor {
     String tncType = (String) request.getRequest().get(JsonKey.TNC_TYPE);
     String latestTnC = "";
     // if tncType is null , continue to use the same field for user tnc acceptance
-    if (StringUtils.isNotBlank(tncType)) {
-      latestTnC =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              tncType,
-              JsonKey.LATEST_VERSION,
-              new TypeReference<String>() {},
-              context);
-    } else {
-      latestTnC =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              JsonKey.TNC_CONFIG,
-              JsonKey.LATEST_VERSION,
-              new TypeReference<String>() {},
-              context);
+    if (StringUtils.isBlank(tncType)) {
+      tncType = JsonKey.TNC_CONFIG;
     }
+    latestTnC =
+        systemSettingClient.getSystemSettingByFieldAndKey(
+            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+            tncType,
+            JsonKey.LATEST_VERSION,
+            new TypeReference<String>() {},
+            context);
+
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
@@ -121,7 +115,7 @@ public class UserTnCActor extends BaseActor {
     String lastAcceptedVersion = "";
     String tncAcceptedOn = "";
     Map<String, Object> allTncAcceptedMap = new HashMap<>();
-    if (StringUtils.isBlank(tncType)) {
+    if (JsonKey.TNC_CONFIG.equals(tncType)) {
       lastAcceptedVersion = (String) result.get(JsonKey.TNC_ACCEPTED_VERSION);
       tncAcceptedOn = (String) result.get(JsonKey.TNC_ACCEPTED_ON);
     } else {
@@ -150,7 +144,7 @@ public class UserTnCActor extends BaseActor {
               + " for userId:"
               + userId);
       userMap.put(JsonKey.ID, userId);
-      if (StringUtils.isBlank(tncType)) {
+      if (JsonKey.TNC_CONFIG.equals(tncType)) {
         userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
         userMap.put(
             JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
@@ -159,7 +153,7 @@ public class UserTnCActor extends BaseActor {
         tncAcceptedMap.put(JsonKey.VERSION, acceptedTnC);
         tncAcceptedMap.put(JsonKey.TNC_ACCEPTED_ON, ProjectUtil.getFormattedDate());
         allTncAcceptedMap.put(tncType, tncAcceptedMap);
-        userMap.put(JsonKey.ALL_TNC_ACCEPTED, createDBFormatAllTncAccepted(allTncAcceptedMap));
+        userMap.put(JsonKey.ALL_TNC_ACCEPTED, convertTncMapObjectToJsonString(allTncAcceptedMap));
       }
       response =
           cassandraOperation.updateRecord(
@@ -178,7 +172,9 @@ public class UserTnCActor extends BaseActor {
     }
   }
 
-  private Map<String, Object> createDBFormatAllTncAccepted(Map<String, Object> allTncAcceptedMap) {
+  // Convert Acceptance tnc object as a Json String in cassandra table
+  private Map<String, Object> convertTncMapObjectToJsonString(
+      Map<String, Object> allTncAcceptedMap) {
     Map<String, Object> allTncMap = new HashMap<>();
     for (Map.Entry<String, Object> mapItr : allTncAcceptedMap.entrySet()) {
       Map<String, Object> tncMap = (Map<String, Object>) mapItr.getValue();

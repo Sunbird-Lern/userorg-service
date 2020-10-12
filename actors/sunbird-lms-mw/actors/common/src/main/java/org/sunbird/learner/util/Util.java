@@ -724,11 +724,11 @@ public final class Util {
       } else {
         userDetails.put(JsonKey.ROOT_ORG_NAME, "");
       }
-      // store alltncaccepted as Map Object
+      // store alltncaccepted as Map Object in ES
       Map<String, Object> allTncAccepted =
           (Map<String, Object>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
       if (MapUtils.isNotEmpty(allTncAccepted)) {
-        updateAllTncAcceptance(allTncAccepted);
+        convertTncJsonStringToMapObject(allTncAccepted);
       }
       // save masked email and phone number
       addMaskEmailAndPhone(userDetails);
@@ -745,7 +745,8 @@ public final class Util {
     return userDetails;
   }
 
-  private static void updateAllTncAcceptance(Map<String, Object> allTncAccepted) {
+  // Convert Json String tnc format to object to store in Elastic
+  private static void convertTncJsonStringToMapObject(Map<String, Object> allTncAccepted) {
     for (Map.Entry<String, Object> tncAccepted : allTncAccepted.entrySet()) {
       String tncType = tncAccepted.getKey();
       Map<String, String> tncAcceptedDetailMap = new HashMap<>();
