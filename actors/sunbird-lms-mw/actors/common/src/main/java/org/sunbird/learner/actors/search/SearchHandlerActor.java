@@ -77,10 +77,10 @@ public class SearchHandlerActor extends BaseActor {
       throws Exception {
     Map<String, Object> reqMap = request.getRequest();
     String caller = (String) reqMap.remove(JsonKey.CALLER_ID);
-    UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     if (StringUtils.isNotBlank(caller) && "keycloak".equalsIgnoreCase(caller)) {
       handleKeycloakRequest(searchQueryMap, request.getRequestContext());
     } else {
+      UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
       extractOrFilter(searchQueryMap);
       SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
       searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
@@ -127,7 +127,8 @@ public class SearchHandlerActor extends BaseActor {
     }
   }
 
-  private void handleKeycloakRequest(Map<String, Object> searchQueryMap, RequestContext context) {
+  private void handleKeycloakRequest(Map<String, Object> searchQueryMap, RequestContext context)
+      throws Exception {
     Response response = new Response();
     Map<String, String> filters = (Map<String, String>) searchQueryMap.get(JsonKey.FILTERS);
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
@@ -136,6 +137,7 @@ public class SearchHandlerActor extends BaseActor {
       String key = entry.getKey();
       String value = entry.getValue();
       if (JsonKey.ID.equalsIgnoreCase(key)) {
+        value = UserUtility.encryptData(value);
         response =
             cassandraOperation.getPropertiesValueById(
                 usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), value, fields, context);
