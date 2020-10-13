@@ -127,17 +127,15 @@ public class SearchHandlerActor extends BaseActor {
     }
   }
 
-  private void handleKeycloakRequest(Map<String, Object> searchQueryMap, RequestContext context)
-      throws Exception {
+  private void handleKeycloakRequest(Map<String, Object> searchQueryMap, RequestContext context) {
     Response response = new Response();
     Map<String, String> filters = (Map<String, String>) searchQueryMap.get(JsonKey.FILTERS);
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map.Entry<String, String> entry = filters.entrySet().stream().findFirst().orElse(null);
     if (null != entry) {
-      String key = entry.getKey();
+      String key = entry.getKey().toLowerCase();
       String value = entry.getValue();
       if (JsonKey.ID.equalsIgnoreCase(key)) {
-        value = UserUtility.encryptData(value);
         response =
             cassandraOperation.getPropertiesValueById(
                 usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), value, fields, context);
