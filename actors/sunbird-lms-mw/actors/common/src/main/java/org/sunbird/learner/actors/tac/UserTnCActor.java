@@ -85,7 +85,8 @@ public class UserTnCActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(userList)) {
       user = userList.get(0);
       if (MapUtils.isEmpty(user)) {
-        new ProjectCommonException(
+        ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound);
+        throw new ProjectCommonException(
             ResponseCode.userNotFound.getErrorCode(),
             ResponseCode.userNotFound.getErrorMessage(),
             ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
