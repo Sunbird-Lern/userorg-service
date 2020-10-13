@@ -77,10 +77,10 @@ public class SearchHandlerActor extends BaseActor {
       throws Exception {
     Map<String, Object> reqMap = request.getRequest();
     String caller = (String) reqMap.remove(JsonKey.CALLER_ID);
+    UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     if (StringUtils.isNotBlank(caller) && "keycloak".equalsIgnoreCase(caller)) {
       handleKeycloakRequest(searchQueryMap, request.getRequestContext());
     } else {
-      UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
       extractOrFilter(searchQueryMap);
       SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
       searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
