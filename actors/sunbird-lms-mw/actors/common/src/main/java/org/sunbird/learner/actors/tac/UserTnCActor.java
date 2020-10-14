@@ -76,6 +76,7 @@ public class UserTnCActor extends BaseActor {
             new TypeReference<String>() {},
             context);
 
+    logger.info("acceptedTnc :" + acceptedTnC + "and latestTnc:" + latestTnC);
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
