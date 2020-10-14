@@ -10,7 +10,6 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -18,13 +17,11 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
@@ -42,8 +39,7 @@ import scala.concurrent.Future;
   dispatcher = "most-used-one-dispatcher"
 )
 public class SearchHandlerActor extends BaseActor {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
+
   private OrganisationClient orgClient = new OrganisationClientImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -75,111 +71,50 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    Map<String, Object> reqMap = request.getRequest();
-    String caller = (String) reqMap.remove(JsonKey.CALLER_ID);
-    if (StringUtils.isNotBlank(caller) && "keycloak".equalsIgnoreCase(caller)) {
-      handleKeycloakRequest(searchQueryMap, request.getRequestContext());
-    } else {
-      UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
-      extractOrFilter(searchQueryMap);
-      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-      searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
-      Future<Map<String, Object>> resultF =
-          esService.search(searchDto, filterObjectType, request.getRequestContext());
-      Map<String, Object> result =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-      Response response = new Response();
-      // this fuzzy search Logic
-      if (((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).size() != 0
-          && isFuzzySearchRequired(searchQueryMap)) {
-        List<Map<String, Object>> responseList =
-            getResponseOnFuzzyRequest(
-                getFuzzyFilterMap(searchQueryMap),
-                (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
-        if (responseList.size() != 0) {
-          result.replace(JsonKey.COUNT, responseList.size());
-          result.replace(JsonKey.CONTENT, responseList);
-        } else {
-          throw new ProjectCommonException(
-              ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
-              String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
-              ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
-        }
-      }
-      // Decrypt the data
-      if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-        for (Map<String, Object> userMap : userMapList) {
-          UserUtility.decryptUserDataFrmES(userMap);
-          userMap.remove(JsonKey.ENC_EMAIL);
-          userMap.remove(JsonKey.ENC_PHONE);
-        }
-        String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-        updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
-      }
-      if (result == null) {
-        result = new HashMap<>();
-      }
-      response.put(JsonKey.RESPONSE, result);
-      sender().tell(response, self());
-      generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
-    }
-  }
-
-  private void handleKeycloakRequest(Map<String, Object> searchQueryMap, RequestContext context) {
+    UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
+    extractOrFilter(searchQueryMap);
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
+    Future<Map<String, Object>> resultF =
+        esService.search(searchDto, filterObjectType, request.getRequestContext());
+    Map<String, Object> result =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     Response response = new Response();
-    Map<String, String> filters = (Map<String, String>) searchQueryMap.get(JsonKey.FILTERS);
-    List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
-    Map.Entry<String, String> entry = filters.entrySet().stream().findFirst().orElse(null);
-    if (null != entry) {
-      String key = entry.getKey().toLowerCase();
-      String value = entry.getValue();
-      if (JsonKey.ID.equalsIgnoreCase(key)) {
-        response =
-            cassandraOperation.getPropertiesValueById(
-                usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), value, fields, context);
+    // this fuzzy search Logic
+    if (((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).size() != 0
+        && isFuzzySearchRequired(searchQueryMap)) {
+      List<Map<String, Object>> responseList =
+          getResponseOnFuzzyRequest(
+              getFuzzyFilterMap(searchQueryMap),
+              (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
+      if (responseList.size() != 0) {
+        result.replace(JsonKey.COUNT, responseList.size());
+        result.replace(JsonKey.CONTENT, responseList);
       } else {
-        List<Map<String, Object>> records = getRecordByType(key, value, context);
-        List<String> ids = new ArrayList<>();
-        records
-            .stream()
-            .forEach(
-                record -> {
-                  ids.add((String) record.get(JsonKey.USER_ID));
-                });
-        response =
-            cassandraOperation.getPropertiesValueById(
-                usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), ids, fields, context);
+        throw new ProjectCommonException(
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+            String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
       }
-      for (Map<String, Object> userMap :
-          (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE)) {
+    }
+    // Decrypt the data
+    if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
+      List<Map<String, Object>> userMapList =
+          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
+        userMap.remove(JsonKey.ENC_EMAIL);
+        userMap.remove(JsonKey.ENC_PHONE);
       }
+      String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
+      updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
     }
+    if (result == null) {
+      result = new HashMap<>();
+    }
+    response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
-  }
-
-  public List<Map<String, Object>> getRecordByType(
-      String type, String value, RequestContext context) {
-    EncryptionService encryptionService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
-            .getEncryptionServiceInstance(null);
-    try {
-      value = encryptionService.encryptData(value, context);
-    } catch (Exception e) {
-      logger.info(context, "Exception occurred while encrypting email/phone/userName " + e);
-    }
-    Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.TYPE, type);
-    reqMap.put(JsonKey.VALUE, value);
-    Response response =
-        cassandraOperation.getRecordsByCompositeKey(
-            userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap, context);
-    List<Map<String, Object>> userMapList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    return userMapList;
+    generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
   private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {

@@ -206,6 +206,19 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> userLookup(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.USER_SEARCH.getValue(),
+        httpRequest.body().asJson(),
+        userSearchRequest -> {
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   private CompletionStage<Result> handleGetUserProfile(
       String operation, String userId, Http.Request httpRequest) {
     final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;

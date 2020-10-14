@@ -98,4 +98,11 @@ public class UserDaoImpl implements UserDao {
     }
     return null;
   }
+
+  @Override
+  public Response getUserPropertiesById(
+      List<String> userIds, List<String> properties, RequestContext context) {
+    return cassandraOperation.getPropertiesValueById(
+        Util.KEY_SPACE_NAME, TABLE_NAME, userIds, properties, context);
+  }
 }
