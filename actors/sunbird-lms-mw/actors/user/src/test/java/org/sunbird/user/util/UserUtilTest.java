@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -439,19 +437,6 @@ public class UserUtilTest {
     requestMap.put(JsonKey.PHONE, "9999999999");
     requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
-    Assert.assertTrue(true);
-  }
-
-  @Test
-  public void testRemoveEntryFromUserLookUp() {
-    beforeEachTest();
-    Map<String, Object> mergeeMap = new HashMap<>();
-    mergeeMap.put(JsonKey.EMAIL, "someEmail");
-    mergeeMap.put(JsonKey.PHONE, "somePhone");
-    mergeeMap.put(JsonKey.USERNAME, "someUsername");
-    List<String> userLookUpIdentifiers =
-        Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
-    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
     Assert.assertTrue(true);
   }
 }
