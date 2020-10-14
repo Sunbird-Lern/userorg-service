@@ -141,7 +141,7 @@ public class UserProfileReadActor extends BaseActor {
       } else {
         userId =
             userExternalIdentityService.getUserV1(
-                id, provider, idType, actorMessage.getRequestContext());
+                id.toLowerCase(), provider, idType, actorMessage.getRequestContext());
         if (userId == null) {
           ProjectCommonException.throwClientErrorException(
               ResponseCode.externalIdNotFound,
