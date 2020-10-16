@@ -59,7 +59,7 @@ public class UserBulkMigrationActorTest {
     Response response = getCassandraRecordById();
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(response);
+        .thenReturn(response);
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
