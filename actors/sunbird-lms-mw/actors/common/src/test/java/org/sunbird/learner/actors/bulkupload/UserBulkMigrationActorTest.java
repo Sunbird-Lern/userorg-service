@@ -40,7 +40,9 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Promise;
 import org.sunbird.common.request.RequestContext;
@@ -48,9 +50,9 @@ import org.sunbird.common.request.RequestContext;
 @PrepareForTest({
   ServiceFactory.class,
   TelemetryWriter.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class, ElasticSearchRestHighImpl.class,
-        EsClientFactory.class,
-        ElasticSearchHelper.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+        ElasticSearchRestHighImpl.class,
+        EsClientFactory.class
 })
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
@@ -59,20 +61,23 @@ public class UserBulkMigrationActorTest {
   private static final Props props = Props.create(UserBulkMigrationActor.class);
   private static CassandraOperationImpl cassandraOperation;
   private static EncryptionService encryptionService;
-  private static ElasticSearchService esService;
+  private ElasticSearchService esService;
 
   @Before
   public void setUp() {
+    PowerMockito.mockStatic(EsClientFactory.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(createResponseGet(true));
+    when(esService.search(
+            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
+            .thenReturn(promise.future());
+
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response response = getCassandraRecordById();
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), "c13f855b-6aec-47c2-aabd-063c0a2c21e6", Mockito.any()))
-        .thenReturn(response);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(response);
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
@@ -84,20 +89,23 @@ public class UserBulkMigrationActorTest {
     TelemetryWriter.write(Mockito.any());
     system = ActorSystem.create("system");
 
-    esService = mock(ElasticSearchRestHighImpl.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+  }
 
-    Map<String, Object> esOrgResult = new HashMap<>();
-    esOrgResult.put(JsonKey.ORGANISATION_NAME, "anyOrgName");
 
-    Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
-    promise_esOrgResult.trySuccess(esOrgResult);
-    when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
-            Mockito.eq("anyRootOrgId"),
-            Mockito.any(RequestContext.class)))
-            .thenReturn(promise_esOrgResult.future());
+  private static Map<String, Object> createResponseGet(boolean isResponseRequired) {
+    HashMap<String, Object> response = new HashMap<>();
+    List<Map<String, Object>> content = new ArrayList<>();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
+
+    innerMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    innerMap.put(JsonKey.ORGANISATIONS, orgList);
+    innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
+    content.add(innerMap);
+    response.put(JsonKey.CONTENT, content);
+    return response;
   }
 
   @Test

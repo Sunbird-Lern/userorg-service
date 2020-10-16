@@ -49,9 +49,7 @@ import scala.concurrent.Promise;
   Util.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class,
-  OrganisationClientImpl.class, ElasticSearchRestHighImpl.class,
-        EsClientFactory.class,
-        ElasticSearchHelper.class
+  OrganisationClientImpl.class,
 })
 @PowerMockIgnore("javax.management.*")
 public class DeclaredExternalIdActorTest {
@@ -61,15 +59,10 @@ public class DeclaredExternalIdActorTest {
   private static DecryptionService decryptionService;
   private static SunbirdMWService SunbirdMWService;
   private static OrganisationClient organisationClient;
-  private static ElasticSearchService esService;
 
   @BeforeClass
   public static void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
-    esService = mock(ElasticSearchRestHighImpl.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -83,17 +76,6 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateData(true));
-
-    Map<String, Object> esOrgResult = new HashMap<>();
-    esOrgResult.put(JsonKey.ORGANISATION_NAME, "anyOrgName");
-
-    Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
-    promise_esOrgResult.trySuccess(esOrgResult);
-    when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
-            Mockito.eq("anyRootId"),
-            Mockito.any(RequestContext.class)))
-            .thenReturn(promise_esOrgResult.future());
 
   }
 
