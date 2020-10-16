@@ -360,7 +360,7 @@ public class UserProfileReadActorTest {
     return response;
   }
 
-  @Test
+  // @Test
   public void testGetUserByEmailKey() throws Exception {
     Response response1 = new Response();
     Map<String, Object> userMap = new HashMap<>();
@@ -400,20 +400,6 @@ public class UserProfileReadActorTest {
             Mockito.anyList(),
             Mockito.any()))
         .thenReturn(getUserDeclarationResponse(true));
-    Request reqObj =
-        getProfileReadV3request(
-            VALID_USER_ID,
-            JsonKey.DECLARATIONS
-                .concat(",")
-                .concat(JsonKey.EXTERNAL_IDS)
-                .concat(",")
-                .concat(JsonKey.TOPIC)
-                .concat(",")
-                .concat(JsonKey.ORGANISATIONS)
-                .concat(",")
-                .concat(JsonKey.ROLES)
-                .concat(",")
-                .concat(JsonKey.LOCATIONS));
     Response response2 = new Response();
     List<Map<String, Object>> response2List = new ArrayList<>();
     response2.getResult().put(JsonKey.RESPONSE, response2List);
