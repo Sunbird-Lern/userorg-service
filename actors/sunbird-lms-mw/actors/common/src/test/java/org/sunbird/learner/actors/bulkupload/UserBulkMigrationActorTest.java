@@ -68,8 +68,11 @@ public class UserBulkMigrationActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response response = getCassandraRecordById();
     when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            Mockito.anyString(), Mockito.anyString(), "c13f855b-6aec-47c2-aabd-063c0a2c21e6", Mockito.any()))
         .thenReturn(response);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(response);
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
@@ -80,8 +83,6 @@ public class UserBulkMigrationActorTest {
         .thenReturn(encryptionService);
     TelemetryWriter.write(Mockito.any());
     system = ActorSystem.create("system");
-
-
 
     esService = mock(ElasticSearchRestHighImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -94,7 +95,7 @@ public class UserBulkMigrationActorTest {
     promise_esOrgResult.trySuccess(esOrgResult);
     when(esService.getDataByIdentifier(
             Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
-            Mockito.eq("anyRootId"),
+            Mockito.eq("anyRootOrgId"),
             Mockito.any(RequestContext.class)))
             .thenReturn(promise_esOrgResult.future());
   }
