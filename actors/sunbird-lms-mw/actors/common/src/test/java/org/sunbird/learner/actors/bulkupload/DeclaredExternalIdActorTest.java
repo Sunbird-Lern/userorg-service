@@ -122,7 +122,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.VALIDATED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"VALIDATED\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -135,7 +135,7 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
@@ -148,12 +148,11 @@ public class DeclaredExternalIdActorTest {
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"subOrgId\":null,\"persona\":\"teacher\"}]");
+                "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
-
   @Test
   public void testUploadDeclaredUserOfWrongSubOrg() {
     Organisation org = new Organisation();
@@ -182,6 +181,7 @@ public class DeclaredExternalIdActorTest {
     Request reqObj = new Request();
     Map reqMap = new HashMap<>();
     reqMap.put(JsonKey.PROCESS_ID, "anyProcessId");
+    reqMap.put(JsonKey.ROOT_ORG_ID, "anyOrgId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;
