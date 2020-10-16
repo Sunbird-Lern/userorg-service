@@ -61,18 +61,18 @@ public class UserBulkMigrationActorTest {
   private static final Props props = Props.create(UserBulkMigrationActor.class);
   private static CassandraOperationImpl cassandraOperation;
   private static EncryptionService encryptionService;
-  private ElasticSearchService esService;
+  /*private ElasticSearchService esService;*/
 
   @Before
   public void setUp() {
-    PowerMockito.mockStatic(EsClientFactory.class);
+   /* PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(true));
     when(esService.search(
             Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
-            .thenReturn(promise.future());
+            .thenReturn(promise.future());*/
 
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
@@ -169,6 +169,24 @@ public class UserBulkMigrationActorTest {
     Assert.assertEquals(ResponseCode.OK.getResponseCode(), res.getResponseCode().getResponseCode());
     Assert.assertNotNull(res.getResult().get("processId"));
     // Assert.assertEquals(ResponseCode.mandatoryParamsMissing.getErrorMessage(), res.getMessage());
+  }
+  @Test
+  public void testSelfUserBulkUploadWithProperRejectedCsv() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    byte[] bytes = getFileAsBytes("BulkSelfDeclaredUserUploadRejectedSample.csv");
+    Request reqObj = new Request();
+    reqObj.setOperation(BulkUploadActorOperation.USER_BULK_SELF_DECLARED.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.CREATED_BY, "anyUserID");
+    innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    innerMap.put(JsonKey.FILE, bytes);
+    reqObj.getRequest().put(JsonKey.DATA, innerMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Assert.assertNotNull(res);
+    Assert.assertEquals(ResponseCode.OK.getResponseCode(), res.getResponseCode().getResponseCode());
+    Assert.assertNotNull(res.getResult().get("processId"));
   }
 
   private byte[] getFileAsBytes(String fileName) {
