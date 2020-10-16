@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.*;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,16 +25,23 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -41,7 +49,9 @@ import org.sunbird.models.organisation.Organisation;
   Util.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class,
-  OrganisationClientImpl.class
+  OrganisationClientImpl.class, ElasticSearchRestHighImpl.class,
+        EsClientFactory.class,
+        ElasticSearchHelper.class
 })
 @PowerMockIgnore("javax.management.*")
 public class DeclaredExternalIdActorTest {
@@ -51,10 +61,16 @@ public class DeclaredExternalIdActorTest {
   private static DecryptionService decryptionService;
   private static SunbirdMWService SunbirdMWService;
   private static OrganisationClient organisationClient;
+  private static ElasticSearchService esService;
 
   @BeforeClass
   public static void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(ElasticSearchHelper.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    PowerMockito.mockStatic(EsClientFactory.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
@@ -67,6 +83,18 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateData(true));
+
+    Map<String, Object> esOrgResult = new HashMap<>();
+    esOrgResult.put(JsonKey.ORGANISATION_NAME, "anyOrgName");
+
+    Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
+    promise_esOrgResult.trySuccess(esOrgResult);
+    when(esService.getDataByIdentifier(
+            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
+            Mockito.eq("anyRootId"),
+            Mockito.any(RequestContext.class)))
+            .thenReturn(promise_esOrgResult.future());
+
   }
 
   private static Response updateData(boolean empty) {

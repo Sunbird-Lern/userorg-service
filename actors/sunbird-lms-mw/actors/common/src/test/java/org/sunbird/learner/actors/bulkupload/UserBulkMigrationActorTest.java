@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,7 +27,11 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
@@ -37,11 +42,15 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import scala.concurrent.Promise;
+import org.sunbird.common.request.RequestContext;
 
 @PrepareForTest({
   ServiceFactory.class,
   TelemetryWriter.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class, ElasticSearchRestHighImpl.class,
+        EsClientFactory.class,
+        ElasticSearchHelper.class
 })
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
@@ -50,6 +59,7 @@ public class UserBulkMigrationActorTest {
   private static final Props props = Props.create(UserBulkMigrationActor.class);
   private static CassandraOperationImpl cassandraOperation;
   private static EncryptionService encryptionService;
+  private static ElasticSearchService esService;
 
   @Before
   public void setUp() {
@@ -70,6 +80,23 @@ public class UserBulkMigrationActorTest {
         .thenReturn(encryptionService);
     TelemetryWriter.write(Mockito.any());
     system = ActorSystem.create("system");
+
+
+
+    esService = mock(ElasticSearchRestHighImpl.class);
+    PowerMockito.mockStatic(EsClientFactory.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+
+    Map<String, Object> esOrgResult = new HashMap<>();
+    esOrgResult.put(JsonKey.ORGANISATION_NAME, "anyOrgName");
+
+    Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
+    promise_esOrgResult.trySuccess(esOrgResult);
+    when(esService.getDataByIdentifier(
+            Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
+            Mockito.eq("anyRootId"),
+            Mockito.any(RequestContext.class)))
+            .thenReturn(promise_esOrgResult.future());
   }
 
   @Test
