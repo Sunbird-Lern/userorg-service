@@ -792,6 +792,7 @@ public class UserUtil {
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.ADD);
+      userDeclareEntity.setStatus(JsonKey.SUBMITTED);
       userDeclareEntities.add(userDeclareEntity);
     }
     return currOrgId;
