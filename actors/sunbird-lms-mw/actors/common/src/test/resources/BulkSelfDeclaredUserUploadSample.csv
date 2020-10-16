@@ -1,4 +1,4 @@
-Diksha UUID,Status,State provided ext. ID,Channel,School Name,School UDISE ID,Phone number,Email ID,Persona,Error Type
-8eaa1621-ac15-42a4-9e26-9c846963f331,REJECTED,sdkjdsf,ROOT_ORG,test,22222222222,8888888888,test1@yopmail.com,Teacher,
-8eaa1621-ac15-42a4-9e26-9c846963f332,VALIDATED,sdkjdsf,ROOT_ORG,test,22222222222,8888888888,test1@yopmail.com,Teacher,
-8eaa1621-ac15-42a4-9e26-9c846963f333,ERROR,sdkjdsf,ROOT_ORG,test,22222222222,8888888888,test1@yopmail.com,Teacher,ERROR-EMAIL
+Name,Diksha UUID,State,District,School Name,School UDISE ID,State provided ext. ID,Phone number,Email ID,Persona,Status,Error Type,Channel
+localstateuser15,c13f855b-6aec-47c2-aabd-063c0a2c21e6,Andaman & Nicobar Islands,MIDDLE AND NORTH ANDAMANS,school15,localsuborgxternalid,externalid15,8917401167,localstateuser15@yopmail.com,teacher,ERROR,ERROR-ID,localstatechannel
+localstateuser16,04a283b3-c013-4e00-bf2b-43151844d5ae,Andaman & Nicobar Islands,MIDDLE AND NORTH ANDAMANS,school16,localsuborgxternalid,externalid16,8917401167,localstateuser16@yopmail.com,teacher,REJECTED,,localstatechannel
+localstateuser17,7010b025-1a3c-449c-a886-1340f4d85181,Andaman & Nicobar Islands,MIDDLE AND NORTH ANDAMANS,school17,localsuborgxternalid,externalid17,8917401167,localstateuser17@yopmail.com,teacher,VALIDATED,,localstatechannel
