@@ -156,7 +156,7 @@ public class OTPActor extends BaseActor {
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
     }
     String otpInDB = (String) otpDetails.get(JsonKey.OTP);
-    /*if (StringUtils.isBlank(otpInDB) || StringUtils.isBlank(otpInRequest)) {
+    if (StringUtils.isBlank(otpInDB) || StringUtils.isBlank(otpInRequest)) {
       logger.info(
           request.getRequestContext(),
           "OTPActor:verifyOTP: Mismatch for Key = "
@@ -166,12 +166,9 @@ public class OTPActor extends BaseActor {
               + " otpInDB = "
               + maskOTP(otpInDB));
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
-    }*/
+    }
 
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    sender().tell(response, self());
-    /*if (otpInRequest.equals(otpInDB)) {
+    if (otpInRequest.equals(otpInDB)) {
       logger.info(
           request.getRequestContext(),
           "OTPActor:verifyOTP: Verified successfully Key = " + maskId(key, type));
@@ -189,7 +186,7 @@ public class OTPActor extends BaseActor {
               + " otpInDB = "
               + maskOTP(otpInDB));
       handleMismatchOtp(type, key, otpDetails, request.getRequestContext());
-    }*/
+    }
   }
 
   private void handleMismatchOtp(
