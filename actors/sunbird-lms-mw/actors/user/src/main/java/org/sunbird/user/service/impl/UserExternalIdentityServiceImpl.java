@@ -52,7 +52,7 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
     Map<String, String> providerOrgMap =
         UserUtil.fetchOrgIdByProvider(Arrays.asList(provider), context);
     String orgId = UserUtil.getCaseInsensitiveOrgFromProvider(provider, providerOrgMap);
-    return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, context);
+    return userExternalIdentityDao.getUserIdByExternalId(extId.toLowerCase(), orgId, context);
   }
 
   /**
@@ -66,6 +66,6 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
    */
   @Override
   public String getUserV2(String extId, String orgId, String idType, RequestContext context) {
-    return userExternalIdentityDao.getUserIdByExternalId(extId, orgId, context);
+    return userExternalIdentityDao.getUserIdByExternalId(extId.toLowerCase(), orgId, context);
   }
 }
