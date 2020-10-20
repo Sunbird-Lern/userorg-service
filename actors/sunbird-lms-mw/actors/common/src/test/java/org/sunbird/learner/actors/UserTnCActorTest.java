@@ -34,6 +34,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -137,6 +138,45 @@ public class UserTnCActorTest {
                 .equalsIgnoreCase(ResponseCode.invalidParameterValue.getErrorCode()));
   }
 
+  @Test
+  public void testAllTncAcceptUserTcnSuccessWithAcceptFirstTime() {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(null));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    Response response =
+        setGroupsTncRequest(ACCEPTED_CORRECT_VERSION)
+            .expectMsgClass(duration("1000 second"), Response.class);
+    Assert.assertTrue(
+        null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
+  }
+
+  @Test
+  public void testAllTncAcceptUserTcnSuccessWithContainsOtherTnc() {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser("latestVersion"));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    Response response =
+        setCourseTncRequest(ACCEPTED_CORRECT_VERSION)
+            .expectMsgClass(duration("1000 second"), Response.class);
+    Assert.assertTrue(
+        null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
+  }
+
+  @Test
+  public void testAllTncAcceptUserTcnSuccessWithSecondTime() {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser("v1"));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    Response response =
+        setCourseTncRequest(ACCEPTED_CORRECT_VERSION)
+            .expectMsgClass(duration("1000 second"), Response.class);
+    Assert.assertTrue(
+        null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
+  }
+
   private TestKit setRequest(String version) {
     mockTnCSystemSettingResponse();
     mockCassandraOperation();
@@ -144,6 +184,38 @@ public class UserTnCActorTest {
     reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.VERSION, version);
+    reqObj.setRequest(innerMap);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+    return probe;
+  }
+
+  private TestKit setGroupsTncRequest(String version) {
+    mockTnCSystemSettingResponse();
+    mockCassandraOperation();
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.VERSION, version);
+    innerMap.put(JsonKey.TNC_TYPE, "groups");
+    innerMap.put(JsonKey.USER_ID, "123456");
+    reqObj.setRequest(innerMap);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+    return probe;
+  }
+
+  private TestKit setCourseTncRequest(String version) {
+    mockTnCSystemSettingResponse();
+    mockCassandraOperation();
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.VERSION, version);
+    innerMap.put(JsonKey.TNC_TYPE, "courses");
+    innerMap.put(JsonKey.USER_ID, "123456");
     reqObj.setRequest(innerMap);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -174,6 +246,16 @@ public class UserTnCActorTest {
     user.put(JsonKey.NAME, "someName");
     if (lastAcceptedVersion != null) {
       user.put(JsonKey.TNC_ACCEPTED_VERSION, lastAcceptedVersion);
+    }
+
+    // alltncAccepted
+    if (lastAcceptedVersion != null) {
+      Map<String, Object> allTncAccepted = new HashMap<>();
+      Map<String, Object> groupsTnc = new HashMap<>();
+      groupsTnc.put(JsonKey.VERSION, "v2");
+      groupsTnc.put(JsonKey.TNC_ACCEPTED_ON, ProjectUtil.getDateFormatter());
+      allTncAccepted.put("groups", groupsTnc);
+      user.put(JsonKey.ALL_TNC_ACCEPTED, allTncAccepted);
     }
 
     return user;

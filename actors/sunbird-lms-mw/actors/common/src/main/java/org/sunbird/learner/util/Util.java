@@ -1,5 +1,6 @@
 package org.sunbird.learner.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
 import java.util.*;
@@ -723,11 +724,18 @@ public final class Util {
       } else {
         userDetails.put(JsonKey.ROOT_ORG_NAME, "");
       }
+      // store alltncaccepted as Map Object in ES
+      Map<String, Object> allTncAccepted =
+          (Map<String, Object>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
+      if (MapUtils.isNotEmpty(allTncAccepted)) {
+        convertTncJsonStringToMapObject(allTncAccepted);
+      }
       // save masked email and phone number
       addMaskEmailAndPhone(userDetails);
       userDetails.remove(JsonKey.PASSWORD);
       addEmailAndPhone(userDetails);
       checkEmailAndPhoneVerified(userDetails);
+
     } else {
       logger.info(
           context,
@@ -735,6 +743,20 @@ public final class Util {
     }
     userDetails.put(JsonKey.USERNAME, username);
     return userDetails;
+  }
+
+  // Convert Json String tnc format to object to store in Elastic
+  private static void convertTncJsonStringToMapObject(Map<String, Object> allTncAccepted) {
+    for (Map.Entry<String, Object> tncAccepted : allTncAccepted.entrySet()) {
+      String tncType = tncAccepted.getKey();
+      Map<String, String> tncAcceptedDetailMap = new HashMap<>();
+      try {
+        tncAcceptedDetailMap = mapper.readValue((String) tncAccepted.getValue(), Map.class);
+        allTncAccepted.put(tncType, tncAcceptedDetailMap);
+      } catch (JsonProcessingException e) {
+        logger.error("Json Parsing Exception", e);
+      }
+    }
   }
 
   public static Map<String, Object> getUserDetails(

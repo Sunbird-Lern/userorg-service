@@ -386,6 +386,7 @@ public final class JsonKey {
   public static final String TOPN = "topn";
   public static final String TRY_COUNT = "tryCount";
   public static final String TYPE = "type";
+  public static final String TNC_TYPE = "tncType";
   public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
   public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
   public static final String UPDATE = "update";
@@ -500,6 +501,7 @@ public final class JsonKey {
   public static final String MODE = "mode";
   public static final String TNC_ACCEPTED_ON = "tncAcceptedOn";
   public static final String TNC_ACCEPTED_VERSION = "tncAcceptedVersion";
+  public static final String ALL_TNC_ACCEPTED = "allTncAccepted";
   public static final String TNC_LATEST_VERSION_URL = "tncLatestVersionUrl";
   public static final String PROMPT_TNC = "promptTnC";
   public static final String TNC_LATEST_VERSION = "tncLatestVersion";
@@ -710,6 +712,5 @@ public final class JsonKey {
   public static final String CONSENT_DATA = "consent_data";
   // user consent table columns listing - ended
   public static final String PRIORITY = "priority";
-
   private JsonKey() {}
 }

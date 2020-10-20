@@ -27,6 +27,7 @@ import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -57,6 +58,7 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   SSOServiceFactory.class,
   ElasticSearchRestHighImpl.class,
+  ElasticSearchHelper.class,
   EsClientFactory.class,
   Util.class,
   RequestRouter.class,
@@ -359,13 +361,81 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  @Ignore
-  public void testGetUserByEmailKeyFailureWithInvalidEmail() {
+  public void testGetUserByEmailKey() throws Exception {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_ID, "123-456-7890");
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    userMap.put(JsonKey.IS_DELETED, false);
+    userMap.put(JsonKey.ROOT_ORG_ID, "1234567890");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    responseList.add(userMap);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
+    UserExternalIdentityServiceImpl externalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+        .withNoArguments()
+        .thenReturn(externalIdentityService);
+    List<Map<String, String>> extIdList = new ArrayList<>();
+    Map<String, String> extId = new HashMap<>();
+    extId.put(JsonKey.USER_ID, "userId");
+    extId.put(JsonKey.EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.PROVIDER, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_EXTERNAL_ID, "extrnalId");
+    extId.put(JsonKey.ORIGINAL_ID_TYPE, "rootOrgId");
+    extId.put(JsonKey.ORIGINAL_PROVIDER, "rootOrgId");
+    extIdList.add(extId);
+    when(externalIdentityService.getUserExternalIds(Mockito.anyString(), Mockito.any()))
+        .thenReturn(extIdList);
+    when(cassandraOperation.getPropertiesValueById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(getUserDeclarationResponse(true));
+    Request reqObj =
+        getProfileReadV3request(
+            VALID_USER_ID,
+            JsonKey.DECLARATIONS
+                .concat(",")
+                .concat(JsonKey.EXTERNAL_IDS)
+                .concat(",")
+                .concat(JsonKey.TOPIC)
+                .concat(",")
+                .concat(JsonKey.ORGANISATIONS)
+                .concat(",")
+                .concat(JsonKey.ROLES)
+                .concat(",")
+                .concat(JsonKey.LOCATIONS));
+    Response response2 = new Response();
+    List<Map<String, Object>> response2List = new ArrayList<>();
+    response2.getResult().put(JsonKey.RESPONSE, response2List);
+    when(cassandraOperation.getRecordsByPrimaryKeys(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.anyString(),
+            Mockito.any()))
+        .thenReturn(response1);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.USER_ID, VALID_USER_ID);
+    when(cassandraOperation.getRecordById(
+            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
+        .thenReturn(getUserDeclarationResponse(true));
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
     setCassandraResponse(getCassandraResponse(false));
-    boolean result =
-        testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.userNotFound);
+    PowerMockito.mockStatic(ElasticSearchHelper.class);
+    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(req);
+    PowerMockito.mockStatic(UserUtil.class);
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.any())).thenReturn(new ArrayList<>());
+    boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
     assertTrue(result);
   }
 
@@ -399,8 +469,46 @@ public class UserProfileReadActorTest {
   }
 
   @Test
-  public void testCheckUserExistenceV2() {
+  public void testCheckUserExistenceV1WithEmail() {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
+    boolean result = testScenario(getRequest(reqMap, "checkUserExistence"), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCheckUserExistenceV2WithEmail() {
+    Response response1 = new Response();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_ID, "123456790-789456-741258");
+    userMap.put(JsonKey.FIRST_NAME, "Name");
+    userMap.put(JsonKey.LAST_NAME, "Name");
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    responseList.add(userMap);
+    response1.getResult().put(JsonKey.RESPONSE, responseList);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(response1);
+    setEsResponse(userMap);
+    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
+    boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCheckUserExistenceV2WithLoginid() {
+    reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, VALID_EMAIL);
     setEsSearchResponse(getUserExistsSearchResponseMap());
     boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
     assertTrue(result);
@@ -418,6 +526,8 @@ public class UserProfileReadActorTest {
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> response = new HashMap<>();
     response.put(JsonKey.EXISTS, "true");
+    response.put(JsonKey.FIRST_NAME, "Name");
+    response.put(JsonKey.LAST_NAME, "Name");
     List contentList = new ArrayList<>();
     contentList.add(response);
     map.put(JsonKey.CONTENT, contentList);
@@ -512,6 +622,17 @@ public class UserProfileReadActorTest {
     reqObj.setRequest(reqMap);
     reqObj.setContext(innerMap);
     reqObj.setOperation(actorOperation.getValue());
+    return reqObj;
+  }
+
+  private Request getRequest(Map<String, Object> reqMap, String actorOperation) {
+    Request reqObj = new Request();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    innerMap.put(JsonKey.PRIVATE, false);
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(actorOperation);
     return reqObj;
   }
 

@@ -8,7 +8,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.pattern.Patterns;
+import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
+import akka.util.Timeout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,9 +26,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
-import org.sunbird.actorutil.impl.InterServiceCommunicationImpl;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.UserClient;
@@ -48,6 +48,7 @@ import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
+import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -59,11 +60,12 @@ import scala.concurrent.Promise;
   SystemSettingClientImpl.class,
   UserServiceImpl.class,
   UserUtil.class,
-  InterServiceCommunicationFactory.class,
+  Patterns.class,
   LocationClientImpl.class,
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
   SunbirdMWService.class,
+  PipeToSupport.PipeableFuture.class,
   UserClientImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
@@ -72,8 +74,6 @@ public abstract class UserManagementActorTestBase {
   public ActorSystem system = ActorSystem.create("system");
   public static final Props props = Props.create(UserManagementActor.class);
   public static Map<String, Object> reqMap;
-  static InterServiceCommunication interServiceCommunication =
-      mock(InterServiceCommunicationImpl.class);
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
@@ -106,12 +106,11 @@ public abstract class UserManagementActorTestBase {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
-
-    PowerMockito.mockStatic(InterServiceCommunicationFactory.class);
-    when(InterServiceCommunicationFactory.getInstance()).thenReturn(interServiceCommunication);
-    when(interServiceCommunication.getResponse(
-            Mockito.any(ActorRef.class), Mockito.any(Request.class)))
-        .thenReturn(getEsResponse());
+    PowerMockito.mockStatic(Patterns.class);
+    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    when(Patterns.ask(
+            Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
+        .thenReturn(future);
 
     PowerMockito.mockStatic(SystemSettingClientImpl.class);
     SystemSettingClientImpl systemSettingClient = mock(SystemSettingClientImpl.class);
