@@ -15,6 +15,7 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.Feed;
+import org.sunbird.models.user.FeedStatus;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
@@ -47,13 +48,17 @@ public class UserFeedActor extends BaseActor {
   }
 
   private void updateUserFeed(Request request, RequestContext context) {
-    Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
+    Map<String, Object> updateRequest = request.getRequest();
+    String feedId = (String) updateRequest.get(JsonKey.FEED_ID);
+    Feed feed = mapper.convertValue(updateRequest, Feed.class);
+    feed.setId(feedId);
     Response feedUpdateResponse = feedService.update(feed, context);
     sender().tell(feedUpdateResponse, self());
   }
 
   private void createUserFeed(Request request, RequestContext context) {
     Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
+    feed.setStatus(FeedStatus.UNREAD.getfeedStatus());
     Response feedCreateResponse = feedService.insert(feed, context);
     sender().tell(feedCreateResponse, self());
   }
