@@ -114,7 +114,7 @@ public class UserClientImpl implements UserClient {
     } catch (ProjectCommonException pce){
       throw pce;
     }catch(Exception e){
-      logger.error(context,"upsertUser: Exception occured with error message = " + e.getMessage(), e);
+      logger.error(context,"upsertUser: Exception occurred with error message = " + e.getMessage(), e);
       throw new ProjectCommonException(
               ResponseCode.SERVER_ERROR.getErrorCode(),
               ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -171,8 +171,10 @@ public class UserClientImpl implements UserClient {
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       obj = Await.result(Patterns.ask(actorRef, request, t), t.duration());
+    } catch (ProjectCommonException pce){
+        throw pce;
     } catch (Exception e) {
-      logger.error(context, "searchManagedUser: Exception occured with error message = " + e.getMessage(), e);
+      logger.error(context, "searchManagedUser: Exception occurred with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());

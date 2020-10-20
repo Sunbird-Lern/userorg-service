@@ -78,27 +78,29 @@ public class SystemSettingClientImpl implements SystemSettingClient {
     map.put(param, value);
     request.setContext(map);
     request.setOperation(ActorOperations.GET_SYSTEM_SETTING.getValue());
+    Object obj = null;
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
-      Object obj = Await.result(future, t.duration());
-
-      if (obj instanceof Response) {
-        Response responseObj = (Response) obj;
-        return (SystemSetting) responseObj.getResult().get(JsonKey.RESPONSE);
-      } else if (obj instanceof ProjectCommonException) {
-        throw (ProjectCommonException) obj;
-      } else {
-        throw new ProjectCommonException(
-            ResponseCode.SERVER_ERROR.getErrorCode(),
-            ResponseCode.SERVER_ERROR.getErrorMessage(),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-      }
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce){
+      throw pce;
     }catch(Exception e){
+      logger.error(context, "getSystemSetting: Exception occurred with error message = " + e.getMessage(), e);
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    if (obj instanceof Response) {
+      Response responseObj = (Response) obj;
+      return (SystemSetting) responseObj.getResult().get(JsonKey.RESPONSE);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 }

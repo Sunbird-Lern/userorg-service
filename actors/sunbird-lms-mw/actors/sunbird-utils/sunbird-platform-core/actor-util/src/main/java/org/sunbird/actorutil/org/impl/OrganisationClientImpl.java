@@ -77,7 +77,7 @@ public class OrganisationClientImpl implements OrganisationClient {
     } catch (ProjectCommonException pce){
       throw pce;
     } catch (Exception e) {
-      logger.error(context,"upsertOrg: Exception occured with error message = " + e.getMessage(), e);
+      logger.error(context,"upsertOrg: Exception occurred with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());
@@ -115,7 +115,7 @@ public class OrganisationClientImpl implements OrganisationClient {
     } catch (ProjectCommonException pce){
       throw pce;
     } catch (Exception e) {
-      logger.error(context,"getOrgById: Exception occured with error message = " + e.getMessage(), e);
+      logger.error(context,"getOrgById: Exception occurred with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());
