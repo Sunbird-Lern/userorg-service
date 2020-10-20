@@ -63,6 +63,7 @@ public class OrganisationClientImpl implements OrganisationClient {
   private String upsertOrg(
       ActorRef actorRef, Map<String, Object> orgMap, String operation, RequestContext context) {
     String orgId = null;
+    Object obj = null;
 
     Request request = new Request();
     request.setRequestContext(context);
@@ -72,23 +73,25 @@ public class OrganisationClientImpl implements OrganisationClient {
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
-      Object obj = Await.result(future, t.duration());
-
-      if (obj instanceof Response) {
-        Response response = (Response) obj;
-        orgId = (String) response.get(JsonKey.ORGANISATION_ID);
-      } else if (obj instanceof ProjectCommonException) {
-        throw (ProjectCommonException) obj;
-      } else if (obj instanceof Exception) {
-        throw new ProjectCommonException(
-            ResponseCode.SERVER_ERROR.getErrorCode(),
-            ResponseCode.SERVER_ERROR.getErrorMessage(),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-      }
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce){
+      throw pce;
     } catch (Exception e) {
+      logger.error(context,"upsertOrg: Exception occured with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    if (obj instanceof Response) {
+      Response response = (Response) obj;
+      orgId = (String) response.get(JsonKey.ORGANISATION_ID);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else if (obj instanceof Exception) {
+      throw new ProjectCommonException(
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return orgId;
   }
@@ -104,33 +107,35 @@ public class OrganisationClientImpl implements OrganisationClient {
     requestMap.put(JsonKey.ORGANISATION_ID, orgId);
     request.setRequest(requestMap);
     request.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
-
+    Object obj = null;
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
-      Object obj = Await.result(future, t.duration());
-
-      if (obj instanceof Response) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Response response = (Response) obj;
-
-        // Convert contact details (received from ES) format from map to
-        // JSON string (as in Cassandra contact details are stored as text)
-        Map<String, Object> map = (Map) response.get(JsonKey.RESPONSE);
-        map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
-        organisation = objectMapper.convertValue(map, Organisation.class);
-      } else if (obj instanceof ProjectCommonException) {
-        throw (ProjectCommonException) obj;
-      } else if (obj instanceof Exception) {
-        throw new ProjectCommonException(
-            ResponseCode.SERVER_ERROR.getErrorCode(),
-            ResponseCode.SERVER_ERROR.getErrorMessage(),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-      }
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce){
+      throw pce;
     } catch (Exception e) {
+      logger.error(context,"getOrgById: Exception occured with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    if (obj instanceof Response) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      Response response = (Response) obj;
+
+      // Convert contact details (received from ES) format from map to
+      // JSON string (as in Cassandra contact details are stored as text)
+      Map<String, Object> map = (Map) response.get(JsonKey.RESPONSE);
+      map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
+      organisation = objectMapper.convertValue(map, Organisation.class);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else if (obj instanceof Exception) {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return organisation;
   }

@@ -27,25 +27,27 @@ public class EmailServiceClientImpl implements EmailServiceClient {
     actorRequest.setOperation((String) requestMap.get(JsonKey.REQUEST));
     actorRequest.setRequest(request);
     Response response = null;
+    Object obj = null;
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
-      Object obj = Await.result(future, t.duration());
-
-      if (obj instanceof Response) {
-        response = (Response) obj;
-      } else if (obj instanceof ProjectCommonException) {
-        throw (ProjectCommonException) obj;
-      } else {
-        throw new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
-                ResponseCode.SERVER_ERROR.getResponseCode());
-      }
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce){
+      throw pce;
     } catch (Exception e) {
       ProjectCommonException.throwServerErrorException(
               ResponseCode.unableToCommunicateWithActor,
               ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    if (obj instanceof Response) {
+      response = (Response) obj;
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return response;
   }
