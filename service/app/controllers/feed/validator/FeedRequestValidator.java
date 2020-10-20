@@ -25,7 +25,7 @@ public class FeedRequestValidator extends BaseRequestValidator {
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.CATEGORY))) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.CATEGORY);
     }
-    if ((feedReq.get(JsonKey.PRIORITY)) == null || ((Integer) feedReq.get(JsonKey.PRIORITY)) > 0) {
+    if ((feedReq.get(JsonKey.PRIORITY)) == null || ((Integer) feedReq.get(JsonKey.PRIORITY)) <= 0) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.PRIORITY);
     }
   }
