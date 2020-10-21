@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -220,7 +221,8 @@ public class UserTnCActor extends BaseActor {
 
   private void syncUserDetails(Map<String, Object> userMap, RequestContext context) {
     logger.info(context, "UserTnCActor:syncUserDetails: Trigger sync of user details to ES");
-    userMap.put(JsonKey.TNC_ACCEPTED_ON, Calendar.getInstance().getTimeInMillis());
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
+    userMap.put(JsonKey.TNC_ACCEPTED_ON, simpleDateFormat.format(new Date()));
     esService.update(
         ProjectUtil.EsType.user.getTypeName(), (String) userMap.get(JsonKey.ID), userMap, context);
   }
