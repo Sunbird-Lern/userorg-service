@@ -1,12 +1,11 @@
 package org.sunbird.actorutil.email.impl;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import org.sunbird.actorutil.email.EmailServiceClient;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -32,12 +31,12 @@ public class EmailServiceClientImpl implements EmailServiceClient {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
       obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce){
+    } catch (ProjectCommonException pce) {
       throw pce;
     } catch (Exception e) {
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+          ResponseCode.unableToCommunicateWithActor,
+          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
     if (obj instanceof Response) {
       response = (Response) obj;
@@ -45,9 +44,9 @@ public class EmailServiceClientImpl implements EmailServiceClient {
       throw (ProjectCommonException) obj;
     } else {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return response;
   }
