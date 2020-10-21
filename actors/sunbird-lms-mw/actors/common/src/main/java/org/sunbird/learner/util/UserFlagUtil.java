@@ -45,9 +45,30 @@ public class UserFlagUtil {
         == UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue()) {
       userFlagMap.put(UserFlagEnum.EMAIL_VERIFIED.getUserFlagType(), true);
     }
+    if ((flagsValue & (UserFlagEnum.PHONE_VERIFIED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue()))
+            == (UserFlagEnum.PHONE_VERIFIED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue())) {
+      userFlagMap.put(UserFlagEnum.EMAIL_VERIFIED.getUserFlagType(), true);
+      userFlagMap.put(UserFlagEnum.PHONE_VERIFIED.getUserFlagType(), true);
+    }
     if ((flagsValue & UserFlagEnum.STATE_VALIDATED.getUserFlagValue())
         == UserFlagEnum.STATE_VALIDATED.getUserFlagValue()) {
       userFlagMap.put(UserFlagEnum.STATE_VALIDATED.getUserFlagType(), true);
+    }
+    if ((flagsValue & (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue()))
+            == (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue())) {
+      userFlagMap.put(UserFlagEnum.STATE_VALIDATED.getUserFlagType(), true);
+      userFlagMap.put(UserFlagEnum.EMAIL_VERIFIED.getUserFlagType(), true);
+    }
+    if ((flagsValue & (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.PHONE_VERIFIED.getUserFlagValue()))
+            == (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.PHONE_VERIFIED.getUserFlagValue())) {
+      userFlagMap.put(UserFlagEnum.STATE_VALIDATED.getUserFlagType(), true);
+      userFlagMap.put(UserFlagEnum.PHONE_VERIFIED.getUserFlagType(), true);
+    }
+    if ((flagsValue & (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue()+UserFlagEnum.PHONE_VERIFIED.getUserFlagValue()))
+            == (UserFlagEnum.STATE_VALIDATED.getUserFlagValue()+UserFlagEnum.EMAIL_VERIFIED.getUserFlagValue()+UserFlagEnum.PHONE_VERIFIED.getUserFlagValue())) {
+      userFlagMap.put(UserFlagEnum.STATE_VALIDATED.getUserFlagType(), true);
+      userFlagMap.put(UserFlagEnum.EMAIL_VERIFIED.getUserFlagType(), true);
+      userFlagMap.put(UserFlagEnum.PHONE_VERIFIED.getUserFlagType(), true);
     }
     return userFlagMap;
   }
