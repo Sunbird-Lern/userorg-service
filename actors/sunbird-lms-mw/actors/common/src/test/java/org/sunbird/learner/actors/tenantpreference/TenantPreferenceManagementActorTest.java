@@ -21,7 +21,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -40,7 +39,6 @@ import org.sunbird.learner.util.Util;
   ServiceFactory.class,
   BaseMWService.class,
   RequestRouter.class,
-  InterServiceCommunicationFactory.class,
   ElasticSearchHelper.class,
   Util.class,
   DecryptionService.class,

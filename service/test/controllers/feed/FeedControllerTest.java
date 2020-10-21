@@ -60,8 +60,13 @@ public class FeedControllerTest extends BaseApplicationTest {
 
   @Test
   public void testUpdateUserFeed() {
-    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/user/feed/update").method("PATCH");
     Result result = performTest(UPDATE_FEED_URL, HttpMethods.PATCH.name(), updateFeedRequest(true));
+    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  public void testCreateUserFeed() {
+    Result result = performTest(SAVE_FEED_URL, HttpMethods.POST.name(), createFeedRequest(true));
     assertEquals(getResponseCode(result), ResponseCode.success.name());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -79,10 +84,24 @@ public class FeedControllerTest extends BaseApplicationTest {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
     if (setUserid) {
+      dataMap.put(JsonKey.USER_ID, "userId");
+    }
+    dataMap.put(JsonKey.CATEGORY, "someCategory");
+    dataMap.put(JsonKey.FEED_ID, "someFeedId");
+    dataMap.put(JsonKey.STATUS, "someStatus");
+    requestMap.put(JsonKey.REQUEST, dataMap);
+    return requestMap;
+  }
+
+  private Map createFeedRequest(boolean setUserid) {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    if (setUserid) {
       dataMap.put(JsonKey.USER_ID, "someUserId");
     }
-    dataMap.put(JsonKey.FEED_ID, "someFeedId");
     dataMap.put(JsonKey.CATEGORY, "someCategory");
+    dataMap.put(JsonKey.PRIORITY, 1);
     dataMap.put(JsonKey.STATUS, "someStatus");
     requestMap.put(JsonKey.REQUEST, dataMap);
     return requestMap;
