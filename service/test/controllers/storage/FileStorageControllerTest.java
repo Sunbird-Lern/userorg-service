@@ -4,10 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
@@ -22,7 +20,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
@@ -67,16 +64,5 @@ public class FileStorageControllerTest extends BaseApplicationTest {
     // req.headers(headerMap);
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
-  }
-
-  private static String mapToJson(Map map) {
-    ObjectMapper mapperObj = new ObjectMapper();
-    String jsonResp = "";
-    try {
-      jsonResp = mapperObj.writeValueAsString(map);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    }
-    return jsonResp;
   }
 }

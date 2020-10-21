@@ -5,12 +5,15 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
 import modules.StartModule;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -27,6 +30,7 @@ import org.sunbird.telemetry.util.TelemetryWriter;
 import play.Application;
 import play.Mode;
 import play.inject.guice.GuiceApplicationBuilder;
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
@@ -72,6 +76,34 @@ public abstract class BaseApplicationTest {
     Http.RequestBuilder req = new Http.RequestBuilder().uri(url).method(method);
     Result result = Helpers.route(application, req);
     return result;
+  }
+
+  public Result performTest(String url, String method, Map map) {
+    String data = mapToJson(map);
+    Http.RequestBuilder req;
+    if (StringUtils.isNotBlank(data)) {
+      JsonNode json = Json.parse(data);
+      req = new Http.RequestBuilder().bodyJson(json).uri(url).method(method);
+    } else {
+      req = new Http.RequestBuilder().uri(url).method(method);
+    }
+    // req.headers(new Http.Headers(headerMap));
+    Result result = Helpers.route(application, req);
+    return result;
+  }
+
+  public String mapToJson(Map map) {
+    ObjectMapper mapperObj = new ObjectMapper();
+    String jsonResp = "";
+
+    if (map != null) {
+      try {
+        jsonResp = mapperObj.writeValueAsString(map);
+      } catch (IOException e) {
+        ProjectLogger.log(e.getMessage(), e);
+      }
+    }
+    return jsonResp;
   }
 
   public String getResponseCode(Result result) {

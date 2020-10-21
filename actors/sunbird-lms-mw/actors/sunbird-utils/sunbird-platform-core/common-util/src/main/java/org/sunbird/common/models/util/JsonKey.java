@@ -711,5 +711,6 @@ public final class JsonKey {
   public static final String CONSENT_CREATED_ON = "created_on";
   public static final String CONSENT_DATA = "consent_data";
   // user consent table columns listing - ended
+  public static final String PRIORITY = "priority";
   private JsonKey() {}
 }

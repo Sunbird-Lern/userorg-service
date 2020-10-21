@@ -103,6 +103,7 @@ public enum ActorOperations {
   USER_SELF_DECLARED_TENANT_MIGRATE("userSelfDeclaredTenantMigrate"),
   REJECT_MIGRATION("rejectMigration"),
   GET_USER_FEED_BY_ID("getUserFeedById"),
+  CREATE_USER_FEED("createUserFeed"),
   CREATE_USER_V3("createUserV3"),
   CREATE_USER_V4("createUserV4"),
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
