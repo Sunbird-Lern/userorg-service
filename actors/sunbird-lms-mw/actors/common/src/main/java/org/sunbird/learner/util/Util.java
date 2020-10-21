@@ -501,26 +501,28 @@ public final class Util {
     env = StringUtils.isNotBlank(env) ? env : "";
     requestContext.put(JsonKey.ENV, env);
     requestContext.put(JsonKey.REQUEST_TYPE, JsonKey.API_CALL);
-
     if (JsonKey.USER.equalsIgnoreCase((String) request.getContext().get(JsonKey.ACTOR_TYPE))) {
-      Util.DbInfo usrDbInfo = dbInfoMap.get(JsonKey.USER_DB);
-      Response userResponse =
-          cassandraOperation.getRecordById(
-              usrDbInfo.getKeySpace(),
-              usrDbInfo.getTableName(),
-              (String) request.getContext().get(JsonKey.REQUESTED_BY),
-              request.getRequestContext());
-      List<Map<String, Object>> userList =
-          (List<Map<String, Object>>) userResponse.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(userList)) {
-        Map<String, Object> result = userList.get(0);
-        if (result != null) {
-          String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-          if (StringUtils.isNotBlank(rootOrgId)) {
-            Map<String, String> rollup = new HashMap<>();
+      String requestedByUserId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
+      if (StringUtils.isNotBlank(requestedByUserId)) {
+        Util.DbInfo usrDbInfo = dbInfoMap.get(JsonKey.USER_DB);
+        Response userResponse =
+            cassandraOperation.getRecordById(
+                usrDbInfo.getKeySpace(),
+                usrDbInfo.getTableName(),
+                (String) request.getContext().get(JsonKey.REQUESTED_BY),
+                request.getRequestContext());
+        List<Map<String, Object>> userList =
+            (List<Map<String, Object>>) userResponse.get(JsonKey.RESPONSE);
+        if (CollectionUtils.isNotEmpty(userList)) {
+          Map<String, Object> result = userList.get(0);
+          if (result != null) {
+            String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
+            if (StringUtils.isNotBlank(rootOrgId)) {
+              Map<String, String> rollup = new HashMap<>();
 
-            rollup.put("l1", rootOrgId);
-            requestContext.put(JsonKey.ROLLUP, rollup);
+              rollup.put("l1", rootOrgId);
+              requestContext.put(JsonKey.ROLLUP, rollup);
+            }
           }
         }
       }

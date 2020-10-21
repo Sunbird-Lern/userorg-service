@@ -819,13 +819,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  private void createClientError(ResponseCode responseCode, String field) {
-    throw new ProjectCommonException(
-        responseCode.getErrorCode(),
-        ProjectUtil.formatMessage(responseCode.getErrorMessage(), field),
-        ERROR_CODE);
-  }
-
   private void validateRecoveryEmailOrPhone(Request userRequest) {
     if (StringUtils.isNotBlank((String) userRequest.get(JsonKey.RECOVERY_EMAIL))) {
       validateEmail((String) userRequest.get(JsonKey.RECOVERY_EMAIL));
