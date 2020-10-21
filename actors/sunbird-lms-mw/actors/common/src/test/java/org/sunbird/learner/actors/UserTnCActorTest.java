@@ -9,9 +9,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -102,14 +100,10 @@ public class UserTnCActorTest {
 
   @Test
   public void testAcceptUserTcnSuccessWithAcceptFirstTime() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
-    userList.add(getUser(null));
-    userResponse.put(JsonKey.RESPONSE, userList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
-
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(null));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
     Response response =
         setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(
@@ -118,14 +112,10 @@ public class UserTnCActorTest {
 
   @Test
   public void testAcceptUserTncSuccessManagedUser() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
-    userList.add(getUser(LATEST_VERSION));
-    userResponse.put(JsonKey.RESPONSE, userList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
-
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(LATEST_VERSION));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
     Response response =
         setManagedUSerRequest(ACCEPTED_CORRECT_VERSION)
             .expectMsgClass(duration("10 second"), Response.class);
@@ -150,13 +140,10 @@ public class UserTnCActorTest {
 
   @Test
   public void testAcceptUserTncSuccessAlreadyAccepted() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
-    userList.add(getUser(LATEST_VERSION));
-    userResponse.put(JsonKey.RESPONSE, userList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(LATEST_VERSION));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
 
     Response response =
         setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
@@ -166,16 +153,13 @@ public class UserTnCActorTest {
 
   @Test
   public void testAcceptUserTncForBlockedUser() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
+    Promise<Map<String, Object>> promise = Futures.promise();
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.ROOT_ORG_ID, "anyRootId");
     user.put(JsonKey.IS_DELETED, true);
-    userResponse.put(JsonKey.RESPONSE, userList);
-    userList.add(user);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
+    promise.success(user);
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
 
     ProjectCommonException response =
         setRequest(ACCEPTED_CORRECT_VERSION)
@@ -198,13 +182,10 @@ public class UserTnCActorTest {
 
   @Test
   public void testAllTncAcceptUserTcnSuccessWithAcceptFirstTime() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
-    userList.add(getUser(LATEST_VERSION));
-    userResponse.put(JsonKey.RESPONSE, userList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(LATEST_VERSION));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
     Response response =
         setGroupsTncRequest(ACCEPTED_CORRECT_VERSION)
             .expectMsgClass(duration("1000 second"), Response.class);
@@ -214,13 +195,10 @@ public class UserTnCActorTest {
 
   @Test
   public void testAllTncAcceptUserTcnSuccessWithSecondTime() {
-    Response userResponse = new Response();
-    List<Map<String, Object>> userList = new ArrayList<>();
-    userList.add(getUser("v2"));
-    userResponse.put(JsonKey.RESPONSE, userList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userResponse);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser("v2"));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
     Response response =
         setGroupsTncRequest(ACCEPTED_CORRECT_VERSION)
             .expectMsgClass(duration("1000 second"), Response.class);
