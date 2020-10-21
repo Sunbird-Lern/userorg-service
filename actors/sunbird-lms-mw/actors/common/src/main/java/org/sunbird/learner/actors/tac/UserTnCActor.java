@@ -142,8 +142,7 @@ public class UserTnCActor extends BaseActor {
       } else {
         Map<String, Object> tncAcceptedMap = new HashMap<>();
         tncAcceptedMap.put(JsonKey.VERSION, acceptedTnC);
-        tncAcceptedMap.put(
-            JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
+        tncAcceptedMap.put(JsonKey.TNC_ACCEPTED_ON, ProjectUtil.getFormattedDate());
         allTncAcceptedMap.put(tncType, tncAcceptedMap);
         userMap.put(JsonKey.ALL_TNC_ACCEPTED, convertTncMapObjectToJsonString(allTncAcceptedMap));
       }
