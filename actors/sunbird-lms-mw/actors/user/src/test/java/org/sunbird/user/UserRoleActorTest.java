@@ -10,7 +10,10 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.pattern.Patterns;
+import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
+import akka.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +49,7 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.user.actors.UserRoleActor;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
 
@@ -60,6 +64,8 @@ import scala.concurrent.duration.Duration;
   Util.class,
   UserOrgDaoImpl.class,
   DecryptionService.class,
+  Patterns.class,
+  PipeToSupport.PipeableFuture.class,
   OrgServiceImpl.class,
   OrgService.class
 })
@@ -94,10 +100,9 @@ public class UserRoleActorTest {
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
-
     PowerMockito.mockStatic(ServiceFactory.class);
+    
     cassandraOperation = mock(CassandraOperationImpl.class);
-
     RoleDaoImpl roleDao = Mockito.mock(RoleDaoImpl.class);
     when(RoleDaoImpl.getInstance()).thenReturn(roleDao);
     UserOrgDao userOrgDao = Mockito.mock(UserOrgDaoImpl.class);
@@ -126,8 +131,13 @@ public class UserRoleActorTest {
         .thenReturn(getRecordByPropertyResponse());
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-  }
 
+    PowerMockito.mockStatic(Patterns.class);
+    Future<Object> future = Futures.future(() -> response, system.dispatcher());
+    when(Patterns.ask(
+            Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
+            .thenReturn(future);
+  }
   @Test
   public void testGetUserRoleSuccess() {
     assertTrue(testScenario(true, true, null));
@@ -209,6 +219,7 @@ public class UserRoleActorTest {
       DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
       when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
           .thenReturn(getOrganisationsMap());
+
       if (errorResponse == null) {
         when(response.get(Mockito.anyString())).thenReturn(new HashMap<>());
         mockGetOrgResponse(true);
