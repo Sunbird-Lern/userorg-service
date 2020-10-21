@@ -51,7 +51,8 @@ public class DeclaredExternalIdActor extends BaseActor {
         UserUploadUtil.convertRowToObject(row, request.getRequestContext());
     List<SelfDeclaredUser> userList =
         UserUploadUtil.getMigrationUserAsList(bulkMigrationUser, request.getRequestContext());
-    userList.parallelStream()
+    userList
+        .parallelStream()
         .forEach(
             migrateUser -> {
               // add entry in usr_external_id
@@ -103,7 +104,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-              req.getRequestContext(),
+          req.getRequestContext(),
           "DeclaredExternalIdActor:updateErrorDetail:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),
@@ -129,7 +130,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-              req.getRequestContext(),
+          req.getRequestContext(),
           "DeclaredExternalIdActor:rejectDeclaredDetail:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),
@@ -147,7 +148,7 @@ public class DeclaredExternalIdActor extends BaseActor {
             getOrgDetails(
                 declaredUser.getSubOrgExternalId(),
                 declaredUser.getChannel(),
-                    req.getRequestContext());
+                req.getRequestContext());
         if (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId())) {
           declaredUser.setErrorType(
               SelfDeclaredErrorTypeEnum.ERROR_STATE.getErrorType().replace("_", "-"));
@@ -171,7 +172,7 @@ public class DeclaredExternalIdActor extends BaseActor {
       tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-              req.getRequestContext(),
+          req.getRequestContext(),
           "DeclaredExternalIdActor:migrateDeclaredUser:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),
