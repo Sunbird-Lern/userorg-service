@@ -67,7 +67,7 @@ public class UserTnCActor extends BaseActor {
     }
     String latestTnC =
         getSystemSettingByFieldAndKey(
-            JsonKey.TNC_CONFIG, JsonKey.LATEST_VERSION, new TypeReference<String>() {}, context);
+            tncType, JsonKey.LATEST_VERSION, new TypeReference<String>() {}, context);
 
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
