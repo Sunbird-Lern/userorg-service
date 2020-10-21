@@ -30,7 +30,7 @@ public class FeedRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public static void validateFeedUpdateRequest(Request request, String callerId) {
+  public static boolean validateFeedUpdateRequest(Request request, String callerId) {
     Map<String, Object> feedReq = request.getRequest();
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.USER_ID))) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
@@ -46,5 +46,6 @@ public class FeedRequestValidator extends BaseRequestValidator {
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.FEED_ID))) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.FEED_ID);
     }
+    return true;
   }
 }

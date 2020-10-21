@@ -33,4 +33,31 @@ public class FeedRequestValidatorTest {
     reqObj.setRequest(requestMap);
     FeedRequestValidator.validateFeedRequest(reqObj);
   }
+
+  @Test(expected = ProjectCommonException.class)
+  public void validateFeedUpdateRequestFailureTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.CREATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.DATA, dataMap);
+    reqObj.setRequest(requestMap);
+    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
+  }
+
+  @Test
+  public void validateFeedUpdateRequestTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.CREATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    requestMap.put(JsonKey.DATA, dataMap);
+    reqObj.setRequest(requestMap);
+    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
+  }
 }
