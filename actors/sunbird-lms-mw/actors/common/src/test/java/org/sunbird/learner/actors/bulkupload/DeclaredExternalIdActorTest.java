@@ -140,7 +140,18 @@ public class DeclaredExternalIdActorTest {
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
-
+  @Test
+  public void testUploadDeclaredUserOFErrorStatusWithErrorType() {
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
+            .thenReturn(
+                    "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"errorType\":\"ERROR_ID\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
+    boolean result =
+            testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
+    assertTrue(result);
+  }
   @Test
   public void testUploadDeclaredUserOfRejectedStatus() {
     when(cassandraOperation.getRecordById(
