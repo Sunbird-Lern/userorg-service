@@ -15,6 +15,7 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.Feed;
+import org.sunbird.models.user.FeedStatus;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
@@ -39,11 +40,23 @@ public class UserFeedActor extends BaseActor {
     } else if (ActorOperations.CREATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
       logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
       createUserFeed(request, context);
+    } else if (ActorOperations.DELETE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
+      logger.info(context, "UserFeedActor:onReceive deleteUserFeed method called");
+      deleteUserFeed(request, context);
     } else {
       onReceiveUnsupportedOperation("UserFeedActor");
     }
   }
-
+  
+  private void deleteUserFeed(Request request, RequestContext context) {
+    Response feedDeleteResponse = new Response();
+    Map<String, Object> deleteRequest = request.getRequest();
+    feedService.delete((String) deleteRequest.get(JsonKey.FEED_ID), (String) deleteRequest.get(JsonKey.USER_ID),
+      (String)deleteRequest.get(JsonKey.CATEGORY), context);
+    feedDeleteResponse.getResult().put("")
+    sender().tell(feedDeleteResponse, self());
+  }
+  
   private void createUserFeed(Request request, RequestContext context) {
     Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
     Response feedCreateResponse = feedService.insert(feed, context);
