@@ -138,6 +138,7 @@ PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagem
 #User Feed API
 GET   /v1/user/feed/:userId       @controllers.feed.FeedController.getUserFeed(userId:String,request: play.mvc.Http.Request)
 POST  /v1/user/feed/create        @controllers.feed.FeedController.createUserFeed(request: play.mvc.Http.Request)
+POST  /v1/user/feed/delete        @controllers.feed.FeedController.deleteUserFeed(request: play.mvc.Http.Request)
 
 POST /private/user/v1/scheduler @controllers.scheduler.SchedulerController.startScheduler(request: play.mvc.Http.Request)
 
