@@ -47,7 +47,6 @@ import org.sunbird.ratelimit.service.RateLimitServiceImpl;
   SunbirdMWService.class
 })
 @PowerMockIgnore("javax.management.*")
-@Ignore
 public class OTPActorTest {
 
   private TestKit probe;
