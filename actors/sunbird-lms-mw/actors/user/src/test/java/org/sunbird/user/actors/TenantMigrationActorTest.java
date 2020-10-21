@@ -2,6 +2,7 @@ package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -44,6 +45,8 @@ import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.Feed;
 import org.sunbird.user.UserManagementActorTestBase;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.MigrationUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -60,7 +63,9 @@ import org.sunbird.user.util.MigrationUtils;
   FeedServiceImpl.class,
   FeedFactory.class,
   ShadowUser.class,
-  FeedUtil.class
+  FeedUtil.class,
+  UserServiceImpl.class,
+  UserService.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class TenantMigrationActorTest extends UserManagementActorTestBase {
@@ -77,6 +82,8 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
     PowerMockito.mockStatic(FeedUtil.class);
+    PowerMockito.mockStatic(UserService.class);
+    PowerMockito.mockStatic(UserServiceImpl.class);
 
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);
@@ -306,17 +313,43 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             cassandraOperation.getRecordById(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSelfDeclarationResponse());
-    Response updateResponse = new Response();
+   /* Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
     PowerMockito.when(
             cassandraOperation.updateRecord(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(updateResponse);
+        .thenReturn(updateResponse);*/
+    List<Map<String, Object>> listMap = new ArrayList<>();
+    listMap.add(new HashMap<String, Object>());
+    Map<String, Object> userDetails = new HashMap<>();
+    userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    userDetails.put(JsonKey.ORGANISATIONS, listMap);
+    UserService userService = mock(UserServiceImpl.class);
+    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
+    when(userService.esGetPublicUserProfileById( Mockito.anyString(), Mockito.anyObject())).thenReturn(userDetails);
+    when(userService.getCustodianOrgId( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
+    when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
+
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                    Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
+            .thenReturn(getSuccessUpdateResponse());
+    doNothing()
+            .when(cassandraOperation)
+            .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
+
+    PowerMockito.when(
+            cassandraOperation.getRecordById(
+                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
+            .thenReturn(new Response());
+
+
     boolean result =
         testScenario(
             getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
-            null,
-            ResponseCode.OK);
+                ResponseCode.declaredUserValidatedStatusNotUpdated,
+            null);
     assertTrue(result);
   }
 
@@ -327,6 +360,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     List<Map<String, String>> externalIdLst = new ArrayList();
     requestMap.put(JsonKey.USER_ID, "anyUserID");
     requestMap.put(JsonKey.CHANNEL, "anyChannel");
+    requestMap.put(JsonKey.ROOT_ORG_ID,"anyRootOrgId");
     externalIdMap.put(JsonKey.ID, "anyID");
     externalIdMap.put(JsonKey.ID_TYPE, "anyIDtype");
     externalIdMap.put(JsonKey.PROVIDER, "anyProvider");
@@ -347,5 +381,14 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     responseMap.put(Constants.RESPONSE, Arrays.asList(responseMap));
     response.getResult().putAll(responseMap);
     return response;
+  }
+
+  private Response getSuccessUpdateResponse(){
+    Response upsertResponse = new Response();
+    Map<String, Object> responseMap2 = new HashMap<>();
+    responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
+    upsertResponse.getResult().putAll(responseMap2);
+
+    return upsertResponse;
   }
 }
