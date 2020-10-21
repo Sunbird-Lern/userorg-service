@@ -1,6 +1,7 @@
 package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -43,6 +44,7 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.Feed;
 import org.sunbird.user.UserManagementActorTestBase;
 import org.sunbird.user.service.UserService;
@@ -313,13 +315,13 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             cassandraOperation.getRecordById(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSelfDeclarationResponse());
-   /* Response updateResponse = new Response();
+    Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
     PowerMockito.when(
             cassandraOperation.updateRecord(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(updateResponse);*/
-    List<Map<String, Object>> listMap = new ArrayList<>();
+        .thenReturn(updateResponse);
+    /*List<Map<String, Object>> listMap = new ArrayList<>();
     listMap.add(new HashMap<String, Object>());
     Map<String, Object> userDetails = new HashMap<>();
     userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
@@ -330,25 +332,18 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     when(userService.getCustodianOrgId( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
     when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
 
-    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
             cassandraOperation.updateRecord(
                     Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
             .thenReturn(getSuccessUpdateResponse());
     doNothing()
             .when(cassandraOperation)
-            .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
-
-    PowerMockito.when(
-            cassandraOperation.getRecordById(
-                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(new Response());
-
+            .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());*/
 
     boolean result =
         testScenario(
             getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
-                ResponseCode.declaredUserValidatedStatusNotUpdated,
+                ResponseCode.errorUserMigrationFailed,
             null);
     assertTrue(result);
   }
