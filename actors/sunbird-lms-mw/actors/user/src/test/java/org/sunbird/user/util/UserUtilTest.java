@@ -230,7 +230,7 @@ public class UserUtilTest {
 
     UserDeclareEntity userDeclareEntity =
         UserUtil.createUserDeclaredObject(declareFieldMap, "01245444444");
-    Assert.assertEquals("PENDING", userDeclareEntity.getStatus());
+    Assert.assertEquals("SUBMITTED", userDeclareEntity.getStatus());
   }
 
   private List<Map<String, String>> getExternalIds() {

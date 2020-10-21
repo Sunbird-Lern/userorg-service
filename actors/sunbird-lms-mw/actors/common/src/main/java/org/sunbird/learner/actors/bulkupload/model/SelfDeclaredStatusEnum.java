@@ -1,7 +1,7 @@
 package org.sunbird.learner.actors.bulkupload.model;
 
 public enum SelfDeclaredStatusEnum {
-  PENDING,
+  SUBMITTED,
   VALIDATED,
   REJECTED,
   ERROR
