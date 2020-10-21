@@ -53,6 +53,7 @@ public class UserFeedActor extends BaseActor {
     String feedId = (String) updateRequest.get(JsonKey.FEED_ID);
     Feed feed = mapper.convertValue(updateRequest, Feed.class);
     feed.setId(feedId);
+    feed.setStatus(FeedStatus.READ.getfeedStatus());
     Response feedUpdateResponse = feedService.update(feed, context);
     sender().tell(feedUpdateResponse, self());
   }

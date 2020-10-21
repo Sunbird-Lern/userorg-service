@@ -56,7 +56,6 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.USER_ID, "someUserId");
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
-    requestMap.put(JsonKey.DATA, dataMap);
     reqObj.setRequest(requestMap);
     Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
   }
