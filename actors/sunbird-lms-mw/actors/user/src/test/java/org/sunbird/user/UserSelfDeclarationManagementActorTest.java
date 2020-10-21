@@ -208,7 +208,7 @@ public class UserSelfDeclarationManagementActorTest {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("01234848481");
     userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
-    userDeclareEntity.setStatus(JsonKey.PENDING);
+    userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
     userInfo.put(JsonKey.DECLARED_PHONE, "0890321830");
@@ -221,7 +221,7 @@ public class UserSelfDeclarationManagementActorTest {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("018329328293892");
     userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
-    userDeclareEntity.setStatus(JsonKey.PENDING);
+    userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
     userInfo.put(JsonKey.DECLARED_PHONE, "0890321830");
@@ -234,7 +234,7 @@ public class UserSelfDeclarationManagementActorTest {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org1");
     userDeclareEntity.setPersona("volunteer");
-    userDeclareEntity.setStatus(JsonKey.PENDING);
+    userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
     userInfo.put(JsonKey.DECLARED_PHONE, "0890321830");
@@ -247,7 +247,7 @@ public class UserSelfDeclarationManagementActorTest {
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
     userDeclareEntity.setOrgId("org2");
     userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
-    userDeclareEntity.setStatus(JsonKey.PENDING);
+    userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "dsadaddasdadadadadE^JD");
     userInfo.put(JsonKey.DECLARED_PHONE, "0890321830");

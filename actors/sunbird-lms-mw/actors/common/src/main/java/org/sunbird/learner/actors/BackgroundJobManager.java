@@ -89,31 +89,24 @@ public class BackgroundJobManager extends BaseActor {
   private void updateUserRoleToEs(Request actorMessage) {
     List<String> roles = (List<String>) actorMessage.getRequest().get(JsonKey.ROLES);
     String type = (String) actorMessage.get(JsonKey.TYPE);
-    String orgId = (String) actorMessage.get(JsonKey.ORGANISATION_ID);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(),
-            (String) actorMessage.get(JsonKey.USER_ID),
-            actorMessage.getRequestContext());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.USER_ID, actorMessage.get(JsonKey.USER_ID));
     if (type.equals(JsonKey.USER)) {
       result.put(JsonKey.ROLES, roles);
     } else if (type.equals(JsonKey.ORGANISATION)) {
-      List<Map<String, Object>> roleMapList =
-          (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-      if (null != roleMapList) {
-        for (Map<String, Object> map : roleMapList) {
-          if ((orgId.equalsIgnoreCase((String) map.get(JsonKey.ORGANISATION_ID)))) {
-            map.put(JsonKey.ROLES, roles);
-          }
-        }
-      }
+      Map<String, Object> searchMap = new LinkedHashMap<>(2);
+      searchMap.put(JsonKey.USER_ID, actorMessage.get(JsonKey.USER_ID));
+      Response res =
+          cassandraOperation.getRecordsByCompositeKey(
+              JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, actorMessage.getRequestContext());
+      List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+      result.put(JsonKey.ORGANISATIONS, dataList);
     }
+
     updateDataToElastic(
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.IDENTIFIER),
+        (String) result.get(JsonKey.USER_ID),
         result,
         actorMessage.getRequestContext());
   }

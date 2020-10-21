@@ -1,12 +1,14 @@
 package org.sunbird.actorutil.systemsettings.impl;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
+import java.util.concurrent.TimeUnit;
+
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -15,12 +17,12 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class SystemSettingClientImpl implements SystemSettingClient {
   private static LoggerUtil logger = new LoggerUtil(SystemSettingClientImpl.class);
-
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   private static SystemSettingClient systemSettingClient = null;
 
   public static SystemSettingClient getInstance() {
@@ -76,8 +78,19 @@ public class SystemSettingClientImpl implements SystemSettingClient {
     map.put(param, value);
     request.setContext(map);
     request.setOperation(ActorOperations.GET_SYSTEM_SETTING.getValue());
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
-
+    Object obj = null;
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce){
+      throw pce;
+    }catch(Exception e){
+      logger.error(context, "getSystemSetting: Exception occurred with error message = " + e.getMessage(), e);
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
       return (SystemSetting) responseObj.getResult().get(JsonKey.RESPONSE);
