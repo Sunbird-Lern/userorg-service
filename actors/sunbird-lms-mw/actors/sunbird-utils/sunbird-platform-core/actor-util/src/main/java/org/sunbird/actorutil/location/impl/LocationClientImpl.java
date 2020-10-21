@@ -151,21 +151,23 @@ public class LocationClientImpl implements LocationClient {
     return new ArrayList<>();
   }
 
-  private Object actorCall(ActorRef actorRef, Request request, RequestContext context){
+  private Object actorCall(ActorRef actorRef, Request request, RequestContext context) {
     Object obj = null;
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
       obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce){
+    } catch (ProjectCommonException pce) {
       throw pce;
     } catch (Exception e) {
-      logger.error(context,
-              "Unable to communicate with actor: Exception occurred with error message = "
-                      + e.getMessage(),e);
+      logger.error(
+          context,
+          "Unable to communicate with actor: Exception occurred with error message = "
+              + e.getMessage(),
+          e);
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+          ResponseCode.unableToCommunicateWithActor,
+          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
     checkLocationResponseForException(obj);
     return obj;
@@ -176,9 +178,9 @@ public class LocationClientImpl implements LocationClient {
       throw (ProjectCommonException) obj;
     } else if (obj instanceof Exception) {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 }
