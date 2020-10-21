@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -74,13 +73,14 @@ public class OrganisationClientImpl implements OrganisationClient {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
       obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce){
+    } catch (ProjectCommonException pce) {
       throw pce;
     } catch (Exception e) {
-      logger.error(context,"upsertOrg: Exception occurred with error message = " + e.getMessage(), e);
+      logger.error(
+          context, "upsertOrg: Exception occurred with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+          ResponseCode.unableToCommunicateWithActor,
+          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
     if (obj instanceof Response) {
       Response response = (Response) obj;
@@ -112,13 +112,14 @@ public class OrganisationClientImpl implements OrganisationClient {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);
       obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce){
+    } catch (ProjectCommonException pce) {
       throw pce;
     } catch (Exception e) {
-      logger.error(context,"getOrgById: Exception occurred with error message = " + e.getMessage(), e);
+      logger.error(
+          context, "getOrgById: Exception occurred with error message = " + e.getMessage(), e);
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+          ResponseCode.unableToCommunicateWithActor,
+          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
     if (obj instanceof Response) {
       ObjectMapper objectMapper = new ObjectMapper();
@@ -133,9 +134,9 @@ public class OrganisationClientImpl implements OrganisationClient {
       throw (ProjectCommonException) obj;
     } else if (obj instanceof Exception) {
       throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return organisation;
   }

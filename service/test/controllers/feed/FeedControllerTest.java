@@ -30,6 +30,7 @@ import play.test.Helpers;
 public class FeedControllerTest extends BaseApplicationTest {
 
   String SAVE_FEED_URL = "/v1/user/feed/create";
+  String UPDATE_FEED_URL = "/v1/user/feed/update";
 
   @Before
   public void before() {
@@ -58,13 +59,42 @@ public class FeedControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testUpdateUserFeed() {
+    Result result = performTest(UPDATE_FEED_URL, HttpMethods.PATCH.name(), updateFeedRequest(true));
+    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
   public void testCreateUserFeed() {
     Result result = performTest(SAVE_FEED_URL, HttpMethods.POST.name(), createFeedRequest(true));
     assertEquals(getResponseCode(result), ResponseCode.success.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
+  @Test
+  public void testUpdateUserFeedFailureForUserID() {
+    Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/user/feed/update").method("PATCH");
+    Result result =
+        performTest(UPDATE_FEED_URL, HttpMethods.PATCH.name(), updateFeedRequest(false));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  private Map updateFeedRequest(boolean setUserid) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    if (setUserid) {
+      dataMap.put(JsonKey.USER_ID, "userId");
+    }
+    dataMap.put(JsonKey.CATEGORY, "someCategory");
+    dataMap.put(JsonKey.FEED_ID, "someFeedId");
+    dataMap.put(JsonKey.STATUS, "someStatus");
+    requestMap.put(JsonKey.REQUEST, dataMap);
+    return requestMap;
+  }
+
   private Map createFeedRequest(boolean setUserid) {
+
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
     if (setUserid) {

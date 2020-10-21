@@ -101,7 +101,7 @@ public class UserRoleActorTest {
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(ServiceFactory.class);
-    
+
     cassandraOperation = mock(CassandraOperationImpl.class);
     RoleDaoImpl roleDao = Mockito.mock(RoleDaoImpl.class);
     when(RoleDaoImpl.getInstance()).thenReturn(roleDao);
@@ -136,8 +136,9 @@ public class UserRoleActorTest {
     Future<Object> future = Futures.future(() -> response, system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
-            .thenReturn(future);
+        .thenReturn(future);
   }
+
   @Test
   public void testGetUserRoleSuccess() {
     assertTrue(testScenario(true, true, null));
