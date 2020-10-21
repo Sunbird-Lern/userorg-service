@@ -20,7 +20,8 @@ import org.sunbird.models.user.FeedStatus;
 /** This class contains API related to user feed. */
 @ActorConfig(
   tasks = {"getUserFeedById", "createUserFeed", "updateUserFeed"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserFeedActor extends BaseActor {
 
