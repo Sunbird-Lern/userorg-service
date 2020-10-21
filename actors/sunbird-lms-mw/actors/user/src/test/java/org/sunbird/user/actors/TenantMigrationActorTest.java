@@ -347,7 +347,36 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             null);
     assertTrue(result);
   }
+  @Test
+  public void testUserSelfDeclarationMigrationWithValidatedStatuswithError() {
+    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    PowerMockito.when(
+            cassandraOperation.getRecordById(
+                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
+            .thenReturn(getSelfDeclarationResponse());
+    Response updateResponse = new Response();
+    updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+            .thenReturn(updateResponse);
+    List<Map<String, Object>> listMap = new ArrayList<>();
+    listMap.add(new HashMap<String, Object>());
+    Map<String, Object> userDetails = new HashMap<>();
+    userDetails.put(JsonKey.ROOT_ORG_ID, "");
+    userDetails.put(JsonKey.ORGANISATIONS, listMap);
+    UserService userService = mock(UserServiceImpl.class);
+    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
+    when(userService.esGetPublicUserProfileById( Mockito.anyString(), Mockito.anyObject())).thenReturn(userDetails);
 
+    boolean result =
+            testScenario(
+                    getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
+                    ResponseCode.parameterMismatch,
+                    null);
+    assertTrue(result);
+  }
   public Request getSelfDeclaredMigrateReq(ActorOperations actorOperation) {
     Request reqObj = new Request();
     Map<String, Object> requestMap = new HashMap();
