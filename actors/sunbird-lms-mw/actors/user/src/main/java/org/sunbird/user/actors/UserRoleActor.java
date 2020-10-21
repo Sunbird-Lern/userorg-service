@@ -6,10 +6,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
@@ -18,20 +18,24 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserRoleActor extends UserBaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -69,11 +73,10 @@ public class UserRoleActor extends UserBaseActor {
     Map<String, Object> requestMap = actorMessage.getRequest();
     RoleService.validateRoles((List<String>) requestMap.get(JsonKey.ROLES));
 
-    boolean orgNotFound = initializeHashTagIdFromOrg(requestMap, actorMessage.getRequestContext());
-    if (orgNotFound) return;
+    String hashTagId = getHashTagIdForOrg(requestMap, actorMessage.getRequestContext());
+    if (StringUtils.isBlank(hashTagId)) return;
 
     String userId = (String) requestMap.get(JsonKey.USER_ID);
-    String hashTagId = (String) requestMap.get(JsonKey.HASHTAGID);
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     // update userOrg role with requested roles.
     Map<String, Object> userOrgDBMap = new HashMap<>();
@@ -96,13 +99,11 @@ public class UserRoleActor extends UserBaseActor {
               }
             });
 
-    if (CollectionUtils.isNotEmpty(responseList)) {
-      userOrgDBMap.put(JsonKey.ORGANISATION, responseList.get(0));
-    }
-
-    if (MapUtils.isEmpty(userOrgDBMap)) {
+    if (CollectionUtils.isEmpty(responseList)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrOrgData, null);
     }
+
+    userOrgDBMap.put(JsonKey.ORGANISATION, responseList.get(0));
 
     UserOrg userOrg = prepareUserOrg(requestMap, hashTagId, userOrgDBMap);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
@@ -110,50 +111,41 @@ public class UserRoleActor extends UserBaseActor {
     Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(
-          requestMap,
-          JsonKey.ORGANISATION,
-          userId,
-          organisationId,
-          actorMessage.getRequestContext());
+      syncUserRoles(JsonKey.ORGANISATION, userId, actorMessage.getRequestContext());
     } else {
       logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
     }
     generateTelemetryEvent(requestMap, userId, "userLevel", actorMessage.getContext());
   }
 
-  private boolean initializeHashTagIdFromOrg(
-      Map<String, Object> requestMap, RequestContext context) {
+  private String getHashTagIdForOrg(Map<String, Object> requestMap, RequestContext context) {
 
     String externalId = (String) requestMap.get(JsonKey.EXTERNAL_ID);
     String provider = (String) requestMap.get(JsonKey.PROVIDER);
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
 
     // try find organisation and fetch hashTagId from organisation.
-    Map<String, Object> map = null;
-    Organisation organisation = null;
-    OrganisationClient orgClient = new OrganisationClientImpl();
+    Map<String, Object> orgMap;
+    String hashTagId = null;
     if (StringUtils.isNotBlank(organisationId)) {
-
-      organisation =
-          orgClient.getOrgById(
-              getActorRef(ActorOperations.GET_ORG_DETAILS.getValue()), organisationId, context);
-      if (organisation != null) {
-        requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());
+      orgMap = orgService.getOrgById(organisationId, context);
+      if (MapUtils.isNotEmpty(orgMap)) {
+        hashTagId = (String) orgMap.get(JsonKey.HASHTAGID);
       }
     } else {
-      organisation = orgClient.esGetOrgByExternalId(externalId, provider, context);
-      if (organisation != null) {
-        requestMap.put(JsonKey.ORGANISATION_ID, organisation.getId());
-        requestMap.put(JsonKey.HASHTAGID, organisation.getHashTagId());
+      orgMap = orgService.esGetOrgByExternalId(externalId, provider, context);
+      if (MapUtils.isNotEmpty(orgMap)) {
+        requestMap.put(JsonKey.ORGANISATION_ID, orgMap.get(JsonKey.ORGANISATION_ID));
+        hashTagId = (String) orgMap.get(JsonKey.HASHTAGID);
       }
     }
     // throw error if provided orgId or ExtenralId with Provider is not valid
-    boolean orgNotFound = MapUtils.isEmpty(map) && organisation == null;
-    if (orgNotFound) {
+    if (StringUtils.isNotBlank(hashTagId)) {
+      return hashTagId;
+    } else {
       handleOrgNotFound(externalId, provider, organisationId);
     }
-    return orgNotFound;
+    return "";
   }
 
   private void handleOrgNotFound(String externalId, String provider, String organisationId) {
@@ -194,21 +186,12 @@ public class UserRoleActor extends UserBaseActor {
     return userOrg;
   }
 
-  private void syncUserRoles(
-      Map<String, Object> tempMap,
-      String type,
-      String userid,
-      String orgId,
-      RequestContext context) {
-    logger.info(context, "UserRoleActor: syncUserRoles called");
-
+  private void syncUserRoles(String type, String userId, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
     request.setOperation(ActorOperations.UPDATE_USER_ROLES_ES.getValue());
-    request.getRequest().put(JsonKey.ROLES, tempMap.get(JsonKey.ROLES));
     request.getRequest().put(JsonKey.TYPE, type);
-    request.getRequest().put(JsonKey.USER_ID, userid);
-    request.getRequest().put(JsonKey.ORGANISATION_ID, orgId);
+    request.getRequest().put(JsonKey.USER_ID, userId);
     logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     try {
       tellToAnother(request);

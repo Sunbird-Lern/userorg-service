@@ -17,14 +17,6 @@ public interface UserService {
 
   Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context);
 
-  Map<String, Object> esGetPrivateUserProfileById(String userId, RequestContext context);
-
-  void syncUserProfile(
-      String userId,
-      Map<String, Object> userDataMap,
-      Map<String, Object> userPrivateDataMap,
-      RequestContext context);
-
   String getRootOrgIdFromChannel(String channel, RequestContext context);
 
   String getCustodianChannel(
