@@ -1,9 +1,7 @@
 package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
@@ -33,21 +31,26 @@ public class UserFeedActor extends BaseActor {
     Util.initializeContext(request, TelemetryEnvKey.USER);
     RequestContext context = request.getRequestContext();
     String operation = request.getOperation();
-    if (ActorOperations.GET_USER_FEED_BY_ID.getValue().equalsIgnoreCase(operation)) {
-      logger.info(context, "UserFeedActor:onReceive getUserFeed method called");
-      String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-      getUserFeed(userId, context);
-    } else if (ActorOperations.CREATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
-      logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
-      createUserFeed(request, context);
-    } else if (ActorOperations.DELETE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
-      logger.info(context, "UserFeedActor:onReceive deleteUserFeed method called");
-      deleteUserFeed(request, context);
-    } else if (ActorOperations.UPDATE_USER_FEED.getValue().equalsIgnoreCase(operation)) {
-      logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
-      updateUserFeed(request, context);
-    } else {
-      onReceiveUnsupportedOperation("UserFeedActor");
+    switch (operation) {
+      case "getUserFeedById":
+        logger.info(context, "UserFeedActor:onReceive getUserFeed method called");
+        String userId = (String) request.getRequest().get(JsonKey.USER_ID);
+        getUserFeed(userId, context);
+        break;
+      case "createUserFeed":
+        logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
+        createUserFeed(request, context);
+        break;
+      case "deleteUserFeed":
+        logger.info(context, "UserFeedActor:onReceive deleteUserFeed method called");
+        deleteUserFeed(request, context);
+        break;
+      case "updateUserFeed":
+        logger.info(context, "UserFeedActor:onReceive updateUserFeed method called");
+        updateUserFeed(request, context);
+        break;
+      default:
+        onReceiveUnsupportedOperation("UserFeedActor");
     }
   }
 
