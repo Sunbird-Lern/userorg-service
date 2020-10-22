@@ -105,6 +105,7 @@ public enum ActorOperations {
   GET_USER_FEED_BY_ID("getUserFeedById"),
   CREATE_USER_FEED("createUserFeed"),
   DELETE_USER_FEED("deleteUserFeed"),
+  UPDATE_USER_FEED("updateUserFeed"),
   CREATE_USER_V3("createUserV3"),
   CREATE_USER_V4("createUserV4"),
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
