@@ -51,12 +51,23 @@ public class FeedRequestValidatorTest {
   public void validateFeedUpdateRequestTest() {
     Request reqObj = new Request();
     Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> dataMap = new HashMap<>();
     reqObj.setOperation(ActorOperations.CREATE_USER_FEED.getValue());
     requestMap.put(JsonKey.USER_ID, "someUserId");
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
     reqObj.setRequest(requestMap);
     Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
+  }
+
+  @Test
+  public void validateFeedDeleteRequestTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.CREATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    reqObj.setRequest(requestMap);
+    Assert.assertTrue(FeedRequestValidator.validateFeedDeleteRequest(reqObj, "someUserId"));
   }
 }

@@ -30,6 +30,10 @@ public class FeedRequestValidator extends BaseRequestValidator {
     }
   }
 
+  public static boolean validateFeedDeleteRequest(Request request, String callerId) {
+    return validateFeedUpdateRequest(request, callerId);
+  }
+
   public static boolean validateFeedUpdateRequest(Request request, String callerId) {
     Map<String, Object> feedReq = request.getRequest();
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.USER_ID))) {
