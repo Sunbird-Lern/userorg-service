@@ -14,7 +14,8 @@ import org.sunbird.learner.util.OTPUtil;
 
 @ActorConfig(
   tasks = {},
-  asyncTasks = {"sendOTP"}
+  asyncTasks = {"sendOTP"},
+  dispatcher = "notification-dispatcher"
 )
 public class SendOTPActor extends BaseActor {
   public static final String RESET_PASSWORD = "resetPassword";

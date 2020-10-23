@@ -44,7 +44,8 @@ import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"emailService"},
-  asyncTasks = {"emailService"}
+  asyncTasks = {"emailService"},
+  dispatcher = "notification-dispatcher"
 )
 public class EmailServiceActor extends BaseActor {
 
@@ -57,11 +58,15 @@ public class EmailServiceActor extends BaseActor {
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private SendgridConnection connection = new SendgridConnection();
+  private String resetInterval = ProjectUtil.getConfigValue("sendgrid_connection_reset_interval");
+  private volatile long timer;
 
   @Override
   public void onReceive(Request request) throws Throwable {
     if (null == connection.getTransport()) {
       connection.createConnection();
+      // set timer value
+      timer = System.currentTimeMillis();
     }
     if (request.getOperation().equalsIgnoreCase(BackgroundOperations.emailService.name())) {
       sendMail(request);
@@ -167,10 +172,14 @@ public class EmailServiceActor extends BaseActor {
       VelocityContext context = ProjectUtil.getContext(request);
       StringWriter writer = new StringWriter();
       Velocity.evaluate(context, writer, "SimpleVelocity", template);
-      if ((!connection.getTransport().isConnected())) {
-        logger.info(
-            requestContext, "SMTP Transport client connection is closed. Create new connection.");
-        connection.createConnection();
+      long interval = 60000L;
+      if (StringUtils.isNotBlank(resetInterval)) {
+        interval = Long.parseLong(resetInterval);
+      }
+      if (null == connection.getTransport()
+          || ((System.currentTimeMillis()) - timer >= interval)
+          || (!connection.getTransport().isConnected())) {
+        resetConnection();
       }
       sendEmail.send(
           emails.toArray(new String[emails.size()]),
@@ -185,6 +194,13 @@ public class EmailServiceActor extends BaseActor {
           "EmailServiceActor:sendMail: Exception occurred with message = " + e.getMessage(),
           e);
     }
+  }
+
+  private void resetConnection() {
+    logger.info("SMTP Transport client connection is closed or timed out. Create new connection.");
+    connection.createConnection();
+    // set timer value
+    timer = System.currentTimeMillis();
   }
 
   /**

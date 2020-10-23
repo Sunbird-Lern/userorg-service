@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +51,8 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  UserLookUp.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -88,7 +91,10 @@ public class UserUtilTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-
+    PowerMockito.when(
+            cassandraOperationImpl.deleteRecord(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
     PowerMockito.mockStatic(Util.class);
   }
 
@@ -226,7 +232,7 @@ public class UserUtilTest {
 
     UserDeclareEntity userDeclareEntity =
         UserUtil.createUserDeclaredObject(declareFieldMap, "01245444444");
-    Assert.assertEquals("PENDING", userDeclareEntity.getStatus());
+    Assert.assertEquals("SUBMITTED", userDeclareEntity.getStatus());
   }
 
   private List<Map<String, String>> getExternalIds() {
@@ -337,5 +343,115 @@ public class UserUtilTest {
           "Invalid value provider for parameter channel1004. Please provide a valid value.",
           ex.getMessage());
     }
+  }
+
+  @Test
+  public void testUpdateExternalIdsProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId1 = new HashMap<>();
+    extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.ORIGINAL_PROVIDER, "0123");
+    extId1.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.PROVIDER, "0123");
+    extId1.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId1);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testUpdateExternalIds2ProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId1 = new HashMap<>();
+    extId1.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.ORIGINAL_PROVIDER, "0123");
+    extId1.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId1.put(JsonKey.PROVIDER, "0123");
+    extId1.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId1.put(JsonKey.OPERATION, "add");
+    Map<String, String> extId2 = new HashMap<>();
+    extId2.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.ORIGINAL_PROVIDER, "01234");
+    extId2.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.PROVIDER, "01234");
+    extId2.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId1);
+    externalIds.add(extId2);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
+  public void testUpdateExternalIds3ProviderWithOrgId() {
+    beforeEachTest();
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> extId2 = new HashMap<>();
+    extId2.put(JsonKey.ORIGINAL_ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.ORIGINAL_PROVIDER, "01234");
+    extId2.put(JsonKey.ORIGINAL_EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.ID_TYPE, JsonKey.DECLARED_EMAIL);
+    extId2.put(JsonKey.PROVIDER, "01234");
+    extId2.put(JsonKey.EXTERNAL_ID, "abc@diksha.com");
+    extId2.put(JsonKey.OPERATION, "add");
+    externalIds.add(extId2);
+
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.USER_ID, "user1");
+    requestMap.put(JsonKey.CHANNEL, "0123");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "012345678921");
+    requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
+    try {
+      UserUtil.updateExternalIdsProviderWithOrgId(requestMap, null);
+    } catch (Exception ex) {
+      Assert.assertTrue(true);
+      Assert.assertEquals(
+          "Invalid value provider for parameter 01234. Please provide a valid value.",
+          ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testAddMaskEmailAndMaskPhone() {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.PHONE, "9999999999");
+    requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
+    UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testRemoveEntryFromUserLookUp() {
+    beforeEachTest();
+    Map<String, Object> mergeeMap = new HashMap<>();
+    mergeeMap.put(JsonKey.EMAIL, "someEmail");
+    mergeeMap.put(JsonKey.PHONE, "somePhone");
+    mergeeMap.put(JsonKey.USERNAME, "someUsername");
+    List<String> userLookUpIdentifiers =
+        Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
+    Assert.assertTrue(true);
   }
 }

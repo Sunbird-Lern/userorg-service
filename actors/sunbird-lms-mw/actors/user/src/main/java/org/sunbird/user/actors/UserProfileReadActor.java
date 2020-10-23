@@ -7,10 +7,8 @@ import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -39,12 +37,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
-import org.sunbird.models.user.User;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
@@ -64,7 +56,8 @@ import scala.concurrent.Future;
     "checkUserExistence",
     "checkUserExistenceV2"
   },
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-one-dispatcher"
 )
 public class UserProfileReadActor extends BaseActor {
 
@@ -72,13 +65,11 @@ public class UserProfileReadActor extends BaseActor {
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
   private ActorRef systemSettingActorRef = null;
-  private UserExternalIdentityDaoImpl userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserService userService = UserServiceImpl.getInstance();
-  private static UserExternalIdentityService userExternalIdentityService =
+  private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
 
   @Override
@@ -164,40 +155,25 @@ public class UserProfileReadActor extends BaseActor {
       userId = id;
       showMaskedData = false;
     }
-    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     Map<String, Object> result = null;
-    if (!isPrivate) {
-      Future<Map<String, Object>> resultF =
-          esUtil.getDataByIdentifier(
-              ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
-      try {
-        Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
-        if (object != null) {
-          result = (Map<String, Object>) object;
-        }
-      } catch (Exception e) {
-        logger.error(
-            actorMessage.getRequestContext(),
-            String.format(
-                "%s:%s:User not found with provided id == %s and error %s",
-                this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
-            e);
+
+    Future<Map<String, Object>> resultF =
+        esUtil.getDataByIdentifier(
+            ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
+    try {
+      Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
+      if (object != null) {
+        result = (Map<String, Object>) object;
       }
-    } else {
-      UserDao userDao = new UserDaoImpl();
-      User foundUser = userDao.getUserById(userId, actorMessage.getRequestContext());
-      if (foundUser == null) {
-        throw new ProjectCommonException(
-            ResponseCode.userNotFound.getErrorCode(),
-            ResponseCode.userNotFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-      }
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-      result = objectMapper.convertValue(foundUser, Map.class);
-      result.put(
-          JsonKey.ORGANISATIONS, Util.getUserOrgDetails(userId, actorMessage.getRequestContext()));
+    } catch (Exception e) {
+      logger.error(
+          actorMessage.getRequestContext(),
+          String.format(
+              "%s:%s:User not found with provided id == %s and error %s",
+              this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
+          e);
     }
+
     // check user found or not
     if (result == null || result.size() == 0) {
       throw new ProjectCommonException(
@@ -212,11 +188,9 @@ public class UserProfileReadActor extends BaseActor {
         && (Boolean) result.get(JsonKey.IS_DELETED)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-    Future<Map<String, Object>> esResultF =
-        fetchRootAndRegisterOrganisation(result, actorMessage.getRequestContext());
-    Map<String, Object> esResult =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
-    result.put(JsonKey.ROOT_ORG, esResult);
+    Map<String, Object> rootOrgResult =
+        fetchRootOrganisation(result, actorMessage.getRequestContext());
+    result.put(JsonKey.ROOT_ORG, rootOrgResult);
     // having check for removing private filed from user , if call user and response
     // user data id is not same.
     String requestedById =
@@ -263,11 +237,7 @@ public class UserProfileReadActor extends BaseActor {
                   actorMessage.getRequestContext(),
                   "Get external Ids explicitly from usr_external_identity for v3");
               List<Map<String, String>> resExternalIds =
-                  userExternalIdentityService.getUserExternalIds(
-                      userId, actorMessage.getRequestContext());
-              decryptUserExternalIds(resExternalIds, actorMessage.getRequestContext());
-              UserUtil.updateExternalIdsWithProvider(
-                  resExternalIds, actorMessage.getRequestContext());
+                  fetchExternalIds(userId, result, actorMessage.getRequestContext());
               result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
             }
           }
@@ -277,7 +247,7 @@ public class UserProfileReadActor extends BaseActor {
               actorMessage.getRequestContext(),
               "Get external Ids from both declarations and usr_external_identity for merge them");
           List<Map<String, String>> dbResExternalIds =
-              fetchUserExternalIdentity(userId, actorMessage.getRequestContext());
+              fetchUserExternalIdentity(userId, result, actorMessage.getRequestContext());
           result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
         }
       }
@@ -290,8 +260,7 @@ public class UserProfileReadActor extends BaseActor {
     }
     if (null != actorMessage.getContext().get(JsonKey.FIELDS)) {
       String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
-      addExtraFieldsInUserProfileResponse(
-          result, requestFields, userId, actorMessage.getRequestContext());
+      addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     } else {
       result.remove(JsonKey.MISSING_FIELDS);
       result.remove(JsonKey.COMPLETENESS);
@@ -301,14 +270,11 @@ public class UserProfileReadActor extends BaseActor {
 
     if (null != result) {
       UserUtility.decryptUserDataFrmES(result);
-      updateSkillWithEndoresmentCount(result);
       updateTnc(result);
       // loginId is used internally for checking the duplicate user
       result.remove(JsonKey.LOGIN_ID);
       result.remove(JsonKey.ENC_EMAIL);
       result.remove(JsonKey.ENC_PHONE);
-      // String username = ssoManager.getUsernameById(userId);
-      //  result.put(JsonKey.USERNAME, username);
 
       if (withTokens && StringUtils.isNotEmpty(managedBy) && MapUtils.isNotEmpty(result)) {
         if (StringUtils.isEmpty(managedToken)) {
@@ -336,6 +302,43 @@ public class UserProfileReadActor extends BaseActor {
       response.put(JsonKey.RESPONSE, result);
     }
     return response;
+  }
+
+  private List<Map<String, String>> fetchExternalIds(
+      String userId, Map<String, Object> user, RequestContext context) {
+    try {
+      logger.info(context, "Get external Ids explicitly from usr_external_identity for v3");
+      List<Map<String, String>> resExternalIds =
+          userExternalIdentityService.getUserExternalIds(userId, context);
+      decryptUserExternalIds(resExternalIds, context);
+      if (CollectionUtils.isNotEmpty(resExternalIds)) {
+        String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
+        if (StringUtils.isNotBlank(rootOrgId)) {
+          String orgId = resExternalIds.get(0).get(JsonKey.PROVIDER);
+          if (orgId.equalsIgnoreCase(rootOrgId)) {
+            String provider = (String) user.get(JsonKey.CHANNEL);
+            resExternalIds
+                .stream()
+                .forEach(
+                    s -> {
+                      if (s.get(JsonKey.PROVIDER) != null
+                          && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                        s.put(JsonKey.ID_TYPE, provider);
+                      }
+                      s.put(JsonKey.PROVIDER, provider);
+                    });
+          } else {
+            UserUtil.updateExternalIdsWithProvider(resExternalIds, context);
+          }
+        } else {
+          UserUtil.updateExternalIdsWithProvider(resExternalIds, context);
+        }
+      }
+      return resExternalIds;
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return new ArrayList<>();
   }
 
   /**
@@ -391,14 +394,38 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private List<Map<String, String>> fetchUserExternalIdentity(
-      String userId, RequestContext context) {
+      String userId, Map<String, Object> user, RequestContext context) {
+    try {
+      List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
 
-    List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, context);
-
-    decryptUserExternalIds(dbResExternalIds, context);
-    // update orgId to provider in externalIds
-    UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-    return dbResExternalIds;
+      decryptUserExternalIds(dbResExternalIds, context);
+      // update orgId to provider in externalIds
+      String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
+      if (CollectionUtils.isNotEmpty(dbResExternalIds) && StringUtils.isNotBlank(rootOrgId)) {
+        String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
+        if (orgId.equalsIgnoreCase(rootOrgId)) {
+          String provider = (String) user.get(JsonKey.CHANNEL);
+          dbResExternalIds
+              .stream()
+              .forEach(
+                  s -> {
+                    if (s.get(JsonKey.PROVIDER) != null
+                        && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                      s.put(JsonKey.ID_TYPE, provider);
+                    }
+                    s.put(JsonKey.PROVIDER, provider);
+                  });
+        } else {
+          UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+        }
+      } else {
+        UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+      }
+      return dbResExternalIds;
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return new ArrayList<>();
   }
 
   private void decryptUserExternalIds(
@@ -454,12 +481,6 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  private void setDefaultUserProfileVisibility(Map<String, Object> userMap) {
-    userMap.put(
-        JsonKey.DEFAULT_PROFILE_FIELD_VISIBILITY,
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_USER_PROFILE_FIELD_DEFAULT_VISIBILITY));
-  }
-
   /**
    * This method will remove user private field from response map
    *
@@ -472,6 +493,27 @@ public class UserProfileReadActor extends BaseActor {
     }
     logger.info("All private filed removed=");
     return responseMap;
+  }
+
+  private Map<String, Object> fetchRootOrganisation(
+      Map<String, Object> result, RequestContext context) {
+    try {
+      if (StringUtils.isNotBlank((String) result.get(JsonKey.ROOT_ORG_ID))) {
+        String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
+        Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
+        Response response =
+            cassandraOperation.getRecordById(
+                OrgDb.getKeySpace(), OrgDb.getTableName(), rootOrgId, context);
+        List<Map<String, Object>> responseList =
+            (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        if (CollectionUtils.isNotEmpty(responseList)) {
+          return responseList.get(0);
+        }
+      }
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
+    return null;
   }
 
   private Future<Map<String, Object>> fetchRootAndRegisterOrganisation(
@@ -489,20 +531,14 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void addExtraFieldsInUserProfileResponse(
-      Map<String, Object> result, String fields, String userId, RequestContext context) {
+      Map<String, Object> result, String fields, RequestContext context) {
     if (!StringUtils.isBlank(fields)) {
+      result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (!fields.contains(JsonKey.COMPLETENESS)) {
         result.remove(JsonKey.COMPLETENESS);
       }
       if (!fields.contains(JsonKey.MISSING_FIELDS)) {
         result.remove(JsonKey.MISSING_FIELDS);
-      }
-      if (fields.contains(JsonKey.LAST_LOGIN_TIME)) {
-        result.put(
-            JsonKey.LAST_LOGIN_TIME,
-            Long.parseLong(getLastLoginTime(userId, (String) result.get(JsonKey.LAST_LOGIN_TIME))));
-      } else {
-        result.remove(JsonKey.LAST_LOGIN_TIME);
       }
       if (fields.contains(JsonKey.TOPIC)) {
         // fetch the topic details of all user associated orgs and append in the result
@@ -512,7 +548,7 @@ public class UserProfileReadActor extends BaseActor {
         updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
       }
       if (fields.contains(JsonKey.ROLES)) {
-        updateRoleMasterInfo(result);
+        result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
         result.put(
@@ -523,106 +559,57 @@ public class UserProfileReadActor extends BaseActor {
     }
   }
 
-  private void updateSkillWithEndoresmentCount(Map<String, Object> result) {
-    if (MapUtils.isNotEmpty(result) && result.containsKey(JsonKey.SKILLS)) {
-      List<Map<String, Object>> skillList = (List<Map<String, Object>>) result.get(JsonKey.SKILLS);
-      if (CollectionUtils.isEmpty(skillList)) {
-        return;
-      }
-      for (Map<String, Object> skill : skillList) {
-        skill.put(
-            JsonKey.ENDORSEMENT_COUNT.toLowerCase(),
-            (int) skill.getOrDefault(JsonKey.ENDORSEMENT_COUNT, 0));
-      }
-    }
-  }
-
-  private String getLastLoginTime(String userId, String time) {
-    String lastLoginTime = "";
-    if (Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
-      SSOManager manager = SSOServiceFactory.getInstance();
-      lastLoginTime = manager.getLastLoginTime(userId);
-    } else {
-      lastLoginTime = time;
-    }
-    if (StringUtils.isBlank(lastLoginTime)) {
-      return "0";
-    }
-    return lastLoginTime;
-  }
-
   private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
-
-    String userId = (String) result.get(JsonKey.ID);
-    Map<String, Object> locationCache = new HashMap<>();
     Set<String> topicSet = new HashSet<>();
+    List<Map<String, Object>> userOrgList =
+        (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
+    if (CollectionUtils.isNotEmpty(userOrgList)) {
+      List<String> orgIdList =
+          userOrgList
+              .stream()
+              .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
+              .distinct()
+              .collect(Collectors.toList());
 
-    // fetch all associated user orgs
-    List<String> ids = new ArrayList<>();
-    ids.add(userId);
-    Response response1 =
-        cassandraOperation.getRecordsByPrimaryKeys(
-            userOrgDbInfo.getKeySpace(),
-            userOrgDbInfo.getTableName(),
-            ids,
-            JsonKey.USER_ID,
-            context);
-
-    List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
-
-    List<String> orgIdsList = new ArrayList<>();
-    if (!list.isEmpty()) {
-
-      for (Map<String, Object> m : list) {
-        String orgId = (String) m.get(JsonKey.ORGANISATION_ID);
-        orgIdsList.add(orgId);
-      }
-
-      // fetch all org details from elasticsearch ...
-      if (!orgIdsList.isEmpty()) {
-
-        Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.ID, orgIdsList);
-
+      // fetch all org details from cassandra ...
+      if (CollectionUtils.isNotEmpty(orgIdList)) {
+        Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
         List<String> orgfields = new ArrayList<>();
         orgfields.add(JsonKey.ID);
         orgfields.add(JsonKey.LOCATION_ID);
+        Response userOrgResponse =
+            cassandraOperation.getPropertiesValueById(
+                OrgDb.getKeySpace(), OrgDb.getTableName(), orgIdList, orgfields, context);
+        List<Map<String, Object>> userOrgResponseList =
+            (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
 
-        SearchDTO searchDTO = new SearchDTO();
-        searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-        searchDTO.setFields(orgfields);
-        Future<Map<String, Object>> esresultF =
-            esUtil.search(searchDTO, EsType.organisation.getTypeName(), context);
-        Map<String, Object> esresult =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esresultF);
-        List<Map<String, Object>> esContent =
-            (List<Map<String, Object>>) esresult.get(JsonKey.CONTENT);
-
-        if (!esContent.isEmpty()) {
-          for (Map<String, Object> m : esContent) {
-            if (!StringUtils.isBlank((String) m.get(JsonKey.LOCATION_ID))) {
-              String locationId = (String) m.get(JsonKey.LOCATION_ID);
-              if (locationCache.containsKey(locationId)) {
-                topicSet.add((String) locationCache.get(locationId));
-              } else {
-                // get the location id info from db and set to the cacche and
-                // topicSet
-                Response response3 =
-                    cassandraOperation.getRecordById(
-                        geoLocationDbInfo.getKeySpace(),
-                        geoLocationDbInfo.getTableName(),
-                        locationId,
-                        context);
-                List<Map<String, Object>> list3 =
-                    (List<Map<String, Object>>) response3.get(JsonKey.RESPONSE);
-                if (!list3.isEmpty()) {
-                  Map<String, Object> locationInfoMap = list3.get(0);
-                  String topic = (String) locationInfoMap.get(JsonKey.TOPIC);
-                  topicSet.add(topic);
-                  locationCache.put(locationId, topic);
-                }
-              }
+        if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
+          List<String> locationIdList = new ArrayList<>();
+          for (Map<String, Object> org : userOrgResponseList) {
+            String locId = (String) org.get(JsonKey.LOCATION_ID);
+            if (StringUtils.isNotBlank(locId)) {
+              locationIdList.add(locId);
             }
+          }
+          if (CollectionUtils.isNotEmpty(locationIdList)) {
+            List<String> geoLocationFields = new ArrayList<>();
+            geoLocationFields.add(JsonKey.TOPIC);
+            Response geoLocationResponse =
+                cassandraOperation.getPropertiesValueById(
+                    geoLocationDbInfo.getKeySpace(),
+                    geoLocationDbInfo.getTableName(),
+                    locationIdList,
+                    geoLocationFields,
+                    context);
+            List<Map<String, Object>> geoLocationResponseList =
+                (List<Map<String, Object>>) geoLocationResponse.get(JsonKey.RESPONSE);
+            List<String> topicList =
+                geoLocationResponseList
+                    .stream()
+                    .map(m -> (String) m.get(JsonKey.TOPIC))
+                    .distinct()
+                    .collect(Collectors.toList());
+            topicSet.addAll(topicList);
           }
         }
       }
@@ -631,12 +618,12 @@ public class UserProfileReadActor extends BaseActor {
   }
 
   private void updateUserOrgInfo(List<Map<String, Object>> userOrgs, RequestContext context) {
-    Map<String, Map<String, Object>> orgInfoMap = fetchAllOrgsById(userOrgs, context);
+    Map<String, Map<String, Object>> orgInfoMap = fetchAllOrgById(userOrgs, context);
     Map<String, Map<String, Object>> locationInfoMap = fetchAllLocationsById(orgInfoMap, context);
     prepUserOrgInfoWithAdditionalData(userOrgs, orgInfoMap, locationInfoMap);
   }
 
-  private Map<String, Map<String, Object>> fetchAllOrgsById(
+  private Map<String, Map<String, Object>> fetchAllOrgById(
       List<Map<String, Object>> userOrgs, RequestContext context) {
     List<String> orgIds =
         userOrgs
@@ -644,33 +631,72 @@ public class UserProfileReadActor extends BaseActor {
             .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
             .distinct()
             .collect(Collectors.toList());
-    List<String> fields =
-        Arrays.asList(
-            JsonKey.ORG_NAME, JsonKey.CHANNEL, JsonKey.HASHTAGID, JsonKey.LOCATION_IDS, JsonKey.ID);
-
-    Map<String, Map<String, Object>> orgInfoMap =
-        getEsResultByListOfIds(orgIds, fields, EsType.organisation, context);
-    return orgInfoMap;
+    if (CollectionUtils.isNotEmpty(orgIds)) {
+      List<String> fields =
+          Arrays.asList(
+              JsonKey.ORG_NAME,
+              JsonKey.CHANNEL,
+              JsonKey.HASHTAGID,
+              JsonKey.LOCATION_IDS,
+              JsonKey.ID);
+      Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
+      Response userOrgResponse =
+          cassandraOperation.getPropertiesValueById(
+              OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
+      List<Map<String, Object>> userOrgResponseList =
+          (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
+      return userOrgResponseList
+          .stream()
+          .collect(
+              Collectors.toMap(
+                  obj -> {
+                    return (String) obj.get("id");
+                  },
+                  val -> val));
+    } else {
+      return new HashMap<>();
+    }
   }
 
   private Map<String, Map<String, Object>> fetchAllLocationsById(
       Map<String, Map<String, Object>> orgInfoMap, RequestContext context) {
-    List<String> searchLocations = new ArrayList<>();
+
+    Set<String> locationSet = new HashSet<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
-      List<String> locations = (List<String>) org.get(JsonKey.LOCATION_IDS);
-      if (locations != null) {
-        for (String location : locations) {
-          if (!searchLocations.contains(location)) {
-            searchLocations.add(location);
-          }
-        }
+      List<String> locationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
+      if (CollectionUtils.isNotEmpty(locationIds)) {
+        locationIds.forEach(
+            locId -> {
+              if (StringUtils.isNotBlank(locId)) {
+                locationSet.add(locId);
+              }
+            });
       }
     }
-    List<String> locationFields =
-        Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-    Map<String, Map<String, Object>> locationInfoMap =
-        getEsResultByListOfIds(searchLocations, locationFields, EsType.location, context);
-    return locationInfoMap;
+    if (CollectionUtils.isNotEmpty(locationSet)) {
+      List<String> locList = new ArrayList<>(locationSet);
+      List<String> locationFields =
+          Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
+
+      Response locationResponse =
+          cassandraOperation.getPropertiesValueById(
+              "sunbird", "location", locList, locationFields, context);
+      List<Map<String, Object>> locationResponseList =
+          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+
+      Map<String, Map<String, Object>> locationInfoMap =
+          locationResponseList
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      obj -> {
+                        return (String) obj.get("id");
+                      },
+                      val -> val));
+      return locationInfoMap;
+    } else {
+      return new HashMap<>();
+    }
   }
 
   private void prepUserOrgInfoWithAdditionalData(
@@ -683,9 +709,11 @@ public class UserProfileReadActor extends BaseActor {
       usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
       usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
       usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
-      usrOrg.put(
-          JsonKey.LOCATIONS,
-          prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      if (MapUtils.isNotEmpty(locationInfoMap)) {
+        usrOrg.put(
+            JsonKey.LOCATIONS,
+            prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      }
     }
   }
 
@@ -698,46 +726,6 @@ public class UserProfileReadActor extends BaseActor {
       }
     }
     return retList;
-  }
-
-  private Map<String, Map<String, Object>> getEsResultByListOfIds(
-      List<String> orgIds, List<String> fields, EsType typeToSearch, RequestContext context) {
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.ID, orgIds);
-
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    searchDTO.setFields(fields);
-
-    Future<Map<String, Object>> resultF =
-        esUtil.search(searchDTO, typeToSearch.getTypeName(), context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
-    List<Map<String, Object>> esContent = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    return esContent
-        .stream()
-        .collect(
-            Collectors.toMap(
-                obj -> {
-                  return (String) obj.get("id");
-                },
-                val -> val));
-  }
-
-  private void updateRoleMasterInfo(Map<String, Object> result) {
-    Set<Entry<String, Object>> roleSet = DataCacheHandler.getRoleMap().entrySet();
-    List<Map<String, String>> roleList = new ArrayList<>();
-    roleSet
-        .parallelStream()
-        .forEach(
-            (roleSetItem) -> {
-              Map<String, String> roleMap = new HashMap<>();
-              roleMap.put(JsonKey.ID, roleSetItem.getKey());
-              roleMap.put(JsonKey.NAME, (String) roleSetItem.getValue());
-              roleList.add(roleMap);
-            });
-    result.put(JsonKey.ROLE_LIST, roleList);
   }
 
   /**
@@ -887,7 +875,7 @@ public class UserProfileReadActor extends BaseActor {
       } else {
         // fetch user external identity
         List<Map<String, String>> dbResExternalIds =
-            fetchUserExternalIdentity(requestedById, actorMessage.getRequestContext());
+            fetchUserExternalIdentity(requestedById, result, actorMessage.getRequestContext());
         result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
       }
     } catch (Exception e) {
@@ -910,10 +898,7 @@ public class UserProfileReadActor extends BaseActor {
         List<String> requestFields = (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
         if (requestFields != null) {
           addExtraFieldsInUserProfileResponse(
-              result,
-              String.join(",", requestFields),
-              (String) result.get(JsonKey.USER_ID),
-              actorMessage.getRequestContext());
+              result, String.join(",", requestFields), actorMessage.getRequestContext());
         } else {
           result.remove(JsonKey.MISSING_FIELDS);
           result.remove(JsonKey.COMPLETENESS);
@@ -983,10 +968,15 @@ public class UserProfileReadActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(locationIds)) {
       List<String> locationFields =
           Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-      Map<String, Map<String, Object>> locationInfoMap =
-          getEsResultByListOfIds(locationIds, locationFields, EsType.location, context);
-
-      return locationInfoMap.values().stream().collect(Collectors.toList());
+      List<String> orgfields = new ArrayList<>();
+      orgfields.add(JsonKey.ID);
+      orgfields.add(JsonKey.LOCATION_ID);
+      Response locationResponse =
+          cassandraOperation.getPropertiesValueById(
+              "sunbird", "location", locationIds, locationFields, context);
+      List<Map<String, Object>> locationResponseList =
+          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+      return locationResponseList;
     }
     return new ArrayList<>();
   }
@@ -1160,7 +1150,9 @@ public class UserProfileReadActor extends BaseActor {
                 if (((String) result.get(JsonKey.USER_ID)).equalsIgnoreCase(requestedById)) {
                   List<Map<String, String>> dbResExternalIds =
                       fetchUserExternalIdentity(
-                          (String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext());
+                          (String) result.get(JsonKey.USER_ID),
+                          result,
+                          actorMessage.getRequestContext());
                   extIdMap.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
                   return extIdMap;
                 }
@@ -1180,10 +1172,7 @@ public class UserProfileReadActor extends BaseActor {
                       (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
                   if (requestFields != null) {
                     addExtraFieldsInUserProfileResponse(
-                        result,
-                        String.join(",", requestFields),
-                        (String) result.get(JsonKey.USER_ID),
-                        actorMessage.getRequestContext());
+                        result, String.join(",", requestFields), actorMessage.getRequestContext());
                   } else {
                     result.remove(JsonKey.MISSING_FIELDS);
                     result.remove(JsonKey.COMPLETENESS);

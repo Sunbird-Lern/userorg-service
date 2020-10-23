@@ -80,9 +80,18 @@ public class UserUtil {
           providerSet.add(extId.get(JsonKey.PROVIDER));
         }
       }
-      Map<String, String> orgProviderMap =
-          fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
-
+      Map<String, String> orgProviderMap;
+      if (CollectionUtils.isNotEmpty(providerSet) && providerSet.size() == 1) {
+        String channel = providerSet.stream().findFirst().orElse("");
+        orgProviderMap = new HashMap<>();
+        if (channel.equalsIgnoreCase((String) userMap.get(JsonKey.CHANNEL))) {
+          orgProviderMap.put(channel, (String) userMap.get(JsonKey.ROOT_ORG_ID));
+        } else {
+          orgProviderMap = fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
+        }
+      } else {
+        orgProviderMap = fetchOrgIdByProvider(new ArrayList<>(providerSet), context);
+      }
       if (CollectionUtils.isNotEmpty(
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
         for (Map<String, String> externalId :
@@ -302,12 +311,10 @@ public class UserUtil {
     String phone = (String) userMap.get(JsonKey.PHONE);
     String email = (String) userMap.get(JsonKey.EMAIL);
     if (!StringUtils.isBlank(phone)) {
-      userMap.put(
-          JsonKey.MASKED_PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
+      userMap.put(JsonKey.MASKED_PHONE, maskingService.maskPhone(phone));
     }
     if (!StringUtils.isBlank(email)) {
-      userMap.put(
-          JsonKey.MASKED_EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
+      userMap.put(JsonKey.MASKED_EMAIL, maskingService.maskEmail(email));
     }
   }
 
@@ -553,7 +560,7 @@ public class UserUtil {
     externalIds.forEach(
         externalIdMap -> {
           // Needed in 3.2
-          // externalIdMap.put(JsonKey.STATUS, JsonKey.PENDING);
+          // externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
         });
   }
 
@@ -785,6 +792,7 @@ public class UserUtil {
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.ADD);
+      userDeclareEntity.setStatus(JsonKey.SUBMITTED);
       userDeclareEntities.add(userDeclareEntity);
     }
     return currOrgId;
@@ -888,11 +896,49 @@ public class UserUtil {
       userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
     }
     if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.STATUS))) {
-      userDeclareEntity.setStatus(JsonKey.PENDING);
+      userDeclareEntity.setStatus(JsonKey.SUBMITTED);
     }
     userDeclareEntity.setErrorType((String) declareFieldMap.get(JsonKey.ERR_TYPE));
 
     return userDeclareEntity;
+  }
+
+  public static void removeEntryFromUserLookUp(
+      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
+    logger.info(
+        context,
+        "UserUtil:removeEntryFromUserLookUp remove following identifiers from lookUp table "
+            + identifiers);
+    List<Map<String, String>> reqMap = new ArrayList<>();
+    Map<String, String> deleteLookUp = new HashMap<>();
+    if (identifiers.contains(JsonKey.EMAIL)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EMAIL));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.PHONE)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.PHONE));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.USERNAME)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.USERNAME))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.USERNAME.toLowerCase());
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.USERNAME));
+      logger.info(
+          context,
+          "UserUtil:removeEntryFromUserLookUp before transliterating username: "
+              + (String) userDbMap.get(JsonKey.USERNAME));
+      reqMap.add(deleteLookUp);
+    }
+    if (CollectionUtils.isNotEmpty(reqMap)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqMap, context);
+    }
   }
 }
 

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.actor.router.ActorConfig;
@@ -39,6 +41,7 @@ import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
+import org.sunbird.user.util.UserUtil;
 
 @ActorConfig(
   tasks = {"mergeUser"},
@@ -47,6 +50,7 @@ import org.sunbird.user.util.KafkaConfigConstants;
 public class UserMergeActor extends UserBaseActor {
   String topic = null;
   Producer<String, String> producer = null;
+  ObjectMapper objectMapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
@@ -72,6 +76,7 @@ public class UserMergeActor extends UserBaseActor {
     Response response = new Response();
     Map mergeeDBMap = new HashMap<String, Object>();
     HashMap requestMap = (HashMap) userRequest.getRequest();
+    RequestContext context = userRequest.getRequestContext();
     Map userCertMap = (Map) requestMap.clone();
     Map headers = (Map) userRequest.getContext().get(JsonKey.HEADER);
     String mergeeId = (String) requestMap.get(JsonKey.FROM_ACCOUNT_ID);
@@ -99,6 +104,10 @@ public class UserMergeActor extends UserBaseActor {
       userRequest.put(JsonKey.USER_MERGEE_ACCOUNT, mergeeDBMap);
       UserDao userDao = UserDaoImpl.getInstance();
       Response mergeeResponse = userDao.updateUser(mergeeDBMap, userRequest.getRequestContext());
+      List<String> userLookUpIdentifiers =
+          Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+      UserUtil.removeEntryFromUserLookUp(
+          objectMapper.convertValue(mergee, Map.class), userLookUpIdentifiers, context);
       String mergeeResponseStr = (String) mergeeResponse.get(JsonKey.RESPONSE);
       logger.info(
           userRequest.getRequestContext(),
@@ -187,7 +196,7 @@ public class UserMergeActor extends UserBaseActor {
       throws IOException {
     String content = null;
     Telemetry userCertMergeRequest = createAccountMergeTopicData(mergee, merger);
-    ObjectMapper objectMapper = new ObjectMapper();
+
     content = objectMapper.writeValueAsString(userCertMergeRequest);
     logger.info(context, "UserMergeActor:mergeCertCourseDetails: Kafka producer topic::" + content);
     ProducerRecord<String, String> record = new ProducerRecord<>(topic, content);

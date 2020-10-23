@@ -70,7 +70,8 @@ import scala.concurrent.Future;
     "getManagedUsers",
     "updateUserDeclarations"
   },
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -295,9 +296,9 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.UPDATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
     }
+    UserUtil.addMaskEmailAndMaskPhone(userMap);
     Map<String, Object> requestMap = UserUtil.encryptUserData(userMap);
     validateRecoveryEmailPhone(userDbRecord, userMap);
-    UserUtil.addMaskEmailAndMaskPhone(requestMap);
     Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     if (requestMap.containsKey(JsonKey.TNC_ACCEPTED_ON)) {
@@ -865,12 +866,12 @@ public class UserManagementActor extends BaseActor {
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
+    UserUtil.addMaskEmailAndMaskPhone(userMap);
     try {
       UserUtility.encryptUserData(userMap);
     } catch (Exception ex) {
       logger.error(actorMessage.getRequestContext(), ex.getMessage(), ex);
     }
-    UserUtil.addMaskEmailAndMaskPhone(userMap);
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
@@ -1084,8 +1085,8 @@ public class UserManagementActor extends BaseActor {
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
+    UserUtil.addMaskEmailAndMaskPhone(userMap);
     requestMap = UserUtil.encryptUserData(userMap);
-    UserUtil.addMaskEmailAndMaskPhone(requestMap);
     Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     removeUnwanted(requestMap);
     requestMap.put(JsonKey.IS_DELETED, false);
@@ -1165,33 +1166,16 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(callerId)) {
       sendEmailAndSms(requestMap);
     }
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    Map<String, String> rollUp = new HashMap<>();
-    rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    request.getContext().put(JsonKey.ROLLUP, rollUp);
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
-    TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
-    String signupType =
-        request.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) request.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        request.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) request.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
-    if (StringUtils.isNotBlank(signupType)) {
-      TelemetryUtil.generateCorrelatedObject(
-          signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    }
-    if (StringUtils.isNotBlank(source)) {
-      TelemetryUtil.generateCorrelatedObject(
-          source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    }
-    TelemetryUtil.telemetryProcessingCall(
-        userMap, targetObject, correlatedObject, request.getContext());
+    generateUserTelemetry(userMap, request, userId);
+  }
+
+  private void generateUserTelemetry(Map<String, Object> userMap, Request request, String userId) {
+    Request telemetryReq = new Request();
+    telemetryReq.getRequest().put("userMap", userMap);
+    telemetryReq.getRequest().put("userId", userId);
+    telemetryReq.setContext(request.getContext());
+    telemetryReq.setOperation("generateUserTelemetry");
+    tellToAnother(telemetryReq);
   }
 
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
@@ -1208,7 +1192,7 @@ public class UserManagementActor extends BaseActor {
   private void setStateValidation(
       Map<String, Object> requestMap, Map<String, Boolean> userBooleanMap, RequestContext context) {
     String rootOrgId = (String) requestMap.get(JsonKey.ROOT_ORG_ID);
-    String custodianRootOrgId = getCustodianRootOrgId(context);
+    String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     // if the user is creating for non-custodian(i.e state) the value is set as true else false
     userBooleanMap.put(JsonKey.STATE_VALIDATED, !custodianRootOrgId.equals(rootOrgId));
   }

@@ -22,7 +22,8 @@ import org.sunbird.systemsettings.dao.impl.SystemSettingDaoImpl;
 
 @ActorConfig(
   tasks = {"getSystemSetting", "getAllSystemSettings", "setSystemSetting"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "most-used-two-dispatcher"
 )
 public class SystemSettingsActor extends BaseActor {
 

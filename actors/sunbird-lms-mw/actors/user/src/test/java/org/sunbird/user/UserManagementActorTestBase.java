@@ -178,6 +178,10 @@ public abstract class UserManagementActorTestBase {
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
     when(UserUtil.getActiveUserOrgDetails(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUserOrgDetails());
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     reqMap = getMapObject();
   }
 

@@ -51,8 +51,7 @@ public class DeclaredExternalIdActor extends BaseActor {
         UserUploadUtil.convertRowToObject(row, request.getRequestContext());
     List<SelfDeclaredUser> userList =
         UserUploadUtil.getMigrationUserAsList(bulkMigrationUser, request.getRequestContext());
-    userList
-        .parallelStream()
+    userList.parallelStream()
         .forEach(
             migrateUser -> {
               // add entry in usr_external_id
@@ -87,8 +86,11 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void updateErrorDetail(Request request, SelfDeclaredUser declaredUser) {
+
+    Request req = new Request();
     try {
-      request.setOperation("updateUserSelfDeclarationsErrorType");
+      req.setRequestContext(request.getRequestContext());
+      req.setOperation("updateUserSelfDeclarationsErrorType");
       Map<String, Object> requestMap = new HashMap();
       UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
       userDeclareEntity.setOrgId(declaredUser.getOrgId());
@@ -97,11 +99,11 @@ public class DeclaredExternalIdActor extends BaseActor {
       userDeclareEntity.setErrorType(declaredUser.getErrorType());
       userDeclareEntity.setStatus(declaredUser.getInputStatus());
       requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
-      request.setRequest(requestMap);
-      tellToAnother(request);
+      req.setRequest(requestMap);
+      tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-          request.getRequestContext(),
+              req.getRequestContext(),
           "DeclaredExternalIdActor:updateErrorDetail:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),
@@ -110,8 +112,10 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void rejectDeclaredDetail(Request request, SelfDeclaredUser declaredUser) {
+    Request req = new Request();
     try {
-      request.setOperation("upsertUserSelfDeclarations");
+      req.setRequestContext(request.getRequestContext());
+      req.setOperation("upsertUserSelfDeclarations");
       Map<String, Object> requestMap = new HashMap();
       UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
       userDeclareEntity.setOrgId(declaredUser.getOrgId());
@@ -121,11 +125,11 @@ public class DeclaredExternalIdActor extends BaseActor {
       List userDeclareEntityLst = new ArrayList<UserDeclareEntity>();
       userDeclareEntityLst.add(userDeclareEntity);
       requestMap.put(JsonKey.DECLARATIONS, userDeclareEntityLst);
-      request.setRequest(requestMap);
-      tellToAnother(request);
+      req.setRequest(requestMap);
+      tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-          request.getRequestContext(),
+              req.getRequestContext(),
           "DeclaredExternalIdActor:rejectDeclaredDetail:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),
@@ -134,20 +138,21 @@ public class DeclaredExternalIdActor extends BaseActor {
   }
 
   private void migrateDeclaredUser(Request request, SelfDeclaredUser declaredUser) {
-    request.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
-    logger.info(request.getRequestContext(), "DeclaredExternalIdActor:migrateDeclaredUser ");
+    Request req = new Request();
     try {
+      req.setRequestContext(request.getRequestContext());
+      req.setOperation(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE.getValue());
       if (StringUtils.isNotEmpty(declaredUser.getSubOrgExternalId())) {
         Organisation org =
             getOrgDetails(
                 declaredUser.getSubOrgExternalId(),
                 declaredUser.getChannel(),
-                request.getRequestContext());
-        if (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId())) {
+                    req.getRequestContext());
+        if (org == null || (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId()))) {
           declaredUser.setErrorType(
               SelfDeclaredErrorTypeEnum.ERROR_STATE.getErrorType().replace("_", "-"));
           declaredUser.setInputStatus(SelfDeclaredStatusEnum.ERROR.name());
-          updateErrorDetail(request, declaredUser);
+          updateErrorDetail(req, declaredUser);
           return;
         }
       }
@@ -162,11 +167,11 @@ public class DeclaredExternalIdActor extends BaseActor {
       externalIdMap.put(JsonKey.PROVIDER, declaredUser.getChannel());
       externalIdLst.add(externalIdMap);
       requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
-      request.setRequest(requestMap);
-      tellToAnother(request);
+      req.setRequest(requestMap);
+      tellToAnother(req);
     } catch (Exception e) {
       logger.error(
-          request.getRequestContext(),
+              req.getRequestContext(),
           "DeclaredExternalIdActor:migrateDeclaredUser:Exception in processing the DeclaredUser: "
               + e.getCause()
               + declaredUser.getUserId(),

@@ -30,7 +30,8 @@ import scala.concurrent.Future;
     "upsertUserEducationToES",
     "upsertUserJobProfileToES",
     "upsertUserOrgDetailsToES"
-  }
+  },
+  dispatcher = "most-used-two-dispatcher"
 )
 public class UserBackgroundJobActor extends BaseActor {
 

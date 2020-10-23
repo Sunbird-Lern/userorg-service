@@ -21,7 +21,8 @@ import org.sunbird.learner.util.Util;
 
 @ActorConfig(
   tasks = {"v2Notification"},
-  asyncTasks = {}
+  asyncTasks = {},
+  dispatcher = "notification-dispatcher"
 )
 public class SendNotificationActor extends BaseActor {
   @Override
