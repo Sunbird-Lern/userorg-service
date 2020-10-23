@@ -47,7 +47,16 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service insertRecord method started at ==" + startTime);
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      logger.info(context, "insert request body ==" + request);
+      try {
+        logger.info(context, "insert request body ==" + request);
+        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+        if (CollectionUtils.isEmpty(locationIdList)
+            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
+          logger.info(context, "User request contains empty location or only single location.");
+        }
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred.", ex);
+      }
     }
     Response response = new Response();
     String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
@@ -94,7 +103,16 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service updateRecord method started at ==" + startTime);
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      logger.info(context, "update request body ==" + request);
+      try {
+        logger.info(context, "update request body ==" + request);
+        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+        if (CollectionUtils.isEmpty(locationIdList)
+            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
+          logger.info(context, "User request contains empty location or only single location.");
+        }
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred.", ex);
+      }
     }
     Response response = new Response();
     String query = CassandraUtil.getUpdateQueryStatement(keyspaceName, tableName, request);
@@ -389,7 +407,16 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service upsertRecord method started at ==" + startTime);
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      logger.info(context, "upsert request body ==" + request);
+      try {
+        logger.info(context, "upsert request body ==" + request);
+        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+        if (CollectionUtils.isEmpty(locationIdList)
+            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
+          logger.info(context, "User request contains empty location or only single location.");
+        }
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred.", ex);
+      }
     }
     Response response = new Response();
     String query = "";
