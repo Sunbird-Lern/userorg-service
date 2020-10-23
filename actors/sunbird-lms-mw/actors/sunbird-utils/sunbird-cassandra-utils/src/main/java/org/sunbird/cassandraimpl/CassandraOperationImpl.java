@@ -49,10 +49,14 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
       try {
         logger.info(context, "insert request body ==" + request);
-        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-        if (CollectionUtils.isEmpty(locationIdList)
-            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
-          logger.info(context, "User request contains empty location or only single location.");
+        if (request.containsKey(JsonKey.LOCATION_IDS)) {
+          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+          if (CollectionUtils.isEmpty(locationIdList)
+              || (CollectionUtils.isNotEmpty(locationIdList)
+                  && CollectionUtils.isNotEmpty(locationIdList)
+                  && locationIdList.size() < 2)) {
+            logger.info(context, "User request contains empty location or only single location.");
+          }
         }
       } catch (Exception ex) {
         logger.error(context, "Exception occurred.", ex);
@@ -105,10 +109,14 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
       try {
         logger.info(context, "update request body ==" + request);
-        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-        if (CollectionUtils.isEmpty(locationIdList)
-            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
-          logger.info(context, "User request contains empty location or only single location.");
+        if (request.containsKey(JsonKey.LOCATION_IDS)) {
+          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+          if (CollectionUtils.isEmpty(locationIdList)
+              || (CollectionUtils.isNotEmpty(locationIdList)
+                  && CollectionUtils.isNotEmpty(locationIdList)
+                  && locationIdList.size() < 2)) {
+            logger.info(context, "User request contains empty location or only single location.");
+          }
         }
       } catch (Exception ex) {
         logger.error(context, "Exception occurred.", ex);
@@ -409,10 +417,14 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     if (tableName.equalsIgnoreCase(JsonKey.USER)) {
       try {
         logger.info(context, "upsert request body ==" + request);
-        List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-        if (CollectionUtils.isEmpty(locationIdList)
-            || (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() < 2)) {
-          logger.info(context, "User request contains empty location or only single location.");
+        if (request.containsKey(JsonKey.LOCATION_IDS)) {
+          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
+          if (CollectionUtils.isEmpty(locationIdList)
+              || (CollectionUtils.isNotEmpty(locationIdList)
+                  && CollectionUtils.isNotEmpty(locationIdList)
+                  && locationIdList.size() < 2)) {
+            logger.info(context, "User request contains empty location or only single location.");
+          }
         }
       } catch (Exception ex) {
         logger.error(context, "Exception occurred.", ex);
