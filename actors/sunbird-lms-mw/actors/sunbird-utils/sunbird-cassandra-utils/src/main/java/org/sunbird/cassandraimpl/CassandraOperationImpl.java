@@ -46,6 +46,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service insertRecord method started at ==" + startTime);
+    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+      logger.info(context, "insert request body ==" + request);
+    }
     Response response = new Response();
     String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
     try {
@@ -90,6 +93,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service updateRecord method started at ==" + startTime);
+    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+      logger.info(context, "update request body ==" + request);
+    }
     Response response = new Response();
     String query = CassandraUtil.getUpdateQueryStatement(keyspaceName, tableName, request);
     try {
@@ -382,6 +388,9 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service upsertRecord method started at ==" + startTime);
+    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+      logger.info(context, "upsert request body ==" + request);
+    }
     Response response = new Response();
     String query = "";
     try {
