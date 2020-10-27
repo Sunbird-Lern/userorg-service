@@ -104,7 +104,10 @@ public class TelemetryGenerator {
     if (null != props) {
       edata.put(JsonKey.PROPS, getProps(props));
     }
-
+    String type = (String) params.get(JsonKey.TYPE);
+    if (null != type) {
+      edata.put(JsonKey.TYPE, type);
+    }
     Map<String, Object> target = (Map<String, Object>) params.get(JsonKey.TARGET_OBJECT);
     if (target.get(JsonKey.CURRENT_STATE) != null) {
       edata.put(JsonKey.STATE, StringUtils.capitalize((String) target.get(JsonKey.CURRENT_STATE)));
