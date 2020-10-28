@@ -124,6 +124,19 @@ public class TenantMigrationActor extends BaseActor {
       ProjectCommonException.throwServerErrorException(
           ResponseCode.declaredUserValidatedStatusNotUpdated);
     } else {
+      // First migrating user, if migration success, then status gets updated as VALIDATED.
+      try {
+        migrateUser(request, true);
+      } catch (ProjectCommonException pce) {
+        logger.error(
+            request.getRequestContext(), "TenantMigrationActor:migrateUser user failed.", pce);
+        throw pce;
+      } catch (Exception e) {
+        logger.error(
+            request.getRequestContext(), "TenantMigrationActor:migrateUser user failed.", e);
+        ProjectCommonException.throwServerErrorException(ResponseCode.errorUserMigrationFailed);
+      }
+      // Update the status to VALIDATED in user_self_declaration table
       Map<String, Object> responseMap = responseList.get(0);
       Map attrMap = new HashMap<String, Object>();
       responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
@@ -137,9 +150,6 @@ public class TenantMigrationActor extends BaseActor {
               attrMap,
               compositeKeyMap,
               null);
-      if (response.get(JsonKey.RESPONSE).equals(JsonKey.SUCCESS)) {
-        migrateUser(request, true);
-      }
       sender().tell(response, self());
     }
   }
@@ -392,7 +402,6 @@ public class TenantMigrationActor extends BaseActor {
           getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       Future<Object> future = Patterns.ask(actorRef, userRequest, t);
       response = (Response) Await.result(future, t.duration());
-
       UserLookUp userLookUp = new UserLookUp();
       userLookUp.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),

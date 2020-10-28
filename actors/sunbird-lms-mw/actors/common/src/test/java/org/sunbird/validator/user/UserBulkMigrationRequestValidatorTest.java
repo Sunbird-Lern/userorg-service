@@ -360,4 +360,28 @@ public class UserBulkMigrationRequestValidatorTest {
       Assert.assertEquals("[ In Row 1:the Column Error Type:is invalid ]", e.getMessage());
     }
   }
+
+  @Test
+  public void testMigrationWithValidErrorTypeForDeclaredUsers() {
+    List<SelfDeclaredUser> declaredUserList = new ArrayList<>();
+    SelfDeclaredUser declaredUser = new SelfDeclaredUser();
+    declaredUser.setChannel("TN");
+    declaredUser.setPhone("9876543210");
+    declaredUser.setInputStatus(JsonKey.SELF_DECLARED_ERROR);
+    declaredUser.setOrgExternalId("org ext id");
+    declaredUser.setUserId("user ext id");
+    declaredUser.setErrorType("ERROR_ID");
+    declaredUser.setUserExternalId("user ext id");
+    declaredUser.setPersona("teacher");
+    declaredUserList.add(declaredUser);
+    try {
+      new ShadowUserUpload.ShadowUserUploadBuilder()
+          .setProcessId(ProjectUtil.generateUniqueId())
+          .setFileSize("1024")
+          .setUserValues(declaredUserList)
+          .validateDeclaredUsers();
+    } catch (Exception e) {
+      Assert.assertEquals("[ In Row 1:the Column Error Type:is invalid ]", e.getMessage());
+    }
+  }
 }
