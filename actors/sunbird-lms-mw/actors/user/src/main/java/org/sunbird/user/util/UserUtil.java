@@ -346,17 +346,28 @@ public class UserUtil {
 
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
-      firstName = firstName.split(" ")[0];
-      String translatedFirstName = transliterateUserName(firstName);
-      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
+      String lastName = (String) userMap.get(JsonKey.LAST_NAME);
+
+      String name = String.join(" ", firstName, StringUtils.isNotBlank(lastName) ? lastName : "");
+
+      String userName = null;
+      while (StringUtils.isBlank(userName)) {
+        userName = getUsername(name, context);
+        if (StringUtils.isNotBlank(userName)) {
+          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
+        }
+      }
     } else {
-      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
-      userMap.put(JsonKey.USERNAME, userName);
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness(userName, false, context)) {
+      if (!userLookUp.checkUsernameUniqueness(
+          (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
+    // create loginId to ensure uniqueness for combination of userName and channel
+    String loginId = Util.getLoginId(userMap);
+    userMap.put(JsonKey.LOGIN_ID, loginId);
   }
 
   public static String transliterateUserName(String userName) {
