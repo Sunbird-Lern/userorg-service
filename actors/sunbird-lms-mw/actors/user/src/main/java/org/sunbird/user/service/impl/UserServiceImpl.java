@@ -1,15 +1,13 @@
 package org.sunbird.user.service.impl;
 
 import akka.actor.ActorRef;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
@@ -44,6 +42,16 @@ public class UserServiceImpl implements UserService {
   private static UserService userService = null;
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+
+  private static Random rand = new Random(System.nanoTime());
+  private static final String[] alphabet =
+      new String[] {
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
+        "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+      };
+
+  private static String stripChars = "0";
+  private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -277,16 +285,16 @@ public class UserServiceImpl implements UserService {
       String name, List<String> excludedUsernames, RequestContext context) {
     if (name == null || name.isEmpty()) return null;
     name = Slug.makeSlug(name, true);
-    int numOfDigitsToAppend =
+    int numOfCharsToAppend =
         Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_USERNAME_NUM_DIGITS).trim());
     HashSet<String> userNameSet = new HashSet<>();
     int totalUserNameGenerated = 0;
     String nameLowercase = name.toLowerCase().replaceAll("\\-+", "");
     while (totalUserNameGenerated < GENERATE_USERNAME_COUNT) {
-      int numberSuffix = getRandomFixedLengthInteger(numOfDigitsToAppend);
+      String userNameSuffix = generateUniqueString(numOfCharsToAppend);
 
       StringBuilder userNameSB = new StringBuilder();
-      userNameSB.append(nameLowercase).append(numberSuffix);
+      userNameSB.append(nameLowercase).append(userNameSuffix);
       String generatedUsername = userNameSB.toString();
 
       if (!userNameSet.contains(generatedUsername)
@@ -298,11 +306,36 @@ public class UserServiceImpl implements UserService {
     return new ArrayList<>(userNameSet);
   }
 
-  private int getRandomFixedLengthInteger(int numDigits) {
-    int min = (int) Math.pow(10, numDigits - 1);
-    int max = ((int) Math.pow(10, numDigits)) - 1;
-    int randomNum = (int) (Math.random() * ((max - min) + 1)) + min;
-    return randomNum;
+  private String generateUniqueString(int length) {
+    int totalChars = alphabet.length;
+    BigDecimal exponent = BigDecimal.valueOf(totalChars);
+    exponent = exponent.pow(length);
+    String code = "";
+    BigDecimal number = new BigDecimal(rand.nextInt(1000000));
+    BigDecimal num = number.multiply(largePrimeNumber).remainder(exponent);
+    code = baseN(num, totalChars);
+    int codeLenght = code.length();
+    if (codeLenght < length) {
+      for (int i = codeLenght; i < length; i++) {
+        code = code + alphabet[rand.nextInt(totalChars - 1)];
+      }
+    }
+    if (NumberUtils.isNumber(code.substring(1, 2)) || NumberUtils.isNumber(code.substring(2, 3))) {
+      return code;
+    } else {
+      code = code.substring(0, 1) + alphabet[rand.nextInt(9)] + code.substring(2);
+      return code;
+    }
+  }
+
+  private String baseN(BigDecimal num, int base) {
+    if (num.doubleValue() == 0) {
+      return "0";
+    }
+    double div = Math.floor(num.doubleValue() / base);
+    String val = baseN(new BigDecimal(div), base);
+    return StringUtils.stripStart(val, stripChars)
+        + alphabet[num.remainder(new BigDecimal(base)).intValue()];
   }
 
   @SuppressWarnings("unchecked")

@@ -1,7 +1,6 @@
 package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,7 +8,6 @@ import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -56,15 +54,6 @@ public class UserUtil {
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  static Random rand = new Random(System.nanoTime());
-  private static final String[] alphabet =
-      new String[] {
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-        "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      };
-
-  private static String stripChars = "0";
-  private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
 
   private UserUtil() {}
 
@@ -374,38 +363,6 @@ public class UserUtil {
   public static String transliterateUserName(String userName) {
     String translatedUserName = Junidecode.unidecode(userName);
     return translatedUserName;
-  }
-
-  public static String generateUniqueString(int length) {
-    int totalChars = alphabet.length;
-    BigDecimal exponent = BigDecimal.valueOf(totalChars);
-    exponent = exponent.pow(length);
-    String code = "";
-    BigDecimal number = new BigDecimal(rand.nextInt(1000000));
-    BigDecimal num = number.multiply(largePrimeNumber).remainder(exponent);
-    code = baseN(num, totalChars);
-    int codeLenght = code.length();
-    if (codeLenght < length) {
-      for (int i = codeLenght; i < length; i++) {
-        code = code + alphabet[rand.nextInt(totalChars - 1)];
-      }
-    }
-    if (NumberUtils.isNumber(code.substring(1, 2)) || NumberUtils.isNumber(code.substring(2, 3))) {
-      return code;
-    } else {
-      code = code.substring(0, 1) + alphabet[rand.nextInt(9)] + code.substring(2);
-      return code;
-    }
-  }
-
-  private static String baseN(BigDecimal num, int base) {
-    if (num.doubleValue() == 0) {
-      return "0";
-    }
-    double div = Math.floor(num.doubleValue() / base);
-    String val = baseN(new BigDecimal(div), base);
-    return StringUtils.stripStart(val, stripChars)
-        + alphabet[num.remainder(new BigDecimal(base)).intValue()];
   }
 
   public static void setUserDefaultValue(
