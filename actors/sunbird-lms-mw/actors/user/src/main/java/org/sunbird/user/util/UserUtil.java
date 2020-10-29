@@ -352,9 +352,10 @@ public class UserUtil {
 
       String userName = null;
       while (StringUtils.isBlank(userName)) {
+        name = transliterateUserName(name);
         userName = getUsername(name, context);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
+          userMap.put(JsonKey.USERNAME, userName);
         }
       }
     } else {
@@ -439,9 +440,10 @@ public class UserUtil {
 
       String userName = null;
       while (StringUtils.isBlank(userName)) {
+        name = transliterateUserName(name);
         userName = getUsername(name, context);
         if (StringUtils.isNotBlank(userName)) {
-          userMap.put(JsonKey.USERNAME, transliterateUserName(userName));
+          userMap.put(JsonKey.USERNAME, userName);
         }
       }
     } else {
