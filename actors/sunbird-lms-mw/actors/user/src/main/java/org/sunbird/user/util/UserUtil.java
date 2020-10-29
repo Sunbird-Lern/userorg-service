@@ -446,7 +446,7 @@ public class UserUtil {
     userMap.put(JsonKey.LOGIN_ID, loginId);
   }
 
-  private static String getUsername(String name, RequestContext context) {
+  public static String getUsername(String name, RequestContext context) {
     List<Map<String, Object>> users = null;
     List<String> esUserNameList = new ArrayList<>();
     List<String> encryptedUserNameList = new ArrayList<>();

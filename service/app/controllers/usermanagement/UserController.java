@@ -130,6 +130,20 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> updateUserName(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_NAME.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserById(String userId, Http.Request httpRequest) {
     return handleGetUserProfile(
         ActorOperations.GET_USER_PROFILE.getValue(), ProjectUtil.getLmsUserId(userId), httpRequest);

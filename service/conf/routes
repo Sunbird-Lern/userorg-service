@@ -14,6 +14,7 @@ PATCH	/private/user/v1/update					          @controllers.usermanagement.UserCont
 GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserById(uid:String, request: play.mvc.Http.Request)
 GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV2(uid:String, request: play.mvc.Http.Request)
 GET  	/v3/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
+PATCH	/v1/user/update/username					          @controllers.usermanagement.UserController.updateUserName(request: play.mvc.Http.Request)
 
 POST  /v1/user/getuser                  @controllers.usermanagement.UserController.getUserByLoginId(request: play.mvc.Http.Request)
 GET   /v1/user/get/:idType/:id          @controllers.usermanagement.UserController.getUserByKey(idType:String, id:String, request: play.mvc.Http.Request)

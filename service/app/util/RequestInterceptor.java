@@ -93,6 +93,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/exists/email", var);
     apiHeaderIgnoreMap.put("/v1/user/exists/phone", var);
     apiHeaderIgnoreMap.put("/v1/role/read", var);
+    apiHeaderIgnoreMap.put("/v1/user/update/username", var);
   }
 
   private static String getUserRequestedFor(Http.Request request) {
