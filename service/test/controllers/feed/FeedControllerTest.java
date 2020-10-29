@@ -31,6 +31,7 @@ public class FeedControllerTest extends BaseApplicationTest {
 
   String SAVE_FEED_URL = "/v1/user/feed/create";
   String UPDATE_FEED_URL = "/v1/user/feed/update";
+  String DELETE_FEED_URL = "/v1/user/feed/delete";
 
   @Before
   public void before() {
@@ -80,6 +81,13 @@ public class FeedControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
+  @Test
+  public void testDeleteUserFeed() {
+    Result result = performTest(DELETE_FEED_URL, HttpMethods.POST.name(), updateFeedRequest(true));
+    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
   private Map updateFeedRequest(boolean setUserid) {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
@@ -88,7 +96,6 @@ public class FeedControllerTest extends BaseApplicationTest {
     }
     dataMap.put(JsonKey.CATEGORY, "someCategory");
     dataMap.put(JsonKey.FEED_ID, "someFeedId");
-    dataMap.put(JsonKey.STATUS, "someStatus");
     requestMap.put(JsonKey.REQUEST, dataMap);
     return requestMap;
   }
@@ -102,7 +109,6 @@ public class FeedControllerTest extends BaseApplicationTest {
     }
     dataMap.put(JsonKey.CATEGORY, "someCategory");
     dataMap.put(JsonKey.PRIORITY, 1);
-    dataMap.put(JsonKey.STATUS, "someStatus");
     requestMap.put(JsonKey.REQUEST, dataMap);
     return requestMap;
   }

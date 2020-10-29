@@ -44,6 +44,22 @@ public class FeedController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> deleteUserFeed(Http.Request httpRequest) {
+    String callerId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+    return handleRequest(
+        ActorOperations.DELETE_USER_FEED.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          FeedRequestValidator.validateFeedDeleteRequest(request, callerId);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> updateUserFeed(Http.Request httpRequest) {
     String callerId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     return handleRequest(

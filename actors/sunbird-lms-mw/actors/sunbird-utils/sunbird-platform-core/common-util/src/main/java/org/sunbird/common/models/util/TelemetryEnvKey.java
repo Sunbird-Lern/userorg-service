@@ -10,4 +10,6 @@ public class TelemetryEnvKey {
   public static final String OBJECT_STORE = "ObjectStore";
   public static final String LOCATION = "Location";
   public static final String REQUEST_UPPER_CAMEL = "Request";
+  public static final String USER_CONSENT = "UserConsent";
+  public static final String EDATA_TYPE_USER_CONSENT = "user-consent";
 }

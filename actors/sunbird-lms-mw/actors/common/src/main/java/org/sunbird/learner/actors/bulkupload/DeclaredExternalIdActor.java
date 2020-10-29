@@ -149,7 +149,7 @@ public class DeclaredExternalIdActor extends BaseActor {
                 declaredUser.getSubOrgExternalId(),
                 declaredUser.getChannel(),
                 req.getRequestContext());
-        if (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId())) {
+        if (org == null || (org != null && !org.getRootOrgId().equals(declaredUser.getOrgId()))) {
           declaredUser.setErrorType(
               SelfDeclaredErrorTypeEnum.ERROR_STATE.getErrorType().replace("_", "-"));
           declaredUser.setInputStatus(SelfDeclaredStatusEnum.ERROR.name());

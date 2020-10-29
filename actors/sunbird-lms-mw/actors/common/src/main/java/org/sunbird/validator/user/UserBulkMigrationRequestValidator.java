@@ -156,7 +156,7 @@ public class UserBulkMigrationRequestValidator {
     } else if (!Stream.of(SelfDeclaredErrorTypeEnum.values())
         .map(Enum::name)
         .collect(Collectors.toList())
-        .contains(errorType.replace("-", "_"))) {
+        .contains((errorType.replace("-", "_")).replace(" ", "_"))) {
       errorDetails.setHeader("Error Type");
       errorDetails.setErrorEnum(ErrorEnum.invalid);
       addErrorToList(errorDetails);
