@@ -106,9 +106,6 @@ public class UpdateUserNameActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(resp);
 
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(esUtil.update(
@@ -130,6 +127,24 @@ public class UpdateUserNameActorTest {
 
   @Test
   public void testUpdateUserName() {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    boolean result = testScenario(getRequest(), null);
+    Assert.assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserName2() {
+    response = new Response();
+    Map<String, Object> responseMap = new HashMap<>();
+    responseMap.put(Constants.RESPONSE, new ArrayList<>());
+    response.getResult().putAll(responseMap);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    PowerMockito.mockStatic(UserUtil.class);
+    when(UserUtil.getUsername(Mockito.anyString(), Mockito.any())).thenReturn("amit1232ndf");
     boolean result = testScenario(getRequest(), null);
     Assert.assertTrue(result);
   }
