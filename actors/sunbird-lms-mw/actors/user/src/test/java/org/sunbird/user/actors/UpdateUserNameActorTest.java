@@ -125,7 +125,7 @@ public class UpdateUserNameActorTest {
     when(userLookUp.insertRecords(Mockito.anyList(), Mockito.any())).thenReturn(new Response());
   }
 
-  @Test
+  // @Test
   public void testUpdateUserName() {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
