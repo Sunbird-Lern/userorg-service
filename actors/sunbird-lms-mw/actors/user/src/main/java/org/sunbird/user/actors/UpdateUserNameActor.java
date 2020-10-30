@@ -174,7 +174,7 @@ public class UpdateUserNameActor extends BaseActor {
                 (String) userMap.get(JsonKey.ID),
                 fields,
                 context);
-        userResMap.put("initialUserTableUpdateResponse", res.get(JsonKey.RESPONSE));
+        userResMap.put("beforeUserTableUpdateResponse", res.get(JsonKey.RESPONSE));
 
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(),
