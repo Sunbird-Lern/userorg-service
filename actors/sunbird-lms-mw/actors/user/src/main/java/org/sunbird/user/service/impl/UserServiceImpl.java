@@ -294,7 +294,7 @@ public class UserServiceImpl implements UserService {
       String userNameSuffix = generateUniqueString(numOfCharsToAppend);
 
       StringBuilder userNameSB = new StringBuilder();
-      userNameSB.append(nameLowercase).append(userNameSuffix);
+      userNameSB.append(nameLowercase).append("_").append(userNameSuffix);
       String generatedUsername = userNameSB.toString();
 
       if (!userNameSet.contains(generatedUsername)
