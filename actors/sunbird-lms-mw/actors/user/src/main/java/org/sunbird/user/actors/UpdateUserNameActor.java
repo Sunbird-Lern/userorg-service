@@ -100,9 +100,9 @@ public class UpdateUserNameActor extends BaseActor {
                                   usr.getUserName(),
                                   false,
                                   context);
-                          Map<String, Object> usrLookup = userLookupRes.get(0);
-                          String usrId = (String) usrLookup.get(JsonKey.USER_ID);
                           if (CollectionUtils.isNotEmpty(userLookupRes)) {
+                            Map<String, Object> usrLookup = userLookupRes.get(0);
+                            String usrId = (String) usrLookup.get(JsonKey.USER_ID);
                             if (usrId.equalsIgnoreCase(usr.getId())) {
                               logger.info(
                                   "User entry exist for userName in userlookup for userId : "

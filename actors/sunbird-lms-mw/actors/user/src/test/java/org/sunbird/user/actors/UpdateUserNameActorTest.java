@@ -126,7 +126,7 @@ public class UpdateUserNameActorTest {
   }
 
   @Test
-  public void testUpdateUserName2() {
+  public void testUpdateUserName() {
     response = new Response();
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(Constants.RESPONSE, new ArrayList<>());
