@@ -39,7 +39,9 @@ public class UpdateUserNameActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private UserDao userDao = UserDaoImpl.getInstance();
+  private UserLookUp userLookUp = new UserLookUp();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -67,9 +69,6 @@ public class UpdateUserNameActor extends BaseActor {
           MessageFormat.format(
               ResponseCode.errorMaxSizeExceeded.getErrorMessage(), JsonKey.USERIDS, 100));
     }
-
-    UserDao userDao = new UserDaoImpl();
-    UserLookUp userLookUp = new UserLookUp();
     boolean finalDryRun = dryRun;
     // Iterate requested userids and validate for duplicate username
     userIds

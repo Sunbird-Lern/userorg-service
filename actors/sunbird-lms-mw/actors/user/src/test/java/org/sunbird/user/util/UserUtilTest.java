@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,22 +95,6 @@ public class UserUtilTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     PowerMockito.mockStatic(Util.class);
-  }
-
-  @Test
-  public void generateUniqueStringSuccess() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(4);
-    assertTrue(val.length() == 4);
-  }
-
-  @Test
-  public void generateUniqueStringSecondCharCheck() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(5);
-    assertTrue(val.length() == 5);
-    assertTrue(
-        NumberUtils.isNumber(val.substring(1, 2)) || NumberUtils.isNumber(val.substring(2, 3)));
   }
 
   @Test
