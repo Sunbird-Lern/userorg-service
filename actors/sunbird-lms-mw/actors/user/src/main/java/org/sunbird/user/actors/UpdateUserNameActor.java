@@ -100,105 +100,22 @@ public class UpdateUserNameActor extends BaseActor {
                                   usr.getUserName(),
                                   false,
                                   context);
+                          Map<String, Object> usrLookup = userLookupRes.get(0);
+                          String usrId = (String) usrLookup.get(JsonKey.USER_ID);
                           if (CollectionUtils.isNotEmpty(userLookupRes)) {
-                            // If not empty then don't do anything
-                            Map<String, Object> usrLookup = userLookupRes.get(0);
-                            logger.info(
-                                "User entry exist for userName in userlookup for userId : "
-                                    + usrLookup.get(JsonKey.USER_ID));
+                            if (usrId.equalsIgnoreCase(usr.getId())) {
+                              logger.info(
+                                  "User entry exist for userName in userlookup for userId : "
+                                      + usrLookup.get(JsonKey.USER_ID));
+                            } else if (!usrId.equalsIgnoreCase(usr.getId())) {
+                              // There is no entry for this userId so update username
+                              updateUserName(request, context, userRespList, finalDryRun, usr);
+                            }
                           }
 
                           if (CollectionUtils.isEmpty(userLookupRes)) {
                             // If empty then generate user name and update user , userlookup and es
-                            logger.info(
-                                "User entry for userName does not exist in userlookup for userId : "
-                                    + usr.getId());
-                            String firstName = usr.getFirstName();
-                            String lastName = usr.getLastName();
-
-                            String name =
-                                String.join(
-                                    " ",
-                                    firstName,
-                                    StringUtils.isNotBlank(lastName) ? lastName : "");
-                            name = UserUtil.transliterateUserName(name);
-                            String userName = null;
-                            while (StringUtils.isBlank(userName)) {
-                              userName = UserUtil.getUsername(name, context);
-                              logger.info(context, "Generated userName : " + userName);
-                            }
-                            Map<String, Object> userMap = new HashMap<>();
-                            userMap.put(JsonKey.ID, usr.getId());
-                            userMap.put(JsonKey.USERNAME, userName);
-                            try {
-                              userMap = UserUtility.encryptUserData(userMap);
-                            } catch (Exception ex) {
-                              logger.error(
-                                  context,
-                                  "Exception occurred while encrypting user data:" + userMap,
-                                  ex);
-                              ProjectCommonException.throwServerErrorException(
-                                  ResponseCode.userDataEncryptionError, null);
-                            }
-                            try {
-                              if (finalDryRun) {
-                                logger.info(
-                                    "usermap which update user and userlookup table is :: "
-                                        + userMap);
-                                userRespList.add(userMap);
-                              } else {
-                                // fetch before updating user table (id, username) for validation
-                                Map<String, Object> userResMap = new HashMap<>();
-                                List<String> fields = new ArrayList<>();
-                                fields.add(JsonKey.ID);
-                                fields.add(JsonKey.USERNAME);
-                                Response res =
-                                    cassandraOperation.getPropertiesValueById(
-                                        usrDbInfo.getKeySpace(),
-                                        usrDbInfo.getTableName(),
-                                        (String) userMap.get(JsonKey.ID),
-                                        fields,
-                                        context);
-                                userResMap.put(
-                                    "initialUserTableUpdateResponse", res.get(JsonKey.RESPONSE));
-
-                                cassandraOperation.updateRecord(
-                                    usrDbInfo.getKeySpace(),
-                                    usrDbInfo.getTableName(),
-                                    userMap,
-                                    request.getRequestContext());
-
-                                // print user map as after result
-                                userResMap.put("afterUserTableUpdateResponse", userMap);
-                                insertIntoUserLookUp(userMap, request.getRequestContext());
-
-                                Future<Boolean> responseF =
-                                    esUtil.update(
-                                        ProjectUtil.EsType.user.getTypeName(),
-                                        usr.getId(),
-                                        userMap,
-                                        context);
-                                boolean esResponse =
-                                    (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
-                                userResMap.put("esResponse", esResponse);
-                                userRespList.add(userResMap);
-                                if (esResponse) {
-                                  logger.info(
-                                      context,
-                                      "unable to save the user data to ES with identifier "
-                                          + usr.getId());
-                                } else {
-                                  logger.info(
-                                      context,
-                                      "saved the user data to ES with identifier " + usr.getId());
-                                }
-                              }
-                            } catch (Exception ex) {
-                              logger.error(
-                                  context,
-                                  "Exception occurred while updating userName in user and userlookup table.",
-                                  ex);
-                            }
+                            updateUserName(request, context, userRespList, finalDryRun, usr);
                           }
                         });
               } else {
@@ -209,8 +126,82 @@ public class UpdateUserNameActor extends BaseActor {
             });
 
     Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    response.getResult().put(JsonKey.RESPONSE, userRespList);
     sender().tell(response, self());
+  }
+
+  private void updateUserName(
+      Request request,
+      RequestContext context,
+      List<Map<String, Object>> userRespList,
+      boolean finalDryRun,
+      User usr) {
+    // generate user name and update user , userlookup and es
+    logger.info("User entry for userName does not exist in userlookup for userId : " + usr.getId());
+    String firstName = usr.getFirstName();
+    String lastName = usr.getLastName();
+
+    String name = String.join(" ", firstName, StringUtils.isNotBlank(lastName) ? lastName : "");
+    name = UserUtil.transliterateUserName(name);
+    String userName = null;
+    while (StringUtils.isBlank(userName)) {
+      userName = UserUtil.getUsername(name, context);
+      logger.info(context, "Generated userName : " + userName);
+    }
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.ID, usr.getId());
+    userMap.put(JsonKey.USERNAME, userName);
+    try {
+      userMap = UserUtility.encryptUserData(userMap);
+    } catch (Exception ex) {
+      logger.error(context, "Exception occurred while encrypting user data:" + userMap, ex);
+      ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError, null);
+    }
+    try {
+      if (finalDryRun) {
+        logger.info("usermap which update user and userlookup table is :: " + userMap);
+        userRespList.add(userMap);
+      } else {
+        // fetch before updating user table (id, username) for validation
+        Map<String, Object> userResMap = new HashMap<>();
+        List<String> fields = new ArrayList<>();
+        fields.add(JsonKey.ID);
+        fields.add(JsonKey.USERNAME);
+        Response res =
+            cassandraOperation.getPropertiesValueById(
+                usrDbInfo.getKeySpace(),
+                usrDbInfo.getTableName(),
+                (String) userMap.get(JsonKey.ID),
+                fields,
+                context);
+        userResMap.put("initialUserTableUpdateResponse", res.get(JsonKey.RESPONSE));
+
+        cassandraOperation.updateRecord(
+            usrDbInfo.getKeySpace(),
+            usrDbInfo.getTableName(),
+            userMap,
+            request.getRequestContext());
+
+        // print user map as after result
+        Map<String, Object> opMap = new HashMap<>(userMap);
+        userResMap.put("afterUserTableUpdateResponse", opMap);
+        insertIntoUserLookUp(userMap, request.getRequestContext());
+
+        Future<Boolean> responseF =
+            esUtil.update(ProjectUtil.EsType.user.getTypeName(), usr.getId(), userMap, context);
+        boolean esResponse = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
+        userResMap.put("esResponse", esResponse);
+        userRespList.add(userResMap);
+        if (esResponse) {
+          logger.info(context, "unable to save the user data to ES with identifier " + usr.getId());
+        } else {
+          logger.info(context, "saved the user data to ES with identifier " + usr.getId());
+        }
+      }
+    } catch (Exception ex) {
+      logger.error(
+          context, "Exception occurred while updating userName in user and userlookup table.", ex);
+    }
   }
 
   private Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
