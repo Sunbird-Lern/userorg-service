@@ -124,7 +124,6 @@ public class UpdateUserNameActor extends BaseActor {
                         + user.getUserName());
               }
             });
-
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, userRespList);
     sender().tell(response, self());
@@ -159,8 +158,10 @@ public class UpdateUserNameActor extends BaseActor {
     }
     try {
       if (finalDryRun) {
-        logger.info("usermap which update user and userlookup table is :: " + userMap);
-        userRespList.add(userMap);
+        Map<String, Object> userOpMap = new HashMap<>(userMap);
+        logger.info("usermap which update user and userlookup table is :: " + userOpMap);
+        UserUtility.decryptUserData(userOpMap);
+        userRespList.add(userOpMap);
       } else {
         // fetch before updating user table (id, username) for validation
         Map<String, Object> userResMap = new HashMap<>();
@@ -174,7 +175,13 @@ public class UpdateUserNameActor extends BaseActor {
                 (String) userMap.get(JsonKey.ID),
                 fields,
                 context);
-        userResMap.put("beforeUserTableUpdateResponse", res.get(JsonKey.RESPONSE));
+
+        List<Map<String, Object>> usrList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+        if (CollectionUtils.isNotEmpty(usrList)) {
+          Map<String, Object> userOpMap = new HashMap<>(usrList.get(0));
+          UserUtility.decryptUserData(userOpMap);
+          userResMap.put("beforeUserTableUpdateResponse", userOpMap);
+        }
 
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(),
@@ -184,7 +191,9 @@ public class UpdateUserNameActor extends BaseActor {
 
         // print user map as after result
         Map<String, Object> opMap = new HashMap<>(userMap);
+        UserUtility.decryptUserData(opMap);
         userResMap.put("afterUserTableUpdateResponse", opMap);
+
         insertIntoUserLookUp(userMap, request.getRequestContext());
 
         Future<Boolean> responseF =
