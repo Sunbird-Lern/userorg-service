@@ -130,6 +130,17 @@ public class UserUtilTest {
   }
 
   @Test
+  public void setUserDefaultValueForV3() {
+    beforeEachTest();
+    Map<String, Object> userMap = new HashMap<String, Object>();
+    userMap.put(JsonKey.FIRST_NAME, "Test User");
+    UserUtil.setUserDefaultValueForV3(userMap, null);
+    assertNotNull(userMap.get(JsonKey.USERNAME));
+    assertNotNull(userMap.get(JsonKey.STATUS));
+    assertNotNull(userMap.get(JsonKey.ROLES));
+  }
+
+  @Test
   public void testValidateManagedUserLimit() {
     beforeEachTest();
     Map<String, Object> req = new HashMap<>();
