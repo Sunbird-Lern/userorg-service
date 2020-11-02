@@ -1335,4 +1335,56 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     Response response = CassandraUtil.createResponse(resultSet);
     return response;
   }
+
+  @Override
+  public Response getRecordsByCompositePartitionKey(
+      String keyspaceName,
+      String tableName,
+      Map<String, Object> partitionKeyMap,
+      RequestContext context) {
+    long startTime = System.currentTimeMillis();
+    logger.info(
+        context,
+        "CassandraOperationImpl: getRecordsByCompositePartitionKey called at " + startTime);
+    Response response;
+    Select selectQuery = null;
+    try {
+      Builder selectBuilder = QueryBuilder.select().all();
+      selectQuery = selectBuilder.from(keyspaceName, tableName);
+      Where selectWhere = selectQuery.where();
+      for (Entry<String, Object> entry : partitionKeyMap.entrySet()) {
+        if (entry.getValue() instanceof String) {
+          Clause clause = eq(entry.getKey(), entry.getValue());
+          selectWhere.and(clause);
+        } else if (entry.getValue() instanceof List) {
+
+          Object[] propertyValues =
+              ((List) entry.getValue()).toArray(new Object[((List) entry.getValue()).size()]);
+          Clause clauseList = QueryBuilder.in(entry.getKey(), propertyValues);
+          selectWhere.and(clauseList);
+        }
+      }
+      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
+      response = CassandraUtil.createResponse(results);
+    } catch (Exception e) {
+      logger.error(
+          context,
+          "CassandraOperationImpl:getRecordsByCompositeKey: "
+              + Constants.EXCEPTION_MSG_FETCH
+              + tableName
+              + " : "
+              + e.getMessage(),
+          e);
+      throw new ProjectCommonException(
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    } finally {
+      if (null != selectQuery) {
+        logQueryElapseTime(
+            "getRecordsByCompositeKey", startTime, selectQuery.getQueryString(), context);
+      }
+    }
+    return response;
+  }
 }

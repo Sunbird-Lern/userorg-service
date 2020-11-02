@@ -30,9 +30,6 @@ public interface UserService {
   String getCustodianChannel(
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
 
-  List<Map<String, Object>> esSearchUserByFilters(
-      Map<String, Object> filters, RequestContext context);
-
   List<String> generateUsernames(
       String name, List<String> excludedUsernames, RequestContext context);
 
@@ -47,4 +44,7 @@ public interface UserService {
       Map<String, Object> encryptedTokenList,
       List<Map<String, Object>> respList,
       RequestContext context);
+
+  List<Map<String, Object>> searchUserNameInUserLookup(
+      List<String> encUserNameList, RequestContext context);
 }

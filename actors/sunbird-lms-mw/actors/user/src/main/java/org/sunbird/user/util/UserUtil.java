@@ -346,14 +346,20 @@ public class UserUtil {
 
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
-      firstName = firstName.split(" ")[0];
-      String translatedFirstName = transliterateUserName(firstName);
-      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
+      String lastName = (String) userMap.get(JsonKey.LAST_NAME);
+      String name = String.join(" ", firstName, StringUtils.isNotBlank(lastName) ? lastName : "");
+      name = transliterateUserName(name);
+      String userName = getUsername(name, context);
+      if (StringUtils.isNotBlank(userName)) {
+        userMap.put(JsonKey.USERNAME, userName);
+      } else {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
     } else {
-      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
-      userMap.put(JsonKey.USERNAME, userName);
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness(userName, false, context)) {
+      if (!userLookUp.checkUsernameUniqueness(
+          (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -448,67 +454,72 @@ public class UserUtil {
 
   private static String getUsername(String name, RequestContext context) {
     List<Map<String, Object>> users = null;
-    List<String> esUserNameList = new ArrayList<>();
     List<String> encryptedUserNameList = new ArrayList<>();
     List<String> excludedUsernames = new ArrayList<>();
     List<String> userNameList = new ArrayList<>();
 
     String userName = "";
-    do {
-      do {
-        encryptedUserNameList.clear();
-        excludedUsernames.addAll(userNameList);
+    for (int j = 1; j <= 10; j++) {
+      logger.info("Generating list of 10 userNames in loop for iteration " + j);
+      encryptedUserNameList.clear();
+      excludedUsernames.addAll(userNameList);
 
-        // Generate usernames
-        userNameList = userService.generateUsernames(name, excludedUsernames, context);
+      // Generate usernames
+      userNameList = userService.generateUsernames(name, excludedUsernames, context);
 
-        // Encrypt each user name
-        userService
-            .getEncryptedList(userNameList, context)
-            .stream()
-            .forEach(value -> encryptedUserNameList.add(value));
-
-        // Throw an error in case of encryption failures
-        if (encryptedUserNameList.isEmpty()) {
-          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-        }
-
-        // Search if any user names are taking using ES
-        List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
-        Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.USERNAME, filtersEncryptedUserNameList);
-        users = userService.esSearchUserByFilters(filters, context);
-      } while (CollectionUtils.isNotEmpty(users) && users.size() >= encryptedUserNameList.size());
-
-      esUserNameList.clear();
-
-      // Map list of user results (from ES) into list of usernames
-      users
+      // Encrypt each user name
+      userService
+          .getEncryptedList(userNameList, context)
           .stream()
-          .forEach(
-              user -> {
-                esUserNameList.add((String) user.get(JsonKey.USERNAME));
-              });
-      // Query cassandra to find first username that is not yet assigned
-      Optional<String> result =
-          encryptedUserNameList
-              .stream()
-              .filter(
-                  value -> {
-                    if (!esUserNameList.contains(value)) {
-                      UserLookUp userLookUp = new UserLookUp();
-                      return userLookUp.checkUsernameUniqueness(value, true, context);
-                    }
-                    return false;
-                  })
-              .findFirst();
+          .forEach(value -> encryptedUserNameList.add(value));
 
-      if (result.isPresent()) {
-        userName = result.get();
+      // Throw an error in case of encryption failures
+      if (encryptedUserNameList.isEmpty()) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
 
-    } while (StringUtils.isBlank(userName));
-    return decService.decryptData(userName, context);
+      // Search if any user names are taking using ES
+      List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
+      users = userService.searchUserNameInUserLookup(filtersEncryptedUserNameList, context);
+
+      if (!(CollectionUtils.isNotEmpty(users) && users.size() >= encryptedUserNameList.size())) {
+        break;
+      }
+    }
+
+    List<String> esUserNameList = new ArrayList<>();
+
+    // Map list of results (from User lookup) into list of usernames
+    users
+        .stream()
+        .forEach(
+            user -> {
+              esUserNameList.add((String) user.get(JsonKey.VALUE));
+            });
+
+    // Query cassandra to find first username that is not yet assigned
+    Optional<String> result =
+        encryptedUserNameList
+            .stream()
+            .filter(
+                value -> {
+                  if (!esUserNameList.contains(value)) {
+                    UserLookUp userLookUp = new UserLookUp();
+                    return userLookUp.checkUsernameUniqueness(value, true, context);
+                  }
+                  return false;
+                })
+            .findFirst();
+
+    if (result.isPresent()) {
+      userName = result.get();
+    }
+
+    if (StringUtils.isNotBlank(userName)) {
+      return decService.decryptData(userName, context);
+    }
+
+    return "";
   }
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {

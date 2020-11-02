@@ -249,4 +249,14 @@ public class UserLookUp {
             ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
+
+  public List<Map<String, Object>> getUsersByUserNames(
+      Map<String, Object> partitionKeyMap, RequestContext context) {
+    Response response =
+        cassandraOperation.getRecordsByCompositePartitionKey(
+            userLookUp.getKeySpace(), userLookUp.getTableName(), partitionKeyMap, context);
+    List<Map<String, Object>> userMapList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    return userMapList;
+  }
 }
