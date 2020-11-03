@@ -417,7 +417,7 @@ public class UserUtil {
 
     String userName = "";
     for (int j = 1; j <= 10; j++) {
-      logger.info("Generating list of 10 userNames in loop for iteration " + j, context);
+      logger.info(context, "Generating list of 10 userNames in loop for iteration " + j);
       encryptedUserNameList.clear();
       excludedUsernames.addAll(userNameList);
 
