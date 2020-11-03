@@ -57,7 +57,7 @@ public class UserTnCActor extends BaseActor {
     // if managedUserId's terms and conditions are accepted, get userId from request
     String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
     boolean isManagedUser = false;
-    if (StringUtils.isNotBlank(managedUserId) && !userId.equals(managedUserId)) {
+    if (StringUtils.isNotBlank(managedUserId) && !managedUserId.equals(userId)) {
       userId = managedUserId;
       isManagedUser = true;
     }
