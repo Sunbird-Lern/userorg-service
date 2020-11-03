@@ -37,6 +37,8 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -50,6 +52,8 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
+  UserService.class,
+  UserServiceImpl.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   UserLookUp.class
 })
@@ -113,8 +117,32 @@ public class UserUtilTest {
   }
 
   @Test
-  public void setUserDefaultValueForV3() {
+  public void setUserDefaultValueForV3() throws Exception {
     beforeEachTest();
+    UserService userService = PowerMockito.mock(UserService.class);
+    PowerMockito.mockStatic(UserServiceImpl.class);
+    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
+    List<String> usernameList = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      usernameList.add("username" + i);
+    }
+    when(userService.generateUsernames(Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(usernameList);
+    when(userService.searchUserNameInUserLookup(Mockito.anyList(), Mockito.any()))
+        .thenReturn(new ArrayList());
+    when(userService.getEncryptedList(Mockito.anyList(), Mockito.any())).thenReturn(usernameList);
+    UserLookUp userLookUp = PowerMockito.mock(UserLookUp.class);
+    PowerMockito.whenNew(UserLookUp.class).withNoArguments().thenReturn(userLookUp);
+    PowerMockito.when(
+            userLookUp.checkUsernameUniqueness(
+                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(true);
+    Response response = new Response();
+    response.getResult().put(JsonKey.RESPONSE, new ArrayList<>());
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordsByCompositeKey(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
     Map<String, Object> userMap = new HashMap<String, Object>();
     userMap.put(JsonKey.FIRST_NAME, "Test User");
     UserUtil.setUserDefaultValueForV3(userMap, null);

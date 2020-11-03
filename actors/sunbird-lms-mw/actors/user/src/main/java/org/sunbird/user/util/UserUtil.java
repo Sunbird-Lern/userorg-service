@@ -435,7 +435,7 @@ public class UserUtil {
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
 
-      // Search if any user names are taking using ES
+      // Search if any user names
       List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
       users = userService.searchUserNameInUserLookup(filtersEncryptedUserNameList, context);
 
