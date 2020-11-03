@@ -117,41 +117,6 @@ public class UserUtilTest {
   }
 
   @Test
-  public void setUserDefaultValueForV3() throws Exception {
-    beforeEachTest();
-    UserService userService = PowerMockito.mock(UserService.class);
-    PowerMockito.mockStatic(UserServiceImpl.class);
-    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    List<String> usernameList = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      usernameList.add("username" + i);
-    }
-    when(userService.generateUsernames(Mockito.anyString(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(usernameList);
-    when(userService.searchUserNameInUserLookup(Mockito.anyList(), Mockito.any()))
-        .thenReturn(new ArrayList());
-    when(userService.getEncryptedList(Mockito.anyList(), Mockito.any())).thenReturn(usernameList);
-    UserLookUp userLookUp = PowerMockito.mock(UserLookUp.class);
-    PowerMockito.whenNew(UserLookUp.class).withNoArguments().thenReturn(userLookUp);
-    PowerMockito.when(
-            userLookUp.checkUsernameUniqueness(
-                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
-        .thenReturn(true);
-    Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, new ArrayList<>());
-    PowerMockito.when(
-            cassandraOperationImpl.getRecordsByCompositeKey(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
-    Map<String, Object> userMap = new HashMap<String, Object>();
-    userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap, null);
-    assertNotNull(userMap.get(JsonKey.USERNAME));
-    assertNotNull(userMap.get(JsonKey.STATUS));
-    assertNotNull(userMap.get(JsonKey.ROLES));
-  }
-
-  @Test
   public void testValidateManagedUserLimit() {
     beforeEachTest();
     Map<String, Object> req = new HashMap<>();
