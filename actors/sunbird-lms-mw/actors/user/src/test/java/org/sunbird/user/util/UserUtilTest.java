@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +51,6 @@ import scala.concurrent.Promise;
   Util.class,
   EncryptionService.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  UserLookUp.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -99,22 +97,6 @@ public class UserUtilTest {
   }
 
   @Test
-  public void generateUniqueStringSuccess() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(4);
-    assertTrue(val.length() == 4);
-  }
-
-  @Test
-  public void generateUniqueStringSecondCharCheck() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(5);
-    assertTrue(val.length() == 5);
-    assertTrue(
-        NumberUtils.isNumber(val.substring(1, 2)) || NumberUtils.isNumber(val.substring(2, 3)));
-  }
-
-  @Test
   public void copyAndConvertExternalIdsToLower() {
     beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<Map<String, String>>();
@@ -127,17 +109,6 @@ public class UserUtilTest {
     userExternalIdMap = externalIds.get(0);
     assertNotNull(userExternalIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID));
     assertEquals(userExternalIdMap.get(JsonKey.PROVIDER), "state");
-  }
-
-  @Test
-  public void setUserDefaultValueForV3() {
-    beforeEachTest();
-    Map<String, Object> userMap = new HashMap<String, Object>();
-    userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap, null);
-    assertNotNull(userMap.get(JsonKey.USERNAME));
-    assertNotNull(userMap.get(JsonKey.STATUS));
-    assertNotNull(userMap.get(JsonKey.ROLES));
   }
 
   @Test
