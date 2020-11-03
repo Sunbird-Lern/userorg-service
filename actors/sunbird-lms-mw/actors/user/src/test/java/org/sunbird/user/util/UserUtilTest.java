@@ -37,8 +37,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -52,10 +50,7 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  UserService.class,
-  UserServiceImpl.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  UserLookUp.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
