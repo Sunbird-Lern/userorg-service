@@ -901,8 +901,6 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
-    logger.info(
-        actorMessage.getRequestContext(), "User insert request body for user db  : " + userMap);
     Response response =
         cassandraOperation.insertRecord(
             usrDbInfo.getKeySpace(),
@@ -1110,8 +1108,6 @@ public class UserManagementActor extends BaseActor {
     Response response = null;
     boolean isPasswordUpdated = false;
     try {
-      logger.info(
-          request.getRequestContext(), "User insert request body for user db  : " + requestMap);
       response =
           cassandraOperation.insertRecord(
               usrDbInfo.getKeySpace(),
