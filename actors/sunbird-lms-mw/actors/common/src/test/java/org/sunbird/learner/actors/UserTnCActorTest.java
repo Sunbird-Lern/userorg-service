@@ -129,8 +129,8 @@ public class UserTnCActorTest {
     reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.VERSION, version);
-    innerMap.put(JsonKey.USER_ID, version);
-    innerMap.put(JsonKey.MANAGED_BY, null);
+    innerMap.put(JsonKey.USER_ID, "someUserId");
+    innerMap.put(JsonKey.MANAGED_BY, "someUserId");
     reqObj.setRequest(innerMap);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
