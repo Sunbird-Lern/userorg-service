@@ -615,9 +615,10 @@ public class BaseController extends Controller {
           if (ActorOperations.UPDATE_USER.getValue().equals(request.getOperation())) {
             logger.info(
                 request.getRequestContext(),
-                "actorResponseHandler:update user request : "
-                    + request.getRequest()
-                    + ", header : "
+                "actorResponseHandler:update user request : " + request.getRequest());
+            logger.info(
+                request.getRequestContext(),
+                "actorResponseHandler:update user request header : "
                     + httpReq.getHeaders().toMap());
           }
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
