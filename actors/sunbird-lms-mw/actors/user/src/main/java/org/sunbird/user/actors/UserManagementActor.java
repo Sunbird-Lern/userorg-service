@@ -259,6 +259,7 @@ public class UserManagementActor extends BaseActor {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
@@ -326,6 +327,8 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
+    logger.info(actorMessage.getRequestContext(), "Update request body for user db: " + requestMap);
+
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(),
