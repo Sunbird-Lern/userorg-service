@@ -135,6 +135,9 @@ public class UserManagementActor extends BaseActor {
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(
+        actorMessage.getRequestContext(),
+        "Incoming update user declaration request body: " + userMap);
     Response response = new Response();
     List<String> errMsgs = new ArrayList<>();
     try {
@@ -204,6 +207,7 @@ public class UserManagementActor extends BaseActor {
   private void createUserV3_V4(Request actorMessage, boolean isV4) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(actorMessage.getRequestContext(), "Incoming request for user create : " + userMap);
     String signupType =
         (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
             ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
@@ -259,6 +263,7 @@ public class UserManagementActor extends BaseActor {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
@@ -326,6 +331,8 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
+    logger.info(actorMessage.getRequestContext(), "Update request body for user db: " + requestMap);
+
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(),
@@ -678,6 +685,7 @@ public class UserManagementActor extends BaseActor {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(actorMessage.getRequestContext(), "Incoming request for user create : " + userMap);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
     if (StringUtils.isNotBlank(version)
@@ -893,6 +901,8 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
+    logger.info(
+        actorMessage.getRequestContext(), "User insert request body for user db  : " + userMap);
     Response response =
         cassandraOperation.insertRecord(
             usrDbInfo.getKeySpace(),
@@ -1100,6 +1110,8 @@ public class UserManagementActor extends BaseActor {
     Response response = null;
     boolean isPasswordUpdated = false;
     try {
+      logger.info(
+          request.getRequestContext(), "User insert request body for user db  : " + requestMap);
       response =
           cassandraOperation.insertRecord(
               usrDbInfo.getKeySpace(),
