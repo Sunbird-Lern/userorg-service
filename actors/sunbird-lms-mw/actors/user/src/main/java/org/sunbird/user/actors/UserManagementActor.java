@@ -135,9 +135,6 @@ public class UserManagementActor extends BaseActor {
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
-    logger.info(
-        actorMessage.getRequestContext(),
-        "Incoming update user declaration request body: " + userMap);
     Response response = new Response();
     List<String> errMsgs = new ArrayList<>();
     try {
@@ -207,7 +204,6 @@ public class UserManagementActor extends BaseActor {
   private void createUserV3_V4(Request actorMessage, boolean isV4) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
-    logger.info(actorMessage.getRequestContext(), "Incoming request for user create : " + userMap);
     String signupType =
         (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
             ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
@@ -685,7 +681,6 @@ public class UserManagementActor extends BaseActor {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
-    logger.info(actorMessage.getRequestContext(), "Incoming request for user create : " + userMap);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
     if (StringUtils.isNotBlank(version)
