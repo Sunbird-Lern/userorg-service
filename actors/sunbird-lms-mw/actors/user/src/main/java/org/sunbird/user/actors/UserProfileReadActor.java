@@ -646,14 +646,18 @@ public class UserProfileReadActor extends BaseActor {
               OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
       List<Map<String, Object>> userOrgResponseList =
           (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-      return userOrgResponseList
-          .stream()
-          .collect(
-              Collectors.toMap(
-                  obj -> {
-                    return (String) obj.get("id");
-                  },
-                  val -> val));
+      if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
+        return userOrgResponseList
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    obj -> {
+                      return (String) obj.get("id");
+                    },
+                    val -> val));
+      } else {
+        return new HashMap<>();
+      }
     } else {
       return new HashMap<>();
     }
