@@ -646,14 +646,18 @@ public class UserProfileReadActor extends BaseActor {
               OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
       List<Map<String, Object>> userOrgResponseList =
           (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-      return userOrgResponseList
-          .stream()
-          .collect(
-              Collectors.toMap(
-                  obj -> {
-                    return (String) obj.get("id");
-                  },
-                  val -> val));
+      if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
+        return userOrgResponseList
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    obj -> {
+                      return (String) obj.get("id");
+                    },
+                    val -> val));
+      } else {
+        return new HashMap<>();
+      }
     } else {
       return new HashMap<>();
     }
@@ -706,14 +710,17 @@ public class UserProfileReadActor extends BaseActor {
       Map<String, Map<String, Object>> locationInfoMap) {
     for (Map<String, Object> usrOrg : userOrgs) {
       Map<String, Object> orgInfo = orgInfoMap.get(usrOrg.get(JsonKey.ORGANISATION_ID));
-      usrOrg.put(JsonKey.ORG_NAME, orgInfo.get(JsonKey.ORG_NAME));
-      usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
-      usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
-      usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
-      if (MapUtils.isNotEmpty(locationInfoMap)) {
-        usrOrg.put(
-            JsonKey.LOCATIONS,
-            prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      if (MapUtils.isNotEmpty(orgInfo)) {
+        usrOrg.put(JsonKey.ORG_NAME, orgInfo.get(JsonKey.ORG_NAME));
+        usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
+        usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
+        usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
+        if (MapUtils.isNotEmpty(locationInfoMap)) {
+          usrOrg.put(
+              JsonKey.LOCATIONS,
+              prepLocationFields(
+                  (List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+        }
       }
     }
   }
