@@ -706,14 +706,17 @@ public class UserProfileReadActor extends BaseActor {
       Map<String, Map<String, Object>> locationInfoMap) {
     for (Map<String, Object> usrOrg : userOrgs) {
       Map<String, Object> orgInfo = orgInfoMap.get(usrOrg.get(JsonKey.ORGANISATION_ID));
-      usrOrg.put(JsonKey.ORG_NAME, orgInfo.get(JsonKey.ORG_NAME));
-      usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
-      usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
-      usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
-      if (MapUtils.isNotEmpty(locationInfoMap)) {
-        usrOrg.put(
-            JsonKey.LOCATIONS,
-            prepLocationFields((List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+      if (MapUtils.isNotEmpty(orgInfo)) {
+        usrOrg.put(JsonKey.ORG_NAME, orgInfo.get(JsonKey.ORG_NAME));
+        usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
+        usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
+        usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
+        if (MapUtils.isNotEmpty(locationInfoMap)) {
+          usrOrg.put(
+              JsonKey.LOCATIONS,
+              prepLocationFields(
+                  (List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
+        }
       }
     }
   }
