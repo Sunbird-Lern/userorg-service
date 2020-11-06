@@ -7,7 +7,6 @@ import static org.powermock.api.mockito.PowerMockito.*;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,23 +24,16 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -76,7 +68,6 @@ public class DeclaredExternalIdActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateData(true));
-
   }
 
   private static Response updateData(boolean empty) {
@@ -142,17 +133,31 @@ public class DeclaredExternalIdActorTest {
   }
 
   @Test
+  public void testUploadDeclaredUserOFErrorStatusWithErrorType() {
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(createDeclaredBulkUploadData(JsonKey.ERROR));
+    when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
+        .thenReturn(
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"ERROR\",\"errorType\":\"ERROR_ID\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
+    boolean result =
+        testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testUploadDeclaredUserOfRejectedStatus() {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(createDeclaredBulkUploadData(JsonKey.REJECTED));
     when(decryptionService.decryptData(Mockito.anyString(), Mockito.any()))
         .thenReturn(
-                "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
+            "[{\"email\":null,\"phone\":null,\"name\":null,\"userExternalId\":\"\",\"orgExternalId\":null,\"channel\":\"\",\"inputStatus\":\"REJECTED\",\"schoolName\":null,\"userId\":\"\",\"persona\":\"teacher\"}]");
     boolean result =
         testScenario(createRequest(BulkUploadActorOperation.PROCESS_USER_BULK_SELF_DECLARED), null);
     assertTrue(result);
   }
+
   @Test
   public void testUploadDeclaredUserOfWrongSubOrg() {
     Organisation org = new Organisation();

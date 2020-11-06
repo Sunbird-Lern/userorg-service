@@ -7,12 +7,12 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -25,6 +25,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"userTnCAccept"},
@@ -67,7 +68,7 @@ public class UserTnCActor extends BaseActor {
     }
     String latestTnC =
         getSystemSettingByFieldAndKey(
-            JsonKey.TNC_CONFIG, JsonKey.LATEST_VERSION, new TypeReference<String>() {}, context);
+            tncType, JsonKey.LATEST_VERSION, new TypeReference<String>() {}, context);
 
     if (!acceptedTnC.equalsIgnoreCase(latestTnC)) {
       ProjectCommonException.throwClientErrorException(
@@ -76,21 +77,12 @@ public class UserTnCActor extends BaseActor {
               ResponseCode.invalidParameterValue.getErrorMessage(), acceptedTnC, JsonKey.VERSION));
     }
 
-    Response userResponse =
-        cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> userList =
-        (List<Map<String, Object>>) userResponse.get(JsonKey.RESPONSE);
-    Map<String, Object> user;
-    if (CollectionUtils.isNotEmpty(userList)) {
-      user = userList.get(0);
-      if (MapUtils.isEmpty(user)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound);
-        throw new ProjectCommonException(
-            ResponseCode.userNotFound.getErrorCode(),
-            ResponseCode.userNotFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-      }
+    Future<Map<String, Object>> resultF =
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
+    Map<String, Object> user =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+
+    if (MapUtils.isNotEmpty(user)) {
       // Check whether user account is locked or not
       if (user.containsKey(JsonKey.IS_DELETED)
           && ProjectUtil.isNotNull(user.get(JsonKey.IS_DELETED))
@@ -99,7 +91,7 @@ public class UserTnCActor extends BaseActor {
       }
       // If user account isManagedUser(passed in request) and managedBy is empty, not a valid
       // scenario
-      if (isManagedUser && ProjectUtil.isNull(user.get(JsonKey.MANAGED_BY))) {
+      if (isManagedUser && StringUtils.isBlank((String) user.get(JsonKey.MANAGED_BY))) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
@@ -123,8 +115,8 @@ public class UserTnCActor extends BaseActor {
       if (MapUtils.isNotEmpty(allTncAcceptedMap)) {
         Map<String, String> tncAcceptedMap = (Map<String, String>) allTncAcceptedMap.get(tncType);
         if (MapUtils.isNotEmpty(tncAcceptedMap)) {
-          lastAcceptedVersion = (String) tncAcceptedMap.get(JsonKey.VERSION);
-          tncAcceptedOn = (String) tncAcceptedMap.get(JsonKey.TNC_ACCEPTED_ON);
+          lastAcceptedVersion = tncAcceptedMap.get(JsonKey.VERSION);
+          tncAcceptedOn = tncAcceptedMap.get(JsonKey.TNC_ACCEPTED_ON);
         }
       } else {
         allTncAcceptedMap = new HashMap<>();
@@ -151,8 +143,7 @@ public class UserTnCActor extends BaseActor {
       } else {
         Map<String, Object> tncAcceptedMap = new HashMap<>();
         tncAcceptedMap.put(JsonKey.VERSION, acceptedTnC);
-        tncAcceptedMap.put(
-            JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
+        tncAcceptedMap.put(JsonKey.TNC_ACCEPTED_ON, ProjectUtil.getFormattedDate());
         allTncAcceptedMap.put(tncType, tncAcceptedMap);
         userMap.put(JsonKey.ALL_TNC_ACCEPTED, convertTncMapObjectToJsonString(allTncAcceptedMap));
       }

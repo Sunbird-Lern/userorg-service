@@ -1,9 +1,18 @@
 package org.sunbird.user.actors;
 
+import static akka.testkit.JavaTestKit.duration;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +23,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -21,148 +33,155 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        ServiceFactory.class,
-        CassandraOperationImpl.class
+  ServiceFactory.class,
+  CassandraOperationImpl.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserConsentActorTest {
-    private static ActorSystem system = ActorSystem.create("system");
-    private final Props props = Props.create(UserConsentActor.class);
-    private static Response response = null;
-    public static CassandraOperationImpl cassandraOperation;
+  private static ActorSystem system = ActorSystem.create("system");
+  private final Props props = Props.create(UserConsentActor.class);
+  private static Response response = null;
+  public static CassandraOperationImpl cassandraOperation;
+  private static ElasticSearchService esUtil;
+  private static Map<String, Object> userFeed = new HashMap<>();
 
-    @Before
-    public void setUp() throws Exception {
-        PowerMockito.mockStatic(ServiceFactory.class);
-        cassandraOperation = mock(CassandraOperationImpl.class);
-        when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    }
+  @Before
+  public void setUp() throws Exception {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
-    public static Response getSuccessResponse() {
-        Map<String, Object> consent = new HashMap<String, Object>();
-        consent.put(JsonKey.USER_ID, "test-user");
-        consent.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
-        consent.put(JsonKey.CONSENT_OBJECTID, "test-collection");
-        consent.put(JsonKey.CONSENT_OBJECTTYPE, "Collection");
-        consent.put(JsonKey.STATUS, "ACTIVE");
+    PowerMockito.mockStatic(EsClientFactory.class);
+    esUtil = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
+  }
 
-        List<Map<String, Object>> consentList =  new ArrayList<Map<String, Object>>();
-        consentList.add(consent);
+  public static Response getSuccessResponse() {
+    Map<String, Object> consent = new HashMap<String, Object>();
+    consent.put(JsonKey.USER_ID, "test-user");
+    consent.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
+    consent.put(JsonKey.CONSENT_OBJECTID, "test-collection");
+    consent.put(JsonKey.CONSENT_OBJECTTYPE, "Collection");
+    consent.put(JsonKey.STATUS, "ACTIVE");
 
-        Response response = new Response();
-        response.put(JsonKey.RESPONSE, consentList);
-        return response;
-    }
+    List<Map<String, Object>> consentList = new ArrayList<Map<String, Object>>();
+    consentList.add(consent);
 
-    public static Response getSuccessNoRecordResponse() {
-        Map<String, Object> consent = new HashMap<String, Object>();
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, consentList);
+    return response;
+  }
 
-        List<Map<String, Object>> consentList =  new ArrayList<Map<String, Object>>();
-        consentList.add(consent);
+  public static Response getSuccessNoRecordResponse() {
+    Map<String, Object> consent = new HashMap<String, Object>();
 
-        Response response = new Response();
-        response.put(JsonKey.RESPONSE, consentList);
-        return response;
-    }
+    List<Map<String, Object>> consentList = new ArrayList<Map<String, Object>>();
+    consentList.add(consent);
 
-    public static Request getUserConsentRequest(){
-        Map<String, Object> filters = new HashMap<String, Object>();
-        filters.put(JsonKey.USER_ID, "test-user");
-        filters.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
-        filters.put(JsonKey.CONSENT_OBJECTID, "test-collection");
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, consentList);
+    return response;
+  }
 
-        Map<String, Object> consent = new HashMap<String, Object>();
-        consent.put("filters", filters);
+  public static Request getUserConsentRequest() {
+    Map<String, Object> filters = new HashMap<String, Object>();
+    filters.put(JsonKey.USER_ID, "test-user");
+    filters.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
+    filters.put(JsonKey.CONSENT_OBJECTID, "test-collection");
 
-        Request reqObj = new Request();
-        reqObj.setOperation(ActorOperations.GET_USER_CONSENT.getValue());
-        reqObj.put("consent",consent);
+    Map<String, Object> consent = new HashMap<String, Object>();
+    consent.put("filters", filters);
 
-        return reqObj;
-    }
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.GET_USER_CONSENT.getValue());
+    reqObj.put("consent", consent);
 
-    public static Request updateUserConsentRequest(){
-        Map<String, Object> consent = new HashMap<String, Object>();
-        consent.put(JsonKey.USER_ID, "test-user");
-        consent.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
-        consent.put(JsonKey.CONSENT_OBJECTID, "test-collection");
-        consent.put(JsonKey.CONSENT_OBJECTTYPE, "Collection");
-        consent.put(JsonKey.STATUS, "ACTIVE");
+    return reqObj;
+  }
 
-        Request reqObj = new Request();
-        reqObj.setOperation(ActorOperations.UPDATE_USER_CONSENT.getValue());
-        reqObj.put("consent",consent);
+  public static Request updateUserConsentRequest() {
+    Map<String, Object> consent = new HashMap<String, Object>();
+    consent.put(JsonKey.USER_ID, "test-user");
+    consent.put(JsonKey.CONSENT_CONSUMERID, "test-organisation");
+    consent.put(JsonKey.CONSENT_OBJECTID, "test-collection");
+    consent.put(JsonKey.CONSENT_OBJECTTYPE, "Collection");
+    consent.put(JsonKey.STATUS, "ACTIVE");
 
-        return reqObj;
-    }
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.UPDATE_USER_CONSENT.getValue());
+    reqObj.put("consent", consent);
 
-    @Test
-    public void getUserConsentTestSuccess() {
-        TestKit probe = new TestKit(system);
-        ActorRef subject = system.actorOf(props);
+    return reqObj;
+  }
 
-        when(cassandraOperation.getRecordsByProperties(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyMap(),
-                Mockito.any(RequestContext.class)))
-                .thenReturn(getSuccessResponse());
+  @Test
+  public void getUserConsentTestSuccess() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
 
-        subject.tell(getUserConsentRequest(), probe.getRef());
-        Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-        Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
-    }
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getSuccessResponse());
 
-    @Test
-    public void getUserConsentTestNotFound() {
-        TestKit probe = new TestKit(system);
-        ActorRef subject = system.actorOf(props);
+    subject.tell(getUserConsentRequest(), probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
 
-        when(cassandraOperation.getRecordsByProperties(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyMap(),
-                Mockito.any(RequestContext.class)))
-                .thenReturn(getSuccessNoRecordResponse());
+  @Test
+  public void getUserConsentTestNotFound() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
 
-        subject.tell(getUserConsentRequest(), probe.getRef());
-        Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-        Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
-    }
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getSuccessNoRecordResponse());
 
-    @Test
-    public void updateUserConsentTest() {
-        TestKit probe = new TestKit(system);
-        ActorRef subject = system.actorOf(props);
+    subject.tell(getUserConsentRequest(), probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
 
-        when(cassandraOperation.getRecordsByProperties(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyMap(),
-                Mockito.any(RequestContext.class)))
-                .thenReturn(getSuccessResponse());
+  @Test
+  public void updateUserConsentTest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
 
-        when(cassandraOperation.upsertRecord(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyMap(),
-                Mockito.any(RequestContext.class)))
-                .thenReturn(getSuccessResponse());
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getSuccessResponse());
 
-        subject.tell(updateUserConsentRequest(), probe.getRef());
-        Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-        Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
-    }
+    when(cassandraOperation.upsertRecord(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getSuccessResponse());
+
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.ORGANISATION_ID, "test-organisation");
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(reqMap);
+    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+
+    subject.tell(updateUserConsentRequest(), probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
 }

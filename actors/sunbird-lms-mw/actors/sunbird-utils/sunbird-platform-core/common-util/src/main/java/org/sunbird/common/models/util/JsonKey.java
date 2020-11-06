@@ -689,9 +689,10 @@ public final class JsonKey {
   public static final String CONSENT_OBJECT_TYPE = "object_type";
   public static final String CONSENT_LAST_UPDATED_ON = "last_updated_on";
   public static final String CONSENT_CREATED_ON = "created_on";
-  public static final String CONSENT_DATA = "consent_data";
+  public static final String CONSENT_OBJECT = "object";
   // user consent table columns listing - ended
   public static final String PRIORITY = "priority";
+  public static final String FEED_LIMIT = "feed_limit";
 
   private JsonKey() {}
 }

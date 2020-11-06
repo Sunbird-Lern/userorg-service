@@ -134,6 +134,32 @@ public class UserFeedActorTest {
     assertTrue(result);
   }
 
+  @Test
+  public void updateUserFeedTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.UPDATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    reqObj.setRequest(requestMap);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void deleteUserFeedTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.DELETE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    reqObj.setRequest(requestMap);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
 
     TestKit probe = new TestKit(system);
