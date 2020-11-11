@@ -290,8 +290,7 @@ public class UserManagementActor extends BaseActor {
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
-    // if we are updating email then need to update isEmailVerified flag inside keycloak
-    UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
+
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
@@ -322,8 +321,8 @@ public class UserManagementActor extends BaseActor {
     // As of now disallowing updating manageble user's phone/email, will le allowed in next release
     boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
-            && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
-        || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
+        && ((StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL))
+            || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))))) {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
@@ -336,6 +335,7 @@ public class UserManagementActor extends BaseActor {
             requestMap,
             actorMessage.getRequestContext());
     insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
+    removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
@@ -371,6 +371,31 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private void removeUserLookupEntry(
+      Map<String, Object> userLookUpData,
+      Map<String, Object> userDbRecord,
+      RequestContext requestContext) {
+    List<Map<String, String>> reqList = new ArrayList<>();
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.EMAIL)) {
+      String email = (String) userDbRecord.get(JsonKey.EMAIL);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookupMap.put(JsonKey.VALUE, email);
+      reqList.add(lookupMap);
+    }
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.PHONE)) {
+      String phone = (String) userDbRecord.get(JsonKey.PHONE);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookupMap.put(JsonKey.VALUE, phone);
+      reqList.add(lookupMap);
+    }
+    if (CollectionUtils.isNotEmpty(reqList)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqList, requestContext);
+    }
   }
 
   private void updateLocationCodeToIds(
@@ -576,26 +601,6 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg, context);
     }
   }
-  // Check if the user is Custodian Org user
-  private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
-    boolean isCustodianOrgUser = false;
-    String custodianRootOrgId = null;
-    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
-    try {
-      custodianRootOrgId = getCustodianRootOrgId(context);
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "UserManagementActor: isCustodianOrgUser :"
-              + " Exception Occured while fetching Custodian Org ",
-          ex);
-    }
-    if (StringUtils.isNotBlank(custodianRootOrgId)
-        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
-      isCustodianOrgUser = true;
-    }
-    return isCustodianOrgUser;
-  }
 
   private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
@@ -608,6 +613,17 @@ public class UserManagementActor extends BaseActor {
         userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
       }
     }
+  }
+  // Check if the user is Custodian Org user
+  private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
+    boolean isCustodianOrgUser = false;
+    String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
+    if (StringUtils.isNotBlank(custodianRootOrgId)
+        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
+      isCustodianOrgUser = true;
+    }
+    return isCustodianOrgUser;
   }
 
   private void ignoreOrAcceptFrameworkData(
@@ -772,16 +788,8 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.errorTeacherCannotBelongToCustodianOrg,
             ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
       } else if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId = null;
-        try {
-          custodianRootOrgId = getCustodianRootOrgId(context);
-        } catch (Exception ex) {
-          logger.error(
-              context,
-              "UserManagementActor: validateUserType :"
-                  + " Exception Occurred while fetching Custodian Org ",
-              ex);
-        }
+        String custodianRootOrgId =
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
         if (StringUtils.isNotBlank(custodianRootOrgId)
             && ((String) userMap.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(custodianRootOrgId)) {
           ProjectCommonException.throwClientErrorException(
@@ -1247,12 +1255,6 @@ public class UserManagementActor extends BaseActor {
       userDbRecord.put(verifiedFlagType, false);
     }
     return userDbRecord;
-  }
-
-  private String getCustodianRootOrgId(RequestContext context) {
-    String custodianChannel =
-        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef, context);
-    return userService.getRootOrgIdFromChannel(custodianChannel, context);
   }
 
   @SuppressWarnings("unchecked")

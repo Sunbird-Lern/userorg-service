@@ -139,10 +139,7 @@ public class UserTnCActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     targetObject =
         TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.USER_ID),
-            JsonKey.USER,
-            JsonKey.UPDATE,
-            lastAcceptedVersion);
+            (String) userMap.get(JsonKey.ID), JsonKey.USER, JsonKey.UPDATE, lastAcceptedVersion);
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
     ProjectLogger.log(
         "UserTnCActor:syncUserDetails: Telemetry generation call ended ", LoggerEnum.INFO.name());

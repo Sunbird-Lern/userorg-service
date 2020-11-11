@@ -22,6 +22,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 
@@ -190,6 +191,26 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testUpdateUserUpdateEmailSuccess() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+        .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(
+            Mockito.anyMap(), Mockito.any(RequestContext.class)))
+        .thenReturn(user);
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    boolean result =
+        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testUpdateUserSuccessWithLocationCodes() {
     when(InterServiceCommunicationFactory.getInstance())
         .thenReturn(interServiceCommunication)
@@ -260,8 +281,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId1");
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean result =
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
@@ -272,8 +295,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Map<String, Object> req = getExternalIdMap();
     req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId");
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "rootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean result =
         testScenario(
             getRequest(false, true, true, req, ActorOperations.UPDATE_USER),
