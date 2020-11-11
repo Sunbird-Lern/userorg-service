@@ -505,21 +505,6 @@ public class UserUtil {
     }
   }
 
-  public static boolean checkEmailSameOrDiff(
-      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
-    String encEmail = (String) userRequestMap.get(JsonKey.EMAIL);
-    String email = (String) userDbRecord.get(JsonKey.EMAIL);
-    if (StringUtils.isNotBlank(encEmail) && StringUtils.isNotBlank(email)) {
-      try {
-        encEmail = encryptionService.encryptData((String) userRequestMap.get(JsonKey.EMAIL), null);
-      } catch (Exception ex) {
-        logger.error("Exception occurred while encrypting user email.", ex);
-      }
-      return (!((encEmail).equalsIgnoreCase(email)));
-    }
-    return false;
-  }
-
   /**
    * This method will check the diff b/w uer request and user db record email & phone are same or
    * not if its not same then will return true to delete entry from userLookup table
@@ -534,12 +519,6 @@ public class UserUtil {
     String encEmailOrPhone = (String) userRequestMap.get(emailOrPhone);
     String dbEmailOrPhone = (String) userDbRecord.get(emailOrPhone);
     if (StringUtils.isNotBlank(encEmailOrPhone) && StringUtils.isNotBlank(dbEmailOrPhone)) {
-      try {
-        encEmailOrPhone =
-            encryptionService.encryptData((String) userRequestMap.get(emailOrPhone), null);
-      } catch (Exception ex) {
-        logger.error("Exception occurred while encrypting user email.", ex);
-      }
       return (!((encEmailOrPhone).equalsIgnoreCase(dbEmailOrPhone)));
     }
     return false;

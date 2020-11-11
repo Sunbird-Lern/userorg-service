@@ -277,7 +277,7 @@ public class UserManagementActor extends BaseActor {
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
-    validateUserType(userMap, isCustodianOrgUser, actorMessage.getRequestContext());
+    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
@@ -322,8 +322,8 @@ public class UserManagementActor extends BaseActor {
     // As of now disallowing updating manageble user's phone/email, will le allowed in next release
     boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
-            && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
-        || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
+        && ((StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL))
+            || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))))) {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
@@ -600,20 +600,24 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg, context);
     }
   }
+
+  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
+    if (userMap.containsKey(JsonKey.USER_TYPE)) {
+      String userType = (String) userMap.get(JsonKey.USER_TYPE);
+      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
+            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
+      } else {
+        userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
+      }
+    }
+  }
   // Check if the user is Custodian Org user
   private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
     boolean isCustodianOrgUser = false;
-    String custodianRootOrgId = null;
+    String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
-    try {
-      custodianRootOrgId = getCustodianRootOrgId(context);
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "UserManagementActor: isCustodianOrgUser :"
-              + " Exception Occured while fetching Custodian Org ",
-          ex);
-    }
     if (StringUtils.isNotBlank(custodianRootOrgId)
         && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
       isCustodianOrgUser = true;
@@ -783,16 +787,8 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.errorTeacherCannotBelongToCustodianOrg,
             ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
       } else if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId = null;
-        try {
-          custodianRootOrgId = getCustodianRootOrgId(context);
-        } catch (Exception ex) {
-          logger.error(
-              context,
-              "UserManagementActor: validateUserType :"
-                  + " Exception Occurred while fetching Custodian Org ",
-              ex);
-        }
+        String custodianRootOrgId =
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
         if (StringUtils.isNotBlank(custodianRootOrgId)
             && ((String) userMap.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(custodianRootOrgId)) {
           ProjectCommonException.throwClientErrorException(
@@ -1258,12 +1254,6 @@ public class UserManagementActor extends BaseActor {
       userDbRecord.put(verifiedFlagType, false);
     }
     return userDbRecord;
-  }
-
-  private String getCustodianRootOrgId(RequestContext context) {
-    String custodianChannel =
-        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef, context);
-    return userService.getRootOrgIdFromChannel(custodianChannel, context);
   }
 
   @SuppressWarnings("unchecked")

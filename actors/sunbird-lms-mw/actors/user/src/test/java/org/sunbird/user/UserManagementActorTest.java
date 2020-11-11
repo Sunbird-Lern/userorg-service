@@ -260,8 +260,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId1");
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean result =
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
@@ -272,8 +274,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Map<String, Object> req = getExternalIdMap();
     req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId");
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "rootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean result =
         testScenario(
             getRequest(false, true, true, req, ActorOperations.UPDATE_USER),
