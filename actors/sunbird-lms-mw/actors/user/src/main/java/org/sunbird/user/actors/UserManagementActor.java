@@ -4,12 +4,14 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -17,8 +19,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
@@ -59,7 +59,9 @@ import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 @ActorConfig(
   tasks = {
@@ -71,7 +73,7 @@ import scala.concurrent.Future;
     "updateUserDeclarations"
   },
   asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
+  dispatcher = "most-used-one-dispatcher"
 )
 public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -83,8 +85,6 @@ public class UserManagementActor extends BaseActor {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private ObjectMapper mapper = new ObjectMapper();
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserClient userClient = new UserClientImpl();
@@ -1330,9 +1330,10 @@ public class UserManagementActor extends BaseActor {
     request.getRequest().putAll(userMap);
     logger.info(context, "UserManagementActor:saveUserAttributes");
     try {
-      return (Response)
-          interServiceCommunication.getResponse(
-              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()), request);
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      ActorRef actorRef = getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      return (Response) Await.result(future, t.duration());
     } catch (Exception e) {
       logger.error(context, e.getMessage(), e);
     }
@@ -1538,9 +1539,10 @@ public class UserManagementActor extends BaseActor {
     request.getRequest().putAll(userMap);
     logger.info(context, "UserManagementActor:saveUserSelfDeclareAttributes");
     try {
-      return (Response)
-          interServiceCommunication.getResponse(
-              getActorRef(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue()), request);
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      ActorRef actorRef = getActorRef(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      return (Response) Await.result(future, t.duration());
     } catch (Exception e) {
       logger.error(context, e.getMessage(), e);
     }

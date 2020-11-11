@@ -28,5 +28,9 @@ public class UserFlagUtilTest {
     Assert.assertEquals(true, userFlagMap.get(JsonKey.EMAIL_VERIFIED));
     userFlagMap = UserFlagUtil.assignUserFlagValues(4);
     Assert.assertEquals(true, userFlagMap.get(JsonKey.STATE_VALIDATED));
+    userFlagMap = UserFlagUtil.assignUserFlagValues(5);
+    Assert.assertEquals(true, userFlagMap.get(JsonKey.PHONE_VERIFIED));
+    userFlagMap = UserFlagUtil.assignUserFlagValues(6);
+    Assert.assertEquals(true, userFlagMap.get(JsonKey.EMAIL_VERIFIED));
   }
 }

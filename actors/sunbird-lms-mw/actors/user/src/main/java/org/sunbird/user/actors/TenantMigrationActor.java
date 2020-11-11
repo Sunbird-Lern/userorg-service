@@ -1,10 +1,13 @@
 package org.sunbird.user.actors;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -12,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
@@ -44,7 +45,9 @@ import org.sunbird.user.util.MigrationUtils;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 /**
  * This class contains method and business logic to migrate user from custodian org to some other
@@ -61,8 +64,6 @@ public class TenantMigrationActor extends BaseActor {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private Util.DbInfo usrDecDbInfo = Util.dbInfoMap.get(JsonKey.USR_DECLARATION_TABLE);
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   private ActorRef systemSettingActorRef = null;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
@@ -123,6 +124,19 @@ public class TenantMigrationActor extends BaseActor {
       ProjectCommonException.throwServerErrorException(
           ResponseCode.declaredUserValidatedStatusNotUpdated);
     } else {
+      // First migrating user, if migration success, then status gets updated as VALIDATED.
+      try {
+        migrateUser(request, true);
+      } catch (ProjectCommonException pce) {
+        logger.error(
+            request.getRequestContext(), "TenantMigrationActor:migrateUser user failed.", pce);
+        throw pce;
+      } catch (Exception e) {
+        logger.error(
+            request.getRequestContext(), "TenantMigrationActor:migrateUser user failed.", e);
+        ProjectCommonException.throwServerErrorException(ResponseCode.errorUserMigrationFailed);
+      }
+      // Update the status to VALIDATED in user_self_declaration table
       Map<String, Object> responseMap = responseList.get(0);
       Map attrMap = new HashMap<String, Object>();
       responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
@@ -136,9 +150,6 @@ public class TenantMigrationActor extends BaseActor {
               attrMap,
               compositeKeyMap,
               null);
-      if (response.get(JsonKey.RESPONSE).equals(JsonKey.SUCCESS)) {
-        migrateUser(request, true);
-      }
       sender().tell(response, self());
     }
   }
@@ -375,20 +386,22 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       // Update channel to orgId  for provider field in usr_external_identiy table
       UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq, request.getRequestContext());
       User user = mapper.convertValue(userExtIdsReq, User.class);
       UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-      Request userequest = new Request();
-      userequest.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+      Request userRequest = new Request();
+      userRequest.setOperation(
+          UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
-      userequest.getRequest().putAll(userExtIdsReq);
-      response =
-          (Response)
-              interServiceCommunication.getResponse(
-                  getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue()),
-                  userequest);
+      userRequest.getRequest().putAll(userExtIdsReq);
+
+      ActorRef actorRef =
+          getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+      Future<Object> future = Patterns.ask(actorRef, userRequest, t);
+      response = (Response) Await.result(future, t.duration());
       UserLookUp userLookUp = new UserLookUp();
       userLookUp.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),

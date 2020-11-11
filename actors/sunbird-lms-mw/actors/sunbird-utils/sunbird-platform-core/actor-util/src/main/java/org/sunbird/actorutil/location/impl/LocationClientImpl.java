@@ -1,15 +1,16 @@
 package org.sunbird.actorutil.location.impl;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.sunbird.actorutil.InterServiceCommunication;
-import org.sunbird.actorutil.InterServiceCommunicationFactory;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -19,11 +20,12 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class LocationClientImpl implements LocationClient {
   private static LoggerUtil logger = new LoggerUtil(LocationClientImpl.class);
-  private static InterServiceCommunication interServiceCommunication =
-      InterServiceCommunicationFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
 
   @Override
@@ -59,7 +61,7 @@ public class LocationClientImpl implements LocationClient {
     request.setOperation(LocationActorOperation.SEARCH_LOCATION.getValue());
     request.getRequest().putAll(searchRequestMap);
     logger.info(context, "callSearchLocation ");
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
+    Object obj = actorCall(actorRef, request, context);
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
       List<Map<String, Object>> responseList =
@@ -109,8 +111,7 @@ public class LocationClientImpl implements LocationClient {
     Map<String, Object> resLocation = new HashMap<>();
     request.setOperation(LocationActorOperation.CREATE_LOCATION.getValue());
     logger.info(context, "callCreateLocation ");
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
-    checkLocationResponseForException(obj);
+    Object obj = actorCall(actorRef, request, context);
     if (obj instanceof Response) {
       Response response = (Response) obj;
       locationId = (String) response.get(JsonKey.ID);
@@ -125,8 +126,7 @@ public class LocationClientImpl implements LocationClient {
     request.getRequest().putAll(mapper.convertValue(location, Map.class));
     request.setOperation(LocationActorOperation.UPDATE_LOCATION.getValue());
     logger.info(context, "callUpdateLocation ");
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
-    checkLocationResponseForException(obj);
+    Object obj = actorCall(actorRef, request, context);
   }
 
   @Override
@@ -140,8 +140,7 @@ public class LocationClientImpl implements LocationClient {
     request.getRequest().putAll(requestMap);
 
     logger.info(context, "getRelatedLocationIds called");
-    Object obj = interServiceCommunication.getResponse(actorRef, request);
-    checkLocationResponseForException(obj);
+    Object obj = actorCall(actorRef, request, context);
 
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
@@ -150,6 +149,28 @@ public class LocationClientImpl implements LocationClient {
     }
 
     return new ArrayList<>();
+  }
+
+  private Object actorCall(ActorRef actorRef, Request request, RequestContext context) {
+    Object obj = null;
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce) {
+      throw pce;
+    } catch (Exception e) {
+      logger.error(
+          context,
+          "Unable to communicate with actor: Exception occurred with error message = "
+              + e.getMessage(),
+          e);
+      ProjectCommonException.throwServerErrorException(
+          ResponseCode.unableToCommunicateWithActor,
+          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    checkLocationResponseForException(obj);
+    return obj;
   }
 
   private void checkLocationResponseForException(Object obj) {

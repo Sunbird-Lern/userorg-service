@@ -1,6 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -22,10 +23,12 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
@@ -64,9 +67,10 @@ public class UserFeedActorTest {
   private static Map<String, Object> userFeed = new HashMap<>();
   private static ElasticSearchService esUtil;
   private static EsClientFactory esFactory;
+  private static CassandraOperation cassandraOperation = null;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(ElasticSearchHelper.class);
@@ -90,6 +94,17 @@ public class UserFeedActorTest {
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     PowerMockito.when(esService.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
         .thenReturn(promise.future());
+    cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
+    Response upsertResponse = new Response();
+    Map<String, Object> responseMap2 = new HashMap<>();
+    responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
+    upsertResponse.getResult().putAll(responseMap2);
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
   }
 
   @Test
@@ -102,5 +117,63 @@ public class UserFeedActorTest {
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void saveUserFeedTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.CREATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.PRIORITY, 1);
+    requestMap.put(JsonKey.DATA, dataMap);
+    reqObj.setRequest(requestMap);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void updateUserFeedTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.UPDATE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    reqObj.setRequest(requestMap);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void deleteUserFeedTest() {
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap<>();
+    reqObj.setOperation(ActorOperations.DELETE_USER_FEED.getValue());
+    requestMap.put(JsonKey.USER_ID, "someUserId");
+    requestMap.put(JsonKey.CATEGORY, "someCategory");
+    requestMap.put(JsonKey.FEED_ID, "someFeedId");
+    reqObj.setRequest(requestMap);
+    boolean result = testScenario(reqObj, null);
+    assertTrue(result);
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
   }
 }
