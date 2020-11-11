@@ -22,6 +22,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Promise;
 
@@ -182,6 +183,26 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   @Test
   public void testUpdateUserSuccess() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    boolean result =
+        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserUpdateEmailSuccess() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+        .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(
+            Mockito.anyMap(), Mockito.any(RequestContext.class)))
+        .thenReturn(user);
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =

@@ -290,8 +290,7 @@ public class UserManagementActor extends BaseActor {
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
-    // if we are updating email then need to update isEmailVerified flag inside keycloak
-    // UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
+
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
@@ -378,23 +377,25 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> userLookUpData,
       Map<String, Object> userDbRecord,
       RequestContext requestContext) {
-    List<Map<String, String>> reqMap = new ArrayList<>();
+    List<Map<String, String>> reqList = new ArrayList<>();
     if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.EMAIL)) {
       String email = (String) userDbRecord.get(JsonKey.EMAIL);
       Map<String, String> lookupMap = new LinkedHashMap<>();
       lookupMap.put(JsonKey.TYPE, JsonKey.EMAIL);
       lookupMap.put(JsonKey.VALUE, email);
-      reqMap.add(lookupMap);
+      reqList.add(lookupMap);
     }
     if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.PHONE)) {
       String phone = (String) userDbRecord.get(JsonKey.PHONE);
       Map<String, String> lookupMap = new LinkedHashMap<>();
       lookupMap.put(JsonKey.TYPE, JsonKey.PHONE);
       lookupMap.put(JsonKey.VALUE, phone);
-      reqMap.add(lookupMap);
+      reqList.add(lookupMap);
     }
-    UserLookUp userLookUp = new UserLookUp();
-    userLookUp.deleteRecords(reqMap, requestContext);
+    if (CollectionUtils.isNotEmpty(reqList)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqList, requestContext);
+    }
   }
 
   private void updateLocationCodeToIds(
