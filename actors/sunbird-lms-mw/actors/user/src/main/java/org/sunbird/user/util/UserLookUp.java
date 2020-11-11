@@ -119,7 +119,7 @@ public class UserLookUp {
           ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
         } else {
           Map<String, Object> userMap = userMapList.get(0);
-          if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+          if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
             ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
           }
         }
@@ -158,7 +158,7 @@ public class UserLookUp {
           ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
         } else {
           Map<String, Object> userMap = userMapList.get(0);
-          if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+          if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
             ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
           }
         }

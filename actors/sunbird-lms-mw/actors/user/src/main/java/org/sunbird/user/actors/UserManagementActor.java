@@ -277,7 +277,7 @@ public class UserManagementActor extends BaseActor {
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
-    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
+    validateUserType(userMap, isCustodianOrgUser, actorMessage.getRequestContext());
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
@@ -291,7 +291,7 @@ public class UserManagementActor extends BaseActor {
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
     // if we are updating email then need to update isEmailVerified flag inside keycloak
-    UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
+    // UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
@@ -336,6 +336,7 @@ public class UserManagementActor extends BaseActor {
             requestMap,
             actorMessage.getRequestContext());
     insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
+    removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
@@ -371,6 +372,29 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private void removeUserLookupEntry(
+      Map<String, Object> userLookUpData,
+      Map<String, Object> userDbRecord,
+      RequestContext requestContext) {
+    List<Map<String, String>> reqMap = new ArrayList<>();
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.EMAIL)) {
+      String email = (String) userDbRecord.get(JsonKey.EMAIL);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookupMap.put(JsonKey.VALUE, email);
+      reqMap.add(lookupMap);
+    }
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.PHONE)) {
+      String phone = (String) userDbRecord.get(JsonKey.PHONE);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookupMap.put(JsonKey.VALUE, phone);
+      reqMap.add(lookupMap);
+    }
+    UserLookUp userLookUp = new UserLookUp();
+    userLookUp.deleteRecords(reqMap, requestContext);
   }
 
   private void updateLocationCodeToIds(
@@ -595,19 +619,6 @@ public class UserManagementActor extends BaseActor {
       isCustodianOrgUser = true;
     }
     return isCustodianOrgUser;
-  }
-
-  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
-    if (userMap.containsKey(JsonKey.USER_TYPE)) {
-      String userType = (String) userMap.get(JsonKey.USER_TYPE);
-      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-      } else {
-        userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-      }
-    }
   }
 
   private void ignoreOrAcceptFrameworkData(
