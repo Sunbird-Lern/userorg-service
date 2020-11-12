@@ -15,6 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
@@ -35,6 +37,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.FeedAction;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
@@ -330,6 +333,8 @@ public class TenantMigrationActor extends BaseActor {
                 MessageFormat.format(
                     ResponseCode.parameterMismatch.getErrorMessage(),
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
+          } else {
+            migrateReq.put(JsonKey.LOCATION_IDS, result.get(JsonKey.LOCATION_IDS));
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
@@ -349,6 +354,17 @@ public class TenantMigrationActor extends BaseActor {
                   ResponseCode.invalidParameterValue.getErrorMessage(),
                   (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
                   JsonKey.ORG_EXTERNAL_ID));
+        } else {
+          // Fetch locationids of the suborg and update the location of sso user
+          OrganisationClient orgClient = new OrganisationClientImpl();
+          Organisation organisation =
+              orgClient.esGetOrgByExternalId(
+                  (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
+                  (String) migrateReq.get(JsonKey.CHANNEL),
+                  context);
+          if (organisation != null && CollectionUtils.isNotEmpty(organisation.getLocationIds())) {
+            migrateReq.put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+          }
         }
       }
     }
@@ -504,6 +520,7 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.put(JsonKey.FLAGS_VALUE, request.getRequest().get(JsonKey.FLAGS_VALUE));
     userRequest.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     userRequest.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
+    userRequest.put(JsonKey.LOCATION_IDS, request.getRequest().get(JsonKey.LOCATION_IDS));
     if (request.getRequest().containsKey(JsonKey.STATUS)) {
       userRequest.put(JsonKey.STATUS, request.getRequest().get(JsonKey.STATUS));
       userRequest.put(

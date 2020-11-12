@@ -474,6 +474,9 @@ public class UserManagementActor extends BaseActor {
             missingOrgIds.add(orgId);
           } else {
             userOrg.put(JsonKey.HASH_TAG_ID, organisation.getHashTagId());
+            if (!organisation.isRootOrg()) {
+              actorMessage.getRequest().put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+            }
             if (userOrg.get(JsonKey.ROLES) != null) {
               List<String> rolesList = (List<String>) userOrg.get(JsonKey.ROLES);
               RoleService.validateRoles(rolesList);
@@ -756,6 +759,14 @@ public class UserManagementActor extends BaseActor {
       }
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
+
+      // Fetch locationids of the suborg and update the location of sso user
+      OrganisationClient orgClient = new OrganisationClientImpl();
+      Organisation organisation =
+          orgClient.esGetOrgByExternalId(orgExternalId, channel, actorMessage.getRequestContext());
+      if (organisation != null && CollectionUtils.isNotEmpty(organisation.getLocationIds())) {
+        userMap.put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+      }
     }
     processUserRequest(userMap, callerId, actorMessage);
   }
@@ -1255,7 +1266,12 @@ public class UserManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void convertValidatedLocationCodesToIDs(
       Map<String, Object> userMap, RequestContext context) {
-    if (userMap.containsKey(JsonKey.LOCATION_CODES)
+    if (userMap.containsKey(JsonKey.LOCATION_IDS)
+        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
+      userMap.remove(JsonKey.LOCATION_IDS);
+    }
+    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
+        && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
       LocationClientImpl locationClient = new LocationClientImpl();
       List<String> locationIdList =
