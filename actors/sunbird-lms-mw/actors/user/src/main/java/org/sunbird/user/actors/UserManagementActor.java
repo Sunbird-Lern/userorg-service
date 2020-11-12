@@ -43,6 +43,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
@@ -761,11 +763,10 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
 
       // Fetch locationids of the suborg and update the location of sso user
-      OrganisationClient orgClient = new OrganisationClientImpl();
-      Organisation organisation =
-          orgClient.esGetOrgByExternalId(orgExternalId, channel, actorMessage.getRequestContext());
-      if (organisation != null && CollectionUtils.isNotEmpty(organisation.getLocationIds())) {
-        userMap.put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+      OrgService orgService = OrgServiceImpl.getInstance();
+      Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
+      if (MapUtils.isNotEmpty(orgMap)) {
+        userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
       }
     }
     processUserRequest(userMap, callerId, actorMessage);
