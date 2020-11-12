@@ -9,8 +9,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -57,6 +56,9 @@ public class UserTnCActorTest {
   private String groupsConfig =
       "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
 
+  private String orgAdminTnC =
+      "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
+
   private static final Props props = Props.create(UserTnCActor.class);
   private static final CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);;
   private static final String LATEST_VERSION = "V2";
@@ -85,7 +87,7 @@ public class UserTnCActorTest {
     Map<String, String> config = new HashMap<>();
     config.put(JsonKey.TNC_CONFIG, tncConfig);
     config.put("groups", groupsConfig);
-
+    config.put("orgAdminTnC", orgAdminTnC);
     when(DataCacheHandler.getConfigSettings()).thenReturn(config);
 
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -206,6 +208,19 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
+  @Test
+  public void testOrgAdminTnCSuccessWithAcceptFirstTime() {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getUser(ACCEPTED_CORRECT_VERSION));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    Response response =
+        setOrgAdminTncRequest(ACCEPTED_CORRECT_VERSION)
+            .expectMsgClass(duration("1000 second"), Response.class);
+    Assert.assertTrue(
+        null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
+  }
+
   private TestKit setRequest(String version) {
     mockCassandraOperation();
     Request reqObj = new Request();
@@ -234,6 +249,21 @@ public class UserTnCActorTest {
     return probe;
   }
 
+  private TestKit setOrgAdminTncRequest(String version) {
+    mockCassandraOperation();
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.VERSION, version);
+    innerMap.put(JsonKey.TNC_TYPE, "orgAdminTnC");
+    innerMap.put(JsonKey.ORGANISATION_ID, "orgid1");
+    reqObj.setRequest(innerMap);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+    return probe;
+  }
+
   private void mockCassandraOperation() {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -251,6 +281,12 @@ public class UserTnCActorTest {
       user.put(JsonKey.TNC_ACCEPTED_VERSION, lastAcceptedVersion);
     }
 
+    List<Map<String, Object>> orgs = new ArrayList<>();
+    Map<String, Object> org = new HashMap<>();
+    org.put(JsonKey.ID, "orgid1");
+    org.put(JsonKey.ROLES, Arrays.asList("PUBLIC", "ORG_ADMIN"));
+    orgs.add(org);
+    user.put(JsonKey.ORGANISATIONS, orgs);
     // alltncAccepted
     if (lastAcceptedVersion != null) {
       Map<String, Object> allTncAccepted = new HashMap<>();

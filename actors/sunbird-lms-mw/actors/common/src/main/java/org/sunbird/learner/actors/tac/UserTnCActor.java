@@ -101,13 +101,13 @@ public class UserTnCActor extends BaseActor {
       }
 
       // check if it is org admin TnC and user is not an admin of the organisation
-      if (StringUtils.isNotBlank(orgId)) {
-        if (!isOrgAdmin(user, orgId)) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.invalidParameterValue,
-              MessageFormat.format(
-                  ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.ORG_ID));
-        }
+      if (StringUtils.isNotBlank(orgId) && !isOrgAdmin(user, orgId)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                orgId,
+                JsonKey.ORGANISATION_ID));
       }
     } else {
       throw new ProjectCommonException(
