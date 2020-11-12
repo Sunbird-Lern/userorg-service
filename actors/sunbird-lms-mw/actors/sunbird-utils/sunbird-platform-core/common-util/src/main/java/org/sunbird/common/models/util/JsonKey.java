@@ -693,6 +693,7 @@ public final class JsonKey {
   // user consent table columns listing - ended
   public static final String PRIORITY = "priority";
   public static final String FEED_LIMIT = "feed_limit";
+  public static final String ORG_ADMIN = "ORG_ADMIN";
 
   private JsonKey() {}
 }

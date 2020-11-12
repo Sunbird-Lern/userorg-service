@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -54,6 +55,7 @@ public class UserTnCActor extends BaseActor {
     String acceptedTnC = (String) request.getRequest().get(JsonKey.VERSION);
     Map<String, Object> userMap = new HashMap();
     String userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
+    String orgId = (String) request.getRequest().get(JsonKey.ORGANISATION_ID);
     // if managedUserId's terms and conditions are accepted, get userId from request
     String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
     boolean isManagedUser = false;
@@ -96,6 +98,16 @@ public class UserTnCActor extends BaseActor {
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
                 ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID));
+      }
+
+      // check if it is org admin TnC and user is not an admin of the organisation
+      if (StringUtils.isNotBlank(orgId)) {
+        if (!isOrgAdmin(user, orgId)) {
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.invalidParameterValue,
+              MessageFormat.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.ORG_ID));
+        }
       }
     } else {
       throw new ProjectCommonException(
@@ -162,6 +174,25 @@ public class UserTnCActor extends BaseActor {
       response.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
       sender().tell(response, self());
     }
+  }
+
+  // Chech Validate OrgAdmin
+  private boolean isOrgAdmin(Map<String, Object> user, String orgId) {
+    List<Map<String, Object>> orgDetails =
+        (List<Map<String, Object>>) user.get(JsonKey.ORGANISATIONS);
+    if (CollectionUtils.isNotEmpty(orgDetails)) {
+      Map<String, Object> org =
+          orgDetails
+              .stream()
+              .filter(x -> orgId.equals((String) x.get(JsonKey.ID)))
+              .findAny()
+              .orElse(null);
+      if (MapUtils.isNotEmpty(org)) {
+        List<String> roles = (List<String>) org.get(JsonKey.ROLES);
+        return roles.contains(JsonKey.ORG_ADMIN);
+      }
+    }
+    return false;
   }
 
   // Convert Acceptance tnc object as a Json String in cassandra table
