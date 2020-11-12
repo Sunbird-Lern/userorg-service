@@ -56,7 +56,7 @@ public class UserTnCActorTest {
   private String groupsConfig =
       "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
 
-  private String orgAdminTnC =
+  private String orgAdminTnc =
       "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
 
   private static final Props props = Props.create(UserTnCActor.class);
@@ -87,7 +87,7 @@ public class UserTnCActorTest {
     Map<String, String> config = new HashMap<>();
     config.put(JsonKey.TNC_CONFIG, tncConfig);
     config.put("groups", groupsConfig);
-    config.put("orgAdminTnC", orgAdminTnC);
+    config.put("orgAdminTnc", orgAdminTnc);
     when(DataCacheHandler.getConfigSettings()).thenReturn(config);
 
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -255,8 +255,7 @@ public class UserTnCActorTest {
     reqObj.setOperation(ActorOperations.USER_TNC_ACCEPT.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.VERSION, version);
-    innerMap.put(JsonKey.TNC_TYPE, "orgAdminTnC");
-    innerMap.put(JsonKey.ORGANISATION_ID, "orgid1");
+    innerMap.put(JsonKey.TNC_TYPE, "orgAdminTnc");
     reqObj.setRequest(innerMap);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -281,9 +280,10 @@ public class UserTnCActorTest {
       user.put(JsonKey.TNC_ACCEPTED_VERSION, lastAcceptedVersion);
     }
 
+    user.put(JsonKey.ROOT_ORG_ID, "orgid1");
     List<Map<String, Object>> orgs = new ArrayList<>();
     Map<String, Object> org = new HashMap<>();
-    org.put(JsonKey.ID, "orgid1");
+    org.put(JsonKey.ORGANISATION_ID, "orgid1");
     org.put(JsonKey.ROLES, Arrays.asList("PUBLIC", "ORG_ADMIN"));
     orgs.add(org);
     user.put(JsonKey.ORGANISATIONS, orgs);

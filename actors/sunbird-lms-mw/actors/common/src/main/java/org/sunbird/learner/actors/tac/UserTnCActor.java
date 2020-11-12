@@ -55,7 +55,6 @@ public class UserTnCActor extends BaseActor {
     String acceptedTnC = (String) request.getRequest().get(JsonKey.VERSION);
     Map<String, Object> userMap = new HashMap();
     String userId = (String) request.getContext().get(JsonKey.REQUESTED_BY);
-    String orgId = (String) request.getRequest().get(JsonKey.ORGANISATION_ID);
     // if managedUserId's terms and conditions are accepted, get userId from request
     String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
     boolean isManagedUser = false;
@@ -101,12 +100,12 @@ public class UserTnCActor extends BaseActor {
       }
 
       // check if it is org admin TnC and user is not an admin of the organisation
-      if (StringUtils.isNotBlank(orgId) && !isOrgAdmin(user, orgId)) {
+      if (JsonKey.ORG_ADMIN_TNC.equals(tncType) && !isOrgAdmin(user)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
                 ResponseCode.invalidParameterValue.getErrorMessage(),
-                orgId,
+                user.get(JsonKey.ROOT_ORG_ID),
                 JsonKey.ORGANISATION_ID));
       }
     } else {
@@ -177,14 +176,16 @@ public class UserTnCActor extends BaseActor {
   }
 
   // Chech Validate OrgAdmin
-  private boolean isOrgAdmin(Map<String, Object> user, String orgId) {
+  private boolean isOrgAdmin(Map<String, Object> user) {
     List<Map<String, Object>> orgDetails =
         (List<Map<String, Object>>) user.get(JsonKey.ORGANISATIONS);
     if (CollectionUtils.isNotEmpty(orgDetails)) {
       Map<String, Object> org =
           orgDetails
               .stream()
-              .filter(x -> orgId.equals((String) x.get(JsonKey.ID)))
+              .filter(
+                  x ->
+                      user.get(JsonKey.ROOT_ORG_ID).equals((String) x.get(JsonKey.ORGANISATION_ID)))
               .findAny()
               .orElse(null);
       if (MapUtils.isNotEmpty(org)) {
