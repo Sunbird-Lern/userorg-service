@@ -476,7 +476,7 @@ public class UserManagementActor extends BaseActor {
             missingOrgIds.add(orgId);
           } else {
             userOrg.put(JsonKey.HASH_TAG_ID, organisation.getHashTagId());
-            if (!organisation.isRootOrg()) {
+            if (organisation.isRootOrg() != null && !organisation.isRootOrg()) {
               actorMessage.getRequest().put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
             }
             if (userOrg.get(JsonKey.ROLES) != null) {
