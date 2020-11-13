@@ -763,10 +763,12 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
 
       // Fetch locationids of the suborg and update the location of sso user
-      OrgService orgService = OrgServiceImpl.getInstance();
-      Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
-      if (MapUtils.isNotEmpty(orgMap)) {
-        userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+      if (!isCustodianOrg) {
+        OrgService orgService = OrgServiceImpl.getInstance();
+        Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
+        if (MapUtils.isNotEmpty(orgMap)) {
+          userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+        }
       }
     }
     processUserRequest(userMap, callerId, actorMessage);

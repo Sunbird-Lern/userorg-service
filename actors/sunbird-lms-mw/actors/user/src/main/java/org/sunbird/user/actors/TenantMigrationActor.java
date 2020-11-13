@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
@@ -35,9 +33,10 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.FeedAction;
 import org.sunbird.models.user.User;
 import org.sunbird.services.sso.SSOManager;
@@ -356,14 +355,10 @@ public class TenantMigrationActor extends BaseActor {
                   JsonKey.ORG_EXTERNAL_ID));
         } else {
           // Fetch locationids of the suborg and update the location of sso user
-          OrganisationClient orgClient = new OrganisationClientImpl();
-          Organisation organisation =
-              orgClient.esGetOrgByExternalId(
-                  (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
-                  (String) migrateReq.get(JsonKey.CHANNEL),
-                  context);
-          if (organisation != null && CollectionUtils.isNotEmpty(organisation.getLocationIds())) {
-            migrateReq.put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+          OrgService orgService = OrgServiceImpl.getInstance();
+          Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
+          if (org.apache.commons.collections.MapUtils.isNotEmpty(orgMap)) {
+            migrateReq.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
           }
         }
       }
