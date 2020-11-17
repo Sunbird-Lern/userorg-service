@@ -516,8 +516,8 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     userRequest.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     if (request.getRequest().containsKey(JsonKey.LOCATION_IDS)
-        && MapUtils.isNotEmpty(
-            (Map<String, Object>) request.getRequest().get(JsonKey.LOCATION_IDS))) {
+        && CollectionUtils.isNotEmpty(
+            (List<String>) request.getRequest().get(JsonKey.LOCATION_IDS))) {
       userRequest.put(JsonKey.LOCATION_IDS, request.getRequest().get(JsonKey.LOCATION_IDS));
     }
     if (request.getRequest().containsKey(JsonKey.STATUS)) {
