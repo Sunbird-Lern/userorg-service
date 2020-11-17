@@ -43,6 +43,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
@@ -474,6 +476,9 @@ public class UserManagementActor extends BaseActor {
             missingOrgIds.add(orgId);
           } else {
             userOrg.put(JsonKey.HASH_TAG_ID, organisation.getHashTagId());
+            if (organisation.isRootOrg() != null && !organisation.isRootOrg()) {
+              actorMessage.getRequest().put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+            }
             if (userOrg.get(JsonKey.ROLES) != null) {
               List<String> rolesList = (List<String>) userOrg.get(JsonKey.ROLES);
               RoleService.validateRoles(rolesList);
@@ -756,6 +761,15 @@ public class UserManagementActor extends BaseActor {
       }
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
+
+      // Fetch locationids of the suborg and update the location of sso user
+      if (!isCustodianOrg) {
+        OrgService orgService = OrgServiceImpl.getInstance();
+        Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
+        if (MapUtils.isNotEmpty(orgMap)) {
+          userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+        }
+      }
     }
     processUserRequest(userMap, callerId, actorMessage);
   }
@@ -1255,7 +1269,12 @@ public class UserManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void convertValidatedLocationCodesToIDs(
       Map<String, Object> userMap, RequestContext context) {
-    if (userMap.containsKey(JsonKey.LOCATION_CODES)
+    if (userMap.containsKey(JsonKey.LOCATION_IDS)
+        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
+      userMap.remove(JsonKey.LOCATION_IDS);
+    }
+    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
+        && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
       LocationClientImpl locationClient = new LocationClientImpl();
       List<String> locationIdList =

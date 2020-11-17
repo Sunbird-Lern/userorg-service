@@ -31,6 +31,7 @@ import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.UserClient;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
@@ -106,6 +107,19 @@ public abstract class UserManagementActorTestBase {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(getSuccessResponse());
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getOrgFromCassandra());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getOrgandLocationFromCassandra());
+
     PowerMockito.mockStatic(Patterns.class);
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
@@ -182,6 +196,27 @@ public abstract class UserManagementActorTestBase {
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     reqMap = getMapObject();
+  }
+
+  public Response getOrgFromCassandra() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ORG_ID, "anyOrgId");
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    return response;
+  }
+
+  public Response getOrgandLocationFromCassandra() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ORG_ID, "anyOrgId");
+    map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    return response;
   }
 
   public void mockForUserOrgUpdate() {

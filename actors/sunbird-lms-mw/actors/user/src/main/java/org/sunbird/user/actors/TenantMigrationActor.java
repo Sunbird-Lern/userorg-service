@@ -33,6 +33,8 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.FeedAction;
@@ -330,6 +332,8 @@ public class TenantMigrationActor extends BaseActor {
                 MessageFormat.format(
                     ResponseCode.parameterMismatch.getErrorMessage(),
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
+          } else {
+            migrateReq.put(JsonKey.LOCATION_IDS, result.get(JsonKey.LOCATION_IDS));
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
@@ -349,6 +353,13 @@ public class TenantMigrationActor extends BaseActor {
                   ResponseCode.invalidParameterValue.getErrorMessage(),
                   (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
                   JsonKey.ORG_EXTERNAL_ID));
+        } else {
+          // Fetch locationids of the suborg and update the location of sso user
+          OrgService orgService = OrgServiceImpl.getInstance();
+          Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
+          if (org.apache.commons.collections.MapUtils.isNotEmpty(orgMap)) {
+            migrateReq.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+          }
         }
       }
     }
@@ -504,6 +515,7 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.put(JsonKey.FLAGS_VALUE, request.getRequest().get(JsonKey.FLAGS_VALUE));
     userRequest.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     userRequest.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
+    userRequest.put(JsonKey.LOCATION_IDS, request.getRequest().get(JsonKey.LOCATION_IDS));
     if (request.getRequest().containsKey(JsonKey.STATUS)) {
       userRequest.put(JsonKey.STATUS, request.getRequest().get(JsonKey.STATUS));
       userRequest.put(

@@ -52,6 +52,17 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testCreateUserSuccessWithOrgExternalId() {
+    reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
+    boolean result =
+        testScenario(
+            getRequest(
+                false, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateUserSuccessWithoutUserCallerIdChannelAndRootOrgId() {
 
     boolean result =
