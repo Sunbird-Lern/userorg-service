@@ -35,6 +35,7 @@ PATCH /v1/user/update/logintime	  @controllers.usermanagement.UserLoginControlle
 POST  /v1/user/tnc/accept         @controllers.tac.UserTnCController.acceptTnC(request: play.mvc.Http.Request)
 GET   /v1/user/type/list						    @controllers.usermanagement.UserTypeController.getUserTypes(request: play.mvc.Http.Request)
 PATCH /private/user/v1/account/merge @controllers.usermanagement.UserMergeController.mergeUser(request: play.mvc.Http.Request)
+PATCH	/v1/user/update/userlocation @controllers.usermanagement.UserController.updateUserLocation(request: play.mvc.Http.Request)
 
 # Organisation management APIs
 POST  /v1/org/create		    @controllers.organisationmanagement.OrgController.createOrg(request: play.mvc.Http.Request)

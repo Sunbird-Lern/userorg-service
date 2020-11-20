@@ -114,7 +114,8 @@ public enum ActorOperations {
   CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
-  GET_USER_CONSENT("getUserConsent");
+  GET_USER_CONSENT("getUserConsent"),
+  UPDATE_USER_LOCATION("updateUserLocation");
 
   private String value;
 

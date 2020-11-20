@@ -332,4 +332,18 @@ public class UserController extends BaseController {
         true,
         httpRequest);
   }
+
+  public CompletionStage<Result> updateUserLocation(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.UPDATE_USER_LOCATION.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 }
