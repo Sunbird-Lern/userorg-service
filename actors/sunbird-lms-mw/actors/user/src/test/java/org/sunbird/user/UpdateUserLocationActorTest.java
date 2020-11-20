@@ -37,7 +37,6 @@ import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UpdateUserLocationActor;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
 
@@ -46,7 +45,6 @@ import scala.concurrent.Promise;
   UserDao.class,
   UserDaoImpl.class,
   UserUtility.class,
-  UserLookUp.class,
   ServiceFactory.class,
   ElasticSearchRestHighImpl.class,
   ElasticSearchHelper.class,
@@ -77,7 +75,6 @@ public class UpdateUserLocationActorTest {
     userList.add(getValidUserResponse1());
     userList.add(getValidUserResponse2());
     Mockito.when(userDao.searchUser(Mockito.anyMap(), Mockito.any())).thenReturn(userList);
-    // Mockito.when(userDao.getUserById("invalidUserId", null)).thenReturn(null);
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -116,14 +113,6 @@ public class UpdateUserLocationActorTest {
             Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
-
-    UserLookUp userLookUp = PowerMockito.mock(UserLookUp.class);
-    whenNew(UserLookUp.class).withNoArguments().thenReturn(userLookUp);
-
-    when(userLookUp.getRecordByType(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
-        .thenReturn(new ArrayList<>());
-    when(userLookUp.insertRecords(Mockito.anyList(), Mockito.any())).thenReturn(new Response());
   }
 
   @Test
@@ -172,43 +161,28 @@ public class UpdateUserLocationActorTest {
     Map<String, Object> fMap = new HashMap<>();
     fMap.put(JsonKey.ID, "123-456-7890");
     fMap.put(JsonKey.USER_ID, "123-456-789");
-    fMap.put(JsonKey.USERNAME, "category");
-    fMap.put(JsonKey.FIRST_NAME, "first");
-    fMap.put(JsonKey.LAST_NAME, "last");
+    fMap.put(JsonKey.LOCATION_IDS, new ArrayList<>());
     return fMap;
   }
 
   private User getValidUserResponse1() {
     User user = new User();
     user.setId("ValidUserId1");
-    user.setEmail("anyEmail1@gmail.com");
     user.setChannel("TN");
-    user.setPhone("9876543210");
-    user.setMaskedEmail("any****@gmail.com");
-    user.setMaskedPhone("987*****0");
-    user.setIsDeleted(false);
-    user.setFlagsValue(3);
     user.setUserType("TEACHER");
-    user.setUserId("ValidUserId");
-    user.setFirstName("Demo Name");
-    user.setUserName("validUserName1");
+    user.setLocationIds(new ArrayList<>());
+    user.setOrganisations(new ArrayList<>());
     return user;
   }
 
   private User getValidUserResponse2() {
     User user = new User();
     user.setId("ValidUserId2");
-    user.setEmail("anyEmail2@gmail.com");
     user.setChannel("TN");
-    user.setPhone("9876543210");
-    user.setMaskedEmail("any****@gmail.com");
-    user.setMaskedPhone("987*****0");
-    user.setIsDeleted(false);
-    user.setFlagsValue(3);
     user.setUserType("TEACHER");
     user.setUserId("ValidUserId");
-    user.setFirstName("Demo Name");
-    user.setUserName("validUserName2");
+    user.setLocationIds(new ArrayList<>());
+    user.setOrganisations(new ArrayList<>());
     return user;
   }
 }

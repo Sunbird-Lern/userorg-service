@@ -27,7 +27,6 @@ import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.util.UserLookUp;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -41,7 +40,6 @@ public class UpdateUserLocationActor extends BaseActor {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserDao userDao = UserDaoImpl.getInstance();
-  private UserLookUp userLookUp = new UserLookUp();
   private OrganisationClient organisationClient = new OrganisationClientImpl();
 
   @Override
