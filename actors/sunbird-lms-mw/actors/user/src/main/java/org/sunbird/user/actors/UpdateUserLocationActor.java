@@ -84,47 +84,48 @@ public class UpdateUserLocationActor extends BaseActor {
                     && CollectionUtils.isNotEmpty(usr.getOrganisations())
                     && usr.getOrganisations().size() > 0) {
 
-                  // Get all suborg id list
-                  List<String> suborgList = new ArrayList<>();
+                  // Get all org id list
+                  List<String> orgidList = new ArrayList<>();
                   List<Map<String, Object>> orgList = usr.getOrganisations();
                   orgList
                       .stream()
                       .forEach(
                           orgMap -> {
-                            if (orgMap.get(JsonKey.IS_ROOT_ORG) != null) {
-                              Boolean isRootOrg = (Boolean) orgMap.get(JsonKey.IS_ROOT_ORG);
-                              if (!isRootOrg.booleanValue()) {
-                                suborgList.add((String) orgMap.get(JsonKey.ORGANISATION_ID));
-                              }
-                            }
+                            orgidList.add((String) orgMap.get(JsonKey.ORGANISATION_ID));
                           });
-                  // Get location ids of all suborg
-                  List<String> fields = new ArrayList<>();
-                  fields.add(JsonKey.ID);
-                  fields.add(JsonKey.LOCATION_IDS);
-                  List<Organisation> suborgDetailsList =
-                      organisationClient.esSearchOrgByIds(suborgList, fields, context);
 
-                  boolean locationExists = false;
-                  List<String> subOrgLocationIds = null;
-                  for (Organisation org : suborgDetailsList) {
-                    if (org.getLocationIds() != null
-                        && org.getLocationIds().containsAll(usr.getLocationIds())) {
-                      locationExists = true;
-                    } else {
-                      if (org.getLocationIds() != null) {
-                        subOrgLocationIds = org.getLocationIds();
+                  // Get location ids of all org
+                  if (CollectionUtils.isNotEmpty(orgidList)) {
+                    List<String> fields = new ArrayList<>();
+                    List<Organisation> suborgDetailsList =
+                        organisationClient.esSearchOrgByIds(orgidList, fields, context);
+
+                    boolean locationExists = false;
+                    List<String> subOrgLocationIds = null;
+                    for (Organisation org : suborgDetailsList) {
+                      // If org is a suborg, then check location ids
+                      if (org.isRootOrg() == null || !org.isRootOrg()) {
+                        if (org.getLocationIds() != null
+                            && org.getLocationIds().containsAll(usr.getLocationIds())) {
+                          locationExists = true;
+                        } else {
+                          if (org.getLocationIds() != null) {
+                            subOrgLocationIds = org.getLocationIds();
+                          }
+                        }
                       }
                     }
-                  }
 
-                  if (!locationExists) {
-                    if (subOrgLocationIds != null) {
-                      updateUserLocation(
-                          context, userRespList, finalDryRun, usr.getId(), subOrgLocationIds);
+                    if (!locationExists) {
+                      if (subOrgLocationIds != null) {
+                        updateUserLocation(
+                            context, userRespList, finalDryRun, usr.getId(), subOrgLocationIds);
+                      }
                     }
+                  } else {
+                    logger.info(
+                        "User location is same as suborg location for userid " + usr.getId());
                   }
-
                 } else {
                   logger.info("Location not updated for userid " + usr.getId());
                 }
