@@ -128,10 +128,9 @@ public class UpdateUserLocationActor extends BaseActor {
                         if (!isRootOrg) {
                           if (org.get(JsonKey.LOCATION_IDS) != null) {
                             List<String> orgLocationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
+                            subOrgLocationIds = orgLocationIds;
                             if (orgLocationIds.size() <= userLocationIds.size()) {
                               locationExists = true;
-                            } else {
-                                subOrgLocationIds = orgLocationIds;
                             }
                           }
                         }
@@ -146,17 +145,31 @@ public class UpdateUserLocationActor extends BaseActor {
                     } else {
                       logger.info(
                         "User location update not required, location ids are same as org location for userid " + userId);
+                      Map<String,Object> resMap = new HashMap<>();
+                      resMap.put("userlocnUpdateNotRequired","User location update not required, location ids are same as org location for userid" + userId);
+                      resMap.put("userLocIds",userLocationIds);
+                      resMap.put("subOrgLocIds",subOrgLocationIds);
+                      userRespList.add(resMap);
                     }
                   } else {
                     logger.info(
                         "User not associated with any org for userid " + userId);
+                    Map<String,Object> resMap = new HashMap<>();
+                    resMap.put("userOrgEmpty","UserOrg is empty for the given userid" + userId);
+                    userRespList.add(resMap);
                   }
                 } else {
-                  logger.info("Location or UserOrg is empty for the given userid " + userId);
+                  logger.info("UserOrg is empty for the given userid " + userId);
+                  Map<String,Object> resMap = new HashMap<>();
+                  resMap.put("userOrgEmpty","UserOrg is empty for the given userid" + userId);
+                  userRespList.add(resMap);
                 }
 
               } else {
                 logger.info("For the given userid no user exist in ES. " + userId);
+                Map<String,Object> resMap = new HashMap<>();
+                resMap.put("userNotFound","userid no user exist in ES." + userId);
+                userRespList.add(resMap);
               }
             });
     Response response = new Response();
