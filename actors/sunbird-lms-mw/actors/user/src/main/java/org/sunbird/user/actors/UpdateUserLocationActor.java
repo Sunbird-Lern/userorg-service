@@ -91,10 +91,12 @@ public class UpdateUserLocationActor extends BaseActor {
               if (MapUtils.isNotEmpty(usr) && usr.size() > 0) {
                 List<String> userLocationIds = (List<String>) usr.get(JsonKey.LOCATION_IDS);
                 List<Map<String,Object>> userOrganisations = (List<Map<String, Object>>) usr.get(JsonKey.ORGANISATIONS);
-                if (CollectionUtils.isNotEmpty(userLocationIds)
-                    && CollectionUtils.isNotEmpty(userOrganisations)
+                if (CollectionUtils.isNotEmpty(userOrganisations)
                     && userOrganisations.size() > 0) {
 
+                  if (CollectionUtils.isEmpty(userLocationIds)) {
+                    userLocationIds = new ArrayList<>(1);
+                  }
                   // Get all org id list
                   List<String> orgidList = new ArrayList<>();
                   userOrganisations
