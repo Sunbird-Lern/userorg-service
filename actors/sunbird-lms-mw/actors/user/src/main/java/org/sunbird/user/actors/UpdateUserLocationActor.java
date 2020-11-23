@@ -85,7 +85,7 @@ public class UpdateUserLocationActor extends BaseActor {
                   context,
                   String.format(
                     "%s:%s:User not found with provided id == %s and error %s",
-                    this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
+                    this.getClass().getSimpleName(), "updateUserLocation",userId, e.getMessage()),
                   e);
               }
 
