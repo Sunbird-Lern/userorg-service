@@ -10,8 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -123,12 +121,12 @@ public class UpdateUserLocationActor extends BaseActor {
                     for (Map<String,Object> org : suborgDetailsList) {
                       // If org is a suborg, then check location ids
 
-                      if (org.get(JsonKey.IS_ROOT_ORG) == null) {
+                      if (org.get(JsonKey.IS_ROOT_ORG) != null) {
                         boolean isRootOrg = (boolean) org.get(JsonKey.IS_ROOT_ORG);
                         if (!isRootOrg) {
                           if (org.get(JsonKey.LOCATION_IDS) != null) {
                             List<String> orgLocationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
-                            if (orgLocationIds.containsAll(userLocationIds)) {
+                            if (orgLocationIds.size() <= userLocationIds.size()) {
                               locationExists = true;
                             } else {
                                 subOrgLocationIds = orgLocationIds;
