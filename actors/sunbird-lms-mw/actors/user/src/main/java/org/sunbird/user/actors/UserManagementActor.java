@@ -490,6 +490,8 @@ public class UserManagementActor extends BaseActor {
         List<String> fields = new ArrayList<>();
         fields.add(JsonKey.HASHTAGID);
         fields.add(JsonKey.ID);
+        fields.add(JsonKey.LOCATION_IDS);
+        fields.add(JsonKey.IS_ROOT_ORG);
         List<Organisation> orgList =
             organisationClient.esSearchOrgByIds(
                 orgIdList, fields, actorMessage.getRequestContext());
