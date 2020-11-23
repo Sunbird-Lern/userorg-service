@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -23,10 +25,7 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.User;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -39,8 +38,6 @@ public class UpdateUserLocationActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private UserDao userDao = UserDaoImpl.getInstance();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -74,20 +71,35 @@ public class UpdateUserLocationActor extends BaseActor {
         .stream()
         .forEach(
             userId -> {
-              Map<String, Object> searchQueryMap = new HashMap<>();
-              searchQueryMap.put(JsonKey.USER_ID, userId);
-              // ES search call on userId , to fetch user with location
-              List<User> userList = userDao.searchUser(searchQueryMap, context);
-              if (CollectionUtils.isNotEmpty(userList) && userList.size() > 0) {
-                User usr = userList.get(0);
-                if (CollectionUtils.isNotEmpty(usr.getLocationIds())
-                    && CollectionUtils.isNotEmpty(usr.getOrganisations())
-                    && usr.getOrganisations().size() > 0) {
+              Map<String, Object> usr = null;
+              Future<Map<String, Object>> resultF =
+                esUtil.getDataByIdentifier(
+                  ProjectUtil.EsType.user.getTypeName(), userId, context);
+              try {
+                Object object = Await.result(resultF, ElasticSearchHelper.timeout.duration());
+                if (object != null) {
+                  usr = (Map<String, Object>) object;
+                }
+              } catch (Exception e) {
+                logger.error(
+                  context,
+                  String.format(
+                    "%s:%s:User not found with provided id == %s and error %s",
+                    this.getClass().getSimpleName(), "getUserProfileData", e.getMessage()),
+                  e);
+              }
+
+
+              if (MapUtils.isNotEmpty(usr) && usr.size() > 0) {
+                List<String> userLocationIds = (List<String>) usr.get(JsonKey.LOCATION_IDS);
+                List<Map<String,Object>> userOrganisations = (List<Map<String, Object>>) usr.get(JsonKey.ORGANISATIONS);
+                if (CollectionUtils.isNotEmpty(userLocationIds)
+                    && CollectionUtils.isNotEmpty(userOrganisations)
+                    && userOrganisations.size() > 0) {
 
                   // Get all org id list
                   List<String> orgidList = new ArrayList<>();
-                  List<Map<String, Object>> orgList = usr.getOrganisations();
-                  orgList
+                  userOrganisations
                       .stream()
                       .forEach(
                           orgMap -> {
@@ -97,20 +109,30 @@ public class UpdateUserLocationActor extends BaseActor {
                   // Get location ids of all org
                   if (CollectionUtils.isNotEmpty(orgidList)) {
                     List<String> fields = new ArrayList<>();
-                    List<Organisation> suborgDetailsList =
-                        organisationClient.esSearchOrgByIds(orgidList, fields, context);
+                    fields.add(JsonKey.IS_ROOT_ORG);
+                    fields.add(JsonKey.LOCATION_IDS);
+                    fields.add(JsonKey.ID);
+                    Util.DbInfo orgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
+                    Response response =
+                      cassandraOperation.getPropertiesValueById(orgDb.getKeySpace(), orgDb.getTableName(), orgidList, fields, context);
+                    List<Map<String, Object>> suborgDetailsList =
+                      (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
                     boolean locationExists = false;
                     List<String> subOrgLocationIds = null;
-                    for (Organisation org : suborgDetailsList) {
+                    for (Map<String,Object> org : suborgDetailsList) {
                       // If org is a suborg, then check location ids
-                      if (org.isRootOrg() == null || !org.isRootOrg()) {
-                        if (org.getLocationIds() != null
-                            && org.getLocationIds().containsAll(usr.getLocationIds())) {
-                          locationExists = true;
-                        } else {
-                          if (org.getLocationIds() != null) {
-                            subOrgLocationIds = org.getLocationIds();
+
+                      if (org.get(JsonKey.IS_ROOT_ORG) == null) {
+                        boolean isRootOrg = (boolean) org.get(JsonKey.IS_ROOT_ORG);
+                        if (!isRootOrg) {
+                          if (org.get(JsonKey.LOCATION_IDS) != null) {
+                            List<String> orgLocationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
+                            if (orgLocationIds.containsAll(userLocationIds)) {
+                              locationExists = true;
+                            } else {
+                                subOrgLocationIds = orgLocationIds;
+                            }
                           }
                         }
                       }
@@ -119,15 +141,18 @@ public class UpdateUserLocationActor extends BaseActor {
                     if (!locationExists) {
                       if (subOrgLocationIds != null) {
                         updateUserLocation(
-                            context, userRespList, finalDryRun, usr.getId(), subOrgLocationIds);
+                            context, userRespList, finalDryRun, userId, subOrgLocationIds);
                       }
+                    } else {
+                      logger.info(
+                        "User location update not required, location ids are same as org location for userid " + userId);
                     }
                   } else {
                     logger.info(
-                        "User location is same as suborg location for userid " + usr.getId());
+                        "User not associated with any org for userid " + userId);
                   }
                 } else {
-                  logger.info("Location not updated for userid " + usr.getId());
+                  logger.info("Location or UserOrg is empty for the given userid " + userId);
                 }
 
               } else {
@@ -188,9 +213,9 @@ public class UpdateUserLocationActor extends BaseActor {
         userResMap.put("esResponse", esResponse);
         userRespList.add(userResMap);
         if (esResponse) {
-          logger.info(context, "unable to save the user data to ES with identifier " + userId);
+          logger.info(context, "unable to save the user location data to ES with identifier " + userId);
         } else {
-          logger.info(context, "saved the user data to ES with identifier " + userId);
+          logger.info(context, "saved the user location data to ES with identifier " + userId);
         }
       }
     } catch (Exception ex) {

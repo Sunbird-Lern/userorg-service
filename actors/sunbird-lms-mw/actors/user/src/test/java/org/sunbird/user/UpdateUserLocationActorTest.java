@@ -171,7 +171,6 @@ public class UpdateUserLocationActorTest {
     user.setChannel("TN");
     user.setUserType("TEACHER");
     user.setLocationIds(new ArrayList<>());
-    user.setOrganisations(new ArrayList<>());
     return user;
   }
 
@@ -182,7 +181,6 @@ public class UpdateUserLocationActorTest {
     user.setUserType("TEACHER");
     user.setUserId("ValidUserId");
     user.setLocationIds(new ArrayList<>());
-    user.setOrganisations(new ArrayList<>());
     return user;
   }
 }

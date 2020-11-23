@@ -71,15 +71,6 @@ public class User implements Serializable {
   private String recoveryPhone;
   private String managedBy;
   private String accessCode;
-  private List<Map<String, Object>> organisations;
-
-  public List<Map<String, Object>> getOrganisations() {
-    return organisations;
-  }
-
-  public void setOrganisations(List<Map<String, Object>> organisations) {
-    this.organisations = organisations;
-  }
 
   public List<String> getLocationIds() {
     return locationIds;
