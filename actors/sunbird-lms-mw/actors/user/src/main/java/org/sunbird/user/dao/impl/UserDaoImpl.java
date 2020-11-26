@@ -65,8 +65,8 @@ public class UserDaoImpl implements UserDao {
   public List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
     List<User> userList = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
-    SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
+    SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
     String type = ProjectUtil.EsType.user.getTypeName();
     Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
     Map<String, Object> result =

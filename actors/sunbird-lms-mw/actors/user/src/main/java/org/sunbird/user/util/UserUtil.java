@@ -1,7 +1,6 @@
 package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,7 +8,6 @@ import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -56,15 +54,6 @@ public class UserUtil {
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  static Random rand = new Random(System.nanoTime());
-  private static final String[] alphabet =
-      new String[] {
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-        "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      };
-
-  private static String stripChars = "0";
-  private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
 
   private UserUtil() {}
 
@@ -346,14 +335,20 @@ public class UserUtil {
 
     if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
       String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
-      firstName = firstName.split(" ")[0];
-      String translatedFirstName = transliterateUserName(firstName);
-      userMap.put(JsonKey.USERNAME, translatedFirstName + "_" + generateUniqueString(4));
+      String lastName = (String) userMap.get(JsonKey.LAST_NAME);
+      String name = String.join(" ", firstName, StringUtils.isNotBlank(lastName) ? lastName : "");
+      name = transliterateUserName(name);
+      String userName = getUsername(name, context);
+      if (StringUtils.isNotBlank(userName)) {
+        userMap.put(JsonKey.USERNAME, userName);
+      } else {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
     } else {
-      String userName = transliterateUserName((String) userMap.get(JsonKey.USERNAME));
-      userMap.put(JsonKey.USERNAME, userName);
+      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness(userName, false, context)) {
+      if (!userLookUp.checkUsernameUniqueness(
+          (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
@@ -362,38 +357,6 @@ public class UserUtil {
   public static String transliterateUserName(String userName) {
     String translatedUserName = Junidecode.unidecode(userName);
     return translatedUserName;
-  }
-
-  public static String generateUniqueString(int length) {
-    int totalChars = alphabet.length;
-    BigDecimal exponent = BigDecimal.valueOf(totalChars);
-    exponent = exponent.pow(length);
-    String code = "";
-    BigDecimal number = new BigDecimal(rand.nextInt(1000000));
-    BigDecimal num = number.multiply(largePrimeNumber).remainder(exponent);
-    code = baseN(num, totalChars);
-    int codeLenght = code.length();
-    if (codeLenght < length) {
-      for (int i = codeLenght; i < length; i++) {
-        code = code + alphabet[rand.nextInt(totalChars - 1)];
-      }
-    }
-    if (NumberUtils.isNumber(code.substring(1, 2)) || NumberUtils.isNumber(code.substring(2, 3))) {
-      return code;
-    } else {
-      code = code.substring(0, 1) + alphabet[rand.nextInt(9)] + code.substring(2);
-      return code;
-    }
-  }
-
-  private static String baseN(BigDecimal num, int base) {
-    if (num.doubleValue() == 0) {
-      return "0";
-    }
-    double div = Math.floor(num.doubleValue() / base);
-    String val = baseN(new BigDecimal(div), base);
-    return StringUtils.stripStart(val, stripChars)
-        + alphabet[num.remainder(new BigDecimal(base)).intValue()];
   }
 
   public static void setUserDefaultValue(
@@ -448,67 +411,72 @@ public class UserUtil {
 
   private static String getUsername(String name, RequestContext context) {
     List<Map<String, Object>> users = null;
-    List<String> esUserNameList = new ArrayList<>();
     List<String> encryptedUserNameList = new ArrayList<>();
     List<String> excludedUsernames = new ArrayList<>();
     List<String> userNameList = new ArrayList<>();
 
     String userName = "";
-    do {
-      do {
-        encryptedUserNameList.clear();
-        excludedUsernames.addAll(userNameList);
+    for (int j = 1; j <= 10; j++) {
+      logger.info(context, "Generating list of 10 userNames in loop for iteration " + j);
+      encryptedUserNameList.clear();
+      excludedUsernames.addAll(userNameList);
 
-        // Generate usernames
-        userNameList = userService.generateUsernames(name, excludedUsernames, context);
+      // Generate usernames
+      userNameList = userService.generateUsernames(name, excludedUsernames, context);
 
-        // Encrypt each user name
-        userService
-            .getEncryptedList(userNameList, context)
-            .stream()
-            .forEach(value -> encryptedUserNameList.add(value));
-
-        // Throw an error in case of encryption failures
-        if (encryptedUserNameList.isEmpty()) {
-          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-        }
-
-        // Search if any user names are taking using ES
-        List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
-        Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.USERNAME, filtersEncryptedUserNameList);
-        users = userService.esSearchUserByFilters(filters, context);
-      } while (CollectionUtils.isNotEmpty(users) && users.size() >= encryptedUserNameList.size());
-
-      esUserNameList.clear();
-
-      // Map list of user results (from ES) into list of usernames
-      users
+      // Encrypt each user name
+      userService
+          .getEncryptedList(userNameList, context)
           .stream()
-          .forEach(
-              user -> {
-                esUserNameList.add((String) user.get(JsonKey.USERNAME));
-              });
-      // Query cassandra to find first username that is not yet assigned
-      Optional<String> result =
-          encryptedUserNameList
-              .stream()
-              .filter(
-                  value -> {
-                    if (!esUserNameList.contains(value)) {
-                      UserLookUp userLookUp = new UserLookUp();
-                      return userLookUp.checkUsernameUniqueness(value, true, context);
-                    }
-                    return false;
-                  })
-              .findFirst();
+          .forEach(value -> encryptedUserNameList.add(value));
 
-      if (result.isPresent()) {
-        userName = result.get();
+      // Throw an error in case of encryption failures
+      if (encryptedUserNameList.isEmpty()) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
 
-    } while (StringUtils.isBlank(userName));
-    return decService.decryptData(userName, context);
+      // Search if any user names
+      List<String> filtersEncryptedUserNameList = new ArrayList<>(encryptedUserNameList);
+      users = userService.searchUserNameInUserLookup(filtersEncryptedUserNameList, context);
+
+      if (!(CollectionUtils.isNotEmpty(users) && users.size() >= encryptedUserNameList.size())) {
+        break;
+      }
+    }
+
+    List<String> esUserNameList = new ArrayList<>();
+
+    // Map list of results (from User lookup) into list of usernames
+    users
+        .stream()
+        .forEach(
+            user -> {
+              esUserNameList.add((String) user.get(JsonKey.VALUE));
+            });
+
+    // Query cassandra to find first username that is not yet assigned
+    Optional<String> result =
+        encryptedUserNameList
+            .stream()
+            .filter(
+                value -> {
+                  if (!esUserNameList.contains(value)) {
+                    UserLookUp userLookUp = new UserLookUp();
+                    return userLookUp.checkUsernameUniqueness(value, true, context);
+                  }
+                  return false;
+                })
+            .findFirst();
+
+    if (result.isPresent()) {
+      userName = result.get();
+    }
+
+    if (StringUtils.isNotBlank(userName)) {
+      return decService.decryptData(userName, context);
+    }
+
+    return "";
   }
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {
@@ -537,23 +505,23 @@ public class UserUtil {
     }
   }
 
-  public static void checkEmailSameOrDiff(
-      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord) {
-    if (StringUtils.isNotBlank((String) userRequestMap.get(JsonKey.EMAIL))) {
-      String email = (String) userDbRecord.get(JsonKey.EMAIL);
-      String encEmail = (String) userRequestMap.get(JsonKey.EMAIL);
-      if (StringUtils.isNotBlank(email)) {
-        try {
-          encEmail =
-              encryptionService.encryptData((String) userRequestMap.get(JsonKey.EMAIL), null);
-        } catch (Exception ex) {
-          logger.error("Exception occurred while encrypting user email.", ex);
-        }
-        if ((encEmail).equalsIgnoreCase(email)) {
-          userRequestMap.remove(JsonKey.EMAIL);
-        }
-      }
+  /**
+   * This method will check the diff b/w uer request and user db record email & phone are same or
+   * not if its not same then will return true to delete entry from userLookup table
+   *
+   * @param userRequestMap
+   * @param userDbRecord
+   * @param emailOrPhone
+   * @return
+   */
+  public static boolean isEmailOrPhoneDiff(
+      Map<String, Object> userRequestMap, Map<String, Object> userDbRecord, String emailOrPhone) {
+    String encEmailOrPhone = (String) userRequestMap.get(emailOrPhone);
+    String dbEmailOrPhone = (String) userDbRecord.get(emailOrPhone);
+    if (StringUtils.isNotBlank(encEmailOrPhone) && StringUtils.isNotBlank(dbEmailOrPhone)) {
+      return (!((encEmailOrPhone).equalsIgnoreCase(dbEmailOrPhone)));
     }
+    return false;
   }
 
   private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
