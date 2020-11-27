@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -42,6 +43,9 @@ import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.models.user.Feed;
 import org.sunbird.user.UserManagementActorTestBase;
 import org.sunbird.user.service.UserService;
@@ -64,7 +68,9 @@ import org.sunbird.user.util.MigrationUtils;
   ShadowUser.class,
   FeedUtil.class,
   UserServiceImpl.class,
-  UserService.class
+  UserService.class,
+  OrgServiceImpl.class,
+  OrgService.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class TenantMigrationActorTest extends UserManagementActorTestBase {
@@ -75,6 +81,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
   private CassandraOperation cassandraOperation = null;
   private static Response response;
   private static IFeedService feedService;
+  @Mock private OrgExternalService externalClass;
 
   @Before
   public void beforeEachTest() {
@@ -83,6 +90,8 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(FeedUtil.class);
     PowerMockito.mockStatic(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    PowerMockito.mockStatic(OrgService.class);
 
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);
@@ -318,16 +327,42 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             cassandraOperation.updateRecord(
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateResponse);
-    /*List<Map<String, Object>> listMap = new ArrayList<>();
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getOrgFromCassandra());
+
+    List<Map<String, Object>> listMap = new ArrayList<>();
     listMap.add(new HashMap<String, Object>());
     Map<String, Object> userDetails = new HashMap<>();
     userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     userDetails.put(JsonKey.ORGANISATIONS, listMap);
     UserService userService = mock(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.esGetPublicUserProfileById( Mockito.anyString(), Mockito.anyObject())).thenReturn(userDetails);
-    when(userService.getCustodianOrgId( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
-    when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
+    when(userService.esGetPublicUserProfileById(Mockito.anyString(), Mockito.anyObject()))
+        .thenReturn(userDetails);
+    when(userService.getCustodianOrgId(Mockito.anyObject(), Mockito.anyObject()))
+        .thenReturn("anyRootOrgId");
+
+    try {
+      OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
+      PowerMockito.whenNew(OrgExternalService.class)
+          .withAnyArguments()
+          .thenReturn(orgExternalService);
+      when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+          .thenReturn("anyRootOrgId");
+    } catch (Exception e) {
+
+    }
+    OrgService orgService = mock(OrgServiceImpl.class);
+    PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(getOrgandLocation());
+
+    /* when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
 
     PowerMockito.when(
             cassandraOperation.updateRecord(
@@ -343,6 +378,24 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
             ResponseCode.errorUserMigrationFailed,
             null);
     assertTrue(result);
+  }
+
+  public Map<String, Object> getOrgandLocation() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ORG_ID, "anyOrgId");
+    map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    return map;
+  }
+
+  public Response getOrgFromCassandra() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ORG_ID, "anyOrgId");
+    map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    return response;
   }
 
   @Test
@@ -390,6 +443,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     externalIdMap.put(JsonKey.PROVIDER, "anyProvider");
     externalIdLst.add(externalIdMap);
     requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
+    requestMap.put(JsonKey.ORG_EXTERNAL_ID, "anyOrgId");
     reqObj.setRequest(requestMap);
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;

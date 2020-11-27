@@ -12,7 +12,6 @@ public class RequestContext {
   private String reqId;
   private String debugEnabled;
   private String op;
-  private final String pid = "learner-service";
   private Map<String, Object> contextMap = new HashMap<>();
 
   public RequestContext() {}
@@ -43,7 +42,6 @@ public class RequestContext {
     contextMap.put("appVer", appVer);
     contextMap.put("reqId", reqId);
     contextMap.put("op", op);
-    contextMap.put("pid", pid);
   }
 
   public String getUid() {

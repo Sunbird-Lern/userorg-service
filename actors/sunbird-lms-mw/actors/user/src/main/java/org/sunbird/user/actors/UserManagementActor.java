@@ -43,6 +43,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
@@ -259,6 +261,7 @@ public class UserManagementActor extends BaseActor {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
     Map<String, Object> userMap = actorMessage.getRequest();
+    logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
     validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
@@ -289,8 +292,6 @@ public class UserManagementActor extends BaseActor {
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
-    // if we are updating email then need to update isEmailVerified flag inside keycloak
-    UserUtil.checkEmailSameOrDiff(userMap, userDbRecord);
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
@@ -321,11 +322,13 @@ public class UserManagementActor extends BaseActor {
     // As of now disallowing updating manageble user's phone/email, will le allowed in next release
     boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
-            && (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL)))
-        || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))) {
+        && ((StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL))
+            || (StringUtils.isNotEmpty((String) requestMap.get(JsonKey.PHONE)))))) {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
+    logger.info(actorMessage.getRequestContext(), "Update request body for user db: " + requestMap);
+
     Response response =
         cassandraOperation.updateRecord(
             usrDbInfo.getKeySpace(),
@@ -333,6 +336,7 @@ public class UserManagementActor extends BaseActor {
             requestMap,
             actorMessage.getRequestContext());
     insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
+    removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
@@ -368,6 +372,31 @@ public class UserManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private void removeUserLookupEntry(
+      Map<String, Object> userLookUpData,
+      Map<String, Object> userDbRecord,
+      RequestContext requestContext) {
+    List<Map<String, String>> reqList = new ArrayList<>();
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.EMAIL)) {
+      String email = (String) userDbRecord.get(JsonKey.EMAIL);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookupMap.put(JsonKey.VALUE, email);
+      reqList.add(lookupMap);
+    }
+    if (UserUtil.isEmailOrPhoneDiff(userLookUpData, userDbRecord, JsonKey.PHONE)) {
+      String phone = (String) userDbRecord.get(JsonKey.PHONE);
+      Map<String, String> lookupMap = new LinkedHashMap<>();
+      lookupMap.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookupMap.put(JsonKey.VALUE, phone);
+      reqList.add(lookupMap);
+    }
+    if (CollectionUtils.isNotEmpty(reqList)) {
+      UserLookUp userLookUp = new UserLookUp();
+      userLookUp.deleteRecords(reqList, requestContext);
+    }
   }
 
   private void updateLocationCodeToIds(
@@ -461,6 +490,8 @@ public class UserManagementActor extends BaseActor {
         List<String> fields = new ArrayList<>();
         fields.add(JsonKey.HASHTAGID);
         fields.add(JsonKey.ID);
+        fields.add(JsonKey.LOCATION_IDS);
+        fields.add(JsonKey.IS_ROOT_ORG);
         List<Organisation> orgList =
             organisationClient.esSearchOrgByIds(
                 orgIdList, fields, actorMessage.getRequestContext());
@@ -474,6 +505,9 @@ public class UserManagementActor extends BaseActor {
             missingOrgIds.add(orgId);
           } else {
             userOrg.put(JsonKey.HASH_TAG_ID, organisation.getHashTagId());
+            if (organisation.isRootOrg() != null && !organisation.isRootOrg()) {
+              actorMessage.getRequest().put(JsonKey.LOCATION_IDS, organisation.getLocationIds());
+            }
             if (userOrg.get(JsonKey.ROLES) != null) {
               List<String> rolesList = (List<String>) userOrg.get(JsonKey.ROLES);
               RoleService.validateRoles(rolesList);
@@ -573,26 +607,6 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg, context);
     }
   }
-  // Check if the user is Custodian Org user
-  private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
-    boolean isCustodianOrgUser = false;
-    String custodianRootOrgId = null;
-    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
-    try {
-      custodianRootOrgId = getCustodianRootOrgId(context);
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "UserManagementActor: isCustodianOrgUser :"
-              + " Exception Occured while fetching Custodian Org ",
-          ex);
-    }
-    if (StringUtils.isNotBlank(custodianRootOrgId)
-        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
-      isCustodianOrgUser = true;
-    }
-    return isCustodianOrgUser;
-  }
 
   private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
@@ -605,6 +619,17 @@ public class UserManagementActor extends BaseActor {
         userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
       }
     }
+  }
+  // Check if the user is Custodian Org user
+  private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
+    boolean isCustodianOrgUser = false;
+    String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
+    if (StringUtils.isNotBlank(custodianRootOrgId)
+        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
+      isCustodianOrgUser = true;
+    }
+    return isCustodianOrgUser;
   }
 
   private void ignoreOrAcceptFrameworkData(
@@ -756,6 +781,15 @@ public class UserManagementActor extends BaseActor {
       }
       userMap.remove(JsonKey.ORG_EXTERNAL_ID);
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
+
+      // Fetch locationids of the suborg and update the location of sso user
+      if (!isCustodianOrg) {
+        OrgService orgService = OrgServiceImpl.getInstance();
+        Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
+        if (MapUtils.isNotEmpty(orgMap)) {
+          userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+        }
+      }
     }
     processUserRequest(userMap, callerId, actorMessage);
   }
@@ -769,16 +803,8 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.errorTeacherCannotBelongToCustodianOrg,
             ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
       } else if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId = null;
-        try {
-          custodianRootOrgId = getCustodianRootOrgId(context);
-        } catch (Exception ex) {
-          logger.error(
-              context,
-              "UserManagementActor: validateUserType :"
-                  + " Exception Occurred while fetching Custodian Org ",
-              ex);
-        }
+        String custodianRootOrgId =
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
         if (StringUtils.isNotBlank(custodianRootOrgId)
             && ((String) userMap.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(custodianRootOrgId)) {
           ProjectCommonException.throwClientErrorException(
@@ -1246,16 +1272,15 @@ public class UserManagementActor extends BaseActor {
     return userDbRecord;
   }
 
-  private String getCustodianRootOrgId(RequestContext context) {
-    String custodianChannel =
-        userService.getCustodianChannel(new HashMap<>(), systemSettingActorRef, context);
-    return userService.getRootOrgIdFromChannel(custodianChannel, context);
-  }
-
   @SuppressWarnings("unchecked")
   private void convertValidatedLocationCodesToIDs(
       Map<String, Object> userMap, RequestContext context) {
-    if (userMap.containsKey(JsonKey.LOCATION_CODES)
+    if (userMap.containsKey(JsonKey.LOCATION_IDS)
+        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
+      userMap.remove(JsonKey.LOCATION_IDS);
+    }
+    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
+        && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
       LocationClientImpl locationClient = new LocationClientImpl();
       List<String> locationIdList =
