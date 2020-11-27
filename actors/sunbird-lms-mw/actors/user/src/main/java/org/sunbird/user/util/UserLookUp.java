@@ -119,7 +119,7 @@ public class UserLookUp {
           ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
         } else {
           Map<String, Object> userMap = userMapList.get(0);
-          if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+          if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
             ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
           }
         }
@@ -158,7 +158,7 @@ public class UserLookUp {
           ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
         } else {
           Map<String, Object> userMap = userMapList.get(0);
-          if (!(((String) userMap.get(JsonKey.ID)).equalsIgnoreCase(user.getId()))) {
+          if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
             ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
           }
         }
@@ -248,5 +248,15 @@ public class UserLookUp {
         ProjectUtil.formatMessage(
             ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
         ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
+
+  public List<Map<String, Object>> getUsersByUserNames(
+      Map<String, Object> partitionKeyMap, RequestContext context) {
+    Response response =
+        cassandraOperation.getRecordsByCompositePartitionKey(
+            userLookUp.getKeySpace(), userLookUp.getTableName(), partitionKeyMap, context);
+    List<Map<String, Object>> userMapList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    return userMapList;
   }
 }

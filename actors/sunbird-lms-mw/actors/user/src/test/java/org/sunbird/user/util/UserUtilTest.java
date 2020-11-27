@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.math.NumberUtils;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,8 +50,7 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  UserLookUp.class
+  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserUtilTest {
@@ -97,22 +97,6 @@ public class UserUtilTest {
   }
 
   @Test
-  public void generateUniqueStringSuccess() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(4);
-    assertTrue(val.length() == 4);
-  }
-
-  @Test
-  public void generateUniqueStringSecondCharCheck() {
-    beforeEachTest();
-    String val = UserUtil.generateUniqueString(5);
-    assertTrue(val.length() == 5);
-    assertTrue(
-        NumberUtils.isNumber(val.substring(1, 2)) || NumberUtils.isNumber(val.substring(2, 3)));
-  }
-
-  @Test
   public void copyAndConvertExternalIdsToLower() {
     beforeEachTest();
     List<Map<String, String>> externalIds = new ArrayList<Map<String, String>>();
@@ -125,17 +109,6 @@ public class UserUtilTest {
     userExternalIdMap = externalIds.get(0);
     assertNotNull(userExternalIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID));
     assertEquals(userExternalIdMap.get(JsonKey.PROVIDER), "state");
-  }
-
-  @Test
-  public void setUserDefaultValueForV3() {
-    beforeEachTest();
-    Map<String, Object> userMap = new HashMap<String, Object>();
-    userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap, null);
-    assertNotNull(userMap.get(JsonKey.USERNAME));
-    assertNotNull(userMap.get(JsonKey.STATUS));
-    assertNotNull(userMap.get(JsonKey.ROLES));
   }
 
   @Test
@@ -437,6 +410,19 @@ public class UserUtilTest {
     requestMap.put(JsonKey.PHONE, "9999999999");
     requestMap.put(JsonKey.EMAIL, "sunbird@example.com");
     UserUtil.addMaskEmailAndMaskPhone(requestMap);
+    Assert.assertTrue(true);
+  }
+
+  @Test
+  public void testRemoveEntryFromUserLookUp() {
+    beforeEachTest();
+    Map<String, Object> mergeeMap = new HashMap<>();
+    mergeeMap.put(JsonKey.EMAIL, "someEmail");
+    mergeeMap.put(JsonKey.PHONE, "somePhone");
+    mergeeMap.put(JsonKey.USERNAME, "someUsername");
+    List<String> userLookUpIdentifiers =
+        Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
+    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
     Assert.assertTrue(true);
   }
 }
