@@ -612,15 +612,6 @@ public class BaseController extends Controller {
         "actorResponseHandler: called for actor operation :" + request.getOperation());
     Function<Object, Result> function =
         result -> {
-          if (ActorOperations.UPDATE_USER.getValue().equals(request.getOperation())) {
-            logger.info(
-                request.getRequestContext(),
-                "actorResponseHandler:update user request : " + request.getRequest());
-            logger.info(
-                request.getRequestContext(),
-                "actorResponseHandler:update user request header : "
-                    + httpReq.getHeaders().toMap());
-          }
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
             setGlobalHealthFlag(result);
           }

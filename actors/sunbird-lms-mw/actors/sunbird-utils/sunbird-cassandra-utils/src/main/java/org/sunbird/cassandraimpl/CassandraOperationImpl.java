@@ -46,21 +46,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service insertRecord method started at ==" + startTime);
-    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      try {
-        logger.info(context, "insert request body ==" + request);
-        if (request.containsKey(JsonKey.LOCATION_IDS)) {
-          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-          if (CollectionUtils.isEmpty(locationIdList)) {
-            logger.info(context, "insert request: User request contains empty location.");
-          } else if (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() == 1) {
-            logger.info(context, "insert request: User request contains only single location.");
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(context, "Exception occurred.", ex);
-      }
-    }
     Response response = new Response();
     String query = CassandraUtil.getPreparedStatement(keyspaceName, tableName, request);
     try {
@@ -105,22 +90,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service updateRecord method started at ==" + startTime);
-    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      try {
-        logger.info(context, "update request body ==" + request);
-        if (request.containsKey(JsonKey.LOCATION_IDS)) {
-          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-          if (CollectionUtils.isEmpty(locationIdList)) {
-            logger.info(context, "update request: User request contains empty location.");
-          } else if (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() == 1) {
-            logger.info(context, "update request: User request contains only single location.");
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(context, "Exception occurred.", ex);
-      }
-    }
-
     Response response = new Response();
     String query = CassandraUtil.getUpdateQueryStatement(keyspaceName, tableName, request);
     try {
@@ -393,7 +362,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       selectQuery = selectBuilder.from(keyspaceName, tableName);
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
@@ -409,25 +377,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     return response;
   }
 
+  @Override
   public Response upsertRecord(
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.info(context, "Cassandra Service upsertRecord method started at ==" + startTime);
-    if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-      try {
-        logger.info(context, "upsert request body ==" + request);
-        if (request.containsKey(JsonKey.LOCATION_IDS)) {
-          List<String> locationIdList = (List<String>) request.get(JsonKey.LOCATION_IDS);
-          if (CollectionUtils.isEmpty(locationIdList)) {
-            logger.info(context, "upsertRecord : User request contains empty location.");
-          } else if (CollectionUtils.isNotEmpty(locationIdList) && locationIdList.size() == 1) {
-            logger.info(context, "upsertRecord : User request contains only single location.");
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(context, "Exception occurred.", ex);
-      }
-    }
     Response response = new Response();
     String query = "";
     try {

@@ -327,7 +327,6 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
-    logger.info(actorMessage.getRequestContext(), "Update request body for user db: " + requestMap);
 
     Response response =
         cassandraOperation.updateRecord(
