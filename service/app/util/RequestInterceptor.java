@@ -95,6 +95,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/role/read", var);
     apiHeaderIgnoreMap.put("/private/user/v1/lookup", var);
     apiHeaderIgnoreMap.put("/private/user/feed/v1/create", var);
+    apiHeaderIgnoreMap.put("/private/user/feed/v1/create", var);
   }
 
   private static String getUserRequestedFor(Http.Request request) {
