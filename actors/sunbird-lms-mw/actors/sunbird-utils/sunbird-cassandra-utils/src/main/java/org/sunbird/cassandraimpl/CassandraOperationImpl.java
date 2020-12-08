@@ -362,7 +362,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       selectQuery = selectBuilder.from(keyspaceName, tableName);
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + tableName + " : " + e.getMessage(), e);
