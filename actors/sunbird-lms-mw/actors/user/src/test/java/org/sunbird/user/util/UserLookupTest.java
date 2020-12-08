@@ -155,7 +155,7 @@ public class UserLookupTest {
     Response response1 = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.ID, "123-456-789");
+    result.put(JsonKey.USER_ID, "123-456-789");
     responseList.add(result);
     response1.getResult().put(JsonKey.RESPONSE, responseList);
 

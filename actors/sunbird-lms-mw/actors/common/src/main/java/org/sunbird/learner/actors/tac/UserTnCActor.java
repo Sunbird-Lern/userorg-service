@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -97,6 +98,16 @@ public class UserTnCActor extends BaseActor {
             MessageFormat.format(
                 ResponseCode.invalidParameterValue.getErrorMessage(), userId, JsonKey.USER_ID));
       }
+
+      // check if it is org admin TnC and user is not an admin of the organisation
+      if (JsonKey.ORG_ADMIN_TNC.equals(tncType) && !isOrgAdmin(user)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                user.get(JsonKey.ROOT_ORG_ID),
+                JsonKey.ORGANISATION_ID));
+      }
     } else {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
@@ -162,6 +173,27 @@ public class UserTnCActor extends BaseActor {
       response.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
       sender().tell(response, self());
     }
+  }
+
+  // Chech Validate OrgAdmin
+  private boolean isOrgAdmin(Map<String, Object> user) {
+    List<Map<String, Object>> orgDetails =
+        (List<Map<String, Object>>) user.get(JsonKey.ORGANISATIONS);
+    if (CollectionUtils.isNotEmpty(orgDetails)) {
+      Map<String, Object> org =
+          orgDetails
+              .stream()
+              .filter(
+                  x ->
+                      user.get(JsonKey.ROOT_ORG_ID).equals((String) x.get(JsonKey.ORGANISATION_ID)))
+              .findAny()
+              .orElse(null);
+      if (MapUtils.isNotEmpty(org)) {
+        List<String> roles = (List<String>) org.get(JsonKey.ROLES);
+        return roles.contains(JsonKey.ORG_ADMIN);
+      }
+    }
+    return false;
   }
 
   // Convert Acceptance tnc object as a Json String in cassandra table
