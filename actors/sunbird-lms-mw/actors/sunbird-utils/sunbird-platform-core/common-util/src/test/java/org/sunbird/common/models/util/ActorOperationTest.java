@@ -78,8 +78,6 @@ public class ActorOperationTest {
     Assert.assertEquals("deleteNote", ActorOperations.DELETE_NOTE.getValue());
     Assert.assertEquals(
         "insertUserNotesToElastic", ActorOperations.INSERT_USER_NOTES_ES.getValue());
-    Assert.assertEquals("encryptUserData", ActorOperations.ENCRYPT_USER_DATA.getValue());
-    Assert.assertEquals("decryptUserData", ActorOperations.DECRYPT_USER_DATA.getValue());
     Assert.assertEquals(
         "updateUserNotesToElastic", ActorOperations.UPDATE_USER_NOTES_ES.getValue());
     Assert.assertEquals("userCurrentLogin", ActorOperations.USER_CURRENT_LOGIN.getValue());
