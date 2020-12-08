@@ -377,6 +377,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     return response;
   }
 
+  @Override
   public Response upsertRecord(
       String keyspaceName, String tableName, Map<String, Object> request, RequestContext context) {
     long startTime = System.currentTimeMillis();
