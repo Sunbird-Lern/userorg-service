@@ -10,6 +10,7 @@ import java.util.Properties;
  * @author Amit Kumar
  */
 public class CassandraPropertyReader {
+  private static LoggerUtil logger = new LoggerUtil(CassandraPropertyReader.class);
 
   private final Properties properties = new Properties();
   private static final String file = "cassandratablecolumn.properties";
@@ -21,7 +22,7 @@ public class CassandraPropertyReader {
     try {
       properties.load(in);
     } catch (IOException e) {
-      ProjectLogger.log("Error in properties cache", e);
+      logger.error("Error in properties cache", e);
     }
   }
 

@@ -60,8 +60,6 @@ public enum ActorOperations {
   GET_NOTE("getNote"),
   DELETE_NOTE("deleteNote"),
   INSERT_USER_NOTES_ES("insertUserNotesToElastic"),
-  ENCRYPT_USER_DATA("encryptUserData"),
-  DECRYPT_USER_DATA("decryptUserData"),
   UPDATE_USER_NOTES_ES("updateUserNotesToElastic"),
   USER_CURRENT_LOGIN("userCurrentLogin"),
   CREATE_TENANT_PREFERENCE("createTanentPreference"),

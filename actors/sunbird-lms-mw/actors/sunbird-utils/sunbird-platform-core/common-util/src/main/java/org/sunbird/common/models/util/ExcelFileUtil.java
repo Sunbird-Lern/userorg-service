@@ -11,6 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelFileUtil extends FileUtil {
 
+  private static LoggerUtil logger = new LoggerUtil(ExcelFileUtil.class);
+
   @SuppressWarnings({"resource", "unused"})
   public File writeToFile(String fileName, List<List<Object>> dataValues) {
     // Blank workbook
@@ -48,17 +50,16 @@ public class ExcelFileUtil extends FileUtil {
       file = new File(fileName + ".xlsx");
       out = new FileOutputStream(file);
       workbook.write(out);
-      // out.close();
-      ProjectLogger.log("File " + fileName + " created successfully");
+      logger.info("File " + fileName + " created successfully");
 
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error("writeToFile: " + e.getMessage(), e);
     } finally {
       if (null != out) {
         try {
           out.close();
         } catch (IOException e) {
-          ProjectLogger.log(e.getMessage(), e);
+          logger.error("writeToFile: " + e.getMessage(), e);
         }
       }
     }

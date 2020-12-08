@@ -6,7 +6,6 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.UrlValidator;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -46,7 +44,6 @@ public class ProjectUtil {
     "externalresource.properties",
     "sso.properties",
     "userencryption.properties",
-    "profilecompleteness.properties",
     "mailTemplates.properties"
   };
   public static PropertiesCache propertiesCache;
@@ -228,19 +225,6 @@ public class ProjectUtil {
   }
 
   /**
-   * This method will generate auth token based on name , source and timestamp
-   *
-   * @param name String
-   * @param source String
-   * @return String
-   */
-  public static String createAuthToken(String name, String source) {
-    String data = name + source + System.currentTimeMillis();
-    UUID authId = UUID.nameUUIDFromBytes(data.getBytes(StandardCharsets.UTF_8));
-    return authId.toString();
-  }
-
-  /**
    * This method will generate unique id based on current time stamp and some random value mixed up.
    *
    * @param environmentId int
@@ -296,22 +280,11 @@ public class ProjectUtil {
    * @author Manzarul
    */
   public enum EsType {
-    course("cbatch"),
-    courseBatch("course-batch"),
-    content("content"),
-    badgeassociations("badgeassociations"),
     user("user"),
     organisation("org"),
-    usercourses("user-courses"),
     usernotes("usernotes"),
-    userprofilevisibility("userprofilevisibility"),
     telemetry("telemetry"),
     location("location"),
-    announcementType("announcementtype"),
-    announcement("announcement"),
-    metrics("metrics"),
-    cbatchstats("cbatchstats"),
-    cbatchassessment("cbatch-assessment"),
     userfeed("userfeed");
 
     private String typeName;
@@ -435,7 +408,6 @@ public class ProjectUtil {
     if (StringUtils.isBlank(logoUrl)) {
       logoUrl = getConfigValue(JsonKey.SUNBIRD_ENV_LOGO_URL);
     }
-    ProjectLogger.log("ProjectUtil:getSunbirdLogoUrl: url = " + logoUrl, LoggerEnum.INFO.name());
     return logoUrl;
   }
 
@@ -454,7 +426,6 @@ public class ProjectUtil {
     if (StringUtils.isBlank(fromEmail)) {
       fromEmail = getConfigValue(JsonKey.EMAIL_SERVER_FROM);
     }
-    ProjectLogger.log("ProjectUtil:getFromEmail: fromEmail = " + fromEmail, LoggerEnum.INFO.name());
     return fromEmail;
   }
 
@@ -590,8 +561,7 @@ public class ProjectUtil {
       phoneNumber = phoneNumberUtil.parse(phNumber, isoCode);
       return phoneNumberUtil.isValidNumber(phoneNumber);
     } catch (NumberParseException e) {
-      ProjectLogger.log("Exception occurred while validating phone number : ", e);
-      ProjectLogger.log(phNumber + "this phone no. is not a valid one.");
+      logger.error(phNumber + " :this phone no. is not a valid one.", e);
     }
     return false;
   }
@@ -658,7 +628,7 @@ public class ProjectUtil {
       t.merge(context, writer);
       return writer.toString();
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred while formating and sending SMS " + ex);
+      logger.error("Exception occurred while formating and sending SMS ", ex);
     }
     return "";
   }
@@ -672,7 +642,7 @@ public class ProjectUtil {
         date = null;
       }
     } catch (ParseException ex) {
-      ProjectLogger.log(ex.getMessage(), ex);
+      logger.error("isDateValidFormat: " + ex.getMessage(), ex);
     }
     return date != null;
   }
@@ -708,18 +678,6 @@ public class ProjectUtil {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  /**
-   * Method to verify url is valid or not.
-   *
-   * @param url String
-   * @return boolean
-   */
-  public static boolean isUrlvalid(String url) {
-    String[] schemes = {"http", "https"};
-    UrlValidator urlValidator = new UrlValidator(schemes);
-    return urlValidator.isValid(url);
-  }
-
   public static String getConfigValue(String key) {
     if (StringUtils.isNotBlank(System.getenv(key))) {
       return System.getenv(key);
@@ -752,7 +710,7 @@ public class ProjectUtil {
     try {
       return mapper.writeValueAsString(mapList);
     } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error("convertMapToJsonString : " + e.getMessage(), e);
     }
     return null;
   }

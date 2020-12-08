@@ -68,9 +68,6 @@ POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploa
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String, request: play.mvc.Http.Request)
 GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String, request: play.mvc.Http.Request)
 
-POST  /v1/user/data/encrypt              @controllers.usermanagement.UserDataEncryptionController.encrypt(request: play.mvc.Http.Request)
-POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEncryptionController.decrypt(request: play.mvc.Http.Request)
-
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService(request: play.mvc.Http.Request)
 
 #Email

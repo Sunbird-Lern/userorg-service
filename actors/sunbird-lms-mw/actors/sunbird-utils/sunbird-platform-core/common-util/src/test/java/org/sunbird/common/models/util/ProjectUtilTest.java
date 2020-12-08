@@ -105,12 +105,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testCreateAuthTokenSuccess() {
-    String authToken = ProjectUtil.createAuthToken("test", "tset1234");
-    assertNotNull(authToken);
-  }
-
-  @Test
   public void testValidatePhoneNumberFailureWithInvalidPhoneNumber() {
     assertFalse(ProjectUtil.validatePhoneNumber("312"));
   }
