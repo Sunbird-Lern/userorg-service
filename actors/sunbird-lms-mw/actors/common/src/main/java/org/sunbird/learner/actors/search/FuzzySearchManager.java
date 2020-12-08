@@ -3,11 +3,12 @@ package org.sunbird.learner.actors.search;
 import java.util.*;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class FuzzySearchManager {
+  private static LoggerUtil logger = new LoggerUtil(FuzzySearchManager.class);
+
   private Map<String, Object> fuzzySearchMap;
   private List<Map<String, Object>> searchMap;
 
@@ -36,22 +37,20 @@ public class FuzzySearchManager {
                         splittedName[i].trim(), getFuzzyAttributeFromMap(map.getKey())));
               }
             });
-    ProjectLogger.log(
+    logger.info(
         String.format(
             "%s:%s:the size of resultSet i.e number of searches found is %s",
-            this.getClass().getSimpleName(), "startFuzzySearch", resultSet.size()),
-        LoggerEnum.INFO.name());
+            this.getClass().getSimpleName(), "startFuzzySearch", resultSet.size()));
     return prepareResponseList(resultSet);
   }
 
   private void validateKeyInFuzzyMap(String key) {
     Map<String, Object> resultMap = searchMap.get(0);
     if (!resultMap.keySet().contains(key)) {
-      ProjectLogger.log(
+      logger.info(
           String.format(
               "%s:%s:key not found in searchMap %s",
-              this.getClass().getSimpleName(), "getFuzzyAttributeFromMap", key),
-          LoggerEnum.ERROR.name());
+              this.getClass().getSimpleName(), "getFuzzyAttributeFromMap", key));
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
     }
   }
@@ -66,13 +65,12 @@ public class FuzzySearchManager {
               attributesValueMap.put(
                   (String) resultMap.get(JsonKey.ID), (String) resultMap.get(key));
             });
-    ProjectLogger.log(
+    logger.info(
         String.format(
             "%s:%s:the prepared Map for fuzzy search  %s",
             this.getClass().getSimpleName(),
             "getFuzzyAttributeFromMap",
-            Collections.singleton(attributesValueMap.toString())),
-        LoggerEnum.INFO.name());
+            Collections.singleton(attributesValueMap.toString())));
     return attributesValueMap;
   }
 
@@ -89,11 +87,10 @@ public class FuzzySearchManager {
                 responseList.add(resultMap);
               }
             });
-    ProjectLogger.log(
+    logger.info(
         String.format(
             "%s:%s:returning only fuzzy matched result, the size of List of map is   %s",
-            this.getClass().getSimpleName(), "fetchResultSetFromSearchMap", responseList.size()),
-        LoggerEnum.INFO.name());
+            this.getClass().getSimpleName(), "fetchResultSetFromSearchMap", responseList.size()));
     return responseList;
   }
 
