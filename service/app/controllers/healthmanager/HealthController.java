@@ -61,7 +61,6 @@ public class HealthController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> getLearnerServiceHealth(String val, Http.Request httpRequest) {
-    ProjectLogger.log("Call to get play service health api = " + val, LoggerEnum.INFO.name());
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
     if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
@@ -103,11 +102,6 @@ public class HealthController extends BaseController {
 
   private void handleSigTerm() {
     if (signalHandler.isShuttingDown()) {
-      ProjectLogger.log(
-          "SIGTERM is "
-              + signalHandler.isShuttingDown()
-              + ", So play server will not allow any new request.",
-          LoggerEnum.INFO.name());
       throw new ProjectCommonException(
           ResponseCode.serviceUnAvailable.getErrorCode(),
           ResponseCode.serviceUnAvailable.getErrorMessage(),

@@ -93,7 +93,8 @@ public class BackGroundServiceActor extends BaseActor {
             logger.error(
                 actorMessage.getRequestContext(),
                 "Exception occurred while converting string to long "
-                    + (String) map.get(JsonKey.USER_COUNT_TTL));
+                    + (String) map.get(JsonKey.USER_COUNT_TTL),
+                ex);
             userCountTTL = 0L;
           }
           logger.info(actorMessage.getRequestContext(), "userCountTTL == " + userCountTTL);
@@ -117,7 +118,7 @@ public class BackGroundServiceActor extends BaseActor {
     }
   }
 
-  private static int getUserCount(String locationId) {
+  private int getUserCount(String locationId) {
     SearchDTO searchDto = new SearchDTO();
     List<String> list = new ArrayList<>();
     list.add(JsonKey.ID);

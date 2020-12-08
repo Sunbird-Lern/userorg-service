@@ -247,8 +247,7 @@ public class UserTnCActor extends BaseActor {
             JsonKey.UPDATE,
             lastAcceptedVersion);
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
-    ProjectLogger.log(
-        "UserTnCActor:syncUserDetails: Telemetry generation call ended ", LoggerEnum.INFO.name());
+    logger.info("UserTnCActor:syncUserDetails: Telemetry generation call ended ");
   }
 
   private void syncUserDetails(Map<String, Object> userMap, RequestContext context) {

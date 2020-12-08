@@ -369,7 +369,7 @@ public class EmailServiceActor extends BaseActor {
                 context);
         esResult = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
       } catch (Exception ex) {
-        ProjectLogger.log(
+        logger.error(
             "EmailServiceActor:getUserEmailsFromSearchQuery: Exception occurred with error message = "
                 + ex.getMessage(),
             ex);
@@ -393,7 +393,7 @@ public class EmailServiceActor extends BaseActor {
                 if (ProjectUtil.isEmailvalid(email)) {
                   emails.add(email);
                 } else {
-                  ProjectLogger.log(
+                  logger.info(
                       "EmailServiceActor:sendMail: Email decryption failed for userId = "
                           + user.get(JsonKey.USER_ID));
                 }
