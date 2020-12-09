@@ -211,6 +211,8 @@ public class UserController extends BaseController {
         ActorOperations.USER_SEARCH.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
+          Request request = (Request) userSearchRequest;
+          new UserRequestValidator().validateUserLookupRequest(request);
           return null;
         },
         null,

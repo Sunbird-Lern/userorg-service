@@ -15,7 +15,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
-public class KeycloakUserLookupActor extends BaseActor {
+public class UserLookupActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {

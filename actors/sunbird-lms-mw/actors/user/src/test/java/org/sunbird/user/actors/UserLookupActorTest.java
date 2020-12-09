@@ -32,10 +32,10 @@ import org.sunbird.user.util.UserLookUp;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserLookUp.class, UserDao.class, UserDaoImpl.class})
 @PowerMockIgnore({"javax.management.*"})
-public class KeycloakUserLookupActorTest {
+public class UserLookupActorTest {
 
   private static ActorSystem system = ActorSystem.create("system");
-  private final Props props = Props.create(KeycloakUserLookupActor.class);
+  private final Props props = Props.create(UserLookupActor.class);
 
   @Test
   public void getUserKeycloakSearchTestWithId() throws Exception {
