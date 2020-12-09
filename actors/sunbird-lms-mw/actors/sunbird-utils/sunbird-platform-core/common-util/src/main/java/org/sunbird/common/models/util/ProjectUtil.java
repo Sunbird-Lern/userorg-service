@@ -183,6 +183,22 @@ public class ProjectUtil {
     }
   }
 
+  public enum UserLookupType {
+    USERNAME(JsonKey.USER_LOOKUP_FILED_USER_NAME),
+    EMAIL(JsonKey.EMAIL),
+    PHONE(JsonKey.PHONE);
+
+    private String type;
+
+    UserLookupType(String type) {
+      this.type = type;
+    }
+
+    public String getType() {
+      return this.type;
+    }
+  }
+
   /**
    * This method will provide formatted date
    *

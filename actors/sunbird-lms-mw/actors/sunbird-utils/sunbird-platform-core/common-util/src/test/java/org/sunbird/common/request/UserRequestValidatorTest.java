@@ -1283,6 +1283,15 @@ public class UserRequestValidatorTest {
     return request;
   }
 
+  private Request initailizeLookupRequest() {
+    Request request = new Request();
+    Map<String, Object> requestObj = new HashMap<>();
+    requestObj.put(JsonKey.KEY, JsonKey.FIRST_NAME);
+    requestObj.put(JsonKey.VALUE, "9321234123");
+    request.setRequest(requestObj);
+    return request;
+  }
+
   @Test
   public void testValidateVerifyUserFailureWithEmptyId() {
     Request request = new Request();
@@ -1434,6 +1443,18 @@ public class UserRequestValidatorTest {
     boolean response = false;
     try {
       new UserRequestValidator().validateUserDeclarationRequest(request);
+    } catch (ProjectCommonException e) {
+      response = true;
+    }
+    Assert.assertTrue(response);
+  }
+
+  @Test
+  public void testValidateUserLookupRequest() {
+    Request request = initailizeLookupRequest();
+    boolean response = false;
+    try {
+      new UserRequestValidator().validateUserLookupRequest(request);
     } catch (ProjectCommonException e) {
       response = true;
     }
