@@ -394,8 +394,10 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
-    headerMap.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
-    headerMap.put(JsonKey.X_REQUEST_ID, context.getReqId());
+    if (null != context) {
+      headerMap.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
+      headerMap.put(JsonKey.X_REQUEST_ID, context.getReqId());
+    }
     String reqString = "";
     String regStatus = "";
     try {
@@ -456,8 +458,10 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
-    headers.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
-    headers.put(JsonKey.X_REQUEST_ID, context.getReqId());
+    if (null != context) {
+      headers.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
+      headers.put(JsonKey.X_REQUEST_ID, context.getReqId());
+    }
     String reqString = "";
     String regStatus = "";
     try {
