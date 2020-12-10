@@ -197,6 +197,33 @@ public class UserRequestValidatorTest {
   }
 
   @Test
+  public void testValidateLocationCodesAsMapFormatWithSuccess() {
+    boolean response = false;
+    Request request = initailizeRequest();
+    Map<String, Object> requestObj = request.getRequest();
+    List<Map<String, String>> location = new ArrayList<>();
+    Map locationCode1 = new HashMap();
+    Map locationCode2 = new HashMap();
+    locationCode1.put("state", "KA");
+    locationCode1.put("district", "KA-DIS");
+    locationCode2.put("state", "AP");
+    locationCode2.put("district", "AP-DIS");
+    location.add(locationCode1);
+    location.add(locationCode2);
+    requestObj.put(JsonKey.LOCATION_CODES, location);
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.validateCreateUserRequest(request);
+      response = true;
+    } catch (ProjectCommonException e) {
+      Assert.assertNull(e);
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
+    }
+    assertEquals(true, response);
+  }
+
+  @Test
   public void testValidateLocationCodesFailure() {
     Request request = initailizeRequest();
     Map<String, Object> requestObj = request.getRequest();

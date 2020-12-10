@@ -63,18 +63,20 @@ public class UserRequestValidator extends BaseRequestValidator {
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
           ERROR_CODE);
     }
-    List<String> set = null;
-    if (((List) locationCodes).get(0) instanceof String) {
-      set = new ArrayList(new HashSet<>((List<String>) locationCodes));
-      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
-    } else {
-      set = new ArrayList();
-      List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
-      for (Map location : locationList) {
-        set.add((String) location.get(JsonKey.CODE));
+    if (locationCodes != null) {
+      List<String> set = null;
+      if (((List) locationCodes).get(0) instanceof String) {
+        set = new ArrayList(new HashSet<>((List<String>) locationCodes));
+        userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
+      } else {
+        set = new ArrayList();
+        List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
+        for (Map location : locationList) {
+          set.add((String) location.get(JsonKey.CODE));
+        }
       }
+      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
-    userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
   }
 
   private void validateUserName(Request userRequest) {
