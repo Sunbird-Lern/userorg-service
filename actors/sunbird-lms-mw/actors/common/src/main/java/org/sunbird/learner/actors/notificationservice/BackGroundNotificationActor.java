@@ -7,6 +7,7 @@ import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.util.HttpClientUtil;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 
 @ActorConfig(
@@ -41,6 +42,8 @@ public class BackGroundNotificationActor extends BaseActor {
       headers.put("Accept", "application/json");
       headers.put("Content-type", "application/json");
       headers.put("requestId", reqObj.getRequestId());
+      headers.put(JsonKey.X_TRACE_ENABLED, reqObj.getRequestContext().getDebugEnabled());
+      headers.put(JsonKey.X_REQUEST_ID, reqObj.getRequestContext().getReqId());
 
       String response = HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers);
       logger.info(

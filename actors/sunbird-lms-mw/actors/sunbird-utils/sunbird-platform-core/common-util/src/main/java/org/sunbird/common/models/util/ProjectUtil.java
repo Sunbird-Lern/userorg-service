@@ -483,12 +483,13 @@ public class ProjectUtil {
    * @throws IOException
    */
   public static String registertag(
-      String tagId, String body, Map<String, String> header, RequestContext context)
-      throws IOException {
+      String tagId, String body, Map<String, String> header, RequestContext context) {
     String tagStatus = "";
     try {
       logger.info(context, "start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
+      header.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
+      header.put(JsonKey.X_REQUEST_ID, context.getReqId());
       tagStatus =
           HttpClientUtil.post(
               analyticsBaseUrl

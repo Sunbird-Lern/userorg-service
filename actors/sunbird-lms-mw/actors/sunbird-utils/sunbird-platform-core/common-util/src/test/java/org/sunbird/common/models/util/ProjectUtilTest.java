@@ -1,13 +1,7 @@
 package org.sunbird.common.models.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -226,8 +220,8 @@ public class ProjectUtilTest extends BaseHttpTest {
     String response = null;
     try {
       response = ProjectUtil.registertag("testTag", "{}", ProjectUtil.getEkstepHeader(), null);
-    } catch (IOException e) {
-
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     assertNotNull(response);
   }

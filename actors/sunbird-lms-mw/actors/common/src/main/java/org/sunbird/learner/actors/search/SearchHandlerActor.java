@@ -136,6 +136,7 @@ public class SearchHandlerActor extends BaseActor {
             getContext().dispatcher());
     Patterns.pipe(response, getContext().dispatcher()).to(sender());
     Request telemetryReq = new Request();
+    telemetryReq.setRequestContext(request.getRequestContext());
     telemetryReq.getRequest().put("context", request.getContext());
     telemetryReq.getRequest().put("searchFResponse", response);
     telemetryReq.getRequest().put("indexType", indexType);
