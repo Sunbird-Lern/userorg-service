@@ -73,7 +73,6 @@ public class EmailServiceActor extends BaseActor {
   private void sendMail(Request actorMessage) {
     Map<String, Object> request =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.EMAIL_REQUEST);
-    logger.info(actorMessage.getRequestContext(), "Request for sending Notification : " + request);
 
     List<String> userIds = (List<String>) request.get(JsonKey.RECIPIENT_USERIDS);
     if (CollectionUtils.isEmpty(userIds)) {
