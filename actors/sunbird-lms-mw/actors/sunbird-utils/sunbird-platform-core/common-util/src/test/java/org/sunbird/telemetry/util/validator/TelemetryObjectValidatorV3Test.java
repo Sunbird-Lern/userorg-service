@@ -9,7 +9,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.telemetry.dto.Actor;
 import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Telemetry;
@@ -52,7 +51,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateAudit(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertTrue(result);
   }
@@ -82,7 +81,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateAudit(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -117,7 +116,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateAudit(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -152,7 +151,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateAudit(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -180,7 +179,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateAudit(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -217,7 +216,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateSearch(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertTrue(result);
   }
@@ -249,7 +248,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateSearch(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -283,7 +282,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateLog(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertTrue(result);
   }
@@ -315,7 +314,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateLog(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }
@@ -348,7 +347,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateError(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertTrue(result);
   }
@@ -378,7 +377,7 @@ public class TelemetryObjectValidatorV3Test {
     try {
       result = validatorV3.validateError(mapper.writeValueAsString(telemetry));
     } catch (JsonProcessingException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Assert.assertFalse(result);
   }

@@ -12,11 +12,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 
 public class FuzzyMatcher {
+  private static LoggerUtil logger = new LoggerUtil(FuzzyMatcher.class);
 
   private static final String nameToBeMatchedId = "0";
   private static final String ENCODING = "UTF-8";
@@ -35,9 +35,7 @@ public class FuzzyMatcher {
               .setThreshold(getFuzzyThreshold())
               .createDocument();
     } catch (UnsupportedEncodingException e) {
-      ProjectLogger.log(
-          "FuzzyMatcher:matchDoc: Error occured dueing encoding of data " + e,
-          LoggerEnum.ERROR.name());
+      logger.error("FuzzyMatcher:matchDoc: Error occured dueing encoding of data ", e);
     }
     return match(doc, prepareDocumentFromSearchMap(attributesValueMap));
   }
@@ -54,11 +52,10 @@ public class FuzzyMatcher {
       for (int i = 0; i < matchList.size(); i++) {
         Match<Document> matchDoc = matchList.get(i);
         matchedKeys.add(matchDoc.getMatchedWith().getKey());
-        ProjectLogger.log(
+        logger.info(
             String.format(
                 "%s:%s:document matched doc: %s with id  %s",
-                "FuzzyMatcher", "match", matchDoc, matchDoc.getMatchedWith().getKey()),
-            LoggerEnum.INFO.name());
+                "FuzzyMatcher", "match", matchDoc, matchDoc.getMatchedWith().getKey()));
       }
     }
     return matchedKeys;
@@ -73,11 +70,10 @@ public class FuzzyMatcher {
         .forEach(
             result -> {
               String[] attributes = result.getValue().split(" ");
-              ProjectLogger.log(
+              logger.info(
                   "FuzzyMatcher:prepareDocumentFromSearchMap: the name got for match "
                       .concat(result.getValue() + "")
-                      .concat("spliited name size is " + attributes.length),
-                  LoggerEnum.INFO.name());
+                      .concat("spliited name size is " + attributes.length));
               for (int i = 0; i < attributes.length; i++) {
                 try {
                   docList.add(
@@ -89,28 +85,24 @@ public class FuzzyMatcher {
                                   .createElement())
                           .createDocument());
                 } catch (UnsupportedEncodingException e) {
-                  ProjectLogger.log(
-                      "Error occured during prepareDocumentFromSearchMap " + e,
-                      LoggerEnum.ERROR.name());
+                  logger.error("Error occured during prepareDocumentFromSearchMap ", e);
                 }
               }
             });
-    ProjectLogger.log(
+    logger.info(
         String.format(
             "%s:%s:document size prepared to be matched is %s ",
-            "FuzzyMatcher", "prepareDocumentFromSearchMap", docList.size()),
-        LoggerEnum.INFO.name());
+            "FuzzyMatcher", "prepareDocumentFromSearchMap", docList.size()));
     return docList;
   }
 
   private static float getFuzzyThreshold() {
     String threshold =
         PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_FUZZY_SEARCH_THRESHOLD);
-    ProjectLogger.log(
+    logger.info(
         String.format(
             "%s:%s:the threshold got for Fuzzy search is %s",
-            "FuzzyMatcher", "getFuzzyThreshold", threshold),
-        LoggerEnum.INFO.name());
+            "FuzzyMatcher", "getFuzzyThreshold", threshold));
     return Float.parseFloat(threshold);
   }
 }

@@ -142,9 +142,7 @@ public class UserMergeActor extends UserBaseActor {
       triggerUserMergeTelemetry(telemetryMap, merger, userRequest.getContext());
 
     } else {
-      ProjectLogger.log(
-          "UserMergeActor:updateUserMergeDetails: User mergee is not exist : " + mergeeId,
-          LoggerEnum.ERROR.name());
+      logger.info("UserMergeActor:updateUserMergeDetails: User mergee is not exist : " + mergeeId);
       throw new ProjectCommonException(
           ResponseCode.invalidIdentifier.getErrorCode(),
           ProjectUtil.formatMessage(

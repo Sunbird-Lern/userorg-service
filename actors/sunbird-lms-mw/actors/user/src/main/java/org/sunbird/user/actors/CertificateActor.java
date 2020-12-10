@@ -87,13 +87,11 @@ public class CertificateActor extends UserBaseActor {
             });
         cassandraOperation.batchUpdateById(
             certDbInfo.getKeySpace(), certDbInfo.getTableName(), responseList, null);
-        ProjectLogger.log(
-            "CertificateActor:getCertificate: cert details merged to user id : " + mergerId,
-            LoggerEnum.INFO.name());
+        logger.info(
+            "CertificateActor:getCertificate: cert details merged to user id : " + mergerId);
       } else {
-        ProjectLogger.log(
-            "CertificateActor:getCertificate: cert details unavailable for user id : " + mergeeId,
-            LoggerEnum.INFO.name());
+        logger.info(
+            "CertificateActor:getCertificate: cert details unavailable for user id : " + mergeeId);
       }
       userResult.setResponseCode(ResponseCode.success);
       sender().tell(userResult, self());
@@ -103,12 +101,11 @@ public class CertificateActor extends UserBaseActor {
   }
 
   private void sendMergeNotification(String mergeeId, String mergerId) {
-    ProjectLogger.log(
+    logger.info(
         "CertificateActor:sendMergeNotification start sending merge notification to user "
             + mergeeId
             + " -"
-            + mergerId,
-        LoggerEnum.INFO.name());
+            + mergerId);
     List<String> ids = new ArrayList<String>();
     ids.add(mergeeId);
     ids.add(mergerId);
@@ -129,19 +126,17 @@ public class CertificateActor extends UserBaseActor {
     if (MapUtils.isNotEmpty(mergeeUserMap)) {
       mergeeUserMap = createUserData(mergeeUserMap, false);
     } else {
-      ProjectLogger.log(
+      logger.info(
           "CertificateActor:sendMergeNotification mergee user account not found , so email or sms can't be sent "
-              + mergeeId,
-          LoggerEnum.INFO.name());
+              + mergeeId);
       return;
     }
     if (MapUtils.isNotEmpty(mergerUserMap)) {
       mergerUserMap = createUserData(mergerUserMap, true);
     } else {
-      ProjectLogger.log(
+      logger.info(
           "CertificateActor:sendMergeNotification merger user account not found , so email or sms can't be sent "
-              + mergeeId,
-          LoggerEnum.INFO.name());
+              + mergeeId);
       return;
     }
 
@@ -242,14 +237,10 @@ public class CertificateActor extends UserBaseActor {
     Map<String, Object> record = response.getResult();
     if (record != null && record.get(JsonKey.RESPONSE) != null) {
       List responseList = (List) record.get(JsonKey.RESPONSE);
-      ProjectLogger.log(
-          "CertificateActor:getUserByIdentifier user found with id:" + identifiers,
-          LoggerEnum.INFO.name());
+      logger.info("CertificateActor:getUserByIdentifier user found with id:" + identifiers);
       return responseList;
     }
-    ProjectLogger.log(
-        "CertificateActor:getUserByIdentifier user not found with id:" + identifiers,
-        LoggerEnum.INFO.name());
+    logger.info("CertificateActor:getUserByIdentifier user not found with id:" + identifiers);
     return null;
   }
 
@@ -273,18 +264,15 @@ public class CertificateActor extends UserBaseActor {
       userResponse.put(JsonKey.PDF, recordStore.get(JsonKey.PDF_URL));
       userResponse.put(JsonKey.COURSE_ID, recordStore.get(JsonKey.COURSE_ID));
       userResponse.put(JsonKey.BATCH_ID, recordStore.get(JsonKey.BATCH_ID));
-      ProjectLogger.log(
+      logger.info(
           "CertificateActor:getCertificate: userMap got with certificateId "
                   .concat(certificatedId + "")
               + " and response got "
-              + userResponse,
-          LoggerEnum.INFO.name());
+              + userResponse);
       userResult.put(JsonKey.RESPONSE, userResponse);
       sender().tell(userResult, self());
     } else {
-      ProjectLogger.log(
-          "CertificateActor:getCertificate: access code is incorrect : " + accessCode,
-          LoggerEnum.ERROR.name());
+      logger.info("CertificateActor:getCertificate: access code is incorrect : " + accessCode);
       throw new ProjectCommonException(
           ResponseCode.invalidParameter.getErrorCode(),
           ProjectUtil.formatMessage(
@@ -305,16 +293,12 @@ public class CertificateActor extends UserBaseActor {
         responseDetails = (Map<String, Object>) responseList.get(0);
         if (responseDetails.get(JsonKey.IS_DELETED) != null
             && (boolean) responseDetails.get(JsonKey.IS_DELETED)) {
-          ProjectLogger.log(
-              "CertificateActor:getCertificate: certificate is deleted : ",
-              LoggerEnum.ERROR.name());
+          logger.info("CertificateActor:getCertificate: certificate is deleted : ");
           ProjectCommonException.throwClientErrorException(
               ResponseCode.errorUnavailableCertificate, null);
         }
       } else {
-        ProjectLogger.log(
-            "CertificateActor:getCertificate: cert id is incorrect : " + certificatedId,
-            LoggerEnum.ERROR.name());
+        logger.info("CertificateActor:getCertificate: cert id is incorrect : " + certificatedId);
         throw new ProjectCommonException(
             ResponseCode.invalidParameter.getErrorCode(),
             ProjectUtil.formatMessage(
@@ -350,12 +334,11 @@ public class CertificateActor extends UserBaseActor {
               certDbInfo.getKeySpace(), certDbInfo.getTableName(), certAddReqMap, null);
     }
 
-    ProjectLogger.log(
+    logger.info(
         "CertificateActor:addCertificate:successfully added certificate in records with userId"
             + certAddReqMap.get(JsonKey.USER_ID)
             + " and certId:"
-            + certAddReqMap.get(JsonKey.CERT_ID),
-        LoggerEnum.INFO.name());
+            + certAddReqMap.get(JsonKey.CERT_ID));
     sender().tell(response, self());
     telemetryMap.put(JsonKey.USER_ID, userId);
     telemetryMap.put(JsonKey.CERT_ID, certAddReqMap.get(JsonKey.ID));
@@ -388,9 +371,8 @@ public class CertificateActor extends UserBaseActor {
     String courseId = (String) certAddRequestMap.get(JsonKey.COURSE_ID);
     storeMap.put(JsonKey.BATCH_ID, StringUtils.isNotBlank(batchId) ? batchId : StringUtils.EMPTY);
     storeMap.put(JsonKey.COURSE_ID, StringUtils.isNotBlank(batchId) ? courseId : StringUtils.EMPTY);
-    ProjectLogger.log(
-        "CertificateActor:populateStoreMapWithUrlAndIds: store map after populated: " + storeMap,
-        LoggerEnum.INFO.name());
+    logger.info(
+        "CertificateActor:populateStoreMapWithUrlAndIds: store map after populated: " + storeMap);
   }
 
   private Map<String, Object> getRequiredRequest(Map<String, Object> certAddReqMap) {
@@ -412,8 +394,7 @@ public class CertificateActor extends UserBaseActor {
       String completeUrl =
           ProjectUtil.getConfigValue(JsonKey.SUNBIRD_CERT_SERVICE_BASE_URL)
               + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_CERT_DOWNLOAD_URI);
-      ProjectLogger.log(
-          "CertificateActor:getSignUrl complete url found: " + completeUrl, LoggerEnum.INFO.name());
+      logger.info("CertificateActor:getSignUrl complete url found: " + completeUrl);
 
       Map<String, String> headerMap = new HashMap<>();
       headerMap.put("Content-Type", "application/json");
@@ -434,8 +415,7 @@ public class CertificateActor extends UserBaseActor {
       }
 
     } catch (Exception e) {
-      ProjectLogger.log(
-          "CertificateActor:getSignUrl exception occurred :" + e, LoggerEnum.ERROR.name());
+      logger.error("CertificateActor:getSignUrl exception occurred :", e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -445,18 +425,16 @@ public class CertificateActor extends UserBaseActor {
 
   private void assureUniqueCertId(String certificatedId) {
     if (isIdentityPresent(certificatedId)) {
-      ProjectLogger.log(
+      logger.info(
           "CertificateActor:addCertificate:provided certificateId exists in record "
-              .concat(certificatedId),
-          LoggerEnum.ERROR.name());
+              .concat(certificatedId));
       throw new ProjectCommonException(
           ResponseCode.invalidParameter.getErrorCode(),
           ResponseMessage.Message.DATA_ALREADY_EXIST,
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    ProjectLogger.log(
-        "CertificateActor:addCertificate:successfully certId not found in records creating new record",
-        LoggerEnum.INFO.name());
+    logger.info(
+        "CertificateActor:addCertificate:successfully certId not found in records creating new record");
   }
 
   private boolean isIdentityPresent(String certificateId) {
@@ -474,7 +452,7 @@ public class CertificateActor extends UserBaseActor {
   }
 
   private void triggerMergeCertTelemetry(Map telemetryMap, Map<String, Object> context) {
-    ProjectLogger.log(
+    logger.debug(
         "UserMergeActor:triggerMergeCertTelemetry: generating telemetry event for merge certificate");
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
@@ -504,7 +482,7 @@ public class CertificateActor extends UserBaseActor {
   }
 
   private void triggerAddCertTelemetry(Map telemetryMap, Map<String, Object> context) {
-    ProjectLogger.log(
+    logger.debug(
         "UserMergeActor:triggerAddCertTelemetry: generating telemetry event for add certificate");
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();

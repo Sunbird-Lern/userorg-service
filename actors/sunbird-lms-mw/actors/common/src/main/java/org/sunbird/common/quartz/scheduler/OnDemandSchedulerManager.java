@@ -5,11 +5,10 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import java.util.HashMap;
 import java.util.Map;
 import org.quartz.*;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 
 public class OnDemandSchedulerManager extends SchedulerManager {
-
+  private static LoggerUtil logger = new LoggerUtil(OnDemandSchedulerManager.class);
   private static OnDemandSchedulerManager onDemandSchedulerManager = null;
   private static final String BULK_UPLOAD = "bulkupload";
   private static final String SHADOW_USER = "shadowuser";
@@ -24,8 +23,7 @@ public class OnDemandSchedulerManager extends SchedulerManager {
   }
 
   public void scheduleOnDemand(String identifier, String job) {
-    ProjectLogger.log(
-        "onDemandSchedulerManager:scheduleOnDemand:" + job + " started", LoggerEnum.INFO.name());
+    logger.info("onDemandSchedulerManager:scheduleOnDemand:" + job + " started");
     JobDetail jobDetail = null;
     JobBuilder jobBuilder = null;
     String jobName = schedulerMap.get(job);
@@ -52,12 +50,9 @@ public class OnDemandSchedulerManager extends SchedulerManager {
       }
       scheduler.scheduleJob(jobDetail, trigger);
       scheduler.start();
-      ProjectLogger.log(
-          "onDemandSchedulerManager:scheduleOnDemand:scheduler ended", LoggerEnum.INFO.name());
+      logger.info("onDemandSchedulerManager:scheduleOnDemand:scheduler ended");
     } catch (Exception e) {
-      ProjectLogger.log(
-          "onDemandSchedulerManager:scheduleOnDemand Error occurred " + e.getMessage(),
-          LoggerEnum.ERROR.name());
+      logger.error("onDemandSchedulerManager:scheduleOnDemand Error occurred " + e.getMessage(), e);
     }
   }
 
@@ -81,9 +76,7 @@ public class OnDemandSchedulerManager extends SchedulerManager {
           scheduleOnDemand(identifier, job);
           break;
         default:
-          ProjectLogger.log(
-              "OnDemandSchedulerManager:triggerScheduler: There is no such job",
-              LoggerEnum.INFO.name());
+          logger.info("OnDemandSchedulerManager:triggerScheduler: There is no such job");
       }
     }
   }

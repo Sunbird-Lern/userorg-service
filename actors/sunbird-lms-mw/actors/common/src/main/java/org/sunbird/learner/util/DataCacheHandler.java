@@ -9,8 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
@@ -21,6 +20,7 @@ import org.sunbird.learner.actors.role.service.RoleService;
  * @author Amit Kumar
  */
 public class DataCacheHandler implements Runnable {
+  private static LoggerUtil logger = new LoggerUtil(DataCacheHandler.class);
 
   private static Map<String, Object> roleMap = new ConcurrentHashMap<>();
   private static Map<String, Object> telemetryPdata = new ConcurrentHashMap<>(3);
@@ -79,14 +79,14 @@ public class DataCacheHandler implements Runnable {
 
   @Override
   public void run() {
-    ProjectLogger.log("DataCacheHandler:run: Cache refresh started.", LoggerEnum.INFO.name());
+    logger.info("DataCacheHandler:run: Cache refresh started.");
     roleCache(roleMap);
     orgTypeCache(orgTypeMap);
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
     initLocationOrderMap();
-    ProjectLogger.log("DataCacheHandler:run: Cache refresh completed.", LoggerEnum.INFO.name());
+    logger.info("DataCacheHandler:run: Cache refresh completed.");
   }
 
   private void initLocationOrderMap() {
@@ -131,9 +131,8 @@ public class DataCacheHandler implements Runnable {
   private void cacheSystemConfig(Map<String, String> configSettings) {
     Response response =
         cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
-    ProjectLogger.log(
-        "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult(),
-        LoggerEnum.INFO.name());
+    logger.info(
+        "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {

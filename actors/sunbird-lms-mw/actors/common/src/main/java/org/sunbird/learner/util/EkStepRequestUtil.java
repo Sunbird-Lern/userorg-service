@@ -2,16 +2,15 @@
 package org.sunbird.learner.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.*;
-
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.sunbird.common.models.util.*;
 
 /**
  * This class will make the call to EkStep content search
@@ -19,6 +18,7 @@ import java.util.Map;
  * @author Manzarul
  */
 public final class EkStepRequestUtil {
+  private static LoggerUtil logger = new LoggerUtil(EkStepRequestUtil.class);
 
   private static ObjectMapper mapper = new ObjectMapper();
 
@@ -43,23 +43,22 @@ public final class EkStepRequestUtil {
             JsonKey.AUTHORIZATION,
             PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
       }
-      ProjectLogger.log("making call for content search ==" + params, LoggerEnum.INFO.name());
+      logger.info("making call for content search ==" + params);
       String response =
-        HttpClientUtil.post(
+          HttpClientUtil.post(
               baseSearchUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
               params,
               headers);
-      ProjectLogger.log("Content serach response is ==" + response, LoggerEnum.INFO.name());
+      logger.info("Content serach response is ==" + response);
       Map<String, Object> data = mapper.readValue(response, Map.class);
       if (MapUtils.isNotEmpty(data)) {
         String resmsgId = (String) ((Map<String, Object>) data.get("params")).get("resmsgid");
         String apiId = (String) data.get("id");
         data = (Map<String, Object>) data.get(JsonKey.RESULT);
-        ProjectLogger.log(
+        logger.info(
             "Total number of content fetched from Ekstep while assembling page data : "
-                + data.get("count"),
-            LoggerEnum.INFO.name());
+                + data.get("count"));
         if (MapUtils.isNotEmpty(data)) {
           Object contentList = data.get(JsonKey.CONTENT);
           Map<String, Object> param = new HashMap<>();
@@ -76,10 +75,10 @@ public final class EkStepRequestUtil {
           }
         }
       } else {
-        ProjectLogger.log("EkStepRequestUtil:searchContent No data found", LoggerEnum.INFO.name());
+        logger.info("EkStepRequestUtil:searchContent No data found");
       }
     } catch (IOException e) {
-      ProjectLogger.log("Error found during contnet search parse==" + e.getMessage(), e);
+      logger.error("Error found during contnet search parse==" + e.getMessage(), e);
     }
     return resMap;
   }

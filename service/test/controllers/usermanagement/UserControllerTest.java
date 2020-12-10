@@ -429,7 +429,7 @@ public class UserControllerTest extends BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        ProjectLogger.log(e.getMessage(), e);
+        e.printStackTrace();
       }
     }
     return jsonResp;
@@ -447,10 +447,7 @@ public class UserControllerTest extends BaseApplicationTest {
         return params.getStatus();
       }
     } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-              + e.getMessage(),
-          LoggerEnum.ERROR.name());
+      e.printStackTrace();
     }
     return "";
   }
