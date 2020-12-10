@@ -18,10 +18,8 @@ public class ApplicationStart {
 
   @Inject
   public ApplicationStart(ApplicationLifecycle applicationLifecycle, Environment environment) {
-    ProjectLogger.log("ApplicationStart:ApplicationStart: Start", LoggerEnum.DEBUG.name());
     setEnvironment(environment);
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
-    ProjectLogger.log("Server started.. with environment: " + env.name(), LoggerEnum.INFO.name());
     SunbirdMWService.init();
     checkCassandraConnections();
     // initialize HttpClientUtil class
@@ -31,7 +29,6 @@ public class ApplicationStart {
           return CompletableFuture.completedFuture(null);
         });
     KeyManager.init();
-    ProjectLogger.log("ApplicationStart:ApplicationStart: End", LoggerEnum.DEBUG.name());
   }
 
   private void setEnvironment(Environment environment) {

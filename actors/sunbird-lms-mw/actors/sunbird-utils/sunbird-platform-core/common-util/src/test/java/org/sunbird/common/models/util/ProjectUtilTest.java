@@ -105,12 +105,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testCreateAuthTokenSuccess() {
-    String authToken = ProjectUtil.createAuthToken("test", "tset1234");
-    assertNotNull(authToken);
-  }
-
-  @Test
   public void testValidatePhoneNumberFailureWithInvalidPhoneNumber() {
     assertFalse(ProjectUtil.validatePhoneNumber("312"));
   }
@@ -251,14 +245,9 @@ public class ProjectUtilTest extends BaseHttpTest {
 
   @Test
   public void testEsTypeSuccess() {
-    assertEquals("content", ProjectUtil.EsType.content.getTypeName());
-    assertEquals("cbatch", ProjectUtil.EsType.course.getTypeName());
-    assertEquals("course-batch", ProjectUtil.EsType.courseBatch.getTypeName());
     assertEquals("user", ProjectUtil.EsType.user.getTypeName());
     assertEquals("org", ProjectUtil.EsType.organisation.getTypeName());
-    assertEquals("user-courses", ProjectUtil.EsType.usercourses.getTypeName());
     assertEquals("usernotes", ProjectUtil.EsType.usernotes.getTypeName());
-    assertEquals("userprofilevisibility", ProjectUtil.EsType.userprofilevisibility.getTypeName());
   }
 
   @Test

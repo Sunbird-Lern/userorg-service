@@ -10,9 +10,7 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.systemsetting.SystemSetting;
@@ -79,10 +77,10 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
       String jsonString = mapper.writeValueAsString((list.get(0)));
       return mapper.readValue(jsonString, SystemSetting.class);
     } catch (IOException e) {
-      ProjectLogger.log(
+      logger.error(
           "SystemSetting:getSystemSetting: Exception occurred with error messgae = "
               + e.getMessage(),
-          LoggerEnum.ERROR.name());
+          e);
       ProjectCommonException.throwServerErrorException(
           ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
     }

@@ -3,7 +3,6 @@ package org.sunbird.user.actors;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
@@ -42,8 +41,7 @@ public class UserLoginActor extends UserBaseActor {
     if (Boolean.parseBoolean(PropertiesCache.getInstance().getProperty(JsonKey.IS_SSO_ENABLED))) {
       SSOManager ssoManager = SSOServiceFactory.getInstance();
       boolean loginTimeResponse = ssoManager.addUserLoginTime(userId);
-      ProjectLogger.log(
-          "UserLoginActor:updateUserLoginTime: keycloak response = " + loginTimeResponse);
+      logger.info("UserLoginActor:updateUserLoginTime: keycloak response = " + loginTimeResponse);
     }
   }
 }

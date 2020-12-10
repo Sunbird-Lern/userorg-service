@@ -10,13 +10,11 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
@@ -33,7 +31,6 @@ public class HealthActor extends BaseActor {
   public void onReceive(Request message) throws Throwable {
     if (message instanceof Request) {
       try {
-        ProjectLogger.log("AssessmentItemActor onReceive called");
         Request actorMessage = message;
         Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
         if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.HEALTH_CHECK.getValue())) {
@@ -47,27 +44,12 @@ public class HealthActor extends BaseActor {
             .equalsIgnoreCase(ActorOperations.CASSANDRA.getValue())) {
           cassandraHealthCheck();
         } else {
-          ProjectLogger.log("UNSUPPORTED OPERATION");
-          ProjectCommonException exception =
-              new ProjectCommonException(
-                  ResponseCode.invalidOperationName.getErrorCode(),
-                  ResponseCode.invalidOperationName.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-          sender().tell(exception, self());
+          onReceiveUnsupportedOperation("HealthActor");
         }
       } catch (Exception ex) {
-        ProjectLogger.log(ex.getMessage(), ex);
+        logger.error(ex.getMessage(), ex);
         sender().tell(ex, self());
       }
-    } else {
-      // Throw exception as message body
-      ProjectLogger.log("UNSUPPORTED MESSAGE");
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidRequestData.getErrorCode(),
-              ResponseCode.invalidRequestData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
     }
   }
 
@@ -87,7 +69,7 @@ public class HealthActor extends BaseActor {
     } catch (Exception e) {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.ES_SERVICE, true, e));
       isallHealthy = false;
-      ProjectLogger.log("Elastic search health Error == ", e);
+      logger.error("Elastic search health Error == ", e);
     }
     finalResponseMap.put(JsonKey.CHECKS, responseList);
     finalResponseMap.put(JsonKey.NAME, "ES health check api");
@@ -197,8 +179,6 @@ public class HealthActor extends BaseActor {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
       isallHealthy = false;
     }
-    ProjectLogger.log(
-        "HealthActor:checkAllComponentHealth: EKSTEP URL COMMENTED", LoggerEnum.INFO.name());
     finalResponseMap.put(JsonKey.CHECKS, responseList);
     finalResponseMap.put(JsonKey.NAME, "Complete health check api");
     if (isallHealthy) {

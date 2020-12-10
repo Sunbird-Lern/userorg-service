@@ -1,8 +1,7 @@
 package org.sunbird.error.factory;
 
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.error.CsvError;
 import org.sunbird.error.CsvErrorDispatcher;
@@ -16,6 +15,8 @@ import org.sunbird.error.ListErrorDispatcher;
  * @author anmolgupta
  */
 public class ErrorDispatcherFactory {
+
+  private static LoggerUtil logger = new LoggerUtil(ErrorDispatcherFactory.class);
 
   /** this ERROR_VISUALIZATION_THRESHOLD will decide in which need to show errors */
   public static final int ERROR_VISUALIZATION_THRESHOLD = getErrorVisualizationThreshold();
@@ -41,9 +42,8 @@ public class ErrorDispatcherFactory {
   private static int getErrorVisualizationThreshold() {
     String value =
         PropertiesCache.getInstance().readProperty(JsonKey.ERROR_VISUALIZATION_THRESHOLD);
-    ProjectLogger.log(
-        "ErrorDispatcherFactory:getErrorVisualizationThreshold:threshold got ".concat(value + ""),
-        LoggerEnum.INFO.name());
+    logger.info(
+        "ErrorDispatcherFactory:getErrorVisualizationThreshold:threshold got ".concat(value + ""));
     return Integer.parseInt(value);
   }
 }

@@ -25,7 +25,7 @@ public class SchedularActor extends BaseActor {
         .equalsIgnoreCase(ActorOperations.SCHEDULE_BULK_UPLOAD.getValue())) {
       schedule(actorMessage);
     } else {
-      ProjectLogger.log("UNSUPPORTED OPERATION");
+      onReceiveUnsupportedOperation("SchedularActor");
     }
   }
 
