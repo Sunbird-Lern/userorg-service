@@ -425,10 +425,7 @@ public class CertificateActor extends UserBaseActor {
 
       Map<String, String> headerMap = new HashMap<>();
       headerMap.put("Content-Type", "application/json");
-      if (null != request.getRequestContext()) {
-        headerMap.put(JsonKey.X_TRACE_ENABLED, request.getRequestContext().getDebugEnabled());
-        headerMap.put(JsonKey.X_REQUEST_ID, request.getRequestContext().getReqId());
-      }
+      ProjectUtil.setTraceIdInHeader(headerMap, request.getRequestContext());
       String httpResponse = HttpClientUtil.post(completeUrl, requestBody, headerMap);
       if (StringUtils.isNotBlank(httpResponse)) {
         HashMap<String, Object> val =

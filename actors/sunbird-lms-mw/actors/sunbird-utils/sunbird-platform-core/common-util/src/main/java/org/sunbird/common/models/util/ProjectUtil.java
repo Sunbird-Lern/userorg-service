@@ -473,6 +473,13 @@ public class ProjectUtil {
     return responseMap;
   }
 
+  public static void setTraceIdInHeader(Map<String, String> header, RequestContext context) {
+    if (null != context) {
+      header.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
+      header.put(JsonKey.X_REQUEST_ID, context.getReqId());
+    }
+  }
+
   /**
    * This method will make EkStep api call register the tag.
    *
@@ -488,10 +495,7 @@ public class ProjectUtil {
     try {
       logger.info(context, "start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
-      if (null != context) {
-        header.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
-        header.put(JsonKey.X_REQUEST_ID, context.getReqId());
-      }
+      setTraceIdInHeader(header, context);
       tagStatus =
           HttpClientUtil.post(
               analyticsBaseUrl

@@ -30,10 +30,7 @@ public class ContentStoreUtil {
   private static Map<String, Object> handleReadRequest(
       String id, String urlPath, RequestContext context) {
     Map<String, String> headers = getHeaders();
-    if (null != context) {
-      headers.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
-      headers.put(JsonKey.X_REQUEST_ID, context.getReqId());
-    }
+    ProjectUtil.setTraceIdInHeader(headers, context);
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> resultMap = new HashMap<>();
 
