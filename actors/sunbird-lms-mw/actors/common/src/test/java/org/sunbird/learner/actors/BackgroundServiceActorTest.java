@@ -16,7 +16,6 @@ import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -64,7 +63,7 @@ public class BackgroundServiceActorTest {
     try {
       Thread.sleep(20000);
     } catch (InterruptedException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Response response =
         cassandraOperation.getRecordById(
@@ -102,7 +101,7 @@ public class BackgroundServiceActorTest {
     try {
       Thread.sleep(20000);
     } catch (InterruptedException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Response response =
         cassandraOperation.getRecordById(
@@ -141,7 +140,7 @@ public class BackgroundServiceActorTest {
     try {
       Thread.sleep(20000);
     } catch (InterruptedException e) {
-      ProjectLogger.log(e.getMessage(), e);
+      e.printStackTrace();
     }
     Response response =
         cassandraOperation.getRecordById(

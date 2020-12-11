@@ -3,6 +3,7 @@ package org.sunbird.common.request;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -117,6 +118,22 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateUserCreateV3(userRequest);
     validateLocationCodes(userRequest);
     validateFrameworkDetails(userRequest);
+  }
+
+  public void validateUserLookupRequest(Request request) {
+    checkMandatoryFieldsPresent(request.getRequest(), JsonKey.VALUE, JsonKey.KEY);
+    List<String> types =
+        Stream.of(ProjectUtil.UserLookupType.values())
+            .map(ProjectUtil.UserLookupType::getType)
+            .collect(Collectors.toList());
+    types.add(JsonKey.ID);
+    String key = (String) request.get(JsonKey.KEY);
+    if (!types.contains(key)) {
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.invalidValue,
+          MessageFormat.format(
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.KEY, key, types));
+    }
   }
 
   public void validateCreateUserV1Request(Request userRequest) {

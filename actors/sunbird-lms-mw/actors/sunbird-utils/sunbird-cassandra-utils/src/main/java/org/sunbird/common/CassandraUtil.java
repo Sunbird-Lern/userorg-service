@@ -24,7 +24,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.CassandraPropertyReader;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -33,6 +33,7 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Amit Kumar
  */
 public final class CassandraUtil {
+  private static LoggerUtil logger = new LoggerUtil(CassandraUtil.class);
 
   private static final CassandraPropertyReader propertiesCache =
       CassandraPropertyReader.getInstance();
@@ -63,7 +64,6 @@ public final class CassandraUtil {
       }
     }
     query.append(commaSepValueBuilder + Constants.CLOSING_BRACE);
-    ProjectLogger.log(query.toString());
     return query.toString();
   }
 
@@ -87,7 +87,6 @@ public final class CassandraUtil {
               .forEach(entry -> rowMap.put(entry.getKey(), row.getObject(entry.getValue())));
           responseList.add(rowMap);
         });
-    ProjectLogger.log(responseList.toString());
     response.put(Constants.RESPONSE, responseList);
     return response;
   }
@@ -120,7 +119,6 @@ public final class CassandraUtil {
     query.append(String.join(" = ? ,", key));
     query.append(
         Constants.EQUAL_WITH_QUE_MARK + Constants.WHERE_ID + Constants.EQUAL_WITH_QUE_MARK);
-    ProjectLogger.log(query.toString());
     return query.toString();
   }
 
@@ -145,7 +143,6 @@ public final class CassandraUtil {
             + Constants.IDENTIFIER
             + Constants.EQUAL
             + " ?; ");
-    ProjectLogger.log(query.toString());
     return query.toString();
   }
 
@@ -199,7 +196,7 @@ public final class CassandraUtil {
         }
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred - batchUpdateQuery", ex);
+      logger.error("Exception occurred - batchUpdateQuery", ex);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),
@@ -246,7 +243,7 @@ public final class CassandraUtil {
         }
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred - getPrimaryKey", ex);
+      logger.error("Exception occurred - getPrimaryKey", ex);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
           ResponseCode.SERVER_ERROR.getErrorMessage(),

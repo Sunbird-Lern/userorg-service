@@ -8,8 +8,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestValidator;
 import play.mvc.Http;
@@ -34,7 +32,6 @@ public class SearchController extends BaseController {
   public CompletionStage<Result> compositeSearch(Http.Request httpRequest) {
     try {
       JsonNode requestData = httpRequest.body().asJson();
-      ProjectLogger.log("getting search request data = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
@@ -56,7 +53,6 @@ public class SearchController extends BaseController {
   public CompletionStage<Result> sync(Http.Request httpRequest) {
     try {
       JsonNode requestData = httpRequest.body().asJson();
-      ProjectLogger.log("making a call to data synch api = " + requestData, LoggerEnum.INFO.name());
       Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
       String operation = (String) reqObj.getRequest().get(JsonKey.OPERATION_FOR);
