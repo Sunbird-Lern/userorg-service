@@ -279,7 +279,6 @@ public class UserManagementActor extends BaseActor {
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
-    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
@@ -607,16 +606,6 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
-    if (userMap.containsKey(JsonKey.USER_TYPE)) {
-      String userType = (String) userMap.get(JsonKey.USER_TYPE);
-      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-      }
-    }
-  }
   // Check if the user is Custodian Org user
   private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
     boolean isCustodianOrgUser = false;
@@ -741,7 +730,6 @@ public class UserManagementActor extends BaseActor {
         return;
       }
     }
-    validateUserType(userMap, isCustodianOrg, actorMessage.getRequestContext());
     if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
       String orgExternalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
       String channel = (String) userMap.get(JsonKey.CHANNEL);
@@ -789,27 +777,6 @@ public class UserManagementActor extends BaseActor {
       }
     }
     processUserRequest(userMap, callerId, actorMessage);
-  }
-
-  private void validateUserType(
-      Map<String, Object> userMap, boolean isCustodianOrg, RequestContext context) {
-    String userType = (String) userMap.get(JsonKey.USER_TYPE);
-    if (StringUtils.isNotBlank(userType)) {
-      if (userType.equalsIgnoreCase(UserType.TEACHER.getTypeName()) && isCustodianOrg) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-      } else if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId =
-            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-        if (StringUtils.isNotBlank(custodianRootOrgId)
-            && ((String) userMap.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(custodianRootOrgId)) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-        }
-      }
-    }
   }
 
   private void validateChannelAndOrganisationId(
