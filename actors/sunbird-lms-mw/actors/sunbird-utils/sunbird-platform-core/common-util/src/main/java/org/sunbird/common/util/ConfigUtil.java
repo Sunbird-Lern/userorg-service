@@ -4,8 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -16,6 +15,7 @@ import org.sunbird.common.responsecode.ResponseCode;
  */
 public class ConfigUtil {
 
+  public static LoggerUtil logger = new LoggerUtil(ConfigUtil.class);
   private static Config config;
   private static final String DEFAULT_TYPE_SAFE_CONFIG_FILE_NAME = "service.conf";
   private static final String INVALID_FILE_NAME = "Please provide a valid file name.";
@@ -47,9 +47,6 @@ public class ConfigUtil {
    */
   public static Config getConfig(String fileName) {
     if (StringUtils.isBlank(fileName)) {
-      ProjectLogger.log(
-          "ConfigUtil:getConfigWithFilename: Given file name is null or empty: " + fileName,
-          LoggerEnum.INFO.name());
       throw new ProjectCommonException(
           ResponseCode.internalError.getErrorCode(),
           INVALID_FILE_NAME,
@@ -61,20 +58,6 @@ public class ConfigUtil {
       }
     }
     return config;
-  }
-
-  public static void validateMandatoryConfigValue(String configParameter) {
-    if (StringUtils.isBlank(configParameter)) {
-      ProjectLogger.log(
-          "ConfigUtil:validateMandatoryConfigValue: Missing mandatory configuration parameter: "
-              + configParameter,
-          LoggerEnum.ERROR.name());
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryConfigParamMissing.getErrorCode(),
-          ResponseCode.mandatoryConfigParamMissing.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode(),
-          configParameter);
-    }
   }
 
   private static Config createConfig(String fileName) {
@@ -90,11 +73,7 @@ public class ConfigUtil {
    * @return Type safe config object
    */
   public static Config getConfigFromJsonString(String jsonString, String configType) {
-    ProjectLogger.log("ConfigUtil: getConfigFromJsonString called", LoggerEnum.DEBUG.name());
-
     if (null == jsonString || StringUtils.isBlank(jsonString)) {
-      ProjectLogger.log(
-          "ConfigUtil:getConfigFromJsonString: Empty string", LoggerEnum.ERROR.name());
       ProjectCommonException.throwServerErrorException(
           ResponseCode.errorConfigLoadEmptyString,
           ProjectUtil.formatMessage(
@@ -105,10 +84,10 @@ public class ConfigUtil {
     try {
       jsonConfig = ConfigFactory.parseString(jsonString);
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
           "ConfigUtil:getConfigFromJsonString: Exception occurred during parse with error message = "
               + e.getMessage(),
-          LoggerEnum.ERROR.name());
+          e);
       ProjectCommonException.throwServerErrorException(
           ResponseCode.errorConfigLoadParseString,
           ProjectUtil.formatMessage(
@@ -116,18 +95,11 @@ public class ConfigUtil {
     }
 
     if (null == jsonConfig || jsonConfig.isEmpty()) {
-      ProjectLogger.log(
-          "ConfigUtil:getConfigFromJsonString: Empty configuration", LoggerEnum.ERROR.name());
       ProjectCommonException.throwServerErrorException(
           ResponseCode.errorConfigLoadEmptyConfig,
           ProjectUtil.formatMessage(
               ResponseCode.errorConfigLoadEmptyConfig.getErrorMessage(), configType));
     }
-
-    ProjectLogger.log(
-        "ConfigUtil:getConfigFromJsonString: Successfully constructed type safe configuration",
-        LoggerEnum.DEBUG.name());
-
     return jsonConfig;
   }
 }

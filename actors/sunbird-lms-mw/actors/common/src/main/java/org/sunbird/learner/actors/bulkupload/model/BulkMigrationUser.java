@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -14,6 +13,8 @@ import org.sunbird.common.responsecode.ResponseCode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BulkMigrationUser {
+  private static LoggerUtil logger = new LoggerUtil(BulkMigrationUser.class);
+
   private static final long serialVersionUID = 1L;
   private String id;
   private String data;
@@ -241,15 +242,9 @@ public class BulkMigrationUser {
       long encStartTime = System.currentTimeMillis();
       try {
         String encryptedData = encryptionService.encryptData(decryptedData, null);
-        ProjectLogger.log(
-            "BulkMigrationUser:encryptData:TIME TAKEN TO ENCRYPT DATA in(ms):"
-                .concat((System.currentTimeMillis() - encStartTime) + ""),
-            LoggerEnum.INFO.name());
         return encryptedData;
       } catch (Exception e) {
-        ProjectLogger.log(
-            "BulkMigrationUser:encryptData:error occurred while encrypting data",
-            LoggerEnum.ERROR.name());
+        logger.error("BulkMigrationUser:encryptData:error occurred while encrypting data", e);
         throw new ProjectCommonException(
             ResponseCode.SERVER_ERROR.getErrorCode(),
             ResponseCode.userDataEncryptionError.getErrorMessage(),

@@ -59,10 +59,9 @@ public class SearchTelemetryGenerator extends BaseActor {
         }
       }
     } catch (Exception e) {
-      ProjectLogger.log(
+      logger.error(
           "SearchTelemetryGenerator:generateTelemetry: Error occured in generating Telemetry for orgSearch  ",
-          e,
-          LoggerEnum.ERROR.name());
+          e);
     }
   }
 

@@ -8,10 +8,11 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.apache.velocity.VelocityContext;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 
 public class SendEmail {
 
+  public LoggerUtil logger = new LoggerUtil(SendEmail.class);
   private static final String fromEmail = System.getenv(JsonKey.EMAIL_SERVER_FROM);
 
   public boolean send(
@@ -44,7 +45,7 @@ public class SendEmail {
       transport.sendMessage(message, message.getAllRecipients());
     } catch (Exception e) {
       sentStatus = false;
-      ProjectLogger.log("SendEmail:send: Exception occurred with message = " + e.getMessage(), e);
+      logger.error("SendEmail:send: Exception occurred with message = " + e.getMessage(), e);
     }
     return sentStatus;
   }

@@ -269,23 +269,16 @@ public class ShadowUserProcessor {
   }
 
   private void generateTelemetry(String userId, String rootOrgId, ShadowUser shadowUser) {
-    // ExecutionContext.getCurrent()
-    //    .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
-    ProjectLogger.log(
-        "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString(),
-        LoggerEnum.INFO.name());
+    logger.info(
+        "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString());
     Map<String, Object> targetObject = new HashMap<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", rootOrgId);
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    // ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
     TelemetryUtil.generateCorrelatedObject(
         shadowUser.getProcessId(), JsonKey.PROCESS_ID, null, correlatedObject);
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
-    // TelemetryUtil.telemetryProcessingCall(
-    //    mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
+    TelemetryUtil.generateTargetObject(
+        userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
   }
 
   /**
@@ -296,10 +289,9 @@ public class ShadowUserProcessor {
    * @return
    */
   private List<String> getMatchingUserIds(List<Map<String, Object>> esUser) {
-    ProjectLogger.log(
+    logger.info(
         "ShadowUserProcessor:getMatchingUserIds:GOT response from counting matchingUserIds:"
-            + esUser.size(),
-        LoggerEnum.INFO.name());
+            + esUser.size());
     List<String> matchingUserIds = new ArrayList<>();
     esUser
         .stream()
@@ -416,10 +408,9 @@ public class ShadowUserProcessor {
 
       @Override
       public void onFailure(Throwable t) {
-        ProjectLogger.log(
-            "ShadowUserProcessor:getSyncCallback:FAILURE:ERROR OCCURRED WHILE GETTING SYNC CALLBACKS"
-                + t,
-            LoggerEnum.ERROR.name());
+        logger.error(
+            "ShadowUserProcessor:getSyncCallback:FAILURE:ERROR OCCURRED WHILE GETTING SYNC CALLBACKS",
+            t);
       }
     };
   }
@@ -621,10 +612,9 @@ public class ShadowUserProcessor {
       telemetryContext.putAll(contextMap);
       processIdtelemetryCtxMap.put(processId, telemetryContext);
     }
-    ProjectLogger.log(
+    logger.info(
         "ShadowUserMigrationScheduler:getFullRecordFromProcessId:got single row data from bulk_upload_process with processId:"
-            + processId,
-        LoggerEnum.INFO.name());
+            + processId);
     return telemetryContext;
   }
 

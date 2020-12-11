@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class PropertiesCache {
 
+  private static LoggerUtil logger = new LoggerUtil(PropertiesCache.class);
+
   private final String[] fileName = {
     "elasticsearch.config.properties",
     "cassandra.config.properties",
@@ -21,7 +23,6 @@ public class PropertiesCache {
     "externalresource.properties",
     "sso.properties",
     "userencryption.properties",
-    "profilecompleteness.properties",
     "mailTemplates.properties"
   };
   private final Properties configProp = new Properties();
@@ -35,10 +36,9 @@ public class PropertiesCache {
       try {
         configProp.load(in);
       } catch (IOException e) {
-        ProjectLogger.log("Error in properties cache", e);
+        logger.error("Error in properties cache", e);
       }
     }
-    loadWeighted();
   }
 
   public static PropertiesCache getInstance() {
@@ -63,28 +63,6 @@ public class PropertiesCache {
     String value = System.getenv(key);
     if (StringUtils.isNotBlank(value)) return value;
     return configProp.getProperty(key) != null ? configProp.getProperty(key) : key;
-  }
-
-  private void loadWeighted() {
-    String key = configProp.getProperty("user.profile.attribute");
-    String value = configProp.getProperty("user.profile.weighted");
-    if (StringUtils.isBlank(key)) {
-      ProjectLogger.log("Profile completeness value is not set==", LoggerEnum.INFO.name());
-    } else {
-      String keys[] = key.split(",");
-      String values[] = value.split(",");
-      if (keys.length == value.length()) {
-        // then take the value from user
-        ProjectLogger.log("weighted value is provided by user.");
-        for (int i = 0; i < keys.length; i++)
-          attributePercentageMap.put(keys[i], new Float(values[i]));
-      } else {
-        // equally divide all the provided field.
-        ProjectLogger.log("weighted value is not provided  by user.");
-        float perc = (float) 100.0 / keys.length;
-        for (int i = 0; i < keys.length; i++) attributePercentageMap.put(keys[i], perc);
-      }
-    }
   }
 
   /**

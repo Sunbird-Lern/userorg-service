@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.jvnet.mock_javamail.Mailbox;
 import org.sunbird.common.models.util.mail.GMailAuthenticator;
-import org.sunbird.common.models.util.mail.SendMail;
 
 /** @author Manzarul */
 public class EmailTest {
@@ -32,12 +31,6 @@ public class EmailTest {
   public void passwordAuthTest() {
     PasswordAuthentication authentication = authenticator.getPasswordAuthentication();
     Assert.assertEquals("test", authentication.getPassword());
-  }
-
-  @Test
-  public void initialiseFromPropertyTest() {
-    SendMail.initialiseFromProperty();
-    Assert.assertTrue(true);
   }
 
   @AfterClass

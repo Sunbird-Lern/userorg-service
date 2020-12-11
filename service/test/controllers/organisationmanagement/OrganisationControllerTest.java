@@ -18,8 +18,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http;
@@ -238,7 +236,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        ProjectLogger.log(e.getMessage(), e);
+        e.printStackTrace();
       }
     }
     return jsonResp;
@@ -256,10 +254,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
         return params.getStatus();
       }
     } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-              + e.getMessage(),
-          LoggerEnum.ERROR.name());
+      e.printStackTrace();
     }
     return "";
   }

@@ -115,8 +115,7 @@ public class UserUtil {
       Map<String, String> providerOrgCaseInsensitiveMap =
           new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
       providerOrgCaseInsensitiveMap.putAll(providerOrgMap);
-      ProjectLogger.log(
-          String.format("Checking channel: %s as with any case", provider), LoggerEnum.INFO);
+      logger.info(String.format("Checking channel: %s as with any case", provider));
       orgId = providerOrgCaseInsensitiveMap.get(provider);
     }
     return orgId;

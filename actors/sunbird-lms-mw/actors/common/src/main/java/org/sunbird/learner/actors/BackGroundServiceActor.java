@@ -14,7 +14,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
@@ -43,27 +42,37 @@ public class BackGroundServiceActor extends BaseActor {
   }
 
   private void updateUserCount(Request actorMessage) {
-    ProjectLogger.log("In BackgroundService actor in updateUserCount method.");
+    logger.info(
+        actorMessage.getRequestContext(), "In BackgroundService actor in updateUserCount method.");
     Util.DbInfo locDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
     List<Object> locationIds = (List<Object>) actorMessage.getRequest().get(JsonKey.LOCATION_IDS);
     String operation = (String) actorMessage.getRequest().get(JsonKey.OPERATION);
-    ProjectLogger.log("operation for updating UserCount" + operation);
+    logger.info(actorMessage.getRequestContext(), "operation for updating UserCount" + operation);
     Response response =
         cassandraOperation.getRecordsByProperty(
-            locDbInfo.getKeySpace(), locDbInfo.getTableName(), JsonKey.ID, locationIds, null);
+            locDbInfo.getKeySpace(),
+            locDbInfo.getTableName(),
+            JsonKey.ID,
+            locationIds,
+            actorMessage.getRequestContext());
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != list && !list.isEmpty()) {
       for (Map<String, Object> map : list) {
         String locationId = (String) map.get(JsonKey.ID);
-        ProjectLogger.log("Processing start for LocationId " + locationId);
+        logger.info(
+            actorMessage.getRequestContext(), "Processing start for LocationId " + locationId);
         Long userCountTTL = 0L;
         int userCount =
             (map.get(JsonKey.USER_COUNT) == null) ? 0 : (int) (map.get(JsonKey.USER_COUNT));
-        ProjectLogger.log("userCount is " + userCount + "for location id " + locationId);
+        logger.info(
+            actorMessage.getRequestContext(),
+            "userCount is " + userCount + "for location id " + locationId);
         if (userCount == 0
             && !StringUtils.isBlank(operation)
             && operation.equalsIgnoreCase("UpdateUserCountScheduler")) {
-          ProjectLogger.log("Processing start for LocationId for Scheduler " + locationId);
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Processing start for LocationId for Scheduler " + locationId);
           int count = getUserCount(locationId);
           Map<String, Object> reqMap = new HashMap<>();
           reqMap.put(JsonKey.ID, locationId);
@@ -73,24 +82,28 @@ public class BackGroundServiceActor extends BaseActor {
               locDbInfo.getKeySpace(), locDbInfo.getTableName(), reqMap, null);
         } else if (!StringUtils.isBlank(operation)
             && operation.equalsIgnoreCase("GeoLocationManagementActor")) {
-          ProjectLogger.log(
+          logger.info(
+              actorMessage.getRequestContext(),
               "Processing start for LocationId for GeoLocationManagementActor " + locationId);
           try {
             if (!StringUtils.isBlank((String) map.get(JsonKey.USER_COUNT_TTL))) {
               userCountTTL = Long.valueOf((String) map.get(JsonKey.USER_COUNT_TTL));
             }
           } catch (Exception ex) {
-            ProjectLogger.log(
+            logger.error(
+                actorMessage.getRequestContext(),
                 "Exception occurred while converting string to long "
-                    + (String) map.get(JsonKey.USER_COUNT_TTL));
+                    + (String) map.get(JsonKey.USER_COUNT_TTL),
+                ex);
             userCountTTL = 0L;
           }
-          ProjectLogger.log("userCountTTL == " + userCountTTL);
+          logger.info(actorMessage.getRequestContext(), "userCountTTL == " + userCountTTL);
           Long currentTime = System.currentTimeMillis();
           Long diff = currentTime - userCountTTL;
           int hours = (int) (diff / (1000 * 60 * 60));
           if (hours >= 24) {
-            ProjectLogger.log("Updating user count for LocnId " + locationId);
+            logger.info(
+                actorMessage.getRequestContext(), "Updating user count for LocnId " + locationId);
             int usrCount = getUserCount(locationId);
             Map<String, Object> reqMap = new HashMap<>();
             reqMap.put(JsonKey.ID, locationId);
@@ -101,12 +114,11 @@ public class BackGroundServiceActor extends BaseActor {
           }
         }
       }
-      ProjectLogger.log("Processing end user count update ");
+      logger.info(actorMessage.getRequestContext(), "Processing end user count update ");
     }
   }
 
-  private static int getUserCount(String locationId) {
-    ProjectLogger.log("fetching user count start ");
+  private int getUserCount(String locationId) {
     SearchDTO searchDto = new SearchDTO();
     List<String> list = new ArrayList<>();
     list.add(JsonKey.ID);
@@ -124,7 +136,7 @@ public class BackGroundServiceActor extends BaseActor {
     for (Map<String, Object> map : orgList) {
       orgIdList.add((String) map.get(JsonKey.ID));
     }
-    ProjectLogger.log(
+    logger.info(
         "Total No of Organisation for Location Id " + locationId + " , " + orgIdList.size());
     if (!orgIdList.isEmpty()) {
       searchDto = new SearchDTO();
@@ -134,14 +146,14 @@ public class BackGroundServiceActor extends BaseActor {
       searchDto.setLimit(0);
       Map<String, Object> filter2 = new HashMap<>();
       filter2.put(JsonKey.ORGANISATIONS + "." + JsonKey.ORGANISATION_ID, orgIdList);
-      ProjectLogger.log("filter2.get(JsonKey.ORGANISATIONS.JsonKey.ORGANISATION_ID) " + orgIdList);
+      logger.info("filter2.get(JsonKey.ORGANISATIONS.JsonKey.ORGANISATION_ID) " + orgIdList);
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter2);
       Future<Map<String, Object>> esResponse2F =
           esService.search(searchDto, ProjectUtil.EsType.user.getTypeName(), null);
       Map<String, Object> esResponse2 =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponse2F);
       long userCount = (long) esResponse2.get(JsonKey.COUNT);
-      ProjectLogger.log("Total No of User for Location Id " + locationId + " , " + userCount);
+      logger.info("Total No of User for Location Id " + locationId + " , " + userCount);
       return (int) userCount;
     } else {
       return 0;
