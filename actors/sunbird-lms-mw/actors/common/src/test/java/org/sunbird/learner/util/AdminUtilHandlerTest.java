@@ -60,4 +60,21 @@ public class AdminUtilHandlerTest {
       assertNotNull(tempMap.get(JsonKey.TOKEN));
     }
   }
+
+  @Test
+  public void testFetchEncryptedTokenFailure() {
+    List<AdminUtilRequestData> reqData = new ArrayList<AdminUtilRequestData>();
+    reqData.add(new AdminUtilRequestData("parentId", "childId1"));
+    reqData.add(new AdminUtilRequestData("parentId", "childId2"));
+
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+        .thenThrow(new RuntimeException("Exception Messsage"));
+    try {
+      Map<String, Object> encryptedTokenList =
+          AdminUtilHandler.fetchEncryptedToken(
+              AdminUtilHandler.prepareAdminUtilPayload(reqData), null);
+    } catch (Exception e) {
+      assertNotNull(e);
+    }
+  }
 }
