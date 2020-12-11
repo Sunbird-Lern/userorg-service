@@ -870,7 +870,6 @@ public class UserRequestValidator extends BaseRequestValidator {
         for (Map<String, Object> declareFields : declarations) {
           String userId = (String) declareFields.get(JsonKey.USER_ID);
           String orgId = (String) declareFields.get(JsonKey.ORG_ID);
-          Map<String, Object> info = (Map<String, Object>) declareFields.get(JsonKey.INFO);
           if (StringUtils.isBlank(userId) || StringUtils.isBlank(orgId)) {
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing.getErrorCode(),
@@ -880,9 +879,6 @@ public class UserRequestValidator extends BaseRequestValidator {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
           declareFields.put(JsonKey.PERSONA, "default");
-          // if (MapUtils.isNotEmpty(info) && info.containsValue(null)) {
-          //  ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
-          // }
         }
       }
     } catch (Exception ex) {

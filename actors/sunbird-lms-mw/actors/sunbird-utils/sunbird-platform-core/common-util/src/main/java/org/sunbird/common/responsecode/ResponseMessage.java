@@ -364,7 +364,7 @@ public interface ResponseMessage {
     String ERROR_CONFIG_LOAD_PARSE_STRING =
         "Loading {0} configuration failed due to parsing error.";
     String MISSING_SELF_DECLARED_MANDATORY_PARAMETERS =
-        "Mandatory parameter {0} or {1} or {2} is missing.";
+        "Mandatory parameter {0} or {1} is missing.";
     String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "Loading {0} configuration failed.";
     String ERROR_CONFLICTING_FIELD_CONFIGURATION =
         "Field {0} in {1} configuration is conflicting in {2} and {3}.";

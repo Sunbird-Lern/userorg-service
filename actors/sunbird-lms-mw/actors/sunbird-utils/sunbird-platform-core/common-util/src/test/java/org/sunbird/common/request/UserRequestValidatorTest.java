@@ -1489,13 +1489,9 @@ public class UserRequestValidatorTest {
   }
 
   private List createUpdateUserDeclarationMissingUserInfoIdRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> info = new HashMap<>();
     info.put(JsonKey.DECLARED_EMAIL, null);
     Map<String, Object> declarationMap = new HashMap<>();
-    declarationMap.put(JsonKey.ORG_ID, "1234");
-    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     declarationMap.put(JsonKey.USER_ID, "1234");
     declarationMap.put(JsonKey.INFO, info);
     List<Map<String, Object>> declarations = new ArrayList<>();
