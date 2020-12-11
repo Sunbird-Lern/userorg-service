@@ -270,7 +270,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithUserTypeAsOther() {
-    reqMap.put(JsonKey.USER_TYPE, JsonKey.OTHER);
+    reqMap.put(JsonKey.USER_TYPE, JsonKey.STUDENT);
 
     boolean result =
         testScenario(

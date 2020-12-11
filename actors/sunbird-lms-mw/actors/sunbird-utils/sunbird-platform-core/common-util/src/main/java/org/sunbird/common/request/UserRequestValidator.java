@@ -766,12 +766,15 @@ public class UserRequestValidator extends BaseRequestValidator {
     return frameworkMap.get(key);
   }
 
+  // TODO:  Validate userType with data from form api
   private void validateUserType(Request userRequest) {
     String userType = (String) userRequest.getRequest().get(JsonKey.USER_TYPE);
 
     if (userType != null
-        && (!JsonKey.OTHER.equalsIgnoreCase(userType))
-        && (!JsonKey.TEACHER.equalsIgnoreCase(userType))) {
+        && (!JsonKey.ADMINISTRATOR.equalsIgnoreCase(userType))
+        && (!JsonKey.TEACHER.equalsIgnoreCase(userType))
+        && (!JsonKey.GUARDIAN.equalsIgnoreCase(userType))
+        && (!JsonKey.STUDENT.equalsIgnoreCase(userType))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
