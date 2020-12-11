@@ -49,7 +49,6 @@ import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.UserType;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -115,69 +114,9 @@ public class UserManagementActor extends BaseActor {
       case "getManagedUsers": // managedUser search
         getManagedUsers(request);
         break;
-      case "updateUserDeclarations": // update self declare
-        updateUserDeclarations(request);
-        break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
     }
-  }
-
-  /**
-   * This method will update self declaration for the user to Cassandra
-   *
-   * @param actorMessage
-   */
-  private void updateUserDeclarations(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(),
-        "UserManagementActor:updateUserDeclarations method called.");
-
-    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
-    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
-    actorMessage.toLower();
-    Map<String, Object> userMap = actorMessage.getRequest();
-    Response response = new Response();
-    List<String> errMsgs = new ArrayList<>();
-    try {
-      List<Map<String, Object>> declarations =
-          (List<Map<String, Object>>) userMap.get(JsonKey.DECLARATIONS);
-      // Get the User ID
-      userMap.put(JsonKey.USER_ID, declarations.get(0).get(JsonKey.USER_ID));
-      Map<String, Object> userDbRecord =
-          UserUtil.validateExternalIdsAndReturnActiveUser(
-              userMap, actorMessage.getRequestContext());
-      UserUtil.encryptDeclarationFields(
-          declarations, userDbRecord, actorMessage.getRequestContext());
-      List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
-      for (Map<String, Object> declareFieldMap : declarations) {
-        UserDeclareEntity userDeclareEntity =
-            UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
-        userDeclareEntityList.add(userDeclareEntity);
-      }
-      userMap.remove(JsonKey.DECLARATIONS);
-      userMap.put(JsonKey.DECLARATIONS, userDeclareEntityList);
-      response = saveUserSelfDeclareAttributes(userMap, actorMessage.getRequestContext());
-    } catch (Exception ex) {
-      errMsgs.add(ex.getMessage());
-      logger.error(
-          actorMessage.getRequestContext(),
-          "UserSelfDeclarationManagementActor:upsertUserSelfDeclarations: Exception occurred with error message = "
-              + ex.getMessage(),
-          ex);
-    }
-    if (CollectionUtils.isNotEmpty((List<String>) response.getResult().get(JsonKey.ERROR_MSG))
-        || CollectionUtils.isNotEmpty(errMsgs)) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.internalError, errMsgs.get(0));
-    }
-    sender().tell(response, self());
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-    TelemetryUtil.telemetryProcessingCall(
-        userMap, targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /**
@@ -1553,23 +1492,5 @@ public class UserManagementActor extends BaseActor {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
-  }
-
-  private Response saveUserSelfDeclareAttributes(
-      Map<String, Object> userMap, RequestContext context) {
-    Request request = new Request();
-    request.setRequestContext(context);
-    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
-    request.getRequest().putAll(userMap);
-    logger.info(context, "UserManagementActor:saveUserSelfDeclareAttributes");
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      ActorRef actorRef = getActorRef(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      return (Response) Await.result(future, t.duration());
-    } catch (Exception e) {
-      logger.error(context, e.getMessage(), e);
-    }
-    return null;
   }
 }

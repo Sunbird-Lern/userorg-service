@@ -659,6 +659,7 @@ public final class JsonKey {
   // This denotes the persona of the user in self declaration and
   // is different from role or user type = TEACHER
   public static final String TEACHER_PERSONA = "teacher";
+  public static final String DEFAULT_PERSONA = "default";
   public static final String TENANT_PREFERENCE_V2 = "tenantPreferenceV2";
   public static final String REQUESTED_FOR = "requestedFor";
   public static final String X_Session_ID = "x-session-id";
