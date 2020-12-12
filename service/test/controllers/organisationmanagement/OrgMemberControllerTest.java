@@ -182,7 +182,7 @@ public class OrgMemberControllerTest extends BaseApplicationTest {
 
       if (response != null) {
         ResponseParams params = response.getParams();
-        return params.getStatus();
+        return params.getErr();
       }
     } catch (Exception e) {
       e.printStackTrace();

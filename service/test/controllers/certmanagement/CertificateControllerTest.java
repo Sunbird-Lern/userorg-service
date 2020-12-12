@@ -75,7 +75,6 @@ public class CertificateControllerTest extends BaseApplicationTest {
             "POST",
             getValidateReq(JsonKey.CERT_ID),
             application);
-    System.out.println("dfkd" + Helpers.contentAsString(result));
     assertEquals(
         ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
   }
