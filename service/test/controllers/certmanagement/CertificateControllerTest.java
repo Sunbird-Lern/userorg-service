@@ -62,7 +62,6 @@ public class CertificateControllerTest extends BaseApplicationTest {
     Result result =
         TestUtil.performTest(
             "/private/user/v1/certs/validate", "POST", getValidateReq(null), application);
-    System.out.println("dfkd" + Helpers.contentAsString(result));
     assertEquals(
         ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
   }
