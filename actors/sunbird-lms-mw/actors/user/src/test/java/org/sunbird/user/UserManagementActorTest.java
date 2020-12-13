@@ -270,23 +270,12 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithUserTypeAsOther() {
-    reqMap.put(JsonKey.USER_TYPE, JsonKey.OTHER);
+    reqMap.put(JsonKey.USER_TYPE, JsonKey.STUDENT);
 
     boolean result =
         testScenario(
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testCreateUserFailureWithUserTypeAsTeacherAndCustodianOrg() {
-    reqMap.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
-
-    boolean result =
-        testScenario(
-            getRequest(false, false, true, reqMap, ActorOperations.CREATE_USER),
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg);
     assertTrue(result);
   }
 
@@ -302,22 +291,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     boolean result =
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserFailureWithUserTypeTeacher() {
-    Map<String, Object> req = getExternalIdMap();
-    req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
-    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
-    Map<String, String> configMap = new HashMap<>();
-    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
-    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "rootOrgId");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
-    boolean result =
-        testScenario(
-            getRequest(false, true, true, req, ActorOperations.UPDATE_USER),
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg);
     assertTrue(result);
   }
 
