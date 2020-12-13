@@ -231,7 +231,7 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
-      logger.info(
+      logger.debug(
           "BaseController:handleRequest for operation: "
               + operation
               + " requestId: "

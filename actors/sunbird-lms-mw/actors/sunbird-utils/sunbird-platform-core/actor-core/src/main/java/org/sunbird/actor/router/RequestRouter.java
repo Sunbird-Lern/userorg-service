@@ -77,7 +77,7 @@ public class RequestRouter extends BaseRouter {
    */
   private boolean route(ActorRef router, Request message, ExecutionContext ec) {
     long startTime = System.currentTimeMillis();
-    logger.info(
+    logger.debug(
         "Actor Service Call start  for  api =="
             + message.getOperation()
             + " start time "
