@@ -1,6 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -27,6 +28,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -306,5 +308,66 @@ public class UserSelfDeclarationManagementActorTest {
     }
     userDeclareEntity.setErrorType("ERROR-PHONE");
     return userDeclareEntity;
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclarations() {
+    Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
+    boolean result =
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
+            null);
+    assertTrue(result);
+  }
+
+  public Map createUpdateUserDeclrationRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
+    Map<String, Object> userDeclareFieldMap = new HashMap<>();
+    userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
+    userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
+    userDeclareFieldMap.put(JsonKey.INFO, userInfo);
+    List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
+    userDeclareEntityList.add(userDeclareFieldMap);
+    request.put(JsonKey.DECLARATIONS, userDeclareEntityList);
+    return request;
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public Request getRequest(
+      boolean isCallerIdReq,
+      boolean isRootOrgIdReq,
+      boolean isVersionReq,
+      Map<String, Object> reqMap,
+      ActorOperations actorOperation) {
+
+    Request reqObj = new Request();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    if (isCallerIdReq) innerMap.put(JsonKey.CALLER_ID, "anyCallerId");
+    if (isVersionReq) innerMap.put(JsonKey.VERSION, "v2");
+    if (isRootOrgIdReq) innerMap.put(JsonKey.ROOT_ORG_ID, "MY_ROOT_ORG_ID");
+    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(actorOperation.getValue());
+    return reqObj;
   }
 }
