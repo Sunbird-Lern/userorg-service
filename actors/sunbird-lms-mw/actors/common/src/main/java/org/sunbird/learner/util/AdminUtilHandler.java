@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.HttpClientUtil;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.adminutil.AdminUtilParams;
 import org.sunbird.models.adminutil.AdminUtilRequest;
@@ -41,16 +45,17 @@ public class AdminUtilHandler {
    * @param reqObject AdminUtilRequestPayload
    * @return encryptedTokenList
    */
-  public static Map<String, Object> fetchEncryptedToken(AdminUtilRequestPayload reqObject) {
+  public static Map<String, Object> fetchEncryptedToken(
+      AdminUtilRequestPayload reqObject, RequestContext context) {
     Map<String, Object> data = null;
     ObjectMapper mapper = new ObjectMapper();
     try {
 
       String body = mapper.writeValueAsString(reqObject);
-      logger.info("AdminUtilHandler :: fetchEncryptedToken: request payload" + body);
+      logger.info(context, "AdminUtilHandler :: fetchEncryptedToken: request payload" + body);
       Map<String, String> headers = new HashMap<>();
       headers.put("Content-Type", "application/json");
-
+      ProjectUtil.setTraceIdInHeader(headers, context);
       String response =
           HttpClientUtil.post(
               ProjectUtil.getConfigValue(JsonKey.ADMINUTIL_BASE_URL)
@@ -63,14 +68,18 @@ public class AdminUtilHandler {
       }
     } catch (IOException e) {
       logger.error(
-          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(), e);
+          context,
+          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
+          e);
       throw new ProjectCommonException(
           ResponseCode.unableToConnectToAdminUtil.getErrorCode(),
           ResponseCode.unableToConnectToAdminUtil.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } catch (Exception e) {
       logger.error(
-          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(), e);
+          context,
+          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
+          e);
       throw new ProjectCommonException(
           ResponseCode.unableToParseData.getErrorCode(),
           ResponseCode.unableToParseData.getErrorMessage(),

@@ -477,6 +477,7 @@ public final class JsonKey {
   public static final String SUNBIRD_USER_PROFILE_READ_EXCLUDED_FIELDS = "read.excludedFields";
   public static final String CALLER_ID = "callerId";
   public static final String USER_TYPE = "userType";
+  public static final String USER_SUB_TYPE = "userSubType";
   public static final String MANAGED_BY = "managedBy";
   public static final String MANAGED_FOR = "managedFor";
   public static final String COURSE_BATCH_URL = "courseBatchUrl";
@@ -507,8 +508,10 @@ public final class JsonKey {
   public static final String INSTALLATION_NAME = "installationName";
   public static final String LOCATION_CODES = "locationCodes";
   public static final String USER_LOCATIONS = "userLocations";
-  public static final String OTHER = "OTHER";
+  public static final String ADMINISTRATOR = "ADMINISTRATOR";
   public static final String TEACHER = "TEACHER";
+  public static final String STUDENT = "STUDENT";
+  public static final String GUARDIAN = "GUARDIAN";
   public static final String USER_EXTERNAL_ID = "userExternalId";
   public static final String USER_ID_TYPE = "userIdType";
   public static final String USER_PROVIDER = "userProvider";
