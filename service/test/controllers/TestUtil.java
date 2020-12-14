@@ -53,7 +53,11 @@ public class TestUtil {
 
       if (response != null) {
         ResponseParams params = response.getParams();
-        return params.getStatus();
+        if (result.status() != 200) {
+          return params.getErr();
+        } else {
+          return params.getStatus();
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();

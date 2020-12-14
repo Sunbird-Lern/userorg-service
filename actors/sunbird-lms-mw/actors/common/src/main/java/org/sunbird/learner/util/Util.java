@@ -394,6 +394,7 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
+    ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
     String regStatus = "";
     try {
@@ -454,6 +455,7 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
+    ProjectUtil.setTraceIdInHeader(headers, context);
     String reqString = "";
     String regStatus = "";
     try {

@@ -60,6 +60,7 @@ public class User implements Serializable {
   private String maskedPhone;
   private List<Map<String, String>> externalIds;
   private String userType;
+  private String userSubType;
   private Timestamp tncAcceptedOn;
   private String tncAcceptedVersion;
   private Map<String, List<String>> framework;
@@ -488,5 +489,13 @@ public class User implements Serializable {
 
   public void setAccessCode(String accessCode) {
     this.accessCode = accessCode;
+  }
+
+  public String getUserSubType() {
+    return userSubType;
+  }
+
+  public void setUserSubType(String userSubType) {
+    this.userSubType = userSubType;
   }
 }
