@@ -23,7 +23,10 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -228,7 +231,7 @@ public class BaseController extends Controller {
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
 
-      logger.info(
+      logger.debug(
           "BaseController:handleRequest for operation: "
               + operation
               + " requestId: "
@@ -323,9 +326,11 @@ public class BaseController extends Controller {
       params.setErr(code.getErrorCode());
       params.setErrmsg(
           StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
+      params.setStatus(JsonKey.FAILED);
+    } else {
+      params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     }
     params.setMsgid(requestId);
-    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     return params;
   }
 
@@ -404,9 +409,9 @@ public class BaseController extends Controller {
         createResponseParamObj(
             code, exception.getMessage(), Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     if (response.getParams() != null) {
-      response.getParams().setStatus(response.getParams().getStatus());
+      response.getParams().setStatus(JsonKey.FAILED);
       if (exception.getCode() != null) {
-        response.getParams().setStatus(exception.getCode());
+        response.getParams().setStatus(JsonKey.FAILED);
       }
       if (!StringUtils.isBlank(response.getParams().getErrmsg())
           && response.getParams().getErrmsg().contains("{0}")) {
@@ -452,6 +457,12 @@ public class BaseController extends Controller {
     return BaseController.createSuccessResponse(request, courseResponse);
   }
 
+  private static void removeFields(Map<String, Object> params, String... properties) {
+    for (String property : properties) {
+      params.remove(property);
+    }
+  }
+
   /**
    * @param file
    * @return
@@ -460,12 +471,6 @@ public class BaseController extends Controller {
     return Results.ok(file)
         .withHeader("Content-Type", "application/x-download")
         .withHeader("Content-disposition", "attachment; filename=" + file.getName());
-  }
-
-  private static void removeFields(Map<String, Object> params, String... properties) {
-    for (String property : properties) {
-      params.remove(property);
-    }
   }
 
   private String generateStackTrace(StackTraceElement[] elements) {
@@ -721,8 +726,9 @@ public class BaseController extends Controller {
     final String ver2 = "/" + JsonKey.VERSION_2;
     final String ver3 = "/" + JsonKey.VERSION_3;
     final String ver4 = "/" + JsonKey.VERSION_4;
+    final String privateVersion = "/" + JsonKey.PRIVATE;
     path = path.trim();
-    StringBuilder builder = new StringBuilder("");
+    String respId = "";
     if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
@@ -735,18 +741,16 @@ public class BaseController extends Controller {
         requestUrl = requestUrl.replaceFirst(ver4, "api");
       }
       String[] list = requestUrl.split("/");
-      for (String str : list) {
-        if (str.matches("[A-Za-z]+")) {
-          builder.append(str).append(".");
-        }
-      }
-      builder.deleteCharAt(builder.length() - 1);
+      respId = String.join(".", list);
     } else {
       if ("/health".equalsIgnoreCase(path)) {
-        builder.append("api.all.health");
+        respId = "api.all.health";
+      } else if (path.startsWith(privateVersion)) {
+        String[] list = path.split("/");
+        respId = String.join(".", list);
       }
     }
-    return builder.toString();
+    return respId;
   }
 
   /**
