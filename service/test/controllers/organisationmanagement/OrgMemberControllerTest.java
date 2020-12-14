@@ -179,9 +179,10 @@ public class OrgMemberControllerTest extends BaseApplicationTest {
 
     try {
       Response response = mapper.readValue(responseStr, Response.class);
-
-      if (response != null) {
-        ResponseParams params = response.getParams();
+      ResponseParams params = response.getParams();
+      if (result.status() != 200) {
+        return params.getErr();
+      } else {
         return params.getStatus();
       }
     } catch (Exception e) {
