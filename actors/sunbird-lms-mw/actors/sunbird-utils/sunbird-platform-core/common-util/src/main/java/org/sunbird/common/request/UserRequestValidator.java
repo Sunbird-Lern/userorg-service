@@ -19,6 +19,23 @@ import org.sunbird.common.responsecode.ResponseMessage;
 public class UserRequestValidator extends BaseRequestValidator {
 
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  protected static List<String> typeList = new ArrayList<>();
+
+  static {
+    List<String> subTypeList =
+        Arrays.asList(
+            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+    for (String str : subTypeList) {
+      typeList.addAll(
+          ((Arrays.asList(str.split(",")))
+                  .stream()
+                  .map(
+                      x -> {
+                        return x.toLowerCase();
+                      }))
+              .collect(Collectors.toList()));
+    }
+  }
 
   public void validateCreateUserRequest(Request userRequest) {
     externalIdsValidation(userRequest, JsonKey.CREATE);
@@ -72,25 +89,33 @@ public class UserRequestValidator extends BaseRequestValidator {
       } else {
         set = new ArrayList();
         List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
-        List<String> locationTypes =
-            Arrays.asList(
-                ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES)
-                    .split(";"));
         for (Map location : locationList) {
-          if (!locationTypes.contains(location.get(JsonKey.TYPE))) {
-            throw new ProjectCommonException(
-                ResponseCode.invalidLocationType.getErrorCode(),
-                MessageFormat.format(
-                    ResponseCode.invalidLocationType.getErrorMessage(),
-                    location.get(JsonKey.TYPE),
-                    locationTypes),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-          }
+          isValidLocationType((String) location.get(JsonKey.TYPE));
           set.add((String) location.get(JsonKey.CODE));
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
+  }
+
+  /**
+   * This method will validate location type
+   *
+   * @param type
+   * @return
+   */
+  public static boolean isValidLocationType(String type) {
+    if (null != type && !typeList.contains(type.toLowerCase())) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidValue.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(),
+              GeoLocationJsonKey.LOCATION_TYPE,
+              type,
+              typeList),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    return true;
   }
 
   private void validateUserName(Request userRequest) {

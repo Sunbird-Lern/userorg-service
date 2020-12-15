@@ -204,10 +204,10 @@ public class UserRequestValidatorTest {
     List<Map<String, String>> location = new ArrayList<>();
     Map locationCode1 = new HashMap();
     Map locationCode2 = new HashMap();
-    locationCode1.put("state", "KA");
-    locationCode1.put("district", "KA-DIS");
-    locationCode2.put("state", "AP");
-    locationCode2.put("district", "AP-DIS");
+    locationCode1.put("type", "state");
+    locationCode1.put("code", "KA");
+    locationCode2.put("type", "district");
+    locationCode2.put("code", "KA-DIS");
     location.add(locationCode1);
     location.add(locationCode2);
     requestObj.put(JsonKey.LOCATION_CODES, location);
