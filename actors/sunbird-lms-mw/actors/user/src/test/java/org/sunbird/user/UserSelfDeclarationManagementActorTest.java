@@ -8,6 +8,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -25,8 +26,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -40,6 +43,7 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.actors.UserSelfDeclarationManagementActor;
 import org.sunbird.user.util.UserActorOperations;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -57,6 +61,7 @@ public class UserSelfDeclarationManagementActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
   private ObjectMapper mapper = new ObjectMapper();
+  public static ElasticSearchService esService;
 
   @BeforeClass
   public static void setUp() {
@@ -105,6 +110,22 @@ public class UserSelfDeclarationManagementActorTest {
 
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
+
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getEsResponseMap());
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
+  }
+
+  public static Map<String, Object> getEsResponseMap() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.ID, "rootOrgId");
+    map.put(JsonKey.CHANNEL, "anyChannel");
+    return map;
   }
 
   private Response cassandraInsertRecord() {
@@ -322,13 +343,14 @@ public class UserSelfDeclarationManagementActorTest {
 
   public Map createUpdateUserDeclrationRequests() {
     Map<String, Object> request = new HashMap<>();
-    Map<String, Object> userInfo = new HashMap<>();
+    /*Map<String, Object> userInfo = new HashMap<>();
     userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
-    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");*/
     Map<String, Object> userDeclareFieldMap = new HashMap<>();
     userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
     userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
-    userDeclareFieldMap.put(JsonKey.INFO, userInfo);
+    userDeclareFieldMap.put(JsonKey.OPERATION, JsonKey.ADD);
+    // userDeclareFieldMap.put(JsonKey.INFO, userInfo);
     List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
     userDeclareEntityList.add(userDeclareFieldMap);
     request.put(JsonKey.DECLARATIONS, userDeclareEntityList);
