@@ -402,7 +402,7 @@ public class UserServiceImpl implements UserService {
       // Fetch encrypted token list from admin utils
       encryptedTokenList =
           AdminUtilHandler.fetchEncryptedToken(
-              AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
+              AdminUtilHandler.prepareAdminUtilPayload(managedUsers), context);
     } catch (ProjectCommonException pe) {
       throw pe;
     } catch (Exception e) {

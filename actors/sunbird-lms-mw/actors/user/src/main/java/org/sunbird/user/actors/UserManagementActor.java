@@ -45,7 +45,10 @@ import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.learner.util.*;
+import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.UserFlagUtil;
+import org.sunbird.learner.util.UserUtility;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -279,7 +282,6 @@ public class UserManagementActor extends BaseActor {
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
-    validateUserTypeForUpdate(userMap, isCustodianOrgUser);
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
@@ -357,7 +359,7 @@ public class UserManagementActor extends BaseActor {
     sender().tell(response, self());
     // Managed-users should get ResetPassword Link
     if (resetPasswordLink) {
-      sendResetPasswordLink(requestMap);
+      sendResetPasswordLink(requestMap, actorMessage.getRequestContext());
     }
     if (null != resp) {
       Map<String, Object> completeUserDetails = new HashMap<>(userDbRecord);
@@ -607,18 +609,6 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void validateUserTypeForUpdate(Map<String, Object> userMap, boolean isCustodianOrgUser) {
-    if (userMap.containsKey(JsonKey.USER_TYPE)) {
-      String userType = (String) userMap.get(JsonKey.USER_TYPE);
-      if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType) && isCustodianOrgUser) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-      } else {
-        userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-      }
-    }
-  }
   // Check if the user is Custodian Org user
   private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
     boolean isCustodianOrgUser = false;
@@ -743,7 +733,6 @@ public class UserManagementActor extends BaseActor {
         return;
       }
     }
-    validateUserType(userMap, isCustodianOrg, actorMessage.getRequestContext());
     if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
       String orgExternalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
       String channel = (String) userMap.get(JsonKey.CHANNEL);
@@ -791,29 +780,6 @@ public class UserManagementActor extends BaseActor {
       }
     }
     processUserRequest(userMap, callerId, actorMessage);
-  }
-
-  private void validateUserType(
-      Map<String, Object> userMap, boolean isCustodianOrg, RequestContext context) {
-    String userType = (String) userMap.get(JsonKey.USER_TYPE);
-    if (StringUtils.isNotBlank(userType)) {
-      if (userType.equalsIgnoreCase(UserType.TEACHER.getTypeName()) && isCustodianOrg) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-            ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-      } else if (UserType.TEACHER.getTypeName().equalsIgnoreCase(userType)) {
-        String custodianRootOrgId =
-            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-        if (StringUtils.isNotBlank(custodianRootOrgId)
-            && ((String) userMap.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(custodianRootOrgId)) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg,
-              ResponseCode.errorTeacherCannotBelongToCustodianOrg.getErrorMessage());
-        }
-      }
-    } else {
-      userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-    }
   }
 
   private void validateChannelAndOrganisationId(
@@ -1189,7 +1155,7 @@ public class UserManagementActor extends BaseActor {
     }
     requestMap.put(JsonKey.PASSWORD, userMap.get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank(callerId)) {
-      sendEmailAndSms(requestMap);
+      sendEmailAndSms(requestMap, request.getRequestContext());
     }
     generateUserTelemetry(userMap, request, userId);
   }
@@ -1301,17 +1267,19 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void sendEmailAndSms(Map<String, Object> userMap) {
+  private void sendEmailAndSms(Map<String, Object> userMap, RequestContext context) {
     // sendEmailAndSms
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
+    EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);
   }
 
-  private void sendResetPasswordLink(Map<String, Object> userMap) {
+  private void sendResetPasswordLink(Map<String, Object> userMap, RequestContext context) {
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
+    EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(
         UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);

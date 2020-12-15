@@ -124,7 +124,6 @@ public class OnRequestHandler implements ActionCreator {
       String actionMethod = request.method();
       String url = request.uri();
       String methodName = actionMethod;
-      long startTime = System.currentTimeMillis();
       String signType = "";
       String source = "";
       if (request.body() != null && request.body().asJson() != null) {

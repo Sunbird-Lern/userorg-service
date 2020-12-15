@@ -67,7 +67,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
     Promise<String> promise = Futures.promise();
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchUtilRest:save: method started at ==" + startTime + " for Index " + index);
     if (StringUtils.isBlank(identifier) || StringUtils.isBlank(index)) {
@@ -99,7 +99,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                     + identifier);
 
             promise.success(indexResponse.getId());
-            logger.info(
+            logger.debug(
                 context,
                 "ElasticSearchRestHighImpl:save: method end at =="
                     + System.currentTimeMillis()
@@ -120,7 +120,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                     + " id : "
                     + identifier,
                 e);
-            logger.info(
+            logger.debug(
                 context,
                 "ElasticSearchRestHighImpl:save: method end at =="
                     + System.currentTimeMillis()
@@ -149,7 +149,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   public Future<Boolean> update(
       String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:update: method started at =="
             + startTime
@@ -174,7 +174,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                       + index
                       + ",identifier : "
                       + identifier);
-              logger.info(
+              logger.debug(
                   context,
                   "ElasticSearchRestHighImpl:update: method end =="
                       + " for INdex "
@@ -216,7 +216,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     Promise<Map<String, Object>> promise = Futures.promise();
     if (StringUtils.isNotEmpty(identifier) && StringUtils.isNotEmpty(index)) {
 
-      logger.info(
+      logger.debug(
           context,
           "ElasticSearchRestHighImpl:getDataByIdentifier: method started at =="
               + startTime
@@ -233,7 +233,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                 Map<String, Object> sourceAsMap = getResponse.getSourceAsMap();
                 if (MapUtils.isNotEmpty(sourceAsMap)) {
                   promise.success(sourceAsMap);
-                  logger.info(
+                  logger.debug(
                       context,
                       "ElasticSearchRestHighImpl:getDataByIdentifier: method end =="
                           + " for Index "
@@ -284,7 +284,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   @Override
   public Future<Boolean> delete(String index, String identifier, RequestContext context) {
     long startTime = System.currentTimeMillis();
-    logger.info(context, "ElasticSearchRestHighImpl:delete: method started at ==" + startTime);
+    logger.debug(context, "ElasticSearchRestHighImpl:delete: method started at ==" + startTime);
     Promise<Boolean> promise = Futures.promise();
     if (StringUtils.isNotEmpty(identifier) && StringUtils.isNotEmpty(index)) {
       DeleteRequest delRequest = new DeleteRequest(index, _DOC, identifier);
@@ -326,7 +326,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       promise.failure(ProjectUtil.createClientException(ResponseCode.invalidData));
     }
 
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:delete: method end =="
             + " ,Total time elapsed = "
@@ -348,7 +348,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       SearchDTO searchDTO, String index, RequestContext context) {
     long startTime = System.currentTimeMillis();
 
-    logger.info(context, "ElasticSearchRestHighImpl:search: method started at ==" + startTime);
+    logger.debug(context, "ElasticSearchRestHighImpl:search: method started at ==" + startTime);
     SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     SearchRequest searchRequest = new SearchRequest(index);
     searchRequest.types(_DOC);
@@ -448,7 +448,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
         new ActionListener<SearchResponse>() {
           @Override
           public void onResponse(SearchResponse response) {
-            logger.info(
+            logger.debug(
                 context, "ElasticSearchRestHighImpl:search:onResponse  response1 = " + response);
             if (response.getHits() == null || response.getHits().getTotalHits() == 0) {
 
@@ -460,7 +460,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             } else {
               Map<String, Object> responseMap =
                   ElasticSearchHelper.getSearchResponseMap(response, searchDTO, finalFacetList);
-              logger.info(
+              logger.debug(
                   context,
                   "ElasticSearchRestHighImpl:search: method end "
                       + " ,Total time elapsed = "
@@ -473,7 +473,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
           public void onFailure(Exception e) {
             promise.failure(e);
 
-            logger.info(
+            logger.debug(
                 context,
                 "ElasticSearchRestHighImpl:search: method end   for Index "
                     + index
@@ -533,7 +533,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   public Future<Boolean> bulkInsert(
       String index, List<Map<String, Object>> dataList, RequestContext context) {
     long startTime = System.currentTimeMillis();
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:bulkInsert: method started at =="
             + startTime
@@ -577,7 +577,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
         };
     ConnectionManager.getRestClient().bulkAsync(request, listener);
 
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:bulkInsert: method end =="
             + " for Index "
@@ -594,7 +594,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
   private static SearchSourceBuilder addAggregations(
       SearchSourceBuilder searchSourceBuilder, List<Map<String, String>> facets) {
     long startTime = System.currentTimeMillis();
-    logger.info(
+    logger.debug(
         null, "ElasticSearchRestHighImpl:addAggregations: method started at ==" + startTime);
     Map<String, String> map = facets.get(0);
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -612,7 +612,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             AggregationBuilders.terms(key).field(key + ElasticSearchHelper.RAW_APPEND));
       }
     }
-    logger.info(
+    logger.debug(
         null,
         "ElasticSearchRestHighImpl:addAggregations: method end =="
             + " ,Total time elapsed = "
@@ -635,7 +635,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       String index, String identifier, Map<String, Object> data, RequestContext context) {
     long startTime = System.currentTimeMillis();
     Promise<Boolean> promise = Futures.promise();
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:upsert: method started at =="
             + startTime
@@ -663,7 +663,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                       + index
                       + ",identifier : "
                       + identifier);
-              logger.info(
+              logger.debug(
                   context,
                   "ElasticSearchRestHighImpl:upsert: method end =="
                       + " for Index "
