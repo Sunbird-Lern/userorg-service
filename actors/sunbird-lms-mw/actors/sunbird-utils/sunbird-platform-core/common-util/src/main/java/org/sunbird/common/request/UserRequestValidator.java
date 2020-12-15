@@ -9,6 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
@@ -71,7 +72,20 @@ public class UserRequestValidator extends BaseRequestValidator {
       } else {
         set = new ArrayList();
         List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
+        List<String> locationTypes =
+            Arrays.asList(
+                ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES)
+                    .split(";"));
         for (Map location : locationList) {
+          if (!locationTypes.contains(location.get(JsonKey.TYPE))) {
+            throw new ProjectCommonException(
+                ResponseCode.invalidLocationType.getErrorCode(),
+                MessageFormat.format(
+                    ResponseCode.invalidLocationType.getErrorMessage(),
+                    location.get(JsonKey.TYPE),
+                    locationTypes),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
           set.add((String) location.get(JsonKey.CODE));
         }
       }
