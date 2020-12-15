@@ -9,6 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
@@ -18,6 +19,23 @@ import org.sunbird.common.responsecode.ResponseMessage;
 public class UserRequestValidator extends BaseRequestValidator {
 
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  protected static List<String> typeList = new ArrayList<>();
+
+  static {
+    List<String> subTypeList =
+        Arrays.asList(
+            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+    for (String str : subTypeList) {
+      typeList.addAll(
+          ((Arrays.asList(str.split(",")))
+                  .stream()
+                  .map(
+                      x -> {
+                        return x.toLowerCase();
+                      }))
+              .collect(Collectors.toList()));
+    }
+  }
 
   public void validateCreateUserRequest(Request userRequest) {
     externalIdsValidation(userRequest, JsonKey.CREATE);
@@ -64,9 +82,42 @@ public class UserRequestValidator extends BaseRequestValidator {
           ERROR_CODE);
     }
     if (locationCodes != null) {
-      List<String> set = new ArrayList(new HashSet<>((List<String>) locationCodes));
+      List<String> set = null;
+      // As of now locationCode can take array of only locationcodes and map of locationCodes which
+      // include type and code of the location
+      if (((List) locationCodes).get(0) instanceof String) {
+        set = new ArrayList(new HashSet<>((List<String>) locationCodes));
+        userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
+      } else {
+        set = new ArrayList();
+        List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
+        for (Map location : locationList) {
+          isValidLocationType((String) location.get(JsonKey.TYPE));
+          set.add((String) location.get(JsonKey.CODE));
+        }
+      }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
+  }
+
+  /**
+   * This method will validate location type
+   *
+   * @param type
+   * @return
+   */
+  public static boolean isValidLocationType(String type) {
+    if (null != type && !typeList.contains(type.toLowerCase())) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidValue.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(),
+              GeoLocationJsonKey.LOCATION_TYPE,
+              type,
+              typeList),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    return true;
   }
 
   private void validateUserName(Request userRequest) {
