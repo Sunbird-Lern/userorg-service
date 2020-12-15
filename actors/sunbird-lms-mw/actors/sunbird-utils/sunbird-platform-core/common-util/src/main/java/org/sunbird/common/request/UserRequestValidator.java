@@ -83,6 +83,8 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
     if (locationCodes != null) {
       List<String> set = null;
+      // As of now locationCode can take array of only locationcodes and map of locationCodes which
+      // include type and code of the location
       if (((List) locationCodes).get(0) instanceof String) {
         set = new ArrayList(new HashSet<>((List<String>) locationCodes));
         userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
