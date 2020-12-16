@@ -52,7 +52,8 @@ import scala.concurrent.Promise;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
   Util.class,
-  EsClientFactory.class
+  EsClientFactory.class,
+  ElasticSearchRestHighImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserSelfDeclarationManagementActorTest {
@@ -61,7 +62,7 @@ public class UserSelfDeclarationManagementActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
   private ObjectMapper mapper = new ObjectMapper();
-  public static ElasticSearchService esService;
+  private static ElasticSearchService esService;
 
   @BeforeClass
   public static void setUp() {
@@ -69,7 +70,6 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
   }
 
@@ -111,6 +111,7 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
 
+    PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
