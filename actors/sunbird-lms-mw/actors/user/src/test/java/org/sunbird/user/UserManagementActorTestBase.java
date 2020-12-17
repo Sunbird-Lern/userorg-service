@@ -394,20 +394,4 @@ public abstract class UserManagementActorTestBase {
     }
     return user;
   }
-
-  public Map createUpdateUserDeclrationRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
-    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
-    Map<String, Object> userDeclareFieldMap = new HashMap<>();
-    userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
-    userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
-    userDeclareFieldMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
-    userDeclareFieldMap.put(JsonKey.INFO, userInfo);
-    List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
-    userDeclareEntityList.add(userDeclareFieldMap);
-    request.put(JsonKey.DECLARATIONS, userDeclareEntityList);
-    return request;
-  }
 }
