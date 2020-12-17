@@ -199,7 +199,7 @@ public class LocationRequestValidator {
         getLocationTypeOrderMap(currentLocType.toLowerCase());
     Map<String, Integer> parentLocTypeoOrdermap =
         getLocationTypeOrderMap(currentLocType.toLowerCase());
-    if (currentLocType.equalsIgnoreCase("school")) {
+    if (currentLocType.equalsIgnoreCase(JsonKey.LOCATION_TYPE_SCHOOL)) {
       levelLimit = 2;
     }
     if (!((currentLocTypeoOrdermap.get(currentLocType.toLowerCase())
