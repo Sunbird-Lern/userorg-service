@@ -924,21 +924,15 @@ public class UserRequestValidator extends BaseRequestValidator {
         for (Map<String, Object> declareFields : declarations) {
           String userId = (String) declareFields.get(JsonKey.USER_ID);
           String orgId = (String) declareFields.get(JsonKey.ORG_ID);
-          String persona = (String) declareFields.get(JsonKey.PERSONA);
-          Map<String, Object> info = (Map<String, Object>) declareFields.get(JsonKey.INFO);
-          if (StringUtils.isBlank(userId)
-              || StringUtils.isBlank(orgId)
-              || StringUtils.isBlank(persona)) {
+          if (StringUtils.isBlank(userId) || StringUtils.isBlank(orgId)) {
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing.getErrorCode(),
                 MessageFormat.format(
                     ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
-                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
+                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
-          if (MapUtils.isNotEmpty(info) && info.containsValue(null)) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
-          }
+          declareFields.put(JsonKey.PERSONA, "default");
         }
       }
     } catch (Exception ex) {

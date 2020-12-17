@@ -107,16 +107,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testUpdateUserSelfDeclarations() {
-    Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
-    boolean result =
-        testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
-            null);
-    assertTrue(result);
-  }
-
-  @Test
   public void testCreateUserSuccessWithLocationCodes() {
     Future<Object> future1 = Futures.future(() -> getEsResponseForLocation(), system.dispatcher());
     Future<Object> future2 = Futures.future(() -> getEsResponse(), system.dispatcher());
