@@ -187,6 +187,7 @@ public class LocationRequestValidator {
    */
   private static boolean validateParentLocationType(
       UpsertLocationRequest parentLocation, UpsertLocationRequest location, String opType) {
+    int levelLimit = 1;
     String parentType = parentLocation.getType();
     String currentLocType = location.getType();
     Map<String, Object> locn = null;
@@ -198,9 +199,12 @@ public class LocationRequestValidator {
         getLocationTypeOrderMap(currentLocType.toLowerCase());
     Map<String, Integer> parentLocTypeoOrdermap =
         getLocationTypeOrderMap(currentLocType.toLowerCase());
-    if ((currentLocTypeoOrdermap.get(currentLocType.toLowerCase())
+    if (currentLocType.equalsIgnoreCase("school")) {
+      levelLimit = 2;
+    }
+    if (!((currentLocTypeoOrdermap.get(currentLocType.toLowerCase())
             - parentLocTypeoOrdermap.get(parentType.toLowerCase()))
-        != 1) {
+        <= levelLimit)) {
       throw new ProjectCommonException(
           ResponseCode.invalidParameter.getErrorCode(),
           ProjectUtil.formatMessage(
