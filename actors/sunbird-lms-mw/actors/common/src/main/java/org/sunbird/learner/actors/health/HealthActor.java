@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
@@ -14,7 +13,11 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -169,36 +172,6 @@ public class HealthActor extends BaseActor {
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.ES_SERVICE, true, e));
       isallHealthy = false;
     }
-    // check EKStep Util.
-    try {
-      String body = "{\"request\":{\"filters\":{\"identifier\":\"test\"}}}";
-      Map<String, String> headers = new HashMap<>();
-      headers.put(
-          JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.EKSTEP_AUTHORIZATION));
-      if (StringUtils.isBlank(headers.get(JsonKey.AUTHORIZATION))) {
-        headers.put(
-            JsonKey.AUTHORIZATION,
-            PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
-        headers.put("Content_Type", "application/json; charset=utf-8");
-      }
-      String searchBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
-      String response =
-          HttpClientUtil.post(
-              searchBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
-              body,
-              headers);
-      if (response.contains("OK")) {
-        responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, false, null));
-      } else {
-        responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
-      }
-    } catch (Exception e) {
-      responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
-      isallHealthy = false;
-    }
-    ProjectLogger.log(
-        "HealthActor:checkAllComponentHealth: EKSTEP URL COMMENTED", LoggerEnum.INFO.name());
     finalResponseMap.put(JsonKey.CHECKS, responseList);
     finalResponseMap.put(JsonKey.NAME, "Complete health check api");
     if (isallHealthy) {
