@@ -42,7 +42,7 @@ public class PrintEntryExitLog {
       Map<String, Object> reqMap = request.getRequest();
       Map<String, Object> newReqMap = new HashMap<>();
       newReqMap.putAll(reqMap);
-      if (url.contains("search") || url.contains("lookup")) {
+      if (url.contains("search")) {
         Map<String, Object> filters = (Map<String, Object>) newReqMap.get(JsonKey.FILTERS);
         if (MapUtils.isNotEmpty(filters)) {
           maskAttributes(filters);
