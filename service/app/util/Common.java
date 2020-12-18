@@ -3,6 +3,10 @@ package util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 
@@ -26,5 +30,20 @@ public class Common {
       attributeValue = (String) httpReq.attrs().get(attribute);
     }
     return attributeValue;
+  }
+
+  public static ResponseParams createResponseParamObj(
+      ResponseCode code, String customMessage, String requestId) {
+    ResponseParams params = new ResponseParams();
+    if (code.getResponseCode() != 200) {
+      params.setErr(code.getErrorCode());
+      params.setErrmsg(
+          StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
+      params.setStatus(JsonKey.FAILED);
+    } else {
+      params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
+    }
+    params.setMsgid(requestId);
+    return params;
   }
 }

@@ -119,7 +119,6 @@ public class RequestInterceptor {
         }
       }
     } catch (Exception e) {
-      logger.error(e.getMessage(), e);
       logger.error("Likely a possibility? " + request.uri(), e);
     }
     return requestedForUserID;
@@ -163,7 +162,7 @@ public class RequestInterceptor {
               }
             }
           } else {
-            logger.info("Ignoring x-authenticated-for token...");
+            logger.debug("Ignoring x-authenticated-for token...");
           }
         }
         userAuthentication.put(JsonKey.USER_ID, clientId);
