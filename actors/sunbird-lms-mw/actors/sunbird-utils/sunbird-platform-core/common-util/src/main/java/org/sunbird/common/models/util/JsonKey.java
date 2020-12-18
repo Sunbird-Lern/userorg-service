@@ -700,6 +700,7 @@ public final class JsonKey {
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
   public static final String REQUEST_ID = "requestid";
+  public static final String LOCATION_TYPE_SCHOOL = "school";
 
   private JsonKey() {}
 }
