@@ -40,14 +40,16 @@ public class PrintEntryExitLog {
       String requestId = request.getRequestContext().getReqId();
       List<Map<String, Object>> params = new ArrayList<>();
       Map<String, Object> reqMap = request.getRequest();
+      Map<String, Object> newReqMap = new HashMap<>();
+      newReqMap.putAll(reqMap);
       if (url.contains("search") || url.contains("lookup")) {
-        Map<String, Object> filters = (Map<String, Object>) reqMap.get(JsonKey.FILTERS);
+        Map<String, Object> filters = (Map<String, Object>) newReqMap.get(JsonKey.FILTERS);
         if (MapUtils.isNotEmpty(filters)) {
           maskAttributes(filters);
         }
       }
-      maskAttributes(reqMap);
-      params.add(reqMap);
+      maskAttributes(newReqMap);
+      params.add(newReqMap);
       entryLogEvent.setEdata("system", "trace", requestId, entryLogMsg, params);
       logger.info(request.getRequestContext(), entryLogEvent.toString());
     } catch (Exception ex) {
@@ -81,8 +83,10 @@ public class PrintEntryExitLog {
             }
           } else {
             Map<String, Object> resMap = response.getResult();
-            maskAttributes(resMap);
-            params.add(resMap);
+            Map<String, Object> newRespMap = new HashMap<>();
+            newRespMap.putAll(resMap);
+            maskAttributes(newRespMap);
+            params.add(newRespMap);
           }
         }
 
