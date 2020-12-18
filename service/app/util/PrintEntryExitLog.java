@@ -48,6 +48,11 @@ public class PrintEntryExitLog {
           maskAttributes(filters);
         }
       }
+      if (url.contains("otp")) {
+        if (MapUtils.isNotEmpty(newReqMap)) {
+          maskOtpAttributes(newReqMap);
+        }
+      }
       maskAttributes(newReqMap);
       params.add(newReqMap);
       entryLogEvent.setEdata("system", "trace", requestId, entryLogMsg, params);
@@ -93,6 +98,7 @@ public class PrintEntryExitLog {
         if (null != response.getParams()) {
           Map<String, Object> resParam = new HashMap<>();
           resParam.putAll(objectMapper.convertValue(response.getParams(), Map.class));
+          resParam.put(JsonKey.RESPONSE_CODE, response.getResponseCode().getResponseCode());
           params.add(resParam);
         }
       }
@@ -144,6 +150,7 @@ public class PrintEntryExitLog {
       if (null != responseParams) {
         Map<String, Object> resParam = new HashMap<>();
         resParam.putAll(objectMapper.convertValue(responseParams, Map.class));
+        resParam.put(JsonKey.RESPONSE_CODE, exception.getResponseCode());
         params.add(resParam);
       }
       exitLogEvent.setEdata("system", "trace", requestId, exitLogMsg, params);
@@ -180,6 +187,23 @@ public class PrintEntryExitLog {
     String password = (String) filters.get(JsonKey.PASSWORD);
     if (StringUtils.isNotBlank(password)) {
       filters.put(JsonKey.PASSWORD, "**********");
+    }
+  }
+
+  private static void maskOtpAttributes(Map<String, Object> otpReqMap) {
+    String type = (String) otpReqMap.get(JsonKey.TYPE);
+    String key = (String) otpReqMap.get(JsonKey.KEY);
+    String otp = (String) otpReqMap.get(JsonKey.OTP);
+    if (StringUtils.isNotBlank(type)) {
+      if (type.equalsIgnoreCase(JsonKey.PHONE)) {
+        otpReqMap.put(JsonKey.TYPE, maskId(key, JsonKey.PHONE));
+      }
+      if (type.equalsIgnoreCase(JsonKey.EMAIL)) {
+        otpReqMap.put(JsonKey.TYPE, maskId(key, JsonKey.EMAIL));
+      }
+    }
+    if (StringUtils.isNotBlank(otp)) {
+      otpReqMap.put(JsonKey.OTP, maskId(otp, JsonKey.OTP));
     }
   }
 }
