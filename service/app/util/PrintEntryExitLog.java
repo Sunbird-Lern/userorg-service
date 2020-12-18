@@ -63,7 +63,7 @@ public class PrintEntryExitLog {
       EntryExitLogEvent exitLogEvent = new EntryExitLogEvent();
       exitLogEvent.setEid("LOG");
       String url = (String) request.getContext().get(JsonKey.URL);
-      String entryLogMsg =
+      String exitLogMsg =
           "EXIT LOG: method : "
               + request.getContext().get(JsonKey.METHOD)
               + ", url: "
@@ -96,7 +96,7 @@ public class PrintEntryExitLog {
           params.add(resParam);
         }
       }
-      exitLogEvent.setEdata("system", "trace", requestId, entryLogMsg, params);
+      exitLogEvent.setEdata("system", "trace", requestId, exitLogMsg, params);
       logger.info(request.getRequestContext(), exitLogEvent.toString());
     } catch (Exception ex) {
       logger.error("Exception occurred while logging exit log", ex);
@@ -108,7 +108,7 @@ public class PrintEntryExitLog {
     try {
       EntryExitLogEvent exitLogEvent = new EntryExitLogEvent();
       exitLogEvent.setEid("LOG");
-      String entryLogMsg =
+      String exitLogMsg =
           "EXIT LOG: method : "
               + request.getContext().get(JsonKey.METHOD)
               + ", url: "
@@ -146,7 +146,7 @@ public class PrintEntryExitLog {
         resParam.putAll(objectMapper.convertValue(responseParams, Map.class));
         params.add(resParam);
       }
-      exitLogEvent.setEdata("system", "trace", requestId, entryLogMsg, params);
+      exitLogEvent.setEdata("system", "trace", requestId, exitLogMsg, params);
       logger.info(request.getRequestContext(), exitLogEvent.toString());
     } catch (Exception ex) {
       logger.error("Exception occurred while logging exit log", ex);
