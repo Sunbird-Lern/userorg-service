@@ -113,35 +113,34 @@ public class PrintEntryExitLog {
               + request.getOperation();
       String requestId = request.getRequestContext().getReqId();
       List<Map<String, Object>> params = new ArrayList<>();
-      if (exception == null) {
+      if (null == exception) {
         exception =
             new ProjectCommonException(
                 ResponseCode.internalError.getErrorCode(),
                 ResponseCode.internalError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
-      if (null != exception) {
-        ResponseCode code = ResponseCode.getResponse(exception.getCode());
-        if (code == null) {
-          code = ResponseCode.SERVER_ERROR;
-        }
-        ResponseParams responseParams =
-            createResponseParamObj(code, exception.getMessage(), requestId);
-        if (responseParams != null) {
+
+      ResponseCode code = ResponseCode.getResponse(exception.getCode());
+      if (code == null) {
+        code = ResponseCode.SERVER_ERROR;
+      }
+      ResponseParams responseParams =
+          createResponseParamObj(code, exception.getMessage(), requestId);
+      if (responseParams != null) {
+        responseParams.setStatus(JsonKey.FAILED);
+        if (exception.getCode() != null) {
           responseParams.setStatus(JsonKey.FAILED);
-          if (exception.getCode() != null) {
-            responseParams.setStatus(JsonKey.FAILED);
-          }
-          if (!StringUtils.isBlank(responseParams.getErrmsg())
-              && responseParams.getErrmsg().contains("{0}")) {
-            responseParams.setErrmsg(exception.getMessage());
-          }
         }
-        if (null != responseParams) {
-          Map<String, Object> resParam = new HashMap<>();
-          resParam.putAll(objectMapper.convertValue(responseParams, Map.class));
-          params.add(resParam);
+        if (!StringUtils.isBlank(responseParams.getErrmsg())
+            && responseParams.getErrmsg().contains("{0}")) {
+          responseParams.setErrmsg(exception.getMessage());
         }
+      }
+      if (null != responseParams) {
+        Map<String, Object> resParam = new HashMap<>();
+        resParam.putAll(objectMapper.convertValue(responseParams, Map.class));
+        params.add(resParam);
       }
       exitLogEvent.setEdata("system", "trace", requestId, entryLogMsg, params);
       logger.info(request.getRequestContext(), exitLogEvent.toString());
