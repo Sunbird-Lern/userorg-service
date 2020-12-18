@@ -10,10 +10,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import modules.SignalHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Http;
@@ -31,7 +32,6 @@ public class HealthController extends BaseController {
     list.add("actor");
     list.add("cassandra");
     list.add("es");
-    list.add("ekstep");
   }
 
   /**
@@ -64,22 +64,18 @@ public class HealthController extends BaseController {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
     if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
-      if (ActorOperations.EKSTEP.name().equalsIgnoreCase(val)) {
-        return getEkStepHealtCheck(httpRequest);
-      } else {
-        try {
-          handleSigTerm();
-          Request reqObj = new Request();
-          reqObj.setOperation(val);
-          reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
-          reqObj
-              .getRequest()
-              .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
-          reqObj.setEnv(getEnvironment());
-          return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
-        } catch (Exception e) {
-          return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
-        }
+      try {
+        handleSigTerm();
+        Request reqObj = new Request();
+        reqObj.setOperation(val);
+        reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
+        reqObj
+            .getRequest()
+            .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+        reqObj.setEnv(getEnvironment());
+        return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+      } catch (Exception e) {
+        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
     } else {
       try {
@@ -107,47 +103,5 @@ public class HealthController extends BaseController {
           ResponseCode.serviceUnAvailable.getErrorMessage(),
           ResponseCode.SERVICE_UNAVAILABLE.getResponseCode());
     }
-  }
-
-  public CompletionStage<Result> getEkStepHealtCheck(play.mvc.Http.Request request) {
-    Map<String, Object> finalResponseMap = new HashMap<>();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    // check EKStep Util.
-    try {
-      String body = "{\"request\":{\"filters\":{\"identifier\":\"test\"}}}";
-      Map<String, String> headers = new HashMap<>();
-      headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + System.getenv(JsonKey.AUTHORIZATION));
-      if (StringUtils.isBlank((String) headers.get(JsonKey.AUTHORIZATION))) {
-        headers.put(
-            JsonKey.AUTHORIZATION,
-            PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION));
-      }
-      headers.put("Content-Type", "application/json");
-      String ekStepBaseUrl = ProjectUtil.getConfigValue(JsonKey.SEARCH_SERVICE_API_BASE_URL);
-      String response =
-          HttpClientUtil.post(
-              ekStepBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CONTENT_SEARCH_URL),
-              body,
-              headers);
-      if (response.contains("OK")) {
-        responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, false, null));
-        finalResponseMap.put(JsonKey.Healthy, true);
-      } else {
-        responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
-        finalResponseMap.put(JsonKey.Healthy, false);
-      }
-    } catch (Exception e) {
-      responseList.add(ProjectUtil.createCheckResponse(JsonKey.EKSTEP_SERVICE, true, null));
-      finalResponseMap.put(JsonKey.Healthy, false);
-    }
-    finalResponseMap.put(JsonKey.CHECKS, responseList);
-    finalResponseMap.put(JsonKey.NAME, "EkStep service health");
-    Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
-    response.setId("Ekstep.service.health.api");
-    response.setVer(getApiVersion(request.path()));
-    response.setTs(Common.getFromRequest(request, Attrs.X_REQUEST_ID));
-    return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
   }
 }

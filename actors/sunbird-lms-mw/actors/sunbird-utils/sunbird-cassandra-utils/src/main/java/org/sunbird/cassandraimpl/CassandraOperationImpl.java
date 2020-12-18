@@ -2,14 +2,24 @@ package org.sunbird.cassandraimpl;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 
-import com.datastax.driver.core.*;
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
-import com.datastax.driver.core.querybuilder.*;
+import com.datastax.driver.core.querybuilder.Clause;
+import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.Insert;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Select.Builder;
 import com.datastax.driver.core.querybuilder.Select.Selection;
 import com.datastax.driver.core.querybuilder.Select.Where;
+import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.querybuilder.Update.Assignments;
 import java.text.MessageFormat;
 import java.util.Iterator;
@@ -651,7 +661,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != batchStatement) {
-        logQueryElapseTime("batchInsert", startTime, batchStatement.toString(), context);
+        logQueryElapseTime(
+            "batchInsert", startTime, batchStatement.getStatements().toString(), context);
       }
     }
     return response;
@@ -698,7 +709,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != batchStatement) {
-        logQueryElapseTime("batchUpdateById", startTime, batchStatement.toString(), context);
+        logQueryElapseTime(
+            "batchUpdateById", startTime, batchStatement.getStatements().toString(), context);
       }
     }
     return response;
@@ -753,7 +765,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != batchStatement) {
-        logQueryElapseTime("performBatchAction", startTime, batchStatement.toString(), context);
+        logQueryElapseTime(
+            "performBatchAction", startTime, batchStatement.getStatements().toString(), context);
       }
     }
     return response;
@@ -821,7 +834,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != batchStatement) {
-        logQueryElapseTime("batchUpdate", startTime, batchStatement.toString(), context);
+        logQueryElapseTime(
+            "batchUpdate", startTime, batchStatement.getStatements().toString(), context);
       }
     }
     return response;
@@ -835,7 +849,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     String message =
         "Cassandra operation {0} started at {1} and completed at {2}. Total time elapsed is {3}.";
     MessageFormat mf = new MessageFormat(message);
-    logger.info(context, mf.format(new Object[] {operation, startTime, stopTime, elapsedTime}));
+    logger.debug(context, mf.format(new Object[] {operation, startTime, stopTime, elapsedTime}));
   }
 
   // todo overload this method, getRecordsByIndexedProperty -> getRecordsById or PrimaryKey
@@ -1092,8 +1106,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
               insert.value(x.getKey(), x.getValue());
             });
     insert.using(QueryBuilder.ttl(ttl));
-    logger.info(
-        context, "CassandraOperationImpl:insertRecordWithTTL: query = " + insert.getQueryString());
     if (null != insert) {
       logQueryElapseTime("insertRecordWithTTL", startTime, insert.getQueryString(), context);
     }
@@ -1222,11 +1234,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     logger.debug(
         context, "CassandraOperationImpl:batchInsertWithTTL: call started at " + startTime);
     if (CollectionUtils.isEmpty(records) || CollectionUtils.isEmpty(ttls)) {
-      logger.info(context, "CassandraOperationImpl:batchInsertWithTTL: records or ttls is empty");
+      logger.debug(context, "CassandraOperationImpl:batchInsertWithTTL: records or ttls is empty");
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     if (ttls.size() != records.size()) {
-      logger.info(
+      logger.debug(
           context,
           "CassandraOperationImpl:batchInsertWithTTL: Mismatch of records and ttls list size");
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
@@ -1270,7 +1282,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != batchStatement) {
-        logQueryElapseTime("batchInsertWithTTL", startTime, batchStatement.toString(), context);
+        logQueryElapseTime(
+            "batchInsertWithTTL", startTime, batchStatement.getStatements().toString(), context);
       }
     }
     return response;
