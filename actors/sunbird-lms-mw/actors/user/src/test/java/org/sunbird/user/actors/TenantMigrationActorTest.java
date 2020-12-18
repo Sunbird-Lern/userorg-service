@@ -248,6 +248,8 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.CHANNEL, "anyChannel");
     reqMap.put(JsonKey.ACTION, action);
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
+    reqMap.put(JsonKey.USER_TYPE, "anyType");
+    reqMap.put(JsonKey.USER_SUB_TYPE, "anySubType");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
     System.out.println(reqMap);
