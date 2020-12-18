@@ -1,7 +1,11 @@
 package org.sunbird.common.request;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
@@ -712,7 +716,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       Map<String, Object> framework =
           (Map<String, Object>) request.getRequest().get(JsonKey.FRAMEWORK);
       if (!MapUtils.isEmpty(framework)) {
-        if (framework.get(JsonKey.ID) instanceof List) {
+        if (null != framework.get(JsonKey.ID) && (framework.get(JsonKey.ID) instanceof List)) {
           List<String> frameworkId = (List<String>) framework.get(JsonKey.ID);
           if (CollectionUtils.isEmpty(frameworkId)) {
             ProjectCommonException.throwClientErrorException(
@@ -728,8 +732,20 @@ public class UserRequestValidator extends BaseRequestValidator {
                 StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID),
                 "1",
                 String.valueOf(frameworkId.size()));
+          } else {
+            if (frameworkId.size() == 1) {
+              String id = frameworkId.get(0);
+              if (StringUtils.isBlank(id)) {
+                ProjectCommonException.throwClientErrorException(
+                    ResponseCode.mandatoryParamsMissing,
+                    MessageFormat.format(
+                        ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+                        StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
+              }
+            }
           }
-        } else if (framework.get(JsonKey.ID) instanceof String) {
+        } else if (null != framework.get(JsonKey.ID)
+            && framework.get(JsonKey.ID) instanceof String) {
           String frameworkId = (String) framework.get(JsonKey.ID);
           if (StringUtils.isBlank(frameworkId)) {
             ProjectCommonException.throwClientErrorException(
@@ -738,6 +754,12 @@ public class UserRequestValidator extends BaseRequestValidator {
                     ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                     StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
           }
+        } else {
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.mandatoryParamsMissing,
+              MessageFormat.format(
+                  ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+                  StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
         }
       }
     }

@@ -698,6 +698,7 @@ public final class JsonKey {
   public static final String FEED_LIMIT = "feed_limit";
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
+  public static final String REQUEST_ID = "requestid";
 
   private JsonKey() {}
 }
