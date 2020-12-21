@@ -32,6 +32,19 @@ public class UserBulkUploadRequestValidatorTest {
   }
 
   @Test
+  public void testValidateUserTypeWithInvalidUserSubTypeParam() {
+    Map<String, Object> userMap = new HashMap<>();
+    try {
+      userMap.put(JsonKey.USER_TYPE, "Administrator");
+      userMap.put(JsonKey.USER_SUB_TYPE, "ABC");
+
+      UserBulkUploadRequestValidator.validateUserBulkUploadRequest(userMap);
+    } catch (Exception e) {
+      Assert.assertTrue(e.getMessage().contains("Invalid userSubType"));
+    }
+  }
+
+  @Test
   public void testUserBulkRequestValidatorSuccess() {
     Map<String, Object> userMap = new HashMap<>();
     try {
