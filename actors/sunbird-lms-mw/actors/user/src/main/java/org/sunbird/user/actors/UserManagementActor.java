@@ -68,14 +68,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 @ActorConfig(
-  tasks = {
-    "createUser",
-    "updateUser",
-    "createUserV3",
-    "createUserV4",
-    "getManagedUsers",
-    "updateUserDeclarations"
-  },
+  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
