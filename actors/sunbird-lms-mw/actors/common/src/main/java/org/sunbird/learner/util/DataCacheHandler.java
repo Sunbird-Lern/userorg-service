@@ -1,7 +1,10 @@
 /** */
 package org.sunbird.learner.util;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -131,7 +134,7 @@ public class DataCacheHandler implements Runnable {
   private void cacheSystemConfig(Map<String, String> configSettings) {
     Response response =
         cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
-    logger.info(
+    logger.debug(
         "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
