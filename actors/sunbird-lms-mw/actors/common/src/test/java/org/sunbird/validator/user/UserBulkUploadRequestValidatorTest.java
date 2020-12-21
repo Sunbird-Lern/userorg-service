@@ -27,8 +27,7 @@ public class UserBulkUploadRequestValidatorTest {
       userMap.put(JsonKey.USER_TYPE, "invalid");
       UserBulkUploadRequestValidator.validateUserBulkUploadRequest(userMap);
     } catch (Exception e) {
-      Assert.assertEquals(
-          "Invalid userType: invalid. Valid values are: [TEACHER, OTHER].", e.getMessage());
+      Assert.assertTrue(e.getMessage().contains("Invalid userType"));
     }
   }
 
