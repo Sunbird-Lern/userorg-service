@@ -54,7 +54,7 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.ID_TYPE),
         userRequest);
     createUserBasicValidation(userRequest);
-    validateUserType(userRequest);
+    validateUserType(userRequest.getRequest());
     phoneValidation(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
@@ -357,7 +357,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
-    validateUserType(userRequest);
+    validateUserType(userRequest.getRequest());
     validateUserOrgField(userRequest);
 
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
@@ -857,8 +857,9 @@ public class UserRequestValidator extends BaseRequestValidator {
   }
 
   // TODO:  Validate userType with data from form api
-  private void validateUserType(Request userRequest) {
-    String userType = (String) userRequest.getRequest().get(JsonKey.USER_TYPE);
+  public void validateUserType(Map<String, Object> userRequestMap) {
+
+    String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
 
     if (userType != null
         && (!JsonKey.ADMINISTRATOR.equalsIgnoreCase(userType))
