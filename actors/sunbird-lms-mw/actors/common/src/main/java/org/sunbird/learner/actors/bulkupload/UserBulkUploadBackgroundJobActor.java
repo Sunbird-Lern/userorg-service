@@ -18,6 +18,7 @@ import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
@@ -25,7 +26,6 @@ import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
-import org.sunbird.validator.user.UserBulkUploadRequestValidator;
 
 @ActorConfig(
   tasks = {},
@@ -36,6 +36,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   private UserClient userClient = new UserClientImpl();
   private OrganisationClient organisationClient = new OrganisationClientImpl();
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
+  private UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -147,7 +148,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           userMap.put(JsonKey.ROLES, roleList);
           RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
         }
-        UserBulkUploadRequestValidator.validateUserBulkUploadRequest(userMap);
+        userRequestValidator.validateUserType(userMap);
       } catch (Exception ex) {
         logger.error(context, ex.getMessage(), ex);
         setTaskStatus(

@@ -52,7 +52,6 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserType;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserOrgDao;
@@ -155,8 +154,6 @@ public class UserManagementActor extends BaseActor {
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
-    userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-
     if (isV4) {
       logger.info(
           actorMessage.getRequestContext(),
