@@ -46,6 +46,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserType;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -189,6 +190,7 @@ public abstract class UserManagementActorTestBase {
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
+    when(DataCacheHandler.getUserTypesConfig()).thenReturn(getUserTypes());
     when(UserUtil.getActiveUserOrgDetails(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUserOrgDetails());
     Map<String, String> configMap = new HashMap<>();
@@ -281,6 +283,16 @@ public abstract class UserManagementActorTestBase {
     reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
     reqMap.put(JsonKey.CHANNEL, "anyChannel");
     return reqMap;
+  }
+
+  public Map<String, List<String>> getUserTypes() {
+    Map<String, List<String>> userTypeOrSubTypeConfigMap = new HashMap<>();
+    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName().toUpperCase(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(
+        UserType.ADMINISTRATOR.getTypeName().toUpperCase(), Arrays.asList("BRC,DAO"));
+    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName().toUpperCase(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName().toUpperCase(), Arrays.asList());
+    return userTypeOrSubTypeConfigMap;
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
