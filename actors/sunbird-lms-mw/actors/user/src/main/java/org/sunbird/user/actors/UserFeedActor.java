@@ -70,6 +70,7 @@ public class UserFeedActor extends BaseActor {
   private void createUserFeed(Request request, RequestContext context) {
     Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
     feed.setStatus(FeedStatus.UNREAD.getfeedStatus());
+    feed.setCreatedBy((String) request.getContext().get(JsonKey.REQUESTED_BY));
     Response feedCreateResponse = feedService.insert(feed, context);
     sender().tell(feedCreateResponse, self());
     // Delete the old user feed
@@ -102,6 +103,7 @@ public class UserFeedActor extends BaseActor {
     Feed feed = mapper.convertValue(updateRequest, Feed.class);
     feed.setId(feedId);
     feed.setStatus(FeedStatus.READ.getfeedStatus());
+    feed.setUpdatedBy((String) request.getContext().get(JsonKey.REQUESTED_BY));
     Response feedUpdateResponse = feedService.update(feed, context);
     sender().tell(feedUpdateResponse, self());
   }
