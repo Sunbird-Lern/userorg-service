@@ -1,7 +1,11 @@
 package org.sunbird.common;
 
 import akka.dispatch.Futures;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -725,7 +729,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                       return (String) obj.get("id");
                     },
                     val -> val)));
-    logger.info(
+    logger.debug(
         context,
         "ElasticSearchRestHighImpl:getEsResultByListOfIds: method ended for index " + index);
 
