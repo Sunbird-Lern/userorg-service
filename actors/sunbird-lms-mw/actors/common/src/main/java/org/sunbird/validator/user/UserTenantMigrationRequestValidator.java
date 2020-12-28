@@ -1,7 +1,8 @@
-package org.sunbird.common.request;
+package org.sunbird.validator.user;
 
 import java.util.Map;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /**

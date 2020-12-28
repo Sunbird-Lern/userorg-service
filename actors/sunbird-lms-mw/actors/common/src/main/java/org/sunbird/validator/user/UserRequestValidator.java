@@ -1,4 +1,4 @@
-package org.sunbird.common.request;
+package org.sunbird.validator.user;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -17,8 +17,11 @@ import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
+import org.sunbird.learner.util.DataCacheHandler;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -54,7 +57,7 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.ID_TYPE),
         userRequest);
     createUserBasicValidation(userRequest);
-    validateUserType(userRequest.getRequest());
+    validateUserTypeAndSubType(userRequest.getRequest());
     phoneValidation(userRequest);
     validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
@@ -357,7 +360,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
-    validateUserType(userRequest.getRequest());
+    validateUserTypeAndSubType(userRequest.getRequest());
     validateUserOrgField(userRequest);
 
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
@@ -857,20 +860,26 @@ public class UserRequestValidator extends BaseRequestValidator {
   }
 
   // TODO:  Validate userType with data from form api
-  public void validateUserType(Map<String, Object> userRequestMap) {
+  public void validateUserTypeAndSubType(Map<String, Object> userRequestMap) {
 
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
-
-    if (userType != null
-        && (!JsonKey.ADMINISTRATOR.equalsIgnoreCase(userType))
-        && (!JsonKey.TEACHER.equalsIgnoreCase(userType))
-        && (!JsonKey.GUARDIAN.equalsIgnoreCase(userType))
-        && (!JsonKey.STUDENT.equalsIgnoreCase(userType))) {
+    Map<String, List<String>> userTypeConfigMap = DataCacheHandler.getUserTypesConfig();
+    if (null != userType && !userTypeConfigMap.containsKey(userType)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
               ResponseCode.invalidParameterValue.getErrorMessage(),
               new String[] {userType, JsonKey.USER_TYPE}));
+    }
+    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
+    if (null != userSubType
+        && (null == userTypeConfigMap.get(userType)
+            || !userTypeConfigMap.get(userType).contains(userSubType))) {
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.invalidParameterValue,
+          MessageFormat.format(
+              ResponseCode.invalidParameterValue.getErrorMessage(),
+              new String[] {userSubType, JsonKey.USER_SUB_TYPE}));
     }
   }
 
