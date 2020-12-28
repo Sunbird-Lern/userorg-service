@@ -284,7 +284,8 @@ public class UserManagementActor extends BaseActor {
         Map<String, Object> org =
             (Map<String, Object>) mapper.convertValue(organisation, Map.class);
         List<Map<String, Object>> orgList = new ArrayList();
-        actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList.add(org));
+        orgList.add(org);
+        actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
         updateUserSchoolOrg = (boolean) actorMessage.getRequest().get("updateUserSchoolOrg");
       }
       if (isPrivate || updateUserSchoolOrg) {
@@ -530,10 +531,11 @@ public class UserManagementActor extends BaseActor {
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
-        userOrg.setHashTagId((String) (org.get(JsonKey.HASH_TAG_ID)));
+        userOrg.setHashTagId((String) (org.get(JsonKey.HASHTAGID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
+        userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
