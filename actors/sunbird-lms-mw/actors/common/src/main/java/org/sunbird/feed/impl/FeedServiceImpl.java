@@ -130,6 +130,6 @@ public class FeedServiceImpl implements IFeedService {
     compositeKey.put(JsonKey.ID, feed.remove(JsonKey.ID));
     return getCassandraInstance()
         .updateRecord(
-            usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), compositeKey, feed, context);
+            usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feed, compositeKey, context);
   }
 }
