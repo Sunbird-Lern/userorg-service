@@ -36,22 +36,19 @@ public class UserFeedActor extends BaseActor {
     Util.initializeContext(request, TelemetryEnvKey.USER);
     RequestContext context = request.getRequestContext();
     String operation = request.getOperation();
+    logger.info(context, "UserFeedActor:onReceive called for operation : " + operation);
     switch (operation) {
       case "getUserFeedById":
-        logger.info(context, "UserFeedActor:onReceive getUserFeed method called");
         String userId = (String) request.getRequest().get(JsonKey.USER_ID);
         getUserFeed(userId, context);
         break;
       case "createUserFeed":
-        logger.info(context, "UserFeedActor:onReceive createUserFeed method called");
         createUserFeed(request, context);
         break;
       case "deleteUserFeed":
-        logger.info(context, "UserFeedActor:onReceive deleteUserFeed method called");
         deleteUserFeed(request, context);
         break;
       case "updateUserFeed":
-        logger.info(context, "UserFeedActor:onReceive updateUserFeed method called");
         updateUserFeed(request, context);
         break;
       default:
@@ -64,9 +61,9 @@ public class UserFeedActor extends BaseActor {
     reqMap.put(JsonKey.USER_ID, userId);
     List<Feed> feedList = feedService.getFeedsByProperties(reqMap, context);
     Map<String, Object> result = new HashMap<>();
+    result.put(JsonKey.USER_FEED, feedList);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
-    result.put(JsonKey.USER_FEED, feedList);
     sender().tell(response, self());
   }
 

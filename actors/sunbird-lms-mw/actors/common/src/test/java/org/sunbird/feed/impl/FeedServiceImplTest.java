@@ -64,8 +64,12 @@ public class FeedServiceImplTest {
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
     PowerMockito.when(
-            cassandraOperation.upsertRecord(
+            cassandraOperation.insertRecord(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.deleteRecord(
