@@ -9,7 +9,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,8 +102,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     feedService = mock(FeedServiceImpl.class);
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
-    when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(feedService.getRecordsByUserId(Mockito.anyMap(), Mockito.any()))
+    when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
 

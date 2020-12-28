@@ -1,14 +1,19 @@
 package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.learner.util.Util;
@@ -54,6 +59,34 @@ public class UserFeedActor extends BaseActor {
     }
   }
 
+  private void getUserFeed(String userId, RequestContext context) {
+    Map<String, Object> reqMap = new WeakHashMap<>(2);
+    reqMap.put(JsonKey.USER_ID, userId);
+    List<Feed> feedList = feedService.getFeedsByProperties(reqMap, context);
+    Map<String, Object> result = new HashMap<>();
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, result);
+    result.put(JsonKey.USER_FEED, feedList);
+    sender().tell(response, self());
+  }
+
+  private void createUserFeed(Request request, RequestContext context) {
+    Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
+    feed.setStatus(FeedStatus.UNREAD.getfeedStatus());
+    Response feedCreateResponse = feedService.insert(feed, context);
+    sender().tell(feedCreateResponse, self());
+    // Delete the old user feed
+    Map<String, Object> reqMap = new WeakHashMap<>(2);
+    reqMap.put(JsonKey.USER_ID, feed.getUserId());
+    List<Feed> feedList = feedService.getFeedsByProperties(reqMap, context);
+    if (feedList.size() >= Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.FEED_LIMIT))) {
+      feedList.sort(Comparator.comparing(Feed::getCreatedOn));
+      Feed delRecord = feedList.get(0);
+      feedService.delete(
+          delRecord.getId(), delRecord.getUserId(), delRecord.getCategory(), context);
+    }
+  }
+
   private void deleteUserFeed(Request request, RequestContext context) {
     Response feedDeleteResponse = new Response();
     Map<String, Object> deleteRequest = request.getRequest();
@@ -74,37 +107,5 @@ public class UserFeedActor extends BaseActor {
     feed.setStatus(FeedStatus.READ.getfeedStatus());
     Response feedUpdateResponse = feedService.update(feed, context);
     sender().tell(feedUpdateResponse, self());
-  }
-
-  private void createUserFeed(Request request, RequestContext context) {
-    Feed feed = mapper.convertValue(request.getRequest(), Feed.class);
-    feed.setStatus(FeedStatus.UNREAD.getfeedStatus());
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.USER_ID, feed.getUserId());
-    List<Feed> feedList = feedService.getRecordsByUserId(reqMap, context);
-    if (feedList.size() >= Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.FEED_LIMIT))) {
-      Collections.sort(feedList, Comparator.comparing(Feed::getCreatedOn));
-      Feed delRecord = feedList.get(0);
-      feedService.delete(
-          delRecord.getId(), delRecord.getUserId(), delRecord.getCategory(), context);
-    }
-    Response feedCreateResponse = feedService.insert(feed, context);
-    sender().tell(feedCreateResponse, self());
-  }
-
-  private void getUserFeed(String userId, RequestContext context) {
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.USER_ID, userId);
-    SearchDTO search = new SearchDTO();
-    search.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Response userFeedResponse = feedService.search(search, context);
-    Map<String, Object> result =
-        (Map<String, Object>) userFeedResponse.getResult().get(JsonKey.RESPONSE);
-    result.put(
-        JsonKey.USER_FEED,
-        result.get(JsonKey.CONTENT) == null ? new ArrayList<>() : result.get(JsonKey.CONTENT));
-    result.remove(JsonKey.COUNT);
-    result.remove(JsonKey.CONTENT);
-    sender().tell(userFeedResponse, self());
   }
 }
