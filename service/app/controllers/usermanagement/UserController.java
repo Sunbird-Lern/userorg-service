@@ -10,7 +10,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.UserRequestValidator;
+import org.sunbird.validator.user.UserRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
