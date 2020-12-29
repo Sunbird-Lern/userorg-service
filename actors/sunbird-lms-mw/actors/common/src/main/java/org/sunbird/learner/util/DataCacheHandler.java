@@ -15,6 +15,7 @@ import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
+import org.sunbird.models.user.UserType;
 
 /**
  * This class will handle the data cache.
@@ -32,6 +33,7 @@ public class DataCacheHandler implements Runnable {
       new ConcurrentHashMap<>();
   private static Map<String, List<String>> frameworkFieldsConfig = new ConcurrentHashMap<>();
   private static Map<String, List<String>> hashtagIdFrameworkIdMap = new ConcurrentHashMap<>();
+  private static Map<String, List<String>> userTypeOrSubTypeConfigMap = new ConcurrentHashMap<>();
   private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
@@ -87,8 +89,18 @@ public class DataCacheHandler implements Runnable {
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
+    cacheUserTypeOrSubTypeConfig(userTypeOrSubTypeConfigMap);
     initLocationOrderMap();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
+  }
+
+  private void cacheUserTypeOrSubTypeConfig(Map<String, List<String>> userTypeOrSubTypeConfigMap) {
+
+    // TODO : Get data from form Api
+    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(UserType.ADMINISTRATOR.getTypeName(), Arrays.asList("BRC,DAO"));
+    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName(), Arrays.asList());
   }
 
   private void initLocationOrderMap() {
@@ -210,6 +222,10 @@ public class DataCacheHandler implements Runnable {
   /** @return the configSettings */
   public static Map<String, String> getConfigSettings() {
     return configSettings;
+  }
+
+  public static Map<String, List<String>> getUserTypesConfig() {
+    return userTypeOrSubTypeConfigMap;
   }
 
   public static Map<String, Map<String, List<Map<String, String>>>> getFrameworkCategoriesMap() {
