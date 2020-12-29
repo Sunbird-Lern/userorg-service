@@ -101,7 +101,7 @@ public class UserRequestValidator extends BaseRequestValidator {
             set.add((String) location.get(JsonKey.CODE));
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.get(JsonKey.CODE));
-            userRequest.getRequest().put("updateUserSchoolOrg", true);
+            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
           }
         }
       }

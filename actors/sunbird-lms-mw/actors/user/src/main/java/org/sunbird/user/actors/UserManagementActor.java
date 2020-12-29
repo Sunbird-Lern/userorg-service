@@ -286,7 +286,8 @@ public class UserManagementActor extends BaseActor {
         List<Map<String, Object>> orgList = new ArrayList();
         orgList.add(org);
         actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
-        updateUserSchoolOrg = (boolean) actorMessage.getRequest().get("updateUserSchoolOrg");
+        updateUserSchoolOrg =
+            (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
       if (isPrivate || updateUserSchoolOrg) {
         updateUserOrganisations(actorMessage);
