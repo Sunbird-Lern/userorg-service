@@ -34,6 +34,7 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 public class UserTncService {
   private static LoggerUtil logger = new LoggerUtil(UserTncService.class);
   private ObjectMapper mapper = new ObjectMapper();
+  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   public String getTncType(Request request) {
@@ -78,7 +79,6 @@ public class UserTncService {
   }
 
   public Map<String, Object> getUserById(String userId, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Response response =
         cassandraOperation.getRecordById(
@@ -130,7 +130,6 @@ public class UserTncService {
   }
 
   private boolean isOrgAdmin(Map<String, Object> user, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Map<String, Object> searchMap = new LinkedHashMap<>(2);
     searchMap.put(JsonKey.USER_ID, user.get(JsonKey.ID));
     searchMap.put(JsonKey.ORGANISATION_ID, user.get(JsonKey.ROOT_ORG_ID));
