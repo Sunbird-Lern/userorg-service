@@ -96,8 +96,13 @@ public class UserRequestValidator extends BaseRequestValidator {
         set = new ArrayList();
         List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
         for (Map location : locationList) {
-          isValidLocationType((String) location.get(JsonKey.TYPE));
-          set.add((String) location.get(JsonKey.CODE));
+          if (!location.get(JsonKey.TYPE).equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+            isValidLocationType((String) location.get(JsonKey.TYPE));
+            set.add((String) location.get(JsonKey.CODE));
+          } else {
+            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.get(JsonKey.CODE));
+            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+          }
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
