@@ -189,6 +189,7 @@ public class UserManagementActor extends BaseActor {
     actorMessage.toLower();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
+    boolean updateUserSchoolOrg = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
@@ -272,7 +273,23 @@ public class UserManagementActor extends BaseActor {
     }
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      if (isPrivate) {
+      Organisation organisation = null;
+      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
+        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+        organisation =
+            organisationClient.esGetOrgByExternalId(
+                String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
+                null,
+                actorMessage.getRequestContext());
+        Map<String, Object> org =
+            (Map<String, Object>) mapper.convertValue(organisation, Map.class);
+        List<Map<String, Object>> orgList = new ArrayList();
+        orgList.add(org);
+        actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
+        updateUserSchoolOrg =
+            (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
+      }
+      if (isPrivate || updateUserSchoolOrg) {
         updateUserOrganisations(actorMessage);
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
@@ -482,7 +499,11 @@ public class UserManagementActor extends BaseActor {
         }
       }
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
+      // custodian-org
+      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
+        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      }
       logger.info(
           actorMessage.getRequestContext(),
           "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
@@ -511,10 +532,11 @@ public class UserManagementActor extends BaseActor {
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
-        userOrg.setHashTagId((String) (org.get(JsonKey.HASH_TAG_ID)));
+        userOrg.setHashTagId((String) (org.get(JsonKey.HASHTAGID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
+        userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
