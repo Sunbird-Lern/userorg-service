@@ -1,6 +1,10 @@
 package org.sunbird.feed;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +40,7 @@ public class FeedUtil {
     reqMap.put(JsonKey.USER_ID, userId);
     reqMap.put(JsonKey.CATEGORY, FeedAction.ORG_MIGRATION_ACTION.getfeedAction());
     logger.info(context, "FeedUtil:saveFeed:fetching feed for userId ." + userId);
-    List<Feed> feedList = feedService.getRecordsByUserId(reqMap, context);
+    List<Feed> feedList = feedService.getFeedsByProperties(reqMap, context);
     logger.info(
         context,
         "FeedUtil:saveFeed total no. of feed fetched for user id ."
