@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -152,21 +151,12 @@ public class DataCacheHandler implements Runnable {
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
       for (Map<String, Object> resultMap : responseList) {
-        if (((String) resultMap.get(JsonKey.FIELD)).equalsIgnoreCase(JsonKey.PHONE_UNIQUE)
-            && StringUtils.isBlank((String) resultMap.get(JsonKey.VALUE))) {
-          configSettings.put(((String) resultMap.get(JsonKey.FIELD)), String.valueOf(false));
-        } else if (((String) resultMap.get(JsonKey.FIELD)).equalsIgnoreCase(JsonKey.EMAIL_UNIQUE)
-            && StringUtils.isBlank((String) resultMap.get(JsonKey.VALUE))) {
-          configSettings.put(((String) resultMap.get(JsonKey.FIELD)), String.valueOf(false));
-        } else {
-          configSettings.put(
-              ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
-        }
+        configSettings.put(
+            ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
       }
-    } else {
-      configSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(false));
-      configSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(false));
     }
+    configSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
+    configSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
   }
 
   @SuppressWarnings("unchecked")
