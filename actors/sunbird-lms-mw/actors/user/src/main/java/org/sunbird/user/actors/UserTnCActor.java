@@ -143,12 +143,12 @@ public class UserTnCActor extends BaseActor {
       RequestContext requestContext,
       Map<String, Object> context) {
     String lastAcceptedVersion = (String) user.get(JsonKey.TNC_ACCEPTED_VERSION);
-    String tncAcceptedOn = (String) user.get(JsonKey.TNC_ACCEPTED_ON);
+    Object tncAcceptedOn = user.get(JsonKey.TNC_ACCEPTED_ON);
     Response response = new Response();
     Map<String, Object> userMap = new HashMap();
     if (StringUtils.isEmpty(lastAcceptedVersion)
         || !lastAcceptedVersion.equalsIgnoreCase(acceptedTnC)
-        || StringUtils.isEmpty(tncAcceptedOn)) {
+        || (null != tncAcceptedOn)) {
       logger.info(
           requestContext,
           "UserTnCActor:updateUserTncConfig: tnc accepted version= "
