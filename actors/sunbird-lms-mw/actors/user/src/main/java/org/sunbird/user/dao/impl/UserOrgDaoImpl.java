@@ -44,4 +44,11 @@ public final class UserOrgDaoImpl implements UserOrgDao {
     return cassandraOperation.insertRecord(
         Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
   }
+
+  @Override
+  public Response getUserOrgListByUserId(String userId, RequestContext context) {
+    Map<String, Object> compositeKey = new LinkedHashMap<>(2);
+    compositeKey.put(JsonKey.USER_ID, userId);
+    return cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, compositeKey, context);
+  }
 }
