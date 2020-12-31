@@ -183,7 +183,8 @@ public class UserProfileReadActorTest {
     extId.put(JsonKey.ORIGINAL_ID_TYPE, "rootOrgId");
     extId.put(JsonKey.ORIGINAL_PROVIDER, "rootOrgId");
     extIdList.add(extId);
-    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.any())).thenReturn(extIdList);
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(extIdList);
 
     Request reqObj = getProfileReadV2request(VALID_USER_ID, JsonKey.DECLARATIONS);
     Map<String, Object> req = new HashMap<>();
@@ -420,7 +421,8 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(ElasticSearchHelper.class);
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(req);
     PowerMockito.mockStatic(UserUtil.class);
-    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.any())).thenReturn(new ArrayList<>());
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
+        .thenReturn(new ArrayList<>());
     boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
     assertTrue(result);
   }

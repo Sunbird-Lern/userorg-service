@@ -41,6 +41,7 @@ public class UserProfileReadService {
 
   private LoggerUtil logger = new LoggerUtil(UserTncService.class);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
   private UserService userService = UserServiceImpl.getInstance();
   private UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
@@ -253,7 +254,6 @@ public class UserProfileReadService {
 
                   } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                    Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
                     Response response =
                         cassandraOperation.getRecordById(
                             locationDbInfo.getKeySpace(),
@@ -415,12 +415,13 @@ public class UserProfileReadService {
     if (CollectionUtils.isNotEmpty(locationIds)) {
       List<String> locationFields =
           Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-      List<String> orgfields = new ArrayList<>();
-      orgfields.add(JsonKey.ID);
-      orgfields.add(JsonKey.LOCATION_ID);
       Response locationResponse =
           cassandraOperation.getPropertiesValueById(
-              "sunbird", "location", locationIds, locationFields, context);
+              locationDbInfo.getKeySpace(),
+              locationDbInfo.getTableName(),
+              locationIds,
+              locationFields,
+              context);
       List<Map<String, Object>> locationResponseList =
           (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
       return locationResponseList;
@@ -490,15 +491,7 @@ public class UserProfileReadService {
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
-      List<String> locationFields =
-          Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-
-      Response locationResponse =
-          cassandraOperation.getPropertiesValueById(
-              "sunbird", "location", locList, locationFields, context);
-      List<Map<String, Object>> locationResponseList =
-          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
-
+      List<Map<String, Object>> locationResponseList = getUserLocations(locList, context);
       Map<String, Map<String, Object>> locationInfoMap =
           locationResponseList
               .stream()
