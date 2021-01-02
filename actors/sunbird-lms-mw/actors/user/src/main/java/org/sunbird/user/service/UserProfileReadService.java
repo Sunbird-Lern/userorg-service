@@ -372,7 +372,8 @@ public class UserProfileReadService {
       }
       return dbResExternalIds;
     } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
+      logger.error(
+          context, "Exception occurred while fetching user externalId. " + ex.getMessage(), ex);
     }
     return new ArrayList<>();
   }
@@ -560,12 +561,12 @@ public class UserProfileReadService {
         Response userOrgResponse =
             cassandraOperation.getPropertiesValueById(
                 OrgDb.getKeySpace(), OrgDb.getTableName(), orgIdList, orgfields, context);
-        List<Map<String, Object>> userOrgResponseList =
+        List<Map<String, Object>> orgResponseList =
             (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
 
-        if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
+        if (CollectionUtils.isNotEmpty(orgResponseList)) {
           List<String> locationIdList = new ArrayList<>();
-          for (Map<String, Object> org : userOrgResponseList) {
+          for (Map<String, Object> org : orgResponseList) {
             String locId = (String) org.get(JsonKey.LOCATION_ID);
             if (StringUtils.isNotBlank(locId)) {
               locationIdList.add(locId);
