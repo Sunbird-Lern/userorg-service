@@ -222,10 +222,12 @@ public class UserProfileReadActor extends BaseActor {
       result.remove(JsonKey.MISSING_FIELDS);
       result.remove(JsonKey.COMPLETENESS);
       profileReadService.updateTnc(result);
-      String requestFields = (String) actorMessage.getRequest().get(JsonKey.FIELDS);
-      if (StringUtils.isNotBlank(requestFields)) {
-        profileReadService.addExtraFieldsInUserProfileResponse(
-            result, requestFields, actorMessage.getRequestContext());
+      if (null != actorMessage.getRequest().get(JsonKey.FIELDS)) {
+        List<String> requestFields = (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
+        if (CollectionUtils.isNotEmpty(requestFields)) {
+          profileReadService.addExtraFieldsInUserProfileResponse(
+              result, String.join(",", requestFields), actorMessage.getRequestContext());
+        }
       }
       response.put(JsonKey.RESPONSE, result);
       UserUtility.decryptUserDataFrmES(result);
@@ -543,10 +545,11 @@ public class UserProfileReadActor extends BaseActor {
                 result.remove(JsonKey.MISSING_FIELDS);
                 result.remove(JsonKey.COMPLETENESS);
                 if (null != actorMessage.getRequest().get(JsonKey.FIELDS)) {
-                  String requestFields = (String) actorMessage.getRequest().get(JsonKey.FIELDS);
-                  if (StringUtils.isNotBlank(requestFields)) {
+                  List<String> requestFields =
+                      (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
+                  if (CollectionUtils.isNotEmpty(requestFields)) {
                     profileReadService.addExtraFieldsInUserProfileResponse(
-                        result, requestFields, actorMessage.getRequestContext());
+                        result, String.join(",", requestFields), actorMessage.getRequestContext());
                   }
                 }
                 UserUtility.decryptUserDataFrmES(result);
