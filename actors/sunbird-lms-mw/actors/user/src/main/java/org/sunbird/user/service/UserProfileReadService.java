@@ -102,12 +102,18 @@ public class UserProfileReadService {
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
-
-    boolean withTokens =
-        Boolean.parseBoolean((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
-
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
+    getManagedToken(actorMessage, userId, result, managedBy);
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, result);
+    return response;
+  }
+
+  private Map<String, Object> getManagedToken(
+      Request actorMessage, String userId, Map<String, Object> result, String managedBy) {
+    boolean withTokens =
+        Boolean.parseBoolean((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
 
     if (withTokens && StringUtils.isNotEmpty(managedBy)) {
       String managedToken = (String) actorMessage.getContext().get(JsonKey.MANAGED_TOKEN);
@@ -128,9 +134,7 @@ public class UserProfileReadService {
         result.put(JsonKey.MANAGED_TOKEN, managedToken);
       }
     }
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, result);
-    return response;
+    return result;
   }
 
   private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
