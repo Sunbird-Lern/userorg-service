@@ -5,23 +5,16 @@ import static org.sunbird.learner.util.Util.isNotNull;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -29,7 +22,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.TelemetryEnvKey;
@@ -39,12 +31,9 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.location.Location;
 import org.sunbird.user.service.UserProfileReadService;
-import org.sunbird.user.util.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
@@ -211,7 +200,8 @@ public class UserProfileReadActor extends BaseActor {
       } else {
         // fetch user external identity
         List<Map<String, String>> dbResExternalIds =
-            fetchUserExternalIdentity(requestedById, result, actorMessage.getRequestContext());
+            profileReadService.fetchUserExternalIdentity(
+                requestedById, result, true, actorMessage.getRequestContext());
         result.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
       }
     } catch (Exception e) {
@@ -229,161 +219,19 @@ public class UserProfileReadActor extends BaseActor {
       // remove email and phone no from response
       result.remove(JsonKey.ENC_EMAIL);
       result.remove(JsonKey.ENC_PHONE);
-      updateTnc(result);
-      if (null != actorMessage.getRequest().get(JsonKey.FIELDS)) {
-        List<String> requestFields = (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
-        if (requestFields != null) {
-          addExtraFieldsInUserProfileResponse(
-              result, String.join(",", requestFields), actorMessage.getRequestContext());
-        } else {
-          result.remove(JsonKey.MISSING_FIELDS);
-          result.remove(JsonKey.COMPLETENESS);
-        }
-      } else {
-        result.remove(JsonKey.MISSING_FIELDS);
-        result.remove(JsonKey.COMPLETENESS);
+      result.remove(JsonKey.MISSING_FIELDS);
+      result.remove(JsonKey.COMPLETENESS);
+      profileReadService.updateTnc(result);
+      String requestFields = (String) actorMessage.getRequest().get(JsonKey.FIELDS);
+      if (StringUtils.isNotBlank(requestFields)) {
+        profileReadService.addExtraFieldsInUserProfileResponse(
+            result, requestFields, actorMessage.getRequestContext());
       }
       response.put(JsonKey.RESPONSE, result);
       UserUtility.decryptUserDataFrmES(result);
     } else {
       result = new HashMap<>();
       response.put(JsonKey.RESPONSE, result);
-    }
-  }
-
-  private void updateTnc(Map<String, Object> userSearchMap) {
-    Map<String, Object> tncConfigMap = null;
-    try {
-      String tncValue = DataCacheHandler.getConfigSettings().get(JsonKey.TNC_CONFIG);
-      ObjectMapper mapper = new ObjectMapper();
-      tncConfigMap = mapper.readValue(tncValue, Map.class);
-
-    } catch (Exception e) {
-      logger.error(
-          "UserProfileReadActor:updateTncInfo: Exception occurred while getting system setting for"
-              + JsonKey.TNC_CONFIG
-              + e.getMessage(),
-          e);
-    }
-
-    if (MapUtils.isNotEmpty(tncConfigMap)) {
-      try {
-        String tncLatestVersion = (String) tncConfigMap.get(JsonKey.LATEST_VERSION);
-        userSearchMap.put(JsonKey.TNC_LATEST_VERSION, tncLatestVersion);
-        String tncUserAcceptedVersion = (String) userSearchMap.get(JsonKey.TNC_ACCEPTED_VERSION);
-        String tncUserAcceptedOn = (String) userSearchMap.get(JsonKey.TNC_ACCEPTED_ON);
-        if (StringUtils.isEmpty(tncUserAcceptedVersion)
-            || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
-            || StringUtils.isEmpty(tncUserAcceptedOn)) {
-          userSearchMap.put(JsonKey.PROMPT_TNC, true);
-        } else {
-          userSearchMap.put(JsonKey.PROMPT_TNC, false);
-        }
-
-        if (tncConfigMap.containsKey(tncLatestVersion)) {
-          String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
-          logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
-          userSearchMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
-        } else {
-          userSearchMap.put(JsonKey.PROMPT_TNC, false);
-          logger.info(
-              "UserProfileReadActor:updateTncInfo: TnC version URL is missing from configuration");
-        }
-      } catch (Exception e) {
-        logger.error(
-            "UserProfileReadActor:updateTncInfo: Exception occurred with error message = "
-                + e.getMessage(),
-            e);
-        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-      }
-    }
-  }
-
-  private List<Map<String, String>> fetchUserExternalIdentity(
-      String userId, Map<String, Object> user, RequestContext context) {
-    try {
-      List<Map<String, String>> dbResExternalIds = UserUtil.getExternalIds(userId, true, context);
-
-      decryptUserExternalIds(dbResExternalIds, context);
-      // update orgId to provider in externalIds
-      String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      if (CollectionUtils.isNotEmpty(dbResExternalIds) && StringUtils.isNotBlank(rootOrgId)) {
-        String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
-        if (orgId.equalsIgnoreCase(rootOrgId)) {
-          String provider = (String) user.get(JsonKey.CHANNEL);
-          dbResExternalIds
-              .stream()
-              .forEach(
-                  s -> {
-                    if (s.get(JsonKey.PROVIDER) != null
-                        && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                      s.put(JsonKey.ID_TYPE, provider);
-                    }
-                    s.put(JsonKey.PROVIDER, provider);
-                  });
-        } else {
-          UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-        }
-      } else {
-        UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-      }
-      return dbResExternalIds;
-    } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
-    }
-    return new ArrayList<>();
-  }
-
-  private void decryptUserExternalIds(
-      List<Map<String, String>> dbResExternalIds, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      dbResExternalIds
-          .stream()
-          .forEach(
-              s -> {
-                if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                  if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-
-                    String decrytpedOriginalExternalId =
-                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), context);
-                    s.put(JsonKey.ID, decrytpedOriginalExternalId);
-
-                  } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                    LocationClientImpl locationClient = new LocationClientImpl();
-                    Location location =
-                        locationClient.getLocationById(
-                            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                            s.get(JsonKey.ORIGINAL_EXTERNAL_ID),
-                            context);
-                    s.put(
-                        JsonKey.ID,
-                        (location == null
-                            ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
-                            : location.getCode()));
-                  } else {
-                    s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                  }
-                  s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
-                  s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-                } else {
-                  s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
-                }
-
-                s.remove(JsonKey.EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_ID_TYPE);
-                s.remove(JsonKey.ORIGINAL_PROVIDER);
-                s.remove(JsonKey.CREATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_ON);
-                s.remove(JsonKey.CREATED_ON);
-                s.remove(JsonKey.USER_ID);
-                s.remove(JsonKey.SLUG);
-              });
     }
   }
 
@@ -408,229 +256,6 @@ public class UserProfileReadActor extends BaseActor {
       logger.error(context, ex.getMessage(), ex);
     }
     return null;
-  }
-
-  private void addExtraFieldsInUserProfileResponse(
-      Map<String, Object> result, String fields, RequestContext context) {
-    if (!StringUtils.isBlank(fields)) {
-      result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
-      if (!fields.contains(JsonKey.COMPLETENESS)) {
-        result.remove(JsonKey.COMPLETENESS);
-      }
-      if (!fields.contains(JsonKey.MISSING_FIELDS)) {
-        result.remove(JsonKey.MISSING_FIELDS);
-      }
-      if (fields.contains(JsonKey.TOPIC)) {
-        // fetch the topic details of all user associated orgs and append in the result
-        fetchTopicOfAssociatedOrgs(result, context);
-      }
-      if (fields.contains(JsonKey.ORGANISATIONS)) {
-        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
-      }
-      if (fields.contains(JsonKey.ROLES)) {
-        result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
-      }
-      if (fields.contains(JsonKey.LOCATIONS)) {
-        result.put(
-            JsonKey.USER_LOCATIONS,
-            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
-        result.remove(JsonKey.LOCATION_IDS);
-      }
-    }
-  }
-
-  private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
-    Set<String> topicSet = new HashSet<>();
-    List<Map<String, Object>> userOrgList =
-        (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-    if (CollectionUtils.isNotEmpty(userOrgList)) {
-      List<String> orgIdList =
-          userOrgList
-              .stream()
-              .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
-              .distinct()
-              .collect(Collectors.toList());
-
-      // fetch all org details from cassandra ...
-      if (CollectionUtils.isNotEmpty(orgIdList)) {
-        Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
-        List<String> orgfields = new ArrayList<>();
-        orgfields.add(JsonKey.ID);
-        orgfields.add(JsonKey.LOCATION_ID);
-        Response userOrgResponse =
-            cassandraOperation.getPropertiesValueById(
-                OrgDb.getKeySpace(), OrgDb.getTableName(), orgIdList, orgfields, context);
-        List<Map<String, Object>> userOrgResponseList =
-            (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-
-        if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
-          List<String> locationIdList = new ArrayList<>();
-          for (Map<String, Object> org : userOrgResponseList) {
-            String locId = (String) org.get(JsonKey.LOCATION_ID);
-            if (StringUtils.isNotBlank(locId)) {
-              locationIdList.add(locId);
-            }
-          }
-          if (CollectionUtils.isNotEmpty(locationIdList)) {
-            List<String> geoLocationFields = new ArrayList<>();
-            geoLocationFields.add(JsonKey.TOPIC);
-            Response geoLocationResponse =
-                cassandraOperation.getPropertiesValueById(
-                    geoLocationDbInfo.getKeySpace(),
-                    geoLocationDbInfo.getTableName(),
-                    locationIdList,
-                    geoLocationFields,
-                    context);
-            List<Map<String, Object>> geoLocationResponseList =
-                (List<Map<String, Object>>) geoLocationResponse.get(JsonKey.RESPONSE);
-            List<String> topicList =
-                geoLocationResponseList
-                    .stream()
-                    .map(m -> (String) m.get(JsonKey.TOPIC))
-                    .distinct()
-                    .collect(Collectors.toList());
-            topicSet.addAll(topicList);
-          }
-        }
-      }
-    }
-    result.put(JsonKey.TOPICS, topicSet);
-  }
-
-  private void updateUserOrgInfo(List<Map<String, Object>> userOrgs, RequestContext context) {
-    Map<String, Map<String, Object>> orgInfoMap = fetchAllOrgById(userOrgs, context);
-    Map<String, Map<String, Object>> locationInfoMap = fetchAllLocationsById(orgInfoMap, context);
-    prepUserOrgInfoWithAdditionalData(userOrgs, orgInfoMap, locationInfoMap);
-  }
-
-  private Map<String, Map<String, Object>> fetchAllOrgById(
-      List<Map<String, Object>> userOrgs, RequestContext context) {
-    List<String> orgIds =
-        userOrgs
-            .stream()
-            .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
-            .distinct()
-            .collect(Collectors.toList());
-    if (CollectionUtils.isNotEmpty(orgIds)) {
-      List<String> fields =
-          Arrays.asList(
-              JsonKey.ORG_NAME,
-              JsonKey.CHANNEL,
-              JsonKey.HASHTAGID,
-              JsonKey.LOCATION_IDS,
-              JsonKey.ID);
-      Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
-      Response userOrgResponse =
-          cassandraOperation.getPropertiesValueById(
-              OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
-      List<Map<String, Object>> userOrgResponseList =
-          (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
-        return userOrgResponseList
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    obj -> {
-                      return (String) obj.get("id");
-                    },
-                    val -> val));
-      } else {
-        return new HashMap<>();
-      }
-    } else {
-      return new HashMap<>();
-    }
-  }
-
-  private Map<String, Map<String, Object>> fetchAllLocationsById(
-      Map<String, Map<String, Object>> orgInfoMap, RequestContext context) {
-
-    Set<String> locationSet = new HashSet<>();
-    for (Map<String, Object> org : orgInfoMap.values()) {
-      List<String> locationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
-      if (CollectionUtils.isNotEmpty(locationIds)) {
-        locationIds.forEach(
-            locId -> {
-              if (StringUtils.isNotBlank(locId)) {
-                locationSet.add(locId);
-              }
-            });
-      }
-    }
-    if (CollectionUtils.isNotEmpty(locationSet)) {
-      List<String> locList = new ArrayList<>(locationSet);
-      List<String> locationFields =
-          Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-
-      Response locationResponse =
-          cassandraOperation.getPropertiesValueById(
-              "sunbird", "location", locList, locationFields, context);
-      List<Map<String, Object>> locationResponseList =
-          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
-
-      Map<String, Map<String, Object>> locationInfoMap =
-          locationResponseList
-              .stream()
-              .collect(
-                  Collectors.toMap(
-                      obj -> {
-                        return (String) obj.get("id");
-                      },
-                      val -> val));
-      return locationInfoMap;
-    } else {
-      return new HashMap<>();
-    }
-  }
-
-  private void prepUserOrgInfoWithAdditionalData(
-      List<Map<String, Object>> userOrgs,
-      Map<String, Map<String, Object>> orgInfoMap,
-      Map<String, Map<String, Object>> locationInfoMap) {
-    for (Map<String, Object> usrOrg : userOrgs) {
-      Map<String, Object> orgInfo = orgInfoMap.get(usrOrg.get(JsonKey.ORGANISATION_ID));
-      if (MapUtils.isNotEmpty(orgInfo)) {
-        usrOrg.put(JsonKey.ORG_NAME, orgInfo.get(JsonKey.ORG_NAME));
-        usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
-        usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
-        usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
-        if (MapUtils.isNotEmpty(locationInfoMap)) {
-          usrOrg.put(
-              JsonKey.LOCATIONS,
-              prepLocationFields(
-                  (List<String>) orgInfo.get(JsonKey.LOCATION_IDS), locationInfoMap));
-        }
-      }
-    }
-  }
-
-  private List<Map<String, Object>> prepLocationFields(
-      List<String> locationIds, Map<String, Map<String, Object>> locationInfoMap) {
-    List<Map<String, Object>> retList = new ArrayList<>();
-    if (locationIds != null) {
-      for (String locationId : locationIds) {
-        retList.add(locationInfoMap.get(locationId));
-      }
-    }
-    return retList;
-  }
-
-  private List<Map<String, Object>> getUserLocations(
-      List<String> locationIds, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(locationIds)) {
-      List<String> locationFields =
-          Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-      List<String> orgfields = new ArrayList<>();
-      orgfields.add(JsonKey.ID);
-      orgfields.add(JsonKey.LOCATION_ID);
-      Response locationResponse =
-          cassandraOperation.getPropertiesValueById(
-              "sunbird", "location", locationIds, locationFields, context);
-      List<Map<String, Object>> locationResponseList =
-          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
-      return locationResponseList;
-    }
-    return new ArrayList<>();
   }
 
   private Future<Response> checkUserExists(Request request, boolean isV1) {
@@ -896,9 +521,10 @@ public class UserProfileReadActor extends BaseActor {
                     (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
                 if (((String) result.get(JsonKey.USER_ID)).equalsIgnoreCase(requestedById)) {
                   List<Map<String, String>> dbResExternalIds =
-                      fetchUserExternalIdentity(
+                      profileReadService.fetchUserExternalIdentity(
                           (String) result.get(JsonKey.USER_ID),
                           result,
+                          true,
                           actorMessage.getRequestContext());
                   extIdMap.put(JsonKey.EXTERNAL_IDS, dbResExternalIds);
                   return extIdMap;
@@ -913,20 +539,15 @@ public class UserProfileReadActor extends BaseActor {
             new Mapper<Map<String, Object>, Map<String, Object>>() {
               @Override
               public Map<String, Object> apply(Map<String, Object> result) {
-                updateTnc(result);
+                profileReadService.updateTnc(result);
+                result.remove(JsonKey.MISSING_FIELDS);
+                result.remove(JsonKey.COMPLETENESS);
                 if (null != actorMessage.getRequest().get(JsonKey.FIELDS)) {
-                  List<String> requestFields =
-                      (List<String>) actorMessage.getRequest().get(JsonKey.FIELDS);
-                  if (requestFields != null) {
-                    addExtraFieldsInUserProfileResponse(
-                        result, String.join(",", requestFields), actorMessage.getRequestContext());
-                  } else {
-                    result.remove(JsonKey.MISSING_FIELDS);
-                    result.remove(JsonKey.COMPLETENESS);
+                  String requestFields = (String) actorMessage.getRequest().get(JsonKey.FIELDS);
+                  if (StringUtils.isNotBlank(requestFields)) {
+                    profileReadService.addExtraFieldsInUserProfileResponse(
+                        result, requestFields, actorMessage.getRequestContext());
                   }
-                } else {
-                  result.remove(JsonKey.MISSING_FIELDS);
-                  result.remove(JsonKey.COMPLETENESS);
                 }
                 UserUtility.decryptUserDataFrmES(result);
                 return result;

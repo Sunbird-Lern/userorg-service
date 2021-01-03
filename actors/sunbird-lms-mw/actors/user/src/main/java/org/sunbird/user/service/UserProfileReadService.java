@@ -45,6 +45,7 @@ public class UserProfileReadService {
   private UserService userService = UserServiceImpl.getInstance();
   private UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
+  private Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
   private UserDao userDao = UserDaoImpl.getInstance();
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
@@ -89,12 +90,13 @@ public class UserProfileReadService {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
-    if (((userId).equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))) {
-      if (StringUtils.isNotBlank(requestFields) && !requestFields.contains(JsonKey.EXTERNAL_IDS)) {
-        result.put(
-            JsonKey.EXTERNAL_IDS,
-            fetchUserExternalIdentity(userId, result, true, actorMessage.getRequestContext()));
-      }
+    if (StringUtils.isNotBlank(userId)
+        && (userId.equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
+        && (StringUtils.isNotBlank(requestFields)
+            && !requestFields.contains(JsonKey.EXTERNAL_IDS))) {
+      result.put(
+          JsonKey.EXTERNAL_IDS,
+          fetchUserExternalIdentity(userId, result, true, actorMessage.getRequestContext()));
     }
 
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
@@ -102,7 +104,7 @@ public class UserProfileReadService {
     }
 
     boolean withTokens =
-        Boolean.valueOf((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
+        Boolean.parseBoolean((String) actorMessage.getContext().get(JsonKey.WITH_TOKENS));
 
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
@@ -113,7 +115,7 @@ public class UserProfileReadService {
         logger.info(
             actorMessage.getRequestContext(),
             "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId);
-        List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> userList = new ArrayList<>();
         userList.add(result);
         // Fetch encrypted token from admin utils
         Map<String, Object> encryptedTokenList =
@@ -152,7 +154,7 @@ public class UserProfileReadService {
     }
 
     Map<String, Object> result = mapper.convertValue(user, Map.class);
-    result = removeUserPrivateField(result);
+    removeUserPrivateField(result);
     return result;
   }
 
@@ -294,11 +296,10 @@ public class UserProfileReadService {
     }
   }
 
-  private void updateTnc(Map<String, Object> userMap) {
+  public void updateTnc(Map<String, Object> userMap) {
     Map<String, Object> tncConfigMap = null;
     try {
       String tncValue = DataCacheHandler.getConfigSettings().get(JsonKey.TNC_CONFIG);
-      ObjectMapper mapper = new ObjectMapper();
       tncConfigMap = mapper.readValue(tncValue, Map.class);
 
     } catch (Exception e) {
@@ -315,22 +316,15 @@ public class UserProfileReadService {
         userMap.put(JsonKey.TNC_LATEST_VERSION, tncLatestVersion);
         String tncUserAcceptedVersion = (String) userMap.get(JsonKey.TNC_ACCEPTED_VERSION);
         Object tncUserAcceptedOn = userMap.get(JsonKey.TNC_ACCEPTED_ON);
-        if (StringUtils.isEmpty(tncUserAcceptedVersion)
-            || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
-            || (null == tncUserAcceptedOn)) {
+        userMap.put(JsonKey.PROMPT_TNC, false);
+        if ((StringUtils.isEmpty(tncUserAcceptedVersion)
+                || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
+                || (null == tncUserAcceptedOn))
+            && (tncConfigMap.containsKey(tncLatestVersion))) {
           userMap.put(JsonKey.PROMPT_TNC, true);
-        } else {
-          userMap.put(JsonKey.PROMPT_TNC, false);
-        }
-
-        if (tncConfigMap.containsKey(tncLatestVersion)) {
           String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
           logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
           userMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
-        } else {
-          userMap.put(JsonKey.PROMPT_TNC, false);
-          logger.info(
-              "UserProfileReadActor:updateTncInfo: TnC version URL is missing from configuration");
         }
       } catch (Exception e) {
         logger.error(
@@ -341,7 +335,7 @@ public class UserProfileReadService {
     }
   }
 
-  private List<Map<String, String>> fetchUserExternalIdentity(
+  public List<Map<String, String>> fetchUserExternalIdentity(
       String userId, Map<String, Object> user, boolean mergeDeclarations, RequestContext context) {
     try {
       List<Map<String, String>> dbResExternalIds =
@@ -350,23 +344,23 @@ public class UserProfileReadService {
       decryptUserExternalIds(dbResExternalIds, context);
       // update orgId to provider in externalIds
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      if (CollectionUtils.isNotEmpty(dbResExternalIds) && StringUtils.isNotBlank(rootOrgId)) {
-        String orgId = dbResExternalIds.get(0).get(JsonKey.PROVIDER);
-        if (orgId.equalsIgnoreCase(rootOrgId)) {
-          String provider = (String) user.get(JsonKey.CHANNEL);
-          dbResExternalIds
-              .stream()
-              .forEach(
-                  s -> {
-                    if (s.get(JsonKey.PROVIDER) != null
-                        && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                      s.put(JsonKey.ID_TYPE, provider);
-                    }
-                    s.put(JsonKey.PROVIDER, provider);
-                  });
-        } else {
-          UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-        }
+      if (CollectionUtils.isNotEmpty(dbResExternalIds)
+          && StringUtils.isNotBlank(rootOrgId)
+          && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
+          && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
+
+        String provider = (String) user.get(JsonKey.CHANNEL);
+        dbResExternalIds
+            .stream()
+            .forEach(
+                s -> {
+                  if (s.get(JsonKey.PROVIDER) != null
+                      && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                    s.put(JsonKey.ID_TYPE, provider);
+                  }
+                  s.put(JsonKey.PROVIDER, provider);
+                });
+
       } else {
         UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
       }
@@ -378,7 +372,7 @@ public class UserProfileReadService {
     return new ArrayList<>();
   }
 
-  private void addExtraFieldsInUserProfileResponse(
+  public void addExtraFieldsInUserProfileResponse(
       Map<String, Object> result, String fields, RequestContext context) {
     if (!StringUtils.isBlank(fields)) {
       result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
@@ -423,9 +417,7 @@ public class UserProfileReadService {
               locationIds,
               locationFields,
               context);
-      List<Map<String, Object>> locationResponseList =
-          (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
-      return locationResponseList;
+      return (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
     }
     return new ArrayList<>();
   }
@@ -452,7 +444,6 @@ public class UserProfileReadService {
               JsonKey.HASHTAGID,
               JsonKey.LOCATION_IDS,
               JsonKey.ID);
-      Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response userOrgResponse =
           cassandraOperation.getPropertiesValueById(
               OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
@@ -461,18 +452,10 @@ public class UserProfileReadService {
       if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
         return userOrgResponseList
             .stream()
-            .collect(
-                Collectors.toMap(
-                    obj -> {
-                      return (String) obj.get("id");
-                    },
-                    val -> val));
-      } else {
-        return new HashMap<>();
+            .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));
       }
-    } else {
-      return new HashMap<>();
     }
+    return new HashMap<>();
   }
 
   private Map<String, Map<String, Object>> fetchAllLocationsById(
@@ -496,12 +479,7 @@ public class UserProfileReadService {
       Map<String, Map<String, Object>> locationInfoMap =
           locationResponseList
               .stream()
-              .collect(
-                  Collectors.toMap(
-                      obj -> {
-                        return (String) obj.get("id");
-                      },
-                      val -> val));
+              .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));
       return locationInfoMap;
     } else {
       return new HashMap<>();
@@ -554,7 +532,6 @@ public class UserProfileReadService {
 
       // fetch all org details from cassandra ...
       if (CollectionUtils.isNotEmpty(orgIdList)) {
-        Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
         List<String> orgfields = new ArrayList<>();
         orgfields.add(JsonKey.ID);
         orgfields.add(JsonKey.LOCATION_ID);
