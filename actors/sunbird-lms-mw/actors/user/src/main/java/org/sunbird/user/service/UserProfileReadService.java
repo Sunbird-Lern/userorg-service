@@ -149,7 +149,8 @@ public class UserProfileReadService {
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     // check whether is_deletd true or false
-    if (user.getIsDeleted()) {
+    boolean isDeleted = user.getIsDeleted();
+    if (isDeleted) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
 
