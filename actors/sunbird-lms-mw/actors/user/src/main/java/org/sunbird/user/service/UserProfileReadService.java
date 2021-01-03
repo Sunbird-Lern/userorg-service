@@ -244,6 +244,9 @@ public class UserProfileReadService {
           .stream()
           .forEach(
               s -> {
+                s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
+                s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
                 if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
                     && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
                     && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
@@ -256,30 +259,18 @@ public class UserProfileReadService {
 
                   } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
                       || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                    Response response =
-                        cassandraOperation.getRecordById(
-                            locationDbInfo.getKeySpace(),
-                            locationDbInfo.getTableName(),
-                            s.get(JsonKey.ORIGINAL_EXTERNAL_ID),
-                            context);
-                    List<Map<String, Object>> locationList =
-                        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-                    Map<String, Object> location = null;
+                    List<String> locationIds = new ArrayList<>(2);
+                    locationIds.add(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
+                    List<Map<String, Object>> locationList = getUserLocations(locationIds, context);
                     if (CollectionUtils.isNotEmpty(locationList)) {
-                      location = locationList.get(0);
+                      Map<String, Object> location = locationList.get(0);
+                      s.put(
+                          JsonKey.ID,
+                          (location == null
+                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
+                              : (String) location.get(JsonKey.CODE)));
                     }
-                    s.put(
-                        JsonKey.ID,
-                        (location == null
-                            ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
-                            : (String) location.get(JsonKey.CODE)));
-                  } else {
-                    s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
                   }
-                  s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
-                  s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-                } else {
-                  s.put(JsonKey.ID, s.get(JsonKey.EXTERNAL_ID));
                 }
 
                 s.remove(JsonKey.EXTERNAL_ID);
@@ -476,11 +467,9 @@ public class UserProfileReadService {
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
       List<Map<String, Object>> locationResponseList = getUserLocations(locList, context);
-      Map<String, Map<String, Object>> locationInfoMap =
-          locationResponseList
-              .stream()
-              .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));
-      return locationInfoMap;
+      return locationResponseList
+          .stream()
+          .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));
     } else {
       return new HashMap<>();
     }
