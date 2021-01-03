@@ -54,9 +54,9 @@ public class UserProfileReadActor extends BaseActor {
   private EncryptionService encryptionService =
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
-  private Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private UserProfileReadService profileReadService = new UserProfileReadService();
+  private UserProfileReadService profileReadService =
+      new UserProfileReadService(getContext().dispatcher());
 
   @Override
   public void onReceive(Request request) throws Throwable {

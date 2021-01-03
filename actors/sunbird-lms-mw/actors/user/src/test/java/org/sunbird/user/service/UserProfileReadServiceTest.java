@@ -3,10 +3,12 @@ package org.sunbird.user.service;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.dispatch.ExecutionContexts;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.util.UserUtil;
+import scala.concurrent.ExecutionContextExecutor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -59,6 +62,9 @@ public class UserProfileReadServiceTest {
 
   private String orgAdminTnc =
       "{\"latestVersion\":\"v1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
+
+  private ExecutionContextExecutor executor =
+      ExecutionContexts.fromExecutor(Executors.newFixedThreadPool(1));
 
   @Before
   public void beforeEachTest() {
@@ -165,7 +171,8 @@ public class UserProfileReadServiceTest {
         .thenReturn(orgRes)
         .thenReturn(locnResponse)
         .thenReturn(locnResponse);
-    UserProfileReadService userProfileReadService = new UserProfileReadService();
+
+    UserProfileReadService userProfileReadService = new UserProfileReadService(executor);
 
     List<Map<String, String>> externalIds = new ArrayList<>();
     Map<String, String> externalId = new HashMap<>();
@@ -224,7 +231,7 @@ public class UserProfileReadServiceTest {
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
     Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(null);
-    UserProfileReadService userProfileReadService = new UserProfileReadService();
+    UserProfileReadService userProfileReadService = new UserProfileReadService(executor);
     try {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
     } catch (ProjectCommonException ex) {
@@ -254,7 +261,7 @@ public class UserProfileReadServiceTest {
     User user = getValidUserResponse("1234567890");
     user.setIsDeleted(true);
     Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(user);
-    UserProfileReadService userProfileReadService = new UserProfileReadService();
+    UserProfileReadService userProfileReadService = new UserProfileReadService(executor);
     try {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
     } catch (ProjectCommonException ex) {
