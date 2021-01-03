@@ -18,11 +18,13 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
@@ -201,6 +203,64 @@ public class UserProfileReadServiceTest {
     Response response1 =
         userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
     Assert.assertNotNull(response1);
+  }
+
+  @Test
+  public void getUserProfileWithEmptyResultTest() {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Response response = new Response();
+    List<Map<String, Object>> resp = new ArrayList<>();
+    response.put(JsonKey.RESPONSE, resp);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
+    UserDao userDao = PowerMockito.mock(UserDao.class);
+    PowerMockito.mockStatic(UserDaoImpl.class);
+    Mockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.mockStatic(UserUtility.class);
+    PowerMockito.mockStatic(Util.class);
+    Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
+        .thenReturn(getUserDbMap("1234567890"));
+    Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(null);
+    UserProfileReadService userProfileReadService = new UserProfileReadService();
+    try {
+      userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
+    } catch (ProjectCommonException ex) {
+      Assert.assertNotNull(ex);
+      Assert.assertEquals(ex.getCode(), ResponseCode.userNotFound.getErrorCode());
+    }
+  }
+
+  @Test
+  public void getLockedUserProfileTest() {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Response response = new Response();
+    List<Map<String, Object>> resp = new ArrayList<>();
+    response.put(JsonKey.RESPONSE, resp);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
+    UserDao userDao = PowerMockito.mock(UserDao.class);
+    PowerMockito.mockStatic(UserDaoImpl.class);
+    Mockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.mockStatic(UserUtility.class);
+    PowerMockito.mockStatic(Util.class);
+    Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
+        .thenReturn(getUserDbMap("1234567890"));
+    User user = getValidUserResponse("1234567890");
+    user.setIsDeleted(true);
+    Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(user);
+    UserProfileReadService userProfileReadService = new UserProfileReadService();
+    try {
+      userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
+    } catch (ProjectCommonException ex) {
+      Assert.assertNotNull(ex);
+      Assert.assertEquals(ex.getCode(), ResponseCode.userAccountlocked.getErrorCode());
+    }
   }
 
   private Request getProfileReadRequest(String userId) {
