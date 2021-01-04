@@ -115,7 +115,7 @@ public class UserTnCActor extends BaseActor {
       tncAcceptedMap.put(JsonKey.TNC_ACCEPTED_ON, ProjectUtil.getFormattedDate());
       try {
         allTncAcceptedMap.put(tncType, mapper.writeValueAsString(tncAcceptedMap));
-        userMap.put(JsonKey.ALL_TNC_ACCEPTED, mapper.writeValueAsString(allTncAcceptedMap));
+        userMap.put(JsonKey.ALL_TNC_ACCEPTED, allTncAcceptedMap);
       } catch (Exception ex) {
         logger.error(requestContext, "Exception occurred while mapping", ex);
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
