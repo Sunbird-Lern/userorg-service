@@ -43,7 +43,7 @@ import scala.concurrent.Future;
 
 public class UserProfileReadService {
 
-  private LoggerUtil logger = new LoggerUtil(UserTncService.class);
+  private LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
   private UserService userService = UserServiceImpl.getInstance();
