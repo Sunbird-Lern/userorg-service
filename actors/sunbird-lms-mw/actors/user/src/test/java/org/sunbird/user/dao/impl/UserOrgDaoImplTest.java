@@ -14,6 +14,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.user.dao.UserOrgDao;
@@ -51,6 +52,18 @@ public class UserOrgDaoImplTest {
     userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     Response res = userOrgDao.updateUserOrg(userOrg, null);
+    Assert.assertNotNull(res);
+  }
+
+  @Test
+  public void testGetUserOrg() {
+    Response response = new Response();
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
+    Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", new RequestContext());
     Assert.assertNotNull(res);
   }
 }
