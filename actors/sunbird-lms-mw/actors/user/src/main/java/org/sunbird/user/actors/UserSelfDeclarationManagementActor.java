@@ -5,6 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -12,9 +14,13 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.UserSelfDeclarationService;
 import org.sunbird.user.service.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -26,6 +32,8 @@ import org.sunbird.user.util.UserUtil;
 public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
+  private OrganisationClient organisationClient = new OrganisationClientImpl();
+  String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -79,6 +87,11 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
       for (Map<String, Object> declareFieldMap : declarations) {
         UserDeclareEntity userDeclareEntity =
             UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
+        Map userInfo = userDeclareEntity.getUserInfo();
+        if (StringUtils.isEmpty((String) userInfo.get(JsonKey.DECLARED_SCHOOLE_UDISE_CODE))) {
+          updateSchoolInfoInSelfDeclaration(
+              (String) userMap.get(JsonKey.USER_ID), actorMessage.getRequestContext(), userInfo);
+        }
         userDeclareEntityList.add(userDeclareEntity);
       }
 
@@ -112,6 +125,27 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
             (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
     TelemetryUtil.telemetryProcessingCall(
         userMap, targetObject, correlatedObject, actorMessage.getContext());
+  }
+
+  private Map<String, Object> updateSchoolInfoInSelfDeclaration(
+      String userId, RequestContext context, Map<String, Object> userInfo) {
+    UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
+    Response res = userOrgDao.getUserOrgDetails(userId, null, context);
+    List<Map<String, Object>> userOrgLst = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+    if (!(userOrgLst.size() == 1
+        && userOrgLst.get(0).get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId))) {
+      for (Map<String, Object> stringObjectMap : userOrgLst) {
+        if (!stringObjectMap.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
+          String organisationId = (String) stringObjectMap.get(JsonKey.ORGANISATION_ID);
+          Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
+          if (null != organisation) {
+            userInfo.put(JsonKey.DECLARED_SCHOOLE_UDISE_CODE, organisation.getId());
+            userInfo.put(JsonKey.DECLARED_SCHOOLE_NAME, organisation.getOrgName());
+          }
+        }
+      }
+    }
+    return userInfo;
   }
 
   private void upsertUserSelfDeclaredDetails(Request request) {

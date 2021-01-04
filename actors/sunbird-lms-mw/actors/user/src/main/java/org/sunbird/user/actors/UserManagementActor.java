@@ -51,10 +51,13 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
@@ -84,6 +87,8 @@ public class UserManagementActor extends BaseActor {
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserClient userClient = new UserClientImpl();
+  private static UserSelfDeclarationDao userSelfDeclarationDao =
+      UserSelfDeclarationDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -496,6 +501,7 @@ public class UserManagementActor extends BaseActor {
       if (!orgList.isEmpty()) {
         for (Map<String, Object> org : orgList) {
           createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+          updateUserSelfDeclaredData(actorMessage, org, userId);
         }
       }
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
@@ -507,6 +513,23 @@ public class UserManagementActor extends BaseActor {
       logger.info(
           actorMessage.getRequestContext(),
           "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+    }
+  }
+
+  private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
+    List<Map<String, Object>> declredDetails =
+        userSelfDeclarationDao.getUserSelfDeclaredFields(userId, actorMessage.getRequestContext());
+    if (!CollectionUtils.isEmpty(declredDetails)) {
+      UserDeclareEntity userDeclareEntity =
+          mapper.convertValue(declredDetails, UserDeclareEntity.class);
+      Map declaredInfo = userDeclareEntity.getUserInfo();
+      if (StringUtils.isNotEmpty((CharSequence) declaredInfo.get("declared-school-udise-code"))
+          && !org.get("id").equals(declaredInfo.get("declared-school-udise-code"))) {
+        declaredInfo.put(JsonKey.DECLARED_SCHOOLE_UDISE_CODE, org.get(JsonKey.ID));
+        declaredInfo.put(JsonKey.DECLARED_SCHOOLE_NAME, org.get(JsonKey.ORG_NAME));
+        userSelfDeclarationDao.upsertUserSelfDeclaredFields(
+            userDeclareEntity, actorMessage.getRequestContext());
+      }
     }
   }
 
