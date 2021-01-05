@@ -366,6 +366,7 @@ public class UserSelfDeclarationManagementActorTest {
     List userOrgLst = new LinkedList<HashMap<String, Object>>();
     Map userOrg = new HashMap();
     userOrg.put(JsonKey.ORGANISATION_ID, "someStateSubOrgId");
+    userOrg.put(JsonKey.EXTERNAL_ID, "someStateExternalId");
     userOrgLst.add(userOrg);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, userOrgLst);

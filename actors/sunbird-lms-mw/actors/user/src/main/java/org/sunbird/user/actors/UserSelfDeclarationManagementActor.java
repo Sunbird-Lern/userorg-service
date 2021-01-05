@@ -139,7 +139,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
           String organisationId = (String) stringObjectMap.get(JsonKey.ORGANISATION_ID);
           Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
           if (null != organisation) {
-            userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getId());
+            userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getExternalId());
             userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.getOrgName());
           }
         }
