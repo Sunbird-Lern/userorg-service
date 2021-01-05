@@ -33,6 +33,10 @@ public class UserOrgDaoImplTest {
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    Response response = new Response();
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
   }
 
   @Test
@@ -57,11 +61,6 @@ public class UserOrgDaoImplTest {
 
   @Test
   public void testGetUserOrg() {
-    Response response = new Response();
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", new RequestContext());
     Assert.assertNotNull(res);
