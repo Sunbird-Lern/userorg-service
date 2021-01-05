@@ -2,7 +2,13 @@ package org.sunbird.user.service.impl;
 
 import akka.actor.ActorRef;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -449,12 +455,9 @@ public class UserServiceImpl implements UserService {
    */
   private List<AdminUtilRequestData> createManagedUserList(
       String parentId, List<Map<String, Object>> respList) {
-    List<AdminUtilRequestData> reqData =
-        respList
-            .stream()
-            .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
-            .collect(Collectors.toList());
-    reqData.forEach(System.out::println);
-    return reqData;
+    return respList
+        .stream()
+        .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
+        .collect(Collectors.toList());
   }
 }

@@ -47,6 +47,13 @@ public final class UserOrgDaoImpl implements UserOrgDao {
   }
 
   @Override
+  public Response getUserOrgListByUserId(String userId, RequestContext context) {
+    Map<String, Object> compositeKey = new LinkedHashMap<>(2);
+    compositeKey.put(JsonKey.USER_ID, userId);
+    return cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, compositeKey, context);
+  }
+
+  @Override
   public Response getUserOrgDetails(String userId, String organisationId, RequestContext context) {
     Map<String, Object> searchMap = new LinkedHashMap<>(2);
     searchMap.put(JsonKey.USER_ID, userId);
