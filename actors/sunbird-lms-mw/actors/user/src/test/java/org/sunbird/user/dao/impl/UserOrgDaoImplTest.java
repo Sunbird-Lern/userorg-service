@@ -5,6 +5,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -29,10 +30,14 @@ public class UserOrgDaoImplTest {
 
   private static CassandraOperationImpl cassandraOperationImpl;
 
-  @Before
-  public void beforeEachTest() {
+  @BeforeClass
+  public static void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
+  }
+
+  @Before
+  public void beforeEachTest() {
     Response response = new Response();
     when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
