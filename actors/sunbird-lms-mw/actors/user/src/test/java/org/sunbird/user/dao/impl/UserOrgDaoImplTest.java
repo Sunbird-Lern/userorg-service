@@ -39,7 +39,6 @@ public class UserOrgDaoImplTest {
   @Before
   public void beforeEachTest() {
     Response response = new Response();
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
@@ -48,6 +47,7 @@ public class UserOrgDaoImplTest {
   @Test
   public void testupdateUserOrg() {
     Response response = new Response();
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.updateRecord(
             Mockito.anyString(),
             Mockito.anyString(),

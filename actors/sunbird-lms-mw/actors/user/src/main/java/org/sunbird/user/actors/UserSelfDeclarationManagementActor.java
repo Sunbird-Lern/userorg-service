@@ -132,16 +132,14 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     Response res = userOrgDao.getUserOrgDetails(userId, null, context);
     List<Map<String, Object>> userOrgLst = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-    if (!(userOrgLst.size() == 1
-        && userOrgLst.get(0).get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId))) {
-      for (Map<String, Object> stringObjectMap : userOrgLst) {
-        if (!stringObjectMap.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
-          String organisationId = (String) stringObjectMap.get(JsonKey.ORGANISATION_ID);
-          Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
-          if (null != organisation) {
-            userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getExternalId());
-            userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.getOrgName());
-          }
+
+    for (Map<String, Object> userOrg : userOrgLst) {
+      if (!userOrg.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
+        String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
+        Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
+        if (null != organisation && !organisation.isRootOrg()) {
+          userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getExternalId());
+          userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.getOrgName());
         }
       }
     }
