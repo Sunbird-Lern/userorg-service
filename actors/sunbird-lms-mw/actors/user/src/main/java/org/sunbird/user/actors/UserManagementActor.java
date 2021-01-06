@@ -521,11 +521,10 @@ public class UserManagementActor extends BaseActor {
         userSelfDeclarationDao.getUserSelfDeclaredFields(userId, actorMessage.getRequestContext());
     if (!CollectionUtils.isEmpty(declredDetails)) {
       UserDeclareEntity userDeclareEntity =
-          mapper.convertValue(declredDetails, UserDeclareEntity.class);
+          mapper.convertValue(declredDetails.get(0), UserDeclareEntity.class);
       Map declaredInfo = userDeclareEntity.getUserInfo();
-      if (StringUtils.isNotEmpty(
-              (CharSequence) declaredInfo.get(JsonKey.DECLARED_SCHOOL_UDISE_CODE))
-          && !org.get(JsonKey.EXTERNAL_ID)
+      if (StringUtils.isEmpty((String) declaredInfo.get(JsonKey.DECLARED_SCHOOL_UDISE_CODE))
+          || !org.get(JsonKey.EXTERNAL_ID)
               .equals(declaredInfo.get(JsonKey.DECLARED_SCHOOL_UDISE_CODE))) {
         declaredInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, org.get(JsonKey.EXTERNAL_ID));
         declaredInfo.put(JsonKey.DECLARED_SCHOOL_NAME, org.get(JsonKey.ORG_NAME));
