@@ -53,11 +53,7 @@ public class ProjectUtil {
           + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
   public static final String[] excludes =
       new String[] {
-        JsonKey.COMPLETENESS,
-        JsonKey.MISSING_FIELDS,
-        JsonKey.PROFILE_VISIBILITY,
-        JsonKey.LOGIN_ID,
-        JsonKey.USER_ID
+        JsonKey.COMPLETENESS, JsonKey.MISSING_FIELDS, JsonKey.PROFILE_VISIBILITY, JsonKey.LOGIN_ID
       };
 
   private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
