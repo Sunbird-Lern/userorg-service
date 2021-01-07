@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -182,23 +183,28 @@ public class DataCacheHandler implements Runnable {
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Set<String> roleSet = new HashSet<>();
-    if (null != responseList && !responseList.isEmpty()) {
+    if (CollectionUtils.isNotEmpty(responseList)) {
       for (Map<String, Object> resultMap : responseList) {
-        roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
-        roleMap.put(
-            ((String) resultMap.get(JsonKey.ID)).trim(),
-            ((String) resultMap.get(JsonKey.NAME)).trim());
+        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
+          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
+          roleMap.put(
+              ((String) resultMap.get(JsonKey.ID)).trim(),
+              ((String) resultMap.get(JsonKey.NAME)).trim());
+        }
       }
     }
+
     Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE, null);
     List<Map<String, Object>> responseList2 =
         (List<Map<String, Object>>) response2.get(JsonKey.RESPONSE);
-    if (null != responseList2 && !responseList2.isEmpty()) {
-      for (Map<String, Object> resultMap2 : responseList2) {
-        roleSet.add(((String) resultMap2.get(JsonKey.ID)).trim());
-        roleMap.put(
-            ((String) resultMap2.get(JsonKey.ID)).trim(),
-            ((String) resultMap2.get(JsonKey.NAME)).trim());
+    if (CollectionUtils.isNotEmpty(responseList2)) {
+      for (Map<String, Object> resultMap : responseList2) {
+        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
+          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
+          roleMap.put(
+              ((String) resultMap.get(JsonKey.ID)).trim(),
+              ((String) resultMap.get(JsonKey.NAME)).trim());
+        }
       }
     }
 
