@@ -94,7 +94,6 @@ public class DataCacheHandler implements Runnable {
     cacheTelemetryPdata(telemetryPdata);
     cacheUserTypeOrSubTypeConfig(userTypeOrSubTypeConfigMap);
     initLocationOrderMap();
-    Set<Map<String, String>> roleSet = new HashSet<>();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
   }
 
