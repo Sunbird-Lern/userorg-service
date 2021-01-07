@@ -1,7 +1,5 @@
 package org.sunbird.user.service;
 
-import akka.dispatch.Futures;
-import akka.dispatch.Mapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -38,8 +36,6 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
-import scala.concurrent.ExecutionContextExecutor;
-import scala.concurrent.Future;
 
 public class UserProfileReadService {
 
@@ -54,12 +50,6 @@ public class UserProfileReadService {
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
   private ObjectMapper mapper = new ObjectMapper();
-  private ExecutionContextExecutor executor;
-
-  public UserProfileReadService(ExecutionContextExecutor executor) {
-    super();
-    this.executor = executor;
-  }
 
   public Response getUserProfileData(Request actorMessage) {
     String id = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
@@ -100,8 +90,7 @@ public class UserProfileReadService {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
 
-    Future<Map<String, Object>> managedTokenFuture =
-        Futures.future(() -> getManagedToken(actorMessage, userId, result, managedBy), executor);
+    getManagedToken(actorMessage, userId, result, managedBy);
 
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
@@ -117,14 +106,6 @@ public class UserProfileReadService {
     }
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
-    managedTokenFuture.map(
-        new Mapper<Map<String, Object>, Map<String, Object>>() {
-          @Override
-          public Map<String, Object> apply(Map<String, Object> managedRes) {
-            return managedRes;
-          }
-        },
-        executor);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
