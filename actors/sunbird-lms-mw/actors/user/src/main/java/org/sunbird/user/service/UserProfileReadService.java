@@ -125,6 +125,8 @@ public class UserProfileReadService {
           }
         },
         executor);
+    // For Backward compatibility , In ES we were sending identifier field
+    result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
@@ -173,8 +175,8 @@ public class UserProfileReadService {
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     // check whether is_deletd true or false
-    boolean isDeleted = user.getIsDeleted();
-    if (isDeleted) {
+    Boolean isDeleted = user.getIsDeleted();
+    if (null != isDeleted && isDeleted.booleanValue()) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
 
