@@ -34,7 +34,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.request.UserRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
@@ -52,16 +51,19 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserType;
+import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.org.UserOrg;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
+import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -85,6 +87,8 @@ public class UserManagementActor extends BaseActor {
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserClient userClient = new UserClientImpl();
+  private static UserSelfDeclarationDao userSelfDeclarationDao =
+      UserSelfDeclarationDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -155,8 +159,6 @@ public class UserManagementActor extends BaseActor {
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     userMap.put(JsonKey.CHANNEL, channel);
-    userMap.put(JsonKey.USER_TYPE, UserType.OTHER.getTypeName());
-
     if (isV4) {
       logger.info(
           actorMessage.getRequestContext(),
@@ -192,6 +194,7 @@ public class UserManagementActor extends BaseActor {
     actorMessage.toLower();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     boolean isPrivate = false;
+    boolean updateUserSchoolOrg = false;
     if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     }
@@ -275,7 +278,23 @@ public class UserManagementActor extends BaseActor {
     }
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      if (isPrivate) {
+      Organisation organisation = null;
+      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
+        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+        organisation =
+            organisationClient.esGetOrgByExternalId(
+                String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
+                null,
+                actorMessage.getRequestContext());
+        Map<String, Object> org =
+            (Map<String, Object>) mapper.convertValue(organisation, Map.class);
+        List<Map<String, Object>> orgList = new ArrayList();
+        orgList.add(org);
+        actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
+        updateUserSchoolOrg =
+            (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
+      }
+      if (isPrivate || updateUserSchoolOrg) {
         updateUserOrganisations(actorMessage);
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
@@ -482,13 +501,36 @@ public class UserManagementActor extends BaseActor {
       if (!orgList.isEmpty()) {
         for (Map<String, Object> org : orgList) {
           createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+          updateUserSelfDeclaredData(actorMessage, org, userId);
         }
       }
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
+      // custodian-org
+      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
+        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      }
       logger.info(
           actorMessage.getRequestContext(),
           "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+    }
+  }
+
+  private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
+    List<Map<String, Object>> declredDetails =
+        userSelfDeclarationDao.getUserSelfDeclaredFields(userId, actorMessage.getRequestContext());
+    if (!CollectionUtils.isEmpty(declredDetails)) {
+      UserDeclareEntity userDeclareEntity =
+          mapper.convertValue(declredDetails.get(0), UserDeclareEntity.class);
+      Map declaredInfo = userDeclareEntity.getUserInfo();
+      if (StringUtils.isEmpty((String) declaredInfo.get(JsonKey.DECLARED_SCHOOL_UDISE_CODE))
+          || !org.get(JsonKey.EXTERNAL_ID)
+              .equals(declaredInfo.get(JsonKey.DECLARED_SCHOOL_UDISE_CODE))) {
+        declaredInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, org.get(JsonKey.EXTERNAL_ID));
+        declaredInfo.put(JsonKey.DECLARED_SCHOOL_NAME, org.get(JsonKey.ORG_NAME));
+        userSelfDeclarationDao.upsertUserSelfDeclaredFields(
+            userDeclareEntity, actorMessage.getRequestContext());
+      }
     }
   }
 
@@ -514,10 +556,11 @@ public class UserManagementActor extends BaseActor {
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
-        userOrg.setHashTagId((String) (org.get(JsonKey.HASH_TAG_ID)));
+        userOrg.setHashTagId((String) (org.get(JsonKey.HASHTAGID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
+        userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }

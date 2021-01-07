@@ -1,7 +1,7 @@
 package org.sunbird.user;
 
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
@@ -229,6 +229,28 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         testScenario(
             getRequest(
                 true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER),
+            null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserSuccessWithLocationSchool() {
+    Future<Object> future1 = Futures.future(() -> getEsResponse(), system.dispatcher());
+    Future<Object> future2 = Futures.future(() -> getEsResponse(), system.dispatcher());
+    when(Patterns.ask(
+            Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
+        .thenReturn(future1)
+        .thenReturn(future2);
+
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+    boolean result =
+        testScenario(
+            getRequest(
+                true,
+                true,
+                true,
+                getUpdateRequestWithLocationCodeSchoolAsOrgExtId(),
+                ActorOperations.UPDATE_USER),
             null);
     assertTrue(result);
   }

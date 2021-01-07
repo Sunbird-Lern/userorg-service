@@ -1,8 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -27,6 +26,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
+import org.sunbird.actorutil.org.OrganisationClient;
+import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.UserClient;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
@@ -45,7 +46,9 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
+import org.sunbird.models.user.UserType;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -67,7 +70,8 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   SunbirdMWService.class,
   PipeToSupport.PipeableFuture.class,
-  UserClientImpl.class
+  UserClientImpl.class,
+  OrganisationClientImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public abstract class UserManagementActorTestBase {
@@ -79,6 +83,7 @@ public abstract class UserManagementActorTestBase {
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   public static UserClient userClient;
+  private static OrganisationClient organisationClient;
 
   @Before
   public void beforeEachTest() {
@@ -189,6 +194,7 @@ public abstract class UserManagementActorTestBase {
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
+    when(DataCacheHandler.getUserTypesConfig()).thenReturn(getUserTypes());
     when(UserUtil.getActiveUserOrgDetails(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUserOrgDetails());
     Map<String, String> configMap = new HashMap<>();
@@ -196,6 +202,15 @@ public abstract class UserManagementActorTestBase {
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     reqMap = getMapObject();
+    organisationClient = mock(OrganisationClient.class);
+    mockStatic(OrganisationClientImpl.class);
+    when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
+    Organisation org = new Organisation();
+    org.setRootOrgId("anyOrgId");
+    org.setId("anyOrgId");
+    when(organisationClient.esGetOrgByExternalId(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(org);
   }
 
   public Response getOrgFromCassandra() {
@@ -283,6 +298,16 @@ public abstract class UserManagementActorTestBase {
     return reqMap;
   }
 
+  public Map<String, List<String>> getUserTypes() {
+    Map<String, List<String>> userTypeOrSubTypeConfigMap = new HashMap<>();
+    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName().toUpperCase(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(
+        UserType.ADMINISTRATOR.getTypeName().toUpperCase(), Arrays.asList("BRC,DAO"));
+    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName().toUpperCase(), Arrays.asList());
+    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName().toUpperCase(), Arrays.asList());
+    return userTypeOrSubTypeConfigMap;
+  }
+
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
 
     TestKit probe = new TestKit(system);
@@ -346,6 +371,15 @@ public abstract class UserManagementActorTestBase {
     Map<String, Object> reqObj = new HashMap();
     reqObj.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCode"));
     reqObj.put(JsonKey.USER_ID, "userId");
+    getUpdateRequestWithDefaultFlags(reqObj);
+    return reqObj;
+  }
+
+  public Map<String, Object> getUpdateRequestWithLocationCodeSchoolAsOrgExtId() {
+    Map<String, Object> reqObj = new HashMap();
+    reqObj.put(JsonKey.ORG_EXTERNAL_ID, "orgExtId");
+    reqObj.put(JsonKey.USER_ID, "userId");
+    reqObj.put("updateUserSchoolOrg", true);
     getUpdateRequestWithDefaultFlags(reqObj);
     return reqObj;
   }

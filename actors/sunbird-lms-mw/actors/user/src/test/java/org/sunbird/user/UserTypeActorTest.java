@@ -53,7 +53,7 @@ public class UserTypeActorTest {
         types.add(entry.getValue());
       }
     }
-    if (types.contains("OTHER") && types.contains("TEACHER") && types.size() == 2) return true;
+    if (types.size() == 4) return true;
     return false;
   }
 }

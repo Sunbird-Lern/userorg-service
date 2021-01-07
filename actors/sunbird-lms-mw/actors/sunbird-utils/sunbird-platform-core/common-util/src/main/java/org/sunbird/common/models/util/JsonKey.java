@@ -637,6 +637,8 @@ public final class JsonKey {
   public static final String WITH_TOKENS = "withTokens";
   public static final String DECLARED_EMAIL = "declared-email";
   public static final String DECLARED_PHONE = "declared-phone";
+  public static final String DECLARED_SCHOOL_UDISE_CODE = "declared-school-udise-code";
+  public static final String DECLARED_SCHOOL_NAME = "declared-school-name";
   public static final String GOOGLE_CAPTCHA_PRIVATE_KEY = "google_captcha_private_key";
   public static final String GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY =
       "google_captcha_mobile_private_key";
@@ -699,6 +701,9 @@ public final class JsonKey {
   public static final String FEED_LIMIT = "feed_limit";
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
+  public static final String REQUEST_ID = "requestid";
+  public static final String LOCATION_TYPE_SCHOOL = "school";
+  public static final String UPDATE_USER_SCHOOL_ORG = "updateUserSchoolOrg";
 
   private JsonKey() {}
 }
