@@ -125,6 +125,8 @@ public class UserProfileReadService {
           }
         },
         executor);
+    // For Backward compatibility , In ES we were sending identifier field
+    result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
