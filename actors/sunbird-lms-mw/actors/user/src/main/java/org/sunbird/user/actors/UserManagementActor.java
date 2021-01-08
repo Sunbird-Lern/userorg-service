@@ -193,27 +193,27 @@ public class UserManagementActor extends BaseActor {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
-    boolean isPrivate = false;
+    // boolean isPrivate = false;
     boolean updateUserSchoolOrg = false;
-    if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
+    /*if (actorMessage.getContext().containsKey(JsonKey.PRIVATE)) {
       isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
-    }
+    }*/
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-    validateUserOrganisations(actorMessage, isPrivate);
+    // validateUserOrganisations(actorMessage, isPrivate);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    if (!isPrivate) {
-      if (StringUtils.isNotBlank(callerId)) {
-        userService.validateUploader(actorMessage, actorMessage.getRequestContext());
-      } else {
-        userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
-      }
+    // if (!isPrivate) {
+    if (StringUtils.isNotBlank(callerId)) {
+      userService.validateUploader(actorMessage, actorMessage.getRequestContext());
+    } else {
+      userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
     }
+    // }
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
@@ -294,7 +294,8 @@ public class UserManagementActor extends BaseActor {
         updateUserSchoolOrg =
             (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
-      if (isPrivate || updateUserSchoolOrg) {
+      if ( // isPrivate ||
+      updateUserSchoolOrg) {
         updateUserOrganisations(actorMessage);
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);

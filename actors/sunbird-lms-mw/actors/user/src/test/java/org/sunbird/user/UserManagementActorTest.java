@@ -7,10 +7,8 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -305,14 +303,16 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
   }
+  /*
 
-  @Test
-  public void testUpdateUserOrgFailureWithoutUserIdPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(false);
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    boolean result = testScenario(request, ResponseCode.errorUnsupportedField);
-    assertTrue(result);
-  }
+    @Test
+    public void testUpdateUserOrgFailureWithoutUserIdPrivateApi() {
+      Map<String, Object> req = getUserOrgUpdateRequest(false);
+      Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
+      boolean result = testScenario(request, ResponseCode.errorUnsupportedField);
+      assertTrue(result);
+    }
+  */
 
   @Test
   public void testUpdateUserOrgFailureWithPublicApi() {
@@ -322,7 +322,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     boolean result = testScenario(request, ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
-
+  /*
   @Test
   public void testUpdateUserOrgFailureWithOrganisationsPrivateApi() {
     Map<String, Object> req = getUserOrgUpdateRequest(false);
@@ -404,7 +404,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(false));
     boolean result = testScenario(request, ResponseCode.invalidRole);
     assertTrue(result);
-  }
+  }*/
 
   // @Test
   public void testCreateUserSuccessWithUserSync() {
@@ -469,10 +469,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS), null);
     assertTrue(result);
   }
-
+  /*
   private Map<String, Object> getSearchResults() {
     Map<String, Object> searchRequestMap = new HashMap<>();
 
     return searchRequestMap;
-  }
+  }*/
 }
