@@ -303,16 +303,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
   }
-  /*
-
-    @Test
-    public void testUpdateUserOrgFailureWithoutUserIdPrivateApi() {
-      Map<String, Object> req = getUserOrgUpdateRequest(false);
-      Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-      boolean result = testScenario(request, ResponseCode.errorUnsupportedField);
-      assertTrue(result);
-    }
-  */
 
   @Test
   public void testUpdateUserOrgFailureWithPublicApi() {
@@ -322,89 +312,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     boolean result = testScenario(request, ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
-  /*
-  @Test
-  public void testUpdateUserOrgFailureWithOrganisationsPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(false);
-    req.put(JsonKey.ORGANISATIONS, new HashMap<>());
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    boolean result = testScenario(request, ResponseCode.dataTypeError);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgFailureWithInvalidOrganisationsPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    req.put(JsonKey.ORGANISATIONS, Arrays.asList("a", "b"));
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    boolean result = testScenario(request, ResponseCode.dataTypeError);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgFailureWithoutOrganisationsPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    ((Map) ((List) req.get(JsonKey.ORGANISATIONS)).get(0)).put(JsonKey.ORGANISATION_ID, "");
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    boolean result = testScenario(request, ResponseCode.mandatoryParamsMissing);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgFailureWithInvalidRolesDataTypePrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    ((Map) ((List) req.get(JsonKey.ORGANISATIONS)).get(0)).put(JsonKey.ROLES, "String");
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    boolean result = testScenario(request, ResponseCode.dataTypeError);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgFailureWithEmptyRolesReqPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    ((Map) ((List) req.get(JsonKey.ORGANISATIONS)).get(0)).put(JsonKey.ROLES, new ArrayList<>());
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    boolean result = testScenario(request, ResponseCode.emptyRolesProvided);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgSuccessPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    getUpdateRequestWithDefaultFlags(req);
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    mockForUserOrgUpdate();
-    boolean result = testScenario(request, null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgSuccessWithoutRolesPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    getUpdateRequestWithDefaultFlags(req);
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    mockForUserOrgUpdate();
-    boolean result = testScenario(request, null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUpdateUserOrgFailureWithInvalidRolesPrivateApi() {
-    Map<String, Object> req = getUserOrgUpdateRequest(true);
-    Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER);
-    request.getContext().put(JsonKey.PRIVATE, true);
-    mockForUserOrgUpdate();
-    when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(false));
-    boolean result = testScenario(request, ResponseCode.invalidRole);
-    assertTrue(result);
-  }*/
 
   // @Test
   public void testCreateUserSuccessWithUserSync() {
@@ -469,10 +376,4 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS), null);
     assertTrue(result);
   }
-  /*
-  private Map<String, Object> getSearchResults() {
-    Map<String, Object> searchRequestMap = new HashMap<>();
-
-    return searchRequestMap;
-  }*/
 }
