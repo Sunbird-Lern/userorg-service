@@ -1,12 +1,13 @@
-package org.sunbird.models.adminutil;
+package org.sunbird.models.FormUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.sunbird.models.adminutil.Params;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AdminUtilRequestPayload implements Serializable {
+public class FormApiUtilRequestPayload implements Serializable {
   private static final long serialVersionUID = -2362783406031347676L;
 
   @JsonProperty private String id;
@@ -17,9 +18,9 @@ public class AdminUtilRequestPayload implements Serializable {
 
   @JsonProperty private Params params;
 
-  @JsonProperty private AdminUtilRequest request;
+  @JsonProperty private FormUtilRequest request;
 
-  public AdminUtilRequestPayload() {}
+  public FormApiUtilRequestPayload() {}
   /**
    * @param request
    * @param ver
@@ -27,8 +28,8 @@ public class AdminUtilRequestPayload implements Serializable {
    * @param params
    * @param ts
    */
-  public AdminUtilRequestPayload(
-      String id, String ver, long ts, Params params, AdminUtilRequest request) {
+  public FormApiUtilRequestPayload(
+      String id, String ver, long ts, Params params, FormUtilRequest request) {
     super();
     this.id = id;
     this.ver = ver;
@@ -78,12 +79,12 @@ public class AdminUtilRequestPayload implements Serializable {
   }
 
   @JsonProperty("request")
-  public AdminUtilRequest getRequest() {
+  public FormUtilRequest getRequest() {
     return request;
   }
 
   @JsonProperty("request")
-  public void setRequest(AdminUtilRequest request) {
+  public void setRequest(FormUtilRequest request) {
     this.request = request;
   }
 

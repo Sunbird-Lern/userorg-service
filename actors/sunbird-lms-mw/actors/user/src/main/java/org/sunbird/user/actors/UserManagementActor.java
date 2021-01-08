@@ -246,6 +246,11 @@ public class UserManagementActor extends BaseActor {
         && StringUtils.isBlank((String) requestMap.get(JsonKey.RECOVERY_PHONE))) {
       requestMap.put(JsonKey.RECOVERY_PHONE, null);
     }
+    // update userSubType to null if userType is changed and subType are not provided
+    if (requestMap.containsKey(JsonKey.USER_TYPE)
+        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
+      requestMap.put(JsonKey.USER_SUB_TYPE, null);
+    }
 
     Map<String, Boolean> userBooleanMap =
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());

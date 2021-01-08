@@ -1,21 +1,21 @@
 /** */
 package org.sunbird.learner.util;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
-import org.sunbird.models.user.UserType;
+import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
+import org.sunbird.models.FormUtil.FormUtilRequest;
 
 /**
  * This class will handle the data cache.
@@ -96,11 +96,50 @@ public class DataCacheHandler implements Runnable {
 
   private void cacheUserTypeOrSubTypeConfig(Map<String, List<String>> userTypeOrSubTypeConfigMap) {
 
-    // TODO : Get data from form Api
-    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(UserType.ADMINISTRATOR.getTypeName(), Arrays.asList("BRC,DAO"));
-    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName(), Arrays.asList());
+    // TODO : Get data from DB
+    //
+    List<String> stateCode = new ArrayList<>();
+    stateCode.add(JsonKey.DEFAULT_PERSONA);
+    RequestContext reqContext = new RequestContext();
+    reqContext.setReqId(UUID.randomUUID().toString());
+    reqContext.setDebugEnabled("false");
+    FormUtilRequest reqObj = new FormUtilRequest();
+    reqObj.setSubType(JsonKey.DEFAULT_PERSONA);
+    reqObj.setType(JsonKey.PROFILE_CONFIG);
+    reqObj.setAction(JsonKey.GET);
+    reqObj.setComponent("*");
+    FormApiUtilRequestPayload formApiUtilRequestPayload =
+        FormApiUtilHandler.prepareFormApiUtilPayload(reqObj);
+    Map<String, Object> formData =
+        FormApiUtilHandler.fetchFormApiConfigDetails(formApiUtilRequestPayload, reqContext);
+    if (MapUtils.isNotEmpty(formData)) {
+      Map<String, Object> formDataMap = (Map<String, Object>) formData.get(JsonKey.FORM);
+      if (MapUtils.isNotEmpty(formDataMap)) {
+        Map<String, Object> dataMap = (Map<String, Object>) formDataMap.get(JsonKey.DATA);
+        if (MapUtils.isNotEmpty(dataMap)) {
+          List<Map<String, Object>> fields =
+              (List<Map<String, Object>>) dataMap.get(JsonKey.FIELDS);
+          for (Map<String, Object> field : fields) {
+            if (JsonKey.PERSONA.equals(field.get(JsonKey.CODE))) {
+              Map<String, Object> childrenMap = (Map<String, Object>) field.get(JsonKey.CHILDREN);
+              for (Map.Entry<String, Object> entryItr : childrenMap.entrySet()) {
+                String userType = entryItr.getKey();
+                List<Map<String, Object>> personaConfigLists =
+                    (List<Map<String, Object>>) entryItr.getValue();
+                List<String> userSubTypes = new ArrayList<>();
+                for (Map<String, Object> configMap : personaConfigLists) {
+                  if (JsonKey.SUB_PERSONA.equals(configMap.get(JsonKey.CODE))) {
+                    List<String> userSubTypeLists = (List<String>) configMap.get(JsonKey.OPTIONS);
+                    userSubTypes.addAll(userSubTypeLists);
+                  }
+                }
+                userTypeOrSubTypeConfigMap.put(userType, userSubTypes);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   private void initLocationOrderMap() {

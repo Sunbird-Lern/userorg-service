@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -14,58 +13,63 @@ import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.models.adminutil.AdminUtilRequest;
-import org.sunbird.models.adminutil.AdminUtilRequestData;
-import org.sunbird.models.adminutil.AdminUtilRequestPayload;
+import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
+import org.sunbird.models.FormUtil.FormUtilRequest;
 import org.sunbird.models.adminutil.Params;
 
-public class AdminUtilHandler {
-  private static LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);
+public class FormApiUtilHandler {
+
+  private static LoggerUtil logger = new LoggerUtil(FormApiUtilHandler.class);
 
   /**
-   * Prepare payload for admin utils
+   * Prepare payload for Form Api Config utils
    *
-   * @param reqData List<AdminUtilRequestData>
-   * @return adminUtilsReq AdminUtilRequestPayload
+   * @param reqData FormUtilRequest
+   * @return formApiUtilReq FormApiUtilRequestPayload
    */
-  public static AdminUtilRequestPayload prepareAdminUtilPayload(
-      List<AdminUtilRequestData> reqData) {
-    AdminUtilRequestPayload adminUtilsReq = new AdminUtilRequestPayload();
-    adminUtilsReq.setId(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD);
-    adminUtilsReq.setVer(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD_VER);
-    adminUtilsReq.setTs(Calendar.getInstance().getTime().getTime());
-    adminUtilsReq.setParams(new Params());
-    adminUtilsReq.setRequest(new AdminUtilRequest(reqData));
-    return adminUtilsReq;
+  public static FormApiUtilRequestPayload prepareFormApiUtilPayload(FormUtilRequest reqData) {
+    FormApiUtilRequestPayload formApiUtilReq = new FormApiUtilRequestPayload();
+    formApiUtilReq.setId(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD);
+    formApiUtilReq.setVer(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD_VER);
+    formApiUtilReq.setTs(Calendar.getInstance().getTime().getTime());
+    formApiUtilReq.setParams(new Params());
+    formApiUtilReq.setRequest(reqData);
+    return formApiUtilReq;
   }
 
   /**
-   * Fetch encrypted token list from admin utils
+   * Fetch Form Api config details of location, userType, userSubType for all states
    *
-   * @param reqObject AdminUtilRequestPayload
-   * @return encryptedTokenList
+   * @param reqObject
+   * @param context
+   * @return
    */
-  public static Map<String, Object> fetchEncryptedToken(
-      AdminUtilRequestPayload reqObject, RequestContext context) {
+  public static Map<String, Object> fetchFormApiConfigDetails(
+      FormApiUtilRequestPayload reqObject, RequestContext context) {
+
     Map<String, Object> data = null;
     ObjectMapper mapper = new ObjectMapper();
     try {
-
       String body = mapper.writeValueAsString(reqObject);
-      logger.info(context, "AdminUtilHandler :: fetchEncryptedToken: request payload" + body);
+      logger.info(
+          context, "FormApiUtilHandler :: fetchFormApiConfigDetails: request payload" + body);
       Map<String, String> headers = new HashMap<>();
       headers.put("Content-Type", "application/json");
+      headers.put(
+          "Authorization",
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ4OFNxQVNvSVFINFluWTY4ejhSOVluWE1qbzYwZWFFUCJ9.nUoXDSIwF9KGOa__Go9jmWk66yCFc1fPsxF-saNyv9M");
       ProjectUtil.setTraceIdInHeader(headers, context);
       String response =
           HttpClientUtil.post(
-              ProjectUtil.getConfigValue(JsonKey.ADMINUTIL_BASE_URL)
-                  + ProjectUtil.getConfigValue(JsonKey.ADMINUTIL_SIGN_ENDPOINT),
+              ProjectUtil.getConfigValue(JsonKey.FORM_API_BASE_URL)
+                  + ProjectUtil.getConfigValue(JsonKey.FORM_API_ENDPOINT),
               body,
               headers);
       data = mapper.readValue(response, Map.class);
       if (MapUtils.isNotEmpty(data)) {
         data = (Map<String, Object>) data.get(JsonKey.RESULT);
       }
+
     } catch (IOException e) {
       logger.error(
           context,
@@ -78,7 +82,7 @@ public class AdminUtilHandler {
     } catch (Exception e) {
       logger.error(
           context,
-          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
           e);
       throw new ProjectCommonException(
           ResponseCode.unableToParseData.getErrorCode(),
