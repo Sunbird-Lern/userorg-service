@@ -95,8 +95,7 @@ public class UserProfileReadService {
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
         && (userId.equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
-        && ((StringUtils.isNotBlank(requestFields) && !requestFields.contains(JsonKey.EXTERNAL_IDS))
-            || (StringUtils.isBlank(requestFields)))) {
+        && StringUtils.isBlank(requestFields)) {
       result.put(
           JsonKey.EXTERNAL_IDS,
           fetchUserExternalIdentity(userId, result, true, actorMessage.getRequestContext()));
