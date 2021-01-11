@@ -102,12 +102,7 @@ public class UserController extends BaseController {
   }
 
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
-    final boolean isPrivate;
-    if (httpRequest.path().contains(JsonKey.PRIVATE)) {
-      isPrivate = true;
-    } else {
-      isPrivate = false;
-    }
+
     return handleRequest(
         ActorOperations.UPDATE_USER.getValue(),
         httpRequest.body().asJson(),
@@ -116,7 +111,6 @@ public class UserController extends BaseController {
           request
               .getContext()
               .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
-          request.getContext().put(JsonKey.PRIVATE, isPrivate);
           new UserRequestValidator().validateUpdateUserRequest(request);
           request
               .getContext()
