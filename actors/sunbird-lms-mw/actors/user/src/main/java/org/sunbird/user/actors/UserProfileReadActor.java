@@ -55,8 +55,7 @@ public class UserProfileReadActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private UserProfileReadService profileReadService =
-      new UserProfileReadService(getContext().dispatcher());
+  private UserProfileReadService profileReadService = new UserProfileReadService();
 
   @Override
   public void onReceive(Request request) throws Throwable {

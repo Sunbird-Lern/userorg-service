@@ -164,7 +164,7 @@ public class UserProfileReadActorTest {
     setEsResponse(null);
     UserProfileReadService userProfileReadService = PowerMockito.mock(UserProfileReadService.class);
     PowerMockito.whenNew(UserProfileReadService.class)
-        .withAnyArguments()
+        .withNoArguments()
         .thenReturn(userProfileReadService);
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, null);
@@ -183,7 +183,7 @@ public class UserProfileReadActorTest {
     reqMap = getUserProfileRequest(VALID_USER_ID);
     UserProfileReadService userProfileReadService = PowerMockito.mock(UserProfileReadService.class);
     PowerMockito.whenNew(UserProfileReadService.class)
-        .withAnyArguments()
+        .withNoArguments()
         .thenReturn(userProfileReadService);
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, getValidUserResponse());
@@ -264,7 +264,7 @@ public class UserProfileReadActorTest {
     req.put(JsonKey.USER_ID, VALID_USER_ID);
     UserProfileReadService userProfileReadService = PowerMockito.mock(UserProfileReadService.class);
     PowerMockito.whenNew(UserProfileReadService.class)
-        .withAnyArguments()
+        .withNoArguments()
         .thenReturn(userProfileReadService);
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, getUserResponseMap());
@@ -330,7 +330,7 @@ public class UserProfileReadActorTest {
 
     UserProfileReadService userProfileReadService = PowerMockito.mock(UserProfileReadService.class);
     PowerMockito.whenNew(UserProfileReadService.class)
-        .withAnyArguments()
+        .withNoArguments()
         .thenReturn(userProfileReadService);
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, getUserResponseMap());
