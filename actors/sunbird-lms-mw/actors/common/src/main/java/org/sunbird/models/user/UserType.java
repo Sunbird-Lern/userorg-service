@@ -1,10 +1,10 @@
 package org.sunbird.models.user;
 
 public enum UserType {
-  TEACHER("Teacher"),
-  ADMINISTRATOR("Administrator"),
-  GUARDIAN("Guardian"),
-  STUDENT("Student");
+  TEACHER("teacher"),
+  ADMINISTRATOR("administrator"),
+  GUARDIAN("guardian"),
+  STUDENT("student");
 
   // Todo to be removed
   private String typeName;
