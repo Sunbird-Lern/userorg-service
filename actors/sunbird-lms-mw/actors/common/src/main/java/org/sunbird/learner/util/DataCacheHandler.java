@@ -101,7 +101,8 @@ public class DataCacheHandler implements Runnable {
 
     // TODO : Get data from form Api
     userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(UserType.ADMINISTRATOR.getTypeName(), Arrays.asList("BRC,DAO"));
+    userTypeOrSubTypeConfigMap.put(
+        UserType.ADMINISTRATOR.getTypeName(), Arrays.asList("BRC", "DAO"));
     userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName(), Arrays.asList());
     userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName(), Arrays.asList());
   }
