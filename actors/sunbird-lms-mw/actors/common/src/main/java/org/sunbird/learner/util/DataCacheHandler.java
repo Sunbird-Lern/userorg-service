@@ -3,11 +3,14 @@ package org.sunbird.learner.util;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -178,17 +181,29 @@ public class DataCacheHandler implements Runnable {
     Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (null != responseList && !responseList.isEmpty()) {
+    Set<String> roleSet = new HashSet<>();
+    if (CollectionUtils.isNotEmpty(responseList)) {
       for (Map<String, Object> resultMap : responseList) {
-        roleMap.put((String) resultMap.get(JsonKey.ID), resultMap.get(JsonKey.NAME));
+        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
+          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
+          roleMap.put(
+              ((String) resultMap.get(JsonKey.ID)).trim(),
+              ((String) resultMap.get(JsonKey.NAME)).trim());
+        }
       }
     }
+
     Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE, null);
     List<Map<String, Object>> responseList2 =
         (List<Map<String, Object>>) response2.get(JsonKey.RESPONSE);
-    if (null != responseList2 && !responseList2.isEmpty()) {
-      for (Map<String, Object> resultMap2 : responseList2) {
-        roleMap.put((String) resultMap2.get(JsonKey.ID), resultMap2.get(JsonKey.NAME));
+    if (CollectionUtils.isNotEmpty(responseList2)) {
+      for (Map<String, Object> resultMap : responseList2) {
+        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
+          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
+          roleMap.put(
+              ((String) resultMap.get(JsonKey.ID)).trim(),
+              ((String) resultMap.get(JsonKey.NAME)).trim());
+        }
       }
     }
 
@@ -197,10 +212,13 @@ public class DataCacheHandler implements Runnable {
         .parallelStream()
         .forEach(
             (roleSetItem) -> {
-              Map<String, String> role = new HashMap<>();
-              role.put(JsonKey.ID, roleSetItem.getKey());
-              role.put(JsonKey.NAME, (String) roleSetItem.getValue());
-              roleList.add(role);
+              if (roleSet.contains(roleSetItem.getKey().trim())) {
+                Map<String, String> role = new HashMap<>();
+                role.put(JsonKey.ID, roleSetItem.getKey().trim());
+                role.put(JsonKey.NAME, ((String) roleSetItem.getValue()).trim());
+                roleList.add(role);
+                roleSet.remove(roleSetItem.getKey().trim());
+              }
             });
   }
 
