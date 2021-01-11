@@ -315,14 +315,14 @@ public class UserProfileReadService {
         String tncUserAcceptedVersion = (String) userMap.get(JsonKey.TNC_ACCEPTED_VERSION);
         Object tncUserAcceptedOn = userMap.get(JsonKey.TNC_ACCEPTED_ON);
         userMap.put(JsonKey.PROMPT_TNC, false);
+        String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
+        logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
+        userMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
         if ((StringUtils.isEmpty(tncUserAcceptedVersion)
                 || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
                 || (null == tncUserAcceptedOn))
             && (tncConfigMap.containsKey(tncLatestVersion))) {
           userMap.put(JsonKey.PROMPT_TNC, true);
-          String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
-          logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
-          userMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
         }
       } catch (Exception e) {
         logger.error(
