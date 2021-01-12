@@ -118,7 +118,6 @@ public class OrgDaoImplTest {
       setEsSearchResponse(getOrgSearchResponseMap());
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);
-      System.out.println("testGetOrgByExternalId resp map ::::::::::::::::::::" + resp);
       Assert.assertNotNull(resp);
 
     } catch (Exception e) {
@@ -135,8 +134,6 @@ public class OrgDaoImplTest {
       setEsSearchResponse(getOrgSearchEmptyResponseMap());
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);
-      System.out.println(
-          "testGetOrgByExternalIdWithEmptyResponse resp map ::::::::::::::::::::" + resp);
       Assert.assertNotNull(resp);
 
     } catch (Exception e) {
