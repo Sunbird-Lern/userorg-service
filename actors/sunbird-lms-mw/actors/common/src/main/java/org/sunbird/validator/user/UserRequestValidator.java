@@ -777,7 +777,7 @@ public class UserRequestValidator extends BaseRequestValidator {
         stateCode = JsonKey.DEFAULT_PERSONA;
       }
       if (!userTypeConfigMap.containsKey(stateCode)) {
-        // Get data from Form Api
+        // Get profile data config
         Map<String, List<String>> userProfileConfigMap =
             FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
         if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {

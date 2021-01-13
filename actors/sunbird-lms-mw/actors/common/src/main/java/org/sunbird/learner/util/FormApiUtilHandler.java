@@ -42,8 +42,9 @@ public class FormApiUtilHandler {
     reqObj.setAction(JsonKey.GET);
     reqObj.setComponent("*");
     FormApiUtilRequestPayload formApiUtilRequestPayload = prepareFormApiUtilPayload(reqObj);
-    Map<String, Object> formData = fetchFormApiConfigDetails(formApiUtilRequestPayload, reqContext);
-    return formData;
+    Map<String, Object> profileConfig =
+        fetchFormApiConfigDetails(formApiUtilRequestPayload, reqContext);
+    return profileConfig;
   }
 
   /**
