@@ -18,7 +18,7 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserUtility;
+import org.sunbird.learner.util.FormApiUtil;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -778,16 +778,15 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
       if (!userTypeConfigMap.containsKey(stateCode)) {
         // Get data from Form Api
-        Map<String, Object> formDataMap = UserUtility.getFormApiConfig(stateCode, context);
         Map<String, List<String>> userProfileConfigMap =
-            UserUtility.getUserTypeFormApiConfig(formDataMap);
+            FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
         if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
           // Get Default Config
           stateCode = JsonKey.DEFAULT_PERSONA;
           userProfileConfigMap = userTypeConfigMap.get(stateCode);
           if (MapUtils.isEmpty(userProfileConfigMap)) {
-            formDataMap = UserUtility.getFormApiConfig(stateCode, context);
-            userProfileConfigMap = UserUtility.getUserTypeFormApiConfig(formDataMap);
+            userProfileConfigMap =
+                FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
             userTypeConfigMap.put(stateCode, userProfileConfigMap);
           }
         } else {

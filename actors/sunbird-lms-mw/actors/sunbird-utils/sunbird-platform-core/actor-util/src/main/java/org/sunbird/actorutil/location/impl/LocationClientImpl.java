@@ -29,14 +29,8 @@ public class LocationClientImpl implements LocationClient {
   private ObjectMapper mapper = new ObjectMapper();
   public static LocationClient locationClient = null;
 
-  public static LocationClient getInstance() {
-    if (locationClient == null) {
-      synchronized (LocationClientImpl.class) {
-        if (locationClient == null) {
-          locationClient = new LocationClientImpl();
-        }
-      }
-    }
+  public static synchronized LocationClient getInstance() {
+    if (locationClient == null) locationClient = new LocationClientImpl();
     return locationClient;
   }
 

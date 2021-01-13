@@ -95,7 +95,6 @@ public abstract class UserManagementActorTestBase {
     ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
     when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
-
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
@@ -158,7 +157,7 @@ public abstract class UserManagementActorTestBase {
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
-    PowerMockito.when(FormApiUtilHandler.fetchFormApiConfigDetails(Mockito.any(), Mockito.any()))
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
         .thenReturn(getFormApiConfig());
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);

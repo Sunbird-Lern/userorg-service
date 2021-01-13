@@ -35,6 +35,17 @@ public class FormApiUtilHandler {
     return formApiUtilReq;
   }
 
+  public static Map<String, Object> getFormApiConfig(String stateCode, RequestContext reqContext) {
+    FormUtilRequest reqObj = new FormUtilRequest();
+    reqObj.setSubType(stateCode);
+    reqObj.setType(JsonKey.PROFILE_CONFIG);
+    reqObj.setAction(JsonKey.GET);
+    reqObj.setComponent("*");
+    FormApiUtilRequestPayload formApiUtilRequestPayload = prepareFormApiUtilPayload(reqObj);
+    Map<String, Object> formData = fetchFormApiConfigDetails(formApiUtilRequestPayload, reqContext);
+    return formData;
+  }
+
   /**
    * Fetch Form Api config details of location, userType, userSubType for all states
    *
