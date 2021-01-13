@@ -27,6 +27,18 @@ import scala.concurrent.duration.Duration;
 public class LocationClientImpl implements LocationClient {
   private static LoggerUtil logger = new LoggerUtil(LocationClientImpl.class);
   private ObjectMapper mapper = new ObjectMapper();
+  public static LocationClient locationClient = null;
+
+  public static LocationClient getInstance() {
+    if (locationClient == null) {
+      synchronized (LocationClientImpl.class) {
+        if (locationClient == null) {
+          locationClient = new LocationClientImpl();
+        }
+      }
+    }
+    return locationClient;
+  }
 
   @Override
   public List<Location> getLocationsByCodes(

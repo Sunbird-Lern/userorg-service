@@ -1,15 +1,17 @@
 package org.sunbird.learner.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.models.util.datasecurity.impl.ServiceFactory;
+import org.sunbird.common.request.RequestContext;
+import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
+import org.sunbird.models.FormUtil.FormUtilRequest;
 
 /**
  * This class is for utility methods for encrypting user data.
@@ -214,5 +216,88 @@ public final class UserUtility {
     logger.info("UserUtility:init:email masked attributes got".concat(emailTypeAttributeKey + ""));
     phoneMaskedAttributes = new ArrayList<>(Arrays.asList(phoneTypeAttributeKey.split(",")));
     logger.info("UserUtility:init:phone masked attributes got".concat(phoneTypeAttributeKey + ""));
+  }
+
+  public static Map<String, Object> getFormApiConfig(String stateCode, RequestContext reqContext) {
+    FormUtilRequest reqObj = new FormUtilRequest();
+    reqObj.setSubType(stateCode);
+    reqObj.setType(JsonKey.PROFILE_CONFIG);
+    reqObj.setAction(JsonKey.GET);
+    reqObj.setComponent("*");
+    FormApiUtilRequestPayload formApiUtilRequestPayload =
+        FormApiUtilHandler.prepareFormApiUtilPayload(reqObj);
+    Map<String, Object> formData =
+        FormApiUtilHandler.fetchFormApiConfigDetails(formApiUtilRequestPayload, reqContext);
+    return formData;
+  }
+
+  public static Map<String, List<String>> getUserTypeFormApiConfig(Map<String, Object> formData) {
+    Map<String, List<String>> userTypeOrSubTypeConfigMap = new HashMap<>();
+    if (MapUtils.isNotEmpty(formData)) {
+      Map<String, Object> formDataMap = (Map<String, Object>) formData.get(JsonKey.FORM);
+      if (MapUtils.isNotEmpty(formDataMap)) {
+        Map<String, Object> dataMap = (Map<String, Object>) formDataMap.get(JsonKey.DATA);
+        if (MapUtils.isNotEmpty(dataMap)) {
+          List<Map<String, Object>> fields =
+              (List<Map<String, Object>>) dataMap.get(JsonKey.FIELDS);
+          for (Map<String, Object> field : fields) {
+            if (JsonKey.PERSONA.equals(field.get(JsonKey.CODE))) {
+              Map<String, Object> childrenMap = (Map<String, Object>) field.get(JsonKey.CHILDREN);
+              for (Map.Entry<String, Object> entryItr : childrenMap.entrySet()) {
+                String userType = entryItr.getKey();
+                List<Map<String, Object>> personaConfigLists =
+                    (List<Map<String, Object>>) entryItr.getValue();
+                List<String> userSubTypes = new ArrayList<>();
+                for (Map<String, Object> configMap : personaConfigLists) {
+                  if (JsonKey.SUB_PERSONA.equals(configMap.get(JsonKey.CODE))) {
+                    Map<String, Object> userSubPersonConfigMap =
+                        (Map<String, Object>) configMap.get(JsonKey.TEMPLATE_OPTIONS);
+                    if (MapUtils.isNotEmpty(userSubPersonConfigMap)) {
+                      List<Map<String, Object>> userSubTypeLists =
+                          (List<Map<String, Object>>) userSubPersonConfigMap.get(JsonKey.OPTIONS);
+                      if (CollectionUtils.isNotEmpty(userSubTypeLists)) {
+                        for (Map<String, Object> userSubType : userSubTypeLists) {
+                          userSubTypes.add((String) userSubType.get(JsonKey.VALUE));
+                        }
+                      }
+                    }
+                  }
+                }
+                userTypeOrSubTypeConfigMap.put(userType, userSubTypes);
+              }
+            }
+          }
+        }
+      }
+    }
+    return userTypeOrSubTypeConfigMap;
+  }
+
+  public static List<String> getLocationTypeConfigMap(Map<String, Object> formData) {
+    List<String> locationTypeList = new ArrayList<>();
+    if (MapUtils.isNotEmpty(formData)) {
+      Map<String, Object> formDataMap = (Map<String, Object>) formData.get(JsonKey.FORM);
+      if (MapUtils.isNotEmpty(formDataMap)) {
+        Map<String, Object> dataMap = (Map<String, Object>) formDataMap.get(JsonKey.DATA);
+        if (MapUtils.isNotEmpty(dataMap)) {
+          List<Map<String, Object>> fields =
+              (List<Map<String, Object>>) dataMap.get(JsonKey.FIELDS);
+          for (Map<String, Object> field : fields) {
+            if (JsonKey.PERSONA.equals(field.get(JsonKey.CODE))) {
+              Map<String, Object> childrenMap = (Map<String, Object>) field.get(JsonKey.CHILDREN);
+              if (MapUtils.isNotEmpty(childrenMap)) {
+                Map.Entry<String, Object> entryItr = childrenMap.entrySet().iterator().next();
+                List<Map<String, Object>> typeConfigList =
+                    (List<Map<String, Object>>) entryItr.getValue();
+                for (Map<String, Object> locationType : typeConfigList) {
+                  locationTypeList.add((String) locationType.get(JsonKey.CODE));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return locationTypeList;
   }
 }

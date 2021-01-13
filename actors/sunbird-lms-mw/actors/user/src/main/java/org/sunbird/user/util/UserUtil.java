@@ -2,7 +2,15 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
@@ -14,7 +22,10 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -33,6 +44,7 @@ import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.validator.user.UserRequestValidator;
 import scala.concurrent.Future;
 
 public class UserUtil {
@@ -54,6 +66,7 @@ public class UserUtil {
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
+  private static UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   private UserUtil() {}
 
@@ -477,6 +490,7 @@ public class UserUtil {
 
     return "";
   }
+
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
@@ -485,6 +499,7 @@ public class UserUtil {
     }
     new UserLookUp().checkExternalIdUniqueness(user, operationType, context);
   }
+
   // validateExternalIds For UPDATE USER
   public static void validateExternalIdsForUpdateUser(
       User user, boolean isCustodianOrg, RequestContext context) {
@@ -551,7 +566,7 @@ public class UserUtil {
   }
 
   public static void validateUserExternalIds(User user, RequestContext context) {
-    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId(), context);
+    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId(), true, context);
     List<Map<String, String>> externalIds = user.getExternalIds();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
@@ -580,14 +595,16 @@ public class UserUtil {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  public static List<Map<String, String>> getExternalIds(String userId, RequestContext context) {
+  public static List<Map<String, String>> getExternalIds(
+      String userId, boolean mergeDeclaration, RequestContext context) {
     List<Map<String, String>> dbResExternalIds =
         userExternalIdentityService.getUserExternalIds(userId, context);
-    List<Map<String, String>> dbSelfDeclaredExternalIds =
-        userExternalIdentityService.getSelfDeclaredDetails(userId, context);
-
-    if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
-      dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+    if (mergeDeclaration) {
+      List<Map<String, String>> dbSelfDeclaredExternalIds =
+          userExternalIdentityService.getSelfDeclaredDetails(userId, context);
+      if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
+        dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+      }
     }
     return dbResExternalIds;
   }
@@ -907,9 +924,9 @@ public class UserUtil {
       userLookUp.deleteRecords(reqMap, context);
     }
   }
-}
 
-@FunctionalInterface
-interface ConvertValuesToLowerCase {
-  Map<String, String> convertToLowerCase(Map<String, String> map);
+  @FunctionalInterface
+  interface ConvertValuesToLowerCase {
+    Map<String, String> convertToLowerCase(Map<String, String> map);
+  }
 }

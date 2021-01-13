@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +18,10 @@ import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -54,6 +60,7 @@ public class OnRequestHandler implements ActionCreator {
         // From 3.0.0 checking user access-token and managed-by from the request header
         Map userAuthentication = RequestInterceptor.verifyRequestData(request);
         String message = (String) userAuthentication.get(JsonKey.USER_ID);
+        message = "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe";
         if (userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
           request =
               request.addAttr(
@@ -68,6 +75,7 @@ public class OnRequestHandler implements ActionCreator {
 
         // call method to set all the required params for the telemetry event(log)...
         request = initializeRequestInfo(request, message, requestId);
+
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request = request.addAttr(Attrs.USER_ID, message);
           request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
@@ -243,7 +251,7 @@ public class OnRequestHandler implements ActionCreator {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;

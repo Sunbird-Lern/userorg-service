@@ -6,13 +6,11 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
 import org.sunbird.models.FormUtil.FormUtilRequest;
 import org.sunbird.models.adminutil.Params;
@@ -47,7 +45,7 @@ public class FormApiUtilHandler {
   public static Map<String, Object> fetchFormApiConfigDetails(
       FormApiUtilRequestPayload reqObject, RequestContext context) {
 
-    Map<String, Object> data = null;
+    Map<String, Object> data = new HashMap<>();
     ObjectMapper mapper = new ObjectMapper();
     try {
       String body = mapper.writeValueAsString(reqObject);
@@ -55,9 +53,6 @@ public class FormApiUtilHandler {
           context, "FormApiUtilHandler :: fetchFormApiConfigDetails: request payload" + body);
       Map<String, String> headers = new HashMap<>();
       headers.put("Content-Type", "application/json");
-      headers.put(
-          "Authorization",
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ4OFNxQVNvSVFINFluWTY4ejhSOVluWE1qbzYwZWFFUCJ9.nUoXDSIwF9KGOa__Go9jmWk66yCFc1fPsxF-saNyv9M");
       ProjectUtil.setTraceIdInHeader(headers, context);
       String response =
           HttpClientUtil.post(
@@ -73,21 +68,14 @@ public class FormApiUtilHandler {
     } catch (IOException e) {
       logger.error(
           context,
-          "AdminUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
           e);
-      throw new ProjectCommonException(
-          ResponseCode.unableToConnectToAdminUtil.getErrorCode(),
-          ResponseCode.unableToConnectToAdminUtil.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+
     } catch (Exception e) {
       logger.error(
           context,
           "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
           e);
-      throw new ProjectCommonException(
-          ResponseCode.unableToParseData.getErrorCode(),
-          ResponseCode.unableToParseData.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
     }
 
     return data;

@@ -168,6 +168,7 @@ public final class JsonKey {
   public static final String FROM_EMAIL = "fromEmail";
   public static final String GENDER = "gender";
   public static final String GEO_LOCATION_DB = "geoLocationDb";
+  public static final String LOCATION_DB = "locationDb";
   public static final String GRADE = "grade";
   public static final String GROUP_QUERY = "groupQuery";
   public static final String HASH_TAG_ID = "hashtagid";
@@ -616,6 +617,7 @@ public final class JsonKey {
   public static final String PROSPECT_CHANNELS_IDS = "prospectChannelsIds";
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
+  public static final String TEMPLATE_OPTIONS = "templateOptions";
   public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
@@ -640,6 +642,8 @@ public final class JsonKey {
   public static final String WITH_TOKENS = "withTokens";
   public static final String DECLARED_EMAIL = "declared-email";
   public static final String DECLARED_PHONE = "declared-phone";
+  public static final String DECLARED_SCHOOL_UDISE_CODE = "declared-school-udise-code";
+  public static final String DECLARED_SCHOOL_NAME = "declared-school-name";
   public static final String GOOGLE_CAPTCHA_PRIVATE_KEY = "google_captcha_private_key";
   public static final String GOOGLE_CAPTCHA_MOBILE_PRIVATE_KEY =
       "google_captcha_mobile_private_key";
