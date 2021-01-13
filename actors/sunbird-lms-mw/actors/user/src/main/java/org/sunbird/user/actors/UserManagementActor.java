@@ -1506,6 +1506,7 @@ public class UserManagementActor extends BaseActor {
       // As of now locationCode can take array of only locationcodes and map of locationCodes which
       // include type and code of the location
       String stateCode = null;
+      List<String> set = new ArrayList<>();
       List<Location> locationList = new ArrayList<>();
       if (((List) locationCodes).get(0) instanceof String) {
         List<String> locations = (List<String>) locationCodes;

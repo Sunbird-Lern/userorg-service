@@ -92,6 +92,8 @@ public class DataCacheHandler implements Runnable {
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
     cacheFormApiDataConfig();
+    cacheUserTypeOrSubTypeConfig();
+    cacheLocationCodeTypeConfig();
     initLocationOrderMap();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
   }
