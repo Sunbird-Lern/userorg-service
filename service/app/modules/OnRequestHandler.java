@@ -60,7 +60,6 @@ public class OnRequestHandler implements ActionCreator {
         // From 3.0.0 checking user access-token and managed-by from the request header
         Map userAuthentication = RequestInterceptor.verifyRequestData(request);
         String message = (String) userAuthentication.get(JsonKey.USER_ID);
-        message = "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe";
         if (userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
           request =
               request.addAttr(
@@ -75,7 +74,6 @@ public class OnRequestHandler implements ActionCreator {
 
         // call method to set all the required params for the telemetry event(log)...
         request = initializeRequestInfo(request, message, requestId);
-
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request = request.addAttr(Attrs.USER_ID, message);
           request = request.addAttr(Attrs.IS_AUTH_REQ, "false");

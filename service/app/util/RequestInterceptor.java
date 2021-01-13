@@ -42,7 +42,6 @@ public class RequestInterceptor {
 
     // ---------------------------
     short var = 1;
-    apiHeaderIgnoreMap.put("/v1/user/read", var);
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
     apiHeaderIgnoreMap.put("/v3/user/create", var);
@@ -134,21 +133,19 @@ public class RequestInterceptor {
    */
   public static Map verifyRequestData(Http.Request request) {
     Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe");
-    userAuthentication.put(JsonKey.MANAGED_FOR, "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe");
+    userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
+    userAuthentication.put(JsonKey.MANAGED_FOR, null);
 
     String clientId = JsonKey.UNAUTHORIZED;
     String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
-      if (true) {
+      if (accessToken.isPresent()) {
         clientId = AccessTokenValidator.verifyUserToken(accessToken.get());
-        clientId = "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe";
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
-          requestedForUserID = "4f68c6d1-00a2-45bf-92ce-62876c6cc1fe";
           if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
             // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
             Optional<String> forTokenHeader =
