@@ -44,7 +44,6 @@ import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.validator.user.UserRequestValidator;
 import scala.concurrent.Future;
 
 public class UserUtil {
@@ -66,7 +65,6 @@ public class UserUtil {
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  private static UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   private UserUtil() {}
 
