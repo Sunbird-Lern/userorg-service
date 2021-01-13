@@ -104,7 +104,7 @@ public class DataCacheHandler implements Runnable {
       RequestContext reqContext = new RequestContext();
       reqContext.setReqId(UUID.randomUUID().toString());
       reqContext.setDebugEnabled("false");
-      Map<String, Object> formDataMap = UserUtility.getFormApiConfig(stateCode, reqContext);
+      Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
       formApiDataConfigMap.put(stateCode, formDataMap);
     }
   }
@@ -115,8 +115,7 @@ public class DataCacheHandler implements Runnable {
       for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
-        Map<String, List<String>> userTypeConfigMap =
-            UserUtility.getUserTypeFormApiConfig(formData);
+        Map<String, List<String>> userTypeConfigMap = FormApiUtil.getUserTypeConfig(formData);
         userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
       }
     }
@@ -128,7 +127,7 @@ public class DataCacheHandler implements Runnable {
       for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
-        List<String> locationCodeLists = UserUtility.getLocationTypeConfigMap(formData);
+        List<String> locationCodeLists = FormApiUtil.getLocationTypeConfigMap(formData);
         stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
       }
     }

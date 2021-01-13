@@ -44,10 +44,7 @@ import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -1539,15 +1536,16 @@ public class UserManagementActor extends BaseActor {
       Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
       if (MapUtils.isEmpty(locationTypeConfigMap)
           || CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-        Map<String, Object> formDataMap =
-            UserUtility.getFormApiConfig(stateCode, userRequest.getRequestContext());
-        List<String> locationTypeList = UserUtility.getLocationTypeConfigMap(formDataMap);
+
+        List<String> locationTypeList =
+            FormApiUtil.getLocationTypeConfigMap(
+                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext()));
         locationTypeConfigMap.put(stateCode, locationTypeList);
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
+        isValidLocationType(location.getType(), typeList);
         if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-          isValidLocationType(location.getType(), typeList);
           set.add(location.getCode());
         } else {
           userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
