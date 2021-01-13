@@ -488,7 +488,6 @@ public class UserUtil {
 
     return "";
   }
-
   // validateExternalIds For CREATE USER and MIGRATE USER
   public static void validateExternalIds(User user, String operationType, RequestContext context) {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
@@ -497,7 +496,6 @@ public class UserUtil {
     }
     new UserLookUp().checkExternalIdUniqueness(user, operationType, context);
   }
-
   // validateExternalIds For UPDATE USER
   public static void validateExternalIdsForUpdateUser(
       User user, boolean isCustodianOrg, RequestContext context) {
@@ -922,9 +920,9 @@ public class UserUtil {
       userLookUp.deleteRecords(reqMap, context);
     }
   }
+}
 
-  @FunctionalInterface
-  interface ConvertValuesToLowerCase {
-    Map<String, String> convertToLowerCase(Map<String, String> map);
-  }
+@FunctionalInterface
+interface ConvertValuesToLowerCase {
+  Map<String, String> convertToLowerCase(Map<String, String> map);
 }
