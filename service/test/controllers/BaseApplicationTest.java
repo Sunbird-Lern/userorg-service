@@ -1,8 +1,10 @@
 package controllers;
 
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +22,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -35,8 +38,14 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, SunbirdMWService.class})
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
+@PrepareForTest({
+  RequestInterceptor.class,
+  TelemetryWriter.class,
+  SunbirdMWService.class,
+  ActorSelection.class,
+  BaseMWService.class
+})
 public abstract class BaseApplicationTest {
   protected Application application;
   private ActorSystem system;
@@ -45,6 +54,9 @@ public abstract class BaseApplicationTest {
   public <T> void setup(Class<T> actorClass) {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
+    PowerMockito.mockStatic(BaseMWService.class);
+    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "userId");
     try {

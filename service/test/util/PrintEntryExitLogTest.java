@@ -17,7 +17,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Common.class})
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class PrintEntryExitLogTest {
   @Test
   public void testPrintExitLogOnFailure() {
