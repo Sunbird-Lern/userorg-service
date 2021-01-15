@@ -6,6 +6,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
@@ -24,6 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
@@ -73,6 +75,8 @@ import org.sunbird.user.util.MigrationUtils;
   UserServiceImpl.class,
   UserService.class,
   OrgServiceImpl.class,
+  ActorSelection.class,
+  BaseMWService.class,
   OrgService.class
 })
 @PowerMockIgnore({
@@ -99,6 +103,10 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.mockStatic(OrgServiceImpl.class);
     PowerMockito.mockStatic(OrgService.class);
+
+    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
+    PowerMockito.mockStatic(BaseMWService.class);
+    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
 
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);

@@ -6,6 +6,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
@@ -25,6 +26,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -71,6 +73,8 @@ import scala.concurrent.Promise;
   SunbirdMWService.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
+  ActorSelection.class,
+  BaseMWService.class,
   OrganisationClientImpl.class
 })
 @PowerMockIgnore({
@@ -97,6 +101,9 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
+    PowerMockito.mockStatic(BaseMWService.class);
+    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
     cassandraOperation = mock(CassandraOperationImpl.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
