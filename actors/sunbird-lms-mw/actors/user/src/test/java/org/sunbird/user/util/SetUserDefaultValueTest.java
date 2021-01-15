@@ -44,7 +44,13 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   UserLookUp.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class SetUserDefaultValueTest {
 
   private static Response response;

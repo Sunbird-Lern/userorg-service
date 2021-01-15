@@ -51,7 +51,13 @@ import org.sunbird.user.util.UserUtil;
   UserUtility.class,
   Util.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserProfileReadServiceTest {
 
   private String tncConfig =

@@ -31,7 +31,13 @@ import org.sunbird.user.util.UserLookUp;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserLookUp.class, UserDao.class, UserDaoImpl.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserLookupActorTest {
 
   private static ActorSystem system = ActorSystem.create("system");

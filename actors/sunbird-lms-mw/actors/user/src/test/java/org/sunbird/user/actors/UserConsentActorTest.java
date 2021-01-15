@@ -42,7 +42,13 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   EsClientFactory.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserConsentActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserConsentActor.class);

@@ -24,7 +24,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
@@ -76,7 +75,13 @@ import org.sunbird.user.util.MigrationUtils;
   OrgServiceImpl.class,
   OrgService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class TenantMigrationActorTest extends UserManagementActorTestBase {
   Props props = Props.create(TenantMigrationActor.class);
   ActorSystem system = ActorSystem.create("system");
@@ -89,8 +94,6 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
 
   @Before
   public void beforeEachTest() {
-    ActorRef actorRef = mock(ActorRef.class);
-    PowerMockito.mockStatic(RequestRouter.class);
     PowerMockito.mockStatic(FeedUtil.class);
     PowerMockito.mockStatic(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
@@ -133,7 +136,6 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(upsertResponse);
 
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     PowerMockito.mockStatic(SystemSettingClientImpl.class);
     SystemSettingClientImpl systemSettingClient = mock(SystemSettingClientImpl.class);
     when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
