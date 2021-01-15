@@ -834,9 +834,6 @@ public enum ResponseCode {
   unableToConnectToAdminUtil(
       ResponseMessage.Key.UNABLE_TO_CONNECT_TO_ADMINUTIL,
       ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
-  unableToConnectToFormApiUtil(
-      ResponseMessage.Key.UNABLE_TO_CONNECT_TO_ADMINUTIL,
-      ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
   dataEncryptionError(
       ResponseMessage.Key.DATA_ENCRYPTION_ERROR, ResponseMessage.Message.DATA_ENCRYPTION_ERROR),
   notificationNotSent(

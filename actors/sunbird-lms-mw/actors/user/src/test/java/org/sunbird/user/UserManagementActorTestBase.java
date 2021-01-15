@@ -51,7 +51,6 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserType;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -360,11 +359,10 @@ public abstract class UserManagementActorTestBase {
     Map<String, Map<String, List<String>>> userTypeOrSubTypeConfigMap = new HashMap<>();
     Map<String, List<String>> userTypeConfigMap = new HashMap<>();
 
-    userTypeConfigMap.put(UserType.STUDENT.getTypeName().toUpperCase(), Arrays.asList());
-    userTypeConfigMap.put(
-        UserType.ADMINISTRATOR.getTypeName().toUpperCase(), Arrays.asList("BRC", "DAO"));
-    userTypeConfigMap.put(UserType.TEACHER.getTypeName().toUpperCase(), Arrays.asList());
-    userTypeConfigMap.put(UserType.GUARDIAN.getTypeName().toUpperCase(), Arrays.asList());
+    userTypeConfigMap.put("STUDENT", Arrays.asList());
+    userTypeConfigMap.put("ADMINISTRATOR", Arrays.asList("BRC", "DAO"));
+    userTypeConfigMap.put("TEACHER", Arrays.asList());
+    userTypeConfigMap.put("GUARDIAN", Arrays.asList());
     return userTypeOrSubTypeConfigMap;
   }
 

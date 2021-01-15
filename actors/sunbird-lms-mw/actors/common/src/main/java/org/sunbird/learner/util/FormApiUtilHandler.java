@@ -80,7 +80,7 @@ public class FormApiUtilHandler {
     } catch (IOException e) {
       logger.error(
           context,
-          "FormApiUtilHandler:fetchEncryptedToken Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
           e);
 
     } catch (Exception e) {

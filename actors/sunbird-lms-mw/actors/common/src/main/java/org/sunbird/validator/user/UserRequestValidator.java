@@ -56,7 +56,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     createUserBasicValidation(userRequest);
     validateUserType(userRequest.getRequest(), null, userRequest.getRequestContext());
     phoneValidation(userRequest);
-    phoneValidation(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
   }
 
