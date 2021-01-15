@@ -64,7 +64,13 @@ import scala.concurrent.Promise;
   UserOrgDaoImpl.class,
   UserOrgDao.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserSelfDeclarationManagementActorTest {
 
   private static final Props props = Props.create(UserSelfDeclarationManagementActor.class);

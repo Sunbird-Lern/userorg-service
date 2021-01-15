@@ -1,7 +1,9 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -23,7 +25,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -60,7 +61,6 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   Util.class,
-  RequestRouter.class,
   SystemSettingClientImpl.class,
   UserServiceImpl.class,
   UserUtil.class,
@@ -73,7 +73,13 @@ import scala.concurrent.Promise;
   UserClientImpl.class,
   OrganisationClientImpl.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
@@ -87,11 +93,6 @@ public abstract class UserManagementActorTestBase {
 
   @Before
   public void beforeEachTest() {
-
-    ActorRef actorRef = mock(ActorRef.class);
-    PowerMockito.mockStatic(RequestRouter.class);
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
-
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);

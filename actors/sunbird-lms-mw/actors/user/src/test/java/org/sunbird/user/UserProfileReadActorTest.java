@@ -22,7 +22,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
@@ -65,7 +64,6 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   EsClientFactory.class,
   Util.class,
-  RequestRouter.class,
   SystemSettingClientImpl.class,
   UserServiceImpl.class,
   UserUtil.class,
@@ -78,7 +76,13 @@ import scala.concurrent.Promise;
   UserDao.class,
   UserUtility.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserProfileReadActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -100,11 +104,6 @@ public class UserProfileReadActorTest {
 
   @Before
   public void beforeEachTest() {
-
-    ActorRef actorRef = mock(ActorRef.class);
-    PowerMockito.mockStatic(RequestRouter.class);
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
-
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);

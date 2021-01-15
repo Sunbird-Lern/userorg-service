@@ -27,7 +27,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -58,7 +57,6 @@ import scala.concurrent.duration.Duration;
   ServiceFactory.class,
   RoleDaoImpl.class,
   BaseMWService.class,
-  RequestRouter.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   Util.class,
@@ -69,7 +67,13 @@ import scala.concurrent.duration.Duration;
   OrgServiceImpl.class,
   OrgService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserRoleActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -95,7 +99,6 @@ public class UserRoleActorTest {
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(BaseMWService.class);
-    PowerMockito.mockStatic(RequestRouter.class);
     PowerMockito.mockStatic(RoleDaoImpl.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
@@ -114,8 +117,6 @@ public class UserRoleActorTest {
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(actorSelection);
     when(actorSelection.resolveOneCS(Duration.create(Mockito.anyLong(), "seconds")))
         .thenReturn(completionStage);
-    ActorRef actorRef = Mockito.mock(ActorRef.class);
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     SearchDTO searchDTO = Mockito.mock(SearchDTO.class);
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
 

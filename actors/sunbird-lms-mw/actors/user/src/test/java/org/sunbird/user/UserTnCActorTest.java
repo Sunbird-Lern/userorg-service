@@ -26,7 +26,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
@@ -50,14 +49,19 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  RequestRouter.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   SunbirdMWService.class,
   DataCacheHandler.class,
   UserTncService.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.crypto.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserTnCActorTest {
   private static ActorSystem system;
   private String tncConfig =
@@ -84,11 +88,8 @@ public class UserTnCActorTest {
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(DataCacheHandler.class);
     PowerMockito.mockStatic(ServiceFactory.class);
-    PowerMockito.mockStatic(RequestRouter.class);
-    ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
