@@ -2,8 +2,15 @@ package org.sunbird.notification.sms;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProvider;
 
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class Message91GetSMSTest extends BaseMessageTest {
 
   @Test
