@@ -77,7 +77,6 @@ import scala.concurrent.Promise;
   UserClientImpl.class,
   ActorSelection.class,
   BaseMWService.class,
-  OrganisationClientImpl.class
   OrganisationClientImpl.class,
   FormApiUtilHandler.class
 })
