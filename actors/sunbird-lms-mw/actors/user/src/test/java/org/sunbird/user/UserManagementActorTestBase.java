@@ -25,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.SunbirdMWService;
+import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
@@ -45,10 +46,11 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserType;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -71,7 +73,8 @@ import scala.concurrent.Promise;
   SunbirdMWService.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
-  OrganisationClientImpl.class
+  OrganisationClientImpl.class,
+  FormApiUtilHandler.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public abstract class UserManagementActorTestBase {
@@ -84,14 +87,13 @@ public abstract class UserManagementActorTestBase {
   public static ElasticSearchService esService;
   public static UserClient userClient;
   private static OrganisationClient organisationClient;
+  private LocationClient locationClient;
 
   @Before
-  public void beforeEachTest() {
-
+  public void beforeEachTest() throws Exception {
     ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
     when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
-
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
@@ -144,7 +146,18 @@ public abstract class UserManagementActorTestBase {
 
     PowerMockito.mockStatic(UserClientImpl.class);
     userClient = mock(UserClientImpl.class);
-
+    PowerMockito.mockStatic(LocationClientImpl.class);
+    locationClient = mock(LocationClientImpl.class);
+    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
+    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists());
+    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationIdLists());
+    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists());
+    PowerMockito.mockStatic(FormApiUtilHandler.class);
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
+        .thenReturn(getFormApiConfig());
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
@@ -195,6 +208,7 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));
     when(DataCacheHandler.getUserTypesConfig()).thenReturn(getUserTypes());
+    when(DataCacheHandler.getLocationTypeConfig()).thenReturn(getLocationTypeConfig());
     when(UserUtil.getActiveUserOrgDetails(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUserOrgDetails());
     Map<String, String> configMap = new HashMap<>();
@@ -211,6 +225,49 @@ public abstract class UserManagementActorTestBase {
     when(organisationClient.esGetOrgByExternalId(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(org);
+  }
+
+  public List<Location> getLocationLists() {
+    List<Location> locations = new ArrayList<>();
+    Location location = new Location();
+    location.setType(JsonKey.STATE);
+    location.setCode("locationCode");
+    locations.add(location);
+    return locations;
+  }
+
+  public List<String> getLocationIdLists() {
+    return Arrays.asList("id");
+  }
+
+  public Map<String, Object> getFormApiConfig() {
+    Map<String, Object> formData = new HashMap<>();
+    Map<String, Object> formMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    List<Map<String, Object>> fieldsList = new ArrayList<>();
+    Map<String, Object> field = new HashMap<>();
+
+    Map<String, Object> children = new HashMap<>();
+    List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
+    Map<String, Object> subPersonConfig = new HashMap<>();
+    Map<String, Object> templateOptionsMap = new HashMap<>();
+    List<Map<String, String>> options = new ArrayList<>();
+    Map<String, String> option = new HashMap<>();
+    option.put(JsonKey.VALUE, "crc");
+    options.add(option);
+
+    templateOptionsMap.put(JsonKey.OPTIONS, options);
+    subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
+    subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
+    userTypeConfigList.add(subPersonConfig);
+    children.put("teacher", userTypeConfigList);
+    field.put(JsonKey.CODE, JsonKey.PERSONA);
+    field.put(JsonKey.CHILDREN, children);
+    fieldsList.add(field);
+    dataMap.put(JsonKey.FIELDS, fieldsList);
+    formMap.put(JsonKey.DATA, dataMap);
+    formData.put(JsonKey.FORM, formMap);
+    return formData;
   }
 
   public Response getOrgFromCassandra() {
@@ -298,14 +355,21 @@ public abstract class UserManagementActorTestBase {
     return reqMap;
   }
 
-  public Map<String, List<String>> getUserTypes() {
-    Map<String, List<String>> userTypeOrSubTypeConfigMap = new HashMap<>();
-    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName().toUpperCase(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(
-        UserType.ADMINISTRATOR.getTypeName().toUpperCase(), Arrays.asList("BRC,DAO"));
-    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName().toUpperCase(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName().toUpperCase(), Arrays.asList());
+  public Map<String, Map<String, List<String>>> getUserTypes() {
+    Map<String, Map<String, List<String>>> userTypeOrSubTypeConfigMap = new HashMap<>();
+    Map<String, List<String>> userTypeConfigMap = new HashMap<>();
+
+    userTypeConfigMap.put("STUDENT", Arrays.asList());
+    userTypeConfigMap.put("ADMINISTRATOR", Arrays.asList("BRC", "DAO"));
+    userTypeConfigMap.put("TEACHER", Arrays.asList());
+    userTypeConfigMap.put("GUARDIAN", Arrays.asList());
     return userTypeOrSubTypeConfigMap;
+  }
+
+  public Map<String, List<String>> getLocationTypeConfig() {
+    Map<String, List<String>> locationTypeConfig = new HashMap<>();
+    locationTypeConfig.put("locationCode", Arrays.asList("school", "state"));
+    return locationTypeConfig;
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
@@ -423,6 +487,7 @@ public abstract class UserManagementActorTestBase {
   public User getUser(boolean isCustodian) {
     User user = new User();
     user.setRootOrgId("rootOrgId");
+    user.setLocationIds(Arrays.asList("id"));
     if (isCustodian) {
       user.setRootOrgId("custodianOrgId");
     }

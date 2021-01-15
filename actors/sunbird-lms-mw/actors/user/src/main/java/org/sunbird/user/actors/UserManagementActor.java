@@ -19,6 +19,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
@@ -43,10 +44,7 @@ import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.learner.util.*;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -76,6 +74,7 @@ import scala.concurrent.duration.Duration;
 public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
+  private static LocationClient locationClient = LocationClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private OrganisationClient organisationClient = new OrganisationClientImpl();
@@ -138,6 +137,7 @@ public class UserManagementActor extends BaseActor {
   private void createUserV4(Request actorMessage) {
     logger.info(
         actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
+    validateLocationCodes(actorMessage);
     createUserV3_V4(actorMessage, true);
   }
 
@@ -196,12 +196,14 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-
+    validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    validateUserTypeAndSubType(
+        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
@@ -361,7 +363,6 @@ public class UserManagementActor extends BaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
-      LocationClientImpl locationClient = new LocationClientImpl();
       List<Location> locationIdList =
           locationClient.getLocationByCodes(
               getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
@@ -626,6 +627,7 @@ public class UserManagementActor extends BaseActor {
     } else {
       userRequestValidator.validateCreateUserV1Request(actorMessage);
     }
+    validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
 
@@ -1169,7 +1171,6 @@ public class UserManagementActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      LocationClientImpl locationClient = new LocationClientImpl();
       List<String> locationIdList =
           locationClient.getRelatedLocationIds(
               getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
@@ -1443,5 +1444,146 @@ public class UserManagementActor extends BaseActor {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
+  }
+
+  private void validateUserTypeAndSubType(
+      Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
+    if (null != userMap.get(JsonKey.USER_TYPE)) {
+      List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
+      List<Location> locations = new ArrayList<>();
+      if (CollectionUtils.isEmpty(locationCodes)) {
+        // Get location code from user records locations Ids
+        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
+        locations =
+            locationClient.getLocationByIds(
+                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                locationIds,
+                context);
+      } else {
+        locations =
+            locationClient.getLocationsByCodes(
+                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                locationCodes,
+                context);
+      }
+      if (CollectionUtils.isNotEmpty(locations)) {
+        String stateCode = null;
+        for (Location location : locations) {
+          if (JsonKey.STATE.equals(location.getType())) {
+            stateCode = location.getCode();
+          }
+        }
+        if (StringUtils.isNotBlank(stateCode)) {
+          // Validate UserType and UserSubType configure based on user state config else user
+          // default config
+          String stateCodeConfig =
+              userRequestValidator.validateUserType(userMap, stateCode, context);
+          userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
+        }
+      } else {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.internalError,
+            MessageFormat.format(
+                ResponseCode.internalError.getErrorMessage(),
+                new String[] {(String) userMap.get(JsonKey.USER_ID)}));
+      }
+    }
+  }
+
+  private void validateLocationCodes(Request userRequest) {
+    Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
+    if ((locationCodes != null) && !(locationCodes instanceof List)) {
+      throw new ProjectCommonException(
+          ResponseCode.dataTypeError.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    if (locationCodes != null) {
+      // As of now locationCode can take array of only locationcodes and map of locationCodes which
+      // include type and code of the location
+      String stateCode = null;
+      List<String> set = new ArrayList<>();
+      List<Location> locationList = new ArrayList<>();
+      if (((List) locationCodes).get(0) instanceof String) {
+        List<String> locations = (List<String>) locationCodes;
+        locationList =
+            locationClient.getLocationsByCodes(
+                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                locations,
+                userRequest.getRequestContext());
+        for (Location location : locationList) {
+          if (JsonKey.STATE.equals(location.getType())) {
+            stateCode = location.getCode();
+          }
+        }
+      } else {
+        locationList = createLocationLists((List<Map<String, String>>) locationCodes);
+        for (Location location : locationList) {
+          if (JsonKey.STATE.equals(location.getType())) {
+            stateCode = location.getCode();
+          }
+        }
+      }
+      // Throw an exception if location codes update is not passed with state code
+      if (StringUtils.isBlank(stateCode)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidParameterValue.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.LOCATION_CODES),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+      Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
+      if (MapUtils.isEmpty(locationTypeConfigMap)
+          || CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
+
+        List<String> locationTypeList =
+            FormApiUtil.getLocationTypeConfigMap(
+                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext()));
+        locationTypeConfigMap.put(stateCode, locationTypeList);
+      }
+      List<String> typeList = locationTypeConfigMap.get(stateCode);
+      for (Location location : locationList) {
+        isValidLocationType(location.getType(), typeList);
+        if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+          set.add(location.getCode());
+        } else {
+          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
+          userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+        }
+      }
+      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
+    }
+  }
+
+  /**
+   * This method will validate location type
+   *
+   * @param type
+   * @return
+   */
+  public static boolean isValidLocationType(String type, List<String> typeList) {
+    if (null != type && !typeList.contains(type.toLowerCase())) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidValue.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(),
+              GeoLocationJsonKey.LOCATION_TYPE,
+              type,
+              typeList),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    return true;
+  }
+
+  private List<Location> createLocationLists(List<Map<String, String>> locationCodes) {
+    List<Location> locations = new ArrayList<>();
+    for (Map<String, String> locationMap : locationCodes) {
+      Location location = new Location();
+      location.setCode(locationMap.get(JsonKey.CODE));
+      location.setType(locationMap.get(JsonKey.TYPE));
+      locations.add(location);
+    }
+    return locations;
   }
 }
