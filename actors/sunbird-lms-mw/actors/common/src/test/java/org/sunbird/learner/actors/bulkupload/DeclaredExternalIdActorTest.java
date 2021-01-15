@@ -2,7 +2,9 @@ package org.sunbird.learner.actors.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -43,7 +45,12 @@ import org.sunbird.models.organisation.Organisation;
   SunbirdMWService.class,
   OrganisationClientImpl.class,
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class DeclaredExternalIdActorTest {
   private static final Props props = Props.create(DeclaredExternalIdActor.class);
   private static ActorSystem system = ActorSystem.create("system");

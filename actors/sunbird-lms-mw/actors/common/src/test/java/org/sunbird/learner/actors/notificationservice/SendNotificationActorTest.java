@@ -54,7 +54,12 @@ import org.sunbird.learner.util.Util;
   ProjectUtil.class,
   BaseMWService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class SendNotificationActorTest {
 
   private static final Props props = Props.create(SendNotificationActor.class);

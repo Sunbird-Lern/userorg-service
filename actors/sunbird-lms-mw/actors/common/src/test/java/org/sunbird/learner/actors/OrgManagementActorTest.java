@@ -22,7 +22,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -47,12 +46,16 @@ import scala.concurrent.Promise;
   OrganisationManagementActor.class,
   Util.class,
   ElasticSearchRestHighImpl.class,
-  RequestRouter.class,
   ProjectUtil.class,
   LocationRequestValidator.class,
   EsClientFactory.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OrgManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

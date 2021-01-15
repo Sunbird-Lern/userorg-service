@@ -44,7 +44,12 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   ElasticSearchRestHighImpl.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class HealthActorTest {
 
   private static ActorSystem system;

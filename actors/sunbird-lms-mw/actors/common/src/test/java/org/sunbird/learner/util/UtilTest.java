@@ -35,7 +35,12 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   CassandraOperationImpl.class,
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class UtilTest {
   private static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;

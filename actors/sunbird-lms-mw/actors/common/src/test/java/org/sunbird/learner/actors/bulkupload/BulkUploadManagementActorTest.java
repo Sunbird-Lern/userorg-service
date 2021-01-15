@@ -16,7 +16,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -38,7 +42,12 @@ import org.sunbird.learner.util.Util;
 /** @author arvind. Junit test cases for bulk upload - user, org */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, Util.class, BulkUploadManagementActor.class})
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class BulkUploadManagementActorTest {
 
   private static ActorSystem system;
