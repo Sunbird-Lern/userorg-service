@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
@@ -39,10 +38,8 @@ public class Common {
       params.setErr(code.getErrorCode());
       params.setErrmsg(
           StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
-      params.setStatus(JsonKey.FAILED);
-    } else {
-      params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     }
+    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
     params.setMsgid(requestId);
     return params;
   }
