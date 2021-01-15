@@ -3,6 +3,8 @@ package org.sunbird.user.service;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +73,7 @@ public class UserProfileReadServiceTest {
   }
 
   @Test
-  public void getUserProfileDataTest() {
+  public void getUserProfileDataTest() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
@@ -79,6 +81,7 @@ public class UserProfileReadServiceTest {
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
     userList.put(JsonKey.USER_ID, "1234");
+    userList.put(JsonKey.IS_DELETED, false);
     userList.put(JsonKey.IS_DELETED, false);
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
@@ -207,7 +210,7 @@ public class UserProfileReadServiceTest {
   }
 
   @Test
-  public void getUserProfileWithEmptyResultTest() {
+  public void getUserProfileWithEmptyResultTest() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
@@ -235,7 +238,7 @@ public class UserProfileReadServiceTest {
   }
 
   @Test
-  public void getLockedUserProfileTest() {
+  public void getLockedUserProfileTest() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
@@ -284,7 +287,7 @@ public class UserProfileReadServiceTest {
     return reqMap;
   }
 
-  private User getValidUserResponse(String userid) {
+  private User getValidUserResponse(String userid) throws JsonProcessingException {
     User user = new User();
     user.setId(userid);
     user.setEmail("anyEmail@gmail.com");
@@ -299,10 +302,19 @@ public class UserProfileReadServiceTest {
     user.setUserId(userid);
     user.setFirstName("Demo Name");
     user.setUserName("validUserName");
+    // {'groupsTnc': '{"tncAcceptedOn":"2021-01-04 19:45:29:725+0530","version":"3.9.0"}'}
+    Map<String, String> tncMap = new HashMap<>();
+    tncMap.put("tncAcceptedOn", "2021-01-04 19:45:29:725+0530");
+    tncMap.put("version", "3.9.0");
+    ObjectMapper mapper = new ObjectMapper();
+    String tnc = mapper.writeValueAsString(tncMap);
+    Map<String, String> groupTncMap = new HashMap<>();
+    groupTncMap.put("groupsTnc", tnc);
+    user.setAllTncAccepted(groupTncMap);
     return user;
   }
 
-  private Map<String, Object> getUserDbMap(String userid) {
+  private Map<String, Object> getUserDbMap(String userid) throws JsonProcessingException {
     Map<String, Object> userDbMap = new HashMap<>();
     userDbMap.put(JsonKey.USERNAME, "validUserName");
     userDbMap.put(JsonKey.CHANNEL, "channel");
@@ -316,6 +328,15 @@ public class UserProfileReadServiceTest {
     userDbMap.put(JsonKey.ID, userid);
     userDbMap.put(JsonKey.FIRST_NAME, "Demo Name");
     userDbMap.put(JsonKey.IS_DELETED, false);
+    // {'groupsTnc': '{"tncAcceptedOn":"2021-01-04 19:45:29:725+0530","version":"3.9.0"}'}
+    Map<String, String> tncMap = new HashMap<>();
+    tncMap.put("tncAcceptedOn", "2021-01-04 19:45:29:725+0530");
+    tncMap.put("version", "3.9.0");
+    ObjectMapper mapper = new ObjectMapper();
+    String tnc = mapper.writeValueAsString(tncMap);
+    Map<String, String> groupTncMap = new HashMap<>();
+    groupTncMap.put("groupsTnc", tnc);
+    userDbMap.put(JsonKey.ALL_TNC_ACCEPTED, groupTncMap);
     return userDbMap;
   }
 }

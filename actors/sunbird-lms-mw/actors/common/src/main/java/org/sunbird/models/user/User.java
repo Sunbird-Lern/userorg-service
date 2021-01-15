@@ -72,6 +72,33 @@ public class User implements Serializable {
   private String recoveryPhone;
   private String managedBy;
   private String accessCode;
+  private Map<String, String> allTncAccepted;
+  private Boolean emailVerified;
+  private Boolean phoneVerified;
+
+  public Boolean getEmailVerified() {
+    return emailVerified;
+  }
+
+  public void setEmailVerified(Boolean emailVerified) {
+    this.emailVerified = emailVerified;
+  }
+
+  public Boolean getPhoneVerified() {
+    return phoneVerified;
+  }
+
+  public void setPhoneVerified(Boolean phoneVerified) {
+    this.phoneVerified = phoneVerified;
+  }
+
+  public Map<String, String> getAllTncAccepted() {
+    return allTncAccepted;
+  }
+
+  public void setAllTncAccepted(Map<String, String> allTncAccepted) {
+    this.allTncAccepted = allTncAccepted;
+  }
 
   public List<String> getLocationIds() {
     return locationIds;

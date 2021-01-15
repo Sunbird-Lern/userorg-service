@@ -43,6 +43,7 @@ public class UserProfileReadService {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
   private UserService userService = UserServiceImpl.getInstance();
+  private UserTncService tncService = new UserTncService();
   private UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
   private Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
@@ -105,6 +106,12 @@ public class UserProfileReadService {
     }
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
+    if (null != result.get(JsonKey.ALL_TNC_ACCEPTED)) {
+      result.put(
+          JsonKey.ALL_TNC_ACCEPTED,
+          tncService.convertTncStringToJsonMap(
+              (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
+    }
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
