@@ -1,5 +1,10 @@
 package org.sunbird.common.models.util;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -22,14 +27,13 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertTrue;
-
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 @PrepareForTest({
   HttpClients.class,
   CloseableHttpClient.class,
@@ -44,12 +48,11 @@ import static org.junit.Assert.assertTrue;
 })
 public class HttpClientUtilTest {
 
-
   private CloseableHttpClient httpclient;
 
-  private Map<String, String> headers (){
+  private Map<String, String> headers() {
     Map<String, String> headers = new HashMap<>();
-    headers.put("Content-Type","application/json");
+    headers.put("Content-Type", "application/json");
     return headers;
   }
 
@@ -75,7 +78,7 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpGet.class))).thenReturn(response);
-    String res = HttpClientUtil.get("http://localhost:80/user/read",headers());
+    String res = HttpClientUtil.get("http://localhost:80/user/read", headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
 
@@ -91,7 +94,9 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
-    String res = HttpClientUtil.post("http://localhost:80/user/read","{\"message\":\"success\"}",headers());
+    String res =
+        HttpClientUtil.post(
+            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
 
@@ -107,9 +112,9 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
-    Map<String,String> fields = new HashMap<>();
+    Map<String, String> fields = new HashMap<>();
     fields.put("message", "success");
-    String res = HttpClientUtil.postFormData("http://localhost:80/user/read",fields,headers());
+    String res = HttpClientUtil.postFormData("http://localhost:80/user/read", fields, headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
 
@@ -125,8 +130,9 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
-    String res = HttpClientUtil.patch("http://localhost:80/user/read","{\"message\":\"success\"}",headers());
+    String res =
+        HttpClientUtil.patch(
+            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
-
 }

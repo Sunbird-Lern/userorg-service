@@ -16,7 +16,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 @PrepareForTest(ConfigUtil.class)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class ConfigUtilTest {
 
   private String configType = "user";
