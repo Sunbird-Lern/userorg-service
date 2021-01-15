@@ -22,7 +22,6 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.UserType;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -325,7 +324,6 @@ public class ShadowUserProcessor {
       propertiesMap.put(JsonKey.IS_DELETED, true);
       propertiesMap.put(JsonKey.STATUS, ProjectUtil.Status.INACTIVE.getValue());
     }
-    propertiesMap.put(JsonKey.USER_TYPE, UserType.TEACHER.getTypeName());
     propertiesMap.put(JsonKey.CHANNEL, shadowUser.getChannel());
     propertiesMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     logger.info(

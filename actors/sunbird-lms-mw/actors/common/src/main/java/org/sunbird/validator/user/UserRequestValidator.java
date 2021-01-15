@@ -1,11 +1,7 @@
 package org.sunbird.validator.user;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
@@ -18,9 +14,11 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.FormApiUtil;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -56,9 +54,8 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.ID_TYPE),
         userRequest);
     createUserBasicValidation(userRequest);
-    validateUserTypeAndSubType(userRequest.getRequest());
+    validateUserType(userRequest.getRequest(), null, userRequest.getRequestContext());
     phoneValidation(userRequest);
-    validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
   }
 
@@ -75,39 +72,6 @@ public class UserRequestValidator extends BaseRequestValidator {
             ResponseCode.passwordValidation.getErrorMessage(),
             ERROR_CODE);
       }
-    }
-  }
-
-  private void validateLocationCodes(Request userRequest) {
-    Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    if ((locationCodes != null) && !(locationCodes instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
-          ERROR_CODE);
-    }
-    if (locationCodes != null) {
-      List<String> set = null;
-      // As of now locationCode can take array of only locationcodes and map of locationCodes which
-      // include type and code of the location
-      if (((List) locationCodes).get(0) instanceof String) {
-        set = new ArrayList(new HashSet<>((List<String>) locationCodes));
-        userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
-      } else {
-        set = new ArrayList();
-        List<Map<String, String>> locationList = (List<Map<String, String>>) locationCodes;
-        for (Map location : locationList) {
-          if (!location.get(JsonKey.TYPE).equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-            isValidLocationType((String) location.get(JsonKey.TYPE));
-            set.add((String) location.get(JsonKey.CODE));
-          } else {
-            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.get(JsonKey.CODE));
-            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
-          }
-        }
-      }
-      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
   }
 
@@ -178,7 +142,6 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   public void validateUserCreateV4(Request userRequest) {
     validateUserCreateV3(userRequest);
-    validateLocationCodes(userRequest);
     validateFrameworkDetails(userRequest);
   }
 
@@ -364,14 +327,11 @@ public class UserRequestValidator extends BaseRequestValidator {
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
-    validateUserTypeAndSubType(userRequest.getRequest());
     validateUserOrgField(userRequest);
-
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
     }
-    validateLocationCodes(userRequest);
     validateExtIdTypeAndProvider(userRequest);
     validateFrameworkDetails(userRequest);
     validateRecoveryEmailOrPhone(userRequest);
@@ -806,21 +766,54 @@ public class UserRequestValidator extends BaseRequestValidator {
   }
 
   // TODO:  Validate userType with data from form api
-  public void validateUserTypeAndSubType(Map<String, Object> userRequestMap) {
-
+  public String validateUserType(
+      Map<String, Object> userRequestMap, String stateCode, RequestContext context) {
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
-    Map<String, List<String>> userTypeConfigMap = DataCacheHandler.getUserTypesConfig();
-    if (null != userType && !userTypeConfigMap.containsKey(userType)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidParameterValue,
-          MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(),
-              new String[] {userType, JsonKey.USER_TYPE}));
+    if (null != userType) {
+      Map<String, Map<String, List<String>>> userTypeConfigMap =
+          DataCacheHandler.getUserTypesConfig();
+      if (StringUtils.isBlank(stateCode)) {
+        stateCode = JsonKey.DEFAULT_PERSONA;
+      }
+      if (!userTypeConfigMap.containsKey(stateCode)) {
+        // Get profile data config
+        Map<String, List<String>> userProfileConfigMap =
+            FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
+        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
+          // Get Default Config
+          stateCode = JsonKey.DEFAULT_PERSONA;
+          userProfileConfigMap = userTypeConfigMap.get(stateCode);
+          if (MapUtils.isEmpty(userProfileConfigMap)) {
+            userProfileConfigMap =
+                FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
+            userTypeConfigMap.put(stateCode, userProfileConfigMap);
+          }
+        } else {
+          userTypeConfigMap.put(stateCode, userProfileConfigMap);
+        }
+      }
+
+      Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+      if (!userTypeMap.containsKey(userType)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                new String[] {userType, JsonKey.USER_TYPE}));
+      }
     }
+    return stateCode;
+  }
+
+  public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
+    String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
+    Map<String, Map<String, List<String>>> userTypeConfigMap =
+        DataCacheHandler.getUserTypesConfig();
     String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
+    Map<String, List<String>> userSubTypeMap = userTypeConfigMap.get(stateCode);
     if (null != userSubType
-        && (null == userTypeConfigMap.get(userType)
-            || !userTypeConfigMap.get(userType).contains(userSubType))) {
+        && (null == userSubTypeMap.get(userType)
+            || !userSubTypeMap.get(userType).contains(userSubType))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(

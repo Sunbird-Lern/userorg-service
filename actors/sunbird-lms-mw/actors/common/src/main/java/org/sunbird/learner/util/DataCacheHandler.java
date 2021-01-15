@@ -1,24 +1,20 @@
 /** */
 package org.sunbird.learner.util;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
-import org.sunbird.models.user.UserType;
 
 /**
  * This class will handle the data cache.
@@ -36,7 +32,10 @@ public class DataCacheHandler implements Runnable {
       new ConcurrentHashMap<>();
   private static Map<String, List<String>> frameworkFieldsConfig = new ConcurrentHashMap<>();
   private static Map<String, List<String>> hashtagIdFrameworkIdMap = new ConcurrentHashMap<>();
-  private static Map<String, List<String>> userTypeOrSubTypeConfigMap = new ConcurrentHashMap<>();
+  private static Map<String, Map<String, List<String>>> userTypeOrSubTypeConfigMap =
+      new ConcurrentHashMap<>();
+  private static Map<String, List<String>> stateLocationTypeConfigMap = new ConcurrentHashMap<>();
+  private static Map<String, Map<String, Object>> formApiDataConfigMap = new ConcurrentHashMap<>();
   private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
@@ -92,19 +91,47 @@ public class DataCacheHandler implements Runnable {
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
-    cacheUserTypeOrSubTypeConfig(userTypeOrSubTypeConfigMap);
+    cacheFormApiDataConfig();
+    cacheUserTypeOrSubTypeConfig();
+    cacheLocationCodeTypeConfig();
     initLocationOrderMap();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
   }
 
-  private void cacheUserTypeOrSubTypeConfig(Map<String, List<String>> userTypeOrSubTypeConfigMap) {
+  // Get form data config
+  private void cacheFormApiDataConfig() {
+    for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
+      String stateCode = itr.getKey();
+      RequestContext reqContext = new RequestContext();
+      reqContext.setReqId(UUID.randomUUID().toString());
+      reqContext.setDebugEnabled("false");
+      Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
+      formApiDataConfigMap.put(stateCode, formDataMap);
+    }
+  }
 
-    // TODO : Get data from form Api
-    userTypeOrSubTypeConfigMap.put(UserType.STUDENT.getTypeName(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(
-        UserType.ADMINISTRATOR.getTypeName(), Arrays.asList("BRC", "DAO"));
-    userTypeOrSubTypeConfigMap.put(UserType.TEACHER.getTypeName(), Arrays.asList());
-    userTypeOrSubTypeConfigMap.put(UserType.GUARDIAN.getTypeName(), Arrays.asList());
+  // Update userType or SubType cache for the state which are fetched from form api
+  private void cacheUserTypeOrSubTypeConfig() {
+    if (MapUtils.isNotEmpty(formApiDataConfigMap)) {
+      for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
+        String stateCode = itr.getKey();
+        Map<String, Object> formData = itr.getValue();
+        Map<String, List<String>> userTypeConfigMap = FormApiUtil.getUserTypeConfig(formData);
+        userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
+      }
+    }
+  }
+
+  // Update Location Code Type cache for the state which are fetched from form api
+  private void cacheLocationCodeTypeConfig() {
+    if (MapUtils.isNotEmpty(formApiDataConfigMap)) {
+      for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
+        String stateCode = itr.getKey();
+        Map<String, Object> formData = itr.getValue();
+        List<String> locationCodeLists = FormApiUtil.getLocationTypeConfigMap(formData);
+        stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
+      }
+    }
   }
 
   private void initLocationOrderMap() {
@@ -243,7 +270,7 @@ public class DataCacheHandler implements Runnable {
     return configSettings;
   }
 
-  public static Map<String, List<String>> getUserTypesConfig() {
+  public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
     return userTypeOrSubTypeConfigMap;
   }
 
@@ -270,5 +297,13 @@ public class DataCacheHandler implements Runnable {
 
   public static Map<String, Integer> getLocationOrderMap() {
     return orderMap;
+  }
+
+  public static Map<String, List<String>> getLocationTypeConfig() {
+    return stateLocationTypeConfigMap;
+  }
+
+  public static Map<String, Map<String, Object>> getFormApiDataConfigMap() {
+    return formApiDataConfigMap;
   }
 }

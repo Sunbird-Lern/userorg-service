@@ -14,10 +14,10 @@ import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.models.adminutil.AdminUtilParams;
 import org.sunbird.models.adminutil.AdminUtilRequest;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.adminutil.AdminUtilRequestPayload;
+import org.sunbird.models.adminutil.Params;
 
 public class AdminUtilHandler {
   private static LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);
@@ -34,7 +34,7 @@ public class AdminUtilHandler {
     adminUtilsReq.setId(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD);
     adminUtilsReq.setVer(JsonKey.EKSTEP_SIGNING_SIGN_PAYLOAD_VER);
     adminUtilsReq.setTs(Calendar.getInstance().getTime().getTime());
-    adminUtilsReq.setParams(new AdminUtilParams());
+    adminUtilsReq.setParams(new Params());
     adminUtilsReq.setRequest(new AdminUtilRequest(reqData));
     return adminUtilsReq;
   }

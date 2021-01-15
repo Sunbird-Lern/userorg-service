@@ -168,6 +168,7 @@ public final class JsonKey {
   public static final String FROM_EMAIL = "fromEmail";
   public static final String GENDER = "gender";
   public static final String GEO_LOCATION_DB = "geoLocationDb";
+  public static final String LOCATION_DB = "locationDb";
   public static final String GRADE = "grade";
   public static final String GROUP_QUERY = "groupQuery";
   public static final String HASH_TAG_ID = "hashtagid";
@@ -275,6 +276,7 @@ public final class JsonKey {
   public static final String PREV_STATE = "PREV_STATE";
   public static final String PRIVATE = "private";
   public static final String PROCESS_ID = "processId";
+  public static final String PROFILE_CONFIG = "profileConfig";
   public static final String PROCESS_START_TIME = "processStartTime";
   public static final String PDATA_ID = "telemetry_pdata_id";
   public static final String PDATA_PID = "telemetry_pdata_pid";
@@ -615,6 +617,7 @@ public final class JsonKey {
   public static final String PROSPECT_CHANNELS_IDS = "prospectChannelsIds";
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
+  public static final String TEMPLATE_OPTIONS = "templateOptions";
   public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
@@ -633,6 +636,8 @@ public final class JsonKey {
   public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
   public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
   public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
+  public static final String FORM_API_BASE_URL = "form_api_base_url";
+  public static final String FORM_API_ENDPOINT = "form_api_endpoint";
   public static final String MANAGED_TOKEN = "managedToken";
   public static final String WITH_TOKENS = "withTokens";
   public static final String DECLARED_EMAIL = "declared-email";
@@ -661,6 +666,7 @@ public final class JsonKey {
   public static final String ERROR_TYPE = "errorType";
   public static final String DECLARATIONS = "declarations";
   public static final String PERSONA = "persona";
+  public static final String SUB_PERSONA = "subPersona";
   // This denotes the persona of the user in self declaration and
   // is different from role or user type = TEACHER
   public static final String TEACHER_PERSONA = "teacher";
@@ -704,6 +710,10 @@ public final class JsonKey {
   public static final String REQUEST_ID = "requestid";
   public static final String LOCATION_TYPE_SCHOOL = "school";
   public static final String UPDATE_USER_SCHOOL_ORG = "updateUserSchoolOrg";
+  public static final String GET = "get";
+  public static final String FORM = "form";
+  public static final String CHILDREN = "children";
+  public static final String OPTIONS = "options";
 
   private JsonKey() {}
 }
