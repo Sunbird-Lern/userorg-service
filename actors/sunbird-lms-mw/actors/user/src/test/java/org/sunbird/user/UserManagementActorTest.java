@@ -22,7 +22,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.UserType;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -258,7 +257,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithUserTypeAsTeacher() {
-    reqMap.put(JsonKey.USER_TYPE, UserType.TEACHER.getTypeName());
+    reqMap.put(JsonKey.USER_TYPE, "teacher");
 
     when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
         .thenReturn("rootOrgId")
@@ -275,7 +274,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testUpdateUserSuccessWithUserTypeTeacher() {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
-    req.put(JsonKey.USER_TYPE, UserType.TEACHER.getTypeName());
+    req.put(JsonKey.USER_TYPE, "teacher");
     req.put(JsonKey.USER_SUB_TYPE, "crc");
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, String> configMap = new HashMap<>();
