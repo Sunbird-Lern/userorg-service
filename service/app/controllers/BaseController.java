@@ -399,9 +399,9 @@ public class BaseController extends Controller {
         createResponseParamObj(
             code, exception.getMessage(), Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     if (response.getParams() != null) {
-      response.getParams().setStatus(JsonKey.FAILED);
+      response.getParams().setStatus(response.getParams().getStatus());
       if (exception.getCode() != null) {
-        response.getParams().setStatus(JsonKey.FAILED);
+        response.getParams().setStatus(exception.getCode());
       }
       if (!StringUtils.isBlank(response.getParams().getErrmsg())
           && response.getParams().getErrmsg().contains("{0}")) {
