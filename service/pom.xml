@@ -37,7 +37,7 @@
 		<play2.plugin.version>1.0.0-rc5</play2.plugin.version>
 		<sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
 		<scala.major.version>2.11</scala.major.version>
-		<scala.version>2.11.8</scala.version>
+		<scala.version>2.11.12</scala.version>
 		<learner.akka.version>2.5.19</learner.akka.version>
 	</properties>
 
