@@ -31,7 +31,7 @@ import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.user.actors.UserTypeActor;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({KeyCloakConnectionProvider.class})
+@PrepareForTest({KeyCloakConnectionProvider.class, FormApiUtilHandler.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
