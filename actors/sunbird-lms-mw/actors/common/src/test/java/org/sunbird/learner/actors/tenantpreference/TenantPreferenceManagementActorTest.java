@@ -49,7 +49,8 @@ import org.sunbird.learner.util.Util;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class TenantPreferenceManagementActorTest {
 
