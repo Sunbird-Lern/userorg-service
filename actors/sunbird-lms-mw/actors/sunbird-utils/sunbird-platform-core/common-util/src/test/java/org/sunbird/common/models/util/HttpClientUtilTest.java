@@ -18,7 +18,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -32,7 +31,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 @PrepareForTest({
   HttpClients.class,
@@ -48,26 +48,19 @@ import org.powermock.modules.junit4.PowerMockRunner;
 })
 public class HttpClientUtilTest {
 
-  private CloseableHttpClient httpclient;
-
   private Map<String, String> headers() {
     Map<String, String> headers = new HashMap<>();
     headers.put("Content-Type", "application/json");
     return headers;
   }
 
-  @Before
-  public void init() {
+  // @Test
+  public void testGetSuccess() throws IOException {
     PowerMockito.mockStatic(HttpClients.class);
     HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
-    httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    CloseableHttpClient httpclient = PowerMockito.mock(CloseableHttpClient.class);
     PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
     PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
-    HttpClientUtil.getInstance();
-  }
-
-  @Test
-  public void testGetSuccess() throws IOException {
     CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
     StatusLine statusLine = PowerMockito.mock(StatusLine.class);
     PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
@@ -78,12 +71,18 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpGet.class))).thenReturn(response);
+    HttpClientUtil.getInstance();
     String res = HttpClientUtil.get("http://localhost:80/user/read", headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
 
   @Test
   public void testPostSuccess() throws IOException {
+    PowerMockito.mockStatic(HttpClients.class);
+    HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+    CloseableHttpClient httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
+    PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
     CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
     StatusLine statusLine = PowerMockito.mock(StatusLine.class);
     PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
@@ -94,6 +93,7 @@ public class HttpClientUtilTest {
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
+    HttpClientUtil.getInstance();
     String res =
         HttpClientUtil.post(
             "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
@@ -102,6 +102,11 @@ public class HttpClientUtilTest {
 
   @Test
   public void testPostFormSuccess() throws IOException {
+    PowerMockito.mockStatic(HttpClients.class);
+    HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+    CloseableHttpClient httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
+    PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
     CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
     StatusLine statusLine = PowerMockito.mock(StatusLine.class);
     PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
@@ -114,12 +119,18 @@ public class HttpClientUtilTest {
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
     Map<String, String> fields = new HashMap<>();
     fields.put("message", "success");
+    HttpClientUtil.getInstance();
     String res = HttpClientUtil.postFormData("http://localhost:80/user/read", fields, headers());
     assertTrue("{\"message\":\"success\"}".equals(res));
   }
 
   @Test
-  public void testPatchSuccess() throws IOException {
+  public void testPatchSuccess() throws Exception {
+    PowerMockito.mockStatic(HttpClients.class);
+    HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+    CloseableHttpClient httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
+    PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
     CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
     StatusLine statusLine = PowerMockito.mock(StatusLine.class);
     PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
@@ -129,7 +140,8 @@ public class HttpClientUtilTest {
     PowerMockito.mockStatic(EntityUtils.class);
     byte[] bytes = "{\"message\":\"success\"}".getBytes();
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
-    PowerMockito.when(httpclient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
+    PowerMockito.when(httpclient.execute(Mockito.any(HttpPatch.class))).thenReturn(response);
+    HttpClientUtil.getInstance();
     String res =
         HttpClientUtil.patch(
             "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
