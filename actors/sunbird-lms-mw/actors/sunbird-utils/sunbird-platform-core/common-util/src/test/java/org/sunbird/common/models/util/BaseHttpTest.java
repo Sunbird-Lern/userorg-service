@@ -27,9 +27,15 @@ import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
 })
 @PrepareForTest({
+  ProjectUtil.class,
   OutputStreamWriter.class,
   URL.class,
   BufferedReader.class,

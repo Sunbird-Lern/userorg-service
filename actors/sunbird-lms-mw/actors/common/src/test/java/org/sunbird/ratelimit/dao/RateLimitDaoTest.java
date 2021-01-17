@@ -62,7 +62,7 @@ public class RateLimitDaoTest {
     doAnswer(
             (Answer)
                 invocation -> {
-                  List<Map<String, Object>> rateLimits = invocation.getArgumentAt(2, List.class);
+                  List<Map<String, Object>> rateLimits = invocation.getArgument(2);
                   assertTrue(CollectionUtils.isNotEmpty(rateLimits));
                   assertSame(1, rateLimits.size());
                   assertSame(1, rateLimits.get(0).get(JsonKey.COUNT));

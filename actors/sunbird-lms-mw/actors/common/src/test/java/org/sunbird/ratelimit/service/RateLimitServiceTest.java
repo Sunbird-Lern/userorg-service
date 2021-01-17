@@ -116,7 +116,7 @@ public class RateLimitServiceTest {
     doAnswer(
             (Answer)
                 invocation -> {
-                  List<RateLimit> rateLimits = invocation.getArgumentAt(0, List.class);
+                  List<RateLimit> rateLimits = invocation.getArgument(0);
                   assertTrue(CollectionUtils.isNotEmpty(rateLimits));
                   assertSame(countsByRateLimiter.size(), rateLimits.size());
                   rateLimits.forEach(
