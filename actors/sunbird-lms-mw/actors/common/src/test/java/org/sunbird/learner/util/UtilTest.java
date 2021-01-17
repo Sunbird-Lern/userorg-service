@@ -39,7 +39,8 @@ import scala.concurrent.Promise;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class UtilTest {
   private static CassandraOperationImpl cassandraOperationImpl;

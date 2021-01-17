@@ -37,7 +37,8 @@ import org.sunbird.models.user.Feed;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class FeedServiceImplTest {
   private static CassandraOperation cassandraOperation = null;

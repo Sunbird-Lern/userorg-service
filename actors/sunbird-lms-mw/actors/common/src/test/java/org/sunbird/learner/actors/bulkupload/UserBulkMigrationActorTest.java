@@ -47,7 +47,8 @@ import org.sunbird.telemetry.util.TelemetryWriter;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class UserBulkMigrationActorTest {
   private static ActorSystem system;
@@ -72,7 +73,6 @@ public class UserBulkMigrationActorTest {
     when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
-    TelemetryWriter.write(Mockito.any());
     system = ActorSystem.create("system");
   }
 

@@ -49,7 +49,8 @@ import org.sunbird.models.organisation.Organisation;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class DeclaredExternalIdActorTest {
   private static final Props props = Props.create(DeclaredExternalIdActor.class);
