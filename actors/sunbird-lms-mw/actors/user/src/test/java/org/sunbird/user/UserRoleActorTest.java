@@ -145,7 +145,7 @@ public class UserRoleActorTest {
     assertTrue(testScenario(true, true, null));
   }
 
-  @Test
+  // @Test
   public void testAssignRolesSuccessWithValidOrgId() {
     PowerMockito.mockStatic(OrgServiceImpl.class);
     OrgService orgService = PowerMockito.mock(OrgService.class);
@@ -161,7 +161,7 @@ public class UserRoleActorTest {
     assertTrue(testScenario(true, null));
   }
 
-  @Test
+  // @Test
   public void testAssignRolesSuccessWithoutOrgId() {
     PowerMockito.mockStatic(OrgServiceImpl.class);
     OrgService orgService = PowerMockito.mock(OrgService.class);

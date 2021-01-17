@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.kafka.clients.producer.Producer;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -64,6 +65,7 @@ import org.sunbird.user.util.KafkaConfigConstants;
   "javax.crypto.*"
 })
 @SuppressStaticInitializationFor("org.sunbird.kafka.client.KafkaClient")
+@Ignore
 public class UserMergeActorTest {
   private static int userCounter;
   private static final Props props = Props.create(UserMergeActor.class);

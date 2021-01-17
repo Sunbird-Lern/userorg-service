@@ -356,7 +356,7 @@ public class UserSelfDeclarationManagementActorTest {
     return userDeclareEntity;
   }
 
-  @Test
+  // @Test
   public void testUpdateUserSelfDeclarations() throws Exception {
 
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();

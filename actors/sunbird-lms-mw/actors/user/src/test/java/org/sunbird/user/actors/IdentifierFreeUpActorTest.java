@@ -93,7 +93,7 @@ public class IdentifierFreeUpActorTest {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testFreeUpWhenOnlyFreeUpEmail() {
     String id = "anyUserId";
     Request reqObj = new Request();

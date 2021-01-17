@@ -11,6 +11,7 @@ import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.admin.client.Keycloak;
@@ -47,6 +48,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public class UserStatusActorTest {
 
   private static final Props props = Props.create(UserStatusActor.class);

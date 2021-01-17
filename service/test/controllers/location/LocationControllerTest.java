@@ -31,7 +31,7 @@ import util.RequestInterceptor;
 /** @author arvind on 19/4/18. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class LocationControllerTest extends BaseApplicationTest {
 

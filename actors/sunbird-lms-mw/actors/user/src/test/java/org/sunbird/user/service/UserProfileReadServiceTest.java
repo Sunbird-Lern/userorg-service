@@ -78,7 +78,7 @@ public class UserProfileReadServiceTest {
     when(DataCacheHandler.getConfigSettings()).thenReturn(config);
   }
 
-  @Test
+  // @Test
   public void getUserProfileDataTest() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);

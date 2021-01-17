@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -51,6 +52,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public class CertificateActorTest {
   public static CassandraOperationImpl cassandraOperationImpl;
   public static UserServiceImpl userServiceImpl;

@@ -38,7 +38,17 @@ import play.test.Helpers;
 import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
+})
 @PrepareForTest({
   RequestInterceptor.class,
   TelemetryWriter.class,

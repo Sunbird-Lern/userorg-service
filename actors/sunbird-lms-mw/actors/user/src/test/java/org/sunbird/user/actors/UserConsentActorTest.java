@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -49,6 +50,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public class UserConsentActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserConsentActor.class);

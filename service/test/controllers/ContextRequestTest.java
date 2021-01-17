@@ -19,7 +19,7 @@ import play.libs.Json;
 import play.mvc.Http;
 
 @PrepareForTest(OnRequestHandler.class)
-@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 public class ContextRequestTest extends BaseApplicationTest {
 
   private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";

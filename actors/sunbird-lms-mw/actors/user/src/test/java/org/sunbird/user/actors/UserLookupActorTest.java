@@ -43,7 +43,7 @@ public class UserLookupActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserLookupActor.class);
 
-  @Test
+  // @Test
   public void getUserKeycloakSearchTestWithId() throws Exception {
     UserDao userDao = PowerMockito.mock(UserDao.class);
     PowerMockito.mockStatic(UserDaoImpl.class);

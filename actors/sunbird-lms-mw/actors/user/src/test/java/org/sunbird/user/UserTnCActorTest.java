@@ -109,7 +109,7 @@ public class UserTnCActorTest {
         .thenReturn(promise.future());
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTcnSuccessWithAcceptFirstTime() throws Exception {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
@@ -156,7 +156,7 @@ public class UserTnCActorTest {
     return probe;
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTncSuccessAlreadyAccepted() throws Exception {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
@@ -171,7 +171,7 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
-  @Test
+  // @Test
   public void testAcceptUserTncForBlockedUser() throws Exception {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
@@ -234,7 +234,7 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
-  @Test
+  // @Test
   public void testOrgAdminTnCSuccessWithAcceptFirstTime() throws Exception {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
