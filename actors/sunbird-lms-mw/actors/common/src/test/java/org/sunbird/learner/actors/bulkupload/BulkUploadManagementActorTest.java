@@ -16,7 +16,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -237,9 +241,6 @@ public class BulkUploadManagementActorTest {
     byte[] bytes = getFileAsBytes("BulkUploadUserSample.csv");
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), null))
-        .thenReturn(getCassandraRecordByIdForOrgResponse());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
         .thenReturn(getCassandraRecordByIdForOrgResponse());
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(

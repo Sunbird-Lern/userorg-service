@@ -3,20 +3,33 @@ package org.sunbird.learner.actors.bulkupload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.BulkUploadJsonKey;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.BulkProcessStatus;
+import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.CloudStorageUtil;
 import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
@@ -28,6 +41,7 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
+import scala.concurrent.Future;
 
 /** This actor will handle bulk upload operation . */
 @ActorConfig(
@@ -37,6 +51,7 @@ import org.sunbird.learner.util.Util.DbInfo;
 public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
   private BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -298,12 +313,18 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
               (String) req.get(JsonKey.ORGANISATION_ID),
               context);
     } else {
-      Map<String, Object> map = new HashMap<>();
-      map.put(JsonKey.EXTERNAL_ID, ((String) req.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
-      map.put(JsonKey.PROVIDER, ((String) req.get(JsonKey.ORG_PROVIDER)).toLowerCase());
-      response =
-          cassandraOperation.getRecordsByPropertiesWithFiltering(
-              orgDb.getKeySpace(), orgDb.getTableName(), map, context);
+      Map<String, Object> filters = new HashMap<>();
+      filters.put(JsonKey.EXTERNAL_ID, ((String) req.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
+      filters.put(JsonKey.PROVIDER, ((String) req.get(JsonKey.ORG_PROVIDER)).toLowerCase());
+      SearchDTO searchDto = new SearchDTO();
+      searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+      Future<Map<String, Object>> resultF =
+          esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
+      Map<String, Object> result =
+          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+      List<Map<String, Object>> dataMapList =
+          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      response.getResult().put(JsonKey.RESPONSE, dataMapList);
     }
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
