@@ -1536,11 +1536,23 @@ public class UserManagementActor extends BaseActor {
       Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
       if (MapUtils.isEmpty(locationTypeConfigMap)
           || CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-
-        List<String> locationTypeList =
-            FormApiUtil.getLocationTypeConfigMap(
-                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext()));
-        locationTypeConfigMap.put(stateCode, locationTypeList);
+        Map<String, Object> userProfileConfigMap =
+            FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
+        // If config is not available check the default profile config
+        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
+          stateCode = JsonKey.DEFAULT_PERSONA;
+          if (CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
+            userProfileConfigMap =
+                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
+            List<String> locationTypeList =
+                FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
+            locationTypeConfigMap.put(stateCode, locationTypeList);
+          }
+        } else {
+          List<String> locationTypeList =
+              FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
+          locationTypeConfigMap.put(stateCode, locationTypeList);
+        }
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
