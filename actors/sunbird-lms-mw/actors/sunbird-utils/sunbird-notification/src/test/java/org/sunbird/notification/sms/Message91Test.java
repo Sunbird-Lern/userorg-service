@@ -3,14 +3,20 @@ package org.sunbird.notification.sms;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
