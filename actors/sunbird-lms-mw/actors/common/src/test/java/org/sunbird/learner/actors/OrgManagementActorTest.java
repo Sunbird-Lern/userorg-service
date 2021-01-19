@@ -152,13 +152,6 @@ public class OrgManagementActorTest {
 
   // @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserId() {
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     boolean result =
         testScenario(
             getRequest(

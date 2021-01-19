@@ -1532,11 +1532,15 @@ public class OrganisationManagementActor extends BaseActor {
   private boolean validateFieldUniqueness(
       String key, String value, String orgId, RequestContext context) {
     if (value != null) {
-      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-      Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), key, value, context);
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      Map<String, Object> filters = new HashMap<>();
+      filters.put(key, value);
+      SearchDTO searchDto = new SearchDTO();
+      searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+      Future<Map<String, Object>> resultF =
+          esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
+      Map<String, Object> result =
+          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       if ((list.isEmpty())) {
         return true;
       } else {

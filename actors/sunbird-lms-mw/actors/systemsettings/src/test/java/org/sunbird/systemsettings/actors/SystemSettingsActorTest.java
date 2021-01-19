@@ -7,7 +7,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,9 +77,6 @@ public class SystemSettingsActorTest {
     when(cassandraOperation.getRecordsByIndexedProperty(
             KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID, null))
         .thenReturn(resp);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, KEYSPACE_NAME, null))
-        .thenReturn(new Response());
   }
 
   private Map<String, Object> getOrgData() {
