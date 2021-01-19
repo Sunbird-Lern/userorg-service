@@ -26,6 +26,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
@@ -112,11 +113,18 @@ public class UserProfileReadService {
           tncService.convertTncStringToJsonMap(
               (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
     }
+    addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
+  }
+
+  private void addFlagValue(Map<String, Object> userDetails) {
+    int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
+    Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
+    userDetails.putAll(userFlagMap);
   }
 
   private Map<String, Object> getManagedToken(
