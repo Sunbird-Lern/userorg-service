@@ -64,6 +64,16 @@ public interface UserDao {
    * ProjectCommonException.
    *
    * @param userId User id.
+   * @param context
+   * @return User User Details.
+   */
+  Map<String, Object> getUserDetailsById(String userId, RequestContext context);
+
+  /**
+   * This method will user based on userId and return user if found else throw
+   * ProjectCommonException.
+   *
+   * @param userId User id.
    * @param properties list of properties
    * @param context
    * @return response

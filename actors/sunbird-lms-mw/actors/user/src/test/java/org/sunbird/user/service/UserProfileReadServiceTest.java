@@ -112,7 +112,7 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
-    Mockito.when(userDao.getUserById("1234567890", null))
+    Mockito.when(userDao.getUserDetailsById("1234567890", null))
         .thenReturn(getValidUserResponse("1234567890"));
 
     UserOrgDao userOrgDao = PowerMockito.mock(UserOrgDao.class);
@@ -255,9 +255,9 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
-    User user = getValidUserResponse("1234567890");
-    user.setIsDeleted(true);
-    Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(user);
+    Map<String, Object> user = getValidUserResponse("1234567890");
+    user.put(JsonKey.IS_DELETED, true);
+    Mockito.when(userDao.getUserDetailsById("1234567890", null)).thenReturn(user);
     UserProfileReadService userProfileReadService = new UserProfileReadService();
     try {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
@@ -287,7 +287,7 @@ public class UserProfileReadServiceTest {
     return reqMap;
   }
 
-  private User getValidUserResponse(String userid) throws JsonProcessingException {
+  private Map<String, Object> getValidUserResponse(String userid) throws JsonProcessingException {
     User user = new User();
     user.setId(userid);
     user.setEmail("anyEmail@gmail.com");
@@ -311,7 +311,9 @@ public class UserProfileReadServiceTest {
     Map<String, String> groupTncMap = new HashMap<>();
     groupTncMap.put("groupsTnc", tnc);
     user.setAllTncAccepted(groupTncMap);
-    return user;
+    ObjectMapper mapper1 = new ObjectMapper();
+    Map<String, Object> result = mapper.convertValue(user, Map.class);
+    return result;
   }
 
   private Map<String, Object> getUserDbMap(String userid) throws JsonProcessingException {

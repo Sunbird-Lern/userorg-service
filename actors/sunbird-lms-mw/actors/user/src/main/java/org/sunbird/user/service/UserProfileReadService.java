@@ -29,7 +29,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -161,23 +160,21 @@ public class UserProfileReadService {
 
   private Map<String, Object> validateUserIdAndGetUserDetails(
       String userId, RequestContext context) {
-    User user = userDao.getUserById(userId, context);
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     // check user found or not
-    if (null == user) {
+    if (MapUtils.isEmpty(user)) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
           ResponseCode.userNotFound.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     // check whether is_deletd true or false
-    Boolean isDeleted = user.getIsDeleted();
+    Boolean isDeleted = (Boolean) user.get(JsonKey.IS_DELETED);
     if (null != isDeleted && isDeleted.booleanValue()) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-
-    Map<String, Object> result = mapper.convertValue(user, Map.class);
-    removeUserPrivateField(result);
-    return result;
+    removeUserPrivateField(user);
+    return user;
   }
 
   private String getUserIdByExternalId(
