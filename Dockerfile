@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim-buster
+FROM adoptopenjdk/openjdk11:alpine-slim
 MAINTAINER "Manojv" "manojv@ilimi.in"
 RUN apk update \
     && apk add  unzip \
