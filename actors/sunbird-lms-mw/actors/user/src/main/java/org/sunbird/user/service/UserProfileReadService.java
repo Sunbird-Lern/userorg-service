@@ -26,9 +26,9 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -112,11 +112,18 @@ public class UserProfileReadService {
           tncService.convertTncStringToJsonMap(
               (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
     }
+    addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
+  }
+
+  private void addFlagValue(Map<String, Object> userDetails) {
+    int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
+    Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
+    userDetails.putAll(userFlagMap);
   }
 
   private Map<String, Object> getManagedToken(
@@ -153,23 +160,21 @@ public class UserProfileReadService {
 
   private Map<String, Object> validateUserIdAndGetUserDetails(
       String userId, RequestContext context) {
-    User user = userDao.getUserById(userId, context);
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     // check user found or not
-    if (null == user) {
+    if (MapUtils.isEmpty(user)) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
           ResponseCode.userNotFound.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     // check whether is_deletd true or false
-    Boolean isDeleted = user.getIsDeleted();
+    Boolean isDeleted = (Boolean) user.get(JsonKey.IS_DELETED);
     if (null != isDeleted && isDeleted.booleanValue()) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-
-    Map<String, Object> result = mapper.convertValue(user, Map.class);
-    removeUserPrivateField(result);
-    return result;
+    removeUserPrivateField(user);
+    return user;
   }
 
   private String getUserIdByExternalId(
