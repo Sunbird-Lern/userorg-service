@@ -1476,18 +1476,19 @@ public class UserManagementActor extends BaseActor {
         if (StringUtils.isNotBlank(stateCode)) {
           // Validate UserType and UserSubType configure based on user state config else user
           // default config
-          String stateCodeConfig =
-              userRequestValidator.validateUserType(userMap, stateCode, context);
-          userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
+          validateUserTypeAndSubType(userMap, context, stateCode);
         }
       } else {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.internalError,
-            MessageFormat.format(
-                ResponseCode.internalError.getErrorMessage(),
-                new String[] {(String) userMap.get(JsonKey.USER_ID)}));
+        // If location is null or empty .Vlidate with default config
+        validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }
+  }
+
+  private void validateUserTypeAndSubType(
+      Map<String, Object> userMap, RequestContext context, String stateCode) {
+    String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
+    userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
   }
 
   private void validateLocationCodes(Request userRequest) {
