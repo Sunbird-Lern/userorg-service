@@ -10,10 +10,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -80,7 +77,7 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testGetUploadStatus() {
     Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/upload/status/pid").method("GET");
     Result result = Helpers.route(application, req);

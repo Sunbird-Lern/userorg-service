@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import play.Application;
 import play.libs.Json;
 import play.mvc.Http;
@@ -38,7 +40,7 @@ public class TestUtil {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        e.printStackTrace();
+        ProjectLogger.log(e.getMessage(), e);
       }
     }
     return jsonResp;
@@ -53,14 +55,13 @@ public class TestUtil {
 
       if (response != null) {
         ResponseParams params = response.getParams();
-        if (result.status() != 200) {
-          return params.getErr();
-        } else {
-          return params.getStatus();
-        }
+        return params.getStatus();
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      ProjectLogger.log(
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

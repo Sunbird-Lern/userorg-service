@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
@@ -39,6 +41,7 @@ public class KeyCloakSyncActor extends BaseActor {
   @Override
   public void onReceive(Request actorMessage) throws Throwable {
     String requestedOperation = actorMessage.getOperation();
+    ProjectLogger.log("Operation name is ==" + requestedOperation);
     if (requestedOperation.equalsIgnoreCase(ActorOperations.SYNC_KEYCLOAK.getValue())) {
       // return SUCCESS to controller and run the sync process in background
       Response response = new Response();
@@ -51,6 +54,7 @@ public class KeyCloakSyncActor extends BaseActor {
   }
 
   private void syncData(Request message) {
+    ProjectLogger.log("USER DB data sync operation to keycloak started ");
     long startTime = System.currentTimeMillis();
     Map<String, Object> req = message.getRequest();
     Map<String, Object> responseMap = new HashMap<>();
@@ -63,19 +67,28 @@ public class KeyCloakSyncActor extends BaseActor {
     Util.DbInfo dbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
 
     if (null != userIds && !userIds.isEmpty()) {
+      ProjectLogger.log(
+          "fetching data for user for these ids "
+              + Arrays.toString(userIds.toArray())
+              + " started");
       Response response =
           cassandraOperation.getRecordsByProperty(
               dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, userIds, null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      ProjectLogger.log(
+          "fetching data for user for these ids " + Arrays.toString(userIds.toArray()) + " done");
     }
     if (null != reponseList && !reponseList.isEmpty()) {
       for (Map<String, Object> map : reponseList) {
         responseMap.put((String) map.get(JsonKey.ID), map);
       }
     } else {
+      ProjectLogger.log("fetching all data for user started");
       Response response =
           cassandraOperation.getAllRecords(dbInfo.getKeySpace(), dbInfo.getTableName(), null);
       reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      ProjectLogger.log("fetching all data for user done");
+      ProjectLogger.log("total db data to sync for user to keycloak " + reponseList.size());
       if (null != reponseList) {
         for (Map<String, Object> map : reponseList) {
           responseMap.put((String) map.get(JsonKey.ID), map);
@@ -90,10 +103,13 @@ public class KeyCloakSyncActor extends BaseActor {
 
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
+    ProjectLogger.log(
+        "total time taken to sync db data for user to keycloak " + elapsedTime + " ms.");
   }
 
   private void updateUserDetails(Entry<String, Object> entry) {
     String userId = entry.getKey();
+    ProjectLogger.log("updating user data started");
     Map<String, Object> userMap = (Map<String, Object>) entry.getValue();
     // Decrypt user data
     UserUtility.decryptUserData(userMap);
@@ -114,12 +130,14 @@ public class KeyCloakSyncActor extends BaseActor {
             cassandraOperation.updateRecord(dbInfo.getKeySpace(), dbInfo.getTableName(), map, null);
             esService.update(ProjectUtil.EsType.user.getTypeName(), userId, map, null);
           }
+          ProjectLogger.log("User sync failed in KeyCloakSyncActor for userID : " + userId);
         }
       } catch (Exception e) {
-        logger.error(e.getMessage(), e);
+        ProjectLogger.log(e.getMessage(), e);
+        ProjectLogger.log("User sync failed in KeyCloakSyncActor for userID : " + userId);
       }
     } else {
-      logger.info("SSO is disabled , cann't sync user data to keycloak.");
+      ProjectLogger.log("SSO is disabled , cann't sync user data to keycloak.");
     }
   }
 }

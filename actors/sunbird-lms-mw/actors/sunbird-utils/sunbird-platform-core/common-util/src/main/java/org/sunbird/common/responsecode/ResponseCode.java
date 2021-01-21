@@ -422,8 +422,6 @@ public enum ResponseCode {
   invalidTypeValue(ResponseMessage.Key.INVALID_TYPE_VALUE, ResponseMessage.Key.INVALID_TYPE_VALUE),
   invalidLocationId(
       ResponseMessage.Key.INVALID_LOCATION_ID, ResponseMessage.Message.INVALID_LOCATION_ID),
-  invalidLocationType(
-      ResponseMessage.Key.INVALID_LOCATION_TYPE, ResponseMessage.Message.INVALID_LOCATION_TYPE),
   invalidHashTagId(
       ResponseMessage.Key.INVALID_HASHTAG_ID, ResponseMessage.Message.INVALID_HASHTAG_ID),
   invalidUsrOrgData(
@@ -851,12 +849,10 @@ public enum ResponseCode {
       ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
   preferenceNotFound(
       ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
-  userConsentNotFound(
-      ResponseMessage.Key.USER_CONSENT_NOT_FOUND, ResponseMessage.Message.USER_CONSENT_NOT_FOUND),
+    userConsentNotFound(ResponseMessage.Key.USER_CONSENT_NOT_FOUND, ResponseMessage.Message.USER_CONSENT_NOT_FOUND),
   InvalidUserInfoValue(
       ResponseMessage.Key.INVALID_USER_INFO_VALUE, ResponseMessage.Message.INVALID_USER_INFO_VALUE),
-  invalidConsentStatus(
-      ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
+  invalidConsentStatus(ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

@@ -6,6 +6,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.UrlValidator;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -44,6 +46,7 @@ public class ProjectUtil {
     "externalresource.properties",
     "sso.properties",
     "userencryption.properties",
+    "profilecompleteness.properties",
     "mailTemplates.properties"
   };
   public static PropertiesCache propertiesCache;
@@ -53,7 +56,11 @@ public class ProjectUtil {
           + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
   public static final String[] excludes =
       new String[] {
-        JsonKey.COMPLETENESS, JsonKey.MISSING_FIELDS, JsonKey.PROFILE_VISIBILITY, JsonKey.LOGIN_ID
+        JsonKey.COMPLETENESS,
+        JsonKey.MISSING_FIELDS,
+        JsonKey.PROFILE_VISIBILITY,
+        JsonKey.LOGIN_ID,
+        JsonKey.USER_ID
       };
 
   private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
@@ -179,22 +186,6 @@ public class ProjectUtil {
     }
   }
 
-  public enum UserLookupType {
-    USERNAME(JsonKey.USER_LOOKUP_FILED_USER_NAME),
-    EMAIL(JsonKey.EMAIL),
-    PHONE(JsonKey.PHONE);
-
-    private String type;
-
-    UserLookupType(String type) {
-      this.type = type;
-    }
-
-    public String getType() {
-      return this.type;
-    }
-  }
-
   /**
    * This method will provide formatted date
    *
@@ -234,6 +225,19 @@ public class ProjectUtil {
     public String getValue() {
       return this.value;
     }
+  }
+
+  /**
+   * This method will generate auth token based on name , source and timestamp
+   *
+   * @param name String
+   * @param source String
+   * @return String
+   */
+  public static String createAuthToken(String name, String source) {
+    String data = name + source + System.currentTimeMillis();
+    UUID authId = UUID.nameUUIDFromBytes(data.getBytes(StandardCharsets.UTF_8));
+    return authId.toString();
   }
 
   /**
@@ -292,11 +296,22 @@ public class ProjectUtil {
    * @author Manzarul
    */
   public enum EsType {
+    course("cbatch"),
+    courseBatch("course-batch"),
+    content("content"),
+    badgeassociations("badgeassociations"),
     user("user"),
     organisation("org"),
+    usercourses("user-courses"),
     usernotes("usernotes"),
+    userprofilevisibility("userprofilevisibility"),
     telemetry("telemetry"),
     location("location"),
+    announcementType("announcementtype"),
+    announcement("announcement"),
+    metrics("metrics"),
+    cbatchstats("cbatchstats"),
+    cbatchassessment("cbatch-assessment"),
     userfeed("userfeed");
 
     private String typeName;
@@ -420,6 +435,7 @@ public class ProjectUtil {
     if (StringUtils.isBlank(logoUrl)) {
       logoUrl = getConfigValue(JsonKey.SUNBIRD_ENV_LOGO_URL);
     }
+    ProjectLogger.log("ProjectUtil:getSunbirdLogoUrl: url = " + logoUrl, LoggerEnum.INFO.name());
     return logoUrl;
   }
 
@@ -438,6 +454,7 @@ public class ProjectUtil {
     if (StringUtils.isBlank(fromEmail)) {
       fromEmail = getConfigValue(JsonKey.EMAIL_SERVER_FROM);
     }
+    ProjectLogger.log("ProjectUtil:getFromEmail: fromEmail = " + fromEmail, LoggerEnum.INFO.name());
     return fromEmail;
   }
 
@@ -469,13 +486,6 @@ public class ProjectUtil {
     return responseMap;
   }
 
-  public static void setTraceIdInHeader(Map<String, String> header, RequestContext context) {
-    if (null != context) {
-      header.put(JsonKey.X_TRACE_ENABLED, context.getDebugEnabled());
-      header.put(JsonKey.X_REQUEST_ID, context.getReqId());
-    }
-  }
-
   /**
    * This method will make EkStep api call register the tag.
    *
@@ -486,12 +496,12 @@ public class ProjectUtil {
    * @throws IOException
    */
   public static String registertag(
-      String tagId, String body, Map<String, String> header, RequestContext context) {
+      String tagId, String body, Map<String, String> header, RequestContext context)
+      throws IOException {
     String tagStatus = "";
     try {
       logger.info(context, "start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
-      setTraceIdInHeader(header, context);
       tagStatus =
           HttpClientUtil.post(
               analyticsBaseUrl
@@ -580,7 +590,8 @@ public class ProjectUtil {
       phoneNumber = phoneNumberUtil.parse(phNumber, isoCode);
       return phoneNumberUtil.isValidNumber(phoneNumber);
     } catch (NumberParseException e) {
-      logger.error(phNumber + " :this phone no. is not a valid one.", e);
+      ProjectLogger.log("Exception occurred while validating phone number : ", e);
+      ProjectLogger.log(phNumber + "this phone no. is not a valid one.");
     }
     return false;
   }
@@ -647,7 +658,7 @@ public class ProjectUtil {
       t.merge(context, writer);
       return writer.toString();
     } catch (Exception ex) {
-      logger.error("Exception occurred while formating and sending SMS ", ex);
+      ProjectLogger.log("Exception occurred while formating and sending SMS " + ex);
     }
     return "";
   }
@@ -661,7 +672,7 @@ public class ProjectUtil {
         date = null;
       }
     } catch (ParseException ex) {
-      logger.error("isDateValidFormat: " + ex.getMessage(), ex);
+      ProjectLogger.log(ex.getMessage(), ex);
     }
     return date != null;
   }
@@ -697,6 +708,18 @@ public class ProjectUtil {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
+  /**
+   * Method to verify url is valid or not.
+   *
+   * @param url String
+   * @return boolean
+   */
+  public static boolean isUrlvalid(String url) {
+    String[] schemes = {"http", "https"};
+    UrlValidator urlValidator = new UrlValidator(schemes);
+    return urlValidator.isValid(url);
+  }
+
   public static String getConfigValue(String key) {
     if (StringUtils.isNotBlank(System.getenv(key))) {
       return System.getenv(key);
@@ -729,7 +752,7 @@ public class ProjectUtil {
     try {
       return mapper.writeValueAsString(mapList);
     } catch (IOException e) {
-      logger.error("convertMapToJsonString : " + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
     return null;
   }

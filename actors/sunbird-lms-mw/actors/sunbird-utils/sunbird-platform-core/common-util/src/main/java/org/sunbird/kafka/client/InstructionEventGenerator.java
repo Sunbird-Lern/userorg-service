@@ -7,13 +7,11 @@ import java.util.UUID;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.telemetry.dto.TelemetryBJREvent;
 
 public class InstructionEventGenerator {
-
-  private static LoggerUtil logger = new LoggerUtil(InstructionEventGenerator.class);
 
   private static ObjectMapper mapper = new ObjectMapper();
   private static String beJobRequesteventId = "BE_JOB_REQUEST";
@@ -100,7 +98,7 @@ public class InstructionEventGenerator {
     try {
       jsonMessage = mapper.writeValueAsString(te);
     } catch (Exception e) {
-      logger.error("Error logging BE_JOB_REQUEST event: " + e.getMessage(), e);
+      ProjectLogger.log("Error logging BE_JOB_REQUEST event: " + e.getMessage(), e);
     }
     return jsonMessage;
   }

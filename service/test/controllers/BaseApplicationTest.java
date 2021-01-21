@@ -24,6 +24,8 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import play.Application;
 import play.Mode;
@@ -98,7 +100,7 @@ public abstract class BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        e.printStackTrace();
+        ProjectLogger.log(e.getMessage(), e);
       }
     }
     return jsonResp;
@@ -110,14 +112,16 @@ public abstract class BaseApplicationTest {
 
     try {
       Response response = mapper.readValue(responseStr, Response.class);
-      ResponseParams params = response.getParams();
-      if (result.status() != 200) {
-        return params.getErr();
-      } else {
+
+      if (response != null) {
+        ResponseParams params = response.getParams();
         return params.getStatus();
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      ProjectLogger.log(
+          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+              + e.getMessage(),
+          LoggerEnum.ERROR.name());
     }
     return "";
   }

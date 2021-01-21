@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -32,11 +33,18 @@ import org.sunbird.user.util.UserUtil;
 @PowerMockIgnore("javax.management.*")
 public class UserExternalIdentityServiceTest {
 
+  private static CassandraOperation cassandraOperationImpl;
+
+  @BeforeClass
+  public static void beforeEachTest() {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+  }
+
   @Test
   public void getUserV1Test() {
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Map<String, Object> propertyMap = new HashMap<>();
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
@@ -62,9 +70,7 @@ public class UserExternalIdentityServiceTest {
 
   @Test
   public void getUserV2Test() {
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Map<String, Object> propertyMap = new HashMap<>();
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
@@ -83,9 +89,6 @@ public class UserExternalIdentityServiceTest {
 
   @Test
   public void getSelfDeclaredDetailsTest() {
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
@@ -104,6 +107,7 @@ public class UserExternalIdentityServiceTest {
         .thenReturn(response);
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
     List selfDeclareExternalId = userExternalIdentityService.getSelfDeclaredDetails("1234", null);
-    Assert.assertNotNull(selfDeclareExternalId);
+    System.out.println(selfDeclareExternalId);
+    Assert.assertTrue(selfDeclareExternalId.size() > 0);
   }
 }

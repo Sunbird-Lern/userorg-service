@@ -8,21 +8,22 @@ import org.quartz.JobExecutionContext;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
 /** @author Amit Kumar */
 public class UpdateUserCountScheduler extends BaseJob {
-  private static LoggerUtil logger = new LoggerUtil(UpdateUserCountScheduler.class);
 
   @Override
   public void execute(JobExecutionContext ctx) {
-    logger.info(
+    ProjectLogger.log(
         "UpdateUserCountScheduler:execute: Triggered Update user count Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
-            + ctx.getJobDetail().toString());
+            + ctx.getJobDetail().toString(),
+        LoggerEnum.INFO.name());
     List<Object> locIdList = new ArrayList<>();
     Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
     Response response =
@@ -34,13 +35,14 @@ public class UpdateUserCountScheduler extends BaseJob {
         locIdList.add(map.get(JsonKey.ID));
       }
     }
-    logger.info(
+    ProjectLogger.log(
         "UpdateUserCountScheduler:execute: size of total locId to processed = " + locIdList.size());
     Request request = new Request();
     request.setOperation(BackgroundOperations.updateUserCountToLocationID.name());
     request.getRequest().put(JsonKey.LOCATION_IDS, locIdList);
     request.getRequest().put(JsonKey.OPERATION, "UpdateUserCountScheduler");
-    logger.info("UpdateUserCountScheduler:execute: calling BackgroundService actor from scheduler");
+    ProjectLogger.log(
+        "UpdateUserCountScheduler:execute: calling BackgroundService actor from scheduler");
     tellToBGRouter(request);
   }
 }

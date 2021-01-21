@@ -11,6 +11,8 @@ import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.bean.ShadowUserUpload;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.error.CsvError;
@@ -43,10 +45,16 @@ public class UserBulkMigrationRequestValidator {
   }
 
   public void validate() {
+    ProjectLogger.log(
+        "UserBulkMigrationRequestValidator:validate:start validating migration users",
+        LoggerEnum.INFO.name());
     checkCsvRows();
   }
 
   public void validateDeclaredUsers() {
+    ProjectLogger.log(
+        "UserBulkMigrationRequestValidator:validate:start validating migration users",
+        LoggerEnum.INFO.name());
     checkDeclaredCsvRows();
   }
 

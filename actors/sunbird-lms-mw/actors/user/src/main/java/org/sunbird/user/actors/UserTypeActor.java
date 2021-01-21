@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.models.user.UserType;
 
 @ActorConfig(
   tasks = {"getUserTypes"},
@@ -23,37 +21,29 @@ public class UserTypeActor extends UserBaseActor {
     String operation = request.getOperation();
     switch (operation) {
       case "getUserTypes":
-        getUserTypes(request);
+        getUserTypes();
         break;
     }
   }
 
   @SuppressWarnings("unchecked")
-  private void getUserTypes(Request request) {
+  private void getUserTypes() {
 
     Response response = new Response();
-    List<Map<String, String>> userTypeList = getUserTypeList(request);
+    List<Map<String, String>> userTypeList = getUserTypeList();
     response.getResult().put(JsonKey.RESPONSE, userTypeList);
     sender().tell(response, self());
   }
 
-  private List<Map<String, String>> getUserTypeList(Request request) {
-    List<Map<String, String>> userTypes = new ArrayList<>();
+  private List<Map<String, String>> getUserTypeList() {
+    List<Map<String, String>> userTypeList = new ArrayList<>();
 
-    Map<String, Map<String, List<String>>> userTypeConfigList =
-        DataCacheHandler.getUserTypesConfig();
-    Map<String, List<String>> userTypeLists = userTypeConfigList.get(JsonKey.DEFAULT_PERSONA);
-    if (MapUtils.isEmpty(userTypeLists)) {
-      userTypeLists =
-          FormApiUtil.getUserTypeConfig(
-              FormApiUtil.getProfileConfig(JsonKey.DEFAULT_PERSONA, request.getRequestContext()));
-    }
-    for (Map.Entry<String, List<String>> itr : userTypeLists.entrySet()) {
+    for (UserType userType : UserType.values()) {
       Map<String, String> userTypeMap = new HashMap<>();
-      userTypeMap.put(JsonKey.ID, itr.getKey());
-      userTypeMap.put(JsonKey.NAME, itr.getKey());
-      userTypes.add(userTypeMap);
+      userTypeMap.put(JsonKey.ID, userType.getTypeName());
+      userTypeMap.put(JsonKey.NAME, userType.getTypeName());
+      userTypeList.add(userTypeMap);
     }
-    return userTypes;
+    return userTypeList;
   }
 }

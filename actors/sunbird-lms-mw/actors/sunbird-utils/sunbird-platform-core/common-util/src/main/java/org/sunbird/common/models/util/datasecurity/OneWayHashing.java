@@ -3,7 +3,7 @@ package org.sunbird.common.models.util.datasecurity;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectLogger;
 
 /**
  * This class will do one way data hashing.
@@ -11,8 +11,6 @@ import org.sunbird.common.models.util.LoggerUtil;
  * @author Manzarul
  */
 public class OneWayHashing {
-
-  public static LoggerUtil logger = new LoggerUtil(OneWayHashing.class);
 
   private OneWayHashing() {}
 
@@ -32,9 +30,10 @@ public class OneWayHashing {
       for (int i = 0; i < byteData.length; i++) {
         sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
       }
+      ProjectLogger.log("encrypted value is==: " + sb.toString());
       return sb.toString();
     } catch (Exception e) {
-      logger.error("Error while encrypting", e);
+      ProjectLogger.log("Error while encrypting", e);
     }
     return "";
   }

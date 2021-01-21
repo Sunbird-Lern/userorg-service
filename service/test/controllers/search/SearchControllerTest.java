@@ -48,7 +48,7 @@ public class SearchControllerTest extends BaseApplicationTest {
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
-  // @Test
+  @Test
   public void testcompositeSearch() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
@@ -69,7 +69,7 @@ public class SearchControllerTest extends BaseApplicationTest {
     assertEquals(200, result.status());
   }
 
-  // @Test
+  @Test
   public void testcompositeSearchUnAuthorized() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);

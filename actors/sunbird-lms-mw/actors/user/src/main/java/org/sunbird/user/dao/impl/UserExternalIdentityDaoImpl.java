@@ -39,7 +39,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
             "getUserIdByExternalId: got userId from user_lookup for extId "
                 + extId
                 + " "
-                + userRecordList.get(0).get(JsonKey.USER_ID));
+                + (String) userRecordList.get(0).get(JsonKey.USER_ID));
         return (String) userRecordList.get(0).get(JsonKey.USER_ID);
       }
     }

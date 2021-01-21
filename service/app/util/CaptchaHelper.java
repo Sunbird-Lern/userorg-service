@@ -10,7 +10,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.sunbird.common.models.util.*;
 
 public class CaptchaHelper {
-  private static LoggerUtil logger = new LoggerUtil(CaptchaHelper.class);
 
   String captchaUrl = null;
   String mobilePrivateKey = null;
@@ -45,11 +44,13 @@ public class CaptchaHelper {
       isCaptchaValid = (boolean) responseMap.get("success");
       if (!isCaptchaValid) {
         List<String> errorLst = (List<String>) responseMap.get("error-codes");
-        logger.info(
-            "exception in validating the google captcha: " + Arrays.toString(errorLst.toArray()));
+        ProjectLogger.log(
+            "exception in validating the google captcha: " + Arrays.toString(errorLst.toArray()),
+            LoggerEnum.ERROR.name());
       }
     } catch (Exception e) {
-      logger.error("exception in processing the captcha: " + captcha, e);
+      ProjectLogger.log(
+          "exception in processing the captcha: " + e, captcha, LoggerEnum.ERROR.name());
     }
     return isCaptchaValid;
   }

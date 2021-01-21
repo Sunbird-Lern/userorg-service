@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
 import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.RequestContext;
 
 /** @author Manzarul */
@@ -115,7 +116,7 @@ public class AzureFileUtility {
     } catch (URISyntaxException | IOException e) {
       logger.error(context, "Unable to upload file :" + fileName, e);
     } catch (Exception e) {
-      logger.error(context, "Unable to upload file :" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     } finally {
       if (null != fis) {
         try {

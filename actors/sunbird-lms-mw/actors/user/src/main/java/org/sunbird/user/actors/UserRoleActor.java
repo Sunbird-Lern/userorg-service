@@ -57,7 +57,7 @@ public class UserRoleActor extends UserBaseActor {
   }
 
   private void getRoles() {
-    logger.info("UserRoleActor: getRoles called");
+    ProjectLogger.log("UserRoleActor: getRoles called", LoggerEnum.INFO.name());
     Response response = DataCacheHandler.getRoleResponse();
     if (response == null) {
       response = RoleService.getUserRoles();

@@ -1,7 +1,13 @@
 package org.sunbird.common.models.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -96,6 +102,12 @@ public class ProjectUtilTest extends BaseHttpTest {
           propertiesCache.getProperty(JsonKey.SUNBIRD_ENV_LOGO_URL),
           context.internalGet(JsonKey.ORG_IMAGE_URL));
     }
+  }
+
+  @Test
+  public void testCreateAuthTokenSuccess() {
+    String authToken = ProjectUtil.createAuthToken("test", "tset1234");
+    assertNotNull(authToken);
   }
 
   @Test
@@ -220,8 +232,8 @@ public class ProjectUtilTest extends BaseHttpTest {
     String response = null;
     try {
       response = ProjectUtil.registertag("testTag", "{}", ProjectUtil.getEkstepHeader(), null);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (IOException e) {
+
     }
     assertNotNull(response);
   }
@@ -239,9 +251,14 @@ public class ProjectUtilTest extends BaseHttpTest {
 
   @Test
   public void testEsTypeSuccess() {
+    assertEquals("content", ProjectUtil.EsType.content.getTypeName());
+    assertEquals("cbatch", ProjectUtil.EsType.course.getTypeName());
+    assertEquals("course-batch", ProjectUtil.EsType.courseBatch.getTypeName());
     assertEquals("user", ProjectUtil.EsType.user.getTypeName());
     assertEquals("org", ProjectUtil.EsType.organisation.getTypeName());
+    assertEquals("user-courses", ProjectUtil.EsType.usercourses.getTypeName());
     assertEquals("usernotes", ProjectUtil.EsType.usernotes.getTypeName());
+    assertEquals("userprofilevisibility", ProjectUtil.EsType.userprofilevisibility.getTypeName());
   }
 
   @Test

@@ -1,45 +1,22 @@
-package org.sunbird.validator.user;
+package org.sunbird.common.request;
 
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.StringFormatter;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
-  protected static List<String> typeList = new ArrayList<>();
-
-  static {
-    List<String> subTypeList =
-        Arrays.asList(
-            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
-    for (String str : subTypeList) {
-      typeList.addAll(
-          ((Arrays.asList(str.split(",")))
-                  .stream()
-                  .map(
-                      x -> {
-                        return x.toLowerCase();
-                      }))
-              .collect(Collectors.toList()));
-    }
-  }
 
   public void validateCreateUserRequest(Request userRequest) {
     externalIdsValidation(userRequest, JsonKey.CREATE);
@@ -54,8 +31,9 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.ID_TYPE),
         userRequest);
     createUserBasicValidation(userRequest);
-    validateUserType(userRequest.getRequest(), null, userRequest.getRequestContext());
+    validateUserType(userRequest);
     phoneValidation(userRequest);
+    validateLocationCodes(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
   }
 
@@ -75,24 +53,19 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  /**
-   * This method will validate location type
-   *
-   * @param type
-   * @return
-   */
-  public static boolean isValidLocationType(String type) {
-    if (null != type && !typeList.contains(type.toLowerCase())) {
+  private void validateLocationCodes(Request userRequest) {
+    Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
+    if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
+          ResponseCode.dataTypeError.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
+          ERROR_CODE);
     }
-    return true;
+    if (locationCodes != null) {
+      List<String> set = new ArrayList(new HashSet<>((List<String>) locationCodes));
+      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
+    }
   }
 
   private void validateUserName(Request userRequest) {
@@ -142,23 +115,8 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   public void validateUserCreateV4(Request userRequest) {
     validateUserCreateV3(userRequest);
+    validateLocationCodes(userRequest);
     validateFrameworkDetails(userRequest);
-  }
-
-  public void validateUserLookupRequest(Request request) {
-    checkMandatoryFieldsPresent(request.getRequest(), JsonKey.VALUE, JsonKey.KEY);
-    List<String> types =
-        Stream.of(ProjectUtil.UserLookupType.values())
-            .map(ProjectUtil.UserLookupType::getType)
-            .collect(Collectors.toList());
-    types.add(JsonKey.ID);
-    String key = (String) request.get(JsonKey.KEY);
-    if (!types.contains(key)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidValue,
-          MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(), JsonKey.KEY, key, types));
-    }
   }
 
   public void validateCreateUserV1Request(Request userRequest) {
@@ -327,11 +285,14 @@ public class UserRequestValidator extends BaseRequestValidator {
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
+    validateUserType(userRequest);
     validateUserOrgField(userRequest);
+
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
     }
+    validateLocationCodes(userRequest);
     validateExtIdTypeAndProvider(userRequest);
     validateFrameworkDetails(userRequest);
     validateRecoveryEmailOrPhone(userRequest);
@@ -339,12 +300,70 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   private void validateUserOrgField(Request userRequest) {
     Map<String, Object> request = userRequest.getRequest();
-    if (request.containsKey(JsonKey.ORGANISATIONS)) {
+    boolean isPrivate =
+        BooleanUtils.isTrue((Boolean) userRequest.getContext().get(JsonKey.PRIVATE));
+    if (isPrivate
+        && StringUtils.isBlank((String) request.get(JsonKey.USER_ID))
+        && request.containsKey(JsonKey.ORGANISATIONS)) {
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.mandatoryParamsMissing,
+          ProjectUtil.formatMessage(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.USER_ID));
+    }
+
+    if (!isPrivate && request.containsKey(JsonKey.ORGANISATIONS)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.errorUnsupportedField,
           ProjectUtil.formatMessage(
               ResponseCode.errorUnsupportedField.getErrorMessage(), JsonKey.ORGANISATIONS));
     }
+
+    if (isPrivate
+        && request.containsKey(JsonKey.ORGANISATIONS)
+        && !(request.get(JsonKey.ORGANISATIONS) instanceof List)) {
+      throwInvalidUserOrgData();
+    }
+
+    if (isPrivate && request.containsKey(JsonKey.ORGANISATIONS)) {
+      List<Object> list = (List<Object>) request.get(JsonKey.ORGANISATIONS);
+      for (Object map : list) {
+        if (!(map instanceof Map)) {
+          throwInvalidUserOrgData();
+        } else {
+          validRolesDataType((Map<String, Object>) map);
+        }
+      }
+    }
+  }
+
+  private void validRolesDataType(Map<String, Object> map) {
+    String organisationId = (String) map.get(JsonKey.ORGANISATION_ID);
+    if (StringUtils.isBlank(organisationId)) {
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.mandatoryParamsMissing,
+          ProjectUtil.formatMessage(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ORGANISATION_ID));
+    }
+    if (map.containsKey(JsonKey.ROLES)) {
+      if (!(map.get(JsonKey.ROLES) instanceof List)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.dataTypeError,
+            MessageFormat.format(
+                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.ROLES, JsonKey.LIST));
+      } else if (CollectionUtils.isEmpty((List) map.get(JsonKey.ROLES))) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.emptyRolesProvided, ResponseCode.emptyRolesProvided.getErrorMessage());
+      }
+    }
+  }
+
+  private void throwInvalidUserOrgData() {
+    ProjectCommonException.throwClientErrorException(
+        ResponseCode.dataTypeError,
+        MessageFormat.format(
+            ResponseCode.dataTypeError.getErrorMessage(),
+            JsonKey.ORGANISATIONS,
+            String.join(" ", JsonKey.LIST, " of ", JsonKey.MAP)));
   }
 
   public void externalIdsValidation(Request userRequest, String operation) {
@@ -625,7 +644,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       Map<String, Object> framework =
           (Map<String, Object>) request.getRequest().get(JsonKey.FRAMEWORK);
       if (!MapUtils.isEmpty(framework)) {
-        if (null != framework.get(JsonKey.ID) && (framework.get(JsonKey.ID) instanceof List)) {
+        if (framework.get(JsonKey.ID) instanceof List) {
           List<String> frameworkId = (List<String>) framework.get(JsonKey.ID);
           if (CollectionUtils.isEmpty(frameworkId)) {
             ProjectCommonException.throwClientErrorException(
@@ -641,20 +660,8 @@ public class UserRequestValidator extends BaseRequestValidator {
                 StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID),
                 "1",
                 String.valueOf(frameworkId.size()));
-          } else {
-            if (frameworkId.size() == 1) {
-              String id = frameworkId.get(0);
-              if (StringUtils.isBlank(id)) {
-                ProjectCommonException.throwClientErrorException(
-                    ResponseCode.mandatoryParamsMissing,
-                    MessageFormat.format(
-                        ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-                        StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
-              }
-            }
           }
-        } else if (null != framework.get(JsonKey.ID)
-            && framework.get(JsonKey.ID) instanceof String) {
+        } else if (framework.get(JsonKey.ID) instanceof String) {
           String frameworkId = (String) framework.get(JsonKey.ID);
           if (StringUtils.isBlank(frameworkId)) {
             ProjectCommonException.throwClientErrorException(
@@ -663,12 +670,6 @@ public class UserRequestValidator extends BaseRequestValidator {
                     ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                     StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
           }
-        } else {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.mandatoryParamsMissing,
-              MessageFormat.format(
-                  ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-                  StringFormatter.joinByDot(JsonKey.FRAMEWORK, JsonKey.ID)));
         }
       }
     }
@@ -765,60 +766,17 @@ public class UserRequestValidator extends BaseRequestValidator {
     return frameworkMap.get(key);
   }
 
-  // TODO:  Validate userType with data from form api
-  public String validateUserType(
-      Map<String, Object> userRequestMap, String stateCode, RequestContext context) {
-    String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
-    if (null != userType) {
-      Map<String, Map<String, List<String>>> userTypeConfigMap =
-          DataCacheHandler.getUserTypesConfig();
-      if (StringUtils.isBlank(stateCode)) {
-        stateCode = JsonKey.DEFAULT_PERSONA;
-      }
-      if (!userTypeConfigMap.containsKey(stateCode)) {
-        // Get profile data config
-        Map<String, List<String>> userProfileConfigMap =
-            FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
-          // Get Default Config
-          stateCode = JsonKey.DEFAULT_PERSONA;
-          userProfileConfigMap = userTypeConfigMap.get(stateCode);
-          if (MapUtils.isEmpty(userProfileConfigMap)) {
-            userProfileConfigMap =
-                FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-            userTypeConfigMap.put(stateCode, userProfileConfigMap);
-          }
-        } else {
-          userTypeConfigMap.put(stateCode, userProfileConfigMap);
-        }
-      }
+  private void validateUserType(Request userRequest) {
+    String userType = (String) userRequest.getRequest().get(JsonKey.USER_TYPE);
 
-      Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
-      if (!userTypeMap.containsKey(userType)) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                new String[] {userType, JsonKey.USER_TYPE}));
-      }
-    }
-    return stateCode;
-  }
-
-  public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
-    String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
-    Map<String, Map<String, List<String>>> userTypeConfigMap =
-        DataCacheHandler.getUserTypesConfig();
-    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
-    Map<String, List<String>> userSubTypeMap = userTypeConfigMap.get(stateCode);
-    if (null != userSubType
-        && (null == userSubTypeMap.get(userType)
-            || !userSubTypeMap.get(userType).contains(userSubType))) {
+    if (userType != null
+        && (!JsonKey.OTHER.equalsIgnoreCase(userType))
+        && (!JsonKey.TEACHER.equalsIgnoreCase(userType))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
               ResponseCode.invalidParameterValue.getErrorMessage(),
-              new String[] {userSubType, JsonKey.USER_SUB_TYPE}));
+              new String[] {userType, JsonKey.USER_TYPE}));
     }
   }
 
@@ -895,15 +853,21 @@ public class UserRequestValidator extends BaseRequestValidator {
         for (Map<String, Object> declareFields : declarations) {
           String userId = (String) declareFields.get(JsonKey.USER_ID);
           String orgId = (String) declareFields.get(JsonKey.ORG_ID);
-          if (StringUtils.isBlank(userId) || StringUtils.isBlank(orgId)) {
+          String persona = (String) declareFields.get(JsonKey.PERSONA);
+          Map<String, Object> info = (Map<String, Object>) declareFields.get(JsonKey.INFO);
+          if (StringUtils.isBlank(userId)
+              || StringUtils.isBlank(orgId)
+              || StringUtils.isBlank(persona)) {
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing.getErrorCode(),
                 MessageFormat.format(
                     ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
-                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
+                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
-          declareFields.put(JsonKey.PERSONA, "default");
+          if (MapUtils.isNotEmpty(info) && info.containsValue(null)) {
+            ProjectCommonException.throwClientErrorException(ResponseCode.InvalidUserInfoValue);
+          }
         }
       }
     } catch (Exception ex) {

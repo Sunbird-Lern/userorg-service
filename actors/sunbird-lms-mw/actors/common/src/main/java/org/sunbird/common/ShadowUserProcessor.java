@@ -22,6 +22,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.UserType;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -268,16 +269,23 @@ public class ShadowUserProcessor {
   }
 
   private void generateTelemetry(String userId, String rootOrgId, ShadowUser shadowUser) {
-    logger.info(
-        "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString());
+    // ExecutionContext.getCurrent()
+    //    .setRequestContext(getTelemetryContextByProcessId((String) shadowUser.getProcessId()));
+    ProjectLogger.log(
+        "ShadowUserProcessor:generateTelemetry:generate telemetry:" + shadowUser.toString(),
+        LoggerEnum.INFO.name());
     Map<String, Object> targetObject = new HashMap<>();
     Map<String, String> rollUp = new HashMap<>();
     rollUp.put("l1", rootOrgId);
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
+    // ExecutionContext.getCurrent().getRequestContext().put(JsonKey.ROLLUP, rollUp);
     TelemetryUtil.generateCorrelatedObject(
         shadowUser.getProcessId(), JsonKey.PROCESS_ID, null, correlatedObject);
-    TelemetryUtil.generateTargetObject(
-        userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
+    targetObject =
+        TelemetryUtil.generateTargetObject(
+            userId, StringUtils.capitalize(JsonKey.USER), JsonKey.MIGRATION_USER_OBJECT, null);
+    // TelemetryUtil.telemetryProcessingCall(
+    //    mapper.convertValue(shadowUser, Map.class), targetObject, correlatedObject);
   }
 
   /**
@@ -288,9 +296,10 @@ public class ShadowUserProcessor {
    * @return
    */
   private List<String> getMatchingUserIds(List<Map<String, Object>> esUser) {
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserProcessor:getMatchingUserIds:GOT response from counting matchingUserIds:"
-            + esUser.size());
+            + esUser.size(),
+        LoggerEnum.INFO.name());
     List<String> matchingUserIds = new ArrayList<>();
     esUser
         .stream()
@@ -324,6 +333,7 @@ public class ShadowUserProcessor {
       propertiesMap.put(JsonKey.IS_DELETED, true);
       propertiesMap.put(JsonKey.STATUS, ProjectUtil.Status.INACTIVE.getValue());
     }
+    propertiesMap.put(JsonKey.USER_TYPE, UserType.TEACHER.getTypeName());
     propertiesMap.put(JsonKey.CHANNEL, shadowUser.getChannel());
     propertiesMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     logger.info(
@@ -406,9 +416,10 @@ public class ShadowUserProcessor {
 
       @Override
       public void onFailure(Throwable t) {
-        logger.error(
-            "ShadowUserProcessor:getSyncCallback:FAILURE:ERROR OCCURRED WHILE GETTING SYNC CALLBACKS",
-            t);
+        ProjectLogger.log(
+            "ShadowUserProcessor:getSyncCallback:FAILURE:ERROR OCCURRED WHILE GETTING SYNC CALLBACKS"
+                + t,
+            LoggerEnum.ERROR.name());
       }
     };
   }
@@ -610,9 +621,10 @@ public class ShadowUserProcessor {
       telemetryContext.putAll(contextMap);
       processIdtelemetryCtxMap.put(processId, telemetryContext);
     }
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:getFullRecordFromProcessId:got single row data from bulk_upload_process with processId:"
-            + processId);
+            + processId,
+        LoggerEnum.INFO.name());
     return telemetryContext;
   }
 
