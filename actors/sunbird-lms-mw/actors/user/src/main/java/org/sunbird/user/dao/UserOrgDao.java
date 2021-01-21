@@ -8,8 +8,4 @@ public interface UserOrgDao {
   Response updateUserOrg(UserOrg userOrg, RequestContext context);
 
   Response createUserOrg(UserOrg userOrg, RequestContext context);
-
-  Response getUserOrgListByUserId(String userId, RequestContext context);
-
-  Response getUserOrgDetails(String userId, String organisationId, RequestContext context);
 }

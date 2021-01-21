@@ -22,6 +22,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
@@ -369,7 +370,7 @@ public class EmailServiceActor extends BaseActor {
                 context);
         esResult = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
       } catch (Exception ex) {
-        logger.error(
+        ProjectLogger.log(
             "EmailServiceActor:getUserEmailsFromSearchQuery: Exception occurred with error message = "
                 + ex.getMessage(),
             ex);
@@ -393,7 +394,7 @@ public class EmailServiceActor extends BaseActor {
                 if (ProjectUtil.isEmailvalid(email)) {
                   emails.add(email);
                 } else {
-                  logger.info(
+                  ProjectLogger.log(
                       "EmailServiceActor:sendMail: Email decryption failed for userId = "
                           + user.get(JsonKey.USER_ID));
                 }

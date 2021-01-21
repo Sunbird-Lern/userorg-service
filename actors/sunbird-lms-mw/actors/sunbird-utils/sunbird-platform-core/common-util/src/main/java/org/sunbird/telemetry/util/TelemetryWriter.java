@@ -6,7 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
 import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.telemetry.collector.TelemetryAssemblerFactory;
 import org.sunbird.telemetry.collector.TelemetryDataAssembler;
@@ -46,8 +48,10 @@ public class TelemetryWriter {
     if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateLog(telemetry)) {
       telemetryEventLogger.info(telemetry);
     } else {
-      logger.info(
-          "TelemetryWriter:processLogEvent: Audit Telemetry validation failed: " + telemetry);
+      ProjectLogger.log(
+          "TelemetryWriter:processLogEvent: Audit Telemetry validation failed: ",
+          telemetry,
+          LoggerEnum.ERROR.name());
     }
   }
 

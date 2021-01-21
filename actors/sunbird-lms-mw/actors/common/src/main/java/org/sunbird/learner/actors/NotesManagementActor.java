@@ -169,7 +169,7 @@ public class NotesManagementActor extends BaseActor {
       Response result =
           cassandraOperation.updateRecord(
               userNotesDbInfo.getKeySpace(), userNotesDbInfo.getTableName(), req, context);
-      logger.info("Note data updated");
+      ProjectLogger.log("Note data updated");
       result.getResult().put(JsonKey.ID, noteId);
       result.getResult().remove(JsonKey.RESPONSE);
       sender().tell(result, self());

@@ -8,19 +8,20 @@ import org.quartz.JobExecutionContext;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 
 public class ChannelRegistrationScheduler extends BaseJob {
-  private static LoggerUtil logger = new LoggerUtil(ChannelRegistrationScheduler.class);
 
   @Override
   public void execute(JobExecutionContext ctx) {
-    logger.info(
+    ProjectLogger.log(
         "ChannelRegistrationScheduler:execute: Running channel registration Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
-            + ctx.getJobDetail().toString());
+            + ctx.getJobDetail().toString(),
+        LoggerEnum.INFO.name());
     Request request = new Request();
     request.setOperation(BackgroundOperations.registerChannel.name());
     Response response =
@@ -30,17 +31,17 @@ public class ChannelRegistrationScheduler extends BaseJob {
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
       Map<String, Object> resultMap = responseList.get(0);
-      logger.info(
+      ProjectLogger.log(
           "value for CHANNEL_REG_STATUS_ID (003) from SYSTEM_SETTINGS_DB is : "
               + (String) resultMap.get(JsonKey.VALUE));
       if (StringUtils.isBlank((String) resultMap.get(JsonKey.VALUE))
           && !Boolean.parseBoolean((String) resultMap.get(JsonKey.VALUE))) {
-        logger.info(
+        ProjectLogger.log(
             "calling ChannelRegistrationActor from ChannelRegistrationScheduler execute method.");
         tellToBGRouter(request);
       }
     } else {
-      logger.info(
+      ProjectLogger.log(
           "calling ChannelRegistrationActor from ChannelRegistrationScheduler execute method, "
               + "entry for CHANNEL_REG_STATUS_ID (003) is null.");
       tellToBGRouter(request);

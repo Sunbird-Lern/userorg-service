@@ -102,7 +102,7 @@ public class ElasticSearchHelper {
   public static SearchRequestBuilder addAggregations(
       SearchRequestBuilder searchRequestBuilder, List<Map<String, String>> facets) {
     long startTime = System.currentTimeMillis();
-    logger.debug("addAggregations: method started at ==" + startTime);
+    logger.info("addAggregations: method started at ==" + startTime);
     if (facets != null && !facets.isEmpty()) {
       Map<String, String> map = facets.get(0);
       if (!MapUtils.isEmpty(map)) {
@@ -123,7 +123,7 @@ public class ElasticSearchHelper {
         }
       }
       long elapsedTime = calculateEndTime(startTime);
-      logger.debug(
+      logger.info(
           "ElasticSearchHelper:addAggregations method end =="
               + " ,Total time elapsed = "
               + elapsedTime);
@@ -172,7 +172,7 @@ public class ElasticSearchHelper {
   public static void addAdditionalProperties(
       BoolQueryBuilder query, Entry<String, Object> entry, Map<String, Float> constraintsMap) {
     long startTime = System.currentTimeMillis();
-    logger.debug("ElasticSearchHelper:addAdditionalProperties: method started at ==" + startTime);
+    logger.info("ElasticSearchHelper:addAdditionalProperties: method started at ==" + startTime);
     String key = entry.getKey();
     if (JsonKey.FILTERS.equalsIgnoreCase(key)) {
 
@@ -192,7 +192,7 @@ public class ElasticSearchHelper {
       }
     }
     long elapsedTime = calculateEndTime(startTime);
-    logger.debug(
+    logger.info(
         "ElasticSearchHelper:addAdditionalProperties: method end =="
             + " ,Total time elapsed = "
             + elapsedTime);

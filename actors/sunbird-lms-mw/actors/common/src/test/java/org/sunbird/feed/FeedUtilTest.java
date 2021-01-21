@@ -1,14 +1,8 @@
 package org.sunbird.feed;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +64,8 @@ public class FeedUtilTest {
     mockStatic(OrganisationClientImpl.class);
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
-    when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
+    when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
+    when(feedService.getRecordsByUserId(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
     when(feedService.insert(Mockito.any(), Mockito.any())).thenReturn(new Response());

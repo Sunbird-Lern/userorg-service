@@ -70,6 +70,7 @@ public class SystemSettingClientImpl implements SystemSettingClient {
 
   private SystemSetting getSystemSetting(
       ActorRef actorRef, String param, Object value, RequestContext context) {
+    ProjectLogger.log("SystemSettingClientImpl: getSystemSetting called", LoggerEnum.DEBUG);
     Request request = new Request();
     request.setRequestContext(context);
     Map<String, Object> map = new HashMap<>();

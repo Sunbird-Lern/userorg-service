@@ -18,13 +18,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 
 /** Class to fetch SSO public key from Keycloak server using 'certs' HTTP API call. */
 public class KeyCloakRsaKeyFetcher {
-  private static LoggerUtil logger = new LoggerUtil(KeyCloakRsaKeyFetcher.class);
-
   private static final String MODULUS = "modulusBase64";
   private static final String EXPONENT = "exponentBase64";
 
@@ -53,10 +52,10 @@ public class KeyCloakRsaKeyFetcher {
         }
       }
     } catch (Exception e) {
-      logger.error(
+      ProjectLogger.log(
           "KeyCloakRsaKeyFetcher:getPublicKeyFromKeyCloak: Exception occurred with message = "
               + e.getMessage(),
-          e);
+          LoggerEnum.ERROR);
     }
     return null;
   }
@@ -91,14 +90,15 @@ public class KeyCloakRsaKeyFetcher {
       if (entity != null) {
         return EntityUtils.toString(entity);
       } else {
-        logger.info(
-            "KeyCloakRsaKeyFetcher:requestKeyFromKeycloak: Not able to fetch SSO public key from keycloak server");
+        ProjectLogger.log(
+            "KeyCloakRsaKeyFetcher:requestKeyFromKeycloak: Not able to fetch SSO public key from keycloak server",
+            LoggerEnum.ERROR);
       }
     } catch (IOException e) {
-      logger.error(
+      ProjectLogger.log(
           "KeyCloakRsaKeyFetcher:requestKeyFromKeycloak: Exception occurred with message = "
               + e.getMessage(),
-          e);
+          LoggerEnum.ERROR);
     }
     return null;
   }
@@ -121,10 +121,10 @@ public class KeyCloakRsaKeyFetcher {
         values.put(EXPONENT, value.get("e").asText());
       }
     } catch (Exception e) {
-      logger.error(
+      ProjectLogger.log(
           "KeyCloakRsaKeyFetcher:getValuesFromJson: Exception occurred with message = "
               + e.getMessage(),
-          e);
+          LoggerEnum.ERROR);
       return null;
     }
 

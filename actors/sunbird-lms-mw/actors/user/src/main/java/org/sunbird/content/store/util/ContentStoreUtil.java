@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.RequestContext;
 
 public class ContentStoreUtil {
@@ -30,7 +27,6 @@ public class ContentStoreUtil {
   private static Map<String, Object> handleReadRequest(
       String id, String urlPath, RequestContext context) {
     Map<String, String> headers = getHeaders();
-    ProjectUtil.setTraceIdInHeader(headers, context);
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> resultMap = new HashMap<>();
 

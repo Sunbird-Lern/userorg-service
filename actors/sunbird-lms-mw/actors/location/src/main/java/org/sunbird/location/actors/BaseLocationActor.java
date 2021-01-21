@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
@@ -36,7 +37,7 @@ public abstract class BaseLocationActor extends BaseActor {
       }
       TelemetryUtil.telemetryProcessingCall(data, targetObject, correlatedObject, context);
     } catch (Exception e) {
-      logger.error("generateTelemetryForLocation : " + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
   }
 
@@ -58,7 +59,7 @@ public abstract class BaseLocationActor extends BaseActor {
       request.setRequest(telemetryRequestForSearch(context, params));
       TelemetryWriter.write(request);
     } catch (Exception e) {
-      logger.error("generateSearchTelemetryEvent : " + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
   }
 

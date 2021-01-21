@@ -14,35 +14,38 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ShadowUserProcessor;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 
 public class ShadowUserMigrationScheduler extends BaseJob {
-  private static LoggerUtil logger = new LoggerUtil(ShadowUserMigrationScheduler.class);
 
   @Override
   public void execute(JobExecutionContext jobExecutionContext) {
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:execute:Running Shadow User Upload Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
-            + jobExecutionContext.getJobDetail().toString());
+            + jobExecutionContext.getJobDetail().toString(),
+        LoggerEnum.INFO.name());
     startMigration();
   }
 
   public void startMigration() {
     List<String> unprocessedRecordIds = getUnprocessedRecordIds();
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:startMigration:Got Bulk Upload Db unprocessed and failed records size is:"
-            + unprocessedRecordIds.size());
+            + unprocessedRecordIds.size(),
+        LoggerEnum.INFO.name());
     processRecords(unprocessedRecordIds);
     ShadowUserProcessor processorObject = new ShadowUserProcessor();
     processorObject.process(null);
     unprocessedRecordIds.clear();
-    logger.info(
-        "ShadowUserMigrationScheduler:execute:Scheduler Job ended for shadow user migration");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:execute:Scheduler Job ended for shadow user migration",
+        LoggerEnum.INFO.name());
   }
 
   /**
@@ -53,8 +56,9 @@ public class ShadowUserMigrationScheduler extends BaseJob {
    * fails update the bulk upload row status to failed and add failureResult
    */
   private void processRecords(List<String> unprocessedRecordIds) {
-    logger.info(
-        "ShadowUserMigrationScheduler:processRecords:Scheduler Job Started for ShadowUser Migration");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:processRecords:Scheduler Job Started for ShadowUser Migration",
+        LoggerEnum.INFO.name());
     unprocessedRecordIds
         .stream()
         .forEach(
@@ -80,31 +84,38 @@ public class ShadowUserMigrationScheduler extends BaseJob {
                 updateMessageInBulkUserTable(
                     bulkMigrationUser.getId(), JsonKey.SUCCESS_RESULT, JsonKey.SUCCESS);
               } catch (Exception e) {
-                logger.error("ShadowUserMigrationScheduler:processRecords:error occurred ", e);
+                ProjectLogger.log(
+                    "ShadowUserMigrationScheduler:processRecords:error occurred ".concat(e + ""),
+                    LoggerEnum.ERROR.name());
                 updateMessageInBulkUserTable(
                     bulkMigrationUser.getId(), JsonKey.FAILURE_RESULT, e.getMessage());
               }
             });
-    logger.info("ShadowUserMigrationScheduler:processRecords:started stage3_____");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:processRecords:started stage3__________________________-",
+        LoggerEnum.INFO.name());
   }
 
   private void processSingleMigUser(
       String createdBy, String processId, MigrationUser singleMigrationUser) {
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:processSingleMigUser:Single migration User Started processing with processId:"
-            + processId);
+            + processId,
+        LoggerEnum.INFO.name());
     Map<String, Object> existingUserDetails =
         getShadowExistingUserDetails(
             singleMigrationUser.getChannel(), singleMigrationUser.getUserExternalId());
     if (MapUtils.isEmpty(existingUserDetails)) {
-      logger.info(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:processSingleMigUser:existing user not found with processId:"
-              + processId);
+              + processId,
+          LoggerEnum.INFO.name());
       insertShadowUserToDb(createdBy, processId, singleMigrationUser);
     } else {
-      logger.info(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:processSingleMigUser:existing user found with processId:"
-              + processId);
+              + processId,
+          LoggerEnum.INFO.name());
       ShadowUser shadowUser = mapper.convertValue(existingUserDetails, ShadowUser.class);
       updateUser(processId, singleMigrationUser, shadowUser);
     }
@@ -136,8 +147,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
             rowMap -> {
               processIds.add((String) rowMap.get(JsonKey.ID));
             });
-    logger.info(
-        "ShadowUserMigrationScheduler:getUnprocessedRecordIds:got rows from Bulk user table is:");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:getUnprocessedRecordIds:got rows from Bulk user table is:"
+            .concat(result.size() + ""),
+        LoggerEnum.INFO.name());
     return processIds;
   }
 
@@ -151,9 +164,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
     }
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:getFullRecordFromProcessId:got single row data from bulk_upload_process with processId:"
-            + processId);
+            + processId,
+        LoggerEnum.INFO.name());
     return result.get(FIRST_RECORD);
   }
 
@@ -162,9 +176,11 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     try {
       bulkMigrationUser = mapper.convertValue(row, BulkMigrationUser.class);
     } catch (Exception e) {
-      logger.error(
-          "ShadowUserMigrationScheduler:convertMapToMigrationObject:error occurred while converting map to pojo",
-          e);
+      e.printStackTrace();
+      ProjectLogger.log(
+          "ShadowUserMigrationScheduler:convertMapToMigrationObject:error occurred while converting map to pojo"
+              .concat(e.getMessage() + ""),
+          LoggerEnum.ERROR.name());
     }
     return bulkMigrationUser;
   }
@@ -176,9 +192,11 @@ public class ShadowUserMigrationScheduler extends BaseJob {
       migrationUserList =
           mapper.readValue(decryptedData, new TypeReference<List<MigrationUser>>() {});
     } catch (Exception e) {
-      logger.error(
-          "ShadowUserMigrationScheduler:getMigrationUserAsList:error occurred while converting map to POJO: ",
-          e);
+      e.printStackTrace();
+      ProjectLogger.log(
+          "ShadowUserMigrationScheduler:getMigrationUserAsList:error occurred while converting map to POJO: "
+              + e,
+          LoggerEnum.ERROR.name());
     }
     return migrationUserList;
   }
@@ -209,11 +227,12 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     Map<String, Object> dbMap = new WeakHashMap<>();
     dbMap.put(JsonKey.USER_EXT_ID, migrationUser.getUserExternalId());
     dbMap.put(JsonKey.ORG_EXT_ID, migrationUser.getOrgExternalId());
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:insertShadowUser: email got  "
             + migrationUser.getEmail()
             + " "
-            + migrationUser.getPhone());
+            + migrationUser.getPhone(),
+        LoggerEnum.INFO.name());
     dbMap.put(JsonKey.EMAIL, migrationUser.getEmail());
     dbMap.put(JsonKey.PHONE, migrationUser.getPhone());
     dbMap.put(JsonKey.ADDED_BY, createdBy);
@@ -230,7 +249,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     Response response =
         cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.SHADOW_USER, dbMap, null);
     dbMap.clear();
-    logger.info("ShadowUserMigrationScheduler:insertShadowUser: record status in cassandra ");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:insertShadowUser: record status in cassandra "
+            .concat(response + ""),
+        LoggerEnum.INFO.name());
   }
 
   private int getInputStatus(String inputStatus) {
@@ -279,13 +301,15 @@ public class ShadowUserMigrationScheduler extends BaseJob {
           JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, null);
 
       if (isClaimed) {
-        logger.info("ShadowUserMigrationScheduler:updateUserInShadowDb: isClaimed ");
+        ProjectLogger.log(
+            "ShadowUserMigrationScheduler:updateUserInShadowDb: isClaimed ",
+            LoggerEnum.INFO.name());
         ShadowUser newShadowUser = getUpdatedShadowUser(compositeKeysMap);
         new ShadowUserProcessor().processClaimedUser(newShadowUser, null);
       }
     }
 
-    logger.info(
+    ProjectLogger.log(
         "ShadowUserMigrationScheduler:updateUserInShadowDb channel:"
             + migrationUser.getChannel()
             + " userExternalId: "
@@ -293,7 +317,8 @@ public class ShadowUserMigrationScheduler extends BaseJob {
             + " isNotSame: "
             + isNotSame
             + " newClaimStatus:"
-            + newClaimStatus);
+            + newClaimStatus,
+        LoggerEnum.INFO.name());
   }
 
   private Map<String, Object> populateUserMap(String processId, MigrationUser migrationUser) {
@@ -318,8 +343,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     Response response =
         cassandraOperation.getRecordsByCompositeKey(
             JsonKey.SUNBIRD, JsonKey.SHADOW_USER, compositeKeysMap, null);
-    logger.info(
-        "ShadowUserMigrationScheduler:getUpdatedShadowUser: record status in cassandra for getting the updated shawdow user object ");
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:getUpdatedShadowUser: record status in cassandra for getting the updated shawdow user object "
+            .concat(response.getResult() + ""),
+        LoggerEnum.INFO.name());
     Map<String, Object> resultmap =
         ((List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE)).get(0);
     ShadowUser shadowUser = mapper.convertValue(resultmap, ShadowUser.class);
@@ -328,29 +355,34 @@ public class ShadowUserMigrationScheduler extends BaseJob {
 
   private void updateStatusInUserBulkTable(String processId, int statusVal) {
     try {
-      logger.info(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:updateStatusInUserBulkTable: got status to change in bulk upload table"
                   .concat(statusVal + "")
               + "with processId"
-              + processId);
+              + processId,
+          LoggerEnum.INFO.name());
       Map<String, Object> propertiesMap = new WeakHashMap<>();
       propertiesMap.put(JsonKey.ID, processId);
       propertiesMap.put(JsonKey.STATUS, statusVal);
       updateBulkUserTable(propertiesMap);
     } catch (Exception e) {
-      logger.error(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:updateStatusInUserBulkTable: status update failed"
                   .concat(e + "")
               + "with processId"
               + processId,
-          e);
+          LoggerEnum.ERROR.name());
     }
   }
 
   private void updateBulkUserTable(Map<String, Object> propertiesMap) {
-    cassandraOperation.updateRecord(
-        bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), propertiesMap, null);
-    logger.info("ShadowUserMigrationScheduler:updateBulkUserTable: status update result");
+    Response response =
+        cassandraOperation.updateRecord(
+            bulkUploadDbInfo.getKeySpace(), bulkUploadDbInfo.getTableName(), propertiesMap, null);
+    ProjectLogger.log(
+        "ShadowUserMigrationScheduler:updateBulkUserTable: status update result"
+            .concat(response + ""),
+        LoggerEnum.INFO.name());
   }
 
   private void updateMessageInBulkUserTable(String processId, String key, String value) {
@@ -413,9 +445,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
       return true;
     } else if (verifiedChannelOrgExternalIdSet.contains(
         migrationUser.getChannel() + ":" + migrationUser.getOrgExternalId())) {
-      logger.info(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:isOrgExternalIdValid: found orgexternalid in cache:"
-              + migrationUser.getOrgExternalId());
+              + migrationUser.getOrgExternalId(),
+          LoggerEnum.INFO.name());
       return true;
     }
     Map<String, Object> request = new WeakHashMap<>();
@@ -444,10 +477,10 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     try {
       return encryptionService.encryptData(key, null);
     } catch (Exception e) {
-      logger.error(
+      ProjectLogger.log(
           "ShadowUserMigrationScheduler:getEncryptedValue: error occurred in encrypting value "
               + key,
-          e);
+          LoggerEnum.ERROR.name());
       return key;
     }
   }

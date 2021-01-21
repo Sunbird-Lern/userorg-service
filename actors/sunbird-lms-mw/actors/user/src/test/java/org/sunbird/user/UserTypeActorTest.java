@@ -10,8 +10,6 @@ import java.util.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -21,11 +19,10 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.user.actors.UserTypeActor;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({KeyCloakConnectionProvider.class, FormApiUtilHandler.class})
+@PrepareForTest({KeyCloakConnectionProvider.class})
 @PowerMockIgnore("javax.management.*")
 public class UserTypeActorTest {
 
@@ -36,13 +33,11 @@ public class UserTypeActorTest {
   public void testGetUserTypesSuccess() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
-    PowerMockito.mockStatic(FormApiUtilHandler.class);
-    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
-        .thenReturn(getFormApiConfig());
+
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.GET_USER_TYPES.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(res.getResponseCode() == ResponseCode.OK && getResponse(res));
   }
 
@@ -58,37 +53,7 @@ public class UserTypeActorTest {
         types.add(entry.getValue());
       }
     }
-    if (types.size() == 1) return true;
+    if (types.contains("OTHER") && types.contains("TEACHER") && types.size() == 2) return true;
     return false;
-  }
-
-  public Map<String, Object> getFormApiConfig() {
-    Map<String, Object> formData = new HashMap<>();
-    Map<String, Object> formMap = new HashMap<>();
-    Map<String, Object> dataMap = new HashMap<>();
-    List<Map<String, Object>> fieldsList = new ArrayList<>();
-    Map<String, Object> field = new HashMap<>();
-
-    Map<String, Object> children = new HashMap<>();
-    List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
-    Map<String, Object> subPersonConfig = new HashMap<>();
-    Map<String, Object> templateOptionsMap = new HashMap<>();
-    List<Map<String, String>> options = new ArrayList<>();
-    Map<String, String> option = new HashMap<>();
-    option.put(JsonKey.VALUE, "crc");
-    options.add(option);
-
-    templateOptionsMap.put(JsonKey.OPTIONS, options);
-    subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
-    subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
-    userTypeConfigList.add(subPersonConfig);
-    children.put("teacher", userTypeConfigList);
-    field.put(JsonKey.CODE, JsonKey.PERSONA);
-    field.put(JsonKey.CHILDREN, children);
-    fieldsList.add(field);
-    dataMap.put(JsonKey.FIELDS, fieldsList);
-    formMap.put(JsonKey.DATA, dataMap);
-    formData.put(JsonKey.FORM, formMap);
-    return formData;
   }
 }

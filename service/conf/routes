@@ -10,17 +10,16 @@ POST	/v3/user/create				            @controllers.usermanagement.UserController.c
 POST  /v4/user/create                   @controllers.usermanagement.UserController.createUserV4(request: play.mvc.Http.Request)
 POST  /v1/user/signup                   @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 PATCH	/v1/user/update					          @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
-
-GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
-GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
+PATCH	/private/user/v1/update					          @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
+GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserById(uid:String, request: play.mvc.Http.Request)
+GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV2(uid:String, request: play.mvc.Http.Request)
 GET  	/v3/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
-GET     /private/user/v1/read/:externalId       @controllers.usermanagement.UserController.getUserByIdV3(externalId:String, request: play.mvc.Http.Request)
 
 POST  /v1/user/getuser                  @controllers.usermanagement.UserController.getUserByLoginId(request: play.mvc.Http.Request)
 GET   /v1/user/get/:idType/:id          @controllers.usermanagement.UserController.getUserByKey(idType:String, id:String, request: play.mvc.Http.Request)
 POST  /v1/user/search					 @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
 POST  /private/user/v1/search            @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
-POST  /private/user/v1/lookup            @controllers.usermanagement.UserController.userLookup(request: play.mvc.Http.Request)
+GET   /private/user/v1/read/:externalId @controllers.usermanagement.UserController.getUserById(externalId:String, request: play.mvc.Http.Request)
 GET  /v1/user/managed/:lua_uuid           @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
 GET  /v2/user/exists/:key/:value        @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
 
@@ -53,21 +52,24 @@ GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.li
 GET    /v1/user/exists/:key/:value         @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 
 #search
-# POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch(request: play.mvc.Http.Request)
+POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch(request: play.mvc.Http.Request)
 #Sync
 POST /v1/data/sync                          @controllers.search.SearchController.sync(request: play.mvc.Http.Request)
 
 #Mock APIs to finish API Gateway onboarding
-# GET /threaddump									@controllers.ThreadDumpController.threaddump(request: play.mvc.Http.Request)
+GET /threaddump									@controllers.ThreadDumpController.threaddump(request: play.mvc.Http.Request)
 
 # Bulk upload APIs
 POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)
 POST /v2/bulk/user/upload                   @controllers.bulkapimanagement.BulkUploadController.userBulkMigrate(request: play.mvc.Http.Request)
-# POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)
+POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload(request: play.mvc.Http.Request)
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload(request: play.mvc.Http.Request)
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String, request: play.mvc.Http.Request)
-# GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String, request: play.mvc.Http.Request)
+GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String, request: play.mvc.Http.Request)
+
+POST  /v1/user/data/encrypt              @controllers.usermanagement.UserDataEncryptionController.encrypt(request: play.mvc.Http.Request)
+POST  /v1/user/data/decrypt              @controllers.usermanagement.UserDataEncryptionController.decrypt(request: play.mvc.Http.Request)
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService(request: play.mvc.Http.Request)
 
@@ -93,12 +95,12 @@ PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPref
 POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
 
 #GEO LOCATION API
-# POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation(request: play.mvc.Http.Request)
-# GET  /v1/notification/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String, request: play.mvc.Http.Request)
-# PATCH  /v1/notification/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String, request: play.mvc.Http.Request)
-# DELETE   /v1/notification/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String, request: play.mvc.Http.Request)
-# POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification(request: play.mvc.Http.Request)
-# POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount(request: play.mvc.Http.Request)
+POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation(request: play.mvc.Http.Request)
+GET  /v1/notification/location/read/:id               @controllers.geolocation.GeoLocationController.getGeoLocation(id:String, request: play.mvc.Http.Request)
+PATCH  /v1/notification/location/update/:locationId   @controllers.geolocation.GeoLocationController.updateGeoLocation(locationId:String, request: play.mvc.Http.Request)
+DELETE   /v1/notification/location/delete/:locationId  @controllers.geolocation.GeoLocationController.deleteGeoLocation(locationId:String, request: play.mvc.Http.Request)
+POST    /v1/notification/send             @controllers.geolocation.GeoLocationController.sendNotification(request: play.mvc.Http.Request)
+POST    /v1/notification/audience             @controllers.geolocation.GeoLocationController.getUserCount(request: play.mvc.Http.Request)
 
 #Location API
 POST   /v1/location/create                      @controllers.location.LocationController.createLocation(request: play.mvc.Http.Request)
@@ -127,10 +129,10 @@ POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPas
 
 #user certificate validate API
 POST /v1/user/migrate            @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate(request: play.mvc.Http.Request)
-# POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate(request: play.mvc.Http.Request)
-# POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate(request: play.mvc.Http.Request)
-# POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl(request: play.mvc.Http.Request)
-# PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate(request: play.mvc.Http.Request)
+POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate(request: play.mvc.Http.Request)
+POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate(request: play.mvc.Http.Request)
+POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl(request: play.mvc.Http.Request)
+PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate(request: play.mvc.Http.Request)
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
 
 #User Feed API

@@ -1,28 +1,32 @@
 package controllers.organisationmanagement;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @PrepareForTest(OnRequestHandler.class)
 public class OrgTypeControllerTest extends BaseApplicationTest {
@@ -30,10 +34,10 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
   private static String orgTypeName = "org-type-name";
   private static String id = "id";
 
+
   @Before
   public void before() {
-    setup(DummyActor.class);
-  }
+    setup(DummyActor.class);}
 
   @Test
   public void testCreateOrgTypeSuccess() {
@@ -121,7 +125,7 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
     } else {
       req = new Http.RequestBuilder().uri(url).method(method);
     }
-    // req.headers(new Http.Headers(headerMap));
+    //req.headers(new Http.Headers(headerMap));
     Result result = Helpers.route(application, req);
     return result;
   }
@@ -134,7 +138,7 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        e.printStackTrace();
+        ProjectLogger.log(e.getMessage(), e);
       }
     }
     return jsonResp;
@@ -146,14 +150,16 @@ public class OrgTypeControllerTest extends BaseApplicationTest {
 
     try {
       Response response = mapper.readValue(responseStr, Response.class);
-      ResponseParams params = response.getParams();
-      if (result.status() != 200) {
-        return params.getErr();
-      } else {
+
+      if (response != null) {
+        ResponseParams params = response.getParams();
         return params.getStatus();
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      ProjectLogger.log(
+              "BaseControllerTest:getResponseCode: Exception occurred with error message = "
+                      + e.getMessage(),
+              LoggerEnum.ERROR.name());
     }
     return "";
   }

@@ -2,13 +2,7 @@ package org.sunbird.user.service.impl;
 
 import akka.actor.ActorRef;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -20,12 +14,8 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.Slug;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -33,7 +23,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserUtility;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
@@ -341,34 +330,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Response userLookUpByKey(
-      String key, String value, List<String> fields, RequestContext context) {
-    Response response;
-    if (JsonKey.ID.equalsIgnoreCase(key)) {
-      List<String> ids = new ArrayList<>(2);
-      ids.add(value);
-      response = userDao.getUserPropertiesById(ids, fields, context);
-    } else {
-      UserLookUp userLookUp = new UserLookUp();
-      List<Map<String, Object>> records =
-          userLookUp.getRecordByType(key.toLowerCase(), value.toLowerCase(), true, context);
-      List<String> ids = new ArrayList<>();
-      records
-          .stream()
-          .forEach(
-              record -> {
-                ids.add((String) record.get(JsonKey.USER_ID));
-              });
-      response = userDao.getUserPropertiesById(ids, fields, context);
-    }
-    for (Map<String, Object> userMap :
-        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE)) {
-      UserUtility.decryptUserDataFrmES(userMap);
-    }
-    return response;
-  }
-
-  @Override
   public String getCustodianOrgId(ActorRef actorRef, RequestContext context) {
     String custodianOrgId = "";
     try {
@@ -408,7 +369,7 @@ public class UserServiceImpl implements UserService {
       // Fetch encrypted token list from admin utils
       encryptedTokenList =
           AdminUtilHandler.fetchEncryptedToken(
-              AdminUtilHandler.prepareAdminUtilPayload(managedUsers), context);
+              AdminUtilHandler.prepareAdminUtilPayload(managedUsers));
     } catch (ProjectCommonException pe) {
       throw pe;
     } catch (Exception e) {
@@ -455,9 +416,12 @@ public class UserServiceImpl implements UserService {
    */
   private List<AdminUtilRequestData> createManagedUserList(
       String parentId, List<Map<String, Object>> respList) {
-    return respList
-        .stream()
-        .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
-        .collect(Collectors.toList());
+    List<AdminUtilRequestData> reqData =
+        respList
+            .stream()
+            .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
+            .collect(Collectors.toList());
+    reqData.forEach(System.out::println);
+    return reqData;
   }
 }

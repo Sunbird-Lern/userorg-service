@@ -7,14 +7,18 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Future;
@@ -40,13 +44,19 @@ import scala.concurrent.Future;
   }
 )
 public class BackgroundJobManager extends BaseActor {
+
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
+    ProjectLogger.log(
+        "BackgroundJobManager received action: " + request.getOperation(), LoggerEnum.INFO.name());
+    ProjectLogger.log("BackgroundJobManager  onReceive called");
     String operation = request.getOperation();
+    ProjectLogger.log("Operation name is ==" + operation);
     if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue())) {
+      ProjectLogger.log("Update user info to ES called.", LoggerEnum.INFO.name());
       updateUserInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue())) {
       updateOrgInfoToEs(request);
@@ -65,7 +75,13 @@ public class BackgroundJobManager extends BaseActor {
     } else if (operation.equalsIgnoreCase(ActorOperations.MERGE_USER_TO_ELASTIC.getValue())) {
       mergeUserDetailsToEs(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      ProjectLogger.log("UNSUPPORTED OPERATION");
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              ResponseCode.invalidOperationName.getErrorCode(),
+              ResponseCode.invalidOperationName.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+      ProjectLogger.log("UnSupported operation in Background Job Manager", exception);
     }
   }
 

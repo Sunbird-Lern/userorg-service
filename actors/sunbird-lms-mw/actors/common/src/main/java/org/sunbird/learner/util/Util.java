@@ -3,15 +3,7 @@ package org.sunbird.learner.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -23,13 +15,9 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.ProjectUtil.OrgStatus;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -164,7 +152,6 @@ public final class Util {
         JsonKey.TENANT_PREFERENCE_V2, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference_v2"));
 
     dbInfoMap.put(JsonKey.USER_LOOKUP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
-    dbInfoMap.put(JsonKey.LOCATION, getDbInfoObject(KEY_SPACE_NAME, JsonKey.LOCATION));
   }
 
   /**
@@ -407,7 +394,6 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
     String regStatus = "";
     try {
@@ -468,7 +454,6 @@ public final class Util {
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
     headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headers, context);
     String reqString = "";
     String regStatus = "";
     try {

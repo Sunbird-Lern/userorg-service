@@ -149,7 +149,7 @@ public class OTPActor extends BaseActor {
     if (MapUtils.isEmpty(otpDetails)) {
       logger.info(
           request.getRequestContext(),
-          "OTP_VALIDATION_FAILED:OTPActor:verifyOTP: Details not found for Key = "
+          "OTPActor:verifyOTP: Details not found for Key = "
               + maskId(key, type)
               + " type = "
               + type);
@@ -159,7 +159,7 @@ public class OTPActor extends BaseActor {
     if (StringUtils.isBlank(otpInDB) || StringUtils.isBlank(otpInRequest)) {
       logger.info(
           request.getRequestContext(),
-          "OTP_VALIDATION_FAILED : OTPActor:verifyOTP: Mismatch for Key = "
+          "OTPActor:verifyOTP: Mismatch for Key = "
               + maskId(key, type)
               + " otpInRequest = "
               + maskOTP(otpInRequest)
@@ -171,8 +171,7 @@ public class OTPActor extends BaseActor {
     if (otpInRequest.equals(otpInDB)) {
       logger.info(
           request.getRequestContext(),
-          "OTP_VALIDATION_SUCCESS:OTPActor:verifyOTP: Verified successfully Key = "
-              + maskId(key, type));
+          "OTPActor:verifyOTP: Verified successfully Key = " + maskId(key, type));
       otpService.deleteOtp(type, key, request.getRequestContext());
       Response response = new Response();
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -180,7 +179,7 @@ public class OTPActor extends BaseActor {
     } else {
       logger.info(
           request.getRequestContext(),
-          "OTP_VALIDATION_FAILED: OTPActor:verifyOTP: Incorrect OTP Key = "
+          "OTPActor:verifyOTP: Incorrect OTP Key = "
               + maskId(key, type)
               + " otpInRequest = "
               + maskOTP(otpInRequest)

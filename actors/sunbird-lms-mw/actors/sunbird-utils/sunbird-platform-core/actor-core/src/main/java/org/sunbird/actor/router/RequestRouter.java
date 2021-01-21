@@ -11,7 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseRouter;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import scala.concurrent.ExecutionContext;
@@ -20,7 +21,6 @@ import scala.concurrent.duration.Duration;
 
 /** @author Mahesh Kumar Gangula */
 public class RequestRouter extends BaseRouter {
-  private LoggerUtil logger = new LoggerUtil(RequestRouter.class);
 
   private static String mode;
   private static String name;
@@ -77,11 +77,12 @@ public class RequestRouter extends BaseRouter {
    */
   private boolean route(ActorRef router, Request message, ExecutionContext ec) {
     long startTime = System.currentTimeMillis();
-    logger.debug(
+    ProjectLogger.log(
         "Actor Service Call start  for  api =="
             + message.getOperation()
             + " start time "
-            + startTime);
+            + startTime,
+        LoggerEnum.PERF_LOG);
     Timeout timeout = new Timeout(Duration.create(message.getTimeout(), TimeUnit.SECONDS));
     Future<Object> future = Patterns.ask(router, message, timeout);
     ActorRef parent = sender();
@@ -91,7 +92,7 @@ public class RequestRouter extends BaseRouter {
           public void onComplete(Throwable failure, Object result) {
             if (failure != null) {
               // We got a failure, handle it here
-              logger.error(failure.getMessage(), failure);
+              ProjectLogger.log(failure.getMessage(), failure);
               if (failure instanceof ProjectCommonException) {
                 parent.tell(failure, self());
               } else if (failure instanceof akka.pattern.AskTimeoutException) {

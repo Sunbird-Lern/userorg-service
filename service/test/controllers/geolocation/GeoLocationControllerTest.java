@@ -11,7 +11,6 @@ import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -33,7 +32,6 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore("javax.management.*")
 @PrepareForTest(OnRequestHandler.class)
-@Ignore
 public class GeoLocationControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;

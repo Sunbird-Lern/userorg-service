@@ -2,7 +2,8 @@
 package mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
@@ -13,7 +14,6 @@ import play.libs.Json;
  * @author Manzarul
  */
 public class RequestMapper {
-  private static LoggerUtil logger = new LoggerUtil(RequestMapper.class);
 
   /**
    * Method to map request
@@ -31,8 +31,9 @@ public class RequestMapper {
     try {
       return Json.fromJson(requestData, obj);
     } catch (Exception e) {
-      logger.error("ControllerRequestMapper error : " + e.getMessage(), e);
-      logger.info("RequestMapper:mapRequest Requested data : " + requestData);
+      ProjectLogger.log("ControllerRequestMapper error : " + e.getMessage(), e);
+      ProjectLogger.log(
+          "RequestMapper:mapRequest Requested data : " + requestData, LoggerEnum.INFO.name());
       throw ProjectUtil.createClientException(ResponseCode.invalidData);
     }
   }

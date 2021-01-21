@@ -8,6 +8,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,21 +26,32 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.actors.UserFeedActor;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  ElasticSearchHelper.class,
+  EsClientFactory.class,
   CassandraOperationImpl.class,
+  ElasticSearchService.class,
   IFeedService.class,
   FeedServiceImpl.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
@@ -50,18 +62,38 @@ public class UserFeedActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserFeedActor.class);
   private static Response response = null;
+  private static Map<String, Object> esResponse = new HashMap<>();
+  private static ElasticSearchService esService;
   private static Map<String, Object> userFeed = new HashMap<>();
+  private static ElasticSearchService esUtil;
+  private static EsClientFactory esFactory;
   private static CassandraOperation cassandraOperation = null;
 
   @Before
   public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(EsClientFactory.class);
+    PowerMockito.mockStatic(ElasticSearchHelper.class);
+    esService = mock(ElasticSearchService.class);
+    esUtil = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
+
     userFeed.put(JsonKey.ID, "123-456-789");
     response = new Response();
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(Constants.RESPONSE, Arrays.asList(userFeed));
     response.getResult().putAll(responseMap);
+    esResponse.put(JsonKey.CONTENT, Arrays.asList(userFeed));
 
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.USER_ID, "123-456-789");
+    SearchDTO search = new SearchDTO();
+    search.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(esResponse);
+    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
+    PowerMockito.when(esService.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
+        .thenReturn(promise.future());
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
@@ -70,12 +102,8 @@ public class UserFeedActorTest {
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
     PowerMockito.when(
-            cassandraOperation.insertRecord(
+            cassandraOperation.upsertRecord(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(upsertResponse);
-    PowerMockito.when(
-            cassandraOperation.updateRecord(
-                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(upsertResponse);
   }
 

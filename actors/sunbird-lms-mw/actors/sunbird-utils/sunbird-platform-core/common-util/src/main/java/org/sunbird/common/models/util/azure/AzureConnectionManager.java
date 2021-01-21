@@ -12,7 +12,7 @@ import java.security.InvalidKeyException;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.PropertiesCache;
 
 /**
@@ -22,7 +22,6 @@ import org.sunbird.common.models.util.PropertiesCache;
  */
 public class AzureConnectionManager {
 
-  private static LoggerUtil logger = new LoggerUtil(AzureConnectionManager.class);
   private static String accountName = "";
   private static String accountKey = "";
   private static String storageAccountString;
@@ -32,7 +31,7 @@ public class AzureConnectionManager {
     String name = System.getenv(JsonKey.ACCOUNT_NAME);
     String key = System.getenv(JsonKey.ACCOUNT_KEY);
     if (StringUtils.isBlank(name) || StringUtils.isBlank(key)) {
-      logger.info(
+      ProjectLogger.log(
           "Azure account name and key is not provided by environment variable." + name + " " + key);
       accountName = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_NAME);
       accountKey = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_KEY);
@@ -45,7 +44,7 @@ public class AzureConnectionManager {
     } else {
       accountName = name;
       accountKey = key;
-      logger.info(
+      ProjectLogger.log(
           "Azure account name and key is  provided by environment variable." + name + " " + key);
       storageAccountString =
           "DefaultEndpointsProtocol=https;AccountName="
@@ -76,7 +75,7 @@ public class AzureConnectionManager {
           cloudBlobClient.getContainerReference(containerName.toLowerCase(Locale.ENGLISH));
       // Create the container if it does not exist.
       boolean response = container.createIfNotExists();
-      logger.info("container creation done if not exist==" + response);
+      ProjectLogger.log("container creation done if not exist==" + response);
       // Create a permissions object.
       if (isPublicAccess) {
         BlobContainerPermissions containerPermissions = new BlobContainerPermissions();
@@ -87,7 +86,7 @@ public class AzureConnectionManager {
       }
       return container;
     } catch (Exception e) {
-      logger.error("Exception occurred while fetching container" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
     return null;
   }
@@ -104,11 +103,11 @@ public class AzureConnectionManager {
         return container;
       }
     } catch (URISyntaxException e) {
-      logger.error("CloudBlobContainer:getContainerReference" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     } catch (StorageException e) {
-      logger.error("CloudBlobContainer:getContainerReference" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
-    logger.info("Container does not exist ==" + containerName);
+    ProjectLogger.log("Container does not exist ==" + containerName);
     return null;
   }
 
@@ -122,9 +121,9 @@ public class AzureConnectionManager {
       // Create the blob client.
       blobClient = storageAccount.createCloudBlobClient();
     } catch (URISyntaxException e) {
-      logger.error("CloudBlobClient:getBlobClient" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     } catch (InvalidKeyException e) {
-      logger.error("CloudBlobClient:getBlobClient" + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
     return blobClient;
   }

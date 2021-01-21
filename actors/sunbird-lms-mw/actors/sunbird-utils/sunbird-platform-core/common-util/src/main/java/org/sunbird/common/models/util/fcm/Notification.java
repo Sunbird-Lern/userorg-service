@@ -3,14 +3,14 @@ package org.sunbird.common.models.util.fcm;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.sunbird.common.models.util.*;
 
 /** @author Manzarul */
 public class Notification {
-  private static LoggerUtil logger = new LoggerUtil(Notification.class);
-
   /** FCM_URL URL of FCM server */
   public static final String FCM_URL = PropertiesCache.getInstance().getProperty(JsonKey.FCM_URL);
   /** FCM_ACCOUNT_KEY FCM server key. */
@@ -34,7 +34,8 @@ public class Notification {
    */
   public static String sendNotification(String topic, Map<String, Object> data, String url) {
     if (StringUtils.isBlank(FCM_ACCOUNT_KEY) || StringUtils.isBlank(url)) {
-      logger.info("FCM account key or URL is not provided===" + FCM_URL);
+      ProjectLogger.log(
+          "FCM account key or URL is not provided===" + FCM_URL, LoggerEnum.INFO.name());
       return JsonKey.FAILURE;
     }
     String response = null;
@@ -44,14 +45,14 @@ public class Notification {
       object.put(JsonKey.DATA, object1);
       object.put(JsonKey.TO, TOPIC_SUFFIX + topic);
       response = HttpClientUtil.post(FCM_URL, object.toString(), headerMap);
-      logger.info("FCM Notification response== for topic " + topic + response);
+      ProjectLogger.log("FCM Notification response== for topic " + topic + response);
       object1 = null;
       object1 = new JSONObject(response);
       long val = object1.getLong(JsonKey.MESSAGE_Id);
       response = val + "";
     } catch (Exception e) {
       response = JsonKey.FAILURE;
-      logger.error("sendNotification: " + e.getMessage(), e);
+      ProjectLogger.log(e.getMessage(), e);
     }
     return response;
   }

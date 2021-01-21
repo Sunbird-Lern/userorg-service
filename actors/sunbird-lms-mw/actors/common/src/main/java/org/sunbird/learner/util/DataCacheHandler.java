@@ -5,14 +5,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.LoggerEnum;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
 
@@ -22,7 +21,6 @@ import org.sunbird.learner.actors.role.service.RoleService;
  * @author Amit Kumar
  */
 public class DataCacheHandler implements Runnable {
-  private static LoggerUtil logger = new LoggerUtil(DataCacheHandler.class);
 
   private static Map<String, Object> roleMap = new ConcurrentHashMap<>();
   private static Map<String, Object> telemetryPdata = new ConcurrentHashMap<>(3);
@@ -32,10 +30,6 @@ public class DataCacheHandler implements Runnable {
       new ConcurrentHashMap<>();
   private static Map<String, List<String>> frameworkFieldsConfig = new ConcurrentHashMap<>();
   private static Map<String, List<String>> hashtagIdFrameworkIdMap = new ConcurrentHashMap<>();
-  private static Map<String, Map<String, List<String>>> userTypeOrSubTypeConfigMap =
-      new ConcurrentHashMap<>();
-  private static Map<String, List<String>> stateLocationTypeConfigMap = new ConcurrentHashMap<>();
-  private static Map<String, Map<String, Object>> formApiDataConfigMap = new ConcurrentHashMap<>();
   private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final String KEY_SPACE_NAME = Util.KEY_SPACE_NAME;
@@ -85,53 +79,14 @@ public class DataCacheHandler implements Runnable {
 
   @Override
   public void run() {
-    logger.info("DataCacheHandler:run: Cache refresh started.");
+    ProjectLogger.log("DataCacheHandler:run: Cache refresh started.", LoggerEnum.INFO.name());
     roleCache(roleMap);
     orgTypeCache(orgTypeMap);
     cacheSystemConfig(configSettings);
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
-    cacheFormApiDataConfig();
-    cacheUserTypeOrSubTypeConfig();
-    cacheLocationCodeTypeConfig();
     initLocationOrderMap();
-    logger.info("DataCacheHandler:run: Cache refresh completed.");
-  }
-
-  // Get form data config
-  private void cacheFormApiDataConfig() {
-    for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
-      String stateCode = itr.getKey();
-      RequestContext reqContext = new RequestContext();
-      reqContext.setReqId(UUID.randomUUID().toString());
-      reqContext.setDebugEnabled("false");
-      Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
-      formApiDataConfigMap.put(stateCode, formDataMap);
-    }
-  }
-
-  // Update userType or SubType cache for the state which are fetched from form api
-  private void cacheUserTypeOrSubTypeConfig() {
-    if (MapUtils.isNotEmpty(formApiDataConfigMap)) {
-      for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
-        String stateCode = itr.getKey();
-        Map<String, Object> formData = itr.getValue();
-        Map<String, List<String>> userTypeConfigMap = FormApiUtil.getUserTypeConfig(formData);
-        userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
-      }
-    }
-  }
-
-  // Update Location Code Type cache for the state which are fetched from form api
-  private void cacheLocationCodeTypeConfig() {
-    if (MapUtils.isNotEmpty(formApiDataConfigMap)) {
-      for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
-        String stateCode = itr.getKey();
-        Map<String, Object> formData = itr.getValue();
-        List<String> locationCodeLists = FormApiUtil.getLocationTypeConfigMap(formData);
-        stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
-      }
-    }
+    ProjectLogger.log("DataCacheHandler:run: Cache refresh completed.", LoggerEnum.INFO.name());
   }
 
   private void initLocationOrderMap() {
@@ -176,18 +131,28 @@ public class DataCacheHandler implements Runnable {
   private void cacheSystemConfig(Map<String, String> configSettings) {
     Response response =
         cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
-    logger.debug(
-        "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult());
+    ProjectLogger.log(
+        "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult(),
+        LoggerEnum.INFO.name());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
       for (Map<String, Object> resultMap : responseList) {
-        configSettings.put(
-            ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
+        if (((String) resultMap.get(JsonKey.FIELD)).equalsIgnoreCase(JsonKey.PHONE_UNIQUE)
+            && StringUtils.isBlank((String) resultMap.get(JsonKey.VALUE))) {
+          configSettings.put(((String) resultMap.get(JsonKey.FIELD)), String.valueOf(false));
+        } else if (((String) resultMap.get(JsonKey.FIELD)).equalsIgnoreCase(JsonKey.EMAIL_UNIQUE)
+            && StringUtils.isBlank((String) resultMap.get(JsonKey.VALUE))) {
+          configSettings.put(((String) resultMap.get(JsonKey.FIELD)), String.valueOf(false));
+        } else {
+          configSettings.put(
+              ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
+        }
       }
+    } else {
+      configSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(false));
+      configSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(false));
     }
-    configSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
-    configSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
   }
 
   @SuppressWarnings("unchecked")
@@ -209,29 +174,17 @@ public class DataCacheHandler implements Runnable {
     Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    Set<String> roleSet = new HashSet<>();
-    if (CollectionUtils.isNotEmpty(responseList)) {
+    if (null != responseList && !responseList.isEmpty()) {
       for (Map<String, Object> resultMap : responseList) {
-        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
-          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
-          roleMap.put(
-              ((String) resultMap.get(JsonKey.ID)).trim(),
-              ((String) resultMap.get(JsonKey.NAME)).trim());
-        }
+        roleMap.put((String) resultMap.get(JsonKey.ID), resultMap.get(JsonKey.NAME));
       }
     }
-
     Response response2 = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE, null);
     List<Map<String, Object>> responseList2 =
         (List<Map<String, Object>>) response2.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(responseList2)) {
-      for (Map<String, Object> resultMap : responseList2) {
-        if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
-          roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
-          roleMap.put(
-              ((String) resultMap.get(JsonKey.ID)).trim(),
-              ((String) resultMap.get(JsonKey.NAME)).trim());
-        }
+    if (null != responseList2 && !responseList2.isEmpty()) {
+      for (Map<String, Object> resultMap2 : responseList2) {
+        roleMap.put((String) resultMap2.get(JsonKey.ID), resultMap2.get(JsonKey.NAME));
       }
     }
 
@@ -240,13 +193,10 @@ public class DataCacheHandler implements Runnable {
         .parallelStream()
         .forEach(
             (roleSetItem) -> {
-              if (roleSet.contains(roleSetItem.getKey().trim())) {
-                Map<String, String> role = new HashMap<>();
-                role.put(JsonKey.ID, roleSetItem.getKey().trim());
-                role.put(JsonKey.NAME, ((String) roleSetItem.getValue()).trim());
-                roleList.add(role);
-                roleSet.remove(roleSetItem.getKey().trim());
-              }
+              Map<String, String> role = new HashMap<>();
+              role.put(JsonKey.ID, roleSetItem.getKey());
+              role.put(JsonKey.NAME, (String) roleSetItem.getValue());
+              roleList.add(role);
             });
   }
 
@@ -268,10 +218,6 @@ public class DataCacheHandler implements Runnable {
   /** @return the configSettings */
   public static Map<String, String> getConfigSettings() {
     return configSettings;
-  }
-
-  public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
-    return userTypeOrSubTypeConfigMap;
   }
 
   public static Map<String, Map<String, List<Map<String, String>>>> getFrameworkCategoriesMap() {
@@ -297,13 +243,5 @@ public class DataCacheHandler implements Runnable {
 
   public static Map<String, Integer> getLocationOrderMap() {
     return orderMap;
-  }
-
-  public static Map<String, List<String>> getLocationTypeConfig() {
-    return stateLocationTypeConfigMap;
-  }
-
-  public static Map<String, Map<String, Object>> getFormApiDataConfigMap() {
-    return formApiDataConfigMap;
   }
 }

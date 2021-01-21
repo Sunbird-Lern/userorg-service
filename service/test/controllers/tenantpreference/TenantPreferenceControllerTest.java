@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.libs.Json;
@@ -124,7 +125,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        e.printStackTrace();
+        ProjectLogger.log(e.getMessage(), e);
       }
     }
     return jsonResp;

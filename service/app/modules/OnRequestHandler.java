@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
@@ -18,10 +15,7 @@ import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -130,6 +124,7 @@ public class OnRequestHandler implements ActionCreator {
       String actionMethod = request.method();
       String url = request.uri();
       String methodName = actionMethod;
+      long startTime = System.currentTimeMillis();
       String signType = "";
       String source = "";
       if (request.body() != null && request.body().asJson() != null) {
@@ -249,7 +244,7 @@ public class OnRequestHandler implements ActionCreator {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
+    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user")) {
       env = JsonKey.USER;
     } else if (uri.startsWith("/v1/org")) {
       env = JsonKey.ORGANISATION;

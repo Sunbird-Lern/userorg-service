@@ -364,7 +364,7 @@ public interface ResponseMessage {
     String ERROR_CONFIG_LOAD_PARSE_STRING =
         "Loading {0} configuration failed due to parsing error.";
     String MISSING_SELF_DECLARED_MANDATORY_PARAMETERS =
-        "Mandatory parameter {0} or {1} is missing.";
+        "Mandatory parameter {0} or {1} or {2} is missing.";
     String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "Loading {0} configuration failed.";
     String ERROR_CONFLICTING_FIELD_CONFIGURATION =
         "Field {0} in {1} configuration is conflicting in {2} and {3}.";
@@ -470,7 +470,6 @@ public interface ResponseMessage {
     String USER_CONSENT_NOT_FOUND = "User consent not found.";
     String INVALID_USER_INFO_VALUE = "Null value is not allowed";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
-    String INVALID_LOCATION_TYPE = "Invalid location type {0} is supplied.Supported values are {1}";
   }
 
   interface Key {
@@ -854,8 +853,6 @@ public interface ResponseMessage {
     String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR";
     String MANAGED_USER_LIMIT_EXCEEDED = "MANAGED_USER_LIMIT_EXCEEDED";
     String UNABLE_TO_CONNECT_TO_ADMINUTIL = "UNABLE_TO_CONNECT_TO_ADMINUTIL";
-    String UNABLE_TO_CONNECT_TO_FORMAPIUTIL = "UNABLE_TO_CONNECT_TO_FORMAPIUTIL";
-
     String DATA_ENCRYPTION_ERROR = "DATA_ENCRYPTION_ERROR";
     String NO_EMAIL_PHONE_ASSOCIATED = "NO_EMAIL_PHONE_ASSOCIATED";
     String INVALID_CAPTCHA = "INVALID_CAPTCHA";
@@ -867,6 +864,5 @@ public interface ResponseMessage {
     String USER_CONSENT_NOT_FOUND = "USER_CONSENT_NOT_FOUND";
     String INVALID_USER_INFO_VALUE = "INVALID_USER_INFO_VALUE";
     String INVALID_CONSENT_STATUS = "INVALID_CONSENT_STATUS";
-    String INVALID_LOCATION_TYPE = "INVALID_LOCATION_TYPE";
   }
 }

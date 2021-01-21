@@ -5,6 +5,7 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 
@@ -23,6 +24,7 @@ public class LocationBackgroundActor extends BaseLocationActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
+    ProjectLogger.log("LocationBackgroundActor onReceive called");
     String operation = request.getOperation();
 
     switch (operation) {

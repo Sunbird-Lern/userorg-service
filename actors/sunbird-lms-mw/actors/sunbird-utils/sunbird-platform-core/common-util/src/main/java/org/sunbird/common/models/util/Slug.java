@@ -17,7 +17,6 @@ import net.sf.junidecode.Junidecode;
  * @author Manzarul
  */
 public class Slug {
-  private static LoggerUtil logger = new LoggerUtil(Slug.class);
 
   private static final Pattern NONLATIN = Pattern.compile("[^\\w-\\.]");
   private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -28,7 +27,7 @@ public class Slug {
     String tempInputValue = "";
     // Validate the input
     if (input == null) {
-      logger.debug("Provided input value is null");
+      ProjectLogger.log("Provided input value is null");
       return input;
     }
     // Remove extra spaces
@@ -58,7 +57,7 @@ public class Slug {
   private static void validateResult(String input, String origInput) {
     // Check if we are not left with a blank
     if (input.length() == 0) {
-      logger.debug("Failed to cleanup the input " + origInput);
+      ProjectLogger.log("Failed to cleanup the input " + origInput);
     }
   }
 
@@ -71,7 +70,7 @@ public class Slug {
     try {
       value = URLDecoder.decode(input, "UTF-8");
     } catch (Exception ex) {
-      logger.error(ex.getMessage(), ex);
+      ProjectLogger.log(ex.getMessage(), ex);
     }
     return value;
   }
