@@ -1454,11 +1454,13 @@ public class UserManagementActor extends BaseActor {
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
-        locations =
-            locationClient.getLocationByIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationIds,
-                context);
+        if (CollectionUtils.isNotEmpty(locationIds)) {
+          locations =
+              locationClient.getLocationByIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                  locationIds,
+                  context);
+        }
       } else {
         locations =
             locationClient.getLocationsByCodes(
