@@ -180,7 +180,7 @@ public class CertificateActorTest {
 
   @Test
   public void testAddReIssueCertificate() {
-    when(userServiceImpl.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(userServiceImpl.getUserById(Mockito.anyString(), null))
         .thenReturn(getUserDetails(new User(), false));
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(),
@@ -195,9 +195,7 @@ public class CertificateActorTest {
             Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsById(true));
     boolean result =
-        testScenario(
-            getAddCertRequest(ActorOperations.ADD_CERTIFICATE, "anyOldId"),
-            ResponseCode.invalidParameter);
+        testScenario(getAddCertRequest(ActorOperations.ADD_CERTIFICATE, "anyOldId"), null);
     assertTrue(result);
   }
 

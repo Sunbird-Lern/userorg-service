@@ -1,7 +1,7 @@
 package org.sunbird.user;
 
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
@@ -30,7 +30,7 @@ import scala.concurrent.Promise;
 @Ignore
 public class UserManagementActorTest extends UserManagementActorTestBase {
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithUserCallerId() {
 
     boolean result =
@@ -40,7 +40,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithoutUserCallerId() {
 
     boolean result =
@@ -51,7 +51,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithOrgExternalId() {
     reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
@@ -62,7 +62,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithoutUserCallerIdChannelAndRootOrgId() {
 
     boolean result =
@@ -70,7 +70,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserFailureWithInvalidChannelAndOrgId() {
 
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
@@ -82,22 +82,22 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  /*  @Test
+  @Test
   public void testCreateUserFailureWithInvalidLocationCodes() {
     Future<Object> future = Futures.future(() -> null, system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
 
-    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList(""));
+    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("invalidLocationCode"));
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
             ResponseCode.invalidParameterValue);
     assertTrue(result);
-  }*/
+  }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithoutVersion() {
 
     boolean result =
@@ -105,12 +105,15 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithLocationCodes() {
-    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    Future<Object> future1 = Futures.future(() -> getEsResponseForLocation(), system.dispatcher());
+    Future<Object> future2 = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
-        .thenReturn(future);
+        .thenReturn(future1)
+        .thenReturn(future2);
+
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCode"));
     boolean result =
         testScenario(getRequest(true, true, true, reqMap, ActorOperations.CREATE_USER), null);
@@ -165,7 +168,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  /*  @Test
+  @Test
   public void testUpdateUserFailureWithLocationCodes() {
     Future<Object> future2 = Futures.future(() -> null, system.dispatcher());
     when(Patterns.ask(
@@ -179,9 +182,9 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
                 true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER),
             ResponseCode.invalidParameterValue);
     assertTrue(result);
-  }*/
+  }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccess() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
@@ -191,7 +194,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserUpdateEmailSuccess() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> user = new HashMap<>();
@@ -211,12 +214,15 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccessWithLocationCodes() {
-    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    Future<Object> future1 = Futures.future(() -> getEsResponseForLocation(), system.dispatcher());
+    Future<Object> future2 = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
-        .thenReturn(future);
+        .thenReturn(future1)
+        .thenReturn(future2);
+
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     boolean result =
         testScenario(
@@ -226,7 +232,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccessWithLocationSchool() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
@@ -246,7 +252,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccessWithoutUserCallerId() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
@@ -256,9 +262,9 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCreateUserSuccessWithUserTypeAsTeacher() {
-    reqMap.put(JsonKey.USER_TYPE, "teacher");
+    reqMap.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
 
     when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
         .thenReturn("rootOrgId")
@@ -271,12 +277,11 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccessWithUserTypeTeacher() {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
-    req.put(JsonKey.USER_TYPE, "teacher");
-    req.put(JsonKey.USER_SUB_TYPE, "crc");
+    req.put(JsonKey.USER_TYPE, JsonKey.TEACHER);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
