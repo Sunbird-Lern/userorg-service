@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -149,7 +150,9 @@ public class OrganisationClientImpl implements OrganisationClient {
     SearchDTO searchDto = new SearchDTO();
     Map<String, Object> filter = new HashMap<>();
     filter.put(JsonKey.EXTERNAL_ID, externalId);
-    filter.put(JsonKey.PROVIDER, provider);
+    if (StringUtils.isNotEmpty(provider)) {
+      filter.put(JsonKey.PROVIDER, provider);
+    }
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     Future<Map<String, Object>> esResponseF =
         esUtil.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);

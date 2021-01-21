@@ -12,6 +12,8 @@ import org.keycloak.admin.client.KeycloakBuilder;
  */
 public class KeyCloakConnectionProvider {
 
+  private static LoggerUtil logger = new LoggerUtil(KeyCloakConnectionProvider.class);
+
   private static Keycloak keycloak;
   private static PropertiesCache cache = PropertiesCache.getInstance();
   public static String SSO_URL = null;
@@ -22,7 +24,8 @@ public class KeyCloakConnectionProvider {
     try {
       initialiseConnection();
     } catch (Exception e) {
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(
+          "Exception occurred while initializing keycloak connection: " + e.getMessage(), e);
     }
     registerShutDownHook();
   }
@@ -33,7 +36,6 @@ public class KeyCloakConnectionProvider {
    * @return Keycloak connection
    */
   public static Keycloak initialiseConnection() throws Exception {
-    ProjectLogger.log("key cloak instance is creation started.");
     keycloak = initialiseEnvConnection();
     if (keycloak != null) {
       return keycloak;
@@ -58,7 +60,7 @@ public class KeyCloakConnectionProvider {
     CLIENT_ID = cache.getProperty(JsonKey.SSO_CLIENT_ID);
     keycloak = keycloakBuilder.build();
 
-    ProjectLogger.log("key cloak instance is created successfully.");
+    logger.info("key cloak instance is created successfully.");
     return keycloak;
   }
 
@@ -80,12 +82,10 @@ public class KeyCloakConnectionProvider {
         || StringUtils.isBlank(password)
         || StringUtils.isBlank(cleintId)
         || StringUtils.isBlank(relam)) {
-      ProjectLogger.log(
-          "key cloak connection is not provided by Environment variable.", LoggerEnum.INFO.name());
+      logger.info("key cloak connection is not provided by Environment variable.");
       return null;
     }
     SSO_URL = url;
-    ProjectLogger.log("SSO url is==" + SSO_URL, LoggerEnum.INFO.name());
     SSO_REALM = relam;
     CLIENT_ID = cleintId;
     KeycloakBuilder keycloakBuilder =
@@ -102,15 +102,11 @@ public class KeyCloakConnectionProvider {
 
     if (StringUtils.isNotBlank(clientSecret)) {
       keycloakBuilder.clientSecret(clientSecret);
-      ProjectLogger.log(
-          "KeyCloakConnectionProvider:initialiseEnvConnection client sceret is provided.",
-          LoggerEnum.INFO.name());
+      logger.info("KeyCloakConnectionProvider:initialiseEnvConnection client sceret is provided.");
     }
     keycloakBuilder.grantType("client_credentials");
     keycloak = keycloakBuilder.build();
-    ProjectLogger.log(
-        "key cloak instance is created from Environment variable settings .",
-        LoggerEnum.INFO.name());
+    logger.info("key cloak instance is created from Environment variable settings .");
     return keycloak;
   }
 
@@ -126,7 +122,7 @@ public class KeyCloakConnectionProvider {
       try {
         return initialiseConnection();
       } catch (Exception e) {
-        ProjectLogger.log(e.getMessage(), e);
+        logger.error("getConnection : " + e.getMessage(), e);
       }
     }
     return null;
@@ -140,11 +136,9 @@ public class KeyCloakConnectionProvider {
    */
   static class ResourceCleanUp extends Thread {
     public void run() {
-      ProjectLogger.log("started resource cleanup.");
       if (null != keycloak) {
         keycloak.close();
       }
-      ProjectLogger.log("completed resource cleanup.");
     }
   }
 
@@ -152,6 +146,5 @@ public class KeyCloakConnectionProvider {
   public static void registerShutDownHook() {
     Runtime runtime = Runtime.getRuntime();
     runtime.addShutdownHook(new ResourceCleanUp());
-    ProjectLogger.log("ShutDownHook registered.");
   }
 }

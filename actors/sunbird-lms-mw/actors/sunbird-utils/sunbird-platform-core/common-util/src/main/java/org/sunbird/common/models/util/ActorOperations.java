@@ -10,8 +10,6 @@ public enum ActorOperations {
   CREATE_USER("createUser"),
   UPDATE_USER("updateUser"),
   USER_AUTH("userAuth"),
-  GET_USER_PROFILE("getUserProfile"),
-  GET_USER_PROFILE_V2("getUserProfileV2"),
   GET_USER_PROFILE_V3("getUserProfileV3"),
   CREATE_ORG("createOrg"),
   UPDATE_ORG("updateOrg"),
@@ -60,8 +58,6 @@ public enum ActorOperations {
   GET_NOTE("getNote"),
   DELETE_NOTE("deleteNote"),
   INSERT_USER_NOTES_ES("insertUserNotesToElastic"),
-  ENCRYPT_USER_DATA("encryptUserData"),
-  DECRYPT_USER_DATA("decryptUserData"),
   UPDATE_USER_NOTES_ES("updateUserNotesToElastic"),
   USER_CURRENT_LOGIN("userCurrentLogin"),
   CREATE_TENANT_PREFERENCE("createTanentPreference"),
@@ -114,6 +110,7 @@ public enum ActorOperations {
   CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
+  USER_SEARCH("userSearch"),
   GET_USER_CONSENT("getUserConsent");
 
   private String value;

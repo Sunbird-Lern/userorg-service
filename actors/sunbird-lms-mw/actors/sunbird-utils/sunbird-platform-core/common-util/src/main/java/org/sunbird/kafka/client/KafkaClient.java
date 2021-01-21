@@ -14,8 +14,7 @@ import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -25,6 +24,8 @@ import org.sunbird.common.responsecode.ResponseCode;
  * @author Pradyumna
  */
 public class KafkaClient {
+
+  public static LoggerUtil logger = new LoggerUtil(KafkaClient.class);
 
   private static final String BOOTSTRAP_SERVERS = ProjectUtil.getConfigValue("kafka_urls");
   private static Producer<String, String> producer;
@@ -52,8 +53,7 @@ public class KafkaClient {
       loadConsumerProperties();
     }
     topics = consumer.listTopics();
-    ProjectLogger.log(
-        "KafkaClient:loadTopics Kafka topic infos =>" + topics, LoggerEnum.INFO.name());
+    logger.info("KafkaClient:loadTopics Kafka topic info" + topics);
   }
 
   private static void loadConsumerProperties() {
@@ -79,7 +79,7 @@ public class KafkaClient {
       ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, event);
       producer.send(record);
     } else {
-      ProjectLogger.log("Topic id: " + topic + ", does not exists.", LoggerEnum.ERROR);
+      logger.info("Topic id: " + topic + ", does not exists.");
       throw new ProjectCommonException(
           "TOPIC_NOT_EXISTS_EXCEPTION",
           "Topic id: " + topic + ", does not exists.",
@@ -87,13 +87,13 @@ public class KafkaClient {
     }
   }
 
-  public static void send(String key, String event, String topic) throws Exception {
+  public static void send(String key, String event, String topic) {
     if (validate(topic)) {
       final Producer<String, String> producer = getProducer();
       ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, key, event);
       producer.send(record);
     } else {
-      ProjectLogger.log("Topic id: " + topic + ", does not exists.", LoggerEnum.ERROR);
+      logger.info("Topic id: " + topic + ", does not exists.");
       throw new ProjectCommonException(
           "TOPIC_NOT_EXISTS_EXCEPTION",
           "Topic id: " + topic + ", does not exists.",
@@ -101,7 +101,7 @@ public class KafkaClient {
     }
   }
 
-  private static boolean validate(String topic) throws Exception {
+  private static boolean validate(String topic) {
     if (topics == null) {
       loadTopics();
     }

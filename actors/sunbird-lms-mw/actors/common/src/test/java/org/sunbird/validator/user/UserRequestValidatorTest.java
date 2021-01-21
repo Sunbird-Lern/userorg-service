@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.request;
+package org.sunbird.validator.user;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,6 +14,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 
@@ -183,6 +185,33 @@ public class UserRequestValidatorTest {
     List<String> location = new ArrayList<>();
     location.add("KA");
     location.add("AP");
+    requestObj.put(JsonKey.LOCATION_CODES, location);
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.validateCreateUserRequest(request);
+      response = true;
+    } catch (ProjectCommonException e) {
+      Assert.assertNull(e);
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
+    }
+    assertEquals(true, response);
+  }
+
+  @Test
+  public void testValidateLocationCodesAsMapFormatWithSuccess() {
+    boolean response = false;
+    Request request = initailizeRequest();
+    Map<String, Object> requestObj = request.getRequest();
+    List<Map<String, String>> location = new ArrayList<>();
+    Map locationCode1 = new HashMap();
+    Map locationCode2 = new HashMap();
+    locationCode1.put("type", "state");
+    locationCode1.put("code", "KA");
+    locationCode2.put("type", "district");
+    locationCode2.put("code", "KA-DIS");
+    location.add(locationCode1);
+    location.add(locationCode2);
     requestObj.put(JsonKey.LOCATION_CODES, location);
     request.setRequest(requestObj);
     try {
@@ -1283,6 +1312,15 @@ public class UserRequestValidatorTest {
     return request;
   }
 
+  private Request initailizeLookupRequest() {
+    Request request = new Request();
+    Map<String, Object> requestObj = new HashMap<>();
+    requestObj.put(JsonKey.KEY, JsonKey.FIRST_NAME);
+    requestObj.put(JsonKey.VALUE, "9321234123");
+    request.setRequest(requestObj);
+    return request;
+  }
+
   @Test
   public void testValidateVerifyUserFailureWithEmptyId() {
     Request request = new Request();
@@ -1440,6 +1478,18 @@ public class UserRequestValidatorTest {
     Assert.assertTrue(response);
   }
 
+  @Test
+  public void testValidateUserLookupRequest() {
+    Request request = initailizeLookupRequest();
+    boolean response = false;
+    try {
+      new UserRequestValidator().validateUserLookupRequest(request);
+    } catch (ProjectCommonException e) {
+      response = true;
+    }
+    Assert.assertTrue(response);
+  }
+
   private List createUpdateUserDeclarationRequests() {
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
@@ -1468,13 +1518,9 @@ public class UserRequestValidatorTest {
   }
 
   private List createUpdateUserDeclarationMissingUserInfoIdRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> info = new HashMap<>();
     info.put(JsonKey.DECLARED_EMAIL, null);
     Map<String, Object> declarationMap = new HashMap<>();
-    declarationMap.put(JsonKey.ORG_ID, "1234");
-    declarationMap.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
     declarationMap.put(JsonKey.USER_ID, "1234");
     declarationMap.put(JsonKey.INFO, info);
     List<Map<String, Object>> declarations = new ArrayList<>();

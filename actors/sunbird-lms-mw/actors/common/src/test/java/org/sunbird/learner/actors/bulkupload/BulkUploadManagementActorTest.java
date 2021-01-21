@@ -9,8 +9,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +28,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -373,10 +370,8 @@ public class BulkUploadManagementActorTest {
               BulkUploadManagementActorTest.class.getClassLoader().getResource(fileName).getFile());
       Path path = Paths.get(file.getPath());
       bytes = Files.readAllBytes(path);
-    } catch (FileNotFoundException e) {
-      ProjectLogger.log(e.getMessage(), e);
-    } catch (IOException e) {
-      ProjectLogger.log(e.getMessage(), e);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return bytes;
   }

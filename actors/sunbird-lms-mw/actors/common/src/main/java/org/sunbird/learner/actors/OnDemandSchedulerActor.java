@@ -12,8 +12,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.quartz.scheduler.OnDemandSchedulerManager;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -33,7 +31,7 @@ public class OnDemandSchedulerActor extends BaseActor {
         .equalsIgnoreCase(ActorOperations.ONDEMAND_START_SCHEDULER.getValue())) {
       startSchedular(actorMessage);
     } else {
-      ProjectLogger.log("UNSUPPORTED OPERATION", LoggerEnum.ERROR);
+      onReceiveUnsupportedOperation(actorMessage.getOperation());
     }
   }
 

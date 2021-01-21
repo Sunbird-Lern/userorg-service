@@ -2,7 +2,15 @@ package org.sunbird.user.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
@@ -14,7 +22,10 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -115,8 +126,7 @@ public class UserUtil {
       Map<String, String> providerOrgCaseInsensitiveMap =
           new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
       providerOrgCaseInsensitiveMap.putAll(providerOrgMap);
-      ProjectLogger.log(
-          String.format("Checking channel: %s as with any case", provider), LoggerEnum.INFO);
+      logger.info(String.format("Checking channel: %s as with any case", provider));
       orgId = providerOrgCaseInsensitiveMap.get(provider);
     }
     return orgId;
@@ -552,7 +562,7 @@ public class UserUtil {
   }
 
   public static void validateUserExternalIds(User user, RequestContext context) {
-    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId(), context);
+    List<Map<String, String>> dbResExternalIds = getExternalIds(user.getUserId(), true, context);
     List<Map<String, String>> externalIds = user.getExternalIds();
     if (CollectionUtils.isNotEmpty(externalIds)) {
       for (Map<String, String> extIdMap : externalIds) {
@@ -581,14 +591,16 @@ public class UserUtil {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  public static List<Map<String, String>> getExternalIds(String userId, RequestContext context) {
+  public static List<Map<String, String>> getExternalIds(
+      String userId, boolean mergeDeclaration, RequestContext context) {
     List<Map<String, String>> dbResExternalIds =
         userExternalIdentityService.getUserExternalIds(userId, context);
-    List<Map<String, String>> dbSelfDeclaredExternalIds =
-        userExternalIdentityService.getSelfDeclaredDetails(userId, context);
-
-    if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
-      dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+    if (mergeDeclaration) {
+      List<Map<String, String>> dbSelfDeclaredExternalIds =
+          userExternalIdentityService.getSelfDeclaredDetails(userId, context);
+      if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
+        dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+      }
     }
     return dbResExternalIds;
   }
@@ -727,7 +739,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               prevOrgId,
-              JsonKey.TEACHER_PERSONA,
+              JsonKey.DEFAULT_PERSONA,
               userInfo);
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
       userDeclareEntity.setOperation(JsonKey.REMOVE);
@@ -755,7 +767,7 @@ public class UserUtil {
           new UserDeclareEntity(
               (String) requestMap.get(JsonKey.USER_ID),
               currOrgId,
-              JsonKey.TEACHER_PERSONA,
+              JsonKey.DEFAULT_PERSONA,
               userInfo);
       userDeclareEntity.setCreatedBy((String) requestMap.get(JsonKey.CREATED_BY));
       userDeclareEntity.setUpdatedBy((String) requestMap.get(JsonKey.UPDATED_BY));
