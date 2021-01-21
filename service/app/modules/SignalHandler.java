@@ -5,8 +5,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import play.api.Application;
 import play.api.Play;
@@ -16,6 +15,7 @@ import sun.misc.Signal;
 
 @Singleton
 public class SignalHandler {
+  private static LoggerUtil logger = new LoggerUtil(SignalHandler.class);
 
   private static long stopDelay = Long.parseLong(ProjectUtil.getConfigValue("sigterm_stop_delay"));
   private static final FiniteDuration STOP_DELAY = Duration.create(stopDelay, TimeUnit.SECONDS);
@@ -28,9 +28,8 @@ public class SignalHandler {
         new Signal("TERM"),
         signal -> {
           isShuttingDown = true;
-          ProjectLogger.log(
-              "Termination required, swallowing SIGTERM to allow current requests to finish",
-              LoggerEnum.INFO.name());
+          logger.info(
+              "Termination required, swallowing SIGTERM to allow current requests to finish");
           actorSystem
               .scheduler()
               .scheduleOnce(

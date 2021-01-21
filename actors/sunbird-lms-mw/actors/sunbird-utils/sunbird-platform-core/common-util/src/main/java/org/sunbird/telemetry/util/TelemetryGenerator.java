@@ -10,8 +10,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.telemetry.dto.Actor;
@@ -26,6 +25,7 @@ import org.sunbird.telemetry.dto.Telemetry;
  * @author Arvind
  */
 public class TelemetryGenerator {
+  private static LoggerUtil logger = new LoggerUtil(TelemetryGenerator.class);
 
   private static ObjectMapper mapper = new ObjectMapper();
 
@@ -144,7 +144,7 @@ public class TelemetryGenerator {
           .flatMap(List::stream)
           .collect(Collectors.toList());
     } catch (Exception e) {
-      ProjectLogger.log("TelemetryGenerator:getProps error =" + e, LoggerEnum.ERROR.name());
+      logger.error("TelemetryGenerator:getProps error =", e);
     }
     return new ArrayList<>();
   }
@@ -183,12 +183,10 @@ public class TelemetryGenerator {
     String event = "";
     try {
       event = mapper.writeValueAsString(telemetry);
-      ProjectLogger.log(
-          "TelemetryGenerator:getTelemetry = Telemetry Event : " + event, LoggerEnum.DEBUG.name());
+      logger.debug("TelemetryGenerator:getTelemetry = Telemetry Event : " + event);
     } catch (Exception e) {
-      ProjectLogger.log(
-          "TelemetryGenerator:getTelemetry = Telemetry Event: failed to generate audit events:" + e,
-          LoggerEnum.ERROR.name());
+      logger.error(
+          "TelemetryGenerator:getTelemetry = Telemetry Event: failed to generate audit events:", e);
     }
     return event;
   }

@@ -112,6 +112,9 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByExternalId() {
     try {
+      PowerMockito.mockStatic(EsClientFactory.class);
+      ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+      when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
       setEsSearchResponse(getOrgSearchResponseMap());
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);
@@ -125,6 +128,9 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByExternalIdWithEmptyResponse() {
     try {
+      PowerMockito.mockStatic(EsClientFactory.class);
+      ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+      when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
       setEsSearchResponse(getOrgSearchEmptyResponseMap());
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);

@@ -3,8 +3,11 @@ package org.sunbird.feed.impl;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.dispatch.Futures;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,59 +21,31 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.Feed;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
-  EsClientFactory.class,
   CassandraOperationImpl.class,
-  ElasticSearchService.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({"javax.management.*"})
 public class FeedServiceImplTest {
-  private ElasticSearchService esUtil;
   private static CassandraOperation cassandraOperation = null;
   private static IFeedService feedService = FeedFactory.getInstance();
-  private static SearchDTO search = new SearchDTO();
-  private static Map<String, Object> esResponse = new HashMap<>();
-  private static Promise<Map<String, Object>> promise;
 
   @Before
   public void setUp() throws Exception {
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.USER_ID, "123-456-789");
-    search.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     PowerMockito.mockStatic(ServiceFactory.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
-    esUtil = mock(ElasticSearchService.class);
-    esUtil = mock(ElasticSearchRestHighImpl.class);
-    promise = Futures.promise();
-    promise.success(esResponse);
-
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
-    when(FeedServiceImpl.getESInstance()).thenReturn(esUtil);
-    when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
-        .thenReturn(promise.future());
-    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
     initCassandraForSuccess();
   }
 
@@ -89,8 +64,12 @@ public class FeedServiceImplTest {
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
     PowerMockito.when(
-            cassandraOperation.upsertRecord(
+            cassandraOperation.insertRecord(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.deleteRecord(
@@ -128,17 +107,8 @@ public class FeedServiceImplTest {
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getRecordsByUserId(props, null);
+    List<Feed> res = feedService.getFeedsByProperties(props, null);
     Assert.assertTrue(res != null);
-  }
-
-  @Test
-  public void testSearch() {
-    Response response = feedService.search(search, null);
-    when(ElasticSearchHelper.getResponseFromFuture(Mockito.any())).thenReturn(esResponse);
-    PowerMockito.when(esUtil.search(search, ProjectUtil.EsType.userfeed.getTypeName(), null))
-        .thenReturn(promise.future());
-    Assert.assertTrue(esResponse != null);
   }
 
   private static Map<String, Object> getFeedMap() {

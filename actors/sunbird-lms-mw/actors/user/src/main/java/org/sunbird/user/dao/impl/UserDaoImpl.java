@@ -88,14 +88,29 @@ public class UserDaoImpl implements UserDao {
 
   @Override
   public User getUserById(String userId, RequestContext context) {
+    Map<String, Object> user = getUserDetailsById(userId, context);
+    if (MapUtils.isNotEmpty(user)) {
+      return mapper.convertValue(user, User.class);
+    }
+    return null;
+  }
+
+  @Override
+  public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
     Response response =
         cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {
-      Map<String, Object> userMap = responseList.get(0);
-      return mapper.convertValue(userMap, User.class);
+      return responseList.get(0);
     }
     return null;
+  }
+
+  @Override
+  public Response getUserPropertiesById(
+      List<String> userIds, List<String> properties, RequestContext context) {
+    return cassandraOperation.getPropertiesValueById(
+        Util.KEY_SPACE_NAME, TABLE_NAME, userIds, properties, context);
   }
 }

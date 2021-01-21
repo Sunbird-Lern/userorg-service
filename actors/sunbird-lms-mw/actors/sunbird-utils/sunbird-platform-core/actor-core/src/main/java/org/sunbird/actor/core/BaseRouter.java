@@ -8,13 +8,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** @author Mahesh Kumar Gangula */
 public abstract class BaseRouter extends BaseActor {
+  private LoggerUtil logger = new LoggerUtil(BaseRouter.class);
 
   public abstract String getRouterMode();
 
@@ -59,11 +60,9 @@ public abstract class BaseRouter extends BaseActor {
             createActor(context, actor, operations, dispatcher);
             break;
           default:
-            System.out.println("Router with name '" + name + "' not supported.");
+            logger.info("Router with name '" + name + "' not supported.");
             break;
         }
-      } else {
-        //				System.out.println(actor.getSimpleName() + " don't have config.");
       }
     }
   }
@@ -113,7 +112,7 @@ public abstract class BaseRouter extends BaseActor {
 
   @Override
   public void onReceiveException(String callerName, Exception e) {
-    ProjectLogger.log(callerName + ": exception in message processing = " + e.getMessage(), e);
+    logger.error(callerName + ": exception in message processing = " + e.getMessage(), e);
     sender().tell(e, ActorRef.noSender());
   }
 }

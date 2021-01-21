@@ -10,7 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -20,7 +24,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.HttpClientUtil;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.user.UserDeclareEntity;
@@ -429,7 +435,7 @@ public class UserControllerTest extends BaseApplicationTest {
       try {
         jsonResp = mapperObj.writeValueAsString(map);
       } catch (IOException e) {
-        ProjectLogger.log(e.getMessage(), e);
+        e.printStackTrace();
       }
     }
     return jsonResp;
@@ -441,16 +447,14 @@ public class UserControllerTest extends BaseApplicationTest {
 
     try {
       Response response = mapper.readValue(responseStr, Response.class);
-
-      if (response != null) {
-        ResponseParams params = response.getParams();
+      ResponseParams params = response.getParams();
+      if (result.status() != 200) {
+        return params.getErr();
+      } else {
         return params.getStatus();
       }
     } catch (Exception e) {
-      ProjectLogger.log(
-          "BaseControllerTest:getResponseCode: Exception occurred with error message = "
-              + e.getMessage(),
-          LoggerEnum.ERROR.name());
+      e.printStackTrace();
     }
     return "";
   }

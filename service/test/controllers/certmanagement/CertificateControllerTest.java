@@ -1,15 +1,19 @@
 package controllers.certmanagement;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import controllers.TestUtil;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
@@ -19,6 +23,7 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 @PrepareForTest(OnRequestHandler.class)
+@Ignore
 public class CertificateControllerTest extends BaseApplicationTest {
 
   public static Map<String, List<String>> headerMap;
@@ -62,7 +67,6 @@ public class CertificateControllerTest extends BaseApplicationTest {
     Result result =
         TestUtil.performTest(
             "/private/user/v1/certs/validate", "POST", getValidateReq(null), application);
-    System.out.println("dfkd" + Helpers.contentAsString(result));
     assertEquals(
         ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
   }
@@ -75,7 +79,6 @@ public class CertificateControllerTest extends BaseApplicationTest {
             "POST",
             getValidateReq(JsonKey.CERT_ID),
             application);
-    System.out.println("dfkd" + Helpers.contentAsString(result));
     assertEquals(
         ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
   }

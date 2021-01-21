@@ -1,16 +1,20 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
@@ -24,9 +28,12 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -37,7 +44,11 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.actors.UserSelfDeclarationManagementActor;
+import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.user.util.UserUtil;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -46,7 +57,12 @@ import org.sunbird.user.util.UserActorOperations;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
   Util.class,
-  EsClientFactory.class
+  EsClientFactory.class,
+  ElasticSearchRestHighImpl.class,
+  UserUtil.class,
+  DataCacheHandler.class,
+  UserOrgDaoImpl.class,
+  UserOrgDao.class
 })
 @PowerMockIgnore({"javax.management.*"})
 public class UserSelfDeclarationManagementActorTest {
@@ -55,6 +71,8 @@ public class UserSelfDeclarationManagementActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
   private ObjectMapper mapper = new ObjectMapper();
+  private static ElasticSearchService esService;
+  private static UserOrgDao userOrgDao;
 
   @BeforeClass
   public static void setUp() {
@@ -62,7 +80,6 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
   }
 
@@ -103,6 +120,31 @@ public class UserSelfDeclarationManagementActorTest {
 
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
+
+    PowerMockito.mockStatic(UserUtil.class);
+
+    PowerMockito.mockStatic(EsClientFactory.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getEsResponseMap());
+    when(esService.getDataByIdentifier(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
+
+    userOrgDao = Mockito.mock(UserOrgDao.class);
+    PowerMockito.mockStatic(UserOrgDaoImpl.class);
+    when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
+  }
+
+  public static Map<String, Object> getEsResponseMap() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.ID, "rootOrgId");
+    map.put(JsonKey.CHANNEL, "anyChannel");
+    return map;
   }
 
   private Response cassandraInsertRecord() {
@@ -306,5 +348,102 @@ public class UserSelfDeclarationManagementActorTest {
     }
     userDeclareEntity.setErrorType("ERROR-PHONE");
     return userDeclareEntity;
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclarations() throws Exception {
+
+    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+    Map userInfo = new HashMap();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "9909090909");
+    userInfo.put(JsonKey.DECLARED_PHONE, "abc@tenant.com");
+    userDeclareEntity.setUserId("userid");
+    userDeclareEntity.setOperation("add");
+    userDeclareEntity.setPersona("somePersona");
+    userDeclareEntity.setUserInfo(userInfo);
+    Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
+
+    List userOrgLst = new LinkedList<HashMap<String, Object>>();
+    Map userOrg = new HashMap();
+    userOrg.put(JsonKey.ORGANISATION_ID, "someStateSubOrgId");
+    userOrg.put(JsonKey.EXTERNAL_ID, "someStateExternalId");
+    userOrgLst.add(userOrg);
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, userOrgLst);
+    when(userOrgDao.getUserOrgDetails(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
+    doNothing()
+        .when(
+            UserUtil.class,
+            "encryptDeclarationFields",
+            Mockito.anyList(),
+            Mockito.anyMap(),
+            Mockito.any());
+    when(UserUtil.class, "createUserDeclaredObject", Mockito.anyMap(), Mockito.anyString())
+        .thenReturn(userDeclareEntity);
+    boolean result =
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
+            null);
+    assertTrue(result);
+  }
+
+  public Map createUpdateUserDeclrationRequests() {
+    Map<String, Object> request = new HashMap<>();
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
+    userInfo.put(JsonKey.DECLARED_PHONE, "9909090909");
+    Map<String, Object> userDeclareFieldMap = new HashMap<>();
+    userDeclareFieldMap.put(JsonKey.USER_ID, "userid");
+    userDeclareFieldMap.put(JsonKey.ORG_ID, "orgID");
+    userDeclareFieldMap.put(JsonKey.PERSONA, "somePersona");
+    userDeclareFieldMap.put(JsonKey.OPERATION, JsonKey.ADD);
+    userDeclareFieldMap.put(JsonKey.INFO, userInfo);
+    List<Map<String, Object>> userDeclareEntityList = new ArrayList<>();
+    userDeclareEntityList.add(userDeclareFieldMap);
+    request.put(JsonKey.DECLARATIONS, userDeclareEntityList);
+    return request;
+  }
+
+  private Map<String, String> configSettingsMap() {
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "anyOrgId");
+    return configMap;
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public Request getRequest(
+      boolean isCallerIdReq,
+      boolean isRootOrgIdReq,
+      boolean isVersionReq,
+      Map<String, Object> reqMap,
+      ActorOperations actorOperation) {
+
+    Request reqObj = new Request();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    if (isCallerIdReq) innerMap.put(JsonKey.CALLER_ID, "anyCallerId");
+    if (isVersionReq) innerMap.put(JsonKey.VERSION, "v2");
+    if (isRootOrgIdReq) innerMap.put(JsonKey.ROOT_ORG_ID, "MY_ROOT_ORG_ID");
+    innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
+    reqObj.setRequest(reqMap);
+    reqObj.setContext(innerMap);
+    reqObj.setOperation(actorOperation.getValue());
+    return reqObj;
   }
 }

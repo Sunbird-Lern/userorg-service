@@ -3,6 +3,7 @@ package org.sunbird.user.dao.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -43,5 +44,25 @@ public final class UserOrgDaoImpl implements UserOrgDao {
   public Response createUserOrg(UserOrg userOrg, RequestContext context) {
     return cassandraOperation.insertRecord(
         Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
+  }
+
+  @Override
+  public Response getUserOrgListByUserId(String userId, RequestContext context) {
+    Map<String, Object> compositeKey = new LinkedHashMap<>(2);
+    compositeKey.put(JsonKey.USER_ID, userId);
+    return cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, compositeKey, context);
+  }
+
+  @Override
+  public Response getUserOrgDetails(String userId, String organisationId, RequestContext context) {
+    Map<String, Object> searchMap = new LinkedHashMap<>(2);
+    searchMap.put(JsonKey.USER_ID, userId);
+    if (StringUtils.isNotEmpty(organisationId)) {
+      searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
+    }
+    Response res =
+        cassandraOperation.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
+    return res;
   }
 }

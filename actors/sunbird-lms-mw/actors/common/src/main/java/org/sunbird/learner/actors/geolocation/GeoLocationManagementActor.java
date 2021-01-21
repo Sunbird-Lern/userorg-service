@@ -64,7 +64,7 @@ public class GeoLocationManagementActor extends BaseActor {
   }
 
   private void getUserCount(Request actorMessage) {
-    ProjectLogger.log("sendnotification actor method called.");
+    logger.info("sendnotification actor method called.");
     List<Object> locationIds = (List<Object>) actorMessage.getRequest().get(JsonKey.LOCATION_IDS);
     List<Map<String, Object>> result = new ArrayList<>();
     List<String> dbIdList = new ArrayList<>();
@@ -105,7 +105,7 @@ public class GeoLocationManagementActor extends BaseActor {
   }
 
   private void sendNotification(Request actorMessage) {
-    ProjectLogger.log("sendnotification actor method called.");
+    logger.info("sendnotification actor method called.");
     String topic = (String) actorMessage.getRequest().get(JsonKey.TO);
     // Topic name is same as Location id in current system.
     // if logic is change then we need to update the matching logic as well
@@ -122,7 +122,7 @@ public class GeoLocationManagementActor extends BaseActor {
     }
     Map<String, Object> notificationData = (Map) actorMessage.getRequest().get(JsonKey.DATA);
     String message = Notification.sendNotification(topic, notificationData, Notification.FCM_URL);
-    ProjectLogger.log("FCM message from Google ==" + message);
+    logger.info("FCM message from Google ==" + message);
     response = new Response();
     if (JsonKey.FAILURE.equalsIgnoreCase(message)) {
       response.getResult().put(JsonKey.RESPONSE, JsonKey.FAILURE);
@@ -140,7 +140,7 @@ public class GeoLocationManagementActor extends BaseActor {
    */
   private void deleteGeoLocation(Request actorMessage) {
 
-    ProjectLogger.log("GeoLocationManagementActor-updateGeoLocation called");
+    logger.info("GeoLocationManagementActor-updateGeoLocation called");
 
     // object of telemetry event...
     Map<String, Object> targetObject = null;
@@ -173,7 +173,7 @@ public class GeoLocationManagementActor extends BaseActor {
    */
   private void updateGeoLocation(Request actorMessage) {
 
-    ProjectLogger.log("GeoLocationManagementActor-updateGeoLocation called");
+    logger.info("GeoLocationManagementActor-updateGeoLocation called");
 
     // object of telemetry event...
     Map<String, Object> targetObject = null;
@@ -235,7 +235,7 @@ public class GeoLocationManagementActor extends BaseActor {
    */
   private void getGeoLocation(Request actorMessage) {
 
-    ProjectLogger.log("GeoLocationManagementActor-getGeoLocation called");
+    logger.info("GeoLocationManagementActor-getGeoLocation called");
     String id = (String) actorMessage.getRequest().get(JsonKey.ID);
     String type = (String) actorMessage.getRequest().get(JsonKey.TYPE);
     Response finalResponse = new Response();
@@ -284,7 +284,7 @@ public class GeoLocationManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void createGeoLocation(Request actorMessage) {
-    ProjectLogger.log("GeoLocationManagementActor-createGeoLocation called");
+    logger.info("GeoLocationManagementActor-createGeoLocation called");
     // object of telemetry event...
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();

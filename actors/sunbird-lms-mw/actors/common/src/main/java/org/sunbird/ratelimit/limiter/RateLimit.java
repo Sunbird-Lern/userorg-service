@@ -5,11 +5,11 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 
 public class RateLimit {
+  private LoggerUtil logger = new LoggerUtil(RateLimit.class);
 
   private String key;
   private String unit;
@@ -75,7 +75,7 @@ public class RateLimit {
 
   public Map<String, Object> getRecord() {
     if (!isValid()) {
-      ProjectLogger.log("RateLimit:getRecord: Invalid record =" + toString(), LoggerEnum.ERROR);
+      logger.info("RateLimit:getRecord: Invalid record =" + toString());
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     Map<String, Object> rateLimitMap = new HashMap<>();

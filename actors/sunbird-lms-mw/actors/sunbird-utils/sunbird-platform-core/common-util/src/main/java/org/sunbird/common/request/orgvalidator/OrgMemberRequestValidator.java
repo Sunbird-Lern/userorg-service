@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -25,13 +24,9 @@ public class OrgMemberRequestValidator extends BaseOrgRequestValidator {
 
   private void validateCommonParams(Request request) {
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.USER_ID))) {
-      ProjectLogger.log(
-          "OrgMemberRequestValidator : validateCommonParams : UserId is missing. Validating userExternalId");
       validateCommonUserParams(request);
     }
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.ORGANISATION_ID))) {
-      ProjectLogger.log(
-          "OrgMemberRequestValidator : validateCommonParams : OrganizationId is missing. Validating ExternalId");
       validateCommonOrgParams(request);
     }
   }

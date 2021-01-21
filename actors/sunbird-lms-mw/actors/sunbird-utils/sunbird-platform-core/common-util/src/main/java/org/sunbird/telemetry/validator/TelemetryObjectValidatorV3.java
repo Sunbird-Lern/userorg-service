@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.telemetry.dto.Telemetry;
 import org.sunbird.telemetry.util.TelemetryEvents;
 
 /** @author arvind */
 public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
+  private static LoggerUtil logger = new LoggerUtil(TelemetryObjectValidatorV3.class);
 
   ObjectMapper mapper = new ObjectMapper();
 
@@ -27,7 +28,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       validateBasics(telemetryObj, missingFields);
       validateAuditEventData(telemetryObj.getEdata(), missingFields);
       if (!missingFields.isEmpty()) {
-        ProjectLogger.log(
+        logger.info(
             "Telemetry Object Creation Error for event : "
                 + TelemetryEvents.AUDIT.getName()
                 + "  missing required fields :"
@@ -36,7 +37,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       }
     } catch (IOException e) {
       validationSuccess = false;
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     return validationSuccess;
   }
@@ -52,7 +53,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       validateBasics(telemetryObj, missingFields);
       validateSearchEventData(telemetryObj.getEdata(), missingFields);
       if (!missingFields.isEmpty()) {
-        ProjectLogger.log(
+        logger.info(
             "Telemetry Object Creation Error for event : "
                 + TelemetryEvents.SEARCH.getName()
                 + "  missing required fields :"
@@ -61,7 +62,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       }
     } catch (IOException e) {
       validationSuccess = false;
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error("validateSearch" + e.getMessage(), e);
     }
     return validationSuccess;
   }
@@ -135,7 +136,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       validateBasics(telemetryObj, missingFields);
       validateLogEventData(telemetryObj.getEdata(), missingFields);
       if (!missingFields.isEmpty()) {
-        ProjectLogger.log(
+        logger.info(
             "Telemetry Object Creation Error for event : "
                 + TelemetryEvents.LOG.getName()
                 + "  missing required fields :"
@@ -144,7 +145,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       }
     } catch (IOException e) {
       validationSuccess = false;
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error("validateLog" + e.getMessage(), e);
     }
     return validationSuccess;
   }
@@ -177,7 +178,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       validateBasics(telemetryObj, missingFields);
       validateErrorEventData(telemetryObj.getEdata(), missingFields);
       if (!missingFields.isEmpty()) {
-        ProjectLogger.log(
+        logger.info(
             "Telemetry Object Creation Error for event : "
                 + TelemetryEvents.ERROR.getName()
                 + "  missing required fields :"
@@ -186,7 +187,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       }
     } catch (IOException e) {
       validationSuccess = false;
-      ProjectLogger.log(e.getMessage(), e);
+      logger.error("validateError" + e.getMessage(), e);
     }
     return validationSuccess;
   }

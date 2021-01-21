@@ -22,36 +22,37 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 public class HttpClientUtil {
+  private static LoggerUtil logger = new LoggerUtil(HttpClientUtil.class);
 
   private static CloseableHttpClient httpclient = null;
   private static HttpClientUtil httpClientUtil;
 
   private HttpClientUtil() {
     ConnectionKeepAliveStrategy keepAliveStrategy =
-      (response, context) -> {
-        HeaderElementIterator it =
-          new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
-        while (it.hasNext()) {
-          HeaderElement he = it.nextElement();
-          String param = he.getName();
-          String value = he.getValue();
-          if (value != null && param.equalsIgnoreCase("timeout")) {
-            return Long.parseLong(value) * 1000;
+        (response, context) -> {
+          HeaderElementIterator it =
+              new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+          while (it.hasNext()) {
+            HeaderElement he = it.nextElement();
+            String param = he.getName();
+            String value = he.getValue();
+            if (value != null && param.equalsIgnoreCase("timeout")) {
+              return Long.parseLong(value) * 1000;
+            }
           }
-        }
-        return 180 * 1000;
-      };
+          return 180 * 1000;
+        };
 
     PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
     connectionManager.setMaxTotal(200);
     connectionManager.setDefaultMaxPerRoute(150);
     connectionManager.closeIdleConnections(180, TimeUnit.SECONDS);
     httpclient =
-      HttpClients.custom()
-        .setConnectionManager(connectionManager)
-        .useSystemProperties()
-        .setKeepAliveStrategy(keepAliveStrategy)
-        .build();
+        HttpClients.custom()
+            .setConnectionManager(connectionManager)
+            .useSystemProperties()
+            .setKeepAliveStrategy(keepAliveStrategy)
+            .build();
   }
 
   public static HttpClientUtil getInstance() {
@@ -80,22 +81,21 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        ProjectLogger.log(
-          "Response from get call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase(),
-          LoggerEnum.INFO.name());
+        logger.info(
+            "Response from get call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
         return "";
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred while calling get method", ex);
+      logger.error("Exception occurred while calling get method", ex);
       return "";
     } finally {
       if (null != response) {
         try {
           response.close();
         } catch (Exception ex) {
-          ProjectLogger.log("Exception occurred while closing get response object", ex);
+          logger.error("Exception occurred while closing get response object", ex);
         }
       }
     }
@@ -119,29 +119,28 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        ProjectLogger.log(
-          "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase(),
-          LoggerEnum.INFO.name());
+        logger.info(
+            "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
         return "";
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred while calling Post method", ex);
+      logger.error("Exception occurred while calling Post method", ex);
       return "";
     } finally {
       if (null != response) {
         try {
           response.close();
         } catch (Exception ex) {
-          ProjectLogger.log("Exception occurred while closing Post response object", ex);
+          logger.error("Exception occurred while closing Post response object", ex);
         }
       }
     }
   }
 
   public static String postFormData(
-    String requestURL, Map<String, String> params, Map<String, String> headers) {
+      String requestURL, Map<String, String> params, Map<String, String> headers) {
     CloseableHttpResponse response = null;
     try {
       HttpPost httpPost = new HttpPost(requestURL);
@@ -165,22 +164,21 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        ProjectLogger.log(
-          "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase(),
-          LoggerEnum.INFO.name());
+        logger.info(
+            "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
         return "";
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred while calling Post method", ex);
+      logger.error("Exception occurred while calling Post method", ex);
       return "";
     } finally {
       if (null != response) {
         try {
           response.close();
         } catch (Exception ex) {
-          ProjectLogger.log("Exception occurred while closing Post response object", ex);
+          logger.error("Exception occurred while closing Post response object", ex);
         }
       }
     }
@@ -204,22 +202,21 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        ProjectLogger.log(
-          "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase(),
-          LoggerEnum.INFO.name());
+        logger.info(
+            "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
         return "";
       }
     } catch (Exception ex) {
-      ProjectLogger.log("Exception occurred while calling patch method", ex);
+      logger.error("Exception occurred while calling patch method", ex);
       return "";
     } finally {
       if (null != response) {
         try {
           response.close();
         } catch (Exception ex) {
-          ProjectLogger.log("Exception occurred while closing patch response object", ex);
+          logger.error("Exception occurred while closing patch response object", ex);
         }
       }
     }

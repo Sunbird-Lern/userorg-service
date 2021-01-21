@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,7 @@ import org.quartz.JobExecutionException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerEnum;
-import org.sunbird.common.models.util.ProjectLogger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
@@ -27,15 +25,16 @@ import org.sunbird.learner.util.Util;
  * @author Manzarul
  */
 public class UploadLookUpScheduler extends BaseJob {
+  private static LoggerUtil logger = new LoggerUtil(UploadLookUpScheduler.class);
+
   private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSSZ");
 
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    ProjectLogger.log(
+    logger.info(
         "Running Upload Scheduler Job at: "
             + Calendar.getInstance().getTime()
             + " triggered by: "
-            + ctx.getJobDetail().toString(),
-        LoggerEnum.INFO.name());
+            + ctx.getJobDetail().toString());
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     List<Map<String, Object>> result = null;
     // get List of process with status as New
@@ -47,10 +46,9 @@ public class UploadLookUpScheduler extends BaseJob {
             ProjectUtil.BulkProcessStatus.NEW.getValue(),
             null);
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
-    ProjectLogger.log(
+    logger.info(
         "Total No. of record in Bulk_upload_process table with status as NEW are : :"
-            + result.size(),
-        LoggerEnum.INFO.name());
+            + result.size());
     if (!result.isEmpty()) {
       process(result);
     }
@@ -63,10 +61,9 @@ public class UploadLookUpScheduler extends BaseJob {
             ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue(),
             null);
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
-    ProjectLogger.log(
+    logger.info(
         "Total No. of record in Bulk_upload_process table with status as IN_PROGRESS are : :"
-            + result.size(),
-        LoggerEnum.INFO.name());
+            + result.size());
     if (null != result) {
       Iterator<Map<String, Object>> itr = result.iterator();
       while (itr.hasNext()) {
@@ -81,15 +78,14 @@ public class UploadLookUpScheduler extends BaseJob {
             itr.remove();
           }
         } catch (ParseException ex) {
-          ProjectLogger.log(ex.getMessage(), ex);
+          logger.error("UploadLookUpScheduler: " + ex.getMessage(), ex);
         }
       }
       if (!result.isEmpty()) {
-        ProjectLogger.log(
+        logger.info(
             "Total No. of record in Bulk_upload_process table with status as IN_PROGRESS "
                 + "with diff bw start time and current time greater than 5Hr are : :"
-                + result.size(),
-            LoggerEnum.INFO.name());
+                + result.size());
         process(result);
       }
     }
@@ -100,17 +96,5 @@ public class UploadLookUpScheduler extends BaseJob {
     request.put(JsonKey.DATA, result);
     request.setOperation(ActorOperations.SCHEDULE_BULK_UPLOAD.getValue());
     tellToBGRouter(request);
-  }
-
-  private Map<String, Object> genarateLogInfo(String logType, String message) {
-
-    Map<String, Object> info = new HashMap<>();
-    info.put(JsonKey.LOG_TYPE, logType);
-    long startTime = System.currentTimeMillis();
-    info.put(JsonKey.START_TIME, startTime);
-    info.put(JsonKey.MESSAGE, message);
-    info.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
-
-    return info;
   }
 }

@@ -1,5 +1,10 @@
 package controllers;
 
+import static util.Common.createResponseParamObj;
+import static util.PrintEntryExitLog.printEntryLog;
+import static util.PrintEntryExitLog.printExitLogOnFailure;
+import static util.PrintEntryExitLog.printExitLogOnSuccessResponse;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.pattern.PatternsCS;
@@ -9,7 +14,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +34,10 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.ClientErrorResponse;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.HeaderParam;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -227,12 +241,6 @@ public class BaseController extends Controller {
       }
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
-
-      logger.info(
-          "BaseController:handleRequest for operation: "
-              + operation
-              + " requestId: "
-              + request.getRequestId());
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       logger.error(
@@ -314,19 +322,6 @@ public class BaseController extends Controller {
     response.setParams(
         createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     return response;
-  }
-
-  public static ResponseParams createResponseParamObj(
-      ResponseCode code, String customMessage, String requestId) {
-    ResponseParams params = new ResponseParams();
-    if (code.getResponseCode() != 200) {
-      params.setErr(code.getErrorCode());
-      params.setErrmsg(
-          StringUtils.isNotBlank(customMessage) ? customMessage : code.getErrorMessage());
-    }
-    params.setMsgid(requestId);
-    params.setStatus(ResponseCode.getHeaderResponseCode(code.getResponseCode()).name());
-    return params;
   }
 
   /**
@@ -452,6 +447,12 @@ public class BaseController extends Controller {
     return BaseController.createSuccessResponse(request, courseResponse);
   }
 
+  private static void removeFields(Map<String, Object> params, String... properties) {
+    for (String property : properties) {
+      params.remove(property);
+    }
+  }
+
   /**
    * @param file
    * @return
@@ -460,12 +461,6 @@ public class BaseController extends Controller {
     return Results.ok(file)
         .withHeader("Content-Type", "application/x-download")
         .withHeader("Content-disposition", "attachment; filename=" + file.getName());
-  }
-
-  private static void removeFields(Map<String, Object> params, String... properties) {
-    for (String property : properties) {
-      params.remove(property);
-    }
   }
 
   private String generateStackTrace(StackTraceElement[] elements) {
@@ -607,9 +602,7 @@ public class BaseController extends Controller {
       String responseKey,
       Request httpReq) {
     setContextData(httpReq, request);
-    logger.info(
-        request.getRequestContext(),
-        "actorResponseHandler: called for actor operation :" + request.getOperation());
+    printEntryLog(request);
     Function<Object, Result> function =
         result -> {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
@@ -619,32 +612,42 @@ public class BaseController extends Controller {
             Response response = (Response) result;
             if (ResponseCode.OK.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
-              logger.info(request.getRequestContext(), "actorResponseHandler:got response");
-              return createCommonResponse(response, responseKey, httpReq);
+              Result reslt = createCommonResponse(response, responseKey, httpReq);
+              printExitLogOnSuccessResponse(request, response);
+              return reslt;
             } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
-              logger.info(request.getRequestContext(), "actorResponseHandler:got client error");
-              return createClientErrorResponse(httpReq, (ClientErrorResponse) response);
+              Result reslt = createClientErrorResponse(httpReq, (ClientErrorResponse) response);
+              printExitLogOnFailure(request, ((ClientErrorResponse) response).getException());
+              return reslt;
             } else if (result instanceof ProjectCommonException) {
-              logger.info(request.getRequestContext(), "actorResponseHandler:got exception");
-              return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
+              Result reslt =
+                  createCommonExceptionResponse((ProjectCommonException) result, httpReq);
+              printExitLogOnFailure(request, (ProjectCommonException) result);
+              return reslt;
             } else if (result instanceof File) {
               logTelemetry(response, httpReq);
               return createFileDownloadResponse((File) result);
             } else {
               if (StringUtils.isNotEmpty((String) response.getResult().get(JsonKey.MESSAGE))
                   && response.getResponseCode().getResponseCode() == 0) {
-                return createCommonResponse(response, responseKey, httpReq);
+                Result reslt = createCommonResponse(response, responseKey, httpReq);
+                printExitLogOnSuccessResponse(request, response);
+                return reslt;
               } else {
                 return createCommonExceptionResponse((Exception) result, httpReq);
               }
             }
           } else if (result instanceof ProjectCommonException) {
-            return createCommonExceptionResponse((ProjectCommonException) result, httpReq);
+            Result reslt = createCommonExceptionResponse((ProjectCommonException) result, httpReq);
+            printExitLogOnFailure(request, (ProjectCommonException) result);
+            return reslt;
           } else if (result instanceof File) {
             return createFileDownloadResponse((File) result);
           } else {
-            return createCommonExceptionResponse(new Exception(), httpReq);
+            Result reslt = createCommonExceptionResponse(new Exception(), httpReq);
+            printExitLogOnFailure(request, null);
+            return reslt;
           }
         };
 
@@ -721,8 +724,9 @@ public class BaseController extends Controller {
     final String ver2 = "/" + JsonKey.VERSION_2;
     final String ver3 = "/" + JsonKey.VERSION_3;
     final String ver4 = "/" + JsonKey.VERSION_4;
+    final String privateVersion = "/" + JsonKey.PRIVATE;
     path = path.trim();
-    StringBuilder builder = new StringBuilder("");
+    String respId = "";
     if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
@@ -735,18 +739,16 @@ public class BaseController extends Controller {
         requestUrl = requestUrl.replaceFirst(ver4, "api");
       }
       String[] list = requestUrl.split("/");
-      for (String str : list) {
-        if (str.matches("[A-Za-z]+")) {
-          builder.append(str).append(".");
-        }
-      }
-      builder.deleteCharAt(builder.length() - 1);
+      respId = String.join(".", list);
     } else {
       if ("/health".equalsIgnoreCase(path)) {
-        builder.append("api.all.health");
+        respId = "api.all.health";
+      } else if (path.startsWith(privateVersion)) {
+        String[] list = path.split("/");
+        respId = String.join(".", list);
       }
     }
-    return builder.toString();
+    return respId;
   }
 
   /**
@@ -869,9 +871,6 @@ public class BaseController extends Controller {
     } else {
       OnRequestHandler.isServiceHealthy = false;
     }
-    logger.info(
-        "BaseController:setGlobalHealthFlag: isServiceHealthy = "
-            + OnRequestHandler.isServiceHealthy);
   }
 
   public static String getResponseSize(String response) throws UnsupportedEncodingException {
