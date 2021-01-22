@@ -117,6 +117,7 @@ public class UserProfileReadServiceTest {
     Map<String, Object> userList2 = new HashMap<>();
     userList2.put(JsonKey.USER_ID, "1234");
     userList2.put(JsonKey.ORG_NAME, "rootOrg");
+    userList2.put(JsonKey.IS_DELETED, false);
     userList2.put(JsonKey.ORGANISATION_ID, "4578963210");
     List<String> roles = new ArrayList<>();
     roles.add("PUBLIC");
@@ -126,6 +127,7 @@ public class UserProfileReadServiceTest {
     Map<String, Object> userList3 = new HashMap<>();
     userList3.put(JsonKey.USER_ID, "1234");
     userList3.put(JsonKey.ORG_NAME, "subOrg");
+    userList3.put(JsonKey.IS_DELETED, false);
     userList3.put(JsonKey.ORGANISATION_ID, "457896321012");
     userList3.put(JsonKey.ROLES, roles);
 

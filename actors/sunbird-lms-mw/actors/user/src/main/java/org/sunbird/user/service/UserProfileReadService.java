@@ -162,7 +162,16 @@ public class UserProfileReadService {
 
   private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
-    return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> userOrgList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> usrOrgList = new ArrayList<>();
+    for (Map<String, Object> userOrg : userOrgList) {
+      Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
+      if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
+        usrOrgList.add(userOrg);
+      }
+    }
+    return usrOrgList;
   }
 
   private Map<String, Object> validateUserIdAndGetUserDetails(
@@ -433,6 +442,7 @@ public class UserProfileReadService {
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
           Map<String, Object> searchQueryMap = new HashMap<>();
           searchQueryMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+          searchQueryMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
           Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
           List<Map<String, Object>> userLocation =
               (List<Map<String, Object>>) result.get(JsonKey.USER_LOCATIONS);
