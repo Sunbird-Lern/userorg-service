@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +15,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
@@ -22,6 +26,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
@@ -36,6 +41,7 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
+import scala.concurrent.Future;
 
 public class UserProfileReadService {
 
@@ -50,6 +56,7 @@ public class UserProfileReadService {
   private UserDao userDao = UserDaoImpl.getInstance();
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
 
   public Response getUserProfileData(Request actorMessage) {
@@ -155,7 +162,16 @@ public class UserProfileReadService {
 
   private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
-    return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> userOrgList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    List<Map<String, Object>> usrOrgList = new ArrayList<>();
+    for (Map<String, Object> userOrg : userOrgList) {
+      Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
+      if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
+        usrOrgList.add(userOrg);
+      }
+    }
+    return usrOrgList;
   }
 
   private Map<String, Object> validateUserIdAndGetUserDetails(
@@ -400,6 +416,7 @@ public class UserProfileReadService {
             JsonKey.USER_LOCATIONS,
             getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
         result.remove(JsonKey.LOCATION_IDS);
+        addSchoolLocation(result, context);
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
         List<Map<String, Object>> declarations =
@@ -413,6 +430,42 @@ public class UserProfileReadService {
         result.put(JsonKey.EXTERNAL_IDS, resExternalIds);
       }
     }
+  }
+
+  private void addSchoolLocation(Map<String, Object> result, RequestContext context) {
+    String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
+    List<Map<String, Object>> organisations =
+        (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
+    if (CollectionUtils.isNotEmpty(organisations) && organisations.size() > 1) {
+      for (int i = 0; i < organisations.size(); i++) {
+        String organisationId = (String) organisations.get(i).get(JsonKey.ORGANISATION_ID);
+        if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
+          Map<String, Object> searchQueryMap = new HashMap<>();
+          searchQueryMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+          searchQueryMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+          Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
+          List<Map<String, Object>> userLocation =
+              (List<Map<String, Object>>) result.get(JsonKey.USER_LOCATIONS);
+          if (null != userLocation) {
+            userLocation.add(schoolLocation);
+          }
+        }
+      }
+    }
+  }
+
+  public Map<String, Object> searchLocation(
+      Map<String, Object> searchQueryMap, RequestContext context) {
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    String type = ProjectUtil.EsType.location.getTypeName();
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
+    Map<String, Object> result =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    if (MapUtils.isNotEmpty(result)
+        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) result.get(JsonKey.CONTENT))) {
+      return ((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).get(0);
+    }
+    return Collections.emptyMap();
   }
 
   private List<Map<String, Object>> getUserLocations(
