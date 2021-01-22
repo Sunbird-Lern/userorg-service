@@ -440,9 +440,11 @@ public class UserProfileReadService {
       for (int i = 0; i < organisations.size(); i++) {
         String organisationId = (String) organisations.get(i).get(JsonKey.ORGANISATION_ID);
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
+          Map<String, Object> filterMap = new HashMap<>();
           Map<String, Object> searchQueryMap = new HashMap<>();
-          searchQueryMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
-          searchQueryMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+          filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+          filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+          searchQueryMap.put(JsonKey.FILTERS, filterMap);
           Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
           List<Map<String, Object>> userLocation =
               (List<Map<String, Object>>) result.get(JsonKey.USER_LOCATIONS);
