@@ -196,14 +196,14 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-    validateLocationCodes(actorMessage);
+    String stateCode = validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     validateUserTypeAndSubType(
-        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext(), stateCode);
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
@@ -295,9 +295,7 @@ public class UserManagementActor extends BaseActor {
         updateUserSchoolOrg =
             (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
-      if (updateUserSchoolOrg) {
-        updateUserOrganisations(actorMessage);
-      }
+      updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
@@ -433,35 +431,32 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
+    logger.info(
+        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
-      logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
-      List<Map<String, Object>> orgList =
-          (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
-      String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
-      String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
-      List<Map<String, Object>> orgListDb =
-          UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
-      }
-      if (!orgList.isEmpty()) {
-        for (Map<String, Object> org : orgList) {
-          createOrUpdateOrganisations(org, orgDbMap, actorMessage);
-          updateUserSelfDeclaredData(actorMessage, org, userId);
-        }
-      }
-      String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
-      // custodian-org
-      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
-        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
-      }
-      logger.info(
-          actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+      orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
+    String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
+    List<Map<String, Object>> orgListDb =
+        UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> orgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(orgListDb)) {
+      orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+    }
+
+    if (!CollectionUtils.isEmpty(orgList)) {
+      for (Map<String, Object> org : orgList) {
+        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        updateUserSelfDeclaredData(actorMessage, org, userId);
+      }
+    }
+    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
@@ -1447,40 +1442,43 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void validateUserTypeAndSubType(
-      Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
+      Map<String, Object> userMap,
+      Map<String, Object> userDbRecord,
+      RequestContext context,
+      String stateCode) {
     if (null != userMap.get(JsonKey.USER_TYPE)) {
-      List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
-      if (CollectionUtils.isEmpty(locationCodes)) {
+      if (StringUtils.isEmpty(stateCode)) {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
+        logger.info(
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
+
         if (CollectionUtils.isNotEmpty(locationIds)) {
           locations =
               locationClient.getLocationByIds(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
                   locationIds,
                   context);
-        }
-      } else {
-        locations =
-            locationClient.getLocationsByCodes(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationCodes,
-                context);
-      }
-      if (CollectionUtils.isNotEmpty(locations)) {
-        String stateCode = null;
-        for (Location location : locations) {
-          if (JsonKey.STATE.equals(location.getType())) {
-            stateCode = location.getCode();
+
+          for (Location location : locations) {
+            if (JsonKey.STATE.equals(location.getType())) {
+              stateCode = location.getCode();
+            }
           }
         }
-        if (StringUtils.isNotBlank(stateCode)) {
-          // Validate UserType and UserSubType configure based on user state config else user
-          // default config
-          validateUserTypeAndSubType(userMap, context, stateCode);
-        }
+      }
+      logger.info(String.format("Validating UserType for state code:%s", stateCode));
+
+      if (StringUtils.isNotBlank(stateCode)) {
+        // Validate UserType and UserSubType configure based on user state config else user
+        // default config
+        validateUserTypeAndSubType(userMap, context, stateCode);
       } else {
+        logger.info(
+            String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
+
         // If location is null or empty .Vlidate with default config
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
@@ -1493,8 +1491,9 @@ public class UserManagementActor extends BaseActor {
     userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
   }
 
-  private void validateLocationCodes(Request userRequest) {
+  private String validateLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
+    String stateCode = null;
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
@@ -1505,7 +1504,6 @@ public class UserManagementActor extends BaseActor {
     if (locationCodes != null) {
       // As of now locationCode can take array of only locationcodes and map of locationCodes which
       // include type and code of the location
-      String stateCode = null;
       List<String> set = new ArrayList<>();
       List<Location> locationList = new ArrayList<>();
       if (((List) locationCodes).get(0) instanceof String) {
@@ -1569,6 +1567,7 @@ public class UserManagementActor extends BaseActor {
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
+    return stateCode;
   }
 
   /**
