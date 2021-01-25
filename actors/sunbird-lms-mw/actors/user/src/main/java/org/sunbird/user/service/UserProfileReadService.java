@@ -412,11 +412,16 @@ public class UserProfileReadService {
         result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
-        result.put(
-            JsonKey.USER_LOCATIONS,
-            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
-        result.remove(JsonKey.LOCATION_IDS);
-        addSchoolLocation(result, context);
+        List<Map<String, Object>> userLocations =
+            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context);
+        if (CollectionUtils.isNotEmpty(userLocations)) {
+          result.put(
+              JsonKey.USER_LOCATIONS,
+              getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
+
+          addSchoolLocation(result, context);
+          result.remove(JsonKey.LOCATION_IDS);
+        }
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
         List<Map<String, Object>> declarations =
@@ -436,20 +441,36 @@ public class UserProfileReadService {
     String rootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
     List<Map<String, Object>> organisations =
         (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-    if (CollectionUtils.isNotEmpty(organisations) && organisations.size() > 1) {
+    List<Map<String, Object>> userLocation =
+        (List<Map<String, Object>>) result.get(JsonKey.USER_LOCATIONS);
+    // inorder to add school, user should have sub-org and attached to locations hierarchy as parent
+    // block/cluster
+    if (CollectionUtils.isNotEmpty(organisations)
+        && organisations.size() > 1
+        && userLocation.size() >= 3) {
       for (int i = 0; i < organisations.size(); i++) {
         String organisationId = (String) organisations.get(i).get(JsonKey.ORGANISATION_ID);
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
           Map<String, Object> filterMap = new HashMap<>();
           Map<String, Object> searchQueryMap = new HashMap<>();
-          filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
-          filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
-          searchQueryMap.put(JsonKey.FILTERS, filterMap);
-          Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
-          List<Map<String, Object>> userLocation =
-              (List<Map<String, Object>>) result.get(JsonKey.USER_LOCATIONS);
+          String shoolParentId = null;
           if (null != userLocation) {
-            userLocation.add(schoolLocation);
+            for (Map<String, Object> location : userLocation) {
+              if (location.containsValue(JsonKey.CLUSTER)) {
+                shoolParentId = (String) location.get(JsonKey.ID);
+                break;
+              } else if (location.containsValue(JsonKey.BLOCK)) {
+                shoolParentId = (String) location.get(JsonKey.ID);
+              }
+            }
+            filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+            filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+            filterMap.put(JsonKey.PARENT_ID, shoolParentId);
+            searchQueryMap.put(JsonKey.FILTERS, filterMap);
+            Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
+            if (MapUtils.isNotEmpty(schoolLocation)) {
+              userLocation.add(schoolLocation);
+            }
           }
         }
       }

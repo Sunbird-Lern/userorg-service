@@ -626,7 +626,7 @@ public final class JsonKey {
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
-  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
+  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken_publickey_basepath";
   public static final String SHA_256_WITH_RSA = "SHA256withRSA";
   public static final String SUB = "sub";
   public static final String DOT_SEPARATOR = ".";
@@ -709,6 +709,8 @@ public final class JsonKey {
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
   public static final String REQUEST_ID = "requestid";
   public static final String LOCATION_TYPE_SCHOOL = "school";
+  public static final String BLOCK = "block";
+  public static final String CLUSTER = "cluster";
   public static final String UPDATE_USER_SCHOOL_ORG = "updateUserSchoolOrg";
   public static final String GET = "get";
   public static final String FORM = "form";
