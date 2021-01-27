@@ -35,10 +35,8 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.Util;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
@@ -63,7 +61,6 @@ import scala.concurrent.Promise;
 public class IdentifierFreeUpActorTest {
   private ElasticSearchService elasticSearchService;
   public static CassandraOperation cassandraOperation;
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   Props props = Props.create(IdentifierFreeUpActor.class);
   ActorSystem system = ActorSystem.create("IdentifierFreeUpActor");
 
@@ -81,11 +78,10 @@ public class IdentifierFreeUpActorTest {
 
   @Test
   public void testFreeUpWhenUserNotExists() {
-    String id = "wrongUserId";
     Response response = new Response();
     response.put(JsonKey.RESPONSE, new ArrayList<>());
     when(cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     boolean result =
         testScenario(
@@ -93,7 +89,7 @@ public class IdentifierFreeUpActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testFreeUpWhenOnlyFreeUpEmail() {
     String id = "anyUserId";
     Request reqObj = new Request();
@@ -118,13 +114,10 @@ public class IdentifierFreeUpActorTest {
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
     when(cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
     doNothing()
         .when(cassandraOperation)
@@ -132,10 +125,7 @@ public class IdentifierFreeUpActorTest {
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(elasticSearchService.update(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);
@@ -167,7 +157,7 @@ public class IdentifierFreeUpActorTest {
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
     when(cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), id, null))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -179,10 +169,7 @@ public class IdentifierFreeUpActorTest {
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(elasticSearchService.update(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(promise.future());
     when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
     boolean result = testScenario(reqObj, null);
