@@ -70,22 +70,13 @@ public class LocationActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.deleteRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSuccessResponse());
   }
 
@@ -98,16 +89,14 @@ public class LocationActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 
-    when(esSearch.search(
-            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(esSearch.getDataByIdentifier(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     data = getDataMap();
   }
 
-  // @Test
+  @Test
   public void testCreateLocationSuccess() {
     Map<String, Object> res = new HashMap<>(data);
     res.remove(GeoLocationJsonKey.PARENT_CODE);
@@ -116,14 +105,14 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateLocationSuccess() {
 
     boolean result = testScenario(LocationActorOperation.UPDATE_LOCATION, true, data, null);
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testDeleteLocationSuccess() {
 
     boolean result = testScenario(LocationActorOperation.DELETE_LOCATION, true, data, null);
@@ -170,19 +159,20 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getContentMapFromES());
     when(esSearch.search(
             Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(promise.future());
+    Promise<Map<String, Object>> promise2 = Futures.promise();
+    promise2.success(new HashMap<>());
+    when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise2.future());
     boolean result =
         testScenario(
-            LocationActorOperation.DELETE_LOCATION,
-            false,
-            data,
-            ResponseCode.invalidLocationDeleteRequest);
+            LocationActorOperation.DELETE_LOCATION, false, data, ResponseCode.invalidParameter);
     assertTrue(result);
   }
 
@@ -229,6 +219,7 @@ public class LocationActorTest {
     data.put(GeoLocationJsonKey.CODE, "S01");
     data.put(JsonKey.NAME, "DUMMY_STATE");
     data.put(JsonKey.ID, "id_01");
+    data.put(JsonKey.LOCATION_ID, "id_01");
     return data;
   }
 
