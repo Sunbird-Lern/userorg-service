@@ -29,7 +29,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -234,7 +233,7 @@ public class NotesManagementActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testGetNoteFailureWithInvalidNoteId() {
     Request req = new Request();
     Map<String, Object> reqMap = new HashMap<>();
@@ -247,7 +246,7 @@ public class NotesManagementActorTest {
     promise.success(reqMap);
     when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     req.setOperation(ActorOperations.GET_NOTE.getValue());
     boolean result = testScenario(req, ResponseCode.invalidNoteId);
@@ -267,7 +266,7 @@ public class NotesManagementActorTest {
     promise.success(reqMap);
     when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esUtil.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     req.setOperation(ActorOperations.GET_NOTE.getValue());
     boolean result = testScenario(req, null);
