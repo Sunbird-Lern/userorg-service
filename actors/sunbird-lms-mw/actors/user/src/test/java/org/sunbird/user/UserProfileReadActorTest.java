@@ -36,7 +36,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -559,7 +558,7 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCheckUserExistenceV2WithEmail() {
     Response response1 = new Response();
     Map<String, Object> userMap = new HashMap<>();
@@ -579,7 +578,7 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testCheckUserExistenceV2WithLoginid() {
     reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, VALID_EMAIL);
     setEsSearchResponse(getUserExistsSearchResponseMap());
@@ -590,8 +589,7 @@ public class UserProfileReadActorTest {
   public void setEsSearchResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(
-            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esService.search(Mockito.anyObject(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
   }
 
@@ -730,16 +728,14 @@ public class UserProfileReadActorTest {
   public void setEsResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.getDataByIdentifier(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
   }
 
   public void setEsResponseForSearch(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(
-            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esService.search(Mockito.anyObject(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
   }
 }
