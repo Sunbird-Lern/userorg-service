@@ -34,7 +34,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -73,7 +72,7 @@ public class BulkUploadManagementActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
   }
 
-  // @Test
+  @Test
   public void checkTelemetryKeyFailure() throws Exception {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -91,10 +90,7 @@ public class BulkUploadManagementActorTest {
 
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());
