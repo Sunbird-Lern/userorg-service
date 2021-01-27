@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -87,6 +88,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
