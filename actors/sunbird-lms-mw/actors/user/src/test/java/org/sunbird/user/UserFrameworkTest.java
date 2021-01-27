@@ -17,6 +17,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -39,7 +40,7 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     mockForUpdateTest();
   }
 
-  // @Test
+  @Test
   public void testUpdateUserFrameworkSuccess() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Request reqObj = getRequest(null, null);
@@ -96,7 +97,8 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
   private void mockContentStoreUtil() {
     Map<String, Object> contentMap = new HashMap<>();
     contentMap.put(JsonKey.RESPONSE, null);
-    when(ContentStoreUtil.readFramework("invalidFrameworkId", null)).thenReturn(contentMap);
+    when(ContentStoreUtil.readFramework("invalidFrameworkId", new RequestContext()))
+        .thenReturn(contentMap);
   }
 
   private void mockDataCacheHandler() {
