@@ -453,18 +453,9 @@ public class UserProfileReadService {
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
           Map<String, Object> filterMap = new HashMap<>();
           Map<String, Object> searchQueryMap = new HashMap<>();
-          String shoolParentId = null;
-          for (Map<String, Object> location : userLocation) {
-            if (location.containsValue(JsonKey.CLUSTER)) {
-              shoolParentId = (String) location.get(JsonKey.ID);
-              break;
-            } else if (location.containsValue(JsonKey.BLOCK)) {
-              shoolParentId = (String) location.get(JsonKey.ID);
-            }
-          }
           filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
           filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
-          filterMap.put(JsonKey.PARENT_ID, shoolParentId);
+          filterMap.put(JsonKey.CODE, organisations.get(i).get(JsonKey.EXTERNAL_ID));
           searchQueryMap.put(JsonKey.FILTERS, filterMap);
           Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
           if (MapUtils.isNotEmpty(schoolLocation)) {
@@ -527,7 +518,8 @@ public class UserProfileReadService {
               JsonKey.CHANNEL,
               JsonKey.HASHTAGID,
               JsonKey.LOCATION_IDS,
-              JsonKey.ID);
+              JsonKey.ID,
+              JsonKey.EXTERNAL_ID);
       Response userOrgResponse =
           cassandraOperation.getPropertiesValueById(
               OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
@@ -579,6 +571,7 @@ public class UserProfileReadService {
         usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
         usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
         usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
+        usrOrg.put(JsonKey.EXTERNAL_ID, orgInfo.get(JsonKey.EXTERNAL_ID));
         if (MapUtils.isNotEmpty(locationInfoMap)) {
           usrOrg.put(
               JsonKey.LOCATIONS,
