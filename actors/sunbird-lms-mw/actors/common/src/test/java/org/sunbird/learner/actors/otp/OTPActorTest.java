@@ -30,7 +30,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.otp.service.OTPService;
@@ -111,14 +110,14 @@ public class OTPActorTest {
     verifyOtpFailureWithExpiredOtp(false, mockedCassandraResponse);
   }
 
-  // @Test
+  @Test
   public void testVerifyOtpSuccessWithPhoneOtp() {
     Response mockedCassandraResponse =
         getMockCassandraRecordByIdSuccessResponse(PHONE_KEY, PHONE_TYPE, REQUEST_OTP);
     verifyOtpSuccessTest(true, mockedCassandraResponse);
   }
 
-  // @Test
+  @Test
   public void testVerifyOtpSuccessWithEmailOtp() {
     Response mockedCassandraResponse =
         getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
@@ -149,7 +148,7 @@ public class OTPActorTest {
             Mockito.anyMap(),
             Mockito.anyList(),
             Mockito.anyList(),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -222,7 +221,7 @@ public class OTPActorTest {
             Mockito.anyMap(),
             Mockito.anyList(),
             Mockito.anyList(),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     when(mockCassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
