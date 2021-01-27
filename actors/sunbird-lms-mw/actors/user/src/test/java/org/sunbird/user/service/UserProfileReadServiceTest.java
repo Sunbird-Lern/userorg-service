@@ -183,9 +183,33 @@ public class UserProfileReadServiceTest {
     locn2.put(JsonKey.TYPE, "district");
     locn2.put(JsonKey.PARENT_ID, "location1");
 
+    Map<String, Object> block = new HashMap<>();
+    block.put(JsonKey.ID, "blockId");
+    block.put(JsonKey.CODE, "block1");
+    block.put(JsonKey.NAME, "block1");
+    block.put(JsonKey.TYPE, "block");
+    block.put(JsonKey.PARENT_ID, "location2");
+
+    Map<String, Object> cluster = new HashMap<>();
+    cluster.put(JsonKey.ID, "clusterId");
+    cluster.put(JsonKey.CODE, "cluster1");
+    cluster.put(JsonKey.NAME, "cluster1");
+    cluster.put(JsonKey.TYPE, "cluster");
+    cluster.put(JsonKey.PARENT_ID, "blockId");
+
+    Map<String, Object> school = new HashMap<>();
+    school.put(JsonKey.ID, "schoolId");
+    school.put(JsonKey.CODE, "school1");
+    school.put(JsonKey.NAME, "school1");
+    school.put(JsonKey.TYPE, "school");
+    school.put(JsonKey.PARENT_ID, "clusterId");
+
     List<Map<String, Object>> locnList = new ArrayList<>();
     locnList.add(locn);
     locnList.add(locn2);
+    locnList.add(block);
+    locnList.add(cluster);
+    locnList.add(school);
     Response locnResponse = new Response();
     locnResponse.getResult().put(JsonKey.RESPONSE, locnList);
 
@@ -344,6 +368,14 @@ public class UserProfileReadServiceTest {
     Map<String, String> groupTncMap = new HashMap<>();
     groupTncMap.put("groupsTnc", tnc);
     user.setAllTncAccepted(groupTncMap);
+    ArrayList<String> locationList =
+        new ArrayList<String>() {
+          {
+            add("location1");
+            add("location2");
+          }
+        };
+    user.setLocationIds(locationList);
     ObjectMapper mapper1 = new ObjectMapper();
     Map<String, Object> result = mapper.convertValue(user, Map.class);
     return result;
@@ -351,6 +383,7 @@ public class UserProfileReadServiceTest {
 
   private Map<String, Object> getUserDbMap(String userid) throws JsonProcessingException {
     Map<String, Object> userDbMap = new HashMap<>();
+    String[] locationIds = new String[] {"location1", "location2"};
     userDbMap.put(JsonKey.USERNAME, "validUserName");
     userDbMap.put(JsonKey.CHANNEL, "channel");
     userDbMap.put(JsonKey.EMAIL, "anyEmail@gmail.com");
@@ -363,6 +396,7 @@ public class UserProfileReadServiceTest {
     userDbMap.put(JsonKey.ID, userid);
     userDbMap.put(JsonKey.FIRST_NAME, "Demo Name");
     userDbMap.put(JsonKey.IS_DELETED, false);
+    userDbMap.put(JsonKey.LOCATION_IDS, locationIds);
     // {'groupsTnc': '{"tncAcceptedOn":"2021-01-04 19:45:29:725+0530","version":"3.9.0"}'}
     Map<String, String> tncMap = new HashMap<>();
     tncMap.put("tncAcceptedOn", "2021-01-04 19:45:29:725+0530");

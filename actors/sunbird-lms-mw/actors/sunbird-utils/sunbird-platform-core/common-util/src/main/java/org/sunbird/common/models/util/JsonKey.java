@@ -709,6 +709,8 @@ public final class JsonKey {
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
   public static final String REQUEST_ID = "requestid";
   public static final String LOCATION_TYPE_SCHOOL = "school";
+  public static final String BLOCK = "block";
+  public static final String CLUSTER = "cluster";
   public static final String UPDATE_USER_SCHOOL_ORG = "updateUserSchoolOrg";
   public static final String GET = "get";
   public static final String FORM = "form";
