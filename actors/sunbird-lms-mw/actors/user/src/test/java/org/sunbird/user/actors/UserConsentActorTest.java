@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -31,7 +30,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.Promise;
@@ -50,14 +48,11 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
 public class UserConsentActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserConsentActor.class);
-  private static Response response = null;
   public static CassandraOperationImpl cassandraOperation;
   private static ElasticSearchService esUtil;
-  private static Map<String, Object> userFeed = new HashMap<>();
 
   @Before
   public void setUp() throws Exception {
@@ -134,10 +129,7 @@ public class UserConsentActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
 
     subject.tell(getUserConsentRequest(), probe.getRef());
@@ -151,10 +143,7 @@ public class UserConsentActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessNoRecordResponse());
 
     subject.tell(getUserConsentRequest(), probe.getRef());
@@ -168,17 +157,11 @@ public class UserConsentActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
 
     when(cassandraOperation.upsertRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
 
     Map<String, Object> reqMap = new HashMap<>();
