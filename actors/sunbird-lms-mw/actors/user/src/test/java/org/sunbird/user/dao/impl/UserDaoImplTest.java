@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -38,7 +37,6 @@ import org.sunbird.user.dao.UserDao;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
 public class UserDaoImplTest {
   private static CassandraOperation cassandraOperationImpl = null;
 
@@ -56,24 +54,21 @@ public class UserDaoImplTest {
     userList.add(user);
     response.getResult().put(JsonKey.RESPONSE, userList);
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
   }
 
   @Test
   public void testGetUserDetailsById() {
     UserDao userDao = UserDaoImpl.getInstance();
-    Map<String, Object> user = userDao.getUserDetailsById("123-456-789", null);
+    Map<String, Object> user = userDao.getUserDetailsById("123-456-789", new RequestContext());
     Assert.assertNotNull(user);
   }
 
   @Test
   public void testGetUserById() {
     UserDao userDao = UserDaoImpl.getInstance();
-    User user = userDao.getUserById("123-456-789", null);
+    User user = userDao.getUserById("123-456-789", new RequestContext());
     Assert.assertNotNull(user);
   }
 }

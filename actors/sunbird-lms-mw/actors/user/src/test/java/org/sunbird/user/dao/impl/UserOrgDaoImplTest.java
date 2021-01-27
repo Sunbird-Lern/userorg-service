@@ -50,10 +50,7 @@ public class UserOrgDaoImplTest {
             Mockito.any()))
         .thenReturn(response);
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
   }
 
@@ -64,14 +61,14 @@ public class UserOrgDaoImplTest {
     userOrg.setOrganisationId("1234567890");
     userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.updateUserOrg(userOrg, null);
+    Response res = userOrgDao.updateUserOrg(userOrg, new RequestContext());
     Assert.assertNotNull(res);
   }
 
-  // @Test
+  @Test
   public void testGetUserOrg() {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", null);
+    Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", new RequestContext());
     Assert.assertNotNull(res);
   }
 }

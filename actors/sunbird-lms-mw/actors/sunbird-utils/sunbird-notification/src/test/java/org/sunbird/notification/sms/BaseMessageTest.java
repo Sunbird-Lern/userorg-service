@@ -2,6 +2,7 @@ package org.sunbird.notification.sms;
 
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -24,12 +25,7 @@ import org.sunbird.notification.utils.SMSFactory;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({
-  "javax.management.*",
-  "javax.net.ssl.*",
-  "javax.security.*",
-  "jdk.internal.reflect.*"
-})
+@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
 @PrepareForTest({
   HttpClients.class,
   CloseableHttpClient.class,
@@ -48,7 +44,8 @@ public abstract class BaseMessageTest {
     PowerMockito.mockStatic(HttpClients.class);
     try {
       doReturn(httpClient).when(HttpClients.class, "createDefault");
-      doReturn(httpResp).when(httpClient).execute(Mockito.any(HttpPost.class));
+      when(httpClient.execute(Mockito.any(HttpPost.class))).thenReturn(httpResp);
+      // doReturn(httpResp).when(httpClient).execute(Mockito.any(HttpPost.class));
       doReturn(statusLine).when(httpResp).getStatusLine();
       doReturn(200).when(statusLine).getStatusCode();
     } catch (Exception e) {
