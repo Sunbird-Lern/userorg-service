@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -39,7 +38,6 @@ import org.sunbird.common.responsecode.ResponseCode;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
-@Ignore
 public class OnDemandSchedulerActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static final Props props = Props.create(OnDemandSchedulerActor.class);
