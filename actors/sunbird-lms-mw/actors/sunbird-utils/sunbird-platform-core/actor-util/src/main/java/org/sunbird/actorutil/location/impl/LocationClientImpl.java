@@ -67,16 +67,20 @@ public class LocationClientImpl implements LocationClient {
     request.setOperation(LocationActorOperation.SEARCH_LOCATION.getValue());
     request.getRequest().putAll(searchRequestMap);
     logger.info(context, "callSearchLocation ");
-    Object obj = actorCall(actorRef, request, context);
-    if (obj instanceof Response) {
-      Response responseObj = (Response) obj;
-      List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) responseObj.getResult().get(JsonKey.RESPONSE);
-      return responseList
-          .stream()
-          .map(s -> mapper.convertValue(s, Location.class))
-          .collect(Collectors.toList());
-    } else {
+    try {
+      Object obj = actorCall(actorRef, request, context);
+      if (obj instanceof Response) {
+        Response responseObj = (Response) obj;
+        List<Map<String, Object>> responseList =
+            (List<Map<String, Object>>) responseObj.getResult().get(JsonKey.RESPONSE);
+        return responseList
+            .stream()
+            .map(s -> mapper.convertValue(s, Location.class))
+            .collect(Collectors.toList());
+      } else {
+        response = new ArrayList<>();
+      }
+    } catch (Exception ex) {
       response = new ArrayList<>();
     }
     return response;
