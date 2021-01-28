@@ -98,10 +98,7 @@ public class FeedUtilTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(response);
+
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);

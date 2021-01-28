@@ -95,9 +95,6 @@ public class OrgManagementActorTest {
             Mockito.anyString(),
             Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
@@ -153,17 +150,6 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testAddUserToOrgSuccessWithUserExtIdAndOrgId() {
-
-    boolean result =
-        testScenario(
-            getRequest(
-                getRequestData(false, true, true, false, basicRequestData), ADD_MEMBER_TO_ORG),
-            null);
-    assertTrue(result);
-  }
-
-  @Test
   public void testAddUserToOrgSuccessWithUserIdAndOrgExtId() {
 
     boolean result =
@@ -174,26 +160,8 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  @Test
-  public void testAddUserToOrgSuccessWithUserExtIdAndOrgExtId() {
-
-    boolean result =
-        testScenario(
-            getRequest(
-                getRequestData(false, false, true, true, basicRequestData), ADD_MEMBER_TO_ORG),
-            null);
-    assertTrue(result);
-  }
-
   // @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserId() {
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     boolean result =
         testScenario(
             getRequest(
@@ -218,10 +186,6 @@ public class OrgManagementActorTest {
 
   @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserExtId() {
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
-
     boolean result =
         testScenario(
             getRequest(
@@ -252,9 +216,6 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getValidateChannelEsResponse(true));
 
@@ -277,9 +238,6 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getValidateChannelEsResponse(true));
 

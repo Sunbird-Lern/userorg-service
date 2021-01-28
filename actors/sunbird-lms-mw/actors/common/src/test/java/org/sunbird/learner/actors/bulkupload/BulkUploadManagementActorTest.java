@@ -244,9 +244,6 @@ public class BulkUploadManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), null))
         .thenReturn(getCassandraRecordByIdForOrgResponse());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
-        .thenReturn(getCassandraRecordByIdForOrgResponse());
     Response insertResponse = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), null))
