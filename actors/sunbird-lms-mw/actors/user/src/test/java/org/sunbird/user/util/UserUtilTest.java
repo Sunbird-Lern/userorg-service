@@ -420,7 +420,7 @@ public class UserUtilTest {
     Assert.assertTrue(true);
   }
 
-  // @Test
+  @Test
   public void testRemoveEntryFromUserLookUp() {
     beforeEachTest();
     Map<String, Object> mergeeMap = new HashMap<>();
@@ -429,7 +429,7 @@ public class UserUtilTest {
     mergeeMap.put(JsonKey.USERNAME, "someUsername");
     List<String> userLookUpIdentifiers =
         Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
-    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
+    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, null);
     Assert.assertTrue(true);
   }
 }
