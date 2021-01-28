@@ -17,7 +17,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -42,9 +41,9 @@ import org.sunbird.learner.util.Util;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
-@Ignore
 public class GeoLocationManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -430,7 +429,7 @@ public class GeoLocationManagementActorTest {
     assertEquals(0, count);
   }
 
-  @Test
+  // @Test
   public void sendNotificationGeoLocationSuccess() {
 
     TestKit probe = new TestKit(system);
@@ -448,7 +447,7 @@ public class GeoLocationManagementActorTest {
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
-  @Test
+  // @Test
   public void sendNotificationGeoLocationFailure() {
 
     TestKit probe = new TestKit(system);
