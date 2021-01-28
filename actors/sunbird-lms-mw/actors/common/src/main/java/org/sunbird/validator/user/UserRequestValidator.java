@@ -793,6 +793,7 @@ public class UserRequestValidator extends BaseRequestValidator {
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
       logger.info(
+          context,
           String.format(
               "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       if (!userTypeMap.containsKey(userType)) {
