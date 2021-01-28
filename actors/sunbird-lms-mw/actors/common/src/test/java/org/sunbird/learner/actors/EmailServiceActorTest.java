@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -37,7 +36,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.EmailServiceActor;
@@ -60,10 +58,15 @@ import scala.concurrent.Promise;
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
+  "javax.net.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
 })
-@Ignore
 public class EmailServiceActorTest {
 
   private static final Props props = Props.create(EmailServiceActor.class);
@@ -130,15 +133,13 @@ public class EmailServiceActorTest {
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(recipientSearchQuery)),
             Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(promise.future());
     Promise<Map<String, Object>> promise_recipientSearchQuery = Futures.promise();
 
     promise_recipientSearchQuery.trySuccess(recipientSearchQuery);
     when(esService.getDataByIdentifier(
-            Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
-            Mockito.eq("001"),
-            Mockito.any(RequestContext.class)))
+            Mockito.eq(ProjectUtil.EsType.user.getTypeName()), Mockito.eq("001"), Mockito.any()))
         .thenReturn(promise_recipientSearchQuery.future());
 
     Promise<Map<String, Object>> promise_esOrgResult = Futures.promise();
@@ -146,7 +147,7 @@ public class EmailServiceActorTest {
     when(esService.getDataByIdentifier(
             Mockito.eq(ProjectUtil.EsType.organisation.getTypeName()),
             Mockito.eq("anyRootId"),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(promise_esOrgResult.future());
   }
 
@@ -194,6 +195,7 @@ public class EmailServiceActorTest {
     queryMap.put(JsonKey.FILTERS, filterMap);
     pageMap.put(JsonKey.RECIPIENT_EMAILS, emailIdList);
     pageMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
+    pageMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "default");
     innerMap.put(JsonKey.EMAIL_REQUEST, pageMap);
     innerMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     innerMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
@@ -218,6 +220,7 @@ public class EmailServiceActorTest {
     innerMap.put(JsonKey.EMAIL_REQUEST, pageMap);
     pageMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     pageMap.put(JsonKey.FIRST_NAME, "Name");
+    pageMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "default");
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
@@ -317,7 +320,7 @@ public class EmailServiceActorTest {
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(new HashMap<>())),
             Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(promise.future());
 
     subject.tell(reqObj, probe.getRef());
@@ -419,7 +422,7 @@ public class EmailServiceActorTest {
     when(esService.search(
             Mockito.eq(ElasticSearchHelper.createSearchDTO(new HashMap<>())),
             Mockito.eq(ProjectUtil.EsType.user.getTypeName()),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenThrow(new ProjectCommonException("", "", 0));
     when(ElasticSearchHelper.getResponseFromFuture(Mockito.any()))
         .thenThrow(new ProjectCommonException("", "", 0));
