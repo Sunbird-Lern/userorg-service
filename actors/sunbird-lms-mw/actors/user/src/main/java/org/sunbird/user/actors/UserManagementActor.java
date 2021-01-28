@@ -1457,11 +1457,13 @@ public class UserManagementActor extends BaseActor {
         logger.info(
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
-        locations =
-            locationClient.getLocationByIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationIds,
-                context);
+        if (CollectionUtils.isNotEmpty(locationIds)) {
+          locations =
+              locationClient.getLocationByIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                  locationIds,
+                  context);
+        }
       } else {
         locations =
             locationClient.getLocationsByCodes(
