@@ -60,7 +60,6 @@ import org.sunbird.learner.util.Util;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-// @Ignore
 public class SendNotificationActorTest {
 
   private static final Props props = Props.create(SendNotificationActor.class);
