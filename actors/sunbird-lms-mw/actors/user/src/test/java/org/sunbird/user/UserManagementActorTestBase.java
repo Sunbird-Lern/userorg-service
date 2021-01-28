@@ -27,6 +27,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.location.LocationClient;
@@ -79,7 +80,8 @@ import scala.concurrent.Promise;
   BaseMWService.class,
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
-  // Await.class
+  ActorRef.class,
+  RequestRouter.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -103,7 +105,9 @@ public abstract class UserManagementActorTestBase {
 
   @Before
   public void beforeEachTest() {
-    // PowerMockito.mockStatic(Await.class);
+    ActorRef actorRef = mock(ActorRef.class);
+    PowerMockito.mockStatic(RequestRouter.class);
+    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);

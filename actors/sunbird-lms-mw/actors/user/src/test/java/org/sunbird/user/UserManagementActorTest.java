@@ -26,6 +26,7 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+@Ignore
 public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test

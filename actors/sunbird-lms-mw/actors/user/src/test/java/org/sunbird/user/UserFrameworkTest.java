@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -31,6 +32,7 @@ import org.sunbird.learner.util.Util;
   "javax.crypto.*"
 })
 @PrepareForTest({DataCacheHandler.class, ContentStoreUtil.class})
+@Ignore
 public class UserFrameworkTest extends UserManagementActorTestBase {
 
   @Before

@@ -38,7 +38,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -90,7 +89,7 @@ public class UserTnCActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-
+    mockCassandraOperationGetUserCall(getUser(null));
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
     Map<String, String> config = new HashMap<>();
@@ -114,13 +113,11 @@ public class UserTnCActorTest {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
 
-    mockCassandraOperationGetUserCall(getUser(null));
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser(null));
 
     Response response =
-        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
+        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -130,8 +127,7 @@ public class UserTnCActorTest {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
     mockCassandraOperationGetUserCall(getUser(LATEST_VERSION));
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser(LATEST_VERSION));
 
     Response response =
@@ -161,8 +157,7 @@ public class UserTnCActorTest {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
     mockCassandraOperationGetUserCall(getUser(LATEST_VERSION));
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser(LATEST_VERSION));
 
     Response response =
@@ -179,9 +174,7 @@ public class UserTnCActorTest {
     user.put(JsonKey.ROOT_ORG_ID, "anyRootId");
     user.put(JsonKey.IS_DELETED, true);
     mockCassandraOperationGetUserCall(user);
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(user);
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
 
     ProjectCommonException response =
         setRequest(ACCEPTED_CORRECT_VERSION)
@@ -207,8 +200,7 @@ public class UserTnCActorTest {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
     mockCassandraOperationGetUserCall(getUser(LATEST_VERSION));
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser(LATEST_VERSION));
 
     Response response =
@@ -223,8 +215,7 @@ public class UserTnCActorTest {
     UserTncService tncService = PowerMockito.mock(UserTncService.class);
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
     mockCassandraOperationGetUserCall(getUser("v2"));
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser("v2"));
 
     Response response =
@@ -240,8 +231,7 @@ public class UserTnCActorTest {
     PowerMockito.whenNew(UserTncService.class).withNoArguments().thenReturn(tncService);
     mockCassandraOperationGetUserCall(getUser(ACCEPTED_CORRECT_VERSION));
     mockCassandraOperationGetUserOrgCall();
-    PowerMockito.when(
-            tncService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(tncService.getUserById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getUser(ACCEPTED_CORRECT_VERSION));
 
     Response response =
