@@ -2,6 +2,7 @@ package org.sunbird.location.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
@@ -82,7 +83,9 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context) {
-    return search(queryMap, context);
+    Map<String, Object> searchQueryMap = new HashMap<>();
+    searchQueryMap.put(JsonKey.FILTERS, queryMap);
+    return search(searchQueryMap, context);
   }
 
   public SearchDTO addSortBy(SearchDTO searchDtO) {
