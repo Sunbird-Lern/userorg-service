@@ -44,7 +44,6 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  OrganisationManagementActor.class,
   Util.class,
   ElasticSearchRestHighImpl.class,
   RequestRouter.class,
