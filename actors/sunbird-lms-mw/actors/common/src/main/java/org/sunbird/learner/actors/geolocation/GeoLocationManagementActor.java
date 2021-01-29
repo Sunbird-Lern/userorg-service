@@ -1,7 +1,11 @@
 package org.sunbird.learner.actors.geolocation;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
@@ -9,7 +13,10 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.models.util.fcm.Notification;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -247,13 +254,13 @@ public class GeoLocationManagementActor extends BaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (type.equalsIgnoreCase(JsonKey.ORGANISATION)) {
-      Response response1 =
-          cassandraOperation.getRecordsByIndexedProperty(
-              geoLocationDbInfo.getKeySpace(),
-              geoLocationDbInfo.getTableName(),
-              JsonKey.ROOT_ORG_ID,
-              id,
-              null);
+      Response response1 = new Response(); // Will depricate these api with SC-2169
+      /*cassandraOperation.getRecordsByIndexedProperty(
+      geoLocationDbInfo.getKeySpace(),
+      geoLocationDbInfo.getTableName(),
+      JsonKey.ROOT_ORG_ID,
+      id,
+      null);*/
       List<Map<String, Object>> list = (List<Map<String, Object>>) response1.get(JsonKey.RESPONSE);
 
       finalResponse.put(JsonKey.RESPONSE, list);

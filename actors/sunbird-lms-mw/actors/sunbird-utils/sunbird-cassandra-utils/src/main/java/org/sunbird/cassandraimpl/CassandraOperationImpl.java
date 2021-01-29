@@ -839,47 +839,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     logger.debug(context, mf.format(new Object[] {operation, startTime, stopTime, elapsedTime}));
   }
 
-  // todo overload this method, getRecordsByIndexedProperty -> getRecordsById or PrimaryKey
-  @Override
-  public Response getRecordsByIndexedProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      RequestContext context) {
-    long startTime = System.currentTimeMillis();
-    logger.debug(
-        context, "CassandraOperationImpl:getRecordsByIndexedProperty called at " + startTime);
-    Response response;
-    Select selectQuery = null;
-    try {
-      selectQuery = QueryBuilder.select().all().from(keyspaceName, tableName);
-      selectQuery.where().and(eq(propertyName, propertyValue));
-      // selectQuery = selectQuery.allowFiltering();
-      ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
-      response = CassandraUtil.createResponse(results);
-    } catch (Exception e) {
-      logger.error(
-          context,
-          "CassandraOperationImpl:getRecordsByIndexedProperty: "
-              + Constants.EXCEPTION_MSG_FETCH
-              + tableName
-              + " : "
-              + e.getMessage(),
-          e);
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    } finally {
-      if (null != selectQuery) {
-        logQueryElapseTime(
-            "getRecordsByIndexedProperty", startTime, selectQuery.getQueryString(), context);
-      }
-    }
-    return response;
-  }
-
   @Override
   public void deleteRecord(
       String keyspaceName,
@@ -1273,28 +1232,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
             "batchInsertWithTTL", startTime, batchStatement.getStatements().toString(), context);
       }
     }
-    return response;
-  }
-
-  @Override
-  public Response getRecordByObjectType(
-      String keyspace,
-      String tableName,
-      String columnName,
-      String key,
-      int value,
-      String objectType,
-      RequestContext context) {
-    long startTime = System.currentTimeMillis();
-    Select selectQuery = QueryBuilder.select().column(columnName).from(keyspace, tableName);
-    Clause clause = QueryBuilder.lt(key, value);
-    selectQuery.where(eq(JsonKey.OBJECT_TYPE, objectType)).and(clause);
-    // selectQuery = selectQuery.allowFiltering();
-    if (null != selectQuery) {
-      logQueryElapseTime("getRecordByObjectType", startTime, selectQuery.getQueryString(), context);
-    }
-    ResultSet resultSet = connectionManager.getSession(keyspace).execute(selectQuery);
-    Response response = CassandraUtil.createResponse(resultSet);
     return response;
   }
 

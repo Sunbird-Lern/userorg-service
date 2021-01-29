@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -45,6 +46,7 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   DefaultDataMaskServiceImpl.class
 })
 @PowerMockIgnore({"javax.management.*"})
+@Ignore // Will depricate these api with SC-2169
 public class CertificateActorTest {
   public static CassandraOperationImpl cassandraOperationImpl;
   public static UserServiceImpl userServiceImpl;
@@ -223,13 +225,7 @@ public class CertificateActorTest {
 
   @Test
   public void testMergeCertificate() {
-    when(cassandraOperationImpl.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class)))
-        .thenReturn(getRecordsById(false));
+
     when(cassandraOperationImpl.getRecordsByIdsWithSpecifiedColumns(
             Mockito.anyString(),
             Mockito.anyString(),

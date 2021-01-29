@@ -105,23 +105,6 @@ public interface CassandraOperation {
       RequestContext context);
 
   /**
-   * Fetch records with specified indexed column
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Indexed Column name
-   * @param propertyValue Value to be used for matching in select query
-   * @param context
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByIndexedProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      RequestContext context);
-
-  /**
    * Fetch records with specified columns (select all if null) for given column map (name, value
    * pairs).
    *
@@ -482,15 +465,6 @@ public interface CassandraOperation {
       Map<String, Object> filters,
       List<String> fields,
       FutureCallback<ResultSet> callback,
-      RequestContext context);
-
-  public Response getRecordByObjectType(
-      String keyspace,
-      String tableName,
-      String columnName,
-      String key,
-      int value,
-      String objectType,
       RequestContext context);
 
   public Response performBatchAction(

@@ -124,24 +124,28 @@ public class OrganisationManagementActor extends BaseActor {
     try {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Map<String, Object> request = actorMessage.getRequest();
+      List<String> fields = new ArrayList<>();
+      fields.add(JsonKey.ID);
+      fields.add(JsonKey.NAME);
       Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
+          cassandraOperation.getAllRecords(
               orgTypeDbInfo.getKeySpace(),
               orgTypeDbInfo.getTableName(),
-              JsonKey.NAME,
-              request.get(JsonKey.NAME),
+              fields,
               actorMessage.getRequestContext());
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (!(list.isEmpty())) {
-        Map<String, Object> map = list.get(0);
-        if (!(((String) map.get(JsonKey.ID)).equals(request.get(JsonKey.ID)))) {
-          ProjectCommonException exception =
-              new ProjectCommonException(
-                  ResponseCode.orgTypeAlreadyExist.getErrorCode(),
-                  ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-          sender().tell(exception, self());
-          return;
+      List<Map<String, Object>> typeList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(typeList)) {
+        String nameInReq = (String) request.get(JsonKey.NAME);
+        String idInReq = (String) request.get(JsonKey.ID);
+        for (Map<String, Object> type : typeList) {
+          String nameInDb = (String) type.get(JsonKey.NAME);
+          String idInDb = (String) request.get(JsonKey.ID);
+          if (nameInReq.equalsIgnoreCase(nameInDb) && !(idInReq.equalsIgnoreCase(idInDb))) {
+            throw new ProjectCommonException(
+                ResponseCode.orgTypeAlreadyExist.getErrorCode(),
+                ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
         }
       }
 

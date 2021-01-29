@@ -122,15 +122,15 @@ public class ShadowUserMigrationScheduler extends BaseJob {
    * @return list
    */
   private List<String> getUnprocessedRecordIds() {
-    Response response =
-        cassandraOperation.getRecordByObjectType(
-            bulkUploadDbInfo.getKeySpace(),
-            bulkUploadDbInfo.getTableName(),
-            JsonKey.ID,
-            JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.INTERRUPT.getValue(),
-            JsonKey.MIGRATION_USER_OBJECT,
-            null);
+    Response response = new Response(); // Will depricate these api with SC-2169
+    /* cassandraOperation.getRecordByObjectType(
+    bulkUploadDbInfo.getKeySpace(),
+    bulkUploadDbInfo.getTableName(),
+    JsonKey.ID,
+    JsonKey.STATUS,
+    ProjectUtil.BulkProcessStatus.INTERRUPT.getValue(),
+    JsonKey.MIGRATION_USER_OBJECT,
+    null);*/
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));

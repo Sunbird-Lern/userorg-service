@@ -78,13 +78,9 @@ public class OrgManagementActorTest {
     promise.success(getEsResponse(false));
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getAllRecords());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
@@ -363,6 +359,17 @@ public class OrgManagementActorTest {
       map.put(JsonKey.IS_DELETED, true);
       list.add(map);
     }
+    res.put(JsonKey.RESPONSE, list);
+    return res;
+  }
+
+  private Response getAllRecords() {
+    Response res = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "id");
+    map.put(JsonKey.NAME, "orgType");
+    list.add(map);
     res.put(JsonKey.RESPONSE, list);
     return res;
   }
