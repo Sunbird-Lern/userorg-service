@@ -5,6 +5,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 
 public class LocationDaoImplTest {
@@ -15,6 +16,15 @@ public class LocationDaoImplTest {
     SearchDTO searchDto = createSearchDtoObj();
     searchDto = dao.addSortBy(searchDto);
     Assert.assertTrue(searchDto.getSortBy().size() == 1);
+  }
+
+  @Test(expected = Exception.class)
+  public void getRecordByPropertyTest() {
+    LocationDaoImpl dao = new LocationDaoImpl();
+    Map<String, Object> search = new HashMap<>();
+    search.put(JsonKey.CODE, "code");
+    dao.getRecordByProperty(search, new RequestContext());
+    Assert.assertTrue(true);
   }
 
   @Test
