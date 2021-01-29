@@ -855,7 +855,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     try {
       selectQuery = QueryBuilder.select().all().from(keyspaceName, tableName);
       selectQuery.where().and(eq(propertyName, propertyValue));
-      selectQuery = selectQuery.allowFiltering();
+      // selectQuery = selectQuery.allowFiltering();
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
@@ -1289,7 +1289,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     Select selectQuery = QueryBuilder.select().column(columnName).from(keyspace, tableName);
     Clause clause = QueryBuilder.lt(key, value);
     selectQuery.where(eq(JsonKey.OBJECT_TYPE, objectType)).and(clause);
-    selectQuery = selectQuery.allowFiltering();
+    // selectQuery = selectQuery.allowFiltering();
     if (null != selectQuery) {
       logQueryElapseTime("getRecordByObjectType", startTime, selectQuery.getQueryString(), context);
     }

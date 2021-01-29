@@ -74,8 +74,7 @@ public class SystemSettingsActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(getOrgData());
     resp.put(JsonKey.RESPONSE, list);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID, null))
+    when(cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, ROOT_ORG_ID, null))
         .thenReturn(resp);
   }
 
@@ -113,12 +112,8 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetSystemSettingFailure() {
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(new Response());
     Map<String, Object> orgData = new HashMap<String, Object>();
     orgData.put(JsonKey.FIELD, KEYSPACE_NAME);
