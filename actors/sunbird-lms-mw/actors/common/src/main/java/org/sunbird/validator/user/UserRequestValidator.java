@@ -8,10 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -24,6 +21,7 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
+  private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
 
   static {
     List<String> subTypeList =
@@ -794,6 +792,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+      logger.info(
+          String.format(
+              "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       if (!userTypeMap.containsKey(userType)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
