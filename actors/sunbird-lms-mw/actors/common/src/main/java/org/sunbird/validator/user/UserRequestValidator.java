@@ -904,7 +904,7 @@ public class UserRequestValidator extends BaseRequestValidator {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
           if (StringUtils.isBlank((String) declareFields.get(JsonKey.PERSONA))) {
-            declareFields.put(JsonKey.PERSONA, "default");
+            declareFields.put(JsonKey.PERSONA, JsonKey.DEFAULT_PERSONA);
           }
         }
       }
