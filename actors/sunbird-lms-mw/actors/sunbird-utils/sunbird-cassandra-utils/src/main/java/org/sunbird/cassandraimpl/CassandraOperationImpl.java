@@ -203,21 +203,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
   }
 
   @Override
-  public Response getRecordsByPropertiesWithFiltering(
-      String keyspaceName,
-      String tableName,
-      Map<String, Object> propertyMap,
-      RequestContext context) {
-    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, true, context);
-  }
-
-  @Override
   public Response getRecordsByProperties(
       String keyspaceName,
       String tableName,
       Map<String, Object> propertyMap,
       List<String> fields,
-      boolean allowFilter,
       RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.debug(
@@ -249,9 +239,6 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
           }
         }
       }
-      if (allowFilter) {
-        selectQuery = selectQuery.allowFiltering();
-      }
       ResultSet results = connectionManager.getSession(keyspaceName).execute(selectQuery);
       response = CassandraUtil.createResponse(results);
     } catch (Exception e) {
@@ -275,7 +262,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       String tableName,
       Map<String, Object> propertyMap,
       RequestContext context) {
-    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, false, context);
+    return getRecordsByProperties(keyspaceName, tableName, propertyMap, null, context);
   }
 
   @Override
