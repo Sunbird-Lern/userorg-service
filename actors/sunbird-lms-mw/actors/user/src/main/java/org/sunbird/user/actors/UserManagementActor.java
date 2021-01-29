@@ -1455,6 +1455,7 @@ public class UserManagementActor extends BaseActor {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
         logger.info(
+            context,
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
@@ -1478,7 +1479,7 @@ public class UserManagementActor extends BaseActor {
             stateCode = location.getCode();
           }
         }
-        logger.info(String.format("Validating UserType for state code:%s", stateCode));
+        logger.info(context, String.format("Validating UserType for state code:%s", stateCode));
         if (StringUtils.isNotBlank(stateCode)) {
           // Validate UserType and UserSubType configure based on user state config else user
           // default config
@@ -1487,6 +1488,7 @@ public class UserManagementActor extends BaseActor {
       } else {
         // If location is null or empty .Vlidate with default config
         logger.info(
+            context,
             String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
