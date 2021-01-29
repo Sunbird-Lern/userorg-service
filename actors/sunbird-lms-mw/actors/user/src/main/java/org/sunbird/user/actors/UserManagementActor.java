@@ -302,9 +302,7 @@ public class UserManagementActor extends BaseActor {
         updateUserSchoolOrg =
             (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
-      if (updateUserSchoolOrg) {
-        updateUserOrganisations(actorMessage);
-      }
+      updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
@@ -440,35 +438,32 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
+    logger.info(
+        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
-      logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
-      List<Map<String, Object>> orgList =
-          (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
-      String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
-      String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
-      List<Map<String, Object>> orgListDb =
-          UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
-      }
-      if (!orgList.isEmpty()) {
-        for (Map<String, Object> org : orgList) {
-          createOrUpdateOrganisations(org, orgDbMap, actorMessage);
-          updateUserSelfDeclaredData(actorMessage, org, userId);
-        }
-      }
-      String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
-      // custodian-org
-      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
-        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
-      }
-      logger.info(
-          actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+      orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
+    String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
+    List<Map<String, Object>> orgListDb =
+        UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> orgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(orgListDb)) {
+      orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+    }
+
+    if (!CollectionUtils.isEmpty(orgList)) {
+      for (Map<String, Object> org : orgList) {
+        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        updateUserSelfDeclaredData(actorMessage, org, userId);
+      }
+    }
+    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
@@ -501,13 +496,18 @@ public class UserManagementActor extends BaseActor {
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     if (MapUtils.isNotEmpty(org)) {
       UserOrg userOrg = mapper.convertValue(org, UserOrg.class);
-      String orgId = (String) org.get(JsonKey.ORGANISATION_ID);
+      String orgId =
+          null != org.get(JsonKey.ORGANISATION_ID)
+              ? (String) org.get(JsonKey.ORGANISATION_ID)
+              : (String) org.get(JsonKey.ID);
+
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
       if (null != orgId && orgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
-        userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ID));
+        userOrg.setOrganisationId(
+            (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
