@@ -139,7 +139,7 @@ public class OrganisationManagementActor extends BaseActor {
         String idInReq = (String) request.get(JsonKey.ID);
         for (Map<String, Object> type : typeList) {
           String nameInDb = (String) type.get(JsonKey.NAME);
-          String idInDb = (String) request.get(JsonKey.ID);
+          String idInDb = (String) type.get(JsonKey.ID);
           if (nameInReq.equalsIgnoreCase(nameInDb) && !(idInReq.equalsIgnoreCase(idInDb))) {
             throw new ProjectCommonException(
                 ResponseCode.orgTypeAlreadyExist.getErrorCode(),
