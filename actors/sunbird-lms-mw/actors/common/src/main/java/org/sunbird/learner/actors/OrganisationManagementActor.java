@@ -688,8 +688,7 @@ public class OrganisationManagementActor extends BaseActor {
                 "".equals(rootOrgId) ? JsonKey.DEFAULT_ROOT_ORG_ID : rootOrgId);
           } else {
             logger.info(actorMessage.getRequestContext(), "Invalid channel id.");
-            sender().tell(ProjectUtil.createClientException(ResponseCode.invalidChannel), self());
-            return;
+            ProjectCommonException.throwClientErrorException(ResponseCode.invalidChannel);
           }
         } else if (!channelAdded
             && !validateChannelUniqueness(
@@ -697,10 +696,7 @@ public class OrganisationManagementActor extends BaseActor {
                 (String) request.get(JsonKey.ORGANISATION_ID),
                 actorMessage.getRequestContext())) {
           logger.info(actorMessage.getRequestContext(), "Channel validation failed");
-          sender()
-              .tell(
-                  ProjectUtil.createClientException(ResponseCode.channelUniquenessInvalid), self());
-          return;
+          ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
         }
       }
       // if channel is not coming and we added it from provider to collect the
@@ -799,7 +795,7 @@ public class OrganisationManagementActor extends BaseActor {
       if (updateOrgDao.containsKey(JsonKey.CHANNEL)) {
 
         String slug = Slug.makeSlug((String) updateOrgDao.getOrDefault(JsonKey.CHANNEL, ""), true);
-        if ((boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
+        if (orgDao.containsKey(JsonKey.IS_ROOT_ORG) && (boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
           String rootOrgId = getRootOrgIdFromSlug(slug, actorMessage.getRequestContext());
           if (StringUtils.isBlank(rootOrgId)
               || (!StringUtils.isBlank(rootOrgId)
@@ -921,15 +917,6 @@ public class OrganisationManagementActor extends BaseActor {
       logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
       return;
     }
-    // remove source and external id
-    usrOrgData.remove(JsonKey.EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.SOURCE);
-    usrOrgData.remove(JsonKey.PROVIDER);
-    usrOrgData.remove(JsonKey.USERNAME);
-    usrOrgData.remove(JsonKey.USER_NAME);
-    usrOrgData.remove(JsonKey.USER_EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.USER_PROVIDER);
-    usrOrgData.remove(JsonKey.USER_ID_TYPE);
     usrOrgData.put(JsonKey.IS_DELETED, false);
 
     String updatedBy = null;
