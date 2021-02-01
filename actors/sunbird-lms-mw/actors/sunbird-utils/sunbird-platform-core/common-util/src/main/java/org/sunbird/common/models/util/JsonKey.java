@@ -716,6 +716,7 @@ public final class JsonKey {
   public static final String FORM = "form";
   public static final String CHILDREN = "children";
   public static final String OPTIONS = "options";
+  public static final String DISTRICT = "district";
 
   private JsonKey() {}
 }
