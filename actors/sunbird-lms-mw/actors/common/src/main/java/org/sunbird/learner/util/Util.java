@@ -3,15 +3,7 @@ package org.sunbird.learner.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -683,11 +675,11 @@ public final class Util {
   @SuppressWarnings("unchecked")
   public static void upsertUserOrgData(Map<String, Object> userMap, RequestContext context) {
     Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-    Map<String, Object> map = new WeakHashMap<>();
+    Map<String, Object> map = new LinkedHashMap<>();
     map.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     Response response =
-        cassandraOperation.getRecordsByPropertiesWithFiltering(
+        cassandraOperation.getRecordsByProperties(
             usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map, context);
     List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (!resList.isEmpty()) {

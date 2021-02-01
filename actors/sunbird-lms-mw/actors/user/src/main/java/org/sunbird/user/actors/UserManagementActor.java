@@ -9,7 +9,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -32,7 +37,13 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.GeoLocationJsonKey;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LocationActorOperation;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -44,7 +55,11 @@ import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.learner.util.*;
+import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.learner.util.UserFlagUtil;
+import org.sunbird.learner.util.UserUtility;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -295,9 +310,7 @@ public class UserManagementActor extends BaseActor {
         updateUserSchoolOrg =
             (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
-      if (updateUserSchoolOrg) {
-        updateUserOrganisations(actorMessage);
-      }
+      updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
@@ -433,35 +446,32 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
+    logger.info(
+        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
-      logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
-      List<Map<String, Object>> orgList =
-          (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
-      String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
-      String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
-      List<Map<String, Object>> orgListDb =
-          UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
-      }
-      if (!orgList.isEmpty()) {
-        for (Map<String, Object> org : orgList) {
-          createOrUpdateOrganisations(org, orgDbMap, actorMessage);
-          updateUserSelfDeclaredData(actorMessage, org, userId);
-        }
-      }
-      String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
-      // custodian-org
-      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
-        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
-      }
-      logger.info(
-          actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+      orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
+    String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
+    List<Map<String, Object>> orgListDb =
+        UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> orgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(orgListDb)) {
+      orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+    }
+
+    if (!CollectionUtils.isEmpty(orgList)) {
+      for (Map<String, Object> org : orgList) {
+        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        updateUserSelfDeclaredData(actorMessage, org, userId);
+      }
+    }
+    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
@@ -494,13 +504,18 @@ public class UserManagementActor extends BaseActor {
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     if (MapUtils.isNotEmpty(org)) {
       UserOrg userOrg = mapper.convertValue(org, UserOrg.class);
-      String orgId = (String) org.get(JsonKey.ORGANISATION_ID);
+      String orgId =
+          null != org.get(JsonKey.ORGANISATION_ID)
+              ? (String) org.get(JsonKey.ORGANISATION_ID)
+              : (String) org.get(JsonKey.ID);
+
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
       if (null != orgId && orgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
-        userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ID));
+        userOrg.setOrganisationId(
+            (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
@@ -1454,11 +1469,17 @@ public class UserManagementActor extends BaseActor {
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
-        locations =
-            locationClient.getLocationByIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationIds,
-                context);
+        logger.info(
+            context,
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
+        if (CollectionUtils.isNotEmpty(locationIds)) {
+          locations =
+              locationClient.getLocationByIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                  locationIds,
+                  context);
+        }
       } else {
         locations =
             locationClient.getLocationsByCodes(
@@ -1473,6 +1494,7 @@ public class UserManagementActor extends BaseActor {
             stateCode = location.getCode();
           }
         }
+        logger.info(context, String.format("Validating UserType for state code:%s", stateCode));
         if (StringUtils.isNotBlank(stateCode)) {
           // Validate UserType and UserSubType configure based on user state config else user
           // default config
@@ -1480,6 +1502,9 @@ public class UserManagementActor extends BaseActor {
         }
       } else {
         // If location is null or empty .Vlidate with default config
+        logger.info(
+            context,
+            String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }

@@ -654,7 +654,7 @@ public class UserUtil {
 
   public static List<Map<String, Object>> getAllUserOrgDetails(
       String userId, RequestContext context) {
-    return getUserOrgDetails(true, userId, context);
+    return getUserOrgDetails(false, userId, context);
   }
 
   public static void toLower(Map<String, Object> userMap) {

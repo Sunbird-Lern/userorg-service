@@ -132,7 +132,7 @@ public class UserAssignRoleTest {
 
   private static void initCassandraForSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
+            cassandraOperation.getRecordsByProperties(
                 Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(response);
 

@@ -105,37 +105,6 @@ public interface CassandraOperation {
       RequestContext context);
 
   /**
-   * Fetch records with specified indexed column
-   *
-   * @param keyspaceName Keyspace name
-   * @param tableName Table name
-   * @param propertyName Indexed Column name
-   * @param propertyValue Value to be used for matching in select query
-   * @param context
-   * @return Response consisting of fetched records
-   */
-  Response getRecordsByIndexedProperty(
-      String keyspaceName,
-      String tableName,
-      String propertyName,
-      Object propertyValue,
-      RequestContext context);
-
-  /**
-   * @desc This method is used to fetch record based on given parameter list and their values
-   * @param keyspaceName String (data base keyspace name)
-   * @param tableName String
-   * @param propertyMap Map<String,Object> propertyMap)(i.e map of column name and their value)
-   * @param context
-   * @return Response Response
-   */
-  public Response getRecordsByPropertiesWithFiltering(
-      String keyspaceName,
-      String tableName,
-      Map<String, Object> propertyMap,
-      RequestContext context);
-
-  /**
    * Fetch records with specified columns (select all if null) for given column map (name, value
    * pairs).
    *
@@ -143,7 +112,6 @@ public interface CassandraOperation {
    * @param tableName Table name
    * @param propertyMap Map describing columns to be used in where clause of select query.
    * @param fields List of columns to be returned in each record
-   * @param allowFiltering
    * @param context
    * @return Response consisting of fetched records
    */
@@ -152,7 +120,6 @@ public interface CassandraOperation {
       String tableName,
       Map<String, Object> propertyMap,
       List<String> fields,
-      boolean allowFiltering,
       RequestContext context);
 
   /**
@@ -498,15 +465,6 @@ public interface CassandraOperation {
       Map<String, Object> filters,
       List<String> fields,
       FutureCallback<ResultSet> callback,
-      RequestContext context);
-
-  public Response getRecordByObjectType(
-      String keyspace,
-      String tableName,
-      String columnName,
-      String key,
-      int value,
-      String objectType,
       RequestContext context);
 
   public Response performBatchAction(
