@@ -141,6 +141,54 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
+  //created
+  @Test
+  public void testUpdateLocationFailureWithLocationType() {
+
+    data.put(GeoLocationJsonKey.LOCATION_TYPE, "anyLocationType");
+    boolean result =
+            testScenario(
+                    LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidValue);
+    assertTrue(result);
+  }
+
+  //created
+//  @Test
+//  public void testUpdateLocationFailureWithoutMandatoryParams() {
+//
+//    data.put(GeoLocationJsonKey.ID, "block");
+//    boolean result =
+//            testScenario(
+//                    LocationActorOperation.UPDATE_LOCATION,
+//                    false,
+//                    data,
+//                    ResponseCode.locationIdRequired);
+//    assertTrue(result);
+//  }
+
+
+//  //created
+//  @Test
+//  public void testUpdateLocationFailureWithoutLocationId(){
+//    Map<String, Object> res = new HashMap<>(data);
+//    res.remove(GeoLocationJsonKey.ID);
+//    boolean result =
+//            testScenario(
+//                    LocationActorOperation.UPDATE_LOCATION, false, null, ResponseCode.locationIdRequired);
+//    assertTrue(result);
+//  }
+
+  //created
+//  @Test
+//  public void testUpdateLocationFailureWithInvalidId() {
+//
+//    data.put(GeoLocationJsonKey.ID, "any-Location-Id");
+//    boolean result =
+//            testScenario(
+//                    LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidLocationId);
+//    assertTrue(result);
+//  }
+
   @Test
   public void testCreateLocationFailureWithoutMandatoryParams() {
 
@@ -153,6 +201,7 @@ public class LocationActorTest {
             ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
+
 
   @Test
   public void testCreateLocationFailureWithParentLocationNotAllowed() {

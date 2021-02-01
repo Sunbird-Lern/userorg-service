@@ -36,10 +36,11 @@ import util.RequestInterceptor;
 public class LocationControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
-  private static final String LOCATION_NAME = "Laddakh";
+  private static final String LOCATION_NAME = "12345";
   private static final String LOCATION_CODE = "LOC_01";
   private static final String LOCATION_TYPE = "State";
   private static final String LOCATION_ID = "123";
+  private static final String PARENT_ID = "1a234bc5-dee6-78f9-01g2-h3ij456k7890";
   private static final String CREATE_LOCATION_URL = "/v1/location/create";
   private static final String UPDATE_LOCATION_URL = "/v1/location/update";
   private static final String DELETE_LOCATION_URL = "/v1/location/delete";
@@ -57,22 +58,22 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocation() {
-    Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> locationData = new HashMap<>();
-    locationData.put(JsonKey.NAME, LOCATION_NAME);
-    locationData.put(JsonKey.CODE, LOCATION_CODE);
-    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
-    requestMap.put(JsonKey.REQUEST, locationData);
-    String data = TestUtil.mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
+    Map userAuthentication = new HashMap<String, String>();  //create new hashmap - userAuthentication
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");   //giving the userid as key value pair for user-authentication
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);  // authenticate the user
+    Map<String, Object> requestMap = new HashMap<>();  //created new hashmap - requestMap
+    Map<String, Object> locationData = new HashMap<>();     //create new Hashmap - locationData
+    locationData.put(JsonKey.NAME, LOCATION_NAME);    // added the location name into locationData as name
+    locationData.put(JsonKey.CODE, LOCATION_CODE);   //added the location code into locationData as code
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);    //added the location type into locationData as location_type
+    requestMap.put(JsonKey.REQUEST, locationData);      // passed the locationData to requestMap as request
+    String data = TestUtil.mapToJson(requestMap);     // convert the requestMap value into Json and moved to data parameter
+    JsonNode json = Json.parse(data);   // data is converted into javascript object and added to json parameter
+    RequestBuilder req =      // creating the request with url and method as post along with the json body
         new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
     // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
+    Result result = Helpers.route(application, req);   // passing the request
+    assertEquals(200, result.status());   //checking whether the result.status and expected are 200
   }
 
   @Test
@@ -82,7 +83,7 @@ public class LocationControllerTest extends BaseApplicationTest {
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
-    requestMap.put(JsonKey.REQUEST, locationData);
+    requestMap.put(JsonKey.REQUEST, locationData);   //passes only name and code
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
     RequestBuilder req =
@@ -93,6 +94,63 @@ public class LocationControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testCreateLocationWithoutName() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> locationData = new HashMap<>();
+    locationData.put(JsonKey.CODE, LOCATION_CODE);
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    requestMap.put(JsonKey.REQUEST, locationData);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+            new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
+  }
+
+  @Test
+  public void testCreateLocationWithValidParentId() {
+
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> locationData = new HashMap<>();
+    locationData.put(JsonKey.NAME,LOCATION_NAME);
+    locationData.put(JsonKey.CODE, LOCATION_CODE);
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    locationData.put(GeoLocationJsonKey.PARENT_ID,PARENT_ID);   //not sure with geolocationjsonkey or jsonkey
+    requestMap.put(JsonKey.REQUEST, locationData);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+            new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testCreateLocationWithoutCode() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> locationData = new HashMap<>();
+    locationData.put(JsonKey.NAME,LOCATION_NAME);
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    requestMap.put(JsonKey.REQUEST, locationData);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+            new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
+  }
+
+
+  @Test
   public void testUpdateLocation() {
 
     Map<String, Object> requestMap = new HashMap<>();
@@ -100,7 +158,6 @@ public class LocationControllerTest extends BaseApplicationTest {
     requestBody.put(JsonKey.NAME, LOCATION_NAME);
     requestBody.put(JsonKey.CODE, LOCATION_CODE);
     requestBody.put(JsonKey.ID, LOCATION_ID);
-
     requestMap.put(JsonKey.REQUEST, requestBody);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
@@ -110,6 +167,41 @@ public class LocationControllerTest extends BaseApplicationTest {
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
+
+  @Test
+  public void testUpdateLocationWithoutId() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put(JsonKey.NAME, LOCATION_NAME);
+    requestBody.put(JsonKey.CODE, LOCATION_CODE);
+    requestMap.put(JsonKey.REQUEST, requestBody);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+            new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
+  }
+
+  @Test    //can avoid this case
+  public void testUpdateLocationWithoutNameOrCode() {
+
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put(JsonKey.CODE, LOCATION_CODE);
+    requestBody.put(JsonKey.ID, LOCATION_ID);
+    requestMap.put(JsonKey.REQUEST, requestBody);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
+            new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(200, result.status());
+  }
+
 
   @Test
   public void testUpdateLocationWithType() {
