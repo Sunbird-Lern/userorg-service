@@ -7,7 +7,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,12 +74,8 @@ public class SystemSettingsActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(getOrgData());
     resp.put(JsonKey.RESPONSE, list);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID, null))
+    when(cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, ROOT_ORG_ID, null))
         .thenReturn(resp);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, KEYSPACE_NAME, null))
-        .thenReturn(new Response());
   }
 
   private Map<String, Object> getOrgData() {
@@ -112,8 +112,9 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetSystemSettingFailure() {
-    //  when(cassandraOperation.getRecordsByIndexedProperty(Mockito.anyString(),
-    // Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(new Response());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(new Response());
     Map<String, Object> orgData = new HashMap<String, Object>();
     orgData.put(JsonKey.FIELD, KEYSPACE_NAME);
     actorMessage.setOperation(ActorOperations.GET_SYSTEM_SETTING.getValue());

@@ -120,7 +120,7 @@ public class TenantMigrationActorTest extends UserManagementActorTestBase {
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
+            cassandraOperation.getRecordsByProperties(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 

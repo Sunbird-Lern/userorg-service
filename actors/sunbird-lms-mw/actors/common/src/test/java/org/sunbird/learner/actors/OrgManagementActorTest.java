@@ -44,7 +44,6 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  OrganisationManagementActor.class,
   Util.class,
   ElasticSearchRestHighImpl.class,
   RequestRouter.class,
@@ -79,16 +78,9 @@ public class OrgManagementActorTest {
     promise.success(getEsResponse(false));
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
+    when(cassandraOperation.getAllRecords(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getAllRecords());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
@@ -132,6 +124,18 @@ public class OrgManagementActorTest {
   }
 
   @Test
+  public void testUpdateOrgTypeWithExistingType() {
+    Request reqObj = new Request();
+    Map<String, Object> requestData = new HashMap<>();
+    requestData.put(JsonKey.ID, "as23-12asd234-123");
+    requestData.put(JsonKey.NAME, "orgType");
+    reqObj.setRequest(requestData);
+    reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
+    boolean result = testScenario(reqObj, ResponseCode.orgTypeAlreadyExist);
+    assertTrue(result);
+  }
+
+  @Test
   public void testAddUserToOrgSuccessWithUserIdAndOrgId() {
 
     boolean result =
@@ -143,13 +147,19 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testAddUserToOrgSuccessWithUserExtIdAndOrgId() {
+  public void testAddUserToOrgFailureWithBlankUserIdAndOrgId() {
+    Map<String, Object> reqMap = getRequestData(false, true, false, false, basicRequestData);
+    Request request = getRequest(reqMap, ADD_MEMBER_TO_ORG);
+    boolean result = testScenario(request, ResponseCode.usrValidationError);
+    assertTrue(result);
+  }
 
-    boolean result =
-        testScenario(
-            getRequest(
-                getRequestData(false, true, true, false, basicRequestData), ADD_MEMBER_TO_ORG),
-            null);
+  @Test
+  public void testAddUserToOrgFailureWithUserIdAndBlankOrgId() {
+    Map<String, Object> reqMap = getRequestData(true, false, false, true, basicRequestData);
+    reqMap.remove(JsonKey.PROVIDER);
+    Request request = getRequest(reqMap, ADD_MEMBER_TO_ORG);
+    boolean result = testScenario(request, ResponseCode.sourceAndExternalIdValidationError);
     assertTrue(result);
   }
 
@@ -164,26 +174,8 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  @Test
-  public void testAddUserToOrgSuccessWithUserExtIdAndOrgExtId() {
-
-    boolean result =
-        testScenario(
-            getRequest(
-                getRequestData(false, false, true, true, basicRequestData), ADD_MEMBER_TO_ORG),
-            null);
-    assertTrue(result);
-  }
-
   // @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserId() {
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     boolean result =
         testScenario(
             getRequest(
@@ -208,10 +200,6 @@ public class OrgManagementActorTest {
 
   @Test
   public void testAddUserToOrgFailureWithUserNotFoundWithUserExtId() {
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
-
     boolean result =
         testScenario(
             getRequest(
@@ -242,9 +230,6 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getValidateChannelEsResponse(true));
 
@@ -267,9 +252,7 @@ public class OrgManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccess());
-    when(cassandraOperation.getRecordsByPropertiesWithFiltering(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
+
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getValidateChannelEsResponse(true));
 
@@ -292,6 +275,41 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
+  @Test
+  public void testUpdateOrgSuccess() {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getValidateChannelEsResponse(true));
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(
+            getRequest(getRequestDataForOrgUpdate(), ActorOperations.UPDATE_ORG.getValue()), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateOrgFailureWithDuplicateChannel() {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getValidateChannelEsResponse(true));
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(promise.future());
+    Map<String, Object> map = getRequestDataForOrgUpdate();
+    map.put(JsonKey.IS_ROOT_ORG, true);
+    boolean result =
+        testScenario(
+            getRequest(map, ActorOperations.UPDATE_ORG.getValue()),
+            ResponseCode.channelUniquenessInvalid);
+    assertTrue(result);
+  }
+
   private Response getOrgStatus() {
     Response res = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
@@ -307,6 +325,13 @@ public class OrgManagementActorTest {
     Response res = new Response();
     res.setResponseCode(ResponseCode.OK);
     return res;
+  }
+
+  private Map<String, Object> getRequestDataForOrgUpdate() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "channel");
+    map.put(JsonKey.ORGANISATION_ID, "orgId");
+    return map;
   }
 
   private Map<String, Object> getRequestDataForOrgCreate(Map<String, Object> map) {
@@ -350,6 +375,17 @@ public class OrgManagementActorTest {
     return res;
   }
 
+  private Response getAllRecords() {
+    Response res = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "id");
+    map.put(JsonKey.NAME, "orgType");
+    list.add(map);
+    res.put(JsonKey.RESPONSE, list);
+    return res;
+  }
+
   private Map<String, Object> getEsResponse(boolean empty) {
     Map<String, Object> response = new HashMap<>();
     List<Map<String, Object>> contentList = new ArrayList<>();
@@ -382,11 +418,11 @@ public class OrgManagementActorTest {
     subject.tell(request, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
