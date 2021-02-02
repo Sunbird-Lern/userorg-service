@@ -1,6 +1,7 @@
 package org.sunbird.location.actors;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -178,6 +179,7 @@ public class LocationActorTest {
                     LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidValue);
     assertTrue(result);
   }
+
 
 
   @Test

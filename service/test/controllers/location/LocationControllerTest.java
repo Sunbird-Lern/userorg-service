@@ -58,22 +58,22 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocation() {
-    Map userAuthentication = new HashMap<String, String>();  //create new hashmap - userAuthentication
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");   //giving the userid as key value pair for user-authentication
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);  // authenticate the user
-    Map<String, Object> requestMap = new HashMap<>();  //created new hashmap - requestMap
-    Map<String, Object> locationData = new HashMap<>();     //create new Hashmap - locationData
-    locationData.put(JsonKey.NAME, LOCATION_NAME);    // added the location name into locationData as name
-    locationData.put(JsonKey.CODE, LOCATION_CODE);   //added the location code into locationData as code
-    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);    //added the location type into locationData as location_type
-    requestMap.put(JsonKey.REQUEST, locationData);      // passed the locationData to requestMap as request
-    String data = TestUtil.mapToJson(requestMap);     // convert the requestMap value into Json and moved to data parameter
-    JsonNode json = Json.parse(data);   // data is converted into javascript object and added to json parameter
-    RequestBuilder req =      // creating the request with url and method as post along with the json body
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> locationData = new HashMap<>();
+    locationData.put(JsonKey.NAME, LOCATION_NAME);
+    locationData.put(JsonKey.CODE, LOCATION_CODE);
+    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    requestMap.put(JsonKey.REQUEST, locationData);
+    String data = TestUtil.mapToJson(requestMap);
+    JsonNode json = Json.parse(data);
+    RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(CREATE_LOCATION_URL).method("POST");
     // req.headers(headerMap);
-    Result result = Helpers.route(application, req);   // passing the request
-    assertEquals(200, result.status());   //checking whether the result.status and expected are 200
+    Result result = Helpers.route(application, req);
+    assertEquals(200, result.status());
   }
 
   @Test
@@ -120,8 +120,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME,LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
-    locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
-    locationData.put(GeoLocationJsonKey.PARENT_ID,PARENT_ID);   //not sure with geolocationjsonkey or jsonkey
+    locationData.put(JsonKey.TYPE, LOCATION_TYPE);
+    locationData.put(JsonKey.PARENT_ID,PARENT_ID);   //not sure with geolocationjsonkey or jsonkey
     requestMap.put(JsonKey.REQUEST, locationData);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
