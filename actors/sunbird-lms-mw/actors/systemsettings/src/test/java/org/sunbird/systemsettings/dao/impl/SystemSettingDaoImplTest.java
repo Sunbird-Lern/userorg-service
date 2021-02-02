@@ -1,6 +1,10 @@
 package org.sunbird.systemsettings.dao.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,11 +61,10 @@ public class SystemSettingDaoImplTest {
   @Test
   public void testReadSystemSettingSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByIndexedProperty(
+            cassandraOperation.getRecordById(
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
                 Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(false));
     SystemSetting systemSetting = systemSettingDaoImpl.readByField(ROOT_ORG_ID, null);
@@ -71,11 +74,10 @@ public class SystemSettingDaoImplTest {
   @Test
   public void testReadSystemSettingEmpty() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByIndexedProperty(
+            cassandraOperation.getRecordById(
                 Mockito.anyString(),
                 Mockito.anyString(),
                 Mockito.anyString(),
-                Mockito.any(),
                 Mockito.any(RequestContext.class)))
         .thenReturn(getSystemSettingSuccessResponse(true));
     SystemSetting systemSetting = systemSettingDaoImpl.readByField(FIELD, null);

@@ -17,6 +17,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -38,6 +39,7 @@ import org.sunbird.learner.util.Util;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, Util.class, DataCacheHandler.class})
 @PowerMockIgnore({"javax.management.*"})
+@Ignore // Will depricate these api with SC-2169
 public class GeoLocationManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -68,13 +70,13 @@ public class GeoLocationManagementActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(cassandraGetRecordById());
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any()))
-        .thenReturn(cassandraGetRecordById());
+    /*when(cassandraOperation.getRecordsByIndexedProperty(
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.anyString(),
+        Mockito.any()))
+    .thenReturn(cassandraGetRecordById());*/
     when(cassandraOperation.getRecordsByProperty(
             Mockito.anyString(),
             Mockito.anyString(),
