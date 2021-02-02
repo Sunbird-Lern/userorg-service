@@ -905,7 +905,9 @@ public class UserRequestValidator extends BaseRequestValidator {
                     new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
-          declareFields.put(JsonKey.PERSONA, "default");
+          if (StringUtils.isBlank((String) declareFields.get(JsonKey.PERSONA))) {
+            declareFields.put(JsonKey.PERSONA, JsonKey.DEFAULT_PERSONA);
+          }
         }
       }
     } catch (Exception ex) {

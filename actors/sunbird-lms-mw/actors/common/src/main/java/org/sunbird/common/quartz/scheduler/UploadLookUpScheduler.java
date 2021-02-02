@@ -14,7 +14,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
@@ -38,13 +37,13 @@ public class UploadLookUpScheduler extends BaseJob {
     Util.DbInfo bulkDb = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
     List<Map<String, Object>> result = null;
     // get List of process with status as New
-    Response res =
-        cassandraOperation.getRecordsByIndexedProperty(
-            bulkDb.getKeySpace(),
-            bulkDb.getTableName(),
-            JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.NEW.getValue(),
-            null);
+    Response res = new Response(); // Will depricate these api with SC-2169
+    /*cassandraOperation.getRecordsByIndexedProperty(
+    bulkDb.getKeySpace(),
+    bulkDb.getTableName(),
+    JsonKey.STATUS,
+    ProjectUtil.BulkProcessStatus.NEW.getValue(),
+    null);*/
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
     logger.info(
         "Total No. of record in Bulk_upload_process table with status as NEW are : :"
@@ -53,13 +52,13 @@ public class UploadLookUpScheduler extends BaseJob {
       process(result);
     }
     // get List of Process with status as InProgress
-    res =
-        cassandraOperation.getRecordsByIndexedProperty(
-            bulkDb.getKeySpace(),
-            bulkDb.getTableName(),
-            JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue(),
-            null);
+    res = new Response(); // Will depricate these api with SC-2169
+    /*cassandraOperation.getRecordsByIndexedProperty(
+    bulkDb.getKeySpace(),
+    bulkDb.getTableName(),
+    JsonKey.STATUS,
+    ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue(),
+    null);*/
     result = ((List<Map<String, Object>>) res.get(JsonKey.RESPONSE));
     logger.info(
         "Total No. of record in Bulk_upload_process table with status as IN_PROGRESS are : :"

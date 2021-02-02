@@ -1,5 +1,8 @@
 package org.sunbird.systemsettings.dao.impl;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,11 +21,16 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
+import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.systemsettings.dao.SystemSettingDao;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CassandraOperationImpl.class})
+@PrepareForTest({
+  CassandraOperationImpl.class,
+  ServiceFactory.class,
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -39,7 +47,9 @@ public class SystemSettingDaoImplTest {
 
   @Before
   public void setUp() {
-    cassandraOperation = PowerMockito.mock(CassandraOperationImpl.class);
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     systemSettingDaoImpl = new SystemSettingDaoImpl(cassandraOperation);
   }
 
@@ -52,7 +62,7 @@ public class SystemSettingDaoImplTest {
     boolean thrown = false;
     try {
       SystemSetting systemSetting = new SystemSetting(ROOT_ORG_ID, FIELD, VALUE);
-      Response upsertResp = systemSettingDaoImpl.write(systemSetting, null);
+      Response upsertResp = systemSettingDaoImpl.write(systemSetting, new RequestContext());
       Assert.assertNotEquals(null, upsertResp);
     } catch (Exception e) {
       thrown = true;
@@ -63,28 +73,21 @@ public class SystemSettingDaoImplTest {
   @Test
   public void testReadSystemSettingSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByIndexedProperty(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any()))
+            cassandraOperation.getRecordById(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(false));
-    SystemSetting systemSetting = systemSettingDaoImpl.readByField(ROOT_ORG_ID, null);
+    SystemSetting systemSetting =
+        systemSettingDaoImpl.readByField(ROOT_ORG_ID, new RequestContext());
     Assert.assertTrue(null != systemSetting);
   }
 
   @Test
   public void testReadSystemSettingEmpty() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByIndexedProperty(
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any()))
+            cassandraOperation.getRecordById(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(true));
-    SystemSetting systemSetting = systemSettingDaoImpl.readByField(FIELD, null);
+    SystemSetting systemSetting = systemSettingDaoImpl.readByField(FIELD, new RequestContext());
     Assert.assertTrue(null == systemSetting);
   }
 
@@ -94,7 +97,7 @@ public class SystemSettingDaoImplTest {
             cassandraOperation.getAllRecords(
                 Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(false));
-    List<SystemSetting> result = systemSettingDaoImpl.readAll(null);
+    List<SystemSetting> result = systemSettingDaoImpl.readAll(new RequestContext());
     Assert.assertTrue(null != result);
   }
 
@@ -104,7 +107,7 @@ public class SystemSettingDaoImplTest {
             cassandraOperation.getAllRecords(
                 Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(true));
-    List<SystemSetting> result = systemSettingDaoImpl.readAll(null);
+    List<SystemSetting> result = systemSettingDaoImpl.readAll(new RequestContext());
     Assert.assertTrue(null != result);
   }
 
