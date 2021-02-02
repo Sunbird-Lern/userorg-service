@@ -9,6 +9,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -19,15 +20,16 @@ import org.sunbird.common.responsecode.ResponseCode;
 @PrepareForTest({Common.class})
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
 public class PrintEntryExitLogTest {
+
   @Test
   public void testPrintExitLogOnFailure() {
     try {
       ResponseParams params = new ResponseParams();
       ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+              new ProjectCommonException(
+                      ResponseCode.internalError.getErrorCode(),
+                      ResponseCode.internalError.getErrorMessage(),
+                      ResponseCode.SERVER_ERROR.getResponseCode());
       ResponseCode code = ResponseCode.getResponse(exception.getCode());
       params.setErr(code.getErrorCode());
       params.setErrmsg(code.getErrorMessage());
@@ -36,8 +38,8 @@ public class PrintEntryExitLogTest {
       PowerMockito.mockStatic(Common.class);
       PowerMockito.when(
               Common.createResponseParamObj(
-                  Mockito.any(ResponseCode.class), Mockito.anyString(), Mockito.anyString()))
-          .thenReturn(params);
+                      Mockito.any(ResponseCode.class), Mockito.anyString(), Mockito.anyString()))
+              .thenReturn(params);
       Request request = new Request();
       request.getContext().put(JsonKey.METHOD, "POST");
       request.getContext().put(JsonKey.URL, "/private/user/v1/lookup");
@@ -51,4 +53,63 @@ public class PrintEntryExitLogTest {
       Assert.assertNull(e);
     }
   }
+
+  @Test
+  public void testPrintExitLogOnSuccessResponse(){
+    try {
+      ResponseParams params = new ResponseParams();
+      params.setErr(null);
+      params.setErrmsg(null);
+      params.setStatus(JsonKey.SUCCESS);
+      params.setMsgid("123-456-7890");
+      PowerMockito.mockStatic(Common.class);
+      PowerMockito.when(
+              Common.createResponseParamObj(
+                      Mockito.any(ResponseCode.class), Mockito.anyString(), Mockito.anyString()))
+              .thenReturn(params);
+      Request request = new Request();
+      request.getContext().put(JsonKey.METHOD,"POST");
+      request.getContext().put(JsonKey.URL, "/private/user/v1/lookup");
+      request.setOperation("searchUser");
+      RequestContext requestContext = new RequestContext();
+      requestContext.setReqId("123-456-7890");
+      request.setRequestContext(requestContext);
+      Response response = new Response();
+      response.getResult().get(JsonKey.RESPONSE);
+      PrintEntryExitLog.printExitLogOnSuccessResponse(request,response);
+      Assert.assertNotNull(response);
+    } catch (Exception e) {
+      Assert.assertNull(e);
+    }
+  }
+  @Test
+  public void testPrintEntrylog() {
+    try {
+      ResponseParams params = new ResponseParams();
+      params.setErr(null);
+      params.setErrmsg(null);
+      params.setStatus(JsonKey.SUCCESS);
+      params.setMsgid("123-456-7880");
+      PowerMockito.mockStatic(Common.class);
+      PowerMockito.when(
+              Common.createResponseParamObj(
+                      Mockito.any(ResponseCode.class), Mockito.anyString(), Mockito.anyString()))
+              .thenReturn(params);
+      Request request = new Request();
+      request.getContext().put(String.valueOf(request), "ENTRY");
+      request.getContext().put(JsonKey.URL, "/private/user/v1/lookup");
+      request.setOperation("searchUser");
+      RequestContext requestContext = new RequestContext();
+      requestContext.setReqId("123-456-7880");
+      request.setRequestContext(request.getRequestContext());
+      Response response = new Response();
+      response.getResult().get(JsonKey.REQUEST);
+      PrintEntryExitLog.printEntryLog(request);
+      Assert.assertNotNull(request);
+    } catch (Exception e) {
+      Assert.assertNull(e);
+    }
+  }
+
+
 }

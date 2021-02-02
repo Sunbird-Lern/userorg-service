@@ -180,6 +180,46 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
+  //created - Fathima Sherin
+  @Test
+  public void testCreateLocationFailureWithoutValidType() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES);
+    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
+  @Test
+  public void testCreateLocationFailureWithInvalidLocationType() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.LOCATION_TYPE);
+    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
+  @Test
+  public void testUpdateLocationFailureWithoutLocationId() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.ID);
+    boolean result = testScenario(LocationActorOperation.UPDATE_LOCATION, true,null,ResponseCode.locationIdRequired);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
+  @Test
+  public void testUpdateLocationFailureWithLocationType() {
+
+    data.put(GeoLocationJsonKey.LOCATION_TYPE, "anyLocationType");
+    boolean result =
+            testScenario(
+                    LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidValue);
+    assertTrue(result);
+  }
+
+
+
   private Map<String, Object> getContentMapFromES() {
 
     List<Map<String, Object>> lst = new ArrayList<>();
