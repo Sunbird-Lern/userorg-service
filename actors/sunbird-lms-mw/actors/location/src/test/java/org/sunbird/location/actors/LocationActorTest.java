@@ -141,7 +141,34 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created
+  //created - Fathima Sherin
+  @Test
+  public void testCreateLocationFailureWithoutValidType() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.LOCATION_TYPE);
+    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
+  @Test
+  public void testCreateLocationFailureWithInvalidLocationType() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES);
+    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
+  @Test
+  public void testUpdateLocationFailureWithoutLocationId() {
+    Map<String, Object> res = new HashMap<>(data);
+    res.remove(GeoLocationJsonKey.ID);
+    boolean result = testScenario(LocationActorOperation.UPDATE_LOCATION, true,null,ResponseCode.locationIdRequired);
+    assertTrue(result);
+  }
+
+  //created - Fathima Sherin
   @Test
   public void testUpdateLocationFailureWithLocationType() {
 
@@ -152,42 +179,6 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created
-//  @Test
-//  public void testUpdateLocationFailureWithoutMandatoryParams() {
-//
-//    data.put(GeoLocationJsonKey.ID, "block");
-//    boolean result =
-//            testScenario(
-//                    LocationActorOperation.UPDATE_LOCATION,
-//                    false,
-//                    data,
-//                    ResponseCode.locationIdRequired);
-//    assertTrue(result);
-//  }
-
-
-//  //created
-//  @Test
-//  public void testUpdateLocationFailureWithoutLocationId(){
-//    Map<String, Object> res = new HashMap<>(data);
-//    res.remove(GeoLocationJsonKey.ID);
-//    boolean result =
-//            testScenario(
-//                    LocationActorOperation.UPDATE_LOCATION, false, null, ResponseCode.locationIdRequired);
-//    assertTrue(result);
-//  }
-
-  //created
-//  @Test
-//  public void testUpdateLocationFailureWithInvalidId() {
-//
-//    data.put(GeoLocationJsonKey.ID, "any-Location-Id");
-//    boolean result =
-//            testScenario(
-//                    LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidLocationId);
-//    assertTrue(result);
-//  }
 
   @Test
   public void testCreateLocationFailureWithoutMandatoryParams() {
@@ -213,6 +204,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
+
   @Test
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -228,6 +220,7 @@ public class LocationActorTest {
             ResponseCode.invalidLocationDeleteRequest);
     assertTrue(result);
   }
+
 
   private Map<String, Object> getContentMapFromES() {
 
