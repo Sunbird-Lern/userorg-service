@@ -33,7 +33,6 @@ import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -163,8 +162,7 @@ public class LocationActorTest {
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getContentMapFromES());
-    when(esSearch.search(
-            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     Promise<Map<String, Object>> promise2 = Futures.promise();
     promise2.success(new HashMap<>());
