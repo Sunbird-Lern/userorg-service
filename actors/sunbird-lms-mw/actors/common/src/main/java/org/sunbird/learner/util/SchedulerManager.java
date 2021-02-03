@@ -21,6 +21,8 @@ public class SchedulerManager {
   /** all scheduler job will be configure here. */
   public static void schedule() {
     service.scheduleWithFixedDelay(new DataCacheHandler(), 0, TTL, TimeUnit.SECONDS);
-    logger.info("SchedulerManager:schedule: Started scheduler job for cache refresh.");
+    logger.info(
+        "SchedulerManager:schedule: Started scheduler job for cache refresh with ttl in sec ="
+            + TTL);
   }
 }
