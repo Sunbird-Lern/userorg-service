@@ -124,24 +124,28 @@ public class OrganisationManagementActor extends BaseActor {
     try {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Map<String, Object> request = actorMessage.getRequest();
+      List<String> fields = new ArrayList<>();
+      fields.add(JsonKey.ID);
+      fields.add(JsonKey.NAME);
       Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
+          cassandraOperation.getAllRecords(
               orgTypeDbInfo.getKeySpace(),
               orgTypeDbInfo.getTableName(),
-              JsonKey.NAME,
-              request.get(JsonKey.NAME),
+              fields,
               actorMessage.getRequestContext());
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (!(list.isEmpty())) {
-        Map<String, Object> map = list.get(0);
-        if (!(((String) map.get(JsonKey.ID)).equals(request.get(JsonKey.ID)))) {
-          ProjectCommonException exception =
-              new ProjectCommonException(
-                  ResponseCode.orgTypeAlreadyExist.getErrorCode(),
-                  ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-          sender().tell(exception, self());
-          return;
+      List<Map<String, Object>> typeList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(typeList)) {
+        String nameInReq = (String) request.get(JsonKey.NAME);
+        String idInReq = (String) request.get(JsonKey.ID);
+        for (Map<String, Object> type : typeList) {
+          String nameInDb = (String) type.get(JsonKey.NAME);
+          String idInDb = (String) type.get(JsonKey.ID);
+          if (nameInReq.equalsIgnoreCase(nameInDb) && !(idInReq.equalsIgnoreCase(idInDb))) {
+            throw new ProjectCommonException(
+                ResponseCode.orgTypeAlreadyExist.getErrorCode(),
+                ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
         }
       }
 
@@ -688,8 +692,7 @@ public class OrganisationManagementActor extends BaseActor {
                 "".equals(rootOrgId) ? JsonKey.DEFAULT_ROOT_ORG_ID : rootOrgId);
           } else {
             logger.info(actorMessage.getRequestContext(), "Invalid channel id.");
-            sender().tell(ProjectUtil.createClientException(ResponseCode.invalidChannel), self());
-            return;
+            ProjectCommonException.throwClientErrorException(ResponseCode.invalidChannel);
           }
         } else if (!channelAdded
             && !validateChannelUniqueness(
@@ -697,10 +700,7 @@ public class OrganisationManagementActor extends BaseActor {
                 (String) request.get(JsonKey.ORGANISATION_ID),
                 actorMessage.getRequestContext())) {
           logger.info(actorMessage.getRequestContext(), "Channel validation failed");
-          sender()
-              .tell(
-                  ProjectUtil.createClientException(ResponseCode.channelUniquenessInvalid), self());
-          return;
+          ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
         }
       }
       // if channel is not coming and we added it from provider to collect the
@@ -799,7 +799,7 @@ public class OrganisationManagementActor extends BaseActor {
       if (updateOrgDao.containsKey(JsonKey.CHANNEL)) {
 
         String slug = Slug.makeSlug((String) updateOrgDao.getOrDefault(JsonKey.CHANNEL, ""), true);
-        if ((boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
+        if (orgDao.containsKey(JsonKey.IS_ROOT_ORG) && (boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
           String rootOrgId = getRootOrgIdFromSlug(slug, actorMessage.getRequestContext());
           if (StringUtils.isBlank(rootOrgId)
               || (!StringUtils.isBlank(rootOrgId)
@@ -921,15 +921,6 @@ public class OrganisationManagementActor extends BaseActor {
       logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
       return;
     }
-    // remove source and external id
-    usrOrgData.remove(JsonKey.EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.SOURCE);
-    usrOrgData.remove(JsonKey.PROVIDER);
-    usrOrgData.remove(JsonKey.USERNAME);
-    usrOrgData.remove(JsonKey.USER_NAME);
-    usrOrgData.remove(JsonKey.USER_EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.USER_PROVIDER);
-    usrOrgData.remove(JsonKey.USER_ID_TYPE);
     usrOrgData.put(JsonKey.IS_DELETED, false);
 
     String updatedBy = null;

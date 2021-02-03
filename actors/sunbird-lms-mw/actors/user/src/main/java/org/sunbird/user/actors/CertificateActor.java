@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +18,11 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.HttpClientUtil;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
@@ -74,13 +82,14 @@ public class CertificateActor extends UserBaseActor {
     Map request = certRequest.getRequest();
     String mergeeId = (String) request.get(JsonKey.FROM_ACCOUNT_ID);
     String mergerId = (String) request.get(JsonKey.TO_ACCOUNT_ID);
-    Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            certDbInfo.getKeySpace(),
-            certDbInfo.getTableName(),
-            JsonKey.USER_ID,
-            mergeeId,
-            certRequest.getRequestContext());
+    Response response = new Response();
+    // Will depricate these api with SC-2169
+    /*cassandraOperation.getRecordsByIndexedProperty(
+    certDbInfo.getKeySpace(),
+    certDbInfo.getTableName(),
+    JsonKey.USER_ID,
+    mergeeId,
+    certRequest.getRequestContext());*/
     Map<String, Object> record = response.getResult();
     if (null != record && null != record.get(JsonKey.RESPONSE)) {
       List responseList = (List) record.get(JsonKey.RESPONSE);
