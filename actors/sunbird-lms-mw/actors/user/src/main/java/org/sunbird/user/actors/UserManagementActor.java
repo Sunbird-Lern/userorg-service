@@ -1495,8 +1495,8 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, RequestContext context, String stateCode) {
-    String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
-    userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
+    // String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
+    // userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
   }
 
   private void validateLocationCodes(Request userRequest) {
@@ -1565,7 +1565,7 @@ public class UserManagementActor extends BaseActor {
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
-        //for create-MUA we allow locations upto district for remaining we will validate all.
+        // for create-MUA we allow locations upto district for remaining we will validate all.
         if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
                 && ((location.getType().equals(JsonKey.STATE))
                     || (location.getType().equals(JsonKey.DISTRICT))))

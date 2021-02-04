@@ -148,7 +148,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           userMap.put(JsonKey.ROLES, roleList);
           RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
         }
-        userRequestValidator.validateUserType(userMap, null, context);
+        // userRequestValidator.validateUserType(userMap, null, context);
       } catch (Exception ex) {
         logger.error(context, ex.getMessage(), ex);
         setTaskStatus(
