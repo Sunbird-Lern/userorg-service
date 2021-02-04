@@ -34,18 +34,6 @@ public class PrintEntryExitLog {
       Map<String, Object> newReqMap = new HashMap<>();
       String url = (String) request.getContext().get(JsonKey.URL);
       newReqMap.putAll(reqMap);
-      if (url.contains("search")) {
-        Map<String, Object> filters = (Map<String, Object>) newReqMap.get(JsonKey.FILTERS);
-        if (MapUtils.isNotEmpty(filters)) {
-          maskAttributes(filters);
-        }
-      }
-      if (url.contains("otp")) {
-        if (MapUtils.isNotEmpty(newReqMap)) {
-          maskOtpAttributes(newReqMap);
-        }
-      }
-      maskAttributes(newReqMap);
       params.add(newReqMap);
       entryLogEvent.setEdataParams(params);
       logger.info(request.getRequestContext(), entryLogEvent.toString());
