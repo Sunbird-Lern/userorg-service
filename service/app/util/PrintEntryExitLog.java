@@ -45,6 +45,11 @@ public class PrintEntryExitLog {
           maskOtpAttributes(newReqMap);
         }
       }
+      if (url.contains("lookup")) {
+        if (MapUtils.isNotEmpty(newReqMap)) {
+          maskId((String) newReqMap.get(JsonKey.VALUE), (String) newReqMap.get(JsonKey.KEY));
+        }
+      }
       maskAttributes(newReqMap);
       params.add(newReqMap);
       entryLogEvent.setEdataParams(params);

@@ -228,8 +228,8 @@ public class BaseController extends Controller {
       Map<String, String> headers,
       boolean isJsonBodyRequired,
       Request httpRequest) {
+    org.sunbird.common.request.Request request = null;
     try {
-      org.sunbird.common.request.Request request = null;
       if (!isJsonBodyRequired) {
         request = createAndInitRequest(operation, httpRequest);
       } else {
@@ -239,11 +239,13 @@ public class BaseController extends Controller {
         request.getRequest().put(pathVariable, pathId);
         request.getContext().put(pathVariable, pathId);
       }
-      if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+      setContextAndPrintEntryLog(httpRequest, request);
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       logger.error(
+          request.getRequestContext(),
           "BaseController:handleRequest for operation: "
               + operation
               + " Exception occurred with error message = "
@@ -262,8 +264,8 @@ public class BaseController extends Controller {
       Map<String, String> headers,
       String esObjectType,
       Request httpRequest) {
+    org.sunbird.common.request.Request request = null;
     try {
-      org.sunbird.common.request.Request request = null;
       if (null != requestBodyJson) {
         request = createAndInitRequest(operation, requestBodyJson, httpRequest);
       } else {
@@ -273,24 +275,33 @@ public class BaseController extends Controller {
         request.getRequest().put(pathVariable, pathId);
         request.getContext().put(pathVariable, pathId);
       }
-      if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
+      request
+          .getRequest()
+          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+      setContextAndPrintEntryLog(httpRequest, request);
+      if (requestValidatorFn != null) requestValidatorFn.apply(request);
       if (StringUtils.isNotBlank(esObjectType)) {
         List<String> esObjectTypeList = new ArrayList<>();
         esObjectTypeList.add(esObjectType);
         ((Map) (request.getRequest().get(JsonKey.FILTERS)))
             .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
       }
-      request
-          .getRequest()
-          .put(JsonKey.REQUESTED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       logger.error(
-          "BaseController:handleRequest: Exception occurred with error message = " + e.getMessage(),
+          request.getRequestContext(),
+          "BaseController:handleSearchRequest: Exception occurred with error message = "
+              + e.getMessage(),
           e);
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
+  }
+
+  private void setContextAndPrintEntryLog(
+      Request httpRequest, org.sunbird.common.request.Request request) {
+    setContextData(httpRequest, request);
+    printEntryLog(request);
   }
 
   /**
@@ -601,8 +612,6 @@ public class BaseController extends Controller {
       Timeout timeout,
       String responseKey,
       Request httpReq) {
-    setContextData(httpReq, request);
-    printEntryLog(request);
     Function<Object, Result> function =
         result -> {
           if (ActorOperations.HEALTH_CHECK.getValue().equals(request.getOperation())) {
