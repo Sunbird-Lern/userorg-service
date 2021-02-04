@@ -797,7 +797,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
-      if (MapUtils.isEmpty(userTypeMap) || CollectionUtils.isEmpty(userTypeMap.get(stateCode))) {
+      if (MapUtils.isEmpty(userTypeMap)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.SERVER_ERROR,
             MessageFormat.format(ResponseMessage.Message.USER_TYPE_CONFIG_IS_EMPTY, stateCode));
