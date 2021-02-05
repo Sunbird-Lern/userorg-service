@@ -636,7 +636,7 @@ public final class JsonKey {
   public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
   public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
   public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
-  public static final String FORM_API_BASE_URL = "form_api_base_url";
+  public static final String PORTAL_SERVICE_PORT = "PORTAL_SERVICE_PORT";
   public static final String FORM_API_ENDPOINT = "form_api_endpoint";
   public static final String MANAGED_TOKEN = "managedToken";
   public static final String WITH_TOKENS = "withTokens";

@@ -1478,7 +1478,7 @@ public class UserManagementActor extends BaseActor {
             stateCode = location.getCode();
           }
         }
-        logger.info(String.format("Validating UserType for state code:%s", stateCode));
+        logger.info(context, String.format("Validating UserType for state code:%s", stateCode));
         if (StringUtils.isNotBlank(stateCode)) {
           // Validate UserType and UserSubType configure based on user state config else user
           // default config
@@ -1487,6 +1487,7 @@ public class UserManagementActor extends BaseActor {
       } else {
         // If location is null or empty .Vlidate with default config
         logger.info(
+            context,
             String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
@@ -1565,7 +1566,7 @@ public class UserManagementActor extends BaseActor {
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
-        //for create-MUA we allow locations upto district for remaining we will validate all.
+        // for create-MUA we allow locations upto district for remaining we will validate all.
         if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
                 && ((location.getType().equals(JsonKey.STATE))
                     || (location.getType().equals(JsonKey.DISTRICT))))
