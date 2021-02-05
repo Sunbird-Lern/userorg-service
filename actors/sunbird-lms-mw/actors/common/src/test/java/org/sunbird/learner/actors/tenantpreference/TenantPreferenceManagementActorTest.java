@@ -8,7 +8,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -19,7 +22,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
@@ -38,13 +40,18 @@ import org.sunbird.learner.util.Util;
 @PrepareForTest({
   ServiceFactory.class,
   BaseMWService.class,
-  RequestRouter.class,
   ElasticSearchHelper.class,
   Util.class,
   DecryptionService.class,
   DataCacheHandler.class,
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class TenantPreferenceManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");

@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM adoptopenjdk/openjdk11:alpine-slim
 MAINTAINER "Manojv" "manojv@ilimi.in"
 RUN apk update \
     && apk add  unzip \

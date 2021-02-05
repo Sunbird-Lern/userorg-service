@@ -425,7 +425,7 @@ public class GeoLocationManagementActorTest {
     assertEquals(0, count);
   }
 
-  @Test
+  // @Test
   public void sendNotificationGeoLocationSuccess() {
 
     TestKit probe = new TestKit(system);
@@ -443,7 +443,7 @@ public class GeoLocationManagementActorTest {
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
-  @Test
+  // @Test
   public void sendNotificationGeoLocationFailure() {
 
     TestKit probe = new TestKit(system);

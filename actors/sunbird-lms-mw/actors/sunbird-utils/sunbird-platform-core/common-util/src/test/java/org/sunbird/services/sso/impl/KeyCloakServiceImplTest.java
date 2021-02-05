@@ -1,6 +1,9 @@
 package org.sunbird.services.sso.impl;
 
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -21,15 +24,23 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BaseHttpTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 
+@PrepareForTest({
+  ProjectUtil.class,
+  KeyCloakConnectionProvider.class,
+  KeycloakRequiredActionLinkUtil.class
+})
+@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
@@ -41,6 +52,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   private static final Map<String, Object> USER_SUCCESS = new HashMap<>();
 
   static {
+    userId.put(JsonKey.USER_ID, UUID.randomUUID().toString());
     USER_SUCCESS.put(JsonKey.USERNAME, userName);
     USER_SUCCESS.put(JsonKey.PASSWORD, "password");
     USER_SUCCESS.put(JsonKey.FIRST_NAME, "A");
@@ -64,6 +76,8 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @BeforeClass
   public static void init() {
+    PowerMockito.mockStatic(ProjectUtil.class);
+    PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("somestring");
     try {
       t = Class.forName("org.sunbird.services.sso.SSOServiceFactory");
     } catch (ClassNotFoundException e) {

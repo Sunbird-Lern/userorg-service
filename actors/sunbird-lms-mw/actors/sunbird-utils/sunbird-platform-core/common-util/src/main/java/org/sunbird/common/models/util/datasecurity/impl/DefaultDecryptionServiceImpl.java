@@ -10,7 +10,9 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -99,7 +101,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       String dValue = null;
       String valueToDecrypt = value.trim();
       for (int i = 0; i < ITERATIONS; i++) {
-        byte[] decordedValue = new sun.misc.BASE64Decoder().decodeBuffer(valueToDecrypt);
+        byte[] decordedValue = java.util.Base64.getDecoder().decode(valueToDecrypt);
         byte[] decValue = c.doFinal(decordedValue);
         dValue =
             new String(decValue, StandardCharsets.UTF_8).substring(sunbird_encryption.length());

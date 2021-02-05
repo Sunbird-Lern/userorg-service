@@ -1,6 +1,7 @@
 package org.sunbird.user.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -52,7 +53,13 @@ import scala.concurrent.Promise;
   EncryptionService.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
@@ -422,7 +429,7 @@ public class UserUtilTest {
     mergeeMap.put(JsonKey.USERNAME, "someUsername");
     List<String> userLookUpIdentifiers =
         Stream.of(JsonKey.EMAIL, JsonKey.PHONE, JsonKey.USERNAME).collect(Collectors.toList());
-    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, new RequestContext());
+    UserUtil.removeEntryFromUserLookUp(mergeeMap, userLookUpIdentifiers, null);
     Assert.assertTrue(true);
   }
 }

@@ -27,7 +27,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -38,7 +37,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -58,7 +56,6 @@ import scala.concurrent.duration.Duration;
   ServiceFactory.class,
   RoleDaoImpl.class,
   BaseMWService.class,
-  RequestRouter.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   Util.class,
@@ -69,7 +66,13 @@ import scala.concurrent.duration.Duration;
   OrgServiceImpl.class,
   OrgService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserRoleActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -95,7 +98,6 @@ public class UserRoleActorTest {
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(BaseMWService.class);
-    PowerMockito.mockStatic(RequestRouter.class);
     PowerMockito.mockStatic(RoleDaoImpl.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
@@ -114,20 +116,14 @@ public class UserRoleActorTest {
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(actorSelection);
     when(actorSelection.resolveOneCS(Duration.create(Mockito.anyLong(), "seconds")))
         .thenReturn(completionStage);
-    ActorRef actorRef = Mockito.mock(ActorRef.class);
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     SearchDTO searchDTO = Mockito.mock(SearchDTO.class);
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(cassandraOperation.getAllRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getCassandraResponse());
     when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordByPropertyResponse());
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -152,10 +148,8 @@ public class UserRoleActorTest {
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
     orgMap.put(JsonKey.HASHTAGID, "1234567890");
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
+    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(true, null));
   }
@@ -168,10 +162,8 @@ public class UserRoleActorTest {
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
     orgMap.put(JsonKey.HASHTAGID, "1234567890");
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
+    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(false, null));
   }
@@ -182,8 +174,7 @@ public class UserRoleActorTest {
     OrgService orgService = PowerMockito.mock(OrgService.class);
     when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     Map<String, Object> orgMap = new HashMap<>();
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(orgMap);
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
     assertTrue(testScenario(false, ResponseCode.CLIENT_ERROR));
   }
 
@@ -193,10 +184,8 @@ public class UserRoleActorTest {
     OrgService orgService = PowerMockito.mock(OrgService.class);
     when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     Map<String, Object> orgMap = new HashMap<>();
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
+    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(false, ResponseCode.invalidParameterValue));
   }
@@ -288,8 +277,7 @@ public class UserRoleActorTest {
   private void mockGetOrgResponse(boolean isResponseRequired) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(isResponseRequired));
-    when(esService.search(
-            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
+    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any()))
         .thenReturn(promise.future());
   }
 

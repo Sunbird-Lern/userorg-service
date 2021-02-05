@@ -25,7 +25,13 @@ import org.sunbird.user.dao.UserOrgDao;
   ServiceFactory.class,
   CassandraOperationImpl.class,
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserOrgDaoImplTest {
 
   private static CassandraOperation cassandraOperationImpl = null;
@@ -44,10 +50,7 @@ public class UserOrgDaoImplTest {
             Mockito.any()))
         .thenReturn(response);
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
   }
 
@@ -58,14 +61,14 @@ public class UserOrgDaoImplTest {
     userOrg.setOrganisationId("1234567890");
     userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.updateUserOrg(userOrg, null);
+    Response res = userOrgDao.updateUserOrg(userOrg, new RequestContext());
     Assert.assertNotNull(res);
   }
 
   @Test
   public void testGetUserOrg() {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-    Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", null);
+    Response res = userOrgDao.getUserOrgDetails("123-456-789", "1234567890", new RequestContext());
     Assert.assertNotNull(res);
   }
 }

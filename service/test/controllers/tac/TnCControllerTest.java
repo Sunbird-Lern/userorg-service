@@ -14,6 +14,7 @@ import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -25,6 +26,17 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
+})
 public class TnCControllerTest extends BaseApplicationTest {
 
   public static final String url = "/v1/user/tnc/accept";
