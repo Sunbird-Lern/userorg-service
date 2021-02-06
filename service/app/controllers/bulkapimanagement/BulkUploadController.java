@@ -69,10 +69,10 @@ public class BulkUploadController extends BaseBulkUploadController {
               JsonKey.LOCATION,
               true,
               httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       baseRequestValidator.checkMandatoryFieldsPresent(
           (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
           GeoLocationJsonKey.LOCATION_TYPE);
-      setContextAndPrintEntryLog(httpRequest, request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
