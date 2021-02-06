@@ -20,7 +20,11 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(), JsonKey.USER, true, httpRequest);
+              BulkUploadActorOperation.USER_BULK_UPLOAD.getValue(),
+              JsonKey.USER,
+              true,
+              httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -31,7 +35,11 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(), JsonKey.USER, true, httpRequest);
+              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(),
+              JsonKey.USER,
+              true,
+              httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -42,22 +50,29 @@ public class BulkUploadController extends BaseBulkUploadController {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(), JsonKey.ORGANISATION, true, httpRequest);
+              BulkUploadActorOperation.ORG_BULK_UPLOAD.getValue(),
+              JsonKey.ORGANISATION,
+              true,
+              httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
 
-
   public CompletionStage<Result> locationBulkUpload(Http.Request httpRequest) {
     try {
       Request request =
           createAndInitBulkRequest(
-              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(), JsonKey.LOCATION, true, httpRequest);
+              BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue(),
+              JsonKey.LOCATION,
+              true,
+              httpRequest);
       baseRequestValidator.checkMandatoryFieldsPresent(
           (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
           GeoLocationJsonKey.LOCATION_TYPE);
+      setContextAndPrintEntryLog(httpRequest, request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -72,7 +87,7 @@ public class BulkUploadController extends BaseBulkUploadController {
         processId,
         JsonKey.PROCESS_ID,
         false,
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> getStatusDownloadLink(String processId, Http.Request httpRequest) {
@@ -83,6 +98,6 @@ public class BulkUploadController extends BaseBulkUploadController {
         processId,
         JsonKey.PROCESS_ID,
         false,
-            httpRequest);
+        httpRequest);
   }
 }
