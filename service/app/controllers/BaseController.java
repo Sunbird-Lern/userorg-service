@@ -298,7 +298,7 @@ public class BaseController extends Controller {
     }
   }
 
-  private void setContextAndPrintEntryLog(
+  protected void setContextAndPrintEntryLog(
       Request httpRequest, org.sunbird.common.request.Request request) {
     setContextData(httpRequest, request);
     printEntryLog(request);
