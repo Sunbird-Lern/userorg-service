@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -71,8 +70,7 @@ public class BulkUploadController extends BaseBulkUploadController {
               httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       baseRequestValidator.checkMandatoryFieldsPresent(
-          (Map<String, Object>) request.getRequest().get(JsonKey.DATA),
-          GeoLocationJsonKey.LOCATION_TYPE);
+          (Map<String, Object>) request.getRequest().get(JsonKey.DATA), JsonKey.LOCATION_TYPE);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

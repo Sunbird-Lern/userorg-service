@@ -38,7 +38,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -1610,10 +1609,7 @@ public class UserManagementActor extends BaseActor {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     return true;

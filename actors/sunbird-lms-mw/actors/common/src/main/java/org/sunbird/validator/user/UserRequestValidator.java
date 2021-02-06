@@ -25,8 +25,7 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   static {
     List<String> subTypeList =
-        Arrays.asList(
-            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
     for (String str : subTypeList) {
       typeList.addAll(
           ((Arrays.asList(str.split(",")))
@@ -84,10 +83,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     return true;

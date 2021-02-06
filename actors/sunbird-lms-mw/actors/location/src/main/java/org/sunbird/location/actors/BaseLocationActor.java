@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.request.Request;
@@ -26,13 +25,9 @@ public abstract class BaseLocationActor extends BaseActor {
       List<Map<String, Object>> correlatedObject = new ArrayList<>();
       targetObject =
           TelemetryUtil.generateTargetObject(targetObjId, JsonKey.LOCATION, operation, null);
-      if (!MapUtils.isEmpty(data)
-          && StringUtils.isNotEmpty((String) data.get(GeoLocationJsonKey.PARENT_ID))) {
+      if (!MapUtils.isEmpty(data) && StringUtils.isNotEmpty((String) data.get(JsonKey.PARENT_ID))) {
         TelemetryUtil.generateCorrelatedObject(
-            (String) data.get(GeoLocationJsonKey.PARENT_ID),
-            JsonKey.LOCATION,
-            null,
-            correlatedObject);
+            (String) data.get(JsonKey.PARENT_ID), JsonKey.LOCATION, null, correlatedObject);
       }
       TelemetryUtil.telemetryProcessingCall(data, targetObject, correlatedObject, context);
     } catch (Exception e) {
