@@ -58,11 +58,9 @@ POST /v1/data/sync                          @controllers.sync.SyncController.syn
 # Bulk upload APIs
 POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)
 POST /v2/bulk/user/upload                   @controllers.bulkapimanagement.BulkUploadController.userBulkMigrate(request: play.mvc.Http.Request)
-# POST /v1/bulk/user/upload               @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)
 POST /v1/org/upload                     @controllers.bulkapimanagement.BulkUploadController.orgBulkUpload(request: play.mvc.Http.Request)
 POST /v1/bulk/location/upload           @controllers.bulkapimanagement.BulkUploadController.locationBulkUpload(request: play.mvc.Http.Request)
 GET  /v1/upload/status/:pid             @controllers.bulkapimanagement.BulkUploadController.getUploadStatus(pid:String, request: play.mvc.Http.Request)
-# GET  /v1/upload/statusDownloadLink/:pid @controllers.bulkapimanagement.BulkUploadController.getStatusDownloadLink(pid:String, request: play.mvc.Http.Request)
 
 POST  /v1/file/upload 						@controllers.storage.FileStorageController.uploadFileService(request: play.mvc.Http.Request)
 

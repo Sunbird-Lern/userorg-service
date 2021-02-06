@@ -87,15 +87,4 @@ public class BulkUploadController extends BaseBulkUploadController {
         false,
         httpRequest);
   }
-
-  public CompletionStage<Result> getStatusDownloadLink(String processId, Http.Request httpRequest) {
-    return handleRequest(
-        ActorOperations.GET_BULK_UPLOAD_STATUS_DOWNLOAD_LINK.getValue(),
-        null,
-        null,
-        processId,
-        JsonKey.PROCESS_ID,
-        false,
-        httpRequest);
-  }
 }

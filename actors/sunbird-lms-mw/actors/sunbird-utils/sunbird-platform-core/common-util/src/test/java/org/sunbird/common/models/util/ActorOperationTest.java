@@ -37,7 +37,6 @@ public class ActorOperationTest {
         "updateOrgInfoToElastic", ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
     Assert.assertEquals(
         "insertOrgInfoToElastic", ActorOperations.INSERT_ORG_INFO_ELASTIC.getValue());
-    Assert.assertEquals("downlaodOrg", ActorOperations.DOWNLOAD_ORGS.getValue());
     Assert.assertEquals("blockUser", ActorOperations.BLOCK_USER.getValue());
     Assert.assertEquals("bulkUpload", ActorOperations.BULK_UPLOAD.getValue());
     Assert.assertEquals("processBulkUpload", ActorOperations.PROCESS_BULK_UPLOAD.getValue());
@@ -50,8 +49,6 @@ public class ActorOperationTest {
     Assert.assertEquals("sync", ActorOperations.SYNC.getValue());
     Assert.assertEquals("scheduleBulkUpload", ActorOperations.SCHEDULE_BULK_UPLOAD.getValue());
     Assert.assertEquals("fileStorageService", ActorOperations.FILE_STORAGE_SERVICE.getValue());
-    Assert.assertEquals(
-        "fileGenerationAndUpload", ActorOperations.FILE_GENERATION_AND_UPLOAD.getValue());
     Assert.assertEquals("healthCheck", ActorOperations.HEALTH_CHECK.getValue());
     Assert.assertEquals("sendMail", ActorOperations.SEND_MAIL.getValue());
     Assert.assertEquals("getOrgTypeList", ActorOperations.GET_ORG_TYPE_LIST.getValue());

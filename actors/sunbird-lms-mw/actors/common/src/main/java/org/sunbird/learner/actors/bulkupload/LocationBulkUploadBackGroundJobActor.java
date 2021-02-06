@@ -48,8 +48,6 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
                     processTasks((List<BulkUploadProcessTask>) tasks, request.getRequestContext());
                     return null;
                   },
-                  null,
-                  (String[]) request.get(JsonKey.FIELDS),
                   request.getRequestContext());
               return null;
             });
