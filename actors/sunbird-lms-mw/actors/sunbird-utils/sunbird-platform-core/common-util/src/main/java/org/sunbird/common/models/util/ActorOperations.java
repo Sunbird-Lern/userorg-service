@@ -20,7 +20,6 @@ public enum ActorOperations {
   APPROVE_ORGANISATION("approveOrganisation"),
   ADD_MEMBER_ORGANISATION("addMemberOrganisation"),
   REMOVE_MEMBER_ORGANISATION("removeMemberOrganisation"),
-  COMPOSITE_SEARCH("compositeSearch"),
   GET_USER_DETAILS_BY_LOGINID("getUserDetailsByLoginId"),
   GET_USER_BY_KEY("getUserByKey"),
   UPDATE_ORG_INFO_ELASTIC("updateOrgInfoToElastic"),
@@ -111,6 +110,8 @@ public enum ActorOperations {
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
   USER_SEARCH("userSearch"),
+  ORG_SEARCH("orgSearch"),
+  USER_LOOKUP("userLookup"),
   GET_USER_CONSENT("getUserConsent");
 
   private String value;

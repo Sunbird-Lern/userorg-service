@@ -52,13 +52,8 @@ PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.
 GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType(request: play.mvc.Http.Request)
 GET    /v1/user/exists/:key/:value         @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 
-#search
-# POST	/v1/search/compositesearch  			@controllers.search.SearchController.compositeSearch(request: play.mvc.Http.Request)
 #Sync
-POST /v1/data/sync                          @controllers.search.SearchController.sync(request: play.mvc.Http.Request)
-
-#Mock APIs to finish API Gateway onboarding
-# GET /threaddump									@controllers.ThreadDumpController.threaddump(request: play.mvc.Http.Request)
+POST /v1/data/sync                          @controllers.sync.SyncController.sync(request: play.mvc.Http.Request)
 
 # Bulk upload APIs
 POST /v1/user/upload                    @controllers.bulkapimanagement.BulkUploadController.userBulkUpload(request: play.mvc.Http.Request)

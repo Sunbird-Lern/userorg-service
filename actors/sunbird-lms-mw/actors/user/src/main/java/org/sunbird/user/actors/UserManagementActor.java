@@ -1427,7 +1427,7 @@ public class UserManagementActor extends BaseActor {
 
     Map<String, Object> searchResult =
         userClient.searchManagedUser(
-            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),
+            getActorRef(ActorOperations.USER_SEARCH.getValue()),
             request,
             request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);

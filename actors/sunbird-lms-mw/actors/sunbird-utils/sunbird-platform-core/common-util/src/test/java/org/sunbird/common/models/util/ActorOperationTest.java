@@ -38,7 +38,6 @@ public class ActorOperationTest {
         "addMemberOrganisation", ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
     Assert.assertEquals(
         "removeMemberOrganisation", ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
-    Assert.assertEquals("compositeSearch", ActorOperations.COMPOSITE_SEARCH.getValue());
     Assert.assertEquals(
         "getUserDetailsByLoginId", ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
     Assert.assertEquals(
@@ -80,5 +79,7 @@ public class ActorOperationTest {
     Assert.assertEquals(
         "updateUserNotesToElastic", ActorOperations.UPDATE_USER_NOTES_ES.getValue());
     Assert.assertEquals("userCurrentLogin", ActorOperations.USER_CURRENT_LOGIN.getValue());
+    Assert.assertEquals("userSearch", ActorOperations.USER_SEARCH.getValue());
+    Assert.assertEquals("orgSearch", ActorOperations.ORG_SEARCH.getValue());
   }
 }
