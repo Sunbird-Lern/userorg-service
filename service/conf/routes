@@ -114,10 +114,6 @@ POST /private/user/v1/password/reset        @controllers.usermanagement.ResetPas
 
 #user certificate validate API
 POST /v1/user/migrate            @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate(request: play.mvc.Http.Request)
-# POST /private/user/v1/certs/validate @controllers.certmanagement.CertificateController.validateCertificate(request: play.mvc.Http.Request)
-# POST /private/user/v1/certs/add  @controllers.certmanagement.CertificateController.addCertificate(request: play.mvc.Http.Request)
-# POST  /v1/user/certs/download    @controllers.certmanagement.CertificateController.getSignUrl(request: play.mvc.Http.Request)
-# PATCH /private/user/v1/certs/merge @controllers.certmanagement.CertificateController.mergeCertificate(request: play.mvc.Http.Request)
 PATCH  /v1/org/assign/key         @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
 
 #User Feed API

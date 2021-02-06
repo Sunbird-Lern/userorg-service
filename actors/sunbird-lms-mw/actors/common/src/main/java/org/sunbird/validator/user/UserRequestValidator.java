@@ -860,15 +860,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public void validateCertValidationRequest(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.CERT_ID))) {
-      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.CERT_ID);
-    }
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.ACCESS_CODE))) {
-      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.ACCESS_CODE);
-    }
-  }
-
   private void validateRecoveryEmailOrPhone(Request userRequest) {
     if (StringUtils.isNotBlank((String) userRequest.get(JsonKey.RECOVERY_EMAIL))) {
       validateEmail((String) userRequest.get(JsonKey.RECOVERY_EMAIL));
