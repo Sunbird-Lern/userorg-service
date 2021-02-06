@@ -116,18 +116,18 @@ public class EsSyncBackgroundActor extends BaseActor {
             esService.bulkInsert(getType(objectType), result, message.getRequestContext());
           }
         }
-        long stopTime = System.currentTimeMillis();
-        long elapsedTime = stopTime - startTime;
-
-        logger.info(
-            message.getRequestContext(),
-            "EsSyncBackgroundActor:sync: Total time taken to sync for type = "
-                + objectType
-                + " is "
-                + elapsedTime
-                + " ms");
       }
     }
+    long stopTime = System.currentTimeMillis();
+    long elapsedTime = stopTime - startTime;
+
+    logger.info(
+        message.getRequestContext(),
+        "EsSyncBackgroundActor:sync: Total time taken to sync for type = "
+            + objectType
+            + " is "
+            + elapsedTime
+            + " ms");
   }
 
   private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
