@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -1488,6 +1489,18 @@ public class UserRequestValidatorTest {
       response = true;
     }
     Assert.assertTrue(response);
+  }
+
+  @Test
+  public void testValidateUserType() {
+    UserRequestValidator validator = new UserRequestValidator();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_TYPE, "userType");
+    try {
+      validator.validateUserType(userMap, null, new RequestContext());
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   private List createUpdateUserDeclarationRequests() {
