@@ -30,7 +30,7 @@ import org.sunbird.learner.util.Util.DbInfo;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
-  tasks = {},
+  tasks = {"backgroundSync"},
   asyncTasks = {"backgroundSync"}
 )
 public class EsSyncBackgroundActor extends BaseActor {

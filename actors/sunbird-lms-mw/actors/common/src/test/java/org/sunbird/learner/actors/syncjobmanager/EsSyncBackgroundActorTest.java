@@ -97,7 +97,7 @@ public class EsSyncBackgroundActorTest {
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     subject.tell(reqObj, probe.getRef());
-    Response response = probe.expectMsgClass(duration("1000 second"), Response.class);
+    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
     assertTrue(response != null);
   }
 
