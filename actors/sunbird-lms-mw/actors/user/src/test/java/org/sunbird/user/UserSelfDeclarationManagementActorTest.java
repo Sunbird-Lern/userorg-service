@@ -374,11 +374,8 @@ public class UserSelfDeclarationManagementActorTest {
             Mockito.anyList(),
             Mockito.anyMap(),
             Mockito.any());
-    PowerMockito.mockStatic(UserUtil.class);
-    when(UserUtil.createUserDeclaredObject(Mockito.anyMap(), Mockito.anyString()))
+    when(UserUtil.class, "createUserDeclaredObject", Mockito.anyMap(), Mockito.anyString())
         .thenReturn(userDeclareEntity);
-    // when(UserUtil.class, "createUserDeclaredObject", Mockito.anyMap(), Mockito.anyString())
-    //    .thenReturn(userDeclareEntity);
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
