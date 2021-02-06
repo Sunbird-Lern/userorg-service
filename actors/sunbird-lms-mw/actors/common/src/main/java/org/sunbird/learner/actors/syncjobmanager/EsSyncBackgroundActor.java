@@ -30,7 +30,7 @@ import org.sunbird.learner.util.Util.DbInfo;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
-  tasks = {"backgroundSync"},
+  tasks = {},
   asyncTasks = {"backgroundSync"}
 )
 public class EsSyncBackgroundActor extends BaseActor {
@@ -76,62 +76,58 @@ public class EsSyncBackgroundActor extends BaseActor {
 
     if (JsonKey.USER.equals(objectType)) {
       handleUserSyncRequest(objectIds, message.getRequestContext());
-      return;
-    }
-    if (CollectionUtils.isNotEmpty(objectIds)) {
-      requestLogMsg =
-          MessageFormat.format(
-              "type = {0} and IDs = {1}", objectType, Arrays.toString(objectIds.toArray()));
-
-      logger.info(
-          message.getRequestContext(),
-          "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " started");
-      Response response =
-          cassandraOperation.getRecordsByProperty(
-              dbInfo.getKeySpace(),
-              dbInfo.getTableName(),
-              JsonKey.ID,
-              objectIds,
-              message.getRequestContext());
-      reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-      logger.info(
-          message.getRequestContext(),
-          "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " completed");
     } else {
-      return;
-    }
-    if (CollectionUtils.isNotEmpty(reponseList)) {
-      for (Map<String, Object> map : reponseList) {
-        responseMap.put((String) map.get(JsonKey.ID), map);
+      if (CollectionUtils.isNotEmpty(objectIds)) {
+        requestLogMsg =
+            MessageFormat.format(
+                "type = {0} and IDs = {1}", objectType, Arrays.toString(objectIds.toArray()));
+
+        logger.info(
+            message.getRequestContext(),
+            "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " started");
+        Response response =
+            cassandraOperation.getRecordsByProperty(
+                dbInfo.getKeySpace(),
+                dbInfo.getTableName(),
+                JsonKey.ID,
+                objectIds,
+                message.getRequestContext());
+        reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+        logger.info(
+            message.getRequestContext(),
+            "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " completed");
+        if (CollectionUtils.isNotEmpty(reponseList)) {
+          for (Map<String, Object> map : reponseList) {
+            responseMap.put((String) map.get(JsonKey.ID), map);
+          }
+          Iterator<Entry<String, Object>> itr = responseMap.entrySet().iterator();
+          if (objectType.equals(JsonKey.ORGANISATION)) {
+            while (itr.hasNext()) {
+              result.add(getOrgDetails(itr.next(), message.getRequestContext()));
+            }
+          } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
+            while (itr.hasNext()) {
+              Entry<String, Object> entry = itr.next();
+              result.add((Map<String, Object>) entry.getValue());
+            }
+          }
+
+          if (CollectionUtils.isNotEmpty(result)) {
+            esService.bulkInsert(getType(objectType), result, message.getRequestContext());
+          }
+        }
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+
+        logger.info(
+            message.getRequestContext(),
+            "EsSyncBackgroundActor:sync: Total time taken to sync for type = "
+                + objectType
+                + " is "
+                + elapsedTime
+                + " ms");
       }
     }
-
-    Iterator<Entry<String, Object>> itr = responseMap.entrySet().iterator();
-    if (objectType.equals(JsonKey.ORGANISATION)) {
-      while (itr.hasNext()) {
-        result.add(getOrgDetails(itr.next(), message.getRequestContext()));
-      }
-    } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
-      while (itr.hasNext()) {
-        Entry<String, Object> entry = itr.next();
-        result.add((Map<String, Object>) entry.getValue());
-      }
-    }
-
-    if (CollectionUtils.isNotEmpty(result)) {
-      esService.bulkInsert(getType(objectType), result, message.getRequestContext());
-    }
-
-    long stopTime = System.currentTimeMillis();
-    long elapsedTime = stopTime - startTime;
-
-    logger.info(
-        message.getRequestContext(),
-        "EsSyncBackgroundActor:sync: Total time taken to sync for type = "
-            + objectType
-            + " is "
-            + elapsedTime
-            + " ms");
   }
 
   private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
