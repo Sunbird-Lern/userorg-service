@@ -16,7 +16,6 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -59,22 +58,6 @@ public class LocationRequestValidator {
                       }))
               .collect(Collectors.toList()));
     }
-  }
-
-  /**
-   * This method will validate location code
-   *
-   * @param code
-   * @return boolean
-   */
-  public static boolean isValidLocationCode(String code) {
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.PROPERTY_NAME, JsonKey.CODE);
-    reqMap.put(JsonKey.PROPERTY_VALUE, code);
-    Response response = locationDao.getRecordByProperty(reqMap, null);
-    List<Map<String, Object>> locationMapList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    return (!locationMapList.isEmpty());
   }
 
   /**
