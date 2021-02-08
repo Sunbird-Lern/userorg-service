@@ -27,7 +27,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
-import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -35,6 +34,7 @@ import scala.concurrent.Promise;
   ProjectUtil.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
+  Util.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -50,6 +50,7 @@ public class LocationRequestValidatorTest {
   @BeforeClass
   public static void before() {
     PowerMockito.mockStatic(ProjectUtil.class);
+    PowerMockito.mockStatic(Util.class);
     PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString()))
         .thenReturn("state,district,block,cluster,school;");
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -113,7 +114,7 @@ public class LocationRequestValidatorTest {
   }
 
   @Test
-  public void isValidParentIdAndCodeTest() {
+  public void isValidParentIdAndCodeAlreadyExistTest() {
     UpsertLocationRequest request = new UpsertLocationRequest();
     request.setCode("code");
     request.setId("id");
@@ -133,15 +134,54 @@ public class LocationRequestValidatorTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    Future<Map<String, Object>> test = promise.future();
     SearchDTO searchDTO = new SearchDTO();
     when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     try {
       LocationRequestValidator.isValidParentIdAndCode(request, "create");
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
+      String msg =
+          ProjectUtil.formatMessage(
+              ResponseCode.alreadyExists.getErrorMessage(), JsonKey.CODE, request.getCode());
+      Assert.assertEquals(msg, ex.getMessage());
+    }
+  }
+
+  @Test
+  public void isValidParentIdAndCodeAlreadyExist2Test() {
+    UpsertLocationRequest request = new UpsertLocationRequest();
+    request.setCode("code");
+    request.setId("id");
+    request.setName("name");
+    request.setType("district");
+    request.setParentId("parentId");
+    request.setParentCode("parentCode");
+
+    Map<String, Object> locMap = new HashMap<>();
+    List<Map<String, Object>> locList = new ArrayList<>();
+
+    locMap.put("id", "1234");
+    locMap.put("channel", "channel004");
+    locList.add(locMap);
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, locList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    SearchDTO searchDTO = new SearchDTO();
+    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    try {
+      LocationRequestValidator.isValidParentIdAndCode(request, "update");
+    } catch (ProjectCommonException ex) {
+      Assert.assertNotNull(ex);
+      String msg =
+          ProjectUtil.formatMessage(
+              ResponseCode.alreadyExists.getErrorMessage(), JsonKey.CODE, request.getCode());
+      Assert.assertEquals(msg, ex.getMessage());
     }
   }
 }
