@@ -21,8 +21,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.dao.LocationDao;
-import org.sunbird.location.dao.impl.LocationDaoImpl;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
 import scala.concurrent.Future;
 
@@ -31,7 +29,6 @@ public class LocationRequestValidator {
 
   private LocationRequestValidator() {}
 
-  private static LocationDao locationDao = new LocationDaoImpl();
   protected static List<List<String>> locationTypeGroupList = new ArrayList<>();
   protected static List<String> typeList = new ArrayList<>();
   private static ObjectMapper mapper = new ObjectMapper();
