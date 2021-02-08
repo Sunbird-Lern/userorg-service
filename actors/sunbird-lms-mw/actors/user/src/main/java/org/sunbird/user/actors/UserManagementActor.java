@@ -1469,6 +1469,7 @@ public class UserManagementActor extends BaseActor {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
         logger.info(
+            context,
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
