@@ -24,17 +24,11 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  ProjectUtil.class,
-  EsClientFactory.class,
-  ElasticSearchRestHighImpl.class,
-  Util.class
-})
+@PrepareForTest({ProjectUtil.class, EsClientFactory.class, ElasticSearchRestHighImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -49,7 +43,6 @@ public class LocationRequestValidatorTest {
   @BeforeClass
   public static void before() {
     PowerMockito.mockStatic(ProjectUtil.class);
-    PowerMockito.mockStatic(Util.class);
     PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString()))
         .thenReturn("state,district,block,cluster,school;");
     PowerMockito.mockStatic(EsClientFactory.class);
