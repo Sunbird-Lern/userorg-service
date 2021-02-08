@@ -8,37 +8,39 @@ node('build-slave') {
         String ANSI_YELLOW = "\u001B[33m"
 
         ansiColor('xterm') {
-            stage('Checkout') {
-                tag_name = env.JOB_NAME.split("/")[-1]
-                pre_checks()
-                if (!env.hub_org) {
-                    println(ANSI_BOLD + ANSI_RED + "Uh Oh! Please set a Jenkins environment variable named hub_org with value as registery/sunbidrded" + ANSI_NORMAL)
-                    error 'Please resolve the errors and rerun..'
-                } else
-                    println(ANSI_BOLD + ANSI_GREEN + "Found environment variable named hub_org with value as: " + hub_org + ANSI_NORMAL)
-            }
-            cleanWs()
-            def scmVars = checkout scm
-            checkout scm: [$class: 'GitSCM', branches: [[name: "refs/tags/$tag_name"]], userRemoteConfigs: [[url: scmVars.GIT_URL]]]
-            build_tag = tag_name + "_" + env.BUILD_NUMBER
-            commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-            artifact_version = tag_name + "_" + commit_hash
-            echo "build_tag: " + build_tag
-
-        //    stage Build
-                env.NODE_ENV = "build"
-                sh 'mvn clean install -U -DskipTests=false '
-            
-       //     stage Package
-                dir('service') {
-                    sh 'mvn play2:dist'
+            withEnv(["JAVA_HOME=${JAVA11_HOME}"]) {
+                stage('Checkout') {
+                    tag_name = env.JOB_NAME.split("/")[-1]
+                    pre_checks()
+                    if (!env.hub_org) {
+                        println(ANSI_BOLD + ANSI_RED + "Uh Oh! Please set a Jenkins environment variable named hub_org with value as registery/sunbidrded" + ANSI_NORMAL)
+                        error 'Please resolve the errors and rerun..'
+                    } else
+                        println(ANSI_BOLD + ANSI_GREEN + "Found environment variable named hub_org with value as: " + hub_org + ANSI_NORMAL)
                 }
-                sh('chmod 777 ./build.sh')
-                sh("./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
-            
-      //      stage ArchiveArtifacts 
-                archiveArtifacts "metadata.json"
-                currentBuild.description = "${build_tag}"
+                cleanWs()
+                def scmVars = checkout scm
+                checkout scm: [$class: 'GitSCM', branches: [[name: "refs/tags/$tag_name"]], userRemoteConfigs: [[url: scmVars.GIT_URL]]]
+                build_tag = tag_name + "_" + env.BUILD_NUMBER
+                commit_hash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                artifact_version = tag_name + "_" + commit_hash
+                echo "build_tag: " + build_tag
+
+            //    stage Build
+                    env.NODE_ENV = "build"
+                    sh 'mvn clean install -U -DskipTests=false '
+
+           //     stage Package
+                    dir('service') {
+                        sh 'mvn play2:dist'
+                    }
+                    sh('chmod 777 ./build.sh')
+                    sh("./build.sh ${build_tag} ${env.NODE_NAME} ${hub_org}")
+
+          //      stage ArchiveArtifacts
+                    archiveArtifacts "metadata.json"
+                    currentBuild.description = "${build_tag}"
+                }
         }
         currentBuild.result = "SUCCESS"    
         slack_notify(currentBuild.result, tag_name)

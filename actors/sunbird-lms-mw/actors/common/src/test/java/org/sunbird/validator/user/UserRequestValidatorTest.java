@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -1490,9 +1491,19 @@ public class UserRequestValidatorTest {
     Assert.assertTrue(response);
   }
 
+  @Test
+  public void testValidateUserType() {
+    UserRequestValidator validator = new UserRequestValidator();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_TYPE, "userType");
+    try {
+      validator.validateUserType(userMap, null, new RequestContext());
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
+
   private List createUpdateUserDeclarationRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> declarationMap = new HashMap<>();
     declarationMap.put(JsonKey.ORG_ID, "1234");
     declarationMap.put(JsonKey.USER_ID, "userid");
@@ -1504,8 +1515,6 @@ public class UserRequestValidatorTest {
   }
 
   private List createUpdateUserDeclarationMissingUserIdRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> info = new HashMap<>();
     info.put(JsonKey.DECLARED_EMAIL, "email");
     Map<String, Object> declarationMap = new HashMap<>();

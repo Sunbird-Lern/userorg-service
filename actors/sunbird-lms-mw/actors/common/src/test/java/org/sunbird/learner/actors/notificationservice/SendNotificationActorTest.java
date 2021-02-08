@@ -35,7 +35,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
@@ -54,7 +53,13 @@ import org.sunbird.learner.util.Util;
   ProjectUtil.class,
   BaseMWService.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class SendNotificationActorTest {
 
   private static final Props props = Props.create(SendNotificationActor.class);
@@ -147,9 +152,10 @@ public class SendNotificationActorTest {
     userIdList.add("001");
     reqMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
     innerMap.put(JsonKey.EMAIL_REQUEST, reqMap);
-    reqObj.setRequest(innerMap);
+    reqMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "default");
+    reqObj.getRequest().put(JsonKey.EMAIL_REQUEST, reqMap);
     subject.tell(reqObj, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(duration("1000 second"), Response.class);
     assertTrue(response != null);
   }
 
@@ -163,7 +169,7 @@ public class SendNotificationActorTest {
             Mockito.anyString(),
             Mockito.anyList(),
             Mockito.anyList(),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -216,7 +222,7 @@ public class SendNotificationActorTest {
             Mockito.anyString(),
             Mockito.anyList(),
             Mockito.anyList(),
-            Mockito.any(RequestContext.class)))
+            Mockito.any()))
         .thenReturn(cassandraGetEmptyRecordById());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

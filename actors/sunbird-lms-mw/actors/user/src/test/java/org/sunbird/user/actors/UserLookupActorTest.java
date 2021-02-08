@@ -22,15 +22,30 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserLookupDaoImpl;
+import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserServiceImpl;
+
+import javax.ws.rs.HEAD;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UserLookupDaoImpl.class, UserDao.class, UserDaoImpl.class})
-@PowerMockIgnore({"javax.management.*"})
+@PrepareForTest({
+        @PrepareForTest({UserLookupDaoImpl.class, UserDao.class, UserDaoImpl.class})
+  UserDao.class,
+  UserDaoImpl.class,
+  UserServiceImpl.class,
+  UserService.class
+})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserLookupActorTest {
 
   private static ActorSystem system = ActorSystem.create("system");
@@ -38,12 +53,12 @@ public class UserLookupActorTest {
 
   @Test
   public void getUserKeycloakSearchTestWithId() throws Exception {
-    UserDao userDao = PowerMockito.mock(UserDao.class);
-    PowerMockito.mockStatic(UserDaoImpl.class);
-    PowerMockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.mockStatic(UserServiceImpl.class);
+    UserService userService = PowerMockito.mock(UserService.class);
+    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
     PowerMockito.when(
-            userDao.getUserPropertiesById(
-                Mockito.anyList(), Mockito.anyList(), Mockito.any(RequestContext.class)))
+            userService.userLookUpByKey(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getResponse());
     PowerMockito.mockStatic(UserLookupDaoImpl.class);
     UserLookupDaoImpl userLookupDao = PowerMockito.mock(UserLookupDaoImpl.class);
@@ -68,6 +83,7 @@ public class UserLookupActorTest {
     fields.add("id");
     fields.add("userId");
     fields.add("status");
+    reqObj.put(JsonKey.FIELDS, fields);
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);

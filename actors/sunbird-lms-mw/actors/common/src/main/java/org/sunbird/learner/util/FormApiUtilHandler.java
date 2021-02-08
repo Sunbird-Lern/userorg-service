@@ -68,7 +68,7 @@ public class FormApiUtilHandler {
       ProjectUtil.setTraceIdInHeader(headers, context);
       String response =
           HttpClientUtil.post(
-              ProjectUtil.getConfigValue(JsonKey.FORM_API_BASE_URL)
+              ProjectUtil.getConfigValue(JsonKey.PORTAL_SERVICE_PORT)
                   + ProjectUtil.getConfigValue(JsonKey.FORM_API_ENDPOINT),
               body,
               headers);

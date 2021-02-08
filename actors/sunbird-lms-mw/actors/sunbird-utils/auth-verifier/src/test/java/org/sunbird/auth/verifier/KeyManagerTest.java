@@ -13,7 +13,12 @@ import org.sunbird.common.models.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PropertiesCache.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class KeyManagerTest {
 
   @Test

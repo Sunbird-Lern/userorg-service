@@ -34,7 +34,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -42,7 +41,13 @@ import org.sunbird.learner.util.Util;
 /** @author arvind. Junit test cases for bulk upload - user, org */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, Util.class, BulkUploadManagementActor.class})
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class BulkUploadManagementActorTest {
 
   private static ActorSystem system;
@@ -85,10 +90,7 @@ public class BulkUploadManagementActorTest {
 
     Response response = createCassandraInsertSuccessResponse();
     when(cassandraOperation.insertRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.BULK_UPLOAD.getValue());

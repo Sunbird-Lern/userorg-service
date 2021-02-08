@@ -32,7 +32,7 @@ import util.RequestInterceptor;
 /** Created by arvind on 4/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class EmailServiceControllerTest extends BaseApplicationTest {
 

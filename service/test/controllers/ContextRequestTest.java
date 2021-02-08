@@ -11,6 +11,7 @@ import modules.OnRequestHandler;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
@@ -18,6 +19,7 @@ import play.libs.Json;
 import play.mvc.Http;
 
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 public class ContextRequestTest extends BaseApplicationTest {
 
   private static String userId = "{userId} uuiuhcf784508 8y8c79-fhh";

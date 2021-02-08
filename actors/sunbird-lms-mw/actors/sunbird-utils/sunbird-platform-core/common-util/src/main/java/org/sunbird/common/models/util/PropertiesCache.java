@@ -2,9 +2,7 @@ package org.sunbird.common.models.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -26,8 +24,7 @@ public class PropertiesCache {
     "mailTemplates.properties"
   };
   private final Properties configProp = new Properties();
-  public final Map<String, Float> attributePercentageMap = new ConcurrentHashMap<>();
-  private static PropertiesCache propertiesCache = null;
+  private static PropertiesCache instance;
 
   /** private default constructor */
   private PropertiesCache() {
@@ -42,17 +39,15 @@ public class PropertiesCache {
   }
 
   public static PropertiesCache getInstance() {
-
-    // change the lazy holder implementation to simple singleton implementation ...
-    if (null == propertiesCache) {
+    if (instance == null) {
+      // To make thread safe
       synchronized (PropertiesCache.class) {
-        if (null == propertiesCache) {
-          propertiesCache = new PropertiesCache();
-        }
+        // check again as multiple threads
+        // can reach above step
+        if (instance == null) instance = new PropertiesCache();
       }
     }
-
-    return propertiesCache;
+    return instance;
   }
 
   public void saveConfigProperty(String key, String value) {
