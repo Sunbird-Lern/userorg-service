@@ -41,8 +41,10 @@ import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.service.UserExternalIdentityService;
+import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import scala.concurrent.Future;
 
@@ -65,6 +67,7 @@ public class UserUtil {
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
+  private static UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
 
   private UserUtil() {}
 
@@ -223,9 +226,8 @@ public class UserUtil {
 
   public static void validateUserPhoneEmailAndWebPages(
       User user, String operationType, RequestContext context) {
-    UserLookUp userLookUp = new UserLookUp();
-    userLookUp.checkPhoneUniqueness(user, operationType, context);
-    userLookUp.checkEmailUniqueness(user, operationType, context);
+    userLookupService.checkPhoneUniqueness(user, operationType, context);
+    userLookupService.checkEmailUniqueness(user, operationType, context);
     if (CollectionUtils.isNotEmpty(user.getWebPages())) {
       SocialMediaType.validateSocialMedia(user.getWebPages());
     }
@@ -356,8 +358,7 @@ public class UserUtil {
       }
     } else {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
-      UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness(
+      if (!userLookupService.checkUsernameUniqueness(
           (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
@@ -408,8 +409,7 @@ public class UserUtil {
       }
     } else {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
-      UserLookUp userLookUp = new UserLookUp();
-      if (!userLookUp.checkUsernameUniqueness(
+      if (!userLookupService.checkUsernameUniqueness(
           (String) userMap.get(JsonKey.USERNAME), false, context)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
@@ -471,8 +471,7 @@ public class UserUtil {
             .filter(
                 value -> {
                   if (!esUserNameList.contains(value)) {
-                    UserLookUp userLookUp = new UserLookUp();
-                    return userLookUp.checkUsernameUniqueness(value, true, context);
+                    return userLookupService.checkUsernameUniqueness(value, true, context);
                   }
                   return false;
                 })
@@ -494,7 +493,7 @@ public class UserUtil {
       List<Map<String, String>> list = copyAndConvertExternalIdsToLower(user.getExternalIds());
       user.setExternalIds(list);
     }
-    new UserLookUp().checkExternalIdUniqueness(user, operationType, context);
+    userLookupService.checkExternalIdUniqueness(user, operationType, context);
   }
   // validateExternalIds For UPDATE USER
   public static void validateExternalIdsForUpdateUser(
@@ -505,7 +504,7 @@ public class UserUtil {
     }
     // If operation is update and user is custodian org, ignore uniqueness check
     if (!isCustodianOrg) {
-      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, context);
+      userLookupService.checkExternalIdUniqueness(user, JsonKey.UPDATE, context);
     }
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user, context);
@@ -916,8 +915,7 @@ public class UserUtil {
       reqMap.add(deleteLookUp);
     }
     if (CollectionUtils.isNotEmpty(reqMap)) {
-      UserLookUp userLookUp = new UserLookUp();
-      userLookUp.deleteRecords(reqMap, context);
+      userLookupService.deleteRecords(reqMap, context);
     }
   }
 }

@@ -70,10 +70,11 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
+import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
-import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
@@ -102,6 +103,7 @@ public class UserManagementActor extends BaseActor {
   private UserClient userClient = new UserClientImpl();
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
+  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -360,8 +362,7 @@ public class UserManagementActor extends BaseActor {
       reqList.add(lookupMap);
     }
     if (CollectionUtils.isNotEmpty(reqList)) {
-      UserLookUp userLookUp = new UserLookUp();
-      userLookUp.deleteRecords(reqList, requestContext);
+      userLookupService.deleteRecords(reqList, requestContext);
     }
   }
 
@@ -631,16 +632,9 @@ public class UserManagementActor extends BaseActor {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
-    String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    if (StringUtils.isNotBlank(version)
-        && (JsonKey.VERSION_2.equalsIgnoreCase(version)
-            || JsonKey.VERSION_3.equalsIgnoreCase(version))) {
-      userRequestValidator.validateCreateUserV2Request(actorMessage);
-      if (StringUtils.isNotBlank(callerId)) {
-        userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
-      }
-    } else {
-      userRequestValidator.validateCreateUserV1Request(actorMessage);
+    userRequestValidator.validateCreateUserRequest(actorMessage);
+    if (StringUtils.isNotBlank(callerId)) {
+      userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
@@ -777,7 +771,7 @@ public class UserManagementActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserLookUp userLookUp = new UserLookUp();
+      UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
       // check phone and uniqueness using user look table
       userLookUp.checkPhoneUniqueness(
           (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
@@ -981,8 +975,7 @@ public class UserManagementActor extends BaseActor {
     }
     Response response = null;
     if (CollectionUtils.isNotEmpty(list)) {
-      UserLookUp userLookUp = new UserLookUp();
-      response = userLookUp.insertRecords(list, context);
+      response = userLookupService.insertRecords(list, context);
     }
     return response;
   }
@@ -1030,12 +1023,7 @@ public class UserManagementActor extends BaseActor {
     Response response = null;
     boolean isPasswordUpdated = false;
     try {
-      response =
-          cassandraOperation.insertRecord(
-              usrDbInfo.getKeySpace(),
-              usrDbInfo.getTableName(),
-              requestMap,
-              request.getRequestContext());
+      response = userService.createUser(userMap, request.getRequestContext());
       insertIntoUserLookUp(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
