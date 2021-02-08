@@ -82,14 +82,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 @ActorConfig(
-  tasks = {
-    "createUser",
-    "updateUser",
-    "createUserV3",
-    "createUserV4",
-    "getManagedUsers",
-    "updateUserDeclarations"
-  },
+  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -1589,12 +1582,18 @@ public class UserManagementActor extends BaseActor {
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
-        isValidLocationType(location.getType(), typeList);
-        if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-          set.add(location.getCode());
-        } else {
-          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+        // for create-MUA we allow locations upto district for remaining we will validate all.
+        if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+                && ((location.getType().equals(JsonKey.STATE))
+                    || (location.getType().equals(JsonKey.DISTRICT))))
+            || !userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())) {
+          isValidLocationType(location.getType(), typeList);
+          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+            set.add(location.getCode());
+          } else {
+            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
+            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+          }
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
