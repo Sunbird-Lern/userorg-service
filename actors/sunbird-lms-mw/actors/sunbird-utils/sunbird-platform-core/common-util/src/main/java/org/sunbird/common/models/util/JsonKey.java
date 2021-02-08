@@ -717,6 +717,7 @@ public final class JsonKey {
   public static final String CHILDREN = "children";
   public static final String OPTIONS = "options";
   public static final String DISTRICT = "district";
+  public static final String PORTAL_SERVICE_PORT = "PORTAL_SERVICE_PORT";
 
   private JsonKey() {}
 }
