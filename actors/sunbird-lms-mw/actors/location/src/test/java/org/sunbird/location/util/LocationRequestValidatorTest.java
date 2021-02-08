@@ -272,7 +272,7 @@ public class LocationRequestValidatorTest {
     }
   }
 
-  // @Test
+  @Test
   public void isValidParentIdAndCode2Test() {
     UpsertLocationRequest request = new UpsertLocationRequest();
     request.setCode("code");
@@ -293,6 +293,7 @@ public class LocationRequestValidatorTest {
     locMap.put("id", "1234");
     locMap.put("name", "locName");
     locMap.put("code", "locCode");
+    locMap.put("type", "state");
     locList.add(locMap);
     Map<String, Object> emptyContentMap2 = new HashMap<>();
     emptyContentMap2.put(JsonKey.CONTENT, locList);
@@ -305,19 +306,63 @@ public class LocationRequestValidatorTest {
         .thenReturn(promise2.future());
 
     Map<String, Object> loc = new HashMap<>();
-
+    loc.put("id", "1234");
+    loc.put("name", "locName");
+    loc.put("code", "locCode");
+    loc.put("type", "state");
     Promise<Map<String, Object>> locPromise = Futures.promise();
     locPromise.success(loc);
 
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(locPromise.future());
+
+    boolean isValid = LocationRequestValidator.isValidParentIdAndCode(request, "update");
+    Assert.assertTrue(isValid);
+  }
+
+  @Test
+  public void isLocationHasChildTest() {
+    UpsertLocationRequest request = new UpsertLocationRequest();
+    request.setCode("code");
+    request.setId("id");
+    request.setName("name");
+    request.setType("district");
+    request.setParentId("parentId");
+    request.setParentCode("parentCode");
+
+    Map<String, Object> locMap = new HashMap<>();
+    List<Map<String, Object>> locList = new ArrayList<>();
+    locMap.put("id", "1234");
+    locMap.put("name", "locName");
+    locMap.put("code", "locCode");
+    locMap.put("type", "state");
+    locList.add(locMap);
+    Map<String, Object> emptyContentMap2 = new HashMap<>();
+    emptyContentMap2.put(JsonKey.CONTENT, locList);
+
+    Promise<Map<String, Object>> promise2 = Futures.promise();
+    promise2.success(emptyContentMap2);
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise2.future());
+
+    Map<String, Object> loc = new HashMap<>();
+    loc.put("id", "1234");
+    loc.put("name", "locName");
+    loc.put("code", "locCode");
+    loc.put("type", "state");
+    Promise<Map<String, Object>> locPromise = Futures.promise();
+    locPromise.success(loc);
+
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(locPromise.future());
+
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "update");
+      LocationRequestValidator.isLocationHasChild("stateid");
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      String msg =
-          ProjectUtil.formatMessage(ResponseCode.invalidParameter.getErrorMessage(), "parentCode");
-      Assert.assertEquals(msg, ex.getMessage());
+      Assert.assertEquals(
+          ResponseCode.invalidLocationDeleteRequest.getErrorMessage(), ex.getMessage());
     }
   }
 }
