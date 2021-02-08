@@ -24,7 +24,6 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
 import scala.concurrent.Promise;
@@ -134,8 +133,7 @@ public class LocationRequestValidatorTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    SearchDTO searchDTO = new SearchDTO();
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     try {
@@ -170,8 +168,7 @@ public class LocationRequestValidatorTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    SearchDTO searchDTO = new SearchDTO();
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
+
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     try {
