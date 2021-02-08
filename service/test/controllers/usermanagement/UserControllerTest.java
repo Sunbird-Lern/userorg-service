@@ -246,6 +246,24 @@ public class UserControllerTest extends BaseApplicationTest {
 
   @Test
   public void testSearchUserSuccess() {
+    Map<String, Object> reqMap = new HashMap<>();
+    Map<String, Object> req = new HashMap<>();
+    req.put("key", "email");
+    req.put("value", "xyz@xyz.com");
+    List<String> fields = new ArrayList<>();
+    fields.add("id");
+    fields.add("userName");
+    fields.add("email");
+    fields.add("phone");
+    req.put("fields", fields);
+    reqMap.put(JsonKey.REQUEST, req);
+    Result result = performTest("/private/user/v1/lookup", "POST", reqMap);
+    assertEquals(getResponseCode(result), ResponseCode.invalidValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testUserLookupSuccess() {
     Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);

@@ -67,4 +67,22 @@ public class SyncControllerTest extends BaseApplicationTest {
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
+
+  @Test
+  public void testsyncFailure() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.OBJECT_TYPE, "invalidObject");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/data/sync").method("POST");
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
+  }
 }

@@ -25,6 +25,21 @@ public class UserRequestValidatorTest {
   private static final UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   @Test
+  public void isValidLocationTypeTestSuccess() {
+    boolean bool = userRequestValidator.isValidLocationType("state");
+    Assert.assertTrue(bool);
+  }
+
+  @Test
+  public void isValidLocationTypeTestFailure() {
+    try {
+      userRequestValidator.isValidLocationType("state2");
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
   public void testValidatePasswordFailure() {
     Request request = initailizeRequest();
     Map<String, Object> requestObj = request.getRequest();
