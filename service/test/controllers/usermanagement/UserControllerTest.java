@@ -256,7 +256,8 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testUserLookupFailure() {
     Map<String, Object> reqMap = new HashMap<>();
     Result result = TestUtil.performTest("/private/user/v1/lookup", "POST", reqMap, application);
-    assertEquals(ResponseCode.invalidValue.getErrorCode(), TestUtil.getResponseCode(result));
+    assertEquals(
+        ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
   }
 
   @Test
