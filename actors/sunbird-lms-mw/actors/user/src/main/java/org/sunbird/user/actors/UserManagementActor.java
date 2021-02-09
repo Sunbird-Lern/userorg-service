@@ -1022,7 +1022,7 @@ public class UserManagementActor extends BaseActor {
     Response response = null;
     boolean isPasswordUpdated = false;
     try {
-      response = userService.createUser(userMap, request.getRequestContext());
+      response = userService.createUser(requestMap, request.getRequestContext());
       insertIntoUserLookUp(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
