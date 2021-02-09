@@ -771,11 +771,10 @@ public class UserManagementActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
       // check phone and uniqueness using user look table
-      userLookUp.checkPhoneUniqueness(
+      userLookupService.checkPhoneUniqueness(
           (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      userLookUp.checkEmailUniqueness(
+      userLookupService.checkEmailUniqueness(
           (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
