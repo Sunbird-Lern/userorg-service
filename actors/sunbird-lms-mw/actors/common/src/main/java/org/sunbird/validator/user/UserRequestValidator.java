@@ -777,14 +777,19 @@ public class UserRequestValidator extends BaseRequestValidator {
         // Get profile data config
         Map<String, List<String>> userProfileConfigMap =
             FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
+        if (MapUtils.isEmpty(userProfileConfigMap)) {
           // Get Default Config
           stateCode = JsonKey.DEFAULT_PERSONA;
           userProfileConfigMap = userTypeConfigMap.get(stateCode);
           if (MapUtils.isEmpty(userProfileConfigMap)) {
             userProfileConfigMap =
                 FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-            userTypeConfigMap.put(stateCode, userProfileConfigMap);
+            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
+              userTypeConfigMap.put(stateCode, userProfileConfigMap);
+            } else {
+              logger.info(
+                  context, String.format("Form Config not found for stateCode:%s", stateCode));
+            }
           }
         } else {
           userTypeConfigMap.put(stateCode, userProfileConfigMap);
@@ -792,6 +797,11 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+      if (MapUtils.isEmpty(userTypeMap)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.SERVER_ERROR,
+            MessageFormat.format(ResponseMessage.Message.USER_TYPE_CONFIG_IS_EMPTY, stateCode));
+      }
       logger.info(
           context,
           String.format(

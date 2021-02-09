@@ -1,7 +1,7 @@
 package org.sunbird.learner.actors;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -32,7 +32,12 @@ import org.sunbird.common.responsecode.ResponseCode;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({OnDemandSchedulerManager.class, SchedulerManager.class})
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class OnDemandSchedulerActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static final Props props = Props.create(OnDemandSchedulerActor.class);

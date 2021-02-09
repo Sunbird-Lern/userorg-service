@@ -21,7 +21,17 @@ import play.test.Helpers;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RequestInterceptor.class, AccessTokenValidator.class})
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
+})
 public class RequestInterceptorTest {
 
   private static AccessTokenValidator tokenValidator;
