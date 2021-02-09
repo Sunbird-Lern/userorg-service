@@ -38,6 +38,7 @@ public class UserLookupServiceImplTest {
     UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
     User user = new User();
     user.setId("1234");
+    user.setEmail("abc@xzn");
     userLookupService.checkEmailUniqueness(user, "read", new RequestContext());
   }
 
