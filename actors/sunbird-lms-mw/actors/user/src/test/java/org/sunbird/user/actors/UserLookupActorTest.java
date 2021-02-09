@@ -22,6 +22,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -29,11 +30,9 @@ import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
-import javax.ws.rs.HEAD;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        @PrepareForTest({UserLookupDaoImpl.class, UserDao.class, UserDaoImpl.class})
+  UserLookupDaoImpl.class,
   UserDao.class,
   UserDaoImpl.class,
   UserServiceImpl.class,
