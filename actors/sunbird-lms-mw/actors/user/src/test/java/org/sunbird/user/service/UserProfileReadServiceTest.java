@@ -27,7 +27,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -94,7 +93,7 @@ public class UserProfileReadServiceTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
     Map<String, Object> esRespone = new HashMap<>();
     esRespone.put(JsonKey.CONTENT, new ArrayList<>());
-    esRespone.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
+    esRespone.put(JsonKey.LOCATION_TYPE, "STATE");
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 

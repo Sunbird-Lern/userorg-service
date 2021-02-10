@@ -30,7 +30,6 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
@@ -86,11 +85,7 @@ public class LocationBulkUploadActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     List<String> headerLine =
-        Arrays.asList(
-            GeoLocationJsonKey.PROPERTY_NAME,
-            GeoLocationJsonKey.CODE,
-            GeoLocationJsonKey.PARENT_CODE,
-            GeoLocationJsonKey.PARENT_ID);
+        Arrays.asList(JsonKey.PROPERTY_NAME, JsonKey.CODE, JsonKey.PARENT_CODE, JsonKey.PARENT_ID);
     List<String> firstDataLine = Arrays.asList("location_name", "location-code", null, null);
     String jsonString = createLines(headerLine, firstDataLine);
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
@@ -123,10 +118,10 @@ public class LocationBulkUploadActorTest {
     ActorRef subject = system.actorOf(props);
     List<String> headerLine =
         Arrays.asList(
-            GeoLocationJsonKey.PROPERTY_NAME + "invalid",
-            GeoLocationJsonKey.CODE,
-            GeoLocationJsonKey.PARENT_CODE,
-            GeoLocationJsonKey.PARENT_ID);
+            JsonKey.PROPERTY_NAME + "invalid",
+            JsonKey.CODE,
+            JsonKey.PARENT_CODE,
+            JsonKey.PARENT_ID);
     List<String> firstDataLine = Arrays.asList("location_name", "location-code", null, null);
     String jsonString = createLines(headerLine, firstDataLine);
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
@@ -141,10 +136,7 @@ public class LocationBulkUploadActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     List<String> headerLine =
-        Arrays.asList(
-            GeoLocationJsonKey.PROPERTY_NAME,
-            GeoLocationJsonKey.PARENT_CODE,
-            GeoLocationJsonKey.PARENT_ID);
+        Arrays.asList(JsonKey.PROPERTY_NAME, JsonKey.PARENT_CODE, JsonKey.PARENT_ID);
     List<String> firstDataLine = Arrays.asList("location_name", null, null);
     String jsonString = createLines(headerLine, firstDataLine);
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
@@ -159,10 +151,7 @@ public class LocationBulkUploadActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     List<String> headerLine =
-        Arrays.asList(
-            GeoLocationJsonKey.PROPERTY_NAME,
-            GeoLocationJsonKey.PARENT_CODE,
-            GeoLocationJsonKey.PARENT_ID);
+        Arrays.asList(JsonKey.PROPERTY_NAME, JsonKey.PARENT_CODE, JsonKey.PARENT_ID);
     String jsonString = createLines(headerLine);
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
@@ -177,11 +166,11 @@ public class LocationBulkUploadActorTest {
     ActorRef subject = system.actorOf(props);
     List<String> headerLine =
         Arrays.asList(
-            GeoLocationJsonKey.PROPERTY_NAME,
-            GeoLocationJsonKey.CODE,
-            GeoLocationJsonKey.PARENT_CODE,
-            GeoLocationJsonKey.PARENT_ID,
-            GeoLocationJsonKey.PROPERTY_VALUE);
+            JsonKey.PROPERTY_NAME,
+            JsonKey.CODE,
+            JsonKey.PARENT_CODE,
+            JsonKey.PARENT_ID,
+            JsonKey.PROPERTY_VALUE);
     List<String> firstDataLine =
         Arrays.asList("location_name", "location-code", null, null, "value");
     String jsonString = createLines(headerLine, firstDataLine);
@@ -199,7 +188,7 @@ public class LocationBulkUploadActorTest {
     innerMap.put(JsonKey.CREATED_BY, USER_ID);
     innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
     innerMap.put(JsonKey.FILE, file);
-    innerMap.put(GeoLocationJsonKey.LOCATION_TYPE, locationType);
+    innerMap.put(JsonKey.LOCATION_TYPE, locationType);
     reqObj.getRequest().put(JsonKey.DATA, innerMap);
     return reqObj;
   }

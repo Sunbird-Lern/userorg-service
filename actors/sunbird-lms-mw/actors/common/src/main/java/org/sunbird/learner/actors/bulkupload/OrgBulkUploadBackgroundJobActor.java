@@ -1,10 +1,8 @@
 package org.sunbird.learner.actors.bulkupload;
 
 import akka.actor.ActorRef;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -44,22 +42,6 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     String operation = request.getOperation();
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);
     if (operation.equalsIgnoreCase("orgBulkUploadBackground")) {
-      Map<String, String> outputColumns =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              "orgProfileConfig",
-              "csv.outputColumns",
-              new TypeReference<Map<String, String>>() {},
-              null);
-
-      String[] outputColumnsOrder =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              "orgProfileConfig",
-              "csv.outputColumnsOrder",
-              new TypeReference<String[]>() {},
-              null);
-
       handleBulkUploadBackground(
           request,
           (baseBulkUpload) -> {
@@ -69,10 +51,6 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
                   processTasks((List<BulkUploadProcessTask>) tasks, request.getRequestContext());
                   return null;
                 },
-                outputColumns,
-                outputColumnsOrder != null
-                    ? outputColumnsOrder
-                    : (String[]) request.get(JsonKey.FIELDS),
                 request.getRequestContext());
             return null;
           });
@@ -159,7 +137,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       ActorRef locationActor,
       List<String> locationCodes,
       RequestContext context)
-      throws IOException, JsonParseException, JsonMappingException {
+      throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     if (ProjectUtil.BulkProcessStatus.COMPLETED.getValue() == task.getStatus()) {
       List<String> locationNames = new ArrayList<>();

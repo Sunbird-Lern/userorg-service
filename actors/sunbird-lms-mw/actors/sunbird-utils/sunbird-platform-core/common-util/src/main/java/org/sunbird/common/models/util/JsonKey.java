@@ -718,6 +718,11 @@ public final class JsonKey {
   public static final String OPTIONS = "options";
   public static final String DISTRICT = "district";
   public static final String PORTAL_SERVICE_PORT = "PORTAL_SERVICE_PORT";
+  public static final String LOCATION_TYPE = "type";
+  public static final String SUNBIRD_VALID_LOCATION_TYPES = "sunbird_valid_location_types";
+  public static final String PARENT_CODE = "parentCode";
+  public static final String PROPERTY_NAME = "name";
+  public static final String PROPERTY_VALUE = "value";
 
   private JsonKey() {}
 }

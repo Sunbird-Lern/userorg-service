@@ -71,7 +71,6 @@ public class SchedulerManager {
       String identifier = "NetOps-PC1502295457753";
 
       scheduleBulkUploadJob(identifier);
-      scheduleUpdateUserCountJob(identifier);
       scheduleChannelReg(identifier);
       scheduleShadowUser(identifier);
 
@@ -112,38 +111,6 @@ public class SchedulerManager {
       scheduler.scheduleJob(channelRegistrationJob, channelRegistrationTrigger);
       scheduler.start();
       logger.info("SchedulerManager:scheduleChannelReg: channelRegistration schedular started");
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-    }
-  }
-
-  private void scheduleUpdateUserCountJob(String identifier) {
-    // add another job for updating user count to Location Table.
-    // 1- create a job and bind with class which is implementing Job
-    // interface.
-    JobDetail updateUserCountJob =
-        JobBuilder.newJob(UpdateUserCountScheduler.class)
-            .requestRecovery(true)
-            .withDescription("Scheduler for updating user count for each geo location")
-            .withIdentity("updateUserCountScheduler", identifier)
-            .build();
-
-    // 2- Create a trigger object that will define frequency of run.
-    // This will run every day 2:00 AM
-    Trigger updateUserCountTrigger =
-        TriggerBuilder.newTrigger()
-            .withIdentity("updateUserCountTrigger", identifier)
-            .withSchedule(
-                CronScheduleBuilder.cronSchedule(
-                    PropertiesCache.getInstance().getProperty("quartz_update_user_count_timer")))
-            .build();
-    try {
-      if (scheduler.checkExists(updateUserCountJob.getKey())) {
-        scheduler.deleteJob(updateUserCountJob.getKey());
-      }
-      scheduler.scheduleJob(updateUserCountJob, updateUserCountTrigger);
-      scheduler.start();
-      logger.info("SchedulerManager:scheduleUpdateUserCountJob: UpdateUserCount schedular started");
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

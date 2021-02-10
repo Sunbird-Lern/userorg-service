@@ -280,69 +280,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   }
 
   @Test
-  public void testSyncUserDataSuccess() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PROVIDER, "ntp");
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.COUNTRY_CODE, "+91");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithoutCountryCode() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PROVIDER, "ntp");
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithoutProvider() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithInvalidUser() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, "xey123-23sss-cbdsgdgdg");
-    try {
-      keyCloakService.syncUserData(request);
-    } catch (ProjectCommonException e) {
-      Assert.assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
-      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-    }
-  }
-
-  @Test
   public void testDoPasswordUpdateSuccess() {
     boolean response = keyCloakService.doPasswordUpdate(userId.get(JsonKey.USER_ID), "password");
     Assert.assertEquals(true, response);
@@ -350,9 +287,8 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @Test
   public void testGetFederatedUserId()
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-          NoSuchMethodException, SecurityException, IllegalArgumentException,
-          InvocationTargetException {
+      throws IllegalAccessException, NoSuchMethodException, SecurityException,
+          IllegalArgumentException, InvocationTargetException {
     KeyCloakServiceImpl.class.getDeclaredMethods();
     Method m = KeyCloakServiceImpl.class.getDeclaredMethod("getFederatedUserId", String.class);
     m.setAccessible(true);

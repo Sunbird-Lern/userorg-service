@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -33,8 +32,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
 
   static {
     List<String> subTypeList =
-        Arrays.asList(
-            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
     for (String str : subTypeList) {
       List<String> typeList =
           (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
@@ -80,7 +78,6 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * return the hierarchy List.
    *
    * @param actorRef Actor reference.
-   * @param codeList List of location ids.
    * @return List of locationIds.
    */
   public List<String> getHierarchyLocationIds(ActorRef actorRef, List<String> locationIdsList) {
