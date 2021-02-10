@@ -29,7 +29,6 @@ import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.request.Request;
@@ -84,7 +83,7 @@ public class LocationActorTest {
 
     Map<String, Object> esRespone = new HashMap<>();
     esRespone.put(JsonKey.CONTENT, new ArrayList<>());
-    esRespone.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
+    esRespone.put(JsonKey.LOCATION_TYPE, "STATE");
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 
@@ -98,8 +97,8 @@ public class LocationActorTest {
   @Test
   public void testCreateLocationSuccess() {
     Map<String, Object> res = new HashMap<>(data);
-    res.remove(GeoLocationJsonKey.PARENT_CODE);
-    res.remove(GeoLocationJsonKey.PARENT_ID);
+    res.remove(JsonKey.PARENT_CODE);
+    res.remove(JsonKey.PARENT_ID);
     boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true, null, null);
     assertTrue(result);
   }
@@ -128,7 +127,7 @@ public class LocationActorTest {
   @Test
   public void testCreateLocationFailureWithInvalidValue() {
 
-    data.put(GeoLocationJsonKey.LOCATION_TYPE, "anyLocationType");
+    data.put(JsonKey.LOCATION_TYPE, "anyLocationType");
     boolean result =
         testScenario(
             LocationActorOperation.CREATE_LOCATION, false, data, ResponseCode.invalidValue);
@@ -138,7 +137,7 @@ public class LocationActorTest {
   @Test
   public void testCreateLocationFailureWithoutMandatoryParams() {
 
-    data.put(GeoLocationJsonKey.LOCATION_TYPE, "block");
+    data.put(JsonKey.LOCATION_TYPE, "block");
     boolean result =
         testScenario(
             LocationActorOperation.CREATE_LOCATION,
@@ -151,7 +150,7 @@ public class LocationActorTest {
   @Test
   public void testCreateLocationFailureWithParentLocationNotAllowed() {
 
-    data.put(GeoLocationJsonKey.PARENT_CODE, "anyCode");
+    data.put(JsonKey.PARENT_CODE, "anyCode");
     boolean result =
         testScenario(
             LocationActorOperation.CREATE_LOCATION, false, data, ResponseCode.parentNotAllowed);
@@ -213,8 +212,8 @@ public class LocationActorTest {
   private static Map<String, Object> getDataMap() {
 
     data = new HashMap();
-    data.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
-    data.put(GeoLocationJsonKey.CODE, "S01");
+    data.put(JsonKey.LOCATION_TYPE, "STATE");
+    data.put(JsonKey.CODE, "S01");
     data.put(JsonKey.NAME, "DUMMY_STATE");
     data.put(JsonKey.ID, "id_01");
     data.put(JsonKey.LOCATION_ID, "id_01");

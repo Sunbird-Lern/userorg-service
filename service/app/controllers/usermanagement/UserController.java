@@ -138,7 +138,7 @@ public class UserController extends BaseController {
   public CompletionStage<Result> searchUser(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
-        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        ActorOperations.USER_SEARCH.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
@@ -155,7 +155,7 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> userLookup(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.USER_SEARCH.getValue(),
+        ActorOperations.USER_LOOKUP.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;

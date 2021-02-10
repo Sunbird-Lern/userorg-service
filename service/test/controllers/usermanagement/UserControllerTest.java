@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import controllers.TestUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -249,6 +250,14 @@ public class UserControllerTest extends BaseApplicationTest {
     Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testUserLookupFailure() {
+    Map<String, Object> reqMap = new HashMap<>();
+    Result result = TestUtil.performTest("/private/user/v1/lookup", "POST", reqMap, application);
+    assertEquals(
+        ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
   }
 
   @Test
