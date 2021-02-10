@@ -1,3 +1,28 @@
+/*
+ * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+
 package org.sunbird.common.models.util.datasecurity.impl;
 
 import java.io.ByteArrayInputStream;
@@ -8,94 +33,173 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * This class defines the decoding half of character encoders. A character decoder is an algorithim
+ * for transforming 8 bit binary data that has been encoded into text by a character encoder, back
+ * into original binary form.
+ *
+ * <p>The character encoders, in general, have been structured around a central theme that binary
+ * data can be encoded into text that has the form:
+ *
+ * <pre>
+ *      [Buffer Prefix]
+ *      [Line Prefix][encoded data atoms][Line Suffix]
+ *      [Buffer Suffix]
+ * </pre>
+ *
+ * Of course in the simplest encoding schemes, the buffer has no distinct prefix of suffix, however
+ * all have some fixed relationship between the text in an 'atom' and the binary data itself.
+ *
+ * <p>In the CharacterEncoder and CharacterDecoder classes, one complete chunk of data is referred
+ * to as a <i>buffer</i>. Encoded buffers are all text, and decoded buffers (sometimes just referred
+ * to as buffers) are binary octets.
+ *
+ * <p>To create a custom decoder, you must, at a minimum, overide three abstract methods in this
+ * class.
+ *
+ * <DL>
+ *   <DD>bytesPerAtom which tells the decoder how many bytes to expect from decodeAtom
+ *   <DD>decodeAtom which decodes the bytes sent to it as text.
+ *   <DD>bytesPerLine which tells the encoder the maximum number of bytes per line.
+ * </DL>
+ *
+ * In general, the character decoders return error in the form of a CEFormatException. The syntax of
+ * the detail string is
+ *
+ * <pre>
+ *      DecoderClassName: Error message.
+ * </pre>
+ *
+ * Several useful decoders have already been written and are referenced in the See Also list below.
+ *
+ * @author Chuck McManis
+ * @see CharacterEncoder
+ * @see BASE64Decoder
+ */
 public abstract class CharacterDecoder {
   public CharacterDecoder() {}
-
+  /** Return the number of bytes per atom of decoding */
   protected abstract int bytesPerAtom();
 
+  /** Return the maximum number of bytes that can be encoded per line */
   protected abstract int bytesPerLine();
 
-  protected void decodeBufferPrefix(PushbackInputStream var1, OutputStream var2)
+  /** decode the beginning of the buffer, by default this is a NOP. */
+  protected void decodeBufferPrefix(PushbackInputStream aStream, OutputStream bStream)
       throws IOException {}
 
-  protected void decodeBufferSuffix(PushbackInputStream var1, OutputStream var2)
+  /** decode the buffer suffix, again by default it is a NOP. */
+  protected void decodeBufferSuffix(PushbackInputStream aStream, OutputStream bStream)
       throws IOException {}
 
-  protected int decodeLinePrefix(PushbackInputStream var1, OutputStream var2) throws IOException {
-    return this.bytesPerLine();
+  /**
+   * This method should return, if it knows, the number of bytes that will be decoded. Many formats
+   * such as uuencoding provide this information. By default we return the maximum bytes that could
+   * have been encoded on the line.
+   */
+  protected int decodeLinePrefix(PushbackInputStream aStream, OutputStream bStream)
+      throws IOException {
+    return (bytesPerLine());
   }
 
-  protected void decodeLineSuffix(PushbackInputStream var1, OutputStream var2) throws IOException {}
+  /**
+   * This method post processes the line, if there are error detection or correction codes in a
+   * line, they are generally processed by this method. The simplest version of this method looks
+   * for the (newline) character.
+   */
+  protected void decodeLineSuffix(PushbackInputStream aStream, OutputStream bStream)
+      throws IOException {}
 
-  protected void decodeAtom(PushbackInputStream var1, OutputStream var2, int var3)
+  /**
+   * This method does an actual decode. It takes the decoded bytes and writes them to the
+   * OutputStream. The integer <i>l</i> tells the method how many bytes are required. This is always
+   * <= bytesPerAtom().
+   */
+  protected void decodeAtom(PushbackInputStream aStream, OutputStream bStream, int l)
       throws IOException {
     throw new IOException();
   }
 
-  protected int readFully(InputStream var1, byte[] var2, int var3, int var4) throws IOException {
-    for (int var5 = 0; var5 < var4; ++var5) {
-      int var6 = var1.read();
-      if (var6 == -1) {
-        return var5 == 0 ? -1 : var5;
-      }
-
-      var2[var5 + var3] = (byte) var6;
+  /** This method works around the bizarre semantics of BufferedInputStream's read method. */
+  protected int readFully(InputStream in, byte buffer[], int offset, int len)
+      throws java.io.IOException {
+    for (int i = 0; i < len; i++) {
+      int q = in.read();
+      if (q == -1) return ((i == 0) ? -1 : i);
+      buffer[i + offset] = (byte) q;
     }
-
-    return var4;
+    return len;
   }
 
-  public void decodeBuffer(InputStream var1, OutputStream var2) throws IOException {
-    int var4 = 0;
-    PushbackInputStream var5 = new PushbackInputStream(var1);
-    this.decodeBufferPrefix(var5, var2);
+  /**
+   * Decode the text from the InputStream and write the decoded octets to the OutputStream. This
+   * method runs until the stream is exhausted.
+   *
+   * @exception IOException An error has occurred while decoding
+   * @exception IOException The input stream is unexpectedly out of data
+   */
+  public void decodeBuffer(InputStream aStream, OutputStream bStream) throws IOException {
+    int i;
+    int totalBytes = 0;
 
+    PushbackInputStream ps = new PushbackInputStream(aStream);
+    decodeBufferPrefix(ps, bStream);
     while (true) {
+      int length;
+
       try {
-        int var6 = this.decodeLinePrefix(var5, var2);
-
-        int var3;
-        for (var3 = 0; var3 + this.bytesPerAtom() < var6; var3 += this.bytesPerAtom()) {
-          this.decodeAtom(var5, var2, this.bytesPerAtom());
-          var4 += this.bytesPerAtom();
+        length = decodeLinePrefix(ps, bStream);
+        for (i = 0; (i + bytesPerAtom()) < length; i += bytesPerAtom()) {
+          decodeAtom(ps, bStream, bytesPerAtom());
+          totalBytes += bytesPerAtom();
         }
-
-        if (var3 + this.bytesPerAtom() == var6) {
-          this.decodeAtom(var5, var2, this.bytesPerAtom());
-          var4 += this.bytesPerAtom();
+        if ((i + bytesPerAtom()) == length) {
+          decodeAtom(ps, bStream, bytesPerAtom());
+          totalBytes += bytesPerAtom();
         } else {
-          this.decodeAtom(var5, var2, var6 - var3);
-          var4 += var6 - var3;
+          decodeAtom(ps, bStream, length - i);
+          totalBytes += (length - i);
         }
-
-        this.decodeLineSuffix(var5, var2);
-      } catch (IOException var8) {
-        this.decodeBufferSuffix(var5, var2);
-        return;
+        decodeLineSuffix(ps, bStream);
+      } catch (IOException e) {
+        break;
       }
     }
+    decodeBufferSuffix(ps, bStream);
   }
 
-  public byte[] decodeBuffer(String var1) throws IOException {
-    byte[] var2 = new byte[var1.length()];
-    var1.getBytes(0, var1.length(), var2, 0);
-    ByteArrayInputStream var3 = new ByteArrayInputStream(var2);
-    ByteArrayOutputStream var4 = new ByteArrayOutputStream();
-    this.decodeBuffer(var3, var4);
-    return var4.toByteArray();
+  /**
+   * Alternate decode interface that takes a String containing the encoded buffer and returns a byte
+   * array containing the data.
+   *
+   * @exception IOException An error has occurred while decoding
+   */
+  public byte decodeBuffer(String inputString)[] throws IOException {
+    byte inputBuffer[] = new byte[inputString.length()];
+    ByteArrayInputStream inStream;
+    ByteArrayOutputStream outStream;
+
+    inputString.getBytes(0, inputString.length(), inputBuffer, 0);
+    inStream = new ByteArrayInputStream(inputBuffer);
+    outStream = new ByteArrayOutputStream();
+    decodeBuffer(inStream, outStream);
+    return (outStream.toByteArray());
   }
 
-  public byte[] decodeBuffer(InputStream var1) throws IOException {
-    ByteArrayOutputStream var2 = new ByteArrayOutputStream();
-    this.decodeBuffer(var1, var2);
-    return var2.toByteArray();
+  /** Decode the contents of the inputstream into a buffer. */
+  public byte decodeBuffer(InputStream in)[] throws IOException {
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    decodeBuffer(in, outStream);
+    return (outStream.toByteArray());
   }
 
-  public ByteBuffer decodeBufferToByteBuffer(String var1) throws IOException {
-    return ByteBuffer.wrap(this.decodeBuffer(var1));
+  /** Decode the contents of the String into a ByteBuffer. */
+  public ByteBuffer decodeBufferToByteBuffer(String inputString) throws IOException {
+    return ByteBuffer.wrap(decodeBuffer(inputString));
   }
 
-  public ByteBuffer decodeBufferToByteBuffer(InputStream var1) throws IOException {
-    return ByteBuffer.wrap(this.decodeBuffer(var1));
+  /** Decode the contents of the inputStream into a ByteBuffer. */
+  public ByteBuffer decodeBufferToByteBuffer(InputStream in) throws IOException {
+    return ByteBuffer.wrap(decodeBuffer(in));
   }
 }
