@@ -104,14 +104,6 @@ public interface SSOManager {
   String getEmailVerifiedUpdatedFlag(String userId);
 
   /**
-   * This method will do the data sync from cassandra db to keyclaok.
-   *
-   * @param request Map<String, Object>
-   * @return String
-   */
-  String syncUserData(Map<String, Object> request);
-
-  /**
    * This method will do the user password update.
    *
    * @param userId String

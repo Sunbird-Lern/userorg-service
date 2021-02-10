@@ -27,16 +27,11 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.CloudStorageUtil;
-import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
-import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
-import org.sunbird.learner.actors.bulkupload.model.StorageDetails;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
@@ -45,7 +40,7 @@ import scala.concurrent.Future;
 
 /** This actor will handle bulk upload operation . */
 @ActorConfig(
-  tasks = {"bulkUpload", "getBulkOpStatus", "getBulkUploadStatusDownloadLink"},
+  tasks = {"bulkUpload", "getBulkOpStatus"},
   asyncTasks = {}
 )
 public class BulkUploadManagementActor extends BaseBulkUploadActor {
@@ -62,49 +57,8 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         .getOperation()
         .equalsIgnoreCase(ActorOperations.GET_BULK_OP_STATUS.getValue())) {
       getUploadStatus(request);
-    } else if (request
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.GET_BULK_UPLOAD_STATUS_DOWNLOAD_LINK.getValue())) {
-      getBulkUploadDownloadStatusLink(request);
-
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
-    }
-  }
-
-  private void getBulkUploadDownloadStatusLink(Request actorMessage) {
-    String processId = (String) actorMessage.getRequest().get(JsonKey.PROCESS_ID);
-    BulkUploadProcessDaoImpl bulkuploadDao = new BulkUploadProcessDaoImpl();
-    BulkUploadProcess bulkUploadProcess =
-        bulkuploadDao.read(processId, actorMessage.getRequestContext());
-    if (bulkUploadProcess != null) {
-
-      try {
-        StorageDetails cloudStorageData = bulkUploadProcess.getDecryptedStorageDetails();
-        if (cloudStorageData == null) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorUnavailableDownloadLink, null);
-        }
-        String signedUrl =
-            CloudStorageUtil.getSignedUrl(
-                CloudStorageType.getByName(cloudStorageData.getStorageType()),
-                cloudStorageData.getContainer(),
-                cloudStorageData.getFileName());
-        Response response = new Response();
-        response.setResponseCode(ResponseCode.OK);
-        Map<String, Object> resultMap = response.getResult();
-        resultMap.put(JsonKey.SIGNED_URL, signedUrl);
-        resultMap.put(JsonKey.OBJECT_TYPE, bulkUploadProcess.getObjectType());
-        resultMap.put(JsonKey.PROCESS_ID, bulkUploadProcess.getId());
-        resultMap.put(JsonKey.STATUS, bulkUploadProcess.getStatus());
-        updateResponseStatus(resultMap);
-        sender().tell(response, self());
-      } catch (IOException e) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorGenerateDownloadLink, null);
-      }
-    } else {
-      ProjectCommonException.throwResourceNotFoundException();
     }
   }
 
