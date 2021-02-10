@@ -101,7 +101,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       String dValue = null;
       String valueToDecrypt = value.trim();
       for (int i = 0; i < ITERATIONS; i++) {
-        byte[] decordedValue = java.util.Base64.getDecoder().decode(valueToDecrypt);
+        byte[] decordedValue = new BASE64Decoder().decodeBuffer(valueToDecrypt);
         byte[] decValue = c.doFinal(decordedValue);
         dValue =
             new String(decValue, StandardCharsets.UTF_8).substring(sunbird_encryption.length());
