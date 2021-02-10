@@ -11,7 +11,7 @@ import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
 @ActorConfig(
-  tasks = {"userSearch"},
+  tasks = {"userLookup"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
