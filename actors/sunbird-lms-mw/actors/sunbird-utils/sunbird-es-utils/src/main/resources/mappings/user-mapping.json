@@ -5,8 +5,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -64,8 +63,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -99,8 +97,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -108,8 +105,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -180,8 +176,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -274,8 +269,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -283,8 +277,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -330,8 +323,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -380,8 +372,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -422,8 +413,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -431,8 +421,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -440,8 +429,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -506,8 +494,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -526,8 +513,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -546,8 +532,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 },
@@ -566,8 +551,7 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower"
+                            "type": "keyword"
                         }
                     }
                 }
@@ -577,8 +561,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -586,8 +569,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -633,8 +615,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -653,8 +634,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -750,8 +730,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -770,8 +749,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
@@ -779,8 +757,7 @@
             "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower"
+                    "type": "keyword"
                 }
             }
         },
