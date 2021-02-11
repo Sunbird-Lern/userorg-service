@@ -2,787 +2,96 @@
     "dynamic": false,
     "properties": {
         "managedBy": {
-            "type": "text",
+            "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
-        },
-        "activeStatus": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
-        },
-        "address": {
-            "properties": {
-                "addType": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "addressLine1": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "addressLine2": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "city": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "country": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdBy": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdDate": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "id": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "state": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "updatedBy": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "updatedDate": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "userId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "zipcode": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                }
-            }
-        },
-        "all_fields": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
+                    "type": "keyword",
                     "analyzer": "keylower"
                 }
             },
             "analyzer": "cs_index_analyzer",
             "search_analyzer": "cs_search_analyzer"
         },
+        "activeStatus": {
+            "type": "keyword",
+            "index": false
+        },
+        "address": {
+            "type": "object",
+            "index": false
+        },
         "appointmentType": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "authenticationStatus": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "avatar": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "badgeAssertions": {
-            "properties": {
-                "assertionId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "assertionid": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeClassImage": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeClassName": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeclassimage": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeclassname": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "badgeid": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdTS": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdTs": {
-                    "type": "date",
-                    "fields": {
-                        "raw": {
-                            "type": "date"
-                        }
-                    }
-                },
-                "createdts": {
-                    "type": "date",
-                    "fields": {
-                        "raw": {
-                            "type": "date"
-                        }
-                    }
-                },
-                "id": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "issuerId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "userId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                }
-            }
+            "type": "object",
+            "index": false
         },
         "badges": {
-            "properties": {
-                "badgeTypeId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdDate": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "id": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "receiverId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                }
-            }
+            "type": "object",
+            "index": false
         },
         "batches": {
-            "properties": {
-                "batchId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "courseId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "enrolledOn": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "lastAccessedOn": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "progress": {
-                    "type": "long",
-                    "fields": {
-                        "raw": {
-                            "type": "long"
-                        }
-                    }
-                }
-            }
+            "type": "object",
+            "index": false
         },
         "channel": {
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "classSubjectTaught": {
-            "properties": {
-                "classes": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "subjects": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                }
-            }
+            "type": "object",
+            "index": false
         },
         "completeness": {
             "type": "long",
-            "fields": {
-                "raw": {
-                    "type": "long"
-                }
-            }
+            "index": false
         },
         "countryCode": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "createdBy": {
-            "type": "text",
+            "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "createdDate": {
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "disabilityType": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "dob": {
             "type": "date",
@@ -793,396 +102,30 @@
             }
         },
         "education": {
-            "properties": {
-                "address": {
-                    "properties": {
-                        "addressLine1": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "addressLine2": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "city": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "createdBy": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "createdDate": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "id": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "state": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "updatedBy": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "updatedDate": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        },
-                        "zipcode": {
-                            "type": "text",
-                            "fields": {
-                                "raw": {
-                                    "type": "text",
-                                    "analyzer": "keylower",
-                                    "fielddata": true
-                                }
-                            },
-                            "copy_to": [
-                                "all_fields"
-                            ],
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer",
-                            "fielddata": true
-                        }
-                    }
-                },
-                "addressId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "boardOrUniversity": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdBy": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "createdDate": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "degree": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "grade": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "id": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "name": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "percentage": {
-                    "type": "double",
-                    "fields": {
-                        "raw": {
-                            "type": "double"
-                        }
-                    }
-                },
-                "updatedBy": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "updatedDate": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "userId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
-                        }
-                    },
-                    "copy_to": [
-                        "all_fields"
-                    ],
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
-                },
-                "yearOfPassing": {
-                    "type": "long",
-                    "fields": {
-                        "raw": {
-                            "type": "long"
-                        }
-                    }
-                }
-            }
+            "type": "object",
+            "index": false
         },
         "email": {
-            "type": "text",
+            "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "prevUsedEmail": {
-            "type": "text",
+            "type": "keyword",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "emailVerified": {
             "type": "boolean",
@@ -1201,68 +144,27 @@
             }
         },
         "employmentState": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "encEmail": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "encPhone": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "firstName": {
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "framework": {
             "properties": {
@@ -1270,81 +172,56 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
+                            "type": "keyword",
+                            "analyzer": "keylower"
                         }
                     },
-                    "copy_to": [
-                        "all_fields"
-                    ],
                     "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
+                    "search_analyzer": "cs_search_analyzer"
                 },
                 "gradeLevel": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
+                            "type": "keyword",
+                            "analyzer": "keylower"
                         }
                     },
-                    "copy_to": [
-                        "all_fields"
-                    ],
                     "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
+                    "search_analyzer": "cs_search_analyzer"
                 },
                 "id": {
-                    "type": "text",
+                    "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
+                            "type": "keyword",
+                            "analyzer": "keylower"
                         }
                     },
-                    "copy_to": [
-                        "all_fields"
-                    ],
                     "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
+                    "search_analyzer": "cs_search_analyzer"
                 },
                 "medium": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
+                            "type": "keyword",
+                            "analyzer": "keylower"
                         }
                     },
-                    "copy_to": [
-                        "all_fields"
-                    ],
                     "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
+                    "search_analyzer": "cs_search_analyzer"
                 },
                 "subject": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "text",
-                            "analyzer": "keylower",
-                            "fielddata": true
+                            "type": "keyword",
+                            "analyzer": "keylower"
                         }
                     },
-                    "copy_to": [
-                        "all_fields"
-                    ],
                     "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer",
-                    "fielddata": true
+                    "search_analyzer": "cs_search_analyzer"
                 }
             }
         },
@@ -1352,161 +229,62 @@
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "gender": {
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "grade": {
             "type": "text",
             "fields": {
                 "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
+                    "type": "keyword",
+                    "analyzer": "keylower"
                 }
             },
-            "copy_to": [
-                "all_fields"
-            ],
             "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "search_analyzer": "cs_search_analyzer"
         },
         "highestAcademicQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestEnglishQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestMathQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestSSTQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestScienceQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestTeacherQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "highestVernacularLanguageQualification": {
-            "type": "text",
-            "fields": {
-                "raw": {
-                    "type": "text",
-                    "analyzer": "keylower",
-                    "fielddata": true
-                }
-            },
-            "copy_to": [
-                "all_fields"
-            ],
-            "analyzer": "cs_index_analyzer",
-            "search_analyzer": "cs_search_analyzer",
-            "fielddata": true
+            "type": "keyword",
+            "index": false
         },
         "id": {
             "type": "text",
