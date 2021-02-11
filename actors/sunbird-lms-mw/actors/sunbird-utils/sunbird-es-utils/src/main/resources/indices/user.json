@@ -64,8 +64,7 @@
                     "index": false
                 },
                 "address": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "appointmentType": {
                     "type": "keyword",
@@ -80,16 +79,13 @@
                     "index": false
                 },
                 "badgeAssertions": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "badges": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "batches": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "channel": {
                     "type": "text",
@@ -103,8 +99,7 @@
                     "search_analyzer": "cs_search_analyzer"
                 },
                 "classSubjectTaught": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "completeness": {
                     "type": "long",
@@ -149,8 +144,7 @@
                     }
                 },
                 "education": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "email": {
                     "type": "keyword",
@@ -357,8 +351,7 @@
                     "index": false
                 },
                 "jobProfile": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "language": {
                     "type": "keyword",
@@ -680,8 +673,7 @@
                     "index": false
                 },
                 "profileVisibility": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "provider": {
                     "type": "text",
@@ -755,8 +747,7 @@
                     "index": false
                 },
                 "skills": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 },
                 "status": {
                     "type": "long",
@@ -880,8 +871,7 @@
                     "index": false
                 },
                 "webPages": {
-                    "type": "object",
-                    "index": false
+                    "type": "object"
                 }
             }
         }
