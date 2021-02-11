@@ -52,12 +52,10 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "activeStatus": {
                     "type": "keyword",
@@ -91,7 +89,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -113,18 +111,16 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "createdDate": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -150,12 +146,10 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "emailVerified": {
                     "type": "boolean",
@@ -189,7 +183,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -202,7 +196,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -213,7 +207,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -224,18 +218,16 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "medium": {
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -246,7 +238,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -259,7 +251,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -270,7 +262,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -281,7 +273,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -320,23 +312,19 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "identifier": {
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "isDeleted": {
                     "type": "boolean",
@@ -361,7 +349,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -380,18 +368,16 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "locationIds": {
-                    "type": "keyword",
+                    "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -432,18 +418,16 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "addedByName": {
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -454,7 +438,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -465,7 +449,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -476,34 +460,28 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "hashTagId": {
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "id": {
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "isApproved": {
                             "type": "boolean",
@@ -533,7 +511,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -544,7 +522,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -555,7 +533,7 @@
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -566,18 +544,16 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "orgjoindate": {
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -588,18 +564,16 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "roles": {
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -610,18 +584,16 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         },
                         "updatedDate": {
                             "type": "text",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
                             },
@@ -632,12 +604,10 @@
                             "type": "keyword",
                             "fields": {
                                 "raw": {
-                                    "type": "keyword",
+                                    "type": "text",
                                     "analyzer": "keylower"
                                 }
-                            },
-                            "analyzer": "cs_index_analyzer",
-                            "search_analyzer": "cs_search_analyzer"
+                            }
                         }
                     }
                 },
@@ -645,12 +615,10 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "phoneVerified": {
                     "type": "boolean",
@@ -679,7 +647,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -691,21 +659,19 @@
                     "index": false
                 },
                 "registryId": {
-                    "type": "text",
-                    "fields": {
-                        "raw": {
-                            "type": "keyword",
-                            "analyzer": "keylower"
-                        }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
-                },
-                "roles": {
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
+                            "analyzer": "keylower"
+                        }
+                    }
+                },
+                "roles": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -716,18 +682,16 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "rootOrgName": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -761,7 +725,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -800,7 +764,7 @@
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -815,18 +779,16 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "updatedDate": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
@@ -837,29 +799,25 @@
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "userName": {
                     "type": "keyword",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
-                    },
-                    "analyzer": "cs_index_analyzer",
-                    "search_analyzer": "cs_search_analyzer"
+                    }
                 },
                 "userType": {
                     "type": "text",
                     "fields": {
                         "raw": {
-                            "type": "keyword",
+                            "type": "text",
                             "analyzer": "keylower"
                         }
                     },
