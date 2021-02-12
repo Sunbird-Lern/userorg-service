@@ -48,8 +48,6 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
                     processTasks((List<BulkUploadProcessTask>) tasks, request.getRequestContext());
                     return null;
                   },
-                  null,
-                  (String[]) request.get(JsonKey.FIELDS),
                   request.getRequestContext());
               return null;
             });
@@ -67,13 +65,13 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
 
       Map<String, Object> row = mapper.readValue(data, Map.class);
 
-      if (checkMandatoryFields(row, GeoLocationJsonKey.CODE)) {
+      if (checkMandatoryFields(row, JsonKey.CODE)) {
         Location location = null;
         try {
           location =
               locationClient.getLocationByCode(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                  (String) row.get(GeoLocationJsonKey.CODE),
+                  (String) row.get(JsonKey.CODE),
                   context);
         } catch (Exception ex) {
           setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, null);
@@ -88,7 +86,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
             task,
             BulkProcessStatus.FAILED,
             MessageFormat.format(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(), GeoLocationJsonKey.CODE),
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CODE),
             row,
             null);
       }
@@ -121,16 +119,15 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     row.put(JsonKey.ID, id);
 
     // since for update type is not allowed so remove from request body
-    String locationType = (String) row.remove(GeoLocationJsonKey.LOCATION_TYPE);
+    String locationType = (String) row.remove(JsonKey.LOCATION_TYPE);
     // check whether update for same type or different type.
-    if (!(areLocationTypesEqual(
-        locationType, (String) response.get(GeoLocationJsonKey.LOCATION_TYPE)))) {
-      row.put(GeoLocationJsonKey.LOCATION_TYPE, response.get(GeoLocationJsonKey.LOCATION_TYPE));
+    if (!(areLocationTypesEqual(locationType, (String) response.get(JsonKey.LOCATION_TYPE)))) {
+      row.put(JsonKey.LOCATION_TYPE, response.get(JsonKey.LOCATION_TYPE));
       setTaskStatus(
           task,
           BulkProcessStatus.FAILED,
           MessageFormat.format(
-              ResponseCode.unupdatableField.getErrorMessage(), GeoLocationJsonKey.LOCATION_TYPE),
+              ResponseCode.unupdatableField.getErrorMessage(), JsonKey.LOCATION_TYPE),
           row,
           JsonKey.UPDATE);
       return;
@@ -151,7 +148,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       setTaskStatus(task, BulkProcessStatus.FAILED, ex.getMessage(), row, JsonKey.UPDATE);
     }
 
-    row.put(GeoLocationJsonKey.LOCATION_TYPE, locationType);
+    row.put(JsonKey.LOCATION_TYPE, locationType);
     task.setData(mapper.writeValueAsString(row));
     setSuccessTaskStatus(task, BulkProcessStatus.COMPLETED, row, JsonKey.UPDATE);
   }

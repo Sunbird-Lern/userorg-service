@@ -25,6 +25,21 @@ public class UserRequestValidatorTest {
   private static final UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   @Test
+  public void isValidLocationTypeTestSuccess() {
+    boolean bool = userRequestValidator.isValidLocationType("state");
+    Assert.assertTrue(bool);
+  }
+
+  @Test
+  public void isValidLocationTypeTestFailure() {
+    try {
+      userRequestValidator.isValidLocationType("state2");
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
   public void testValidatePasswordFailure() {
     Request request = initailizeRequest();
     Map<String, Object> requestObj = request.getRequest();
@@ -1173,82 +1188,6 @@ public class UserRequestValidatorTest {
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
       assertEquals(ResponseCode.phoneNoFormatError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithInvalidLocationIds() {
-    Request request = new Request();
-    request.getRequest().put(JsonKey.LOCATION_IDS, "");
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithEmptyLocationIds() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.locationIdRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithInvalidUserLstReq() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.USER_LIST_REQ, null);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithUserLstReqTrue() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.USER_LIST_REQ, true);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.functionalityMissing.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithEmptyEstCntReq() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.ESTIMATED_COUNT_REQ, "");
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
     }
   }
 

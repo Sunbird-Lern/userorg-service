@@ -19,7 +19,6 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.HeaderParam;
 import play.libs.Json;
@@ -120,8 +119,12 @@ public class LocationControllerTest extends BaseApplicationTest {
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME,LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
+<<<<<<< HEAD
     locationData.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
     locationData.put(GeoLocationJsonKey.PARENT_ID,PARENT_ID);   //not sure with geolocationjsonkey or jsonkey
+=======
+    locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
+>>>>>>> 547a704dba3fcd8b5537eea44ccdc69e266e77d0
     requestMap.put(JsonKey.REQUEST, locationData);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
@@ -208,7 +211,7 @@ public class LocationControllerTest extends BaseApplicationTest {
 
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    requestBody.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
     requestBody.put(JsonKey.ID, LOCATION_ID);
     requestMap.put(JsonKey.REQUEST, requestBody);
     String data = TestUtil.mapToJson(requestMap);
@@ -237,7 +240,7 @@ public class LocationControllerTest extends BaseApplicationTest {
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.NAME, LOCATION_NAME);
     filters.put(JsonKey.CODE, LOCATION_CODE);
-    filters.put(GeoLocationJsonKey.LOCATION_TYPE, LOCATION_TYPE);
+    filters.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
     requestBody.put(JsonKey.FILTERS, filters);
     requestMap.put(JsonKey.REQUEST, requestBody);
     String data = TestUtil.mapToJson(requestMap);

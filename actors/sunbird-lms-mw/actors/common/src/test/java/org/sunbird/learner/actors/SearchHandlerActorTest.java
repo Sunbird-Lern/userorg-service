@@ -16,7 +16,6 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -34,8 +33,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.search.SearchHandlerActor;
 import scala.concurrent.Promise;
@@ -55,7 +52,6 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;
@@ -74,8 +70,7 @@ public class SearchHandlerActorTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(createResponseGet(true));
-    when(esService.search(
-            Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any(RequestContext.class)))
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
   }
 
@@ -96,6 +91,34 @@ public class SearchHandlerActorTest {
   }
 
   @Test
+  public void searchOrg() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    PowerMockito.mockStatic(BaseMWService.class);
+    BaseMWService.getRemoteRouter(Mockito.anyString());
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.ORG_SEARCH.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.QUERY, "");
+    Map<String, Object> filters = new HashMap<>();
+    List<String> objectType = new ArrayList<String>();
+    objectType.add("org");
+    filters.put(JsonKey.ID, "ORG_001");
+    innerMap.put(JsonKey.FILTERS, filters);
+    innerMap.put(JsonKey.LIMIT, 1);
+    Map<String, Object> contextMap = new HashMap<>();
+    contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);
+    reqObj.setContext(contextMap);
+    reqObj.setRequest(innerMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+  }
+
+  @Test
   public void searchUser() {
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
@@ -105,7 +128,7 @@ public class SearchHandlerActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+    reqObj.setOperation(ActorOperations.USER_SEARCH.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.QUERY, "");
     Map<String, Object> filters = new HashMap<>();
@@ -134,7 +157,7 @@ public class SearchHandlerActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+    reqObj.setOperation(ActorOperations.USER_SEARCH.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.QUERY, "");
     Map<String, Object> filters = new HashMap<>();

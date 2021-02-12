@@ -1,6 +1,7 @@
 package controllers.organisationmanagement;
 
 import controllers.BaseController;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
@@ -8,8 +9,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.orgvalidator.OrgRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.concurrent.CompletionStage;
 
 public class OrgController extends BaseController {
 
@@ -22,7 +21,7 @@ public class OrgController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> updateOrg(Http.Request httpRequest) {
@@ -34,7 +33,7 @@ public class OrgController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> updateOrgStatus(Http.Request httpRequest) {
@@ -46,7 +45,7 @@ public class OrgController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> getOrgDetails(Http.Request httpRequest) {
@@ -58,12 +57,12 @@ public class OrgController extends BaseController {
           return null;
         },
         getAllRequestHeaders(httpRequest),
-            httpRequest);
+        httpRequest);
   }
 
   public CompletionStage<Result> search(Http.Request httpRequest) {
     return handleSearchRequest(
-        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        ActorOperations.ORG_SEARCH.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
@@ -73,6 +72,6 @@ public class OrgController extends BaseController {
         null,
         getAllRequestHeaders(httpRequest),
         EsType.organisation.getTypeName(),
-            httpRequest);
+        httpRequest);
   }
 }

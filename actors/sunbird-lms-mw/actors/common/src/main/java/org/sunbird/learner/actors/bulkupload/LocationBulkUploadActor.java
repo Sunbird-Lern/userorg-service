@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
@@ -25,10 +24,7 @@ import org.sunbird.learner.util.Util;
 public class LocationBulkUploadActor extends BaseBulkUploadActor {
 
   String[] bulkLocationAllowedFields = {
-    GeoLocationJsonKey.CODE,
-    JsonKey.NAME,
-    GeoLocationJsonKey.PARENT_CODE,
-    GeoLocationJsonKey.PARENT_ID
+    JsonKey.CODE, JsonKey.NAME, JsonKey.PARENT_CODE, JsonKey.PARENT_ID
   };
 
   @Override
@@ -51,7 +47,7 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
     BulkUploadProcess bulkUploadProcess =
         handleUpload(
             JsonKey.LOCATION, (String) req.get(JsonKey.CREATED_BY), request.getRequestContext());
-    String locationType = (String) req.get(GeoLocationJsonKey.LOCATION_TYPE);
+    String locationType = (String) req.get(JsonKey.LOCATION_TYPE);
     processLocationBulkUpload(
         req,
         bulkUploadProcess.getId(),
@@ -72,7 +68,7 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
       fileByteArray = (byte[]) req.get(JsonKey.FILE);
     }
     Map<String, Object> additionalRowFields = new HashMap<>();
-    additionalRowFields.put(GeoLocationJsonKey.LOCATION_TYPE, locationType);
+    additionalRowFields.put(JsonKey.LOCATION_TYPE, locationType);
     Integer recordCount =
         validateAndParseRecords(fileByteArray, processId, additionalRowFields, context);
     processBulkUpload(
