@@ -15,7 +15,7 @@
                         ],
                         "min_gram": "3",
                         "type": "ngram",
-                        "max_gram": "20"
+                        "max_gram": "10"
                     }
                 },
                 "analyzer": {
