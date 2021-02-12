@@ -27,10 +27,8 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -61,7 +59,13 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchHelper.class
 })
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserProfileReadServiceTest {
 
   private String tncConfig =
@@ -89,12 +93,11 @@ public class UserProfileReadServiceTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
     Map<String, Object> esRespone = new HashMap<>();
     esRespone.put(JsonKey.CONTENT, new ArrayList<>());
-    esRespone.put(GeoLocationJsonKey.LOCATION_TYPE, "STATE");
+    esRespone.put(JsonKey.LOCATION_TYPE, "STATE");
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
 
-    when(esSearch.search(
-            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
 
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -104,7 +107,6 @@ public class UserProfileReadServiceTest {
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
     userList.put(JsonKey.USER_ID, "1234");
-    userList.put(JsonKey.IS_DELETED, false);
     userList.put(JsonKey.IS_DELETED, false);
     resp.add(userList);
     response.put(JsonKey.RESPONSE, resp);
@@ -145,13 +147,14 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
-    Mockito.when(userDao.getUserDetailsById("1234567890", null))
+    Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getValidUserResponse("1234567890"));
 
     UserOrgDao userOrgDao = PowerMockito.mock(UserOrgDao.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
     Mockito.when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
-    Mockito.when(userOrgDao.getUserOrgListByUserId("1234567890", null)).thenReturn(response2);
+    Mockito.when(userOrgDao.getUserOrgListByUserId(Mockito.anyString(), Mockito.any()))
+        .thenReturn(response2);
 
     Map<String, Object> org = new HashMap<>();
     org.put(JsonKey.ID, "4578963210");
@@ -219,7 +222,7 @@ public class UserProfileReadServiceTest {
                 Mockito.anyString(),
                 Mockito.anyList(),
                 Mockito.anyList(),
-                Mockito.any(RequestContext.class)))
+                Mockito.any()))
         .thenReturn(orgRes)
         .thenReturn(orgRes)
         .thenReturn(orgRes)
@@ -257,8 +260,7 @@ public class UserProfileReadServiceTest {
     externalIds.add(externalId2);
 
     PowerMockito.mockStatic(UserUtil.class);
-    when(UserUtil.getExternalIds(
-            Mockito.anyString(), Mockito.anyBoolean(), Mockito.any(RequestContext.class)))
+    when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(externalIds);
 
     Response response1 =
@@ -284,7 +286,7 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
-    Mockito.when(userDao.getUserById("1234567890", null)).thenReturn(null);
+    Mockito.when(userDao.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(null);
     UserProfileReadService userProfileReadService = new UserProfileReadService();
     try {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
@@ -314,7 +316,7 @@ public class UserProfileReadServiceTest {
         .thenReturn(getUserDbMap("1234567890"));
     Map<String, Object> user = getValidUserResponse("1234567890");
     user.put(JsonKey.IS_DELETED, true);
-    Mockito.when(userDao.getUserDetailsById("1234567890", null)).thenReturn(user);
+    Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any())).thenReturn(user);
     UserProfileReadService userProfileReadService = new UserProfileReadService();
     try {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));

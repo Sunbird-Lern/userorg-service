@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -41,7 +43,13 @@ import org.sunbird.telemetry.util.TelemetryWriter;
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserBulkMigrationActorTest {
   private static ActorSystem system;
   private static final Props props = Props.create(UserBulkMigrationActor.class);
@@ -65,7 +73,6 @@ public class UserBulkMigrationActorTest {
     when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
-    TelemetryWriter.write(Mockito.any());
     system = ActorSystem.create("system");
   }
 

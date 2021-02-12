@@ -20,14 +20,20 @@ public final class UserOrgDaoImpl implements UserOrgDao {
 
   private ObjectMapper mapper = new ObjectMapper();
 
+  private static UserOrgDaoImpl instance;
+
   private UserOrgDaoImpl() {}
 
-  private static class LazyInitializer {
-    private static UserOrgDao INSTANCE = new UserOrgDaoImpl();
-  }
-
   public static UserOrgDao getInstance() {
-    return LazyInitializer.INSTANCE;
+    if (instance == null) {
+      // To make thread safe
+      synchronized (UserOrgDaoImpl.class) {
+        // check again as multiple threads
+        // can reach above step
+        if (instance == null) instance = new UserOrgDaoImpl();
+      }
+    }
+    return instance;
   }
 
   @Override

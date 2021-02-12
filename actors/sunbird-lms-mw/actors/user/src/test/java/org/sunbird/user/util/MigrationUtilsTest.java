@@ -1,6 +1,7 @@
 package org.sunbird.user.util;
 
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +28,13 @@ import org.sunbird.user.service.impl.UserServiceImpl;
 @RunWith(PowerMockRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @PrepareForTest({UserServiceImpl.class, ServiceFactory.class, CassandraOperationImpl.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class MigrationUtilsTest {
 
   private static Response response;

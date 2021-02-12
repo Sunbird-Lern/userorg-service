@@ -43,23 +43,6 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     String operation = request.getOperation();
     Util.initializeContext(request, TelemetryEnvKey.USER);
     if (operation.equalsIgnoreCase("userBulkUploadBackground")) {
-
-      Map outputColumns =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              "userProfileConfig",
-              "csv.outputColumns",
-              new TypeReference<Map>() {},
-              request.getRequestContext());
-
-      String[] outputColumnsOrder =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-              "userProfileConfig",
-              "csv.outputColumnsOrder",
-              new TypeReference<String[]>() {},
-              request.getRequestContext());
-
       handleBulkUploadBackground(
           request,
           (baseBulkUpload) -> {
@@ -72,10 +55,6 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
                       request.getRequestContext());
                   return null;
                 },
-                outputColumns,
-                outputColumnsOrder != null
-                    ? outputColumnsOrder
-                    : (String[]) request.get(JsonKey.FIELDS),
                 request.getRequestContext());
             return null;
           });
