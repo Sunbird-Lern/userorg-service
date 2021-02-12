@@ -142,7 +142,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testCreateLocationFailureWithoutValidType() {
     Map<String, Object> res = new HashMap<>(data);
@@ -151,7 +151,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testCreateLocationFailureWithInvalidLocationType() {
     Map<String, Object> res = new HashMap<>(data);
@@ -160,7 +160,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testUpdateLocationFailureWithoutLocationId() {
     Map<String, Object> res = new HashMap<>(data);
@@ -169,7 +169,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testUpdateLocationFailureWithLocationType() {
 
