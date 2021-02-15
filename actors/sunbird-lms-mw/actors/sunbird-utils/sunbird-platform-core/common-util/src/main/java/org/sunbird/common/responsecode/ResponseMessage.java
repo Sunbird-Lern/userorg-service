@@ -148,6 +148,7 @@ public interface ResponseMessage {
     String INVALID_LOCATION_DELETE_REQUEST =
         "One or more locations have a parent reference to given location and hence cannot be deleted.";
     String LOCATION_TYPE_CONFLICTS = "Location type conflicts with its parent location type.";
+    String LOCATION_TYPE_REQUIRED = "Location type is required for creating a location";
     String MANDATORY_PARAMETER_MISSING = "Mandatory parameter {0} is missing.";
     String ERROR_MANDATORY_PARAMETER_EMPTY = "Mandatory parameter {0} is empty.";
     String ERROR_NO_FRAMEWORK_FOUND = "No framework found.";
@@ -378,6 +379,8 @@ public interface ResponseMessage {
     String INVALID_PARAMETER = "INVALID_PARAMETER";
     String INVALID_LOCATION_DELETE_REQUEST = "INVALID_LOCATION_DELETE_REQUEST";
     String LOCATION_TYPE_CONFLICTS = "LOCATION_TYPE_CONFLICTS";
+    String LOCATION_TYPE_REQUIRED = "LOCATION_TYPE_REQUIRED";
+    String INVALID_LOCATION_TYPE = "INVALID_LOCATION_TYPE";
     String MANDATORY_PARAMETER_MISSING = "MANDATORY_PARAMETER_MISSING";
     String ERROR_MANDATORY_PARAMETER_EMPTY = "ERROR_MANDATORY_PARAMETER_EMPTY";
     String ERROR_NO_FRAMEWORK_FOUND = "ERROR_NO_FRAMEWORK_FOUND";
