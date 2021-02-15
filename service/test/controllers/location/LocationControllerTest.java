@@ -65,6 +65,8 @@ public class LocationControllerTest extends BaseApplicationTest {
     locationData.put(JsonKey.NAME, LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
     locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
+
+    locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
     requestMap.put(JsonKey.REQUEST, locationData);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
@@ -120,8 +122,11 @@ public class LocationControllerTest extends BaseApplicationTest {
     locationData.put(JsonKey.NAME,LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
     locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
-    locationData.put(JsonKey.PARENT_ID,PARENT_ID);   //not sure with geolocationjsonkey or jsonkey
+    locationData.put(JsonKey.PARENT_ID,PARENT_ID);
     locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
+
+    locationData.put(JsonKey.TYPE, LOCATION_TYPE);
+    locationData.put(JsonKey.PARENT_ID,PARENT_ID);
     requestMap.put(JsonKey.REQUEST, locationData);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);

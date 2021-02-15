@@ -1,6 +1,7 @@
 package org.sunbird.location.actors;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -134,25 +135,31 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testCreateLocationFailureWithoutValidType() {
     Map<String, Object> res = new HashMap<>(data);
-    res.remove(JsonKey.LOCATION_TYPE);
-    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
-    assertTrue(result);
-  }
-
-  //created - Fathima Sherin
-  @Test
-  public void testCreateLocationFailureWithInvalidLocationType() {
-    Map<String, Object> res = new HashMap<>(data);
+//    res.remove(JsonKey.LOCATION_TYPE);
+//    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
     res.remove(JsonKey.SUNBIRD_VALID_LOCATION_TYPES);
     boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
+  @Test
+  public void testCreateLocationFailureWithInvalidLocationType() {
+    Map<String, Object> res = new HashMap<>(data);
+
+//    res.remove(JsonKey.SUNBIRD_VALID_LOCATION_TYPES);
+//    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
+
+    res.remove(JsonKey.LOCATION_TYPE);
+    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
+    assertTrue(result);
+  }
+
+  //created
   @Test
   public void testUpdateLocationFailureWithoutLocationId() {
     Map<String, Object> res = new HashMap<>(data);
@@ -161,7 +168,7 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created - Fathima Sherin
+  //created
   @Test
   public void testUpdateLocationFailureWithLocationType() {
 
@@ -171,6 +178,7 @@ public class LocationActorTest {
                     LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidValue);
     assertTrue(result);
   }
+
 
 
   @Test
