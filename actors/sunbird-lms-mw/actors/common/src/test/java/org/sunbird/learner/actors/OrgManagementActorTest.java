@@ -703,31 +703,6 @@ public class OrgManagementActorTest {
     return response;
   }
 
-  private boolean testScenarioNew(
-          ActorOperations actorOperation,
-          boolean isSuccess,
-          Map<String, Object> data,
-          ResponseCode errorCode) {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request actorMessage = new Request();
-
-    if (data != null) actorMessage.getRequest().putAll(data);
-    actorMessage.setOperation(actorOperation.getValue());
-    subject.tell(actorMessage, probe.getRef());
-
-    if (isSuccess) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-      return null != res;
-    } else {
-      ProjectCommonException res =
-              probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-              || res.getResponseCode() == errorCode.getResponseCode();
-    }
-  }
-
   private boolean testScenario(Request request, ResponseCode errorCode) {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
