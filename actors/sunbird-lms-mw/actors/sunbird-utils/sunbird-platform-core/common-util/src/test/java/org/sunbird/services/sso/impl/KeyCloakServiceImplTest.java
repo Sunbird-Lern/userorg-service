@@ -1,6 +1,9 @@
 package org.sunbird.services.sso.impl;
 
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -21,15 +24,23 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BaseHttpTest;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
 
+@PrepareForTest({
+  ProjectUtil.class,
+  KeyCloakConnectionProvider.class,
+  KeycloakRequiredActionLinkUtil.class
+})
+@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
@@ -41,6 +52,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   private static final Map<String, Object> USER_SUCCESS = new HashMap<>();
 
   static {
+    userId.put(JsonKey.USER_ID, UUID.randomUUID().toString());
     USER_SUCCESS.put(JsonKey.USERNAME, userName);
     USER_SUCCESS.put(JsonKey.PASSWORD, "password");
     USER_SUCCESS.put(JsonKey.FIRST_NAME, "A");
@@ -64,6 +76,8 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @BeforeClass
   public static void init() {
+    PowerMockito.mockStatic(ProjectUtil.class);
+    PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("somestring");
     try {
       t = Class.forName("org.sunbird.services.sso.SSOServiceFactory");
     } catch (ClassNotFoundException e) {
@@ -266,69 +280,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   }
 
   @Test
-  public void testSyncUserDataSuccess() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PROVIDER, "ntp");
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.COUNTRY_CODE, "+91");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithoutCountryCode() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PROVIDER, "ntp");
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithoutProvider() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String response = keyCloakService.syncUserData(request);
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testSyncUserDataSuccessWithInvalidUser() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PASSWORD, "password");
-    request.put(JsonKey.FIRST_NAME, "A");
-    request.put(JsonKey.LAST_NAME, "B");
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USER_ID, "xey123-23sss-cbdsgdgdg");
-    try {
-      keyCloakService.syncUserData(request);
-    } catch (ProjectCommonException e) {
-      Assert.assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
-      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-    }
-  }
-
-  @Test
   public void testDoPasswordUpdateSuccess() {
     boolean response = keyCloakService.doPasswordUpdate(userId.get(JsonKey.USER_ID), "password");
     Assert.assertEquals(true, response);
@@ -336,9 +287,8 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @Test
   public void testGetFederatedUserId()
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-          NoSuchMethodException, SecurityException, IllegalArgumentException,
-          InvocationTargetException {
+      throws IllegalAccessException, NoSuchMethodException, SecurityException,
+          IllegalArgumentException, InvocationTargetException {
     KeyCloakServiceImpl.class.getDeclaredMethods();
     Method m = KeyCloakServiceImpl.class.getDeclaredMethod("getFederatedUserId", String.class);
     m.setAccessible(true);

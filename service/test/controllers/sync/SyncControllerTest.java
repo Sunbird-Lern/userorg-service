@@ -1,4 +1,4 @@
-package controllers.geolocation;
+package controllers.sync;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -11,7 +11,6 @@ import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -28,13 +27,12 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.RequestInterceptor;
 
-/** Created by arvind on 1/12/17. */
+/** Created by arvind on 6/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
-@Ignore
-public class GeoLocationControllerTest extends BaseApplicationTest {
+public class SyncControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
 
@@ -43,96 +41,48 @@ public class GeoLocationControllerTest extends BaseApplicationTest {
     setup(DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
-    headerMap.put(HeaderParam.X_REQUEST_ID.getName(), new String[] {"123-456-789"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});
+    headerMap.put(HeaderParam.X_REQUEST_ID.getName(), new String[] {"123-456-789"});
     headerMap.put(
         HeaderParam.X_Authenticated_Userid.getName(), new String[] {"Authenticated user id"});
     headerMap.put(JsonKey.MESSAGE_ID, new String[] {"Unique Message id"});
   }
 
   @Test
-  public void testcreateGeoLocationFailure() {
+  public void testsync() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
     when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID, "org123");
+    innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+    innerMap.put(JsonKey.OPERATION_FOR, "learner");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/location/create").method("POST");
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/data/sync").method("POST");
     // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testsyncFailure() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.OBJECT_TYPE, "invalidObject");
+    requestMap.put(JsonKey.REQUEST, innerMap);
+    String data = mapToJson(requestMap);
+
+    JsonNode json = Json.parse(data);
+    RequestBuilder req = new RequestBuilder().bodyJson(json).uri("/v1/data/sync").method("POST");
     Result result = Helpers.route(application, req);
     assertEquals(400, result.status());
-  }
-
-  @Test
-  public void testupdateGeoLocation() {
-    Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID, "org123");
-    innerMap.put(JsonKey.ID, "123");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/location/update").method("PATCH");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testdeleteGeoLocation() {
-    Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID, "org123");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/location/delete/123").method("DELETE");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testsendNotification() {
-    Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.ROOT_ORG_ID, "org123");
-    innerMap.put(JsonKey.TO, "c93");
-    Map map = new HashMap();
-    map.put(JsonKey.FROM_EMAIL, "fromEmail");
-    innerMap.put(JsonKey.DATA, map);
-    innerMap.put(JsonKey.TYPE, "fcm");
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-        new RequestBuilder().bodyJson(json).uri("/v1/notification/send").method("POST");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
   }
 }

@@ -57,22 +57,20 @@ public final class RequestValidator {
   }
 
   public static void validateSyncRequest(Request request) {
-    String operation = (String) request.getRequest().get(JsonKey.OPERATION_FOR);
-    if ((null != operation) && (!operation.equalsIgnoreCase("keycloak"))) {
-      if (request.getRequest().get(JsonKey.OBJECT_TYPE) == null) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ResponseCode.dataTypeError.getErrorMessage(),
-            ERROR_CODE);
-      }
-      List<String> list =
-          new ArrayList<>(Arrays.asList(new String[] {JsonKey.USER, JsonKey.ORGANISATION}));
-      if (!list.contains(request.getRequest().get(JsonKey.OBJECT_TYPE))) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidObjectType.getErrorCode(),
-            ResponseCode.invalidObjectType.getErrorMessage(),
-            ERROR_CODE);
-      }
+    if (request.getRequest().get(JsonKey.OBJECT_TYPE) == null) {
+      throw new ProjectCommonException(
+          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError.getErrorMessage(),
+          ERROR_CODE);
+    }
+    List<String> list =
+        new ArrayList<>(
+            Arrays.asList(new String[] {JsonKey.USER, JsonKey.ORGANISATION, JsonKey.LOCATION}));
+    if (!list.contains(request.getRequest().get(JsonKey.OBJECT_TYPE))) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidObjectType.getErrorCode(),
+          ResponseCode.invalidObjectType.getErrorMessage(),
+          ERROR_CODE);
     }
   }
 
@@ -242,99 +240,6 @@ public final class RequestValidator {
     if (StringUtils.isBlank(clientId)) {
       throw createExceptionInstance(ResponseCode.invalidClientId.getErrorCode());
     }
-  }
-
-  /**
-   * Method to validate notification request data.
-   *
-   * @param request Request
-   */
-  @SuppressWarnings("unchecked")
-  public static void validateSendNotification(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.TO))) {
-      throw createExceptionInstance(ResponseCode.invalidTopic.getErrorCode());
-    }
-    if (request.getRequest().get(JsonKey.DATA) == null
-        || !(request.getRequest().get(JsonKey.DATA) instanceof Map)
-        || ((Map<String, Object>) request.getRequest().get(JsonKey.DATA)).size() == 0) {
-      throw createExceptionInstance(ResponseCode.invalidTopicData.getErrorCode());
-    }
-
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.TYPE))) {
-      throw createExceptionInstance(ResponseCode.invalidNotificationType.getErrorCode());
-    }
-    if (!(JsonKey.FCM.equalsIgnoreCase((String) request.getRequest().get(JsonKey.TYPE)))) {
-      throw createExceptionInstance(ResponseCode.notificationTypeSupport.getErrorCode());
-    }
-  }
-
-  @SuppressWarnings("rawtypes")
-  public static void validateGetUserCount(Request request) {
-    if (!validateListType(request, JsonKey.LOCATION_IDS)) {
-      throw createDataTypeException(
-          ResponseCode.dataTypeError.getErrorCode(), JsonKey.LOCATION_IDS, JsonKey.LIST);
-    }
-    if (null == request.getRequest().get(JsonKey.LOCATION_IDS)
-        && ((List) request.getRequest().get(JsonKey.LOCATION_IDS)).isEmpty()) {
-      throw createExceptionInstance(ResponseCode.locationIdRequired.getErrorCode());
-    }
-
-    if (!validateBooleanType(request, JsonKey.USER_LIST_REQ)) {
-      throw createDataTypeException(
-          ResponseCode.dataTypeError.getErrorCode(), JsonKey.USER_LIST_REQ, "Boolean");
-    }
-
-    if (null != request.getRequest().get(JsonKey.USER_LIST_REQ)
-        && (Boolean) request.getRequest().get(JsonKey.USER_LIST_REQ)) {
-      throw createExceptionInstance(ResponseCode.functionalityMissing.getErrorCode());
-    }
-
-    if (!validateBooleanType(request, JsonKey.ESTIMATED_COUNT_REQ)) {
-      throw createDataTypeException(
-          ResponseCode.dataTypeError.getErrorCode(), JsonKey.ESTIMATED_COUNT_REQ, "Boolean");
-    }
-
-    if (null != request.getRequest().get(JsonKey.ESTIMATED_COUNT_REQ)
-        && (Boolean) request.getRequest().get(JsonKey.ESTIMATED_COUNT_REQ)) {
-      throw createExceptionInstance(ResponseCode.functionalityMissing.getErrorCode());
-    }
-  }
-
-  /**
-   * if the request contains that key and key is not instance of List then it will return false.
-   * other cases it will return true.
-   *
-   * @param request Request
-   * @param key String
-   * @return boolean
-   */
-  private static boolean validateListType(Request request, String key) {
-    return !(request.getRequest().containsKey(key)
-        && null != request.getRequest().get(key)
-        && !(request.getRequest().get(key) instanceof List));
-  }
-
-  /**
-   * If the request contains the key and key value is not Boolean type then it will return false ,
-   * for any other case it will return true.
-   *
-   * @param request Request
-   * @param key String
-   * @return boolean
-   */
-  private static boolean validateBooleanType(Request request, String key) {
-    return !(request.getRequest().containsKey(key)
-        && null != request.getRequest().get(key)
-        && !(request.getRequest().get(key) instanceof Boolean));
-  }
-
-  private static ProjectCommonException createDataTypeException(
-      String errorCode, String key1, String key2) {
-    return new ProjectCommonException(
-        ResponseCode.getResponse(errorCode).getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.getResponse(errorCode).getErrorMessage(), key1, key2),
-        ERROR_CODE);
   }
 
   private static ProjectCommonException createExceptionInstance(String errorCode) {

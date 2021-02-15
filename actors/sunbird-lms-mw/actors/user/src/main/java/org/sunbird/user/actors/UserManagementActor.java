@@ -38,7 +38,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -1427,7 +1426,7 @@ public class UserManagementActor extends BaseActor {
 
     Map<String, Object> searchResult =
         userClient.searchManagedUser(
-            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),
+            getActorRef(ActorOperations.USER_SEARCH.getValue()),
             request,
             request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
@@ -1582,12 +1581,18 @@ public class UserManagementActor extends BaseActor {
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
-        isValidLocationType(location.getType(), typeList);
-        if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-          set.add(location.getCode());
-        } else {
-          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+        // for create-MUA we allow locations upto district for remaining we will validate all.
+        if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+                && ((location.getType().equals(JsonKey.STATE))
+                    || (location.getType().equals(JsonKey.DISTRICT))))
+            || !userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())) {
+          isValidLocationType(location.getType(), typeList);
+          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+            set.add(location.getCode());
+          } else {
+            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
+            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+          }
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
@@ -1605,10 +1610,7 @@ public class UserManagementActor extends BaseActor {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     return true;

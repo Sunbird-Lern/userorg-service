@@ -28,7 +28,7 @@ import util.RequestInterceptor;
 /** Created by arvind on 5/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class HealthControllerTest extends BaseApplicationTest {
 
