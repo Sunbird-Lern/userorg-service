@@ -44,10 +44,8 @@ public class UserDaoImpl implements UserDao {
   }
 
   @Override
-  public String createUser(User user, RequestContext context) {
-    Map<String, Object> map = mapper.convertValue(user, Map.class);
-    cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, context);
-    return (String) map.get(JsonKey.ID);
+  public Response createUser(Map<String, Object> user, RequestContext context) {
+    return cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, user, context);
   }
 
   @Override
