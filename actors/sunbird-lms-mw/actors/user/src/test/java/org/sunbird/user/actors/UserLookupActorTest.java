@@ -18,26 +18,17 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.UserLookUp;
+import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  UserLookUp.class,
-  UserDao.class,
-  UserDaoImpl.class,
-  UserServiceImpl.class,
-  UserService.class
-})
+@PrepareForTest({UserLookupDaoImpl.class, UserDao.class, UserDaoImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -52,12 +43,21 @@ public class UserLookupActorTest {
 
   @Test
   public void getUserKeycloakSearchTestWithId() throws Exception {
-    PowerMockito.mockStatic(UserServiceImpl.class);
-    UserService userService = PowerMockito.mock(UserService.class);
-    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
+
+    PowerMockito.mockStatic(UserLookupDaoImpl.class);
+    UserLookupDaoImpl userLookupDao = PowerMockito.mock(UserLookupDaoImpl.class);
+    PowerMockito.when(UserLookupDaoImpl.getInstance()).thenReturn(userLookupDao);
     PowerMockito.when(
-            userService.userLookUpByKey(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+            userLookupDao.getRecordByType(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyBoolean(),
+                Mockito.any(RequestContext.class)))
+        .thenReturn((List<Map<String, Object>>) getResponse().get(JsonKey.RESPONSE));
+    UserDao userDao = PowerMockito.mock(UserDaoImpl.class);
+    PowerMockito.mockStatic(UserDaoImpl.class);
+    PowerMockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.when(userDao.getUserPropertiesById(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(getResponse());
 
     TestKit probe = new TestKit(system);
@@ -74,12 +74,29 @@ public class UserLookupActorTest {
     fields.add("status");
     reqObj.put(JsonKey.FIELDS, fields);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Assert.assertTrue(res != null);
   }
 
   @Test
   public void getUserKeycloakSearchTestWithKeyValue() throws Exception {
+    PowerMockito.mockStatic(UserLookupDaoImpl.class);
+    UserLookupDaoImpl userLookupDao = PowerMockito.mock(UserLookupDaoImpl.class);
+    PowerMockito.when(UserLookupDaoImpl.getInstance()).thenReturn(userLookupDao);
+    PowerMockito.when(
+            userLookupDao.getRecordByType(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyBoolean(),
+                Mockito.any(RequestContext.class)))
+        .thenReturn((List<Map<String, Object>>) getResponse().get(JsonKey.RESPONSE));
+
+    UserDao userDao = PowerMockito.mock(UserDaoImpl.class);
+    PowerMockito.mockStatic(UserDaoImpl.class);
+    PowerMockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.when(userDao.getUserPropertiesById(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(getResponse());
+
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -93,9 +110,8 @@ public class UserLookupActorTest {
     fields.add("userId");
     fields.add("status");
     subject.tell(reqObj, probe.getRef());
-    ProjectCommonException ex =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(null != ex);
+    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Assert.assertTrue(res != null);
   }
 
   private Response getResponse() {
