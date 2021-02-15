@@ -27,6 +27,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.user.User;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -88,7 +89,7 @@ public class UserLookupTest {
   @Test
   public void checkUsernameUniqueness() throws Exception {
 
-    boolean response = new UserLookUp().checkUsernameUniqueness("userName", true, null);
+    boolean response = new UserLookUpServiceImpl().checkUsernameUniqueness("userName", true, null);
     assertFalse(response);
   }
 
@@ -99,7 +100,7 @@ public class UserLookupTest {
     user.setPhone("9663890400");
     boolean response = false;
     try {
-      new UserLookUp().checkPhoneUniqueness(user, "create", null);
+      new UserLookUpServiceImpl().checkPhoneUniqueness(user, "create", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -113,7 +114,7 @@ public class UserLookupTest {
     user.setPhone("9663890400");
     boolean response = false;
     try {
-      new UserLookUp().checkPhoneUniqueness(user, "update", null);
+      new UserLookUpServiceImpl().checkPhoneUniqueness(user, "update", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -125,7 +126,7 @@ public class UserLookupTest {
   public void checkPhoneExist() {
     boolean response = false;
     try {
-      new UserLookUp().checkPhoneUniqueness("9663890400", null);
+      new UserLookUpServiceImpl().checkPhoneUniqueness("9663890400", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -137,7 +138,7 @@ public class UserLookupTest {
   public void checkEmailUniqueness() throws Exception {
     boolean response = false;
     try {
-      new UserLookUp().checkEmailUniqueness("test@test.com", null);
+      new UserLookUpServiceImpl().checkEmailUniqueness("test@test.com", null);
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
@@ -151,7 +152,7 @@ public class UserLookupTest {
     user.setEmail("test@test.com");
     boolean response = false;
     try {
-      new UserLookUp().checkEmailUniqueness(user, "create", null);
+      new UserLookUpServiceImpl().checkEmailUniqueness(user, "create", null);
     } catch (ProjectCommonException e) {
       assertEquals(e.getResponseCode(), 400);
     }
@@ -172,7 +173,7 @@ public class UserLookupTest {
   @Test
   public void testCheckExternalIdUniquenessSuccessForCreate() {
     try {
-      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
+      new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.userAlreadyExists.getErrorCode(), e.getCode());
     }
@@ -183,7 +184,7 @@ public class UserLookupTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
-      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }
@@ -195,7 +196,7 @@ public class UserLookupTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).remove(JsonKey.OPERATION);
-      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getCode());
     }
@@ -206,7 +207,7 @@ public class UserLookupTest {
     try {
       user.setUserId("someUserId2");
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
-      new UserLookUp().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
+      new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
     }

@@ -16,7 +16,7 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.dao.UserExternalIdentityDao;
-import org.sunbird.user.util.UserLookUp;
+import org.sunbird.user.dao.UserLookupDao;
 
 public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
@@ -29,9 +29,9 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   @Override
   public String getUserIdByExternalId(String extId, String provider, RequestContext context) {
     if (StringUtils.isNotEmpty((provider))) {
-      UserLookUp userLookUp = new UserLookUp();
+      UserLookupDao userLookupDao = new UserLookupDaoImpl();
       List<Map<String, Object>> userRecordList =
-          userLookUp.getRecordByType(
+          userLookupDao.getRecordByType(
               JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID, extId + "@" + provider, false, context);
       if (CollectionUtils.isNotEmpty(userRecordList)) {
         logger.info(
