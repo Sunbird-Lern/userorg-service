@@ -122,7 +122,7 @@ public class OrgManagementActorTest {
     PowerMockito.mockStatic(LocationRequestValidator.class);
   }
 
-  //@Test
+ // @Test
   public void testUpdateOrgStatus() {
     Request reqObj = new Request();
     Map<String, Object> requestData = new HashMap<>();
@@ -204,7 +204,7 @@ public class OrgManagementActorTest {
     boolean result =
             testScenario(
                     getRequest(
-                            getRequestData(true, true, false, false, basicRequestData), ADD_MEMBER_TO_ORG),
+                            getRequestData(true, true, true, true, basicRequestData), ADD_MEMBER_TO_ORG),
                     null);
     assertTrue(result);
   }
@@ -223,28 +223,6 @@ public class OrgManagementActorTest {
     reqMap.remove(JsonKey.PROVIDER);
     Request request = getRequest(reqMap, ADD_MEMBER_TO_ORG);
     boolean result = testScenario(request, ResponseCode.sourceAndExternalIdValidationError);
-    assertTrue(result);
-  }
-
-  // @Test
-  public void testAddUserToOrgSuccessWithUserIdAndOrgExtId() {
-
-    boolean result =
-            testScenario(
-                    getRequest(
-                            getRequestData(true, false, false, true, basicRequestData), ADD_MEMBER_TO_ORG), null);
-    assertTrue(result);
-  }
-
-  //created
-  // @Test
-  public void testAddUserToOrgSuccess() {
-
-    boolean result =
-            testScenario(
-                    getRequest(
-                            getRequestData(false, false, false, true, basicRequestData), ADD_MEMBER_TO_ORG),
-                    null);
     assertTrue(result);
   }
 
@@ -329,14 +307,10 @@ public class OrgManagementActorTest {
   //created
 //@Test
   public void testRemoveMemberOrgFailureWithUserNotFound() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateChannelEsResponse(true));
 
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-    Map<String,Object> map = getRequestDataForOrgUpdate();
-    map.put(JsonKey.USER_ID,"userId");
-    boolean result = testScenario(getRequest(map,ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue()),ResponseCode.userNotFound);
+    Map<String,Object> map = getRequestDataForMemberRemoveFromOrg();
+    map.remove(JsonKey.ORG_ID);
+    boolean result = testScenario(getRequest(map,ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue()),ResponseCode.invalidRequestData);
     assertTrue(result);
   }
 
@@ -606,6 +580,13 @@ public class OrgManagementActorTest {
     map.put(JsonKey.ORGANISATION_ID, "orgId");
     return map;
   }
+
+    private Map<String, Object> getRequestDataForMemberRemoveFromOrg() {
+        Map<String, Object> map = new HashMap<>();
+        map.put(JsonKey.USER_ID,"userId");
+        map.put(JsonKey.ORGANISATION_ID, "orgId");
+        return map;
+    }
 
   private Map<String, Object> getRequestDataForOrgCreate(Map<String, Object> map) {
     map.put(JsonKey.CHANNEL, "channel");
