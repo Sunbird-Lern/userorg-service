@@ -257,7 +257,9 @@ public class OrganisationManagementActor extends BaseActor {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Response response =
           cassandraOperation.getAllRecords(
-              orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), context);
+              orgTypeDbInfo.getKeySpace(),
+                  orgTypeDbInfo.getTableName(),
+                  context);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (!(list.isEmpty())) {
         for (Map<String, Object> map : list) {
