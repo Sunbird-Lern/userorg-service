@@ -19,7 +19,7 @@ public class LocationDaoImplTest {
   }
 
   @Test
-          //(expected = Exception.class)
+        //  (expected = Exception.class)
   public void getRecordByPropertyTest() {
     LocationDaoImpl dao = new LocationDaoImpl();
     Map<String, Object> search = new HashMap<>();
