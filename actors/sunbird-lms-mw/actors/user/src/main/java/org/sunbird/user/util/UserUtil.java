@@ -692,7 +692,7 @@ public class UserUtil {
     if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
       Map<String, Object> searchQueryMap = new HashMap<>();
       searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
-      List<User> managedUserList = Util.searchUser(searchQueryMap, context);
+      List<Map<String, Object>> managedUserList = Util.searchUser(searchQueryMap, context);
       if (CollectionUtils.isNotEmpty(managedUserList)
           && managedUserList.size()
               >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
