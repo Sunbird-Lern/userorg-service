@@ -36,7 +36,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.models.user.User;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import scala.concurrent.Future;
@@ -591,8 +590,9 @@ public final class Util {
    * @param context
    * @return List<User> List of User object.
    */
-  public static List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
-    List<User> userList = new ArrayList<>();
+  public static List<Map<String, Object>> searchUser(
+      Map<String, Object> searchQueryMap, RequestContext context) {
+    List<Map<String, Object>> searchResult = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
@@ -601,17 +601,9 @@ public final class Util {
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
     if (MapUtils.isNotEmpty(result)) {
-      List<Map<String, Object>> searchResult =
-          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if (CollectionUtils.isNotEmpty(searchResult)) {
-        userList =
-            searchResult
-                .stream()
-                .map(s -> mapper.convertValue(s, User.class))
-                .collect(Collectors.toList());
-      }
+      searchResult = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
     }
-    return userList;
+    return searchResult;
   }
 
   public static String getLoginId(Map<String, Object> userMap) {
