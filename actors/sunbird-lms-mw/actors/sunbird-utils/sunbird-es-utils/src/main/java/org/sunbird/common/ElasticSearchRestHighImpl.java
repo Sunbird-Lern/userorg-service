@@ -442,7 +442,9 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     }
     logger.info(
         context,
-        "ElasticSearchRestHighImpl:search: calling search builder======"
+        "ElasticSearchRestHighImpl:search: calling search for index "
+            + index
+            + ", with query = "
             + searchSourceBuilder.toString());
 
     searchRequest.source(searchSourceBuilder);

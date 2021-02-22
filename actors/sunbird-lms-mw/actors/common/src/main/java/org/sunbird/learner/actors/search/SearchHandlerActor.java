@@ -54,7 +54,7 @@ public class SearchHandlerActor extends BaseActor {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
-      handleUserSearch(request, searchQueryMap, "user");
+      handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
       SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
       handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);

@@ -123,7 +123,7 @@ public class UserUtilTest {
     beforeEachTest();
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.MANAGED_BY, "ManagedBy");
-    List managedUserList = new ArrayList<User>();
+    List managedUserList = new ArrayList<Map<String, Object>>();
     while (managedUserList.size() <= 31) {
       managedUserList.add(new User());
     }
