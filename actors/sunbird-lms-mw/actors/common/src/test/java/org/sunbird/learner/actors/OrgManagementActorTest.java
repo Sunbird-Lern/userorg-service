@@ -220,12 +220,18 @@ public class OrgManagementActorTest {
   }
 
 
-
  //  @Test
   public void testAddUserToOrgSuccessWithUserIdAndOrgId() {
+       when(cassandraOperation.getRecordById(
+               Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+               .thenReturn(getRecordsByProperty(false))
+               .thenReturn(getRecordsByProperty(false));
        when(cassandraOperation.getRecordsByCompositeKey(
                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                .thenReturn(getRecordsByProperty(true));
+       when(cassandraOperation.updateRecord(
+               Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+               .thenReturn(getRecordsByProperty(false));
        when(cassandraOperation.insertRecord(
                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                .thenReturn(getSuccess());
@@ -235,6 +241,7 @@ public class OrgManagementActorTest {
        map.put(JsonKey.EXTERNAL_ID, "externalId");
        map.put(JsonKey.USER_ID, "91b4a9e5-2eb1-4aa0-8f0a-ce171ed5ff3e");
        map.put(JsonKey.ROLES,"ADMIN");
+       map.put(JsonKey.ORGANISATION_ID,"organisationId");
        boolean result = testScenario(getRequest(map,ActorOperations.ADD_MEMBER_ORGANISATION.getValue()),null);
     assertTrue(result);
   }
@@ -338,13 +345,18 @@ public class OrgManagementActorTest {
   //created
   //  @Test
   public void testRemoveMemberOrgSuccess() {
-        when(cassandraOperation.getAllRecords(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
-                .thenReturn(getAllRecords());
+        when(cassandraOperation.getRecordsByCompositeKey(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+                .thenReturn(getRecordsByProperty(false));
+//        when(cassandraOperation.getAllRecords(
+//                Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+//                .thenReturn(getAllRecords());
       when(cassandraOperation.deleteRecord(
               Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
               .thenReturn(getRecordsByProperty(false));
-    Map<String,Object> map = getRequestDataForMemberRemoveFromOrg();
+    Map<String,Object> map = new HashMap<>();
+    map.put(JsonKey.USER_ID,"userId");
+    map.put(JsonKey.ORGANISATION_ID,"orgId");
     boolean result = testScenario(getRequest(map,ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue()),null);
     assertTrue(result);
   }
