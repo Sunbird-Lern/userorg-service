@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -128,8 +129,10 @@ public class Msg91SmsProvider implements ISmsProvider {
         // add authkey header
         httpPost.setHeader("authkey", authKey);
         // add dlt template id header
-        httpPost.setHeader("DLT_TE_ID", getTemplateId(smsText));
-
+        String templateId = getTemplateId(smsText);
+        if (StringUtils.isNotBlank(templateId)) {
+          httpPost.setHeader("DLT_TE_ID", templateId);
+        }
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
 
@@ -402,8 +405,12 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       // add authkey header
       httpPost.setHeader("authkey", authKey);
+
       // add dlt template id header
-      httpPost.setHeader("DLT_TE_ID", getTemplateId(smsText));
+      String templateId = getTemplateId(smsText);
+      if (StringUtils.isNotBlank(templateId)) {
+        httpPost.setHeader("DLT_TE_ID", templateId);
+      }
       // create sms
       Sms sms = new Sms(getDoubleEncodedSMS(smsText), phoneNumberList);
 
