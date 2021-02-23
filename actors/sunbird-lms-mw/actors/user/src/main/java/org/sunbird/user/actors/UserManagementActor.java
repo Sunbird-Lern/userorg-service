@@ -1509,7 +1509,7 @@ public class UserManagementActor extends BaseActor {
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (locationCodes != null) {
+    if (CollectionUtils.isNotEmpty((List) locationCodes)) {
       // As of now locationCode can take array of only locationcodes and map of locationCodes which
       // include type and code of the location
       String stateCode = null;
