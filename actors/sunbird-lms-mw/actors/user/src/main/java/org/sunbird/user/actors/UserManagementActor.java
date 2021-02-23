@@ -205,22 +205,22 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
-    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);   //to start api call and get response
     actorMessage.toLower();
-    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
-    boolean updateUserSchoolOrg = false;
-    Map<String, Object> userMap = actorMessage.getRequest();
+    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);   //storing the callerid from the input to a variable callerid
+    boolean updateUserSchoolOrg = false;      //userschoolorg update is false
+    Map<String, Object> userMap = actorMessage.getRequest();    // request from actormessage is stored to userMap
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
-    userRequestValidator.validateUpdateUserRequest(actorMessage);
-    validateLocationCodes(actorMessage);
+    userRequestValidator.validateUpdateUserRequest(actorMessage);    //validation
+    validateLocationCodes(actorMessage);    // validating location code
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
-        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    validateUserTypeAndSubType(
+        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());   //returning active users from db
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);      //getting the managed id
+    validateUserTypeAndSubType(                                     //validating usertype and subtype
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
-    if (StringUtils.isNotBlank(callerId)) {
+    if (StringUtils.isNotBlank(callerId)) {   //validating whether the uploader is belong to same root org as user, then only they can update an user
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
@@ -1449,17 +1449,17 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
-    if (null != userMap.get(JsonKey.USER_TYPE)) {
+    if (null != userMap.get(JsonKey.USER_TYPE)) {   //will get the user type from new column profileusertype
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
-        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
+        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);   //get it from profilelocation column of user table
         logger.info(
             context,
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
-        if (CollectionUtils.isNotEmpty(locationIds)) {
+        if (CollectionUtils.isNotEmpty(locationIds)) {    //here change the search from location table to user table's new column profilelocation
           locations =
               locationClient.getLocationByIds(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
