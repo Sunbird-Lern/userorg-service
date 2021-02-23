@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -17,6 +18,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.jboss.logging.Logger;
 import org.sunbird.notification.sms.Sms;
 import org.sunbird.notification.sms.provider.ISmsProvider;
+import org.sunbird.notification.utils.DataCacheHandler;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
 
@@ -125,6 +127,8 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // add authkey header
         httpPost.setHeader("authkey", authKey);
+        // add dlt template id header
+        httpPost.setHeader("DLT_TE_ID", getTemplateId(smsText));
 
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
@@ -178,6 +182,31 @@ public class Msg91SmsProvider implements ISmsProvider {
     } finally {
       closeHttpResource(httpClient);
     }
+  }
+
+  private static String getTemplateId(String sms) {
+    List<Map<String, String>> smsTemplateConfig = DataCacheHandler.getSmsTemplateConfigList();
+    for (Map<String, String> map : smsTemplateConfig) {
+      Map.Entry<String, String> entry = map.entrySet().iterator().next();
+      String templateString = entry.getKey();
+      String[] templateStringArray = templateString.split(" ");
+      String[] smsStringArray = sms.split(" ");
+      boolean bool = true;
+      if (templateStringArray.length == smsStringArray.length) {
+        for (int i = 0; i < templateStringArray.length; i++) {
+          if (!templateStringArray[i].startsWith("$")) {
+            if (!templateStringArray[i].equalsIgnoreCase(smsStringArray[i])) {
+              bool = false;
+              break;
+            }
+          }
+        }
+      }
+      if (bool) {
+        return entry.getValue();
+      }
+    }
+    return "";
   }
 
   /**
@@ -373,6 +402,8 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       // add authkey header
       httpPost.setHeader("authkey", authKey);
+      // add dlt template id header
+      httpPost.setHeader("DLT_TE_ID", getTemplateId(smsText));
       // create sms
       Sms sms = new Sms(getDoubleEncodedSMS(smsText), phoneNumberList);
 
