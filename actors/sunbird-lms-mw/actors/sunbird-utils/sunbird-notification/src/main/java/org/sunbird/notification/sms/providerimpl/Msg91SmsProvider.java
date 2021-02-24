@@ -197,11 +197,10 @@ public class Msg91SmsProvider implements ISmsProvider {
       boolean bool = true;
       if (templateStringArray.length == smsStringArray.length) {
         for (int i = 0; i < templateStringArray.length; i++) {
-          if (!templateStringArray[i].startsWith("$")) {
-            if (!templateStringArray[i].equalsIgnoreCase(smsStringArray[i])) {
-              bool = false;
-              break;
-            }
+          if (!templateStringArray[i].startsWith("$")
+              && !templateStringArray[i].equalsIgnoreCase(smsStringArray[i])) {
+            bool = false;
+            break;
           }
         }
       }
