@@ -109,7 +109,7 @@ public class Msg91PostMethodTest {
     when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
-        "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
+        "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
     boolean response = megObj.send("4321111111", sms);
     Assert.assertTrue(response);
   }

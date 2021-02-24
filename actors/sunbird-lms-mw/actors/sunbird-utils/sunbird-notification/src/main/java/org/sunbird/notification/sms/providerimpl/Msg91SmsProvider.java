@@ -203,6 +203,8 @@ public class Msg91SmsProvider implements ISmsProvider {
             break;
           }
         }
+      } else {
+        bool = false;
       }
       if (bool) {
         return entry.getValue();
