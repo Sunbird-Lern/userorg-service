@@ -35,7 +35,6 @@ import org.sunbird.notification.utils.SMSFactory;
   HttpClients.class,
   CloseableHttpClient.class,
   PropertiesCache.class,
-  Msg91SmsProvider.class,
   SMSFactory.class,
   DataCacheHandler.class
 })
