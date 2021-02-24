@@ -251,6 +251,11 @@ public class BaseController extends Controller {
               + " Exception occurred with error message = "
               + e.getMessage(),
           e);
+      if (e instanceof ProjectCommonException) {
+        printExitLogOnFailure(request, (ProjectCommonException) e);
+      } else {
+        printExitLogOnFailure(request, null);
+      }
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
@@ -294,6 +299,11 @@ public class BaseController extends Controller {
           "BaseController:handleSearchRequest: Exception occurred with error message = "
               + e.getMessage(),
           e);
+      if (e instanceof ProjectCommonException) {
+        printExitLogOnFailure(request, (ProjectCommonException) e);
+      } else {
+        printExitLogOnFailure(request, null);
+      }
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
   }
