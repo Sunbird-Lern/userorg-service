@@ -7,7 +7,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +30,6 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.duration.FiniteDuration;
@@ -38,7 +41,13 @@ import scala.concurrent.duration.FiniteDuration;
   ServiceFactory.class,
   EsClientFactory.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class SystemSettingsActorTest {
   private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("10 second");
   private ActorSystem system;
@@ -70,12 +79,8 @@ public class SystemSettingsActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(getOrgData());
     resp.put(JsonKey.RESPONSE, list);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, ROOT_ORG_ID, null))
+    when(cassandraOperation.getRecordById(KEYSPACE_NAME, TABLE_NAME, ROOT_ORG_ID, null))
         .thenReturn(resp);
-    when(cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, KEYSPACE_NAME, null))
-        .thenReturn(new Response());
   }
 
   private Map<String, Object> getOrgData() {
@@ -89,10 +94,7 @@ public class SystemSettingsActorTest {
   @Test
   public void testSetSystemSettingSuccess() {
     when(cassandraOperation.upsertRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(new Response());
     actorMessage.setOperation(ActorOperations.SET_SYSTEM_SETTING.getValue());
     actorMessage.getRequest().putAll(getSystemSettingMap());
@@ -112,8 +114,9 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetSystemSettingFailure() {
-    //  when(cassandraOperation.getRecordsByIndexedProperty(Mockito.anyString(),
-    // Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn(new Response());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(new Response());
     Map<String, Object> orgData = new HashMap<String, Object>();
     orgData.put(JsonKey.FIELD, KEYSPACE_NAME);
     actorMessage.setOperation(ActorOperations.GET_SYSTEM_SETTING.getValue());
@@ -128,8 +131,7 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetAllSystemSettingsSuccess() {
-    when(cassandraOperation.getAllRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingResponse());
     actorMessage.setOperation(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
     subject.tell(actorMessage, probe.getRef());
@@ -139,8 +141,7 @@ public class SystemSettingsActorTest {
 
   @Test
   public void testGetAllSystemSettingsSuccessWithEmptyResponse() {
-    when(cassandraOperation.getAllRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+    when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingEmptyResponse());
     actorMessage.setOperation(ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue());
     subject.tell(actorMessage, probe.getRef());

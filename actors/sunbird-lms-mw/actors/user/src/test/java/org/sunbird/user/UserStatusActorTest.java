@@ -30,24 +30,36 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.KeyCloakConnectionProvider;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.User;
+import org.sunbird.services.sso.SSOManager;
+import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.user.actors.UserStatusActor;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UserServiceImpl.class, KeyCloakConnectionProvider.class, ServiceFactory.class})
-@PowerMockIgnore("javax.management.*")
+@PrepareForTest({
+  UserServiceImpl.class,
+  KeyCloakConnectionProvider.class,
+  ServiceFactory.class,
+  SSOServiceFactory.class,
+  SSOManager.class
+})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class UserStatusActorTest {
 
   private static final Props props = Props.create(UserStatusActor.class);
   private static final ActorSystem system = ActorSystem.create("system");
   private static final User user = mock(User.class);
-  private static final CassandraOperationImpl cassandraOperation =
-      mock(CassandraOperationImpl.class);;
+  private static CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
 
   @BeforeClass
   public static void beforeClass() {
@@ -55,10 +67,7 @@ public class UserStatusActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response response = createCassandraUpdateSuccessResponse();
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
   }
 
@@ -83,12 +92,16 @@ public class UserStatusActorTest {
     UserResource userResource = mock(UserResource.class);
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(user);
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
   }
 
   @Test
   public void testBlockUserSuccess() {
+    PowerMockito.mockStatic(SSOServiceFactory.class);
+    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+    PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+    PowerMockito.when(ssoManager.deactivateUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(JsonKey.SUCCESS);
     boolean result = testScenario(false, ActorOperations.BLOCK_USER, true, null);
     assertTrue(result);
   }
@@ -106,6 +119,11 @@ public class UserStatusActorTest {
 
   @Test
   public void testUnblockUserSuccess() {
+    PowerMockito.mockStatic(SSOServiceFactory.class);
+    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+    PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+    PowerMockito.when(ssoManager.activateUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(JsonKey.SUCCESS);
     boolean result = testScenario(true, ActorOperations.UNBLOCK_USER, true, null);
     assertTrue(result);
   }

@@ -292,7 +292,7 @@ public class ProjectUtil {
    * @author Manzarul
    */
   public enum EsType {
-    user("user"),
+    user(getConfigValue("user_index_alias")),
     organisation("org"),
     usernotes("usernotes"),
     telemetry("telemetry"),

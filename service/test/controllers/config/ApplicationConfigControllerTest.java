@@ -29,7 +29,7 @@ import util.RequestInterceptor;
 /** Created by arvind on 6/12/17. */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore("javax.management.*")
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
 public class ApplicationConfigControllerTest extends BaseApplicationTest {
 

@@ -38,9 +38,10 @@ import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.UserLookupDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
+import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 import org.sunbird.user.service.UserService;
-import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
@@ -52,6 +53,8 @@ public class UserServiceImpl implements UserService {
           null);
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
+  private static UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -70,6 +73,11 @@ public class UserServiceImpl implements UserService {
       userService = new UserServiceImpl();
     }
     return userService;
+  }
+
+  @Override
+  public Response createUser(Map<String, Object> user, RequestContext context) {
+    return userDao.createUser(user, context);
   }
 
   @Override
@@ -336,8 +344,34 @@ public class UserServiceImpl implements UserService {
     reqMap.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
     reqMap.put(JsonKey.VALUE, encUserNameList);
 
-    UserLookUp userLookUp = new UserLookUp();
-    return userLookUp.getUsersByUserNames(reqMap, context);
+    return userLookupDao.getUsersByUserNames(reqMap, context);
+  }
+
+  @Override
+  public Response userLookUpByKey(
+      String key, String value, List<String> fields, RequestContext context) {
+    Response response;
+    if (JsonKey.ID.equalsIgnoreCase(key)) {
+      List<String> ids = new ArrayList<>(2);
+      ids.add(value);
+      response = userDao.getUserPropertiesById(ids, fields, context);
+    } else {
+      List<Map<String, Object>> records =
+          userLookupDao.getRecordByType(key.toLowerCase(), value.toLowerCase(), true, context);
+      List<String> ids = new ArrayList<>();
+      records
+          .stream()
+          .forEach(
+              record -> {
+                ids.add((String) record.get(JsonKey.USER_ID));
+              });
+      response = userDao.getUserPropertiesById(ids, fields, context);
+    }
+    for (Map<String, Object> userMap :
+        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE)) {
+      UserUtility.decryptUserDataFrmES(userMap);
+    }
+    return response;
   }
 
   @Override

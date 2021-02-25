@@ -53,7 +53,12 @@ import org.sunbird.models.user.Feed;
   OrganisationClientImpl.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class FeedUtilTest {
   private ElasticSearchService esUtil;
   private CassandraOperation cassandraOperation = null;
@@ -76,7 +81,6 @@ public class FeedUtilTest {
     when(feedService.insert(Mockito.any(), Mockito.any())).thenReturn(new Response());
     when(feedService.update(Mockito.any(), Mockito.any())).thenReturn(new Response());
 
-    // whenNew(OrganisationClientImpl.class).withNoArguments().thenReturn(organisationClient);
     when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
     when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedOrgs());
@@ -93,10 +97,6 @@ public class FeedUtilTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(response);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);

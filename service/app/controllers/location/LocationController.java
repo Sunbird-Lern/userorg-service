@@ -36,7 +36,9 @@ public class LocationController extends BaseController {
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
+          createAndInitRequest(
+              LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       validator.validateCreateLocationRequest(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -60,7 +62,9 @@ public class LocationController extends BaseController {
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
+          createAndInitRequest(
+              LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       validator.validateUpdateLocationRequest(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
@@ -78,10 +82,12 @@ public class LocationController extends BaseController {
    */
   public CompletionStage<Result> deleteLocation(String locationId, Http.Request httpRequest) {
     try {
-      Request request = createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), httpRequest);
-      validator.validateDeleteLocationRequest(locationId);
+      Request request =
+          createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), httpRequest);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.LOCATION_ID, locationId);
+      setContextAndPrintEntryLog(httpRequest, request);
+      validator.validateDeleteLocationRequest(locationId);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
@@ -101,7 +107,9 @@ public class LocationController extends BaseController {
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
-          createAndInitRequest(LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
+          createAndInitRequest(
+              LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
+      setContextAndPrintEntryLog(httpRequest, request);
       validator.validateSearchLocationRequest(request);
       return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
     } catch (Exception e) {

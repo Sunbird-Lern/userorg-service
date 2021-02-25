@@ -166,7 +166,7 @@ public class UserClientImpl implements UserClient {
     Request request = new Request();
     request.setRequestContext(context);
     request.getRequest().putAll(searchRequestMap);
-    request.setOperation(ActorOperations.COMPOSITE_SEARCH.getValue());
+    request.setOperation(ActorOperations.USER_SEARCH.getValue());
 
     Object obj = null;
     try {

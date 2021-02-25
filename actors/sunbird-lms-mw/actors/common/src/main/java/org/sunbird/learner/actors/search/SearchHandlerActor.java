@@ -34,7 +34,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"compositeSearch"},
+  tasks = {"userSearch", "orgSearch"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -48,21 +48,16 @@ public class SearchHandlerActor extends BaseActor {
   public void onReceive(Request request) throws Throwable {
     request.toLower();
     Util.initializeContext(request, TelemetryEnvKey.USER);
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.COMPOSITE_SEARCH.getValue())) {
-      Map<String, Object> searchQueryMap = request.getRequest();
-      Object objectType =
-          ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
-      String filterObjectType = "";
-      if (objectType != null && objectType instanceof List) {
-        List<String> types = (List) objectType;
-        filterObjectType = types.get(0);
-      }
-      if (EsType.organisation.getTypeName().equalsIgnoreCase(filterObjectType)) {
-        SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-        handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
-      } else if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
-        handleUserSearch(request, searchQueryMap, filterObjectType);
-      }
+    Map<String, Object> searchQueryMap = request.getRequest();
+    if (MapUtils.isNotEmpty(searchQueryMap)
+        && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
+      ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
+    }
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+      handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
+      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }

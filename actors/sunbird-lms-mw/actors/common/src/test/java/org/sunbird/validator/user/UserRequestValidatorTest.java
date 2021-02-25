@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.request.RequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
@@ -22,6 +23,21 @@ import org.sunbird.common.responsecode.ResponseMessage;
 public class UserRequestValidatorTest {
 
   private static final UserRequestValidator userRequestValidator = new UserRequestValidator();
+
+  @Test
+  public void isValidLocationTypeTestSuccess() {
+    boolean bool = userRequestValidator.isValidLocationType("state");
+    Assert.assertTrue(bool);
+  }
+
+  @Test
+  public void isValidLocationTypeTestFailure() {
+    try {
+      userRequestValidator.isValidLocationType("state2");
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
 
   @Test
   public void testValidatePasswordFailure() {
@@ -1176,82 +1192,6 @@ public class UserRequestValidatorTest {
   }
 
   @Test
-  public void testValidateGerUserCountFailureWithInvalidLocationIds() {
-    Request request = new Request();
-    request.getRequest().put(JsonKey.LOCATION_IDS, "");
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithEmptyLocationIds() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.locationIdRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithInvalidUserLstReq() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.USER_LIST_REQ, null);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithUserLstReqTrue() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.USER_LIST_REQ, true);
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.functionalityMissing.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateGerUserCountFailureWithEmptyEstCntReq() {
-    Request request = new Request();
-    List<String> list = new ArrayList<>();
-    list.add("4645");
-    request.getRequest().put(JsonKey.LOCATION_IDS, list);
-    request.getRequest().put(JsonKey.ESTIMATED_COUNT_REQ, "");
-
-    try {
-      RequestValidator.validateGetUserCount(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
   public void testValidateVerifyUserSuccess() {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
@@ -1490,9 +1430,19 @@ public class UserRequestValidatorTest {
     Assert.assertTrue(response);
   }
 
+  @Test
+  public void testValidateUserType() {
+    UserRequestValidator validator = new UserRequestValidator();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_TYPE, "userType");
+    try {
+      validator.validateUserType(userMap, null, new RequestContext());
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
+
   private List createUpdateUserDeclarationRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> declarationMap = new HashMap<>();
     declarationMap.put(JsonKey.ORG_ID, "1234");
     declarationMap.put(JsonKey.USER_ID, "userid");
@@ -1504,8 +1454,6 @@ public class UserRequestValidatorTest {
   }
 
   private List createUpdateUserDeclarationMissingUserIdRequests() {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
     Map<String, Object> info = new HashMap<>();
     info.put(JsonKey.DECLARED_EMAIL, "email");
     Map<String, Object> declarationMap = new HashMap<>();

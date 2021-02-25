@@ -1,6 +1,8 @@
 package org.sunbird.ratelimit.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -28,7 +30,12 @@ import org.sunbird.ratelimit.limiter.OtpRateLimiter;
 import org.sunbird.ratelimit.limiter.RateLimit;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*"
+})
 public class RateLimitDaoTest {
 
   private static final String KEY = "9999888898";
@@ -55,7 +62,7 @@ public class RateLimitDaoTest {
     doAnswer(
             (Answer)
                 invocation -> {
-                  List<Map<String, Object>> rateLimits = invocation.getArgumentAt(2, List.class);
+                  List<Map<String, Object>> rateLimits = invocation.getArgument(2);
                   assertTrue(CollectionUtils.isNotEmpty(rateLimits));
                   assertSame(1, rateLimits.size());
                   assertSame(1, rateLimits.get(0).get(JsonKey.COUNT));

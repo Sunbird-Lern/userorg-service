@@ -15,6 +15,7 @@ import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
@@ -26,6 +27,7 @@ import play.mvc.Result;
 import play.test.Helpers;
 
 @PrepareForTest(OnRequestHandler.class)
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 public class OtpControllerTest extends BaseApplicationTest {
 
   private static final String VALID_EMAIL = "someEmail@someDomain.com";
