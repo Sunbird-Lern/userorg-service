@@ -33,7 +33,7 @@ import org.sunbird.helper.ServiceFactory;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-public class DataCacheHandlerTest {
+public class SmsTemplateUtilTest {
 
   public void before() {
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -48,17 +48,15 @@ public class DataCacheHandlerTest {
     responseList.add(result);
     response.getResult().put(JsonKey.RESPONSE, responseList);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getAllRecords(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
   }
 
   @Test
   public void testDataSettings() {
     before();
-    DataCacheHandler handler = new DataCacheHandler();
-    handler.run();
-    List<Map<String, String>> settings = DataCacheHandler.getSmsTemplateConfigList();
+    List<Map<String, String>> settings = SmsTemplateUtil.getSmsTemplateConfigList();
     Assert.assertNotNull(settings);
     Assert.assertTrue(CollectionUtils.isNotEmpty(settings));
   }

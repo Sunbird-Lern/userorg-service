@@ -24,9 +24,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProvider;
-import org.sunbird.notification.utils.DataCacheHandler;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
+import org.sunbird.notification.utils.SmsTemplateUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -36,7 +36,7 @@ import org.sunbird.notification.utils.SMSFactory;
   CloseableHttpClient.class,
   PropertiesCache.class,
   SMSFactory.class,
-  DataCacheHandler.class
+  SmsTemplateUtil.class
 })
 public class Msg91PostMethodTest {
 
@@ -87,7 +87,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSms() {
     initMockRulesFor200();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -106,7 +106,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
@@ -117,7 +117,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSmsFailure() {
     initMockRulesFor400();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -136,7 +136,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -147,7 +147,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSmsToMultiplePhone() {
     initMockRulesFor200();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -166,7 +166,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -180,7 +180,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSmsFailureToMultiplePhone() {
     initMockRulesFor400();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -199,7 +199,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -213,7 +213,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSmsWithCountryCode() {
     initMockRulesFor200();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -232,7 +232,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -243,7 +243,7 @@ public class Msg91PostMethodTest {
   @Test
   public void testSendSmsFailureWithCountryCode() {
     initMockRulesFor400();
-    PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(SmsTemplateUtil.class);
 
     List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
@@ -262,7 +262,7 @@ public class Msg91PostMethodTest {
     settings.add(template1);
     settings.add(template2);
     settings.add(template3);
-    when(DataCacheHandler.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
