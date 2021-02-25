@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -39,11 +40,13 @@ public class DataCacheHandler implements Runnable {
       }
     }
     String smsTemplateConfigString = configSettings.get(JsonKey.SMS_TEMPLATE_CONFIG);
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      smsTemplateConfigList = mapper.readValue(smsTemplateConfigString, List.class);
-    } catch (Exception e) {
-      logger.error("Error occurred while reading sms template config" + e.getMessage(), e);
+    if (StringUtils.isNotBlank(smsTemplateConfigString)) {
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+        smsTemplateConfigList = mapper.readValue(smsTemplateConfigString, List.class);
+      } catch (Exception e) {
+        logger.error("Error occurred while reading sms template config" + e.getMessage(), e);
+      }
     }
   }
 
