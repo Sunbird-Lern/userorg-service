@@ -248,6 +248,7 @@ public interface ResponseMessage {
     String USER_CONSENT_NOT_FOUND = "User consent not found.";
     String INVALID_USER_INFO_VALUE = "Null value is not allowed";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
+    String LOCATION_TYPE_REQUIRED = "location is required";
     String INVALID_LOCATION_TYPE = "Invalid location type {0} is supplied.Supported values are {1}";
     String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
   }
@@ -257,6 +258,8 @@ public interface ResponseMessage {
     String OPERATION_TIMEOUT = "PROCESS_EXE_TIMEOUT";
     String INVALID_OPERATION_NAME = "INVALID_OPERATION_NAME";
     String INVALID_REQUESTED_DATA = "INVALID_REQUESTED_DATA";
+    String INVALID_LOCATION_TYPE = "INVALID_LOCATION_TYPE";
+    String LOCATION_TYPE_REQUIRED = "LOCATION_TYPE_REQUIRED";
     String COURSE_ID_MISSING_ERROR = "COURSE_ID_REQUIRED_ERROR";
     String API_KEY_MISSING_ERROR = "API_KEY_REQUIRED_ERROR";
     String INTERNAL_ERROR = "INTERNAL_ERROR";

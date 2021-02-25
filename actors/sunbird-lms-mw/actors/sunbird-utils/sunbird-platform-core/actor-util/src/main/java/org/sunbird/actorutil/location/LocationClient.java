@@ -2,6 +2,8 @@ package org.sunbird.actorutil.location;
 
 import akka.actor.ActorRef;
 import java.util.List;
+import java.util.Map;
+
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
@@ -71,5 +73,10 @@ public interface LocationClient {
    * @param context
    * @return List of related location IDs
    */
-  List<String> getRelatedLocationIds(ActorRef actorRef, List<String> codes, RequestContext context);
+ // List<String> getRelatedLocationIds(ActorRef actorRef, List<String> codes, RequestContext context);
+
+//  /**
+//   * for given location codes, fetch location IDs and location type.
+//   */
+  List<Map<String, Object>> getRelatedLocationIds(ActorRef actorRef, List<String> codes, RequestContext context);
 }

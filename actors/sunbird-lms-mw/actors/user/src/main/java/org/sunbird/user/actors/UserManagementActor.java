@@ -1172,13 +1172,19 @@ public class UserManagementActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      List<String> locationIdList =
-          locationClient.getRelatedLocationIds(
-              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-              (List<String>) userMap.get(JsonKey.LOCATION_CODES),
-              context);
+//      List<String> locationIdList =
+//          locationClient.getRelatedLocationIds(
+//              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
+//              (List<String>) userMap.get(JsonKey.LOCATION_CODES),
+//              context);
+      List<Map<String, Object>> locationIdList =
+              locationClient.getRelatedLocationIds(
+                      getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
+                      (List<String>) userMap.get(JsonKey.LOCATION_CODES),
+                      context);
       if (locationIdList != null && !locationIdList.isEmpty()) {
         userMap.put(JsonKey.LOCATION_IDS, locationIdList);
+        userMap.put(JsonKey.LOCATION_TYPE, locationIdList);
         userMap.remove(JsonKey.LOCATION_CODES);
       } else {
         ProjectCommonException.throwClientErrorException(

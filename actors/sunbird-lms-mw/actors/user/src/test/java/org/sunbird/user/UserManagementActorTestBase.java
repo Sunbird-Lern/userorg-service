@@ -159,8 +159,8 @@ public abstract class UserManagementActorTestBase {
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
     when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
-    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationIdLists());
+//    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+//        .thenReturn(getLocationIdLists());
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
@@ -242,9 +242,14 @@ public abstract class UserManagementActorTestBase {
     return locations;
   }
 
-  public List<String> getLocationIdLists() {
-    return Arrays.asList("id");
-  }
+//  public List<Map<String, Object>> getLocationIdLists() {
+//    return Arrays.asList("id");
+//  }
+
+//  public List<Map<String, Object>> getLocationIdLists() {
+//    List<Map<String, Object>> locationIdAndType = Arrays.
+//    return Arrays.asList("id");
+//  }
 
   public Map<String, Object> getFormApiConfig() {
     Map<String, Object> formData = new HashMap<>();

@@ -65,11 +65,20 @@ public class LocationActor extends BaseLocationActor {
     }
   }
 
+//  private void getRelatedLocationIds(Request request) {
+//    Response response = new Response();
+//    List<String> relatedLocationIds =
+//        getValidatedRelatedLocationIds(
+//            (List<String>) request.get(JsonKey.LOCATION_CODES), request.getRequestContext());
+//    response.getResult().put(JsonKey.RESPONSE, relatedLocationIds);
+//    sender().tell(response, self());
+//  }
+
   private void getRelatedLocationIds(Request request) {
     Response response = new Response();
-    List<String> relatedLocationIds =
-        getValidatedRelatedLocationIds(
-            (List<String>) request.get(JsonKey.LOCATION_CODES), request.getRequestContext());
+    List<Location> relatedLocationIds =
+            getValidatedRelatedLocationIds(
+                    (List<String>) request.get(JsonKey.LOCATION_CODES), request.getRequestContext());
     response.getResult().put(JsonKey.RESPONSE, relatedLocationIds);
     sender().tell(response, self());
   }
@@ -185,18 +194,41 @@ public class LocationActor extends BaseLocationActor {
     LocationRequestValidator.isValidParentIdAndCode(locationRequest, operation);
   }
 
-  public List<String> getValidatedRelatedLocationIds(
-      List<String> codeList, RequestContext context) {
-    Set<String> locationIds = null;
+//  public List<String> getValidatedRelatedLocationIds(
+//      List<String> codeList, RequestContext context) {
+//    Set<String> locationIds = null;
+//    List<String> codes = new ArrayList<>(codeList);
+//    List<Location> locationList = getSearchResult(JsonKey.CODE, codeList, context);
+//    List<String> locationIdList = new ArrayList<>();
+//    if (CollectionUtils.isNotEmpty(locationList)) {
+//      if (locationList.size() != codes.size()) {
+//        List<String> resCodeList =
+//            locationList.stream().map(Location::getCode).collect(Collectors.toList());
+//        List<String> invalidCodeList =
+//            codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+//        throwInvalidParameterValueException(invalidCodeList);
+//      } else {
+//        locationIds = getValidatedRelatedLocationSet(locationList, context);
+//      }
+//    } else {
+//      throwInvalidParameterValueException(codeList);
+//    }
+//    locationIdList.addAll(locationIds);
+//    return locationIdList;
+//  }
+
+  public List<Location> getValidatedRelatedLocationIds(
+          List<String> codeList, RequestContext context) {
+    Set<Location> locationIds = null;
     List<String> codes = new ArrayList<>(codeList);
     List<Location> locationList = getSearchResult(JsonKey.CODE, codeList, context);
-    List<String> locationIdList = new ArrayList<>();
+    List<Location> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
         List<String> resCodeList =
-            locationList.stream().map(Location::getCode).collect(Collectors.toList());
+                locationList.stream().map(Location::getCode).collect(Collectors.toList());
         List<String> invalidCodeList =
-            codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+                codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidCodeList);
       } else {
         locationIds = getValidatedRelatedLocationSet(locationList, context);
@@ -242,7 +274,7 @@ public class LocationActor extends BaseLocationActor {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  public Set<String> getValidatedRelatedLocationSet(
+  public Set<Location> getValidatedRelatedLocationSet(
       List<Location> locationList, RequestContext context) {
     Set<Location> locationSet = new HashSet<>();
     for (Location requestedLocation : locationList) {
@@ -272,8 +304,43 @@ public class LocationActor extends BaseLocationActor {
         }
       }
     }
-    return locationSet.stream().map(Location::getId).collect(Collectors.toSet());
+    locationSet.stream().map(Location::getType).collect(Collectors.toSet());
+    locationSet.stream().map(Location::getId).collect(Collectors.toSet());
+    return locationSet;
   }
+
+//  public Set<String> getValidatedRelatedLocationSet(
+//          List<Location> locationList, RequestContext context) {
+//    Set<Location> locationSet = new HashSet<>();
+//    for (Location requestedLocation : locationList) {
+//      Set<Location> parentLocnSet = getParentLocations(requestedLocation, context);
+//      if (CollectionUtils.sizeIsEmpty(locationSet)) {
+//        locationSet.addAll(parentLocnSet);
+//      } else {
+//        for (Location currentLocation : parentLocnSet) {
+//          String type = currentLocation.getType();
+//          locationSet
+//                  .stream()
+//                  .forEach(
+//                          location -> {
+//                            if (type.equalsIgnoreCase(location.getType())
+//                                    && !(currentLocation.getId().equals(location.getId()))) {
+//                              throw new ProjectCommonException(
+//                                      ResponseCode.conflictingOrgLocations.getErrorCode(),
+//                                      ProjectUtil.formatMessage(
+//                                              ResponseCode.conflictingOrgLocations.getErrorMessage(),
+//                                              requestedLocation.getCode(),
+//                                              location.getCode(),
+//                                              type),
+//                                      ResponseCode.CLIENT_ERROR.getResponseCode());
+//                            }
+//                          });
+//          locationSet.add(currentLocation);
+//        }
+//      }
+//    }
+//    return locationSet.stream().map(Location::getId).collect(Collectors.toSet());
+//  }
 
   private Set<Location> getParentLocations(Location locationObj, RequestContext context) {
     Set<Location> locationSet = new LinkedHashSet<>();
