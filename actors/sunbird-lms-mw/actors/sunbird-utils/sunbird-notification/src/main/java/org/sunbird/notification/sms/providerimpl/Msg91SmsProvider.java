@@ -170,7 +170,6 @@ public class Msg91SmsProvider implements ISmsProvider {
         } else {
           return false;
         }
-
       } else {
         logger.debug("Msg91SmsProvider - Some mandatory parameters are empty!");
         return false;
@@ -186,27 +185,12 @@ public class Msg91SmsProvider implements ISmsProvider {
     }
   }
 
-  private static String getTemplateId(String sms) {
-    List<Map<String, String>> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigList();
-    for (Map<String, String> map : smsTemplateConfig) {
-      Map.Entry<String, String> entry = map.entrySet().iterator().next();
-      String templateString = entry.getKey();
-      String[] templateStringArray = templateString.split(" ");
-      String[] smsStringArray = sms.split(" ");
-      boolean bool = true;
-      if (templateStringArray.length == smsStringArray.length) {
-        for (int i = 0; i < templateStringArray.length; i++) {
-          if (!templateStringArray[i].startsWith("$")
-              && !templateStringArray[i].equalsIgnoreCase(smsStringArray[i])) {
-            bool = false;
-            break;
-          }
-        }
-      } else {
-        bool = false;
-      }
-      if (bool) {
-        return entry.getValue();
+  private String getTemplateId(String sms) {
+    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
+    for (String key : smsTemplateConfig.keySet()) {
+      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
+      if (sms.matches(pattern)) {
+        return smsTemplateConfig.get(key);
       }
     }
     return "";
