@@ -60,6 +60,7 @@ import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
+import org.sunbird.models.location.LocationIdType;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
@@ -794,6 +795,17 @@ public class UserManagementActor extends BaseActor {
     } catch (Exception ex) {
       logger.error(actorMessage.getRequestContext(), ex.getMessage(), ex);
     }
+
+    Map<String, String> profileUserType = profileUserType(userMap);
+    userMap.put(JsonKey.PROFILE_USER_TYPE,profileUserType);
+
+    RequestContext context = actorMessage.getRequestContext();
+    List<Map<String, LocationIdType>> profileLocation = locationClient.getRelatedLocationIdAndType(
+            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue()),
+            (List<String>) userMap.get(JsonKey.LOCATION_CODES),
+            context);
+    userMap.put(JsonKey.PROFILE_LOCATION,profileLocation);
+
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
@@ -1612,5 +1624,19 @@ public class UserManagementActor extends BaseActor {
       locations.add(location);
     }
     return locations;
+  }
+
+  private Map<String,String> profileUserType(Map<String, Object>userMap) {
+    Map<String, String> userTypeAndSubType = new HashMap<>();
+    if(userMap.containsKey(JsonKey.USER_TYPE)){
+      userTypeAndSubType.put(JsonKey.USER_TYPE, (String) userMap.get(JsonKey.USER_TYPE));
+      if(userMap.containsKey(JsonKey.USER_SUB_TYPE)){
+        userTypeAndSubType.put(JsonKey.USER_SUB_TYPE, (String) userMap.get(JsonKey.USER_SUB_TYPE));
+      }
+      else {
+        userTypeAndSubType.put(JsonKey.USER_SUB_TYPE,null);
+      }
+    }
+    return userTypeAndSubType;
   }
 }

@@ -252,7 +252,9 @@ public final class JsonKey {
   public static final String PDATA_ID = "telemetry_pdata_id";
   public static final String PDATA_PID = "telemetry_pdata_pid";
   public static final String PDATA_VERSION = "telemetry_pdata_ver";
+  public static final String PROFILE_LOCATION = "profile_location";
   public static final String PROFILE_SUMMARY = "profileSummary";
+  public static final String PROFILE_USER_TYPE = "profile_usertype";
   public static final String PROFILE_VISIBILITY = "profileVisibility";
   public static final String PROPS = "props";
   public static final String PROVIDER = "provider";
