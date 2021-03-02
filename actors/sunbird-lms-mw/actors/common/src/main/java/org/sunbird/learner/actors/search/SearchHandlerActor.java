@@ -66,6 +66,7 @@ public class SearchHandlerActor extends BaseActor {
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
+    Map<String, Object> searchQueryMap = request.getRequest();
     if (MapUtils.isNotEmpty(searchQueryMap)
             && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
