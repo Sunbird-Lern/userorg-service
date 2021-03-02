@@ -111,6 +111,9 @@ public enum ActorOperations {
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
   USER_SEARCH("userSearch"),
+  USER_SEARCH_V2("userSearchv2"),
+  ORG_SEARCH("orgSearch"),
+  USER_LOOKUP("userLookup"),
   GET_USER_CONSENT("getUserConsent");
 
   private String value;

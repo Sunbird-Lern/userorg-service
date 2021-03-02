@@ -330,6 +330,8 @@ public class EmailServiceActor extends BaseActor {
     fields.add(JsonKey.EMAIL);
     fields.add(JsonKey.PHONE);
     fields.add(JsonKey.ROOT_ORG_ID);
+    fields.add(JsonKey.PROFILE_USERTYPE);//changed
+    fields.add(JsonKey.PROFILE_LOCATION);//changed
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumns(
             usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), fields, userIdList, context);

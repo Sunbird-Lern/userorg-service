@@ -278,6 +278,8 @@ public final class JsonKey {
   public static final String PROCESS_ID = "processId";
   public static final String PROFILE_CONFIG = "profileConfig";
   public static final String PROCESS_START_TIME = "processStartTime";
+  public static final String PROFILE_LOCATION = "profileLocation";  //changed
+  public static final String PROFILE_USERTYPE = "profileUsertype";  //changed
   public static final String PDATA_ID = "telemetry_pdata_id";
   public static final String PDATA_PID = "telemetry_pdata_pid";
   public static final String PDATA_VERSION = "telemetry_pdata_ver";

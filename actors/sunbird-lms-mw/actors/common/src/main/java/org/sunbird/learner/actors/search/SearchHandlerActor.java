@@ -34,7 +34,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"compositeSearch"},
+  tasks = {"compositeSearch","userSearch", "orgSearch","userSearchv2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -66,7 +66,28 @@ public class SearchHandlerActor extends BaseActor {
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
+    if (MapUtils.isNotEmpty(searchQueryMap)
+            && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
+      ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
+    }
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+      handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
+      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
+    } else {
+      onReceiveUnsupportedOperation(request.getOperation());
+    }
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {//changed
+      handleUserSearchv2(request, searchQueryMap, EsType.user.getTypeName());//changed
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {//changed
+      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);//changed
+      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);//changed
+    } else {//changed
+      onReceiveUnsupportedOperation(request.getOperation());//changed
+    }//changed
   }
+
 
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
@@ -116,7 +137,55 @@ public class SearchHandlerActor extends BaseActor {
     sender().tell(response, self());
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
-
+  private void handleUserSearchv2(                                                                //changed from
+                                                                                                  Request request, Map<String, Object> searchQueryMap, String filterObjectType)
+          throws Exception {
+    UserUtility.encryptUserSearchFilterQueryDatav2(searchQueryMap);
+    extractOrFilter(searchQueryMap);
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
+    Future<Map<String, Object>> resultF =
+            esService.search(searchDto, filterObjectType, request.getRequestContext());
+    Map<String, Object> result =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    Response response = new Response();
+    // this fuzzy search Logic
+    if (((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).size() != 0
+            && isFuzzySearchRequired(searchQueryMap)) {
+      List<Map<String, Object>> responseList =
+              getResponseOnFuzzyRequest(
+                      getFuzzyFilterMap(searchQueryMap),
+                      (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
+      if (responseList.size() != 0) {
+        result.replace(JsonKey.COUNT, responseList.size());
+        result.replace(JsonKey.CONTENT, responseList);
+      } else {
+        throw new ProjectCommonException(
+                ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+                String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
+                ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
+      }
+    }
+    // Decrypt the data
+    if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
+      List<Map<String, Object>> userMapList =
+              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      for (Map<String, Object> userMap : userMapList) {
+        UserUtility.decryptUserDataFrmES(userMap);
+        userMap.remove(JsonKey.ENC_EMAIL);
+        userMap.remove(JsonKey.ENC_PHONE);
+      }
+      String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
+      updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
+    }
+    if (result == null) {
+      result = new HashMap<>();
+    }
+    //if it is version v1 remove profiledetails or send as it is
+    response.put(JsonKey.RESPONSE, result);
+    sender().tell(response, self());
+    generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
+  }                                                                                                        // chanded to
   private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());
