@@ -135,31 +135,14 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created
  @Test
   public void testCreateLocationFailureWithoutValidType() {
     Map<String, Object> res = new HashMap<>(data);
-//    res.remove(JsonKey.LOCATION_TYPE);
-//    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
     res.remove(JsonKey.SUNBIRD_VALID_LOCATION_TYPES);
     boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
     assertTrue(result);
   }
 
-  //created
-  @Test
-  public void testCreateLocationFailureWithInvalidLocationType() {
-    Map<String, Object> res = new HashMap<>(data);
-
-//    res.remove(JsonKey.SUNBIRD_VALID_LOCATION_TYPES);
-//    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.invalidLocationType);
-
-    res.remove(JsonKey.LOCATION_TYPE);
-    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true,null,ResponseCode.locationTypeRequired);
-    assertTrue(result);
-  }
-
-  //created
   @Test
   public void testUpdateLocationFailureWithoutLocationId() {
     Map<String, Object> res = new HashMap<>(data);
@@ -168,10 +151,8 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-  //created
   @Test
   public void testUpdateLocationFailureWithLocationType() {
-
     data.put(JsonKey.LOCATION_TYPE, "anyLocationType");
     boolean result =
             testScenario(

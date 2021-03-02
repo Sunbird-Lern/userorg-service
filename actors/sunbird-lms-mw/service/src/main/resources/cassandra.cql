@@ -69,15 +69,6 @@ CREATE INDEX inx_u_status ON sunbird.user (status);
 CREATE INDEX inx_u_userId ON sunbird.user (userId);
 CREATE INDEX inx_u_userName ON sunbird.user (userName);
 
-//SC-2184
-//ALTER TABLE sunbird.user ADD profilelocation text;
-//ALTER TABLE sunbird.user ADD profileusertype text;
-//CREATE TYPE profilelocation (type text,id text);
-//CREATE TYPE profileusertype (usertype text, usersubtype text);
-//ALTER TABLE sunbird.user ADD profilelocation FROZEN<profilelocation>;
-//ALTER TABLE sunbird.user ADD profileusertype FROZEN<profileusertype>;
-
-
 //user_auth
 //id is auth token
 CREATE TABLE IF NOT EXISTS sunbird.user_auth(id text, userId text,createdDate text,updatedDate text,source text,PRIMARY KEY (id));

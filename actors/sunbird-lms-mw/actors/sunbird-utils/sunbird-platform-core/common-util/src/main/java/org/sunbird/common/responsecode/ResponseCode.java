@@ -11,7 +11,6 @@ public enum ResponseCode {
   invalidOperationName(
       ResponseMessage.Key.INVALID_OPERATION_NAME, ResponseMessage.Message.INVALID_OPERATION_NAME),
   invalidLocationType(ResponseMessage.Key.INVALID_LOCATION_TYPE, ResponseMessage.Message.INVALID_LOCATION_TYPE),
-  locationTypeRequired(ResponseMessage.Key.LOCATION_TYPE_REQUIRED, ResponseMessage.Message.LOCATION_TYPE_REQUIRED),
   invalidRequestData(
       ResponseMessage.Key.INVALID_REQUESTED_DATA, ResponseMessage.Message.INVALID_REQUESTED_DATA),
   courseIdRequired(

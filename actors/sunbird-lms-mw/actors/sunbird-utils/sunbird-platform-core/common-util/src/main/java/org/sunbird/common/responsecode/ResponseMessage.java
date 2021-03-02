@@ -248,7 +248,6 @@ public interface ResponseMessage {
     String USER_CONSENT_NOT_FOUND = "User consent not found.";
     String INVALID_USER_INFO_VALUE = "Null value is not allowed";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
-    String LOCATION_TYPE_REQUIRED = "location is required";
     String INVALID_LOCATION_TYPE = "Invalid location type {0} is supplied.Supported values are {1}";
     String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
   }
