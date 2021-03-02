@@ -265,10 +265,20 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.RECOVERY_PHONE, null);
     }
     // update userSubType to null if userType is changed and subType are not provided
-    if (requestMap.containsKey(JsonKey.USER_TYPE)
-        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
-      requestMap.put(JsonKey.USER_SUB_TYPE, null);
-    }
+//    if (requestMap.containsKey(JsonKey.USER_TYPE)
+//        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
+//      requestMap.put(JsonKey.USER_SUB_TYPE, null);
+//    }
+
+    Map<String, String> profileUserType = profileUserType(requestMap);
+    requestMap.put(JsonKey.PROFILE_USER_TYPE,profileUserType);
+
+    RequestContext context = actorMessage.getRequestContext();
+    List<Map<String, LocationIdType>> profileLocation = locationClient.getRelatedLocationIdAndType(
+            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue()),
+            (List<String>) requestMap.get(JsonKey.LOCATION_CODES),
+            context);
+    requestMap.put(JsonKey.PROFILE_LOCATION,profileLocation);
 
     Map<String, Boolean> userBooleanMap =
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
@@ -796,15 +806,6 @@ public class UserManagementActor extends BaseActor {
       logger.error(actorMessage.getRequestContext(), ex.getMessage(), ex);
     }
 
-    Map<String, String> profileUserType = profileUserType(userMap);
-    userMap.put(JsonKey.PROFILE_USER_TYPE,profileUserType);
-
-    RequestContext context = actorMessage.getRequestContext();
-    List<Map<String, LocationIdType>> profileLocation = locationClient.getRelatedLocationIdAndType(
-            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue()),
-            (List<String>) userMap.get(JsonKey.LOCATION_CODES),
-            context);
-    userMap.put(JsonKey.PROFILE_LOCATION,profileLocation);
 
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
