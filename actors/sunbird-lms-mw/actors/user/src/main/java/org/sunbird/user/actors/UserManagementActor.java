@@ -206,22 +206,22 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
-    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);   //to start api call and get response
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);   //storing the callerid from the input to a variable callerid
-    boolean updateUserSchoolOrg = false;      //userschoolorg update is false
-    Map<String, Object> userMap = actorMessage.getRequest();    // request from actormessage is stored to userMap
+    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
+    boolean updateUserSchoolOrg = false;
+    Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
-    userRequestValidator.validateUpdateUserRequest(actorMessage);    //validation
-    validateLocationCodes(actorMessage);    // validating location code
+    userRequestValidator.validateUpdateUserRequest(actorMessage);
+    validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
-        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());   //returning active users from db
-    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);      //getting the managed id
-    validateUserTypeAndSubType(                                     //validating usertype and subtype
+        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
-    if (StringUtils.isNotBlank(callerId)) {   //validating whether the uploader is belong to same root org as user, then only they can update an user
+    if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
