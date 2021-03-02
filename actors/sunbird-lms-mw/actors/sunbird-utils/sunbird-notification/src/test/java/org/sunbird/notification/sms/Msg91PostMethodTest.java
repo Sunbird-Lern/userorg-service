@@ -89,24 +89,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor200();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
@@ -119,24 +113,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor400();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -149,24 +137,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor200();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -182,24 +164,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor400();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -215,24 +191,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor200();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
@@ -245,24 +215,18 @@ public class Msg91PostMethodTest {
     initMockRulesFor400();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
 
-    List<Map<String, String>> settings = new ArrayList<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "1");
-    Map<String, String> template2 = new HashMap<>();
-    template2.put(
+    template1.put(
         "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
         "2");
-    Map<String, String> template3 = new HashMap<>();
-    template3.put(
+    template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
 
-    settings.add(template1);
-    settings.add(template2);
-    settings.add(template3);
-    when(SmsTemplateUtil.getSmsTemplateConfigList()).thenReturn(settings);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
