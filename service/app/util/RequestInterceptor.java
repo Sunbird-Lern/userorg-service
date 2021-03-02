@@ -149,12 +149,12 @@ public class RequestInterceptor {
           if (StringUtils.isNotEmpty(requestedForUserID) && !requestedForUserID.equals(clientId)) {
             // LUA - MUA user combo, check the 'for' token and its parent, child identifiers
             Optional<String> forTokenHeader =
-                request.header(HeaderParam.X_Authenticated_For.getName());
+                    request.header(HeaderParam.X_Authenticated_For.getName());
             String managedAccessToken = forTokenHeader.isPresent() ? forTokenHeader.get() : "";
             if (StringUtils.isNotEmpty(managedAccessToken)) {
               String managedFor =
-                  AccessTokenValidator.verifyManagedUserToken(
-                      managedAccessToken, clientId, requestedForUserID);
+                      AccessTokenValidator.verifyManagedUserToken(
+                              managedAccessToken, clientId, requestedForUserID);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 managedForId = managedFor;
               } else {
@@ -181,8 +181,8 @@ public class RequestInterceptor {
           clientAccessTokenId = null;
         }
         userAuthentication.put(
-            JsonKey.USER_ID,
-            StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId : JsonKey.ANONYMOUS);
+                JsonKey.USER_ID,
+                StringUtils.isNotBlank(clientAccessTokenId) ? clientAccessTokenId : JsonKey.ANONYMOUS);
       } else {
         userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
       }

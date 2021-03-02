@@ -19,6 +19,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.models.location.Location;
+import org.sunbird.models.location.LocationIdType;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -138,30 +139,8 @@ public class LocationClientImpl implements LocationClient {
     Object obj = actorCall(actorRef, request, context);
   }
 
-//  @Override
-//  public List<String> getRelatedLocationIds(
-//      ActorRef actorRef, List<String> codes, RequestContext context) {
-//    Map<String, Object> requestMap = new HashMap<>();
-//    requestMap.put(JsonKey.LOCATION_CODES, codes);
-//
-//    Request request = new Request();
-//    request.setOperation(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue());
-//    request.getRequest().putAll(requestMap);
-//
-//    logger.info(context, "getRelatedLocationIds called");
-//    Object obj = actorCall(actorRef, request, context);
-//
-//    if (obj instanceof Response) {
-//      Response responseObj = (Response) obj;
-//      List<String> responseList = (List<String>) responseObj.getResult().get(JsonKey.RESPONSE);
-//      return responseList;
-//    }
-//
-//    return new ArrayList<>();
-//  }
-
   @Override
-  public List<Map<String, Object>> getRelatedLocationIds(
+  public List<String> getRelatedLocationIds(
           ActorRef actorRef, List<String> codes, RequestContext context) {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.LOCATION_CODES, codes);
@@ -175,13 +154,33 @@ public class LocationClientImpl implements LocationClient {
 
     if (obj instanceof Response) {
       Response responseObj = (Response) obj;
-      List<Map<String, Object>> responseList = (List<Map<String,Object>>) responseObj.getResult().get(JsonKey.RESPONSE);
+      List<String> responseList = (List<String>) responseObj.getResult().get(JsonKey.RESPONSE);
       return responseList;
     }
 
     return new ArrayList<>();
   }
 
+  @Override
+  public List<Map<String,LocationIdType>> getRelatedLocationIdAndType(
+          ActorRef actorRef, List<String> codes, RequestContext context) {
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.LOCATION_CODES, codes);
+
+    Request request = new Request();
+    request.setOperation(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue());
+    request.getRequest().putAll(requestMap);
+
+    logger.info(context, "getRelatedLocationIdAndTYpe called");
+    Object obj = actorCall(actorRef, request, context);
+
+    if (obj instanceof Response) {
+      Response responseObj = (Response) obj;
+      List<Map<String, LocationIdType>> responseList = (List<Map<String, LocationIdType>>) responseObj.getResult().get(JsonKey.RESPONSE);
+      return responseList;
+    }
+    return new ArrayList<>();
+  }
 
   private Object actorCall(ActorRef actorRef, Request request, RequestContext context) {
     Object obj = null;

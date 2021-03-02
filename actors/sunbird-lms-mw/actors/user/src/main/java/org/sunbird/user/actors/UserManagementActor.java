@@ -9,12 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -60,6 +55,7 @@ import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
+import org.sunbird.models.location.LocationIdType;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
@@ -205,22 +201,22 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
-    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);   //to start api call and get response
+    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
-    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);   //storing the callerid from the input to a variable callerid
-    boolean updateUserSchoolOrg = false;      //userschoolorg update is false
-    Map<String, Object> userMap = actorMessage.getRequest();    // request from actormessage is stored to userMap
+    String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
+    boolean updateUserSchoolOrg = false;
+    Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
-    userRequestValidator.validateUpdateUserRequest(actorMessage);    //validation
-    validateLocationCodes(actorMessage);    // validating location code
+    userRequestValidator.validateUpdateUserRequest(actorMessage);
+    validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
-        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());   //returning active users from db
-    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);      //getting the managed id
-    validateUserTypeAndSubType(                                     //validating usertype and subtype
+        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
-    if (StringUtils.isNotBlank(callerId)) {   //validating whether the uploader is belong to same root org as user, then only they can update an user
+    if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
@@ -264,10 +260,20 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.RECOVERY_PHONE, null);
     }
     // update userSubType to null if userType is changed and subType are not provided
-    if (requestMap.containsKey(JsonKey.USER_TYPE)
-        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
-      requestMap.put(JsonKey.USER_SUB_TYPE, null);
-    }
+//    if (requestMap.containsKey(JsonKey.USER_TYPE)
+//        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
+//      requestMap.put(JsonKey.USER_SUB_TYPE, null);
+//    }
+
+    Map<String, String> profileUserType = profileUserType(requestMap);
+    requestMap.put(JsonKey.PROFILE_USER_TYPE,profileUserType);
+
+    RequestContext context = actorMessage.getRequestContext();
+    List<Map<String, LocationIdType>> profileLocation = locationClient.getRelatedLocationIdAndType(
+            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue()),
+            (List<String>) requestMap.get(JsonKey.LOCATION_CODES),
+            context);
+    requestMap.put(JsonKey.PROFILE_LOCATION,profileLocation);
 
     Map<String, Boolean> userBooleanMap =
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
@@ -794,6 +800,17 @@ public class UserManagementActor extends BaseActor {
     } catch (Exception ex) {
       logger.error(actorMessage.getRequestContext(), ex.getMessage(), ex);
     }
+
+    Map<String, String> profileUserType = profileUserType(userMap);
+    userMap.put(JsonKey.PROFILE_USER_TYPE,profileUserType);
+
+    RequestContext context = actorMessage.getRequestContext();
+    List<Map<String, LocationIdType>> profileLocation = locationClient.getRelatedLocationIdAndType(
+            getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS_AND_TYPE.getValue()),
+            (List<String>) userMap.get(JsonKey.LOCATION_CODES),
+            context);
+    userMap.put(JsonKey.PROFILE_LOCATION,profileLocation);
+
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
@@ -1164,35 +1181,29 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void convertValidatedLocationCodesToIDs(
-      Map<String, Object> userMap, RequestContext context) {
+          Map<String, Object> userMap, RequestContext context) {
     if (userMap.containsKey(JsonKey.LOCATION_IDS)
-        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
+            && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
       userMap.remove(JsonKey.LOCATION_IDS);
     }
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
-        && userMap.containsKey(JsonKey.LOCATION_CODES)
-        && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-//      List<String> locationIdList =
-//          locationClient.getRelatedLocationIds(
-//              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-//              (List<String>) userMap.get(JsonKey.LOCATION_CODES),
-//              context);
-      List<Map<String, Object>> locationIdList =
+            && userMap.containsKey(JsonKey.LOCATION_CODES)
+            && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
+      List<String> locationIdList =
               locationClient.getRelatedLocationIds(
                       getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
                       (List<String>) userMap.get(JsonKey.LOCATION_CODES),
                       context);
       if (locationIdList != null && !locationIdList.isEmpty()) {
         userMap.put(JsonKey.LOCATION_IDS, locationIdList);
-        userMap.put(JsonKey.LOCATION_TYPE, locationIdList);
         userMap.remove(JsonKey.LOCATION_CODES);
       } else {
         ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                JsonKey.LOCATION_CODES,
-                userMap.get(JsonKey.LOCATION_CODES)));
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                        ResponseCode.invalidParameterValue.getErrorMessage(),
+                        JsonKey.LOCATION_CODES,
+                        userMap.get(JsonKey.LOCATION_CODES)));
       }
     }
   }
@@ -1455,17 +1466,17 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
-    if (null != userMap.get(JsonKey.USER_TYPE)) {   //will get the user type from new column profileusertype
+    if (null != userMap.get(JsonKey.USER_TYPE)) {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
-        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);   //get it from profilelocation column of user table
+        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
         logger.info(
             context,
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
-        if (CollectionUtils.isNotEmpty(locationIds)) {    //here change the search from location table to user table's new column profilelocation
+        if (CollectionUtils.isNotEmpty(locationIds)) {
           locations =
               locationClient.getLocationByIds(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
@@ -1619,4 +1630,19 @@ public class UserManagementActor extends BaseActor {
     }
     return locations;
   }
+
+  private Map<String,String> profileUserType(Map<String, Object>userMap) {
+    Map<String, String> userTypeAndSubType = new HashMap<>();
+    if(userMap.containsKey(JsonKey.USER_TYPE)){
+      userTypeAndSubType.put(JsonKey.USER_TYPE, (String) userMap.get(JsonKey.USER_TYPE));
+      if(userMap.containsKey(JsonKey.USER_SUB_TYPE)){
+        userTypeAndSubType.put(JsonKey.USER_SUB_TYPE, (String) userMap.get(JsonKey.USER_SUB_TYPE));
+      }
+      else {
+        userTypeAndSubType.put(JsonKey.USER_SUB_TYPE,null);
+      }
+    }
+    return userTypeAndSubType;
+  }
+
 }
