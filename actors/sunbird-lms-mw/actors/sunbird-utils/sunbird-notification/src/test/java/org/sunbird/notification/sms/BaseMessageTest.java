@@ -19,7 +19,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.notification.sms.providerimpl.Msg91SmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
 
@@ -30,7 +29,6 @@ import org.sunbird.notification.utils.SMSFactory;
   HttpClients.class,
   CloseableHttpClient.class,
   PropertiesCache.class,
-  Msg91SmsProvider.class,
   SMSFactory.class
 })
 public abstract class BaseMessageTest {
