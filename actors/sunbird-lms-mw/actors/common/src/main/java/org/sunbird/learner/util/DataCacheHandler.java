@@ -92,8 +92,6 @@ public class DataCacheHandler implements Runnable {
     cacheRoleForRead();
     cacheTelemetryPdata(telemetryPdata);
     cacheFormApiDataConfig();
-    cacheUserTypeOrSubTypeConfig();
-    cacheLocationCodeTypeConfig();
     initLocationOrderMap();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
   }
@@ -106,7 +104,14 @@ public class DataCacheHandler implements Runnable {
       reqContext.setReqId(UUID.randomUUID().toString());
       reqContext.setDebugEnabled("false");
       Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
-      formApiDataConfigMap.put(stateCode, formDataMap);
+      logger.info(
+          reqContext,
+          String.format("Cache update for form api statecode:%s is not found", stateCode));
+      if (MapUtils.isNotEmpty(formDataMap)) {
+        formApiDataConfigMap.put(stateCode, formDataMap);
+        cacheUserTypeOrSubTypeConfig();
+        cacheLocationCodeTypeConfig();
+      }
     }
   }
 

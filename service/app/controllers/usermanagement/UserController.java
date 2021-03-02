@@ -25,42 +25,7 @@ public class UserController extends BaseController {
         req -> {
           Request request = (Request) req;
           request.getRequest().put("sync", true);
-          new UserRequestValidator().validateCreateUserV1Request(request);
-          return null;
-        },
-        null,
-        null,
-        true,
-        httpRequest);
-  }
-
-  public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
-
-    return handleRequest(
-        ActorOperations.CREATE_USER.getValue(),
-        httpRequest.body().asJson(),
-        req -> {
-          Request request = (Request) req;
-          new UserRequestValidator().validateCreateUserV2Request(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-          return null;
-        },
-        null,
-        null,
-        true,
-        httpRequest);
-  }
-
-  public CompletionStage<Result> createUserV3Sync(Http.Request httpRequest) {
-
-    return handleRequest(
-        ActorOperations.CREATE_USER.getValue(),
-        httpRequest.body().asJson(),
-        req -> {
-          Request request = (Request) req;
-          request.getRequest().put("sync", true);
-          new UserRequestValidator().validateCreateUserV2Request(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          new UserRequestValidator().validateCreateUserRequest(request);
           return null;
         },
         null,
@@ -173,7 +138,7 @@ public class UserController extends BaseController {
   public CompletionStage<Result> searchUser(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
-        ActorOperations.COMPOSITE_SEARCH.getValue(),
+        ActorOperations.USER_SEARCH.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
@@ -190,7 +155,7 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> userLookup(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.USER_SEARCH.getValue(),
+        ActorOperations.USER_LOOKUP.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;

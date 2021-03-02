@@ -7,8 +7,11 @@ import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.Status;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.Util;
@@ -83,13 +86,12 @@ public class UserStatusActor extends UserBaseActor {
     ObjectMapper mapper = new ObjectMapper();
     User updatedUser = mapper.convertValue(userMapES, User.class);
     SSOManager ssoManager = SSOServiceFactory.getInstance();
-    UserDao userDao = UserDaoImpl.getInstance();
     if (isBlocked) {
       ssoManager.deactivateUser(userMapES, request.getRequestContext());
     } else {
       ssoManager.activateUser(userMapES, request.getRequestContext());
     }
-
+    UserDao userDao = UserDaoImpl.getInstance();
     Response response = userDao.updateUser(updatedUser, request.getRequestContext());
     sender().tell(response, self());
 

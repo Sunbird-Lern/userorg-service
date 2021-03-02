@@ -2,6 +2,7 @@ package org.sunbird.location.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
@@ -10,7 +11,9 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
@@ -80,12 +83,9 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context) {
-    return cassandraOperation.getRecordsByIndexedProperty(
-        KEYSPACE_NAME,
-        LOCATION_TABLE_NAME,
-        (String) queryMap.get(GeoLocationJsonKey.PROPERTY_NAME),
-        queryMap.get(GeoLocationJsonKey.PROPERTY_VALUE),
-        context);
+    Map<String, Object> searchQueryMap = new HashMap<>();
+    searchQueryMap.put(JsonKey.FILTERS, queryMap);
+    return search(searchQueryMap, context);
   }
 
   public SearchDTO addSortBy(SearchDTO searchDtO) {

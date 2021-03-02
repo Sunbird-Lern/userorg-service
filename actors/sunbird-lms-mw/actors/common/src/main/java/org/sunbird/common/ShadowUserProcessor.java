@@ -200,7 +200,8 @@ public class ShadowUserProcessor {
     Map<String, Object> response =
         (Map<String, Object>)
             ElasticSearchHelper.getResponseFromFuture(
-                elasticSearchService.search(searchDTO, JsonKey.USER, context));
+                elasticSearchService.search(
+                    searchDTO, ProjectUtil.EsType.user.getTypeName(), context));
     logger.info(
         context,
         "ShadowUserProcessor:getUserMatchedIdentifierFromES:response got from elasticSearch is with processId: "

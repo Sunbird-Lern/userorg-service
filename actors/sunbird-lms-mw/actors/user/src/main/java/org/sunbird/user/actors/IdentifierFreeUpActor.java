@@ -23,7 +23,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
-import org.sunbird.user.util.UserLookUp;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 
 @ActorConfig(
   tasks = {"freeUpUserIdentity"},
@@ -180,7 +180,7 @@ public class IdentifierFreeUpActor extends BaseActor {
       reqMap.add(deleteLookUp);
     }
     if (CollectionUtils.isNotEmpty(reqMap)) {
-      UserLookUp userLookUp = new UserLookUp();
+      UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
       userLookUp.deleteRecords(reqMap, context);
     }
   }

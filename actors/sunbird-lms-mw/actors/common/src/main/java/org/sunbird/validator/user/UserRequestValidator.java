@@ -8,10 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -24,11 +21,11 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
+  private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
 
   static {
     List<String> subTypeList =
-        Arrays.asList(
-            ProjectUtil.getConfigValue(GeoLocationJsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
     for (String str : subTypeList) {
       typeList.addAll(
           ((Arrays.asList(str.split(",")))
@@ -86,10 +83,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     return true;
@@ -779,14 +773,19 @@ public class UserRequestValidator extends BaseRequestValidator {
         // Get profile data config
         Map<String, List<String>> userProfileConfigMap =
             FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
+        if (MapUtils.isEmpty(userProfileConfigMap)) {
           // Get Default Config
           stateCode = JsonKey.DEFAULT_PERSONA;
           userProfileConfigMap = userTypeConfigMap.get(stateCode);
           if (MapUtils.isEmpty(userProfileConfigMap)) {
             userProfileConfigMap =
                 FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-            userTypeConfigMap.put(stateCode, userProfileConfigMap);
+            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
+              userTypeConfigMap.put(stateCode, userProfileConfigMap);
+            } else {
+              logger.info(
+                  context, String.format("Form Config not found for stateCode:%s", stateCode));
+            }
           }
         } else {
           userTypeConfigMap.put(stateCode, userProfileConfigMap);
@@ -794,6 +793,15 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+      if (MapUtils.isEmpty(userTypeMap)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.SERVER_ERROR,
+            MessageFormat.format(ResponseMessage.Message.USER_TYPE_CONFIG_IS_EMPTY, stateCode));
+      }
+      logger.info(
+          context,
+          String.format(
+              "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       if (!userTypeMap.containsKey(userType)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
@@ -852,15 +860,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public void validateCertValidationRequest(Request request) {
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.CERT_ID))) {
-      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.CERT_ID);
-    }
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.ACCESS_CODE))) {
-      createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.ACCESS_CODE);
-    }
-  }
-
   private void validateRecoveryEmailOrPhone(Request userRequest) {
     if (StringUtils.isNotBlank((String) userRequest.get(JsonKey.RECOVERY_EMAIL))) {
       validateEmail((String) userRequest.get(JsonKey.RECOVERY_EMAIL));
@@ -903,7 +902,9 @@ public class UserRequestValidator extends BaseRequestValidator {
                     new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
-          declareFields.put(JsonKey.PERSONA, "default");
+          if (StringUtils.isBlank((String) declareFields.get(JsonKey.PERSONA))) {
+            declareFields.put(JsonKey.PERSONA, JsonKey.DEFAULT_PERSONA);
+          }
         }
       }
     } catch (Exception ex) {

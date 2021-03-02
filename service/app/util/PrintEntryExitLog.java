@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
@@ -31,9 +32,8 @@ public class PrintEntryExitLog {
       EntryExitLogEvent entryLogEvent = getLogEvent(request, "ENTRY");
       List<Map<String, Object>> params = new ArrayList<>();
       Map<String, Object> reqMap = request.getRequest();
-      Map<String, Object> newReqMap = new HashMap<>();
+      Map<String, Object> newReqMap = SerializationUtils.clone(new HashMap<>(reqMap));
       String url = (String) request.getContext().get(JsonKey.URL);
-      newReqMap.putAll(reqMap);
       if (url.contains("search")) {
         Map<String, Object> filters = (Map<String, Object>) newReqMap.get(JsonKey.FILTERS);
         if (MapUtils.isNotEmpty(filters)) {
@@ -43,6 +43,11 @@ public class PrintEntryExitLog {
       if (url.contains("otp")) {
         if (MapUtils.isNotEmpty(newReqMap)) {
           maskOtpAttributes(newReqMap);
+        }
+      }
+      if (url.contains("lookup")) {
+        if (MapUtils.isNotEmpty(newReqMap)) {
+          maskId((String) newReqMap.get(JsonKey.VALUE), (String) newReqMap.get(JsonKey.KEY));
         }
       }
       maskAttributes(newReqMap);

@@ -3,15 +3,7 @@ package org.sunbird.learner.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -44,7 +36,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.models.user.User;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import scala.concurrent.Future;
@@ -127,33 +118,23 @@ public final class Util {
     // this map will have each DB name and it's corresponding keyspace and table
     // name.
     dbInfoMap.put(JsonKey.USER_DB, getDbInfoObject(KEY_SPACE_NAME, "user"));
-    dbInfoMap.put(JsonKey.USER_AUTH_DB, getDbInfoObject(KEY_SPACE_NAME, "user_auth"));
     dbInfoMap.put(JsonKey.ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "organisation"));
     dbInfoMap.put(JsonKey.ADDRESS_DB, getDbInfoObject(KEY_SPACE_NAME, "address"));
-    dbInfoMap.put(JsonKey.EDUCATION_DB, getDbInfoObject(KEY_SPACE_NAME, "user_education"));
-    dbInfoMap.put(JsonKey.JOB_PROFILE_DB, getDbInfoObject(KEY_SPACE_NAME, "user_job_profile"));
-    dbInfoMap.put(JsonKey.USR_EXT_ID_DB, getDbInfoObject(KEY_SPACE_NAME, "user_external_identity"));
 
     dbInfoMap.put(JsonKey.ORG_MAP_DB, getDbInfoObject(KEY_SPACE_NAME, "org_mapping"));
     dbInfoMap.put(JsonKey.ORG_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "org_type"));
     dbInfoMap.put(JsonKey.ROLE, getDbInfoObject(KEY_SPACE_NAME, "role"));
-    dbInfoMap.put(JsonKey.MASTER_ACTION, getDbInfoObject(KEY_SPACE_NAME, "master_action"));
     dbInfoMap.put(JsonKey.URL_ACTION, getDbInfoObject(KEY_SPACE_NAME, "url_action"));
     dbInfoMap.put(JsonKey.ACTION_GROUP, getDbInfoObject(KEY_SPACE_NAME, "action_group"));
     dbInfoMap.put(JsonKey.USER_ACTION_ROLE, getDbInfoObject(KEY_SPACE_NAME, "user_action_role"));
     dbInfoMap.put(JsonKey.ROLE_GROUP, getDbInfoObject(KEY_SPACE_NAME, "role_group"));
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_organisation"));
     dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
-    dbInfoMap.put(JsonKey.REPORT_TRACKING_DB, getDbInfoObject(KEY_SPACE_NAME, "report_tracking"));
     dbInfoMap.put(JsonKey.USER_NOTES_DB, getDbInfoObject(KEY_SPACE_NAME, "user_notes"));
     dbInfoMap.put(JsonKey.MEDIA_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "media_type"));
-    dbInfoMap.put(JsonKey.USER_SKILL_DB, getDbInfoObject(KEY_SPACE_NAME, "user_skills"));
-    dbInfoMap.put(JsonKey.SKILLS_LIST_DB, getDbInfoObject(KEY_SPACE_NAME, "skills"));
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
     dbInfoMap.put(JsonKey.GEO_LOCATION_DB, getDbInfoObject(KEY_SPACE_NAME, "geo_location"));
-
-    dbInfoMap.put(JsonKey.CLIENT_INFO_DB, getDbInfoObject(KEY_SPACE_NAME, "client_info"));
     dbInfoMap.put(JsonKey.SYSTEM_SETTINGS_DB, getDbInfoObject(KEY_SPACE_NAME, "system_settings"));
     dbInfoMap.put(JsonKey.USER_CERT, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_CERT));
     dbInfoMap.put(JsonKey.USER_FEED_DB, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_FEED_DB));
@@ -609,8 +590,9 @@ public final class Util {
    * @param context
    * @return List<User> List of User object.
    */
-  public static List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
-    List<User> userList = new ArrayList<>();
+  public static List<Map<String, Object>> searchUser(
+      Map<String, Object> searchQueryMap, RequestContext context) {
+    List<Map<String, Object>> searchResult = new ArrayList<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
     searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
@@ -619,17 +601,9 @@ public final class Util {
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultf);
     if (MapUtils.isNotEmpty(result)) {
-      List<Map<String, Object>> searchResult =
-          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if (CollectionUtils.isNotEmpty(searchResult)) {
-        userList =
-            searchResult
-                .stream()
-                .map(s -> mapper.convertValue(s, User.class))
-                .collect(Collectors.toList());
-      }
+      searchResult = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
     }
-    return userList;
+    return searchResult;
   }
 
   public static String getLoginId(Map<String, Object> userMap) {
@@ -683,11 +657,11 @@ public final class Util {
   @SuppressWarnings("unchecked")
   public static void upsertUserOrgData(Map<String, Object> userMap, RequestContext context) {
     Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-    Map<String, Object> map = new WeakHashMap<>();
+    Map<String, Object> map = new LinkedHashMap<>();
     map.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     map.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     Response response =
-        cassandraOperation.getRecordsByPropertiesWithFiltering(
+        cassandraOperation.getRecordsByProperties(
             usrOrgDb.getKeySpace(), usrOrgDb.getTableName(), map, context);
     List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (!resList.isEmpty()) {
