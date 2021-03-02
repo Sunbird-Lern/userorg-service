@@ -1449,17 +1449,17 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
-    if (null != userMap.get(JsonKey.USER_TYPE)) {   //will get the user type from new column profileusertype
+    if (null != userMap.get(JsonKey.USER_TYPE)) {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
-        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);   //get it from profilelocation column of user table
+        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
         logger.info(
             context,
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
-        if (CollectionUtils.isNotEmpty(locationIds)) {    //here change the search from location table to user table's new column profilelocation
+        if (CollectionUtils.isNotEmpty(locationIds)) {
           locations =
               locationClient.getLocationByIds(
                   getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
