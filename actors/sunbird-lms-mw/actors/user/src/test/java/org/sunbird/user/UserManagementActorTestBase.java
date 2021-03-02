@@ -245,11 +245,7 @@ public abstract class UserManagementActorTestBase {
 //  public List<Map<String, Object>> getLocationIdLists() {
 //    return Arrays.asList("id");
 //  }
-
-//  public List<Map<String, Object>> getLocationIdLists() {
-//    List<Map<String, Object>> locationIdAndType = Arrays.
-//    return Arrays.asList("id");
-//  }
+//
 
   public Map<String, Object> getFormApiConfig() {
     Map<String, Object> formData = new HashMap<>();

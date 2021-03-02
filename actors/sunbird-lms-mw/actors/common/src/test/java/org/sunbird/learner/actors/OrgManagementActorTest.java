@@ -137,20 +137,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-
-  //created
-  //@Test
-  public void testUpdateOrgStatusFailure() {
-    Map<String, Object> map = getRequestDataForOrgUpdate();
-    map.remove(JsonKey.CHANNEL);
-    map.remove(JsonKey.ORG_ID);
-    map.put(JsonKey.STATUS,0);
-    boolean result = testScenario(getRequest(map,ActorOperations.UPDATE_ORG_STATUS.getValue()),ResponseCode.orgIdRequired);
-    assertTrue(result);
-  }
-
-
-
   @Test
   public void testUpdateOrgTypeFailureWithExistingType() {
     Request reqObj = new Request();
@@ -163,28 +149,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-  //@Test
-  public void testUpdateOrgTypeFailureWithoutName() {
-    Request reqObj = new Request();
-    Map<String, Object> requestData = new HashMap<>();
-    requestData.put(JsonKey.ID, "as23-12asd234-123");
-    reqObj.setRequest(requestData);
-    reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
-    boolean result = testScenario(reqObj, ResponseCode.orgTypeMandatory);
-    assertTrue(result);
-  }
-
-  //created
-  // @Test
-  public void testUpdateOrgTypeFailureWithoutId() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.NAME, "local");
-    boolean result = testScenario(getRequest(map,ActorOperations.UPDATE_ORG_TYPE.getValue()),ResponseCode.orgTypeIdRequired);
-    assertTrue(result);
-  }
-
-  //created
   @Test
   public void testUpdateOrgTypeSuccess() {
     Request reqObj = new Request();
@@ -196,8 +160,6 @@ public class OrgManagementActorTest {
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
   }
-
-
 
   // @Test
   public void testAddUserToOrgSuccessWithUserIdAndOrgId() {
@@ -235,19 +197,6 @@ public class OrgManagementActorTest {
                             getRequestData(true, false, false, true, basicRequestData), ADD_MEMBER_TO_ORG), null);
     assertTrue(result);
   }
-
-  //created
-  // @Test
-  public void testAddUserToOrgSuccess() {
-
-    boolean result =
-            testScenario(
-                    getRequest(
-                            getRequestData(false, false, false, true, basicRequestData), ADD_MEMBER_TO_ORG),
-                    null);
-    assertTrue(result);
-  }
-
 
   @Test
   public void testAddUserToOrgFailureWithInvalidOrg() {
@@ -301,9 +250,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-
-
-  //created
   @Test
   public void testGetOrgDetailsFailWithoutExistingOrg() {
     Map<String, Object> reqMap = getRequestData(false, false, false, true, basicRequestData);
@@ -312,7 +258,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
   @Test
   public void testRemoveMemberOrgFailureWithUserInactive() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -326,22 +271,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-//@Test
-  public void testRemoveMemberOrgFailureWithUserNotFound() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateChannelEsResponse(true));
-
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-    Map<String,Object> map = getRequestDataForOrgUpdate();
-    map.put(JsonKey.USER_ID,"userId");
-    boolean result = testScenario(getRequest(map,ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue()),ResponseCode.userNotFound);
-    assertTrue(result);
-  }
-
-
-  //created
   @Test
   public void testCreateOrgSuccess() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -355,32 +284,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-  //@Test
-  public void testCreateOrgType() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateChannelEsResponse(true));
-
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-    Map<String,Object> map = getRequestDataForOrgUpdate();
-    map.put(JsonKey.ORG_TYPE,"type1");
-
-    boolean result = testScenario(getRequest(map,ActorOperations.CREATE_ORG_TYPE.getValue()),null);
-    assertTrue(result);
-  }
-
-  //created
-// @Test
-  public void testGetOrgTypeList() {
-
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ID,"123df");
-    boolean result = testScenario(getRequest(map,ActorOperations.GET_ORG_TYPE_LIST.getValue()),null);
-    assertTrue(result);
-  }
-
-  //created
   @Test
   public void testCreateOrgFailureWithChannelAlreadyUsed() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -444,19 +347,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created - unchecked
-  // @Test
-  public void testCreateOrgFailureWithoutExtId() {
-    Map<String, Object> map = getRequestDataForOrgCreate(basicRequestData);
-    map.remove(JsonKey.EXTERNAL_ID);
-    boolean result =
-            testScenario(
-                    getRequest(map, ActorOperations.CREATE_ORG.getValue()),
-                    ResponseCode.externalIdNotFound);
-    assertFalse(result);
-  }
-
-  //created
   @Test
   public void testCreateOrgFailureWithDefaultValues() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -466,20 +356,6 @@ public class OrgManagementActorTest {
             .thenReturn(promise.future());
     Map<String,Object> map = getRequestDataForOrgCreate(basicRequestData);
     boolean result = testScenario(getRequest(map,ActorOperations.CREATE_ORG.getValue()),ResponseCode.errorDuplicateEntry);
-    assertTrue(result);
-  }
-
-  //created
-//  @Test
-  public void testCreateOrgFailureWithEmailFormatError() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateChannelEsResponse(true));
-
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-    Map<String,Object> map = getRequestDataForOrgCreate(basicRequestData);
-    map.put(JsonKey.EMAIL,"abcd@efgh.com");
-    boolean result = testScenario(getRequest(map,ActorOperations.CREATE_ORG.getValue()),ResponseCode.emailFormatError);
     assertTrue(result);
   }
 
@@ -496,7 +372,6 @@ public class OrgManagementActorTest {
                     getRequest(getRequestDataForOrgUpdate(), ActorOperations.UPDATE_ORG.getValue()), null);
     assertTrue(result);
   }
-
 
   @Test
   public void testUpdateOrgFailureWithDuplicateChannel() {
@@ -515,8 +390,7 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-  @Test     //unchecked
+  @Test
   public void testUpdateOrgSuccessWithInvalidChannel() {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getValidateChannelEsResponse(false));
@@ -529,20 +403,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-  // @Test
-  public void testUpdateOrgFailureWithInvalidData() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateOrgEsResponse(true));
-
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-    Map<String, Object> map = getRequestDataForOrgUpdate();
-    map.put(JsonKey.IS_ROOT_ORG,true);
-    boolean result = testScenario(getRequest(map,ActorOperations.UPDATE_ORG.getValue()),ResponseCode.invalidData);
-    assertTrue(result);
-  }
-  //created
   @Test
   public void testUpdateOrgFailureWithoutChannel() {
     Map<String, Object> map = getRequestDataForOrgUpdate();
@@ -551,24 +411,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  //created
-  @Test       //unchecked
-  public void testUpdateOrgFailureWithInvalidChannel() {
-    Map<String, Object> map = getRequestDataForOrgUpdate();
-    boolean result = testScenario(getRequest(map,ActorOperations.UPDATE_ORG.getValue()),ResponseCode.invalidChannel);
-    assertTrue(result);
-  }
-
-  //created
-  @Test
-  public void testUpdateOrgFailureWithoutOrgId() {
-    Map<String, Object> map = getRequestDataForOrgUpdate();
-    map.remove(JsonKey.ORG_ID);
-    boolean result = testScenario(getRequest(map,ActorOperations.UPDATE_ORG.getValue()),ResponseCode.invalidChannel);
-    assertTrue(result);
-  }
-
-  //created
   @Test
   public void testUpdateOrgFailure() {
     Promise<Map<String, Object>> promise = Futures.promise();
@@ -613,15 +455,6 @@ public class OrgManagementActorTest {
     map.put(JsonKey.EXTERNAL_ID, "externalId");
     return map;
   }
-
-//  private String emailFormatCheck(String email) {
-//    String correctEmailFormat = "abc@def.com";
-//    assertEquals(correctEmailFormat,email);
-//    if(assertEquals(correctEmailFormat,email))
-//    return email;
-//    )
-//    return null;
-//  }
 
   private Map<String, Object> getRequestData(
           boolean userId, boolean orgId, boolean userExtId, boolean OrgExtId, Map<String, Object> map) {

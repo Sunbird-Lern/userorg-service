@@ -1515,6 +1515,9 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, RequestContext context, String stateCode) {
+    if (StringUtils.isBlank(stateCode)) {
+      stateCode = JsonKey.DEFAULT_PERSONA;
+    }
     String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
     userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
   }
