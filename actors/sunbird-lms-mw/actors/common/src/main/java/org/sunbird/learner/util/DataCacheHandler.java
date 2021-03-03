@@ -156,6 +156,7 @@ public class DataCacheHandler implements Runnable {
   }
 
   private void cacheTelemetryPdata(Map<String, Object> telemetryPdata) {
+    telemetryPdata.clear();
     telemetryPdata.put("telemetry_pdata_id", ProjectUtil.getConfigValue("telemetry_pdata_id"));
     telemetryPdata.put("telemetry_pdata_pid", ProjectUtil.getConfigValue("telemetry_pdata_pid"));
     telemetryPdata.put("telemetry_pdata_ver", ProjectUtil.getConfigValue("telemetry_pdata_ver"));
@@ -186,6 +187,7 @@ public class DataCacheHandler implements Runnable {
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
+      configSettings.clear();
       for (Map<String, Object> resultMap : responseList) {
         configSettings.put(
             ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
@@ -201,6 +203,7 @@ public class DataCacheHandler implements Runnable {
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
+      orgTypeMap.clear();
       for (Map<String, Object> resultMap : responseList) {
         orgTypeMap.put(
             ((String) resultMap.get(JsonKey.NAME)).toLowerCase(),
@@ -216,6 +219,7 @@ public class DataCacheHandler implements Runnable {
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     Set<String> roleSet = new HashSet<>();
     if (CollectionUtils.isNotEmpty(responseList)) {
+      roleMap.clear();
       for (Map<String, Object> resultMap : responseList) {
         if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
           roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
@@ -239,7 +243,7 @@ public class DataCacheHandler implements Runnable {
         }
       }
     }
-
+    roleList.clear();
     roleMap
         .entrySet()
         .parallelStream()
