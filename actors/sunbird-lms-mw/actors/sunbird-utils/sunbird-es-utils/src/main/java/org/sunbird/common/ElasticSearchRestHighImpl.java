@@ -373,6 +373,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     // apply simple query string
     if (!StringUtils.isBlank(searchDTO.getQuery())) {
       SimpleQueryStringBuilder sqsb = QueryBuilders.simpleQueryStringQuery(searchDTO.getQuery());
+      query.must(sqsb);
       if (CollectionUtils.isNotEmpty(searchDTO.getQueryFields())) {
         Map<String, Float> searchFields =
             searchDTO
