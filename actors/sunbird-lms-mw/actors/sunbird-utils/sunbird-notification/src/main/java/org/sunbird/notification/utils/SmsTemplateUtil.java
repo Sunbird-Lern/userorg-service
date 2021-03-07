@@ -15,7 +15,7 @@ public class SmsTemplateUtil {
   private static LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
-  public static List<Map<String, String>> getSmsTemplateConfigList() {
+  public static Map<String, String> getSmsTemplateConfigMap() {
     Response response =
         cassandraOperation.getRecordById(
             JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.SMS_TEMPLATE_CONFIG, null);
@@ -29,12 +29,12 @@ public class SmsTemplateUtil {
       if (StringUtils.isNotBlank(smsTemplateConfigString)) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-          return mapper.readValue(smsTemplateConfigString, List.class);
+          return mapper.readValue(smsTemplateConfigString, Map.class);
         } catch (Exception e) {
           logger.error("Error occurred while reading sms template config" + e.getMessage(), e);
         }
       }
     }
-    return Collections.emptyList();
+    return Collections.emptyMap();
   }
 }

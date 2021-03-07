@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +39,7 @@ public class SmsTemplateUtilTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperationImpl cassandraOperationImpl = mock(CassandraOperationImpl.class);
     String templateConfig =
-        "[{\"OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.\":\"1\"},{\"OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.\":\"2\"},{\"Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.\":\"3\"}]";
+        "{\"OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.\":\"1\",\"OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.\":\"2\",\"Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.\":\"3\",\"Welcome to $instanceName. Your user account has now been created. Click on the link below to  set a password  and start using your account: $link\":\"4\",\"You can now access your diksha state teacher account using $phone. Please log out and login once again to see updated details.\":\"5\",\"VidyaDaan: Your nomination for $content has not been accepted. Thank you for your interest. Please login to https:\\/\\/vdn.diksha.gov.in for details.\":\"6\",\"VidyaDaan: Your nomination for $content is accepted. Please login to https:\\/\\/vdn.diksha.gov.in to start contributing content.\":\"7\",\"VidyaDaan: Your Content $content has not been approved by the project owner. Please login to https:\\/\\/vdn.diksha.gov.in for details.\":\"8\",\"VidyaDaan: Your Content $content has been approved by the project owner.\":\"9\"}";
     Response response = new Response();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Map<String, Object> result = new HashMap<>();
@@ -56,8 +56,8 @@ public class SmsTemplateUtilTest {
   @Test
   public void testDataSettings() {
     before();
-    List<Map<String, String>> settings = SmsTemplateUtil.getSmsTemplateConfigList();
+    Map<String, String> settings = SmsTemplateUtil.getSmsTemplateConfigMap();
     Assert.assertNotNull(settings);
-    Assert.assertTrue(CollectionUtils.isNotEmpty(settings));
+    Assert.assertTrue(MapUtils.isNotEmpty(settings));
   }
 }

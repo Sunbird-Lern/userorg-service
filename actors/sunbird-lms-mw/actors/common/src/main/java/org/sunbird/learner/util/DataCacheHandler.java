@@ -86,11 +86,11 @@ public class DataCacheHandler implements Runnable {
   @Override
   public void run() {
     logger.info("DataCacheHandler:run: Cache refresh started.");
-    roleCache(roleMap);
-    orgTypeCache(orgTypeMap);
-    cacheSystemConfig(configSettings);
+    roleCache();
+    orgTypeCache();
+    cacheSystemConfig();
     cacheRoleForRead();
-    cacheTelemetryPdata(telemetryPdata);
+    cacheTelemetryPdata();
     cacheFormApiDataConfig();
     initLocationOrderMap();
     logger.info("DataCacheHandler:run: Cache refresh completed.");
@@ -155,7 +155,7 @@ public class DataCacheHandler implements Runnable {
     }
   }
 
-  private void cacheTelemetryPdata(Map<String, Object> telemetryPdata) {
+  private void cacheTelemetryPdata() {
     telemetryPdata.put("telemetry_pdata_id", ProjectUtil.getConfigValue("telemetry_pdata_id"));
     telemetryPdata.put("telemetry_pdata_pid", ProjectUtil.getConfigValue("telemetry_pdata_pid"));
     telemetryPdata.put("telemetry_pdata_ver", ProjectUtil.getConfigValue("telemetry_pdata_ver"));
@@ -178,7 +178,8 @@ public class DataCacheHandler implements Runnable {
   }
 
   @SuppressWarnings("unchecked")
-  private void cacheSystemConfig(Map<String, String> configSettings) {
+  private void cacheSystemConfig() {
+    Map<String, String> tempConfigSettings = new ConcurrentHashMap();
     Response response =
         cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.SYSTEM_SETTINGS_DB, null);
     logger.debug(
@@ -187,30 +188,34 @@ public class DataCacheHandler implements Runnable {
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
       for (Map<String, Object> resultMap : responseList) {
-        configSettings.put(
+        tempConfigSettings.put(
             ((String) resultMap.get(JsonKey.FIELD)), (String) resultMap.get(JsonKey.VALUE));
       }
     }
-    configSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
-    configSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
+    tempConfigSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
+    tempConfigSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
+    configSettings = tempConfigSettings;
   }
 
   @SuppressWarnings("unchecked")
-  private void orgTypeCache(Map<String, String> orgTypeMap) {
+  private void orgTypeCache() {
+    Map<String, String> tempOrgTypeMap = new ConcurrentHashMap();
     Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {
       for (Map<String, Object> resultMap : responseList) {
-        orgTypeMap.put(
+        tempOrgTypeMap.put(
             ((String) resultMap.get(JsonKey.NAME)).toLowerCase(),
             (String) resultMap.get(JsonKey.ID));
       }
+      orgTypeMap = tempOrgTypeMap;
     }
   }
 
   @SuppressWarnings("unchecked")
-  private void roleCache(Map<String, Object> roleMap) {
+  private void roleCache() {
+    Map<String, Object> tempRoleMap = new ConcurrentHashMap();
     Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
@@ -219,7 +224,7 @@ public class DataCacheHandler implements Runnable {
       for (Map<String, Object> resultMap : responseList) {
         if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
           roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
-          roleMap.put(
+          tempRoleMap.put(
               ((String) resultMap.get(JsonKey.ID)).trim(),
               ((String) resultMap.get(JsonKey.NAME)).trim());
         }
@@ -233,14 +238,14 @@ public class DataCacheHandler implements Runnable {
       for (Map<String, Object> resultMap : responseList2) {
         if (!roleSet.contains(((String) resultMap.get(JsonKey.ID)).trim())) {
           roleSet.add(((String) resultMap.get(JsonKey.ID)).trim());
-          roleMap.put(
+          tempRoleMap.put(
               ((String) resultMap.get(JsonKey.ID)).trim(),
               ((String) resultMap.get(JsonKey.NAME)).trim());
         }
       }
     }
-
-    roleMap
+    List<Map<String, String>> tempRoleList = new CopyOnWriteArrayList<>();
+    tempRoleMap
         .entrySet()
         .parallelStream()
         .forEach(
@@ -249,10 +254,12 @@ public class DataCacheHandler implements Runnable {
                 Map<String, String> role = new HashMap<>();
                 role.put(JsonKey.ID, roleSetItem.getKey().trim());
                 role.put(JsonKey.NAME, ((String) roleSetItem.getValue()).trim());
-                roleList.add(role);
+                tempRoleList.add(role);
                 roleSet.remove(roleSetItem.getKey().trim());
               }
             });
+    roleMap = tempRoleMap;
+    roleList = tempRoleList;
   }
 
   /** @return the roleMap */
