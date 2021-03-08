@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -59,7 +60,8 @@ public class UserProfileReadService {
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
 
-  public Response getUserProfileData(Request actorMessage) {
+  public Response
+  getUserProfileData(Request actorMessage) {
     String id = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
@@ -122,8 +124,19 @@ public class UserProfileReadService {
     addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    Map<String, Object> result1 = new HashMap<>();
+    result1.putAll(result);
+    if (result1.containsKey(JsonKey.PROFILE_USERTYPE)) {
+      result1.remove(JsonKey.PROFILE_USERTYPE);
+      Map<String, Object> userdetails= (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
+      String userType = (String) userdetails.get(JsonKey.USER_TYPE);
+      String userSubType = (String) userdetails.get(JsonKey.USER_SUB_TYPE);
+
+      result1.put(JsonKey.USER_TYPE,userType);
+      result1.put(JsonKey.USER_SUB_TYPE,userSubType);
+    }
     Response response = new Response();
-    response.put(JsonKey.RESPONSE, result);
+    response.put(JsonKey.RESPONSE, result1);
     return response;
   }
 
