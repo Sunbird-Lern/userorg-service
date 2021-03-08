@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -156,9 +157,7 @@ public class Msg91SmsProvider implements ISmsProvider {
               new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
           httpPost.setEntity(entity);
           Header[] headers = httpPost.getAllHeaders();
-          for (Header header : headers) {
-            logger.info(" SMS request Header = " + header.getName() + ": " + header.getValue());
-          }
+          logger.info(" SMS request Header = " + Arrays.toString(headers));
           String content = EntityUtils.toString(entity);
           logger.info("SMS Request Body : " + content);
           CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -420,9 +419,7 @@ public class Msg91SmsProvider implements ISmsProvider {
             new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
         httpPost.setEntity(entity);
         Header[] headers = httpPost.getAllHeaders();
-        for (Header header : headers) {
-          logger.info(" SMS request Header = " + header.getName() + ": " + header.getValue());
-        }
+        logger.info(" SMS request Header = " + Arrays.toString(headers));
         String content = EntityUtils.toString(entity);
         logger.info("SMS Request Body : " + content);
         CloseableHttpResponse response = httpClient.execute(httpPost);
