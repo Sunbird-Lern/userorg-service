@@ -131,7 +131,6 @@ public class UserProfileReadService {
       Map<String, Object> userdetails= (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
       String userType = (String) userdetails.get(JsonKey.USER_TYPE);
       String userSubType = (String) userdetails.get(JsonKey.USER_SUB_TYPE);
-
       result1.put(JsonKey.USER_TYPE,userType);
       result1.put(JsonKey.USER_SUB_TYPE,userSubType);
     }
