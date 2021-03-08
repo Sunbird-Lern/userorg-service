@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,6 +17,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.notification.sms.Sms;
 import org.sunbird.notification.sms.provider.ISmsProvider;
@@ -153,7 +155,12 @@ public class Msg91SmsProvider implements ISmsProvider {
           HttpEntity entity =
               new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
           httpPost.setEntity(entity);
-
+          Header[] headers = httpPost.getAllHeaders();
+          for (Header header : headers) {
+            logger.info(" SMS request Header = " + header.getName() + ": " + header.getValue());
+          }
+          String content = EntityUtils.toString(entity);
+          logger.info("SMS Request Body : " + content);
           CloseableHttpResponse response = httpClient.execute(httpPost);
           StatusLine sl = response.getStatusLine();
           response.close();
@@ -412,7 +419,12 @@ public class Msg91SmsProvider implements ISmsProvider {
         HttpEntity entity =
             new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
         httpPost.setEntity(entity);
-
+        Header[] headers = httpPost.getAllHeaders();
+        for (Header header : headers) {
+          logger.info(" SMS request Header = " + header.getName() + ": " + header.getValue());
+        }
+        String content = EntityUtils.toString(entity);
+        logger.info("SMS Request Body : " + content);
         CloseableHttpResponse response = httpClient.execute(httpPost);
         StatusLine sl = response.getStatusLine();
         response.close();
