@@ -2,7 +2,13 @@ package org.sunbird.common.quartz.scheduler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +35,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
             + Calendar.getInstance().getTime()
             + " triggered by: "
             + jobExecutionContext.getJobDetail().toString());
-    startMigration();
+    // startMigration();
   }
 
   public void startMigration() {
@@ -116,15 +122,15 @@ public class ShadowUserMigrationScheduler extends BaseJob {
    * @return list
    */
   private List<String> getUnprocessedRecordIds() {
-    Response response =
-        cassandraOperation.getRecordByObjectType(
-            bulkUploadDbInfo.getKeySpace(),
-            bulkUploadDbInfo.getTableName(),
-            JsonKey.ID,
-            JsonKey.STATUS,
-            ProjectUtil.BulkProcessStatus.INTERRUPT.getValue(),
-            JsonKey.MIGRATION_USER_OBJECT,
-            null);
+    Response response = new Response(); // Will depricate these api with SC-2169
+    /* cassandraOperation.getRecordByObjectType(
+    bulkUploadDbInfo.getKeySpace(),
+    bulkUploadDbInfo.getTableName(),
+    JsonKey.ID,
+    JsonKey.STATUS,
+    ProjectUtil.BulkProcessStatus.INTERRUPT.getValue(),
+    JsonKey.MIGRATION_USER_OBJECT,
+    null);*/
     List<Map<String, Object>> result = new ArrayList<>();
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((List) response.getResult().get(JsonKey.RESPONSE));
@@ -189,7 +195,7 @@ public class ShadowUserMigrationScheduler extends BaseJob {
     propertiesMap.put("userExtId", userExtId);
     Map<String, Object> result = new HashMap<>();
     Response response =
-        cassandraOperation.getRecordsByPropertiesWithFiltering(
+        cassandraOperation.getRecordsByProperties(
             JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, null);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       result = ((Map) ((List) response.getResult().get(JsonKey.RESPONSE)).get(0));

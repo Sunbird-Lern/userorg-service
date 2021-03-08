@@ -21,7 +21,7 @@ public interface UserDao {
    * @param context
    * @return User ID.
    */
-  String createUser(User user, RequestContext context);
+  Response createUser(Map<String, Object> user, RequestContext context);
 
   /**
    * This method will update existing user info or throw ProjectCommonException.

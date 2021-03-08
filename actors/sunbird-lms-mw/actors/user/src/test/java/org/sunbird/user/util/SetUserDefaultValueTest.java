@@ -27,6 +27,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)
@@ -42,9 +43,15 @@ import org.sunbird.user.service.impl.UserServiceImpl;
   UserService.class,
   UserServiceImpl.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
-  UserLookUp.class
+  UserLookUpServiceImpl.class
 })
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 public class SetUserDefaultValueTest {
 
   private static Response response;
@@ -104,8 +111,8 @@ public class SetUserDefaultValueTest {
     when(userService.searchUserNameInUserLookup(Mockito.anyList(), Mockito.any()))
         .thenReturn(new ArrayList());
     when(userService.getEncryptedList(Mockito.anyList(), Mockito.any())).thenReturn(usernameList);
-    UserLookUp userLookUp = PowerMockito.mock(UserLookUp.class);
-    PowerMockito.whenNew(UserLookUp.class).withNoArguments().thenReturn(userLookUp);
+    UserLookUpServiceImpl userLookUp = PowerMockito.mock(UserLookUpServiceImpl.class);
+    PowerMockito.whenNew(UserLookUpServiceImpl.class).withNoArguments().thenReturn(userLookUp);
     PowerMockito.when(
             userLookUp.checkUsernameUniqueness(
                 Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))

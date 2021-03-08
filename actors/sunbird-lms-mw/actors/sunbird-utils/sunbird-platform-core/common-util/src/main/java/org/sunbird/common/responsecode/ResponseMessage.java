@@ -10,44 +10,21 @@ public interface ResponseMessage {
   interface Message {
 
     String UNAUTHORIZED_USER = "You are not authorized.";
-    String INVALID_USER_CREDENTIALS = "Please check your credentials";
     String OPERATION_TIMEOUT = "Request processing taking too long time. Please try again later.";
     String INVALID_OPERATION_NAME =
         "Operation name is invalid. Please provide a valid operation name";
     String INVALID_REQUESTED_DATA = "Requested data for this operation is not valid.";
-    String CONSUMER_ID_MISSING_ERROR = "Consumer id is mandatory.";
-    String CONSUMER_ID_INVALID_ERROR = "Consumer id is invalid.";
-    String DEVICE_ID_MISSING_ERROR = "Device id is mandatory.";
-    String CONTENT_ID_INVALID_ERROR = "Please provide a valid content id.";
-    String CONTENT_ID_MISSING_ERROR = "Please provide content id.";
     String COURSE_ID_MISSING_ERROR = "Please provide course id.";
     String API_KEY_MISSING_ERROR = "APi key is mandatory.";
-    String API_KEY_INVALID_ERROR = "APi key is invalid.";
     String INTERNAL_ERROR = "Process failed,please try again later.";
-    String COURSE_NAME_MISSING = "Please provide the course name.";
     String SUCCESS_MESSAGE = "Success";
-    String SESSION_ID_MISSING = "Session id is mandatory.";
     String COURSE_ID_MISSING = "Course id is mandatory.";
-    String CONTENT_ID_MISSING = "Content id is mandatory.";
-    String VERSION_MISSING = "Version is mandatory.";
-    String COURSE_VERSION_MISSING = "Course version is mandatory.";
-    String CONTENT_VERSION_MISSING = "Content version is mandatory.";
-    String COURSE_DESCRIPTION_MISSING = "Description is mandatory.";
-    String COURSE_TOCURL_MISSING = "Course tocurl is mandatory.";
-    String EMAIL_MISSING = "Email is mandatory.";
     String EMAIL_FORMAT = "Email is invalid.";
-    String URL_FORMAT_ERROR = "URL is invalid.";
     String FIRST_NAME_MISSING = "First name is mandatory.";
     String LANGUAGE_MISSING = "Language is mandatory.";
     String PASSWORD_MISSING = "Password is mandatory.";
-    String ERROR_INVALID_CONFIG_PARAM_VALUE = "Invalid value {0} for config parameter {1}.";
-    String ERROR_MAX_SIZE_EXCEEDED = "Size of {0} exceeds max limit {1}";
-    String PASSWORD_MIN_LENGHT = "Password should have at least 8 character.";
-    String PASSWORD_MAX_LENGHT = "Password should not be more than 12 character.";
-    String ORGANISATION_ID_MISSING = "Organization id is mandatory.";
     String REQUIRED_DATA_ORG_MISSING =
         "Organization Id or Provider with External Id values are required for the operation";
-    String ORGANISATION_NAME_MISSING = "organization name is mandatory.";
     String CHANNEL_SHOULD_BE_UNIQUE =
         "Channel value already used by another organization. Provide different value for channel";
     String ERROR_DUPLICATE_ENTRY = "Value {0} for {1} is already in use.";
@@ -57,47 +34,16 @@ public interface ResponseMessage {
         "Given User Data doesn't exist in our records. Please provide a valid one";
     String USR_DATA_VALIDATION_ERROR = "Please provide valid userId or userName and provider";
     String INVALID_ROOT_ORGANIZATION = "Root organization id is invalid";
-    String INVALID_PARENT_ORGANIZATION_ID = "Parent organization id is invalid";
-    String CYCLIC_VALIDATION_FAILURE = "The relation cannot be created as it is cyclic";
-    String ENROLLMENT_START_DATE_MISSING = "Enrollment start date is mandatory.";
-    String COURSE_DURATION_MISSING = "Course duration is mandatory.";
-    String LOGIN_TYPE_MISSING = "Login type is required.";
     String ERROR_INVALID_OTP = "Invalid OTP.";
     String EMAIL_IN_USE = "Email already exists.";
     String USERNAME_EMAIL_IN_USE =
         "Username or Email is already in use. Please try with a different Username or Email.";
     String KEY_CLOAK_DEFAULT_ERROR = "server error at sso.";
-    String USER_REG_UNSUCCESSFUL = "User Registration unsuccessful.";
-    String USER_UPDATE_UNSUCCESSFUL = "User update operation is unsuccessful.";
-    String INVALID_CREDENTIAL = "Invalid credential.";
     String USERNAME_MISSING = "Username is mandatory.";
     String USERNAME_IN_USE = "Username already exists.";
     String USERID_MISSING = "UserId is mandatory.";
-    String ROLE_MISSING = "Role of the user is required";
-    String MESSAGE_ID_MISSING = "Message id is mandatory.";
-    String USERNAME_CANNOT_BE_UPDATED = "UserName cann't be updated.";
     String AUTH_TOKEN_MISSING = "Auth token is mandatory.";
-    String INVALID_AUTH_TOKEN = "Auth token is invalid.Please login again.";
-    String TIMESTAMP_REQUIRED = "TimeStamp is required.";
-    String PUBLISHED_COURSE_CAN_NOT_UPDATED = "Published course can't be updated.";
-    String SOURCE_MISSING = "Source is required.";
-    String SECTION_NAME_MISSING = "Section name is required.";
-    String SECTION_DATA_TYPE_MISSING = "Section data type missing.";
-    String SECTION_ID_REQUIRED = "Section id is required.";
-    String PAGE_NAME_REQUIRED = "Page name is required.";
-    String PAGE_ID_REQUIRED = "Page id is required.";
-    String INVALID_CONFIGURATION = "Invalid configuration data.";
-    String ASSESSMENT_ITEM_ID_REQUIRED = "Assessment item id is required.";
-    String ASSESSMENT_TYPE_REQUIRED = "Assessment type is required.";
-    String ATTEMPTED_DATE_REQUIRED = "Attempted data is required.";
-    String ATTEMPTED_ANSWERS_REQUIRED = "Attempted answers is required.";
-    String MAX_SCORE_REQUIRED = "Max score is required.";
-    String STATUS_CANNOT_BE_UPDATED = "status cann't be updated.";
-    String ATTEMPT_ID_MISSING_ERROR = "Please provide attempt id.";
     String LOGIN_TYPE_ERROR = "provide login type as null.";
-    String INVALID_ORG_ID = "Org id does not exist .";
-    String INVALID_ORG_STATUS = "Invalid org status for approve .";
-    String INVALID_ORG_STATUS_TRANSITION = "Can not change state of Org to requeted state .";
     String ADDRESS_REQUIRED_ERROR = "Please provide address.";
     String EDUCATION_REQUIRED_ERROR = "Please provide education details.";
     String JOBDETAILS_REQUIRED_ERROR = "Please provide job details.";
@@ -110,12 +56,8 @@ public interface ResponseMessage {
     String ORG_ID_MISSING = "Organization Id required.";
     String ACTOR_CONNECTION_ERROR = "Service is not able to connect with actor.";
     String USER_ALREADY_EXISTS = "User already exists for given {0}.";
-    String PAGE_ALREADY_EXIST = "page already exist with this Page Name and Org Code.";
     String INVALID_USER_ID = "User Id does not exists in our records";
     String LOGIN_ID_MISSING = "loginId is required.";
-    String CONTENT_STATUS_MISSING_ERROR = "content status is required .";
-    String ES_ERROR = "Something went wrong when processing data for search";
-    String INVALID_PERIOD = "Time Period is invalid";
     String USER_NOT_FOUND = "user not found.";
     String ID_REQUIRED_ERROR = "For deleting a record, Id is required.";
     String DATA_TYPE_ERROR = "Data type of {0} should be {1}.";
@@ -129,74 +71,28 @@ public interface ResponseMessage {
     String ROLES_MISSING = "user role is required.";
     String EMPTY_ROLES_PROVIDED = "Roles cannot be empty.";
     String CHANNEL_REG_FAILED = "Channel Registration failed.";
-    String INVALID_COURSE_CREATOR_ID = "Course creator id does not exist .";
-    String USER_NOT_ASSOCIATED_TO_ROOT_ORG =
-        "User (ID = {0}) not associated to course batch creator root org.";
     String SLUG_IS_NOT_UNIQUE =
         "Please provide different channel value. This channel value already exist.";
-    String INVALID_DATE_FORMAT =
-        "Invalid Date format . Date format should be : yyyy-MM-dd hh:mm:ss:SSSZ";
-    String SRC_EXTERNAL_ID_ALREADY_EXIST = "PROVIDER WITH EXTERNAL ID ALREADY EXIST .";
-    String USER_ALREADY_ENROLLED_COURSE = "User has already Enrolled this course .";
-    String USER_NOT_ENROLLED_COURSE = "User is not enrolled to given course batch.";
-    String USER_ALREADY_COMPLETED_COURSE = "User already completed given course batch.";
-    String COURSE_BATCH_ALREADY_COMPLETED = "Course batch is already completed.";
-    String COURSE_BATCH_ENROLLMENT_DATE_ENDED = "Course batch enrollment date has ended.";
     String EXISTING_ORG_MEMBER = "You already have a membership of this organization.";
     String CONTENT_TYPE_ERROR = "Please add Content-Type header with value application/json";
     String INVALID_PROPERTY_ERROR = "Invalid property {0}.";
-    String USER_NAME_OR_ID_ERROR = "Please provide either username or userId.";
     String USER_ACCOUNT_BLOCKED = "User account has been blocked .";
     String EMAIL_VERIFY_ERROR = "Please provide a verified email in order to create user.";
     String PHONE_VERIFY_ERROR =
         "Please provide a verified phone number in order to create/update user.";
-    String BULK_USER_UPLOAD_ERROR =
-        "Please provide either organization Id or external Id & provider value.";
     String DATA_SIZE_EXCEEDED = "Maximum upload data size should be {0}";
-    String INVALID_COLUMN_NAME = "Invalid column name.";
     String USER_ALREADY_ACTIVE = "User is already active.";
     String USER_ALREADY_INACTIVE = "User is already inactive.";
-    String ENROLMENT_TYPE_REQUIRED = "Enrolment type is mandatory.";
-    String ENROLMENT_TYPE_VALUE_ERROR = "EnrolmentType value must be either open or invite-only.";
-    String COURSE_BATCH_START_DATE_REQUIRED = "Batch start date is mandatory.";
-    String COURSE_BATCH_START_DATE_INVALID =
-        "Batch start date should be either today or future date.";
     String DATE_FORMAT_ERRROR = "Date format error.";
-    String END_DATE_ERROR = "End date should be greater than start date.";
-    String ENROLLMENT_END_DATE_START_ERROR =
-        "Enrollment End date should be greater than course batch start date.";
-    String ENROLLMENT_END_DATE_END_ERROR =
-        "Enrollment End date should be lesser than course batch end date.";
-    String ENROLLMENT_END_DATE_UPDATE_ERROR =
-        "Invalid Enrollment End date. Please provide future date.";
     String INVALID_CSV_FILE = "Please provide valid csv file.";
-    String INVALID_COURSE_BATCH_ID = "Invalid course batch id ";
-    String COURSE_BATCH_ID_MISSING = "Course batch Id required";
-    String ENROLLMENT_TYPE_VALIDATION = "Enrollment type should be invite-only.";
-    String USER_NOT_BELONGS_TO_ANY_ORG = "User does not belongs to any org .";
     String INVALID_OBJECT_TYPE = "Invalid Object Type.";
-    String INVALID_PROGRESS_STATUS =
-        "Progress status value should be NOT_STARTED(0), STARTED(1), COMPLETED(2).";
-    String COURSE_CREATED_FOR_NULL = "Batch does not belong to any organization .";
-    String COURSE_BATCH_START_PASSED_DATE_INVALID = "This Batch already started.";
-    String UNABLE_TO_CONNECT_TO_EKSTEP = "Unable to connect to Ekstep Server";
-    String UNABLE_TO_CONNECT_TO_ES = "Unable to connect to Elastic Search";
     String UNABLE_TO_PARSE_DATA = "Unable to parse the data";
-    String INVALID_JSON = "Unable to process object to JSON/ JSON to Object";
     String EMPTY_CSV_FILE = "CSV file is Empty.";
-    String INVALID_ROOT_ORG_DATA =
-        "Root org doesn't exist for this Organization Id and channel {0}";
     String NO_DATA = "You have uploaded an empty file. Fill mandatory details and upload the file.";
     String INVALID_CHANNEL = "Channel value is invalid.";
-    String INVALID_PROCESS_ID = "Invalid Process Id.";
     String EMAIL_SUBJECT_ERROR = "Email Subject is mandatory.";
     String EMAIL_BODY_ERROR = "Email Body is mandatory.";
-    String RECIPIENT_ADDRESS_ERROR = "Please send recipientEmails or recipientUserIds.";
     String STORAGE_CONTAINER_NAME_MANDATORY = " Container name can not be null or empty.";
-    String CLOUD_SERVICE_ERROR = "Cloud storage service error.";
-    String RECEIVER_ID_ERROR = "Receiver id is mandatory.";
-    String INVALID_RECEIVER_ID = "Receiver id is invalid.";
-    String USER_ORG_ASSOCIATION_ERROR = "User is already associated with another organization.";
     String INVALID_ROLE = "Invalid role value provided in request.";
     String INVALID_SALT = "Please provide salt value.";
     String ORG_TYPE_MANDATORY = "Org Type name is mandatory.";
@@ -213,20 +109,10 @@ public interface ResponseMessage {
     String INVALID_WEBPAGE_DATA = "Invalid webPage data";
     String INVALID_MEDIA_TYPE = "Invalid media type for webPage";
     String INVALID_WEBPAGE_URL = "Invalid URL for {0}.";
-    String INVALID_DATE_RANGE = "Date range should be between 3 Month.";
-    String INVALID_BATCH_END_DATE_ERROR = "Please provide valid End Date.";
-    String INVALID_BATCH_START_DATE_ERROR = "Please provide valid Start Date.";
-    String COURSE_BATCH_END_DATE_ERROR = "Batch has been closed.";
-    String COURSE_BATCH_IS_CLOSED_ERROR = "Batch has been closed.";
     String CONFIIRM_PASSWORD_MISSING = "Confirm password is mandatory.";
     String CONFIIRM_PASSWORD_EMPTY = "Confirm password can not be empty.";
     String SAME_PASSWORD_ERROR = "New password can't be same as old password.";
-    String ENDORSED_USER_ID_REQUIRED = " Endorsed user id required .";
-    String CAN_NOT_ENDORSE = "Can not endorse since both belong to different orgs .";
-    String INVALID_ORG_TYPE_ID_ERROR = "Please provide valid orgTypeId.";
     String INVALID_ORG_TYPE_ERROR = "Please provide valid orgType.";
-    String TABLE_OR_DOC_NAME_ERROR = "Please provide valid table or documentName.";
-    String EMAIL_OR_PHONE_MISSING = "Please provide either email or phone.";
     // No need to indicate managedby is missing to user.
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "Please provide either email or phone.";
     String ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED =
@@ -234,10 +120,7 @@ public interface ResponseMessage {
     String PHONE_ALREADY_IN_USE = "Phone already in use. Please provide different phone number.";
     String INVALID_CLIENT_NAME = "Please provide unique valid client name";
     String INVALID_CLIENT_ID = "Please provide valid client id";
-    String USER_PHONE_UPDATE_FAILED = "user phone update is failed.";
-    String ES_UPDATE_FAILED = "Data insertion to ES failed.";
     String UPDATE_FAILED = "Data updation failed due to invalid Request";
-    String INVALID_TYPE_VALUE = "Type value should be organisation OR location .";
     String INVALID_LOCATION_ID = "Please provide valid location id.";
     String INVALID_HASHTAG_ID =
         "Please provide different hashTagId.This HashTagId is associated with some other organization.";
@@ -253,47 +136,22 @@ public interface ResponseMessage {
     String ERROR_DUPLICATE_ENTRIES = "System contains duplicate entry for {0}.";
     String LOCATION_ID_REQUIRED = "Please provide Location Id.";
     String NOT_SUPPORTED = "Not Supported.";
-    String USERNAME_USERID_MISSING = "Please provide either userName or userId.";
-    String RECIPIENT_EMAIL_REQUIRED = "Please provide recipient email.";
-    String ASSERTION_EVIDENCE_REQUIRED = "Please provide valid assertion url as an evidence.";
-    String ASSERTION_ID_REQUIRED = "Please provide assertion ID.";
-    String RECIPIENT_ID_REQUIRED = "Please provide a recipient id.";
-    String RECIPIENT_TYPE_REQUIRED = "Please provide recipient type.";
-    String BADGING_SERVER_ERROR = "Badging server is down or on high load";
     String RESOURCE_NOT_FOUND = "Requested resource not found";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "Max allowed size is {0}";
-    String SLUG_REQUIRED = "Slug is required .";
-    String INVALID_ISSUER_ID = "Invalid issuer ID.";
-    String REVOCATION_REASON_REQUIRED = "Please provide revocation reason.";
-    String ALREADY_REVOKED = "Assertion is already revoked.";
-    String INVALID_RECIPIENT_TYPE = "Please provide a valid recipient type.";
-    String CUSTOM_CLIENT_ERROR = "Request failed. {0}";
-    String CUSTOM_RESOURCE_NOT_FOUND_ERROR = "{0}";
-    String CUSTOM_SERVER_ERROR = "{0}";
     String INACTIVE_USER = "User is Inactive. Please make it active to proceed.";
     String USER_INACTIVE_FOR_THIS_ORG =
         "User is Inactive for this org. Please make it active to proceed.";
-    String USER_UPDATE_FAILED_FOR_THIS_ORG = "user updation failed for this org.";
-    String PAGE_NOT_EXIST = "Requested page does not exist.";
-    String SECTION_NOT_EXIST = "Requested section does not exist.";
     String ORG_NOT_EXIST = "Requested organisation does not exist.";
-    String INVALID_PAGE_SOURCE = "Invalid page source.";
-    String LOCATION_TYPE_REQUIRED = "Location type required.";
-    String INVALID_REQUEST_DATA_FOR_LOCATION = "{0} field required.";
     String ALREADY_EXISTS = "A {0} with {1} already exists. Please retry with a unique value.";
     String INVALID_VALUE = "Invalid {0}: {1}. Valid values are: {2}.";
-    String PARENT_CODE_AND_PARENT_ID_MISSING = "Please provide either parentCode or parentId.";
     String INVALID_PARAMETER = "Please provide valid {0}.";
-    String INVALID_PARENT_ID = "Please provide valid parentId.";
     String INVALID_LOCATION_DELETE_REQUEST =
         "One or more locations have a parent reference to given location and hence cannot be deleted.";
     String LOCATION_TYPE_CONFLICTS = "Location type conflicts with its parent location type.";
     String MANDATORY_PARAMETER_MISSING = "Mandatory parameter {0} is missing.";
     String ERROR_MANDATORY_PARAMETER_EMPTY = "Mandatory parameter {0} is empty.";
     String ERROR_NO_FRAMEWORK_FOUND = "No framework found.";
-    String INVALID_LOCN_ID = "Please provide valid locationId.";
     String UPDATE_NOT_ALLOWED = "Update of {0} is not allowed.";
-    String MANDATORY_HEADER_MISSING = "Mandatory header {0} is missing.";
     String INVALID_PARAMETER_VALUE =
         "Invalid value {0} for parameter {1}. Please provide a valid value.";
     String PARENT_NOT_ALLOWED = "For top level location, {0} is not allowed.";
@@ -310,46 +168,13 @@ public interface ResponseMessage {
         "No root organisation found which is associated with given {0}.";
     String OR_FORMAT = "{0} or {1}";
     String AND_FORMAT = "{0} and {1}";
-    String DOT_FORMAT = "{0}.{1}";
     String DEPENDENT_PARAMETER_MISSING = "Missing parameter {0} which is dependent on {1}.";
     String DEPENDENT_PARAMS_MISSING = "Missing parameter value in {0}.";
     String EXTERNALID_NOT_FOUND =
         "External ID (id: {0}, idType: {1}, provider: {2}) not found for given user.";
-    String PARSING_FAILED = "Failed to parse {0}.";
     String EXTERNAL_ID_FORMAT = "externalId (id: {0}, idType: {1}, provider: {2})";
     String EXTERNALID_ASSIGNED_TO_OTHER_USER =
         "External ID (id: {0}, idType: {1}, provider: {2}) already assigned to another user.";
-    String MANDATORY_CONFIG_PARAMETER_MISSING =
-        "Mandatory configuration parameter {0} missing which is required for service startup.";
-    String CASSANDRA_CONNECTION_ESTABLISHMENT_FAILED =
-        "Cassandra connection establishment failed in {0} mode.";
-    String COMMON_ATTRIBUTE_MISMATCH = "{0} mismatch of {1} and {2}";
-    String MULTIPLE_COURSES_FOR_BATCH = "A batch cannot belong to multiple courses.";
-    String ERROR_JSON_TRANSFORM_INVALID_TYPE_CONFIG =
-        "JSON transformation failed as invalid type configuration found for field {0}.";
-    String ERROR_JSON_TRANSFORM_INVALID_DATE_FORMAT =
-        "JSON transformation failed as invalid date format configuration found for field {0}.";
-    String ERROR_JSON_TRANSFORM_INVALID_INPUT =
-        "JSON transformation failed as invalid input provided for field {0}.";
-    String ERROR_JSON_TRANSFORM_INVALID_ENUM_INPUT =
-        "JSON transformation failed as invalid enum input provided for field {0}.";
-    String ERROR_JSON_TRANSFORM_ENUM_VALUES_EMPTY =
-        "JSON transformation failed as enum values is empty in configuration for field {0}.";
-    String ERROR_JSON_TRANSFORM_BASIC_CONFIG_MISSING =
-        "JSON transformation failed as mandatory configuration (toFieldName, fromType or toType) is missing for field {0}.";
-    String ERROR_JSON_TRANSFORM_INVALID_FILTER_CONFIG =
-        "JSON transformation failed as invalid filter configuration found for field {0}.";
-    String ERROR_LOAD_CONFIG = "Loading failed for configuration file {0}.";
-    String ERROR_REGISTRY_CLIENT_CREATION = "Registry client creation failed.";
-    String ERROR_REGISTRY_ADD_ENTITY = "Registry add entity API failed.";
-    String ERROR_REGISTRY_READ_ENTITY = "Registry read entity API failed.";
-    String ERROR_REGISTRY_UPDATE_ENTITY = "Registry update entity API failed.";
-    String ERROR_REGISTRY_DELETE_ENTITY = "Registry delete entity API failed.";
-    String ERROR_REGISTRY_PARSE_RESPONSE = "Error while parsing response from registry.";
-    String ERROR_REGISTRY_ENTITY_TYPE_BLANK = "Request failed as entity type is blank.";
-    String ERROR_REGISTRY_ENTITY_ID_BLANK = "Request failed as entity id is not provided.";
-    String ERROR_REGISTRY_ACCESS_TOKEN_BLANK =
-        "Request failed as user access token is not provided.";
     String DUPLICATE_EXTERNAL_IDS =
         "Duplicate external IDs for given idType ({0}) and provider ({1}).";
     String INVALID_DUPLICATE_VALUE = "Values for {0} and {1} cannot be same.";
@@ -370,7 +195,6 @@ public interface ResponseMessage {
         "Field {0} in {1} configuration is conflicting in {2} and {3}.";
     String ERROR_SYSTEM_SETTING_NOT_FOUND = "System Setting not found for id: {0}";
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "Not able to associate with root org";
-    String ERROR_INACTIVE_CUSTODIAN_ORG = "Custodian organisation is inactive.";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "Unsupported cloud storage type {0}.";
     String ERROR_UNSUPPORTED_FIELD = "Unsupported field {0}.";
     String ERROR_GENERATE_DOWNLOAD_LINK = "Error in generating download link.";
@@ -382,69 +206,25 @@ public interface ResponseMessage {
     String ERROR_CONFLICTING_ROOT_ORG_ID =
         "Root organisation ID of API user is conflicting with that of specified organisation ID.";
     String ERROR_UPDATE_SETTING_NOT_ALLOWED = "Update of system setting {0} is not allowed.";
-    String ERROR_CREATING_FILE = "Error Reading File";
-    String ERROR_PROCESSING_REQUEST = "Something went wrong while Processing Request";
     String ERROR_UNAVAILABLE_CERTIFICATE = "Certificate is unavailable";
-    String INVALID_TEXTBOOK = "Invalid Textbook. Please Provide Valid Textbook Identifier.";
     String CSV_ROWS_EXCEEDS = "Number of rows in csv file is more than ";
-    String INVALID_TEXTBOOK_NAME =
-        "Textbook Name given in the file doesn’t match current Textbook name. Please check and upload again.";
-    String DUPLICATE_ROWS =
-        "Duplicate Textbook node found. Please check and upload again. Row number ";
-    String REQUIRED_HEADER_MISSING = "Required set of header missing: ";
-    String REQUIRED_FIELD_MISSING =
-        "Required columns missing. Please check and upload again. Mandatory fields are: ";
     String BLANK_CSV_DATA =
         "Did not find any Table of Contents data. Please check and upload again.";
-    String EXCEEDS_MAX_CHILDREN = "Number of first level units is more than allowed.";
-    String TEXTBOOK_CHILDREN_EXISTS = "Textbook is already having children.";
-    String TEXTBOOK_UPDATE_FAILURE = "Textbook could not be updated.";
-    String TEXTBOOK_CHILDREN_NOT_EXISTS = "No Children Exists for given TextBook.";
-    String TEXTBOOK_NOT_FOUND = "Textbook not found.";
-    String ERROR_PROCESSING_FILE =
-        "Something Went Wrong While Reading File. Please Check The File.";
     String ERR_FILE_NOT_FOUND = "File not found. Please select valid file and upload.";
-    String ERROR_TB_UPDATE = "Error while updating the textbook";
     String ERROR_INVALID_PARAMETER_SIZE =
         "Parameter {0} is of invalid size (expected: {1}, actual: {2}).";
-    String INVALID_PAGE_SECTION = "Page section associated with the page is invalid.";
     String ERROR_RATE_LIMIT_EXCEEDED =
         "Your per {0} rate limit has exceeded. You can retry after some time.";
-    String ERROR_INVALID_DIAL_CODE = "The given QR code {0} is not valid.";
-    String ERROR_INVALID_TOPIC = "Topic {0} not found in the framework. Please check and correct.";
-    String ERROR_DIAL_CODE_DUPLICATE_ENTRY =
-        "QR code {0} is associated with more than one section {1}.";
-    String ERROR_DIAL_CODE_ALREADY_ASSOCIATED =
-        "QR code {0} is already associated with a section {1} in the textbook";
-    String DIAL_CODE_LINKING_FAILED = "QR code linking failed.";
-    String ERROR_TEXTBOOK_UPDATE = "{0}";
-
-    String ERROR_INVALID_LINKED_CONTENT_ID = "Linked Content {0} is not valid at row {1}.";
-    String ERROR_DUPLICATE_LINKED_CONTENT = "Duplicate content {0} at row {1}.";
-    String TEACHER_CANNOT_BELONG_TO_CUSTODIAN_ORG =
-        "User type teacher is not supported for custodian organisation users";
-    String ERROR_DUPLICATE_QR_CODE_ENTRY =
-        "CSV file contains more than one entry for {0}. Correct the duplicate entry and try again.";
-    String ERROR_INVALID_TEXTBOOK_UNIT_ID = "Invalid textbook unit id {0} for texbook.";
     String INVALID_REQUEST_TIMEOUT = "Invalid request timeout value {0}.";
     String ERROR_USER_UPDATE_PASSWORD = "User is created but password couldn't be updated.";
-    String ERROR_BGMS_MISMATCH = "Mismatch in {0} at row - {1}";
     String ERROR_USER_MIGRATION_FAILED = "User migration failed.";
-    String EMPTY_CONTENTS_FOR_UPDATE_BATCH_STATUS =
-        "Contents should not be empty for batch status update.";
     String IDENTIFIER_VALIDATION_FAILED =
         "Valid identifier is not present in List, Valid supported identifiers are ";
     String FROM_ACCOUNT_ID_MISSING = "From Account id is mandatory.";
     String TO_ACCOUNT_ID_MISSING = "To Account id is mandatory.";
-    String FROM_ACCOUNT_ID_NOT_EXISTS = "From Account id not exists";
     String PARAM_NOT_MATCH = "%s-NOT-MATCH";
     String MANDATORY_HEADER_PARAMETER_MISSING = "Mandatory header parameter {0} is missing.";
     String RECOVERY_PARAM_MATCH_EXCEPTION = "{0} could not be same as {1}";
-    String ERROR_USER_HAS_NOT_CREATED_ANY_COURSE =
-        "User hasn't created any course, or may not have a creator role";
-    String ERROR_UPLOAD_QRCODE_CSV_FAILED = "Uploading the html file to cloud storage has failed.";
-    String ERROR_NO_DIALCODES_LINKED = "No dialcodes are linked to any courses created by user(s)";
-    String EVENTS_DATA_MISSING = "Events array is mandatory";
     String ACCOUNT_NOT_FOUND = "Account not found.";
     String INVALID_EXT_USER_ID = "provided ext user id {0} is incorrect";
     String USER_MIGRATION_FAILED = "user is failed to migrate";
@@ -454,9 +234,7 @@ public interface ResponseMessage {
         "Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters";
     String OTP_VERIFICATION_FAILED = "OTP verification failed. Remaining attempt count is {0}.";
     String SERVICE_UNAVAILABLE = "SERVICE UNAVAILABLE";
-    String MISSING_MESSAGE = "Required fields for create course are missing. {0}";
     String MANAGED_BY_NOT_ALLOWED = "managedBy cannot be updated.";
-    String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "ManagedBy User phone/email cannot be updated.";
     String MANAGED_USER_LIMIT_EXCEEDED = "Managed user creation limit exceeded";
     String UNABLE_TO_CONNECT_TO_ADMINUTIL = "Unable to connect to admin util service";
     String DATA_ENCRYPTION_ERROR = "Error in encrypting the data";
@@ -471,85 +249,37 @@ public interface ResponseMessage {
     String INVALID_USER_INFO_VALUE = "Null value is not allowed";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
     String INVALID_LOCATION_TYPE = "Invalid location type {0} is supplied.Supported values are {1}";
+    String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
   }
 
   interface Key {
     String UNAUTHORIZED_USER = "UNAUTHORIZED_USER";
-    String INVALID_USER_CREDENTIALS = "INVALID_USER_CREDENTIALS";
     String OPERATION_TIMEOUT = "PROCESS_EXE_TIMEOUT";
     String INVALID_OPERATION_NAME = "INVALID_OPERATION_NAME";
     String INVALID_REQUESTED_DATA = "INVALID_REQUESTED_DATA";
-    String CONSUMER_ID_MISSING_ERROR = "CONSUMER_ID_REQUIRED_ERROR";
-    String CONSUMER_ID_INVALID_ERROR = "CONSUMER_ID_INVALID_ERROR";
-    String DEVICE_ID_MISSING_ERROR = "DEVICE_ID_REQUIRED_ERROR";
-    String CONTENT_ID_INVALID_ERROR = "CONTENT_ID_INVALID_ERROR";
-    String CONTENT_ID_MISSING_ERROR = "CONTENT_ID_REQUIRED_ERROR";
     String COURSE_ID_MISSING_ERROR = "COURSE_ID_REQUIRED_ERROR";
     String API_KEY_MISSING_ERROR = "API_KEY_REQUIRED_ERROR";
-    String API_KEY_INVALID_ERROR = "API_KEY_INVALID_ERROR";
     String INTERNAL_ERROR = "INTERNAL_ERROR";
-    String COURSE_NAME_MISSING = "COURSE_NAME_REQUIRED_ERROR";
     String SUCCESS_MESSAGE = "SUCCESS";
-    String SESSION_ID_MISSING = "SESSION_ID_REQUIRED_ERROR";
     String COURSE_ID_MISSING = "COURSE_ID_REQUIRED_ERROR";
-    String CONTENT_ID_MISSING = "CONTENT_ID_REQUIRED_ERROR";
-    String VERSION_MISSING = "VERSION_REQUIRED_ERROR";
-    String COURSE_VERSION_MISSING = "COURSE_VERSION_REQUIRED_ERROR";
-    String CONTENT_VERSION_MISSING = "CONTENT_VERSION_REQUIRED_ERROR";
-    String COURSE_DESCRIPTION_MISSING = "COURSE_DESCRIPTION_REQUIRED_ERROR";
-    String COURSE_TOCURL_MISSING = "COURSE_TOCURL_REQUIRED_ERROR";
-    String EMAIL_MISSING = "EMAIL_ID_REQUIRED_ERROR";
     String EMAIL_FORMAT = "EMAIL_FORMAT_ERROR";
-    String URL_FORMAT_ERROR = "URL_FORMAT_ERROR";
     String FIRST_NAME_MISSING = "FIRST_NAME_REQUIRED_ERROR";
     String LANGUAGE_MISSING = "LANGUAGE_REQUIRED_ERROR";
     String PASSWORD_MISSING = "PASSWORD_REQUIRED_ERROR";
-    String PASSWORD_MIN_LENGHT = "PASSWORD_MIN_LENGHT_ERROR";
-    String PASSWORD_MAX_LENGHT = "PASSWORD_MAX_LENGHT_ERROR";
-    String ORGANISATION_ID_MISSING = "ORGANIZATION_ID_MISSING";
     String REQUIRED_DATA_ORG_MISSING = "REQUIRED_DATA_MISSING";
-    String ORGANISATION_NAME_MISSING = "ORGANIZATION_NAME_MISSING";
     String CHANNEL_SHOULD_BE_UNIQUE = "CHANNEL_SHOULD_BE_UNIQUE";
     String ERROR_DUPLICATE_ENTRY = "ERROR_DUPLICATE_ENTRY";
     String INVALID_ORG_DATA = "INVALID_ORGANIZATION_DATA";
     String INVALID_USR_DATA = "INVALID_USER_DATA";
     String USR_DATA_VALIDATION_ERROR = "USER_DATA_VALIDATION_ERROR";
     String INVALID_ROOT_ORGANIZATION = "INVALID ROOT ORGANIZATION";
-    String INVALID_PARENT_ORGANIZATION_ID = "INVALID_PARENT_ORGANIZATION_ID";
-    String CYCLIC_VALIDATION_FAILURE = "CYCLIC_VALIDATION_FAILURE";
-    String ENROLLMENT_START_DATE_MISSING = "ENROLLMENT_START_DATE_MISSING";
-    String COURSE_DURATION_MISSING = "COURSE_DURATION_MISSING";
-    String LOGIN_TYPE_MISSING = "LOGIN_TYPE_MISSING";
     String EMAIL_IN_USE = "EMAIL_IN_USE";
     String USERNAME_EMAIL_IN_USE = "USERNAME_EMAIL_IN_USE";
     String KEY_CLOAK_DEFAULT_ERROR = "KEY_CLOAK_DEFAULT_ERROR";
-    String USER_REG_UNSUCCESSFUL = "USER_REG_UNSUCCESSFUL";
-    String USER_UPDATE_UNSUCCESSFUL = "USER_UPDATE_UNSUCCESSFUL";
-    String INVALID_CREDENTIAL = "INVALID_CREDENTIAL";
     String USERNAME_MISSING = "USERNAME_MISSING";
     String USERNAME_IN_USE = "USERNAME_IN_USE";
     String USERID_MISSING = "USERID_MISSING";
-    String ROLE_MISSING = "ROLE_MISSING";
-    String MESSAGE_ID_MISSING = "MESSAGE_ID_MISSING";
-    String USERNAME_CANNOT_BE_UPDATED = "USERNAME_CANNOT_BE_UPDATED";
     String AUTH_TOKEN_MISSING = "X_Authenticated_Userid_MISSING";
-    String INVALID_AUTH_TOKEN = "INVALID_AUTH_TOKEN";
-    String TIMESTAMP_REQUIRED = "TIMESTAMP_REQUIRED";
-    String PUBLISHED_COURSE_CAN_NOT_UPDATED = "PUBLISHED_COURSE_CAN_NOT_UPDATED";
-    String SOURCE_MISSING = "SOURCE_MISSING";
-    String SECTION_NAME_MISSING = "SECTION_NAME_MISSING";
-    String SECTION_DATA_TYPE_MISSING = "SECTION_DATA_TYPE_MISSING";
-    String SECTION_ID_REQUIRED = "SECTION_ID_REQUIRED";
-    String PAGE_NAME_REQUIRED = "PAGE_NAME_REQUIRED";
-    String PAGE_ID_REQUIRED = "PAGE_ID_REQUIRED";
-    String INVALID_CONFIGURATION = "INVALID_CONFIGURATION";
-    String ASSESSMENT_ITEM_ID_REQUIRED = "ASSESSMENT_ITEM_ID_REQUIRED";
-    String ASSESSMENT_TYPE_REQUIRED = "ASSESSMENT_TYPE_REQUIRED";
-    String ATTEMPTED_DATE_REQUIRED = "ATTEMPTED_DATE_REQUIRED";
-    String ATTEMPTED_ANSWERS_REQUIRED = "ATTEMPTED_ANSWERS_REQUIRED";
-    String MAX_SCORE_REQUIRED = "MAX_SCORE_REQUIRED";
-    String STATUS_CANNOT_BE_UPDATED = "STATUS_CANNOT_BE_UPDATED";
-    String ATTEMPT_ID_MISSING_ERROR = "ATTEMPT_ID_REQUIRED_ERROR";
     String LOGIN_TYPE_ERROR = "LOGIN_TYPE_ERROR";
     String INVALID_ORG_ID = "INVALID_ORG_ID";
     String INVALID_ORG_STATUS = "INVALID_ORG_STATUS";
@@ -566,12 +296,8 @@ public interface ResponseMessage {
     String ORG_ID_MISSING = "ORG_ID_MISSING";
     String ACTOR_CONNECTION_ERROR = "ACTOR_CONNECTION_ERROR";
     String USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
-    String PAGE_ALREADY_EXIST = "PAGE_ALREADY_EXIST";
     String INVALID_USER_ID = "INVALID_USER_ID";
     String LOGIN_ID_MISSING = "LOGIN_ID_MISSING";
-    String CONTENT_STATUS_MISSING_ERROR = "CONTENT_STATUS_MISSING_ERROR";
-    String ES_ERROR = "ELASTICSEARCH_ERROR";
-    String INVALID_PERIOD = "INVALID_PERIOD";
     String USER_NOT_FOUND = "USER_NOT_FOUND";
     String ID_REQUIRED_ERROR = "ID_REQUIRED_ERROR";
     String DATA_TYPE_ERROR = "DATA_TYPE_ERROR";
@@ -584,62 +310,24 @@ public interface ResponseMessage {
     String NAME_OF_ORGANISATION_ERROR = "NAME_OF_ORGANIZATION_ERROR";
     String ROLES_MISSING = "ROLES_REQUIRED_ERROR";
     String EMPTY_ROLES_PROVIDED = "EMPTY_ROLES_PROVIDED";
-    String INVALID_DATE_FORMAT = "INVALID_DATE_FORMAT";
-    String SRC_EXTERNAL_ID_ALREADY_EXIST = "SRC_EXTERNAL_ID_ALREADY_EXIST";
-    String USER_ALREADY_ENROLLED_COURSE = "USER_ALREADY_ENROLLED_COURSE";
-    String USER_NOT_ENROLLED_COURSE = "USER_NOT_ENROLLED_COURSE";
-    String USER_ALREADY_COMPLETED_COURSE = "USER_ALREADY_COMPLETED_COURSE";
-    String COURSE_BATCH_ALREADY_COMPLETED = "COURSE_BATCH_ALREADY_COMPLETED";
-    String COURSE_BATCH_ENROLLMENT_DATE_ENDED = "COURSE_BATCH_ENROLLMENT_DATE_ENDED";
     String CONTENT_TYPE_ERROR = "CONTENT_TYPE_ERROR";
     String INVALID_PROPERTY_ERROR = "INVALID_PROPERTY_ERROR";
-    String USER_NAME_OR_ID_ERROR = "USER_NAME_OR_ID_ERROR";
     String USER_ACCOUNT_BLOCKED = "USER_ACCOUNT_BLOCKED";
     String EMAIL_VERIFY_ERROR = "EMAIL_VERIFY_ERROR";
     String PHONE_VERIFY_ERROR = "PHONE_VERIFY_ERROR";
-    String BULK_USER_UPLOAD_ERROR = "BULK_USER_UPLOAD_ERROR";
     String DATA_SIZE_EXCEEDED = "DATA_SIZE_EXCEEDED";
-    String INVALID_COLUMN_NAME = "INVALID_COLUMN_NAME";
     String USER_ALREADY_ACTIVE = "USER_ALREADY_ACTIVE";
     String USER_ALREADY_INACTIVE = "USER_ALREADY_INACTIVE";
-    String ENROLMENT_TYPE_REQUIRED = "ENROLMENT_TYPE_REQUIRED";
-    String ENROLMENT_TYPE_VALUE_ERROR = "ENROLMENT_TYPE_VALUE_ERROR";
-    String COURSE_BATCH_START_DATE_REQUIRED = "COURSE_BATCH_START_DATE_REQUIRED";
-    String COURSE_BATCH_START_DATE_INVALID = "COURSE_BATCH_START_DATE_INVALID";
     String DATE_FORMAT_ERRROR = "DATE_FORMAT_ERRROR";
-    String END_DATE_ERROR = "END_DATE_ERROR";
-    String ENROLLMENT_END_DATE_START_ERROR = "ENROLLMENT_END_DATE_START_ERROR";
-    String ENROLLMENT_END_DATE_END_ERROR = "ENROLLMENT_END_DATE_END_ERROR";
-    String ENROLLMENT_END_DATE_UPDATE_ERROR = "ENROLLMENT_END_DATE_UPDATE_ERROR";
     String INVALID_CSV_FILE = "INVALID_CSV_FILE";
-    String INVALID_COURSE_BATCH_ID = "INVALID_COURSE_BATCH_ID";
-    String COURSE_BATCH_ID_MISSING = "COURSE_BATCH_ID_MISSING";
-    String ENROLLMENT_TYPE_VALIDATION = "ENROLLMENT_TYPE_VALIDATION";
-    String COURSE_CREATED_FOR_NULL = "COURSE_CREATED_FOR_NULL";
-    String USER_NOT_BELONGS_TO_ANY_ORG = "USER_NOT_BELONGS_TO_ANY_ORG";
     String INVALID_OBJECT_TYPE = "INVALID_OBJECT_TYPE";
-    String INVALID_PROGRESS_STATUS = "INVALID_PROGRESS_STATUS";
-    String COURSE_BATCH_START_PASSED_DATE_INVALID = "COURSE_BATCH_START_PASSED_DATE_INVALID";
-    String UNABLE_TO_CONNECT_TO_EKSTEP = "UNABLE_TO_CONNECT_TO_EKSTEP";
-    String UNABLE_TO_CONNECT_TO_ES = "UNABLE_TO_CONNECT_TO_ES";
     String UNABLE_TO_PARSE_DATA = "UNABLE_TO_PARSE_DATA";
-    String INVALID_JSON = "INVALID_JSON";
     String EMPTY_CSV_FILE = "EMPTY_CSV_FILE";
-    String INVALID_ROOT_ORG_DATA = "INVALID_ROOT_ORG_DATA";
     String NO_DATA = "NO_DATA";
     String INVALID_CHANNEL = "INVALID_CHANNEL";
-    String INVALID_PROCESS_ID = "INVALID_PROCESS_ID";
     String EMAIL_SUBJECT_ERROR = "EMAIL_SUBJECT_ERROR";
     String EMAIL_BODY_ERROR = "EMAIL_BODY_ERROR";
-    String RECIPIENT_ADDRESS_ERROR = "RECIPIENT_ADDRESS_ERROR";
-    String RECIPIENT_EMAIL_REQUIRED = "RECIPIENT_EMAIL_REQUIRED";
-    String ASSERTION_EVIDENCE_REQUIRED = "ASSERTION_EVIDENCE_REQUIRED";
-    String ASSERTION_ID_REQUIRED = "ASSERTION_ID_REQUIRED";
     String STORAGE_CONTAINER_NAME_MANDATORY = "STORAGE_CONTAINER_NAME_MANDATORY";
-    String USER_ORG_ASSOCIATION_ERROR = "USER_ORG_ASSOCIATION_ERROR";
-    String CLOUD_SERVICE_ERROR = "CLOUD_SERVICE_ERROR";
-    String RECEIVER_ID_ERROR = "RECEIVER_ID_ERROR";
-    String INVALID_RECEIVER_ID = "INVALID_RECEIVER_ID";
     String INVALID_ROLE = "INVALID_ROLE";
     String INVALID_SALT = "INVALID_SALT";
     String ORG_TYPE_MANDATORY = "ORG_TYPE_MANDATORY";
@@ -655,27 +343,15 @@ public interface ResponseMessage {
     String INVALID_WEBPAGE_DATA = "INVALID_WEBPAGE_DATA";
     String INVALID_MEDIA_TYPE = "INVALID_MEDIA_TYPE";
     String INVALID_WEBPAGE_URL = "INVALID_WEBPAGE_URL";
-    String INVALID_DATE_RANGE = "INVALID_DATE_RANGE";
-    String INVALID_BATCH_END_DATE_ERROR = "INVALID_BATCH_END_DATE_ERROR";
-    String INVALID_BATCH_START_DATE_ERROR = "INVALID_BATCH_START_DATE_ERROR";
-    String COURSE_BATCH_END_DATE_ERROR = "COURSE_BATCH_END_DATE_ERROR";
-    String COURSE_BATCH_IS_CLOSED_ERROR = "COURSE_BATCH_IS_CLOSED_ERROR";
     String CONFIIRM_PASSWORD_MISSING = "CONFIIRM_PASSWORD_MISSING";
     String CONFIIRM_PASSWORD_EMPTY = "CONFIIRM_PASSWORD_EMPTY";
     String SAME_PASSWORD_ERROR = "SAME_PASSWORD_ERROR";
-    String ENDORSED_USER_ID_REQUIRED = "ENDORSED_USER_ID_REQUIRED";
-    String CAN_NOT_ENDORSE = "CAN_NOT_ENDORSE";
-    String INVALID_ORG_TYPE_ID_ERROR = "INVALID_ORG_TYPE_ID_ERROR";
     String INVALID_ORG_TYPE_ERROR = "INVALID_ORG_TYPE_ERROR";
-    String TABLE_OR_DOC_NAME_ERROR = "TABLE_OR_DOC_NAME_ERROR";
-    String EMAIL_OR_PHONE_MISSING = "EMAIL_OR_PHONE_MISSING";
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING";
     String ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED = "ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED";
     String PHONE_ALREADY_IN_USE = "PHONE_ALREADY_IN_USE";
     String INVALID_CLIENT_NAME = "INVALID_CLIENT_NAME";
     String INVALID_CLIENT_ID = "INVALID_CLIENT_ID";
-    String USER_PHONE_UPDATE_FAILED = "USER_PHONE_UPDATE_FAILED";
-    String ES_UPDATE_FAILED = "ES_UPDATE_FAILED";
     String UPDATE_FAILED = "UPDATE_FAILED";
     String INVALID_TYPE_VALUE = "INVALID_TYPE_VALUE";
     String INVALID_LOCATION_ID = "INVALID_LOCATION_ID";
@@ -690,54 +366,28 @@ public interface ResponseMessage {
     String INVALID_COUNTRY_CODE = "INVALID_COUNTRY_CODE";
     String LOCATION_ID_REQUIRED = "LOCATION_ID_REQUIRED";
     String NOT_SUPPORTED = "NOT_SUPPORTED";
-    String USERNAME_USERID_MISSING = "USERNAME_USERID_MISSING";
     String CHANNEL_REG_FAILED = "CHANNEL_REG_FAILED";
-    String INVALID_COURSE_CREATOR_ID = "INVALID_COURSE_CREATOR_ID";
-    String USER_NOT_ASSOCIATED_TO_ROOT_ORG = "USER_NOT_ASSOCIATED_TO_ROOT_ORG";
     String SLUG_IS_NOT_UNIQUE = "SLUG_IS_NOT_UNIQUE";
-    String RECIPIENT_ID_REQUIRED = "RECIPIENT_ID_REQUIRED";
-    String RECIPIENT_TYPE_REQUIRED = "RECIPIENT_TYPE_REQUIRED";
-    String BADGING_SERVER_ERROR = "BADGING_SERVER_ERROR";
     String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "MAX_ALLOWED_SIZE_LIMIT_EXCEED";
-    String SLUG_REQUIRED = "SLUG_REQUIRED";
-    String INVALID_ISSUER_ID = "INVALID_ISSUER_ID";
-    String REVOCATION_REASON_REQUIRED = "REVOCATION_REASON_REQUIRED";
-    String ALREADY_REVOKED = "ALREADY_REVOKED";
-    String INVALID_RECIPIENT_TYPE = "INVALID_RECIPIENT_TYPE";
-    String CUSTOM_CLIENT_ERROR = "CLIENT_ERROR";
-    String CUSTOM_RESOURCE_NOT_FOUND_ERROR = "RESOURCE_NOT_FOUND";
-    String CUSTOM_SERVER_ERROR = "SERVER_ERROR";
     String INACTIVE_USER = "INACTIVE_USER";
     String USER_INACTIVE_FOR_THIS_ORG = "USER_INACTIVE_FOR_THIS_ORG";
-    String USER_UPDATE_FAILED_FOR_THIS_ORG = "USER_UPDATE_FAILED_FOR_THIS_ORG";
-    String PREFERENCE_KEY_MISSING = "PREFERENCE_KEY_MISSING";
-    String PAGE_NOT_EXIST = "PAGE_NOT_EXIST";
-    String SECTION_NOT_EXIST = "SECTION_NOT_EXIST";
     String ORG_NOT_EXIST = "ORG_NOT_EXIST";
-    String INVALID_PAGE_SOURCE = "INVALID_PAGE_SOURCE";
-    String LOCATION_TYPE_REQUIRED = "LOCATION_TYPE_REQUIRED";
-    String INVALID_REQUEST_DATA_FOR_LOCATION = "INVALID_REQUEST_DATA_CREATE_LOCATION";
     String ALREADY_EXISTS = "ALREADY_EXISTS";
     String INVALID_VALUE = "INVALID_VALUE";
-    String PARENT_CODE_AND_PARENT_ID_MISSING = "PARENT_CODE_AND_PARENT_ID_MISSING";
     String INVALID_PARAMETER = "INVALID_PARAMETER";
-    String INVALID_PARENT_ID = "INVALID_PARENT_ID";
     String INVALID_LOCATION_DELETE_REQUEST = "INVALID_LOCATION_DELETE_REQUEST";
     String LOCATION_TYPE_CONFLICTS = "LOCATION_TYPE_CONFLICTS";
     String MANDATORY_PARAMETER_MISSING = "MANDATORY_PARAMETER_MISSING";
     String ERROR_MANDATORY_PARAMETER_EMPTY = "ERROR_MANDATORY_PARAMETER_EMPTY";
     String ERROR_NO_FRAMEWORK_FOUND = "ERROR_NO_FRAMEWORK_FOUND";
-    String INVALID_LOCN_ID = "INVALID_LOCATION_ID";
     String UPDATE_NOT_ALLOWED = "UPDATE_NOT_ALLOWED";
-    String MANDATORY_HEADER_MISSING = "MANDATORY_HEADER_MISSING";
     String INVALID_PARAMETER_VALUE = "INVALID_PARAMETER_VALUE";
     String PARENT_NOT_ALLOWED = "PARENT_NOT_ALLOWED";
     String MISSING_FILE_ATTACHMENT = "MISSING_FILE_ATTACHMENT";
     String FILE_ATTACHMENT_SIZE_NOT_CONFIGURED = "ATTACHMENT_SIZE_NOT_CONFIGURED";
     String EMPTY_FILE = "EMPTY_FILE";
     String INVALID_COLUMNS = "INVALID_COLUMNS";
-    String INVALID_COLUMN = "INVALID_COLUMN";
     String CONFLICTING_ORG_LOCATIONS = "CONFLICTING_ORG_LOCATIONS";
     String UNABLE_TO_COMMUNICATE_WITH_ACTOR = "UNABLE_TO_COMMUNICATE_WITH_ACTOR";
     String EMPTY_HEADER_LINE = "EMPTY_HEADER_LINE";
@@ -746,30 +396,7 @@ public interface ResponseMessage {
     String DEPENDENT_PARAMETER_MISSING = "DEPENDENT_PARAMETER_MISSING";
     String EXTERNALID_NOT_FOUND = "EXTERNALID_NOT_FOUND";
     String EXTERNALID_ASSIGNED_TO_OTHER_USER = "EXTERNALID_ASSIGNED_TO_OTHER_USER";
-    String MANDATORY_CONFIG_PARAMETER_MISSING = "MANDATORY_CONFIG_PARAMETER_MISSING";
-    String CASSANDRA_CONNECTION_ESTABLISHMENT_FAILED = "CASSANDRA_CONNECTION_ESTABLISHMENT_FAILED";
-    String COMMON_ATTRIBUTE_MISMATCH = "COMMON_ATTRIBUTE_MISMATCH";
-    String MULTIPLE_COURSES_FOR_BATCH = "MULTIPLE_COURSES_FOR_BATCH";
-    String ERROR_JSON_TRANSFORM_INVALID_TYPE_CONFIG = "ERROR_JSON_TRANSFORM_INVALID_TYPE_CONFIG";
-    String ERROR_JSON_TRANSFORM_INVALID_DATE_FORMAT = "ERROR_JSON_TRANSFORM_INVALID_DATE_FORMAT";
-    String ERROR_JSON_TRANSFORM_INVALID_INPUT = "ERROR_JSON_TRANSFORM_INVALID_INPUT";
-    String ERROR_JSON_TRANSFORM_INVALID_ENUM_INPUT = "ERROR_JSON_TRANSFORM_INVALID_ENUM_INPUT";
-    String ERROR_JSON_TRANSFORM_ENUM_VALUES_EMPTY = "ERROR_JSON_TRANSFORM_ENUM_VALUES_EMPTY";
-    String ERROR_JSON_TRANSFORM_BASIC_CONFIG_MISSING = "ERROR_JSON_TRANSFORM_BASIC_CONFIG_MISSING";
-    String ERROR_JSON_TRANSFORM_INVALID_FILTER_CONFIG =
-        "ERROR_JSON_TRANSFORM_INVALID_FILTER_CONFIG";
-    String ERROR_LOAD_CONFIG = "ERROR_LOAD_CONFIG";
-    String ERROR_REGISTRY_CLIENT_CREATION = "ERROR_REGISTRY_CLIENT_CREATION";
-    String ERROR_REGISTRY_ADD_ENTITY = "ERROR_REGISTRY_ADD_ENTITY";
-    String ERROR_REGISTRY_READ_ENTITY = "ERROR_REGISTRY_READ_ENTITY";
-    String ERROR_REGISTRY_UPDATE_ENTITY = "ERROR_REGISTRY_UPDATE_ENTITY";
-    String ERROR_REGISTRY_DELETE_ENTITY = "ERROR_REGISTRY_DELETE_ENTITY";
-    String ERROR_REGISTRY_PARSE_RESPONSE = "ERROR_REGISTRY_PARSE_RESPONSE";
-    String ERROR_REGISTRY_ENTITY_TYPE_BLANK = "ERROR_REGISTRY_ENTITY_TYPE_BLANK";
-    String ERROR_REGISTRY_ENTITY_ID_BLANK = "ERROR_REGISTRY_ENTITY_ID_BLANK";
-    String ERROR_REGISTRY_ACCESS_TOKEN_BLANK = "ERROR_REGISTRY_ACCESS_TOKEN_BLANK";
     String DUPLICATE_EXTERNAL_IDS = "DUPLICATE_EXTERNAL_IDS";
-    String INVALID_DUPLICATE_VALUE = "INVALID_DUPLICATE_VALUE";
     String EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT = "EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT";
     String NO_EMAIL_RECIPIENTS = "NO_EMAIL_RECIPIENTS";
     String PARAMETER_MISMATCH = "PARAMETER_MISMATCH";
@@ -780,7 +407,6 @@ public interface ResponseMessage {
     String ERROR_CONFLICTING_FIELD_CONFIGURATION = "ERROR_CONFLICTING_FIELD_CONFIGURATION";
     String ERROR_SYSTEM_SETTING_NOT_FOUND = "ERROR_SYSTEM_SETTING_NOT_FOUND";
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "ERROR_NO_ROOT_ORG_ASSOCIATED";
-    String ERROR_INACTIVE_CUSTODIAN_ORG = "ERROR_INACTIVE_CUSTODIAN_ORG";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "ERROR_ UNSUPPORTED_CLOUD_STORAGE";
     String ERROR_UNSUPPORTED_FIELD = "ERROR_UNSUPPORTED_FIELD";
     String ERROR_GENERATE_DOWNLOAD_LINK = "ERROR_GENERATING_DOWNLOAD_LINK";
@@ -792,56 +418,21 @@ public interface ResponseMessage {
     String ERROR_CONFLICTING_VALUES = "ERROR_CONFLICTING_VALUES";
     String ERROR_CONFLICTING_ROOT_ORG_ID = "ERROR_CONFLICTING_ROOT_ORG_ID";
     String ERROR_UPDATE_SETTING_NOT_ALLOWED = "ERROR_UPDATE_SETTING_NOT_ALLOWED";
-    String ERROR_CREATING_FILE = "ERROR_CREATING_FILE";
-    String ERROR_PROCESSING_REQUEST = "ERROR_PROCESSING_REQUEST";
     String ERROR_UNAVAILABLE_CERTIFICATE = "ERROR_UNAVAILABLE_CERTIFICATE";
-    String INVALID_TEXTBOOK = "INVALID_TEXTBOOK";
     String CSV_ROWS_EXCEEDS = "CSV_ROWS_EXCEEDS";
-    String INVALID_TEXTBOOK_NAME = "INVALID_TEXTBOOK_NAME";
-    String DUPLICATE_ROWS = "DUPLICATE_ROWS";
     String ERROR_INVALID_OTP = "ERROR_INVALID_OTP";
-    String REQUIRED_HEADER_MISSING = "REQUIRED_HEADER_MISSING";
-    String REQUIRED_FIELD_MISSING = "REQUIRED_FIELD_MISSING";
     String BLANK_CSV_DATA = "BLANK_CSV_DATA";
-    String EXCEEDS_MAX_CHILDREN = "EXCEEDS_MAX_CHILDREN";
-    String TEXTBOOK_CHILDREN_EXISTS = "TEXTBOOK_CHILDREN_EXISTS";
-    String TEXTBOOK_UPDATE_FAILURE = "TEXTBOOK_UPDATE_FAILURE";
-    String TEXTBOOK_CHILDREN_NOT_EXISTS = "TEXTBOOK_CHILDREN_NOT_EXISTS";
-    String TEXTBOOK_NOT_FOUND = "TEXTBOOK_NOT_FOUND";
-    String ERROR_PROCESSING_FILE = "ERROR_PROCESSING_FILE";
     String ERR_FILE_NOT_FOUND = "ERR_FILE_NOT_FOUND";
-    String ERROR_TB_UPDATE = "ERROR_TB_UPDATE";
     String ERROR_INVALID_PARAMETER_SIZE = "ERROR_INVALID_PARAMETER_SIZE";
-    String INVALID_PAGE_SECTION = "INVALID_PAGE_SECTION";
     String ERROR_RATE_LIMIT_EXCEEDED = "ERROR_RATE_LIMIT_EXCEEDED";
-    String ERROR_INVALID_CONFIG_PARAM_VALUE = "ERROR_INVALID_CONFIG_PARAM_VALUE";
-    String ERROR_MAX_SIZE_EXCEEDED = "ERROR_MAX_SIZE_EXCEEDED";
-    String ERROR_INVALID_DIAL_CODE = "ERROR_INVALID_DIAL_CODE";
-    String ERROR_INVALID_TOPIC = "ERROR_INVALID_TOPIC";
-    String ERROR_DIAL_CODE_DUPLICATE_ENTRY = "ERROR_DIAL_CODE_DUPLICATE_ENTRY";
-    String ERROR_DIAL_CODE_ALREADY_ASSOCIATED = "ERROR_DIAL_CODE_ALREADY_ASSOCIATED";
-    String DIAL_CODE_LINKING_FAILED = "DIAL_CODE_LINKING_FAILED";
-    String ERROR_TEXTBOOK_UPDATE = "ERROR_TEXTBOOK_UPDATE";
-    String ERROR_INVALID_LINKED_CONTENT_ID = "ERROR_INVALID_LINKED_CONTENT_ID";
-    String ERROR_DUPLICATE_LINKED_CONTENT = "DUPLICATE_LINKED_CONTENT";
-    String TEACHER_CANNOT_BELONG_TO_CUSTODIAN_ORG = "TEACHER_CANNOT_BELONG_TO_CUSTODIAN_ORG";
-    String ERROR_DUPLICATE_QR_CODE_ENTRY = "ERROR_DUPLICATE_QR_CODE_ENTRY";
-    String ERROR_INVALID_TEXTBOOK_UNIT_ID = "ERROR_INVALID_TEXTBOOK_UNIT_ID";
     String INVALID_REQUEST_TIMEOUT = "INVALID_REQUEST_TIMEOUT";
-    String ERROR_BGMS_MISMATCH = "ERROR_BGMS_MISMATCH";
     String ERROR_USER_MIGRATION_FAILED = "ERROR_USER_MIGRATION_FAILED";
     String VALID_IDENTIFIER_ABSENSE = "IDENTIFIER IN LIST IS NOT SUPPORTED OR INCORRECT";
     String FROM_ACCOUNT_ID_MISSING = "FROM_ACCOUNT_ID_MISSING";
     String TO_ACCOUNT_ID_MISSING = "TO_ACCOUNT_ID_MISSING";
-    String FROM_ACCOUNT_ID_NOT_EXISTS = "FROM_ACCOUNT_ID_NOT_EXISTS";
     String PARAM_NOT_MATCH = "%s-NOT-MATCH";
     String MANDATORY_HEADER_PARAMETER_MISSING = "MANDATORY_HEADER_PARAMETER_MISSING";
     String RECOVERY_PARAM_MATCH_EXCEPTION = "RECOVERY_PARAM_MATCH_EXCEPTION";
-    String EMPTY_CONTENTS_FOR_UPDATE_BATCH_STATUS = "EMPTY_CONTENTS_FOR_UPDATE_BATCH_STATUS";
-    String ERROR_USER_HAS_NOT_CREATED_ANY_COURSE = "USER_HAS_NOT_CREATED_ANY_COURSE";
-    String ERROR_UPLOAD_QRCODE_CSV_FAILED = "ERROR_UPLOAD_QRCODE_CSV_FAILED";
-    String ERROR_NO_DIALCODES_LINKED = "ERROR_NO_DIALCODES_LINKED";
-    String EVENTS_DATA_MISSING = "EVENTS_DATA_MISSING";
     String ACCOUNT_NOT_FOUND = "ACCOUNT_NOT_FOUND";
     String INVALID_EXT_USER_ID = "INVALID_EXT_USER_ID";
     String USER_MIGRATION_FAILED = "USER_MIGRATION_FAILED";
@@ -849,13 +440,9 @@ public interface ResponseMessage {
     String INVALID_PASSWORD = "INVALID_PASSWORD";
     String OTP_VERIFICATION_FAILED = "OTP_VERIFICATION_FAILED";
     String SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE";
-    String MISSING_CODE = "ERR_COURSE_CREATE_FIELDS_MISSING";
     String MANAGED_BY_NOT_ALLOWED = "MANAGED_BY_NOT_ALLOWED";
-    String MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR = "MANAGED_BY_EMAIL_PHONE_UPDATE_ERROR";
     String MANAGED_USER_LIMIT_EXCEEDED = "MANAGED_USER_LIMIT_EXCEEDED";
     String UNABLE_TO_CONNECT_TO_ADMINUTIL = "UNABLE_TO_CONNECT_TO_ADMINUTIL";
-    String UNABLE_TO_CONNECT_TO_FORMAPIUTIL = "UNABLE_TO_CONNECT_TO_FORMAPIUTIL";
-
     String DATA_ENCRYPTION_ERROR = "DATA_ENCRYPTION_ERROR";
     String NO_EMAIL_PHONE_ASSOCIATED = "NO_EMAIL_PHONE_ASSOCIATED";
     String INVALID_CAPTCHA = "INVALID_CAPTCHA";
@@ -867,6 +454,5 @@ public interface ResponseMessage {
     String USER_CONSENT_NOT_FOUND = "USER_CONSENT_NOT_FOUND";
     String INVALID_USER_INFO_VALUE = "INVALID_USER_INFO_VALUE";
     String INVALID_CONSENT_STATUS = "INVALID_CONSENT_STATUS";
-    String INVALID_LOCATION_TYPE = "INVALID_LOCATION_TYPE";
   }
 }

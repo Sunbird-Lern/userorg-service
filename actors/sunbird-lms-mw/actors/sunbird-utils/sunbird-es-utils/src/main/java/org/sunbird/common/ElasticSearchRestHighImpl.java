@@ -373,9 +373,8 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     // apply simple query string
     if (!StringUtils.isBlank(searchDTO.getQuery())) {
       SimpleQueryStringBuilder sqsb = QueryBuilders.simpleQueryStringQuery(searchDTO.getQuery());
-      if (CollectionUtils.isEmpty(searchDTO.getQueryFields())) {
-        query.must(sqsb.field("all_fields"));
-      } else {
+      query.must(sqsb);
+      if (CollectionUtils.isNotEmpty(searchDTO.getQueryFields())) {
         Map<String, Float> searchFields =
             searchDTO
                 .getQueryFields()
@@ -442,7 +441,9 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     }
     logger.info(
         context,
-        "ElasticSearchRestHighImpl:search: calling search builder======"
+        "ElasticSearchRestHighImpl:search: calling search for index "
+            + index
+            + ", with query = "
             + searchSourceBuilder.toString());
 
     searchRequest.source(searchSourceBuilder);

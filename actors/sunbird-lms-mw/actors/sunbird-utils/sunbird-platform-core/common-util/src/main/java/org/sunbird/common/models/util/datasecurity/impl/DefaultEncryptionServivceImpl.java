@@ -17,7 +17,9 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -116,15 +118,13 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
    * @throws UnsupportedEncodingException
    */
   @SuppressWarnings("restriction")
-  public static String encrypt(String value)
-      throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+  public static String encrypt(String value) throws IllegalBlockSizeException, BadPaddingException {
     String valueToEnc = null;
     String eValue = value;
     for (int i = 0; i < ITERATIONS; i++) {
       valueToEnc = encryption_key + eValue;
       byte[] encValue = c.doFinal(valueToEnc.getBytes(StandardCharsets.UTF_8));
-      eValue = new sun.misc.BASE64Encoder().encode(encValue);
+      eValue = new BASE64Encoder().encode(encValue);
     }
     return eValue;
   }

@@ -48,14 +48,7 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
 
   @Override
   public SystemSetting readByField(String field, RequestContext context) {
-    Response response =
-        cassandraOperation.getRecordsByIndexedProperty(
-            KEYSPACE_NAME, TABLE_NAME, JsonKey.FIELD, field, context);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isEmpty(list)) {
-      return null;
-    }
-    return getSystemSetting(list);
+    return readById(field, context);
   }
 
   public List<SystemSetting> readAll(RequestContext context) {

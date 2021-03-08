@@ -9,7 +9,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -32,7 +37,12 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LocationActorOperation;
+import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.StringFormatter;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -44,7 +54,11 @@ import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.learner.util.*;
+import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.learner.util.UserFlagUtil;
+import org.sunbird.learner.util.UserUtility;
+import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -55,10 +69,11 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
+import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
-import org.sunbird.user.util.UserLookUp;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
@@ -87,6 +102,7 @@ public class UserManagementActor extends BaseActor {
   private UserClient userClient = new UserClientImpl();
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
+  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -295,9 +311,7 @@ public class UserManagementActor extends BaseActor {
         updateUserSchoolOrg =
             (boolean) actorMessage.getRequest().get(JsonKey.UPDATE_USER_SCHOOL_ORG);
       }
-      if (updateUserSchoolOrg) {
-        updateUserOrganisations(actorMessage);
-      }
+      updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
@@ -347,8 +361,7 @@ public class UserManagementActor extends BaseActor {
       reqList.add(lookupMap);
     }
     if (CollectionUtils.isNotEmpty(reqList)) {
-      UserLookUp userLookUp = new UserLookUp();
-      userLookUp.deleteRecords(reqList, requestContext);
+      userLookupService.deleteRecords(reqList, requestContext);
     }
   }
 
@@ -433,35 +446,32 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
+    logger.info(
+        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
-      logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
-      List<Map<String, Object>> orgList =
-          (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
-      String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
-      String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
-      List<Map<String, Object>> orgListDb =
-          UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
-      }
-      if (!orgList.isEmpty()) {
-        for (Map<String, Object> org : orgList) {
-          createOrUpdateOrganisations(org, orgDbMap, actorMessage);
-          updateUserSelfDeclaredData(actorMessage, org, userId);
-        }
-      }
-      String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      // for release-3.6.0 adding user to sub-org i.e to user_org and no-need to remove
-      // custodian-org
-      if (null == actorMessage.getRequest().get("updateUserSchoolOrg")) {
-        removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
-      }
-      logger.info(
-          actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+      orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
+    String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    String rootOrgId = getUserRootOrgId(userId, actorMessage.getRequestContext());
+    List<Map<String, Object>> orgListDb =
+        UserUtil.getAllUserOrgDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> orgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(orgListDb)) {
+      orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+    }
+
+    if (!CollectionUtils.isEmpty(orgList)) {
+      for (Map<String, Object> org : orgList) {
+        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        updateUserSelfDeclaredData(actorMessage, org, userId);
+      }
+    }
+    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
@@ -494,13 +504,18 @@ public class UserManagementActor extends BaseActor {
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     if (MapUtils.isNotEmpty(org)) {
       UserOrg userOrg = mapper.convertValue(org, UserOrg.class);
-      String orgId = (String) org.get(JsonKey.ORGANISATION_ID);
+      String orgId =
+          null != org.get(JsonKey.ORGANISATION_ID)
+              ? (String) org.get(JsonKey.ORGANISATION_ID)
+              : (String) org.get(JsonKey.ID);
+
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
       if (null != orgId && orgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
-        userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ID));
+        userOrg.setOrganisationId(
+            (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
@@ -616,16 +631,9 @@ public class UserManagementActor extends BaseActor {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
-    String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    if (StringUtils.isNotBlank(version)
-        && (JsonKey.VERSION_2.equalsIgnoreCase(version)
-            || JsonKey.VERSION_3.equalsIgnoreCase(version))) {
-      userRequestValidator.validateCreateUserV2Request(actorMessage);
-      if (StringUtils.isNotBlank(callerId)) {
-        userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
-      }
-    } else {
-      userRequestValidator.validateCreateUserV1Request(actorMessage);
+    userRequestValidator.validateCreateUserRequest(actorMessage);
+    if (StringUtils.isNotBlank(callerId)) {
+      userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
@@ -762,11 +770,10 @@ public class UserManagementActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
-      UserLookUp userLookUp = new UserLookUp();
       // check phone and uniqueness using user look table
-      userLookUp.checkPhoneUniqueness(
+      userLookupService.checkPhoneUniqueness(
           (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      userLookUp.checkEmailUniqueness(
+      userLookupService.checkEmailUniqueness(
           (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     } else {
       String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
@@ -966,8 +973,7 @@ public class UserManagementActor extends BaseActor {
     }
     Response response = null;
     if (CollectionUtils.isNotEmpty(list)) {
-      UserLookUp userLookUp = new UserLookUp();
-      response = userLookUp.insertRecords(list, context);
+      response = userLookupService.insertRecords(list, context);
     }
     return response;
   }
@@ -1015,12 +1021,7 @@ public class UserManagementActor extends BaseActor {
     Response response = null;
     boolean isPasswordUpdated = false;
     try {
-      response =
-          cassandraOperation.insertRecord(
-              usrDbInfo.getKeySpace(),
-              usrDbInfo.getTableName(),
-              requestMap,
-              request.getRequestContext());
+      response = userService.createUser(requestMap, request.getRequestContext());
       insertIntoUserLookUp(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
@@ -1412,7 +1413,7 @@ public class UserManagementActor extends BaseActor {
 
     Map<String, Object> searchResult =
         userClient.searchManagedUser(
-            getActorRef(ActorOperations.COMPOSITE_SEARCH.getValue()),
+            getActorRef(ActorOperations.USER_SEARCH.getValue()),
             request,
             request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
@@ -1454,11 +1455,17 @@ public class UserManagementActor extends BaseActor {
       if (CollectionUtils.isEmpty(locationCodes)) {
         // Get location code from user records locations Ids
         List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
-        locations =
-            locationClient.getLocationByIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationIds,
-                context);
+        logger.info(
+            context,
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
+        if (CollectionUtils.isNotEmpty(locationIds)) {
+          locations =
+              locationClient.getLocationByIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                  locationIds,
+                  context);
+        }
       } else {
         locations =
             locationClient.getLocationsByCodes(
@@ -1473,6 +1480,7 @@ public class UserManagementActor extends BaseActor {
             stateCode = location.getCode();
           }
         }
+        logger.info(context, String.format("Validating UserType for state code:%s", stateCode));
         if (StringUtils.isNotBlank(stateCode)) {
           // Validate UserType and UserSubType configure based on user state config else user
           // default config
@@ -1480,6 +1488,9 @@ public class UserManagementActor extends BaseActor {
         }
       } else {
         // If location is null or empty .Vlidate with default config
+        logger.info(
+            context,
+            String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }
@@ -1500,7 +1511,7 @@ public class UserManagementActor extends BaseActor {
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    if (locationCodes != null) {
+    if (CollectionUtils.isNotEmpty((List) locationCodes)) {
       // As of now locationCode can take array of only locationcodes and map of locationCodes which
       // include type and code of the location
       String stateCode = null;
@@ -1557,12 +1568,18 @@ public class UserManagementActor extends BaseActor {
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
-        isValidLocationType(location.getType(), typeList);
-        if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-          set.add(location.getCode());
-        } else {
-          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+        // for create-MUA we allow locations upto district for remaining we will validate all.
+        if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+                && ((location.getType().equals(JsonKey.STATE))
+                    || (location.getType().equals(JsonKey.DISTRICT))))
+            || !userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())) {
+          isValidLocationType(location.getType(), typeList);
+          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+            set.add(location.getCode());
+          } else {
+            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
+            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+          }
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
@@ -1580,10 +1597,7 @@ public class UserManagementActor extends BaseActor {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(),
-              GeoLocationJsonKey.LOCATION_TYPE,
-              type,
-              typeList),
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     return true;

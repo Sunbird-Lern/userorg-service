@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,15 +16,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jboss.logging.Logger;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.notification.sms.Sms;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
+import org.sunbird.notification.utils.SmsTemplateUtil;
 
 public class Msg91SmsProvider implements ISmsProvider {
-
-  private static Logger logger = Logger.getLogger(Msg91SmsProvider.class);
+  private static LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
 
   private static String baseUrl = null;
   private static String getUrl = null;
@@ -125,7 +127,11 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // add authkey header
         httpPost.setHeader("authkey", authKey);
-
+        // add dlt template id header
+        String templateId = getTemplateId(smsText);
+        if (StringUtils.isNotBlank(templateId)) {
+          httpPost.setHeader("DLT_TE_ID", templateId);
+        }
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
 
@@ -152,7 +158,7 @@ public class Msg91SmsProvider implements ISmsProvider {
           StatusLine sl = response.getStatusLine();
           response.close();
           if (sl.getStatusCode() != 200) {
-            logger.error(
+            logger.info(
                 "SMS code for "
                     + tempMobileNumber
                     + " could not be sent: "
@@ -164,13 +170,12 @@ public class Msg91SmsProvider implements ISmsProvider {
         } else {
           return false;
         }
-
       } else {
         logger.debug("Msg91SmsProvider - Some mandatory parameters are empty!");
         return false;
       }
     } catch (IOException e) {
-      logger.error(e);
+      logger.error("Error occurred :", e);
       return false;
     } catch (Exception e) {
       logger.info("Msg91SmsProvider - Error in coverting providerDetails to string!");
@@ -178,6 +183,17 @@ public class Msg91SmsProvider implements ISmsProvider {
     } finally {
       closeHttpResource(httpClient);
     }
+  }
+
+  private String getTemplateId(String sms) {
+    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
+    for (String key : smsTemplateConfig.keySet()) {
+      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
+      if (sms.matches(pattern)) {
+        return smsTemplateConfig.get(key);
+      }
+    }
+    return "";
   }
 
   /**
@@ -216,7 +232,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         StatusLine sl = response.getStatusLine();
         response.close();
         if (sl.getStatusCode() != 200) {
-          logger.error(
+          logger.info(
               "SMS code for "
                   + tempMobileNumber
                   + " could not be sent: "
@@ -231,7 +247,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         return false;
       }
     } catch (IOException e) {
-      logger.error(e);
+      logger.error("Error occurred : ", e);
       return false;
     } finally {
       closeHttpResource(httpClient);
@@ -288,7 +304,7 @@ public class Msg91SmsProvider implements ISmsProvider {
       try {
         httpClient.close();
       } catch (IOException e) {
-        logger.error(e);
+        logger.error("Error occurred while closing http connection", e);
       }
     }
   }
@@ -307,7 +323,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         && !JsonUtil.isStringNullOREmpty(smsText)) {
       return true;
     }
-    logger.error("SMS value is not configure properly.");
+    logger.info("SMS value is not configure properly.");
     return false;
   }
 
@@ -319,7 +335,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         && !JsonUtil.isStringNullOREmpty(country)) {
       return true;
     }
-    logger.error("SMS value is not configure properly.");
+    logger.info("SMS value is not configure properly.");
     return false;
   }
 
@@ -373,6 +389,12 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       // add authkey header
       httpPost.setHeader("authkey", authKey);
+
+      // add dlt template id header
+      String templateId = getTemplateId(smsText);
+      if (StringUtils.isNotBlank(templateId)) {
+        httpPost.setHeader("DLT_TE_ID", templateId);
+      }
       // create sms
       Sms sms = new Sms(getDoubleEncodedSMS(smsText), phoneNumberList);
 
@@ -395,7 +417,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         StatusLine sl = response.getStatusLine();
         response.close();
         if (sl.getStatusCode() != 200) {
-          logger.error(
+          logger.info(
               "SMS code for "
                   + phoneNumberList
                   + " could not be sent: "
@@ -409,10 +431,10 @@ public class Msg91SmsProvider implements ISmsProvider {
       }
 
     } catch (IOException e) {
-      logger.error(e);
+      logger.error("error in converting providerDetails to String", e);
       return false;
     } catch (Exception e) {
-      logger.error("Msg91SmsProvider : send : error in converting providerDetails to String");
+      logger.error("Msg91SmsProvider : send : error in converting providerDetails to String", e);
       return false;
     } finally {
       closeHttpResource(httpClient);

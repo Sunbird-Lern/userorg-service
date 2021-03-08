@@ -5,7 +5,12 @@ import static org.sunbird.learner.util.Util.isNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,9 +22,15 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
+import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.EmailValidator;
+import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LocationActorOperation;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsIndex;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
+import org.sunbird.common.models.util.Slug;
+import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
@@ -113,24 +124,28 @@ public class OrganisationManagementActor extends BaseActor {
     try {
       Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
       Map<String, Object> request = actorMessage.getRequest();
+      List<String> fields = new ArrayList<>();
+      fields.add(JsonKey.ID);
+      fields.add(JsonKey.NAME);
       Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
+          cassandraOperation.getAllRecords(
               orgTypeDbInfo.getKeySpace(),
               orgTypeDbInfo.getTableName(),
-              JsonKey.NAME,
-              request.get(JsonKey.NAME),
+              fields,
               actorMessage.getRequestContext());
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-      if (!(list.isEmpty())) {
-        Map<String, Object> map = list.get(0);
-        if (!(((String) map.get(JsonKey.ID)).equals(request.get(JsonKey.ID)))) {
-          ProjectCommonException exception =
-              new ProjectCommonException(
-                  ResponseCode.orgTypeAlreadyExist.getErrorCode(),
-                  ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-          sender().tell(exception, self());
-          return;
+      List<Map<String, Object>> typeList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(typeList)) {
+        String nameInReq = (String) request.get(JsonKey.NAME);
+        String idInReq = (String) request.get(JsonKey.ID);
+        for (Map<String, Object> type : typeList) {
+          String nameInDb = (String) type.get(JsonKey.NAME);
+          String idInDb = (String) type.get(JsonKey.ID);
+          if (nameInReq.equalsIgnoreCase(nameInDb) && !(idInReq.equalsIgnoreCase(idInDb))) {
+            throw new ProjectCommonException(
+                ResponseCode.orgTypeAlreadyExist.getErrorCode(),
+                ResponseCode.orgTypeAlreadyExist.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
         }
       }
 
@@ -677,8 +692,7 @@ public class OrganisationManagementActor extends BaseActor {
                 "".equals(rootOrgId) ? JsonKey.DEFAULT_ROOT_ORG_ID : rootOrgId);
           } else {
             logger.info(actorMessage.getRequestContext(), "Invalid channel id.");
-            sender().tell(ProjectUtil.createClientException(ResponseCode.invalidChannel), self());
-            return;
+            ProjectCommonException.throwClientErrorException(ResponseCode.invalidChannel);
           }
         } else if (!channelAdded
             && !validateChannelUniqueness(
@@ -686,10 +700,7 @@ public class OrganisationManagementActor extends BaseActor {
                 (String) request.get(JsonKey.ORGANISATION_ID),
                 actorMessage.getRequestContext())) {
           logger.info(actorMessage.getRequestContext(), "Channel validation failed");
-          sender()
-              .tell(
-                  ProjectUtil.createClientException(ResponseCode.channelUniquenessInvalid), self());
-          return;
+          ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
         }
       }
       // if channel is not coming and we added it from provider to collect the
@@ -788,7 +799,7 @@ public class OrganisationManagementActor extends BaseActor {
       if (updateOrgDao.containsKey(JsonKey.CHANNEL)) {
 
         String slug = Slug.makeSlug((String) updateOrgDao.getOrDefault(JsonKey.CHANNEL, ""), true);
-        if ((boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
+        if (orgDao.containsKey(JsonKey.IS_ROOT_ORG) && (boolean) orgDao.get(JsonKey.IS_ROOT_ORG)) {
           String rootOrgId = getRootOrgIdFromSlug(slug, actorMessage.getRequestContext());
           if (StringUtils.isBlank(rootOrgId)
               || (!StringUtils.isBlank(rootOrgId)
@@ -910,15 +921,6 @@ public class OrganisationManagementActor extends BaseActor {
       logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
       return;
     }
-    // remove source and external id
-    usrOrgData.remove(JsonKey.EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.SOURCE);
-    usrOrgData.remove(JsonKey.PROVIDER);
-    usrOrgData.remove(JsonKey.USERNAME);
-    usrOrgData.remove(JsonKey.USER_NAME);
-    usrOrgData.remove(JsonKey.USER_EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.USER_PROVIDER);
-    usrOrgData.remove(JsonKey.USER_ID_TYPE);
     usrOrgData.put(JsonKey.IS_DELETED, false);
 
     String updatedBy = null;
@@ -1084,15 +1086,8 @@ public class OrganisationManagementActor extends BaseActor {
       return;
     }
     if (!(validateOrgRequestForMembers(usrOrgData, actorMessage.getRequestContext()))) {
-      logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
       return;
     }
-
-    // remove source and external id
-    usrOrgData.remove(JsonKey.EXTERNAL_ID);
-    usrOrgData.remove(JsonKey.SOURCE);
-    usrOrgData.remove(JsonKey.USERNAME);
-    usrOrgData.remove(JsonKey.USER_NAME);
 
     String updatedBy = null;
     String orgId = null;
@@ -1101,12 +1096,11 @@ public class OrganisationManagementActor extends BaseActor {
     orgId = (String) usrOrgData.get(JsonKey.ORGANISATION_ID);
     userId = (String) usrOrgData.get(JsonKey.USER_ID);
 
-    if (isNotNull(usrOrgData.get(JsonKey.REQUESTED_BY))) {
+    if (StringUtils.isNotBlank((String) usrOrgData.get(JsonKey.REQUESTED_BY))) {
       updatedBy = (String) usrOrgData.get(JsonKey.REQUESTED_BY);
-      usrOrgData.remove(JsonKey.REQUESTED_BY);
     }
     // check user already exist for the org or not
-    Map<String, Object> requestData = new HashMap<>();
+    Map<String, Object> requestData = new LinkedHashMap<>(2);
     requestData.put(JsonKey.USER_ID, userId);
     requestData.put(JsonKey.ORGANISATION_ID, orgId);
     Response result =
@@ -1255,20 +1249,11 @@ public class OrganisationManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private boolean validateOrgRequest(Map<String, Object> req, RequestContext context) {
-
-    if (isNull(req)) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidRequestData.getErrorCode(),
-              ResponseCode.invalidRequestData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
-    }
-
-    if (isNull(req.get(JsonKey.ORGANISATION_ID))) {
-
-      if (isNull(req.get(JsonKey.PROVIDER)) || isNull(req.get(JsonKey.EXTERNAL_ID))) {
+    String orgId = (String) req.get(JsonKey.ORGANISATION_ID);
+    String provider = (String) req.get(JsonKey.PROVIDER);
+    String externalId = (String) req.get(JsonKey.EXTERNAL_ID);
+    if (StringUtils.isBlank(orgId)) {
+      if (StringUtils.isBlank(provider) || StringUtils.isBlank(externalId)) {
         ProjectCommonException exception =
             new ProjectCommonException(
                 ResponseCode.invalidRequestData.getErrorCode(),
@@ -1276,31 +1261,30 @@ public class OrganisationManagementActor extends BaseActor {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
         return false;
+      } else {
+        // fetch orgid from database on basis of source and external id and put orgid
+        // into request .
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(JsonKey.PROVIDER, req.get(JsonKey.PROVIDER));
+        filters.put(JsonKey.EXTERNAL_ID, req.get(JsonKey.EXTERNAL_ID));
+        SearchDTO searchDto = new SearchDTO();
+        searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+        Future<Map<String, Object>> resultF =
+            esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
+        Map<String, Object> result =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+        List<Map<String, Object>> orgList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+        if (orgList.isEmpty()) {
+          ProjectCommonException exception =
+              new ProjectCommonException(
+                  ResponseCode.invalidRequestData.getErrorCode(),
+                  ResponseCode.invalidRequestData.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+          sender().tell(exception, self());
+          return false;
+        }
+        req.put(JsonKey.ORGANISATION_ID, orgList.get(0).get(JsonKey.ID));
       }
-
-      // fetch orgid from database on basis of source and external id and put orgid
-      // into request .
-      Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-
-      Map<String, Object> requestDbMap = new HashMap<>();
-      requestDbMap.put(JsonKey.PROVIDER, req.get(JsonKey.PROVIDER));
-      requestDbMap.put(JsonKey.EXTERNAL_ID, req.get(JsonKey.EXTERNAL_ID));
-      Response result =
-          cassandraOperation.getRecordsByPropertiesWithFiltering(
-              userdbInfo.getKeySpace(), userdbInfo.getTableName(), requestDbMap, context);
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-
-      if (list.isEmpty()) {
-        ProjectCommonException exception =
-            new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
-                ResponseCode.invalidRequestData.getErrorMessage(),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-        sender().tell(exception, self());
-        return false;
-      }
-
-      req.put(JsonKey.ORGANISATION_ID, list.get(0).get(JsonKey.ID));
     }
     return true;
   }
@@ -1313,17 +1297,11 @@ public class OrganisationManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private boolean validateOrgRequestForMembers(Map<String, Object> req, RequestContext context) {
-    if (isNull(req)) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidRequestData.getErrorCode(),
-              ResponseCode.invalidRequestData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
-    }
-    if (isNull(req.get(JsonKey.ORGANISATION_ID))
-        && (isNull(req.get(JsonKey.PROVIDER)) || isNull(req.get(JsonKey.EXTERNAL_ID)))) {
+    String orgId = (String) req.get(JsonKey.ORGANISATION_ID);
+    String externalId = (String) req.get(JsonKey.EXTERNAL_ID);
+    String provider = (String) req.get(JsonKey.PROVIDER);
+    if (StringUtils.isBlank(orgId)
+        && (StringUtils.isBlank(provider) || StringUtils.isBlank(externalId))) {
       ProjectCommonException exception =
           new ProjectCommonException(
               ResponseCode.sourceAndExternalIdValidationError.getErrorCode(),
@@ -1336,7 +1314,7 @@ public class OrganisationManagementActor extends BaseActor {
     // into request .
 
     Map<String, Object> requestDbMap = new HashMap<>();
-    if (!StringUtils.isBlank((String) req.get(JsonKey.ORGANISATION_ID))) {
+    if (StringUtils.isNotBlank((String) req.get(JsonKey.ORGANISATION_ID))) {
       requestDbMap.put(JsonKey.ID, req.get(JsonKey.ORGANISATION_ID));
     } else {
       requestDbMap.put(JsonKey.PROVIDER, StringUtils.lowerCase((String) req.get(JsonKey.PROVIDER)));
@@ -1350,8 +1328,7 @@ public class OrganisationManagementActor extends BaseActor {
     Map<String, Object> esResponse =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> list = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
-    if (null == list || list.isEmpty()) {
-
+    if (CollectionUtils.isEmpty(list)) {
       ProjectCommonException exception =
           new ProjectCommonException(
               ResponseCode.invalidOrgData.getErrorCode(),
@@ -1373,20 +1350,14 @@ public class OrganisationManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private boolean validateUsrRequest(Map<String, Object> req, RequestContext context) {
-    if (isNull(req)) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidRequestData.getErrorCode(),
-              ResponseCode.invalidRequestData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
-    }
     Map<String, Object> data = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     data.putAll(req);
-    if (isNull(data.get(JsonKey.USER_ID))
-        && isNull(data.get(JsonKey.USER_EXTERNAL_ID))
-        && isNull(data.get(JsonKey.USERNAME))) {
+    String userId = (String) data.get(JsonKey.USER_ID);
+    String userExternalId = (String) data.get(JsonKey.USER_EXTERNAL_ID);
+    String userName = (String) data.get(JsonKey.USERNAME);
+    if (StringUtils.isBlank(userId)
+        && StringUtils.isBlank(userExternalId)
+        && StringUtils.isBlank(userName)) {
       ProjectCommonException exception =
           new ProjectCommonException(
               ResponseCode.usrValidationError.getErrorCode(),
@@ -1395,98 +1366,77 @@ public class OrganisationManagementActor extends BaseActor {
       sender().tell(exception, self());
       return false;
     }
-    Response result = null;
-    boolean fromExtId = false;
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> requestDbMap = new HashMap<>();
     if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_ID))) {
       requestDbMap.put(JsonKey.ID, data.get(JsonKey.USER_ID));
-      result =
+      req.put(JsonKey.USER_ID, userId);
+      Response response =
           cassandraOperation.getRecordById(
               usrDbInfo.getKeySpace(),
               usrDbInfo.getTableName(),
               (String) data.get(JsonKey.USER_ID),
               context);
-    } else if (StringUtils.isNotBlank((String) data.get(JsonKey.USER_EXTERNAL_ID))
-        && StringUtils.isNotBlank((String) data.get(JsonKey.USER_PROVIDER))
-        && StringUtils.isNotBlank((String) data.get(JsonKey.USER_ID_TYPE))) {
-      // not used any more as externalids are not store in encrypted format now
-      logger.info(
-          context,
-          "This condition should not run, as external ids are not stored in encrypted format");
-      requestDbMap.put(JsonKey.PROVIDER, data.get(JsonKey.USER_PROVIDER));
-      requestDbMap.put(JsonKey.ID_TYPE, data.get(JsonKey.USER_ID_TYPE));
-      requestDbMap.put(
-          JsonKey.EXTERNAL_ID, Util.encryptData((String) data.get(JsonKey.USER_EXTERNAL_ID)));
-
-      result =
-          cassandraOperation.getRecordsByPropertiesWithFiltering(
-              JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, requestDbMap, context);
-      fromExtId = true;
-    } else {
-      usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-      requestDbMap.put(JsonKey.PROVIDER, data.get(JsonKey.PROVIDER));
-      requestDbMap.put(JsonKey.USERNAME, data.get(JsonKey.USERNAME));
-      if (data.containsKey(JsonKey.PROVIDER)
-          && !StringUtils.isBlank((String) data.get(JsonKey.PROVIDER))) {
-        data.put(
-            JsonKey.LOGIN_ID,
-            (String) data.get(JsonKey.USERNAME) + "@" + (String) data.get(JsonKey.PROVIDER));
-      } else {
-        data.put(JsonKey.LOGIN_ID, data.get(JsonKey.USERNAME));
-      }
-      String loginId = "";
-      try {
-        loginId = encryptionService.encryptData((String) data.get(JsonKey.LOGIN_ID), context);
-      } catch (Exception e) {
+      List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      if (list.isEmpty()) {
         ProjectCommonException exception =
             new ProjectCommonException(
-                ResponseCode.userDataEncryptionError.getErrorCode(),
-                ResponseCode.userDataEncryptionError.getErrorMessage(),
-                ResponseCode.SERVER_ERROR.getResponseCode());
+                ResponseCode.invalidUsrData.getErrorCode(),
+                ResponseCode.invalidUsrData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
+        return false;
       }
-      result =
-          cassandraOperation.getRecordsByIndexedProperty(
-              usrDbInfo.getKeySpace(),
-              usrDbInfo.getTableName(),
-              JsonKey.LOGIN_ID,
-              loginId,
-              context);
+    } else {
+      userId = getUserIdByUserLookUp(JsonKey.USERNAME.toLowerCase(), userName, context);
+      if (StringUtils.isBlank(userId)) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                ResponseCode.invalidUsrData.getErrorCode(),
+                ResponseCode.invalidUsrData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+        sender().tell(exception, self());
+        return false;
+      }
+      req.put(JsonKey.USER_ID, userId);
     }
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (list.isEmpty()) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidUsrData.getErrorCode(),
-              ResponseCode.invalidUsrData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
-    }
-    String userId =
-        (fromExtId)
-            ? (String) list.get(0).get(JsonKey.USER_ID)
-            : (String) list.get(0).get(JsonKey.ID);
-    req.put(JsonKey.USER_ID, userId);
     return true;
+  }
+
+  private String getUserIdByUserLookUp(String type, String value, RequestContext context) {
+    try {
+      value = encryptionService.encryptData(value, context);
+    } catch (Exception e) {
+      logger.info(context, "Exception occurred while encrypting email/phone " + e);
+    }
+    Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
+    Map<String, Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.TYPE, type);
+    reqMap.put(JsonKey.VALUE, value);
+    Response response =
+        cassandraOperation.getRecordsByCompositeKey(
+            userLookUp.getKeySpace(), userLookUp.getTableName(), reqMap, context);
+    List<Map<String, Object>> userMapList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(userMapList)) {
+      Map<String, Object> userMap = userMapList.get(0);
+      return (String) userMap.get(JsonKey.USER_ID);
+    }
+    return "";
   }
 
   private List<Map<String, Object>> getOrg(String channel, RequestContext context) {
     logger.info(context, "OrganisationManagementActor:getOrg: channel = " + channel);
-    Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Map<String, Object> requestData = new HashMap<>();
-    requestData.put(JsonKey.CHANNEL, channel);
-    requestData.put(JsonKey.IS_ROOT_ORG, true);
-    Response result =
-        cassandraOperation.getRecordsByPropertiesWithFiltering(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), requestData, context);
-    logger.info(context, "OrganisationManagementActor:getOrg: result = " + result.toString());
-    logger.info(
-        context,
-        "OrganisationManagementActor:getOrg: result.response = "
-            + result.get(JsonKey.RESPONSE).toString());
-    return (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.CHANNEL, channel);
+    filters.put(JsonKey.IS_ROOT_ORG, true);
+    SearchDTO searchDto = new SearchDTO();
+    searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+    Future<Map<String, Object>> resultF =
+        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
+    Map<String, Object> result =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    return (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
   }
 
   private String getRootOrgIdFromChannel(String channel, RequestContext context) {
@@ -1573,11 +1523,15 @@ public class OrganisationManagementActor extends BaseActor {
   private boolean validateFieldUniqueness(
       String key, String value, String orgId, RequestContext context) {
     if (value != null) {
-      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-      Response result =
-          cassandraOperation.getRecordsByIndexedProperty(
-              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), key, value, context);
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+      Map<String, Object> filters = new HashMap<>();
+      filters.put(key, value);
+      SearchDTO searchDto = new SearchDTO();
+      searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+      Future<Map<String, Object>> resultF =
+          esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
+      Map<String, Object> result =
+          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       if ((list.isEmpty())) {
         return true;
       } else {

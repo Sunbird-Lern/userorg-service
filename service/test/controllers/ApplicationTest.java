@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import modules.OnRequestHandler;
 import org.junit.Test;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -16,6 +17,7 @@ import play.mvc.Result;
  * whole application, see the wiki for more details. extends WithApplication
  */
 @PrepareForTest({SunbirdMWService.class, OnRequestHandler.class})
+@PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*"})
 public class ApplicationTest {
 
   @Test

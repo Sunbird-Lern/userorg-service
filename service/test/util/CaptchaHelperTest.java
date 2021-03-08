@@ -1,6 +1,6 @@
 package util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +20,17 @@ import org.sunbird.common.models.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, ProjectUtil.class})
-@PowerMockIgnore({"javax.management.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
+})
 public class CaptchaHelperTest {
 
   @Test

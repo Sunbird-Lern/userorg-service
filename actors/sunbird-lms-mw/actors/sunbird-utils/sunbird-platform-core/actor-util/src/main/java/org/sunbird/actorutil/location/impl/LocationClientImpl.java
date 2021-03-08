@@ -37,13 +37,13 @@ public class LocationClientImpl implements LocationClient {
   @Override
   public List<Location> getLocationsByCodes(
       ActorRef actorRef, List<String> codeList, RequestContext context) {
-    return getSearchResponse(actorRef, GeoLocationJsonKey.CODE, codeList, context);
+    return getSearchResponse(actorRef, JsonKey.CODE, codeList, context);
   }
 
   @Override
   public List<Location> getLocationByIds(
       ActorRef actorRef, List<String> idsList, RequestContext context) {
-    return getSearchResponse(actorRef, GeoLocationJsonKey.ID, idsList, context);
+    return getSearchResponse(actorRef, JsonKey.ID, idsList, context);
   }
 
   @Override
@@ -67,16 +67,20 @@ public class LocationClientImpl implements LocationClient {
     request.setOperation(LocationActorOperation.SEARCH_LOCATION.getValue());
     request.getRequest().putAll(searchRequestMap);
     logger.info(context, "callSearchLocation ");
-    Object obj = actorCall(actorRef, request, context);
-    if (obj instanceof Response) {
-      Response responseObj = (Response) obj;
-      List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) responseObj.getResult().get(JsonKey.RESPONSE);
-      return responseList
-          .stream()
-          .map(s -> mapper.convertValue(s, Location.class))
-          .collect(Collectors.toList());
-    } else {
+    try {
+      Object obj = actorCall(actorRef, request, context);
+      if (obj instanceof Response) {
+        Response responseObj = (Response) obj;
+        List<Map<String, Object>> responseList =
+            (List<Map<String, Object>>) responseObj.getResult().get(JsonKey.RESPONSE);
+        return responseList
+            .stream()
+            .map(s -> mapper.convertValue(s, Location.class))
+            .collect(Collectors.toList());
+      } else {
+        response = new ArrayList<>();
+      }
+    } catch (Exception ex) {
       response = new ArrayList<>();
     }
     return response;
@@ -85,7 +89,7 @@ public class LocationClientImpl implements LocationClient {
   @Override
   public Location getLocationByCode(
       ActorRef actorRef, String locationCode, RequestContext context) {
-    String param = GeoLocationJsonKey.CODE;
+    String param = JsonKey.CODE;
     Object value = locationCode;
     List<Location> locationList = getSearchResponse(actorRef, param, value, context);
     if (CollectionUtils.isNotEmpty(locationList)) {
@@ -98,7 +102,7 @@ public class LocationClientImpl implements LocationClient {
   @Override
   public List<Location> getLocationByCodes(
       ActorRef actorRef, List<String> locationCode, RequestContext context) {
-    String param = GeoLocationJsonKey.CODE;
+    String param = JsonKey.CODE;
     Object value = locationCode;
     List<Location> locationList = getSearchResponse(actorRef, param, value, context);
     if (CollectionUtils.isNotEmpty(locationList)) {
@@ -114,7 +118,6 @@ public class LocationClientImpl implements LocationClient {
     Request request = new Request();
     String locationId = null;
     request.getRequest().putAll(mapper.convertValue(location, Map.class));
-    Map<String, Object> resLocation = new HashMap<>();
     request.setOperation(LocationActorOperation.CREATE_LOCATION.getValue());
     logger.info(context, "callCreateLocation ");
     Object obj = actorCall(actorRef, request, context);

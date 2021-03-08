@@ -92,7 +92,7 @@ public class FileStorageController extends BaseController {
       map.put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
-
+      setContextAndPrintEntryLog(httpRequest, reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

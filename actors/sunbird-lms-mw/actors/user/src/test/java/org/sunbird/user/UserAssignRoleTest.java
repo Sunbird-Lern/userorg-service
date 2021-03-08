@@ -52,7 +52,13 @@ import scala.concurrent.duration.FiniteDuration;
   DataCacheHandler.class,
   org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
 })
-@PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})
+@PowerMockIgnore({
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
+})
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 public class UserAssignRoleTest {
 
@@ -132,7 +138,7 @@ public class UserAssignRoleTest {
 
   private static void initCassandraForSuccess() {
     PowerMockito.when(
-            cassandraOperation.getRecordsByPropertiesWithFiltering(
+            cassandraOperation.getRecordsByProperties(
                 Mockito.any(), Mockito.any(), Mockito.any(), null))
         .thenReturn(response);
 
