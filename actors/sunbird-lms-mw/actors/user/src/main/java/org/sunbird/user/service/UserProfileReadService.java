@@ -433,7 +433,7 @@ public class UserProfileReadService {
             getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context);
         if (CollectionUtils.isNotEmpty(userLocations)) {
           result.put(
-              JsonKey.USER_LOCATIONS,
+              JsonKey.PROFILE_LOCATION,
               getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
 
           addSchoolLocation(result, context);
