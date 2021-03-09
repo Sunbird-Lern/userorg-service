@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -117,7 +116,9 @@ public class Msg91SmsProvider implements ISmsProvider {
         String tempMobileNumber = removePlusFromMobileNumber(mobileNumber);
 
         logger.debug("Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
-        path = baseUrl + postUrl;
+        // add dlt template id header
+        String templateId = getTemplateId(smsText);
+        path = baseUrl + postUrl + "?DLT_TE_ID=" + templateId;
         logger.debug("Msg91SmsProvider -Executing request - " + path);
 
         HttpPost httpPost = new HttpPost(path);
@@ -127,11 +128,7 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // add authkey header
         httpPost.setHeader("authkey", authKey);
-        // add dlt template id header
-        String templateId = getTemplateId(smsText);
-        if (StringUtils.isNotBlank(templateId)) {
-          httpPost.setHeader("DLT_TE_ID", templateId);
-        }
+
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
 
@@ -378,10 +375,10 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       String path = null;
       logger.debug("Inside POST");
-
-      path = baseUrl + postUrl;
+      // add dlt template id header
+      String templateId = getTemplateId(smsText);
+      path = baseUrl + postUrl + "?DLT_TE_ID=" + templateId;
       logger.debug("Msg91SmsProvider -Executing request - " + path);
-
       HttpPost httpPost = new HttpPost(path);
 
       // add content-type headers
@@ -390,11 +387,6 @@ public class Msg91SmsProvider implements ISmsProvider {
       // add authkey header
       httpPost.setHeader("authkey", authKey);
 
-      // add dlt template id header
-      String templateId = getTemplateId(smsText);
-      if (StringUtils.isNotBlank(templateId)) {
-        httpPost.setHeader("DLT_TE_ID", templateId);
-      }
       // create sms
       Sms sms = new Sms(getDoubleEncodedSMS(smsText), phoneNumberList);
 
@@ -412,7 +404,6 @@ public class Msg91SmsProvider implements ISmsProvider {
         HttpEntity entity =
             new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
         httpPost.setEntity(entity);
-
         CloseableHttpResponse response = httpClient.execute(httpPost);
         StatusLine sl = response.getStatusLine();
         response.close();
