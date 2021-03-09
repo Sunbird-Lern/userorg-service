@@ -104,7 +104,22 @@ public class SearchHandlerActor extends BaseActor {
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
     }
-    if (result == null) {
+    if (MapUtils.isNotEmpty(result))
+    {
+      Map<String, Object> userTypeDetail = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
+      if (MapUtils.isNotEmpty(userTypeDetail))
+      {
+
+        result.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.USER_TYPE));
+        result.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.USER_SUB_TYPE));
+      }else
+      {
+        result.put(JsonKey.USER_TYPE, null);
+        result.put(JsonKey.USER_SUB_TYPE, null);
+      }
+    }
+    else
+    {
       result = new HashMap<>();
     }
     response.put(JsonKey.RESPONSE, result);

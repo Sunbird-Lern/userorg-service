@@ -121,11 +121,28 @@ public class UserProfileReadService {
     }
     addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
-    result.put(JsonKey.IDENTIFIER, userId);
+    Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
+//    Map<String, Object> userLocationDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_LOCATION);
+
+    if (MapUtils.isNotEmpty(userTypeDetails)) {
+      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.USER_TYPE));
+      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.USER_SUB_TYPE));
+    }else
+    {
+      result.put(JsonKey.USER_TYPE, null);
+      result.put(JsonKey.USER_SUB_TYPE, null);
+    }
+//    if (MapUtils.isEmpty(userLocationDetails))
+//    {
+//      result.put(JsonKey.USER_LOCATIONS, userLocationDetails.get(JsonKey.STATE));
+//      result.put(JsonKey.BLOCK, userLocationDetails.get(JsonKey.BLOCK));
+//
+//    }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
   }
+
 
   private void addFlagValue(Map<String, Object> userDetails) {
     int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());

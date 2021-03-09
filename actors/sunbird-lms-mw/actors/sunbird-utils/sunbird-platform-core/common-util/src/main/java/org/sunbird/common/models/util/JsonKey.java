@@ -432,6 +432,8 @@ public final class JsonKey {
   public static final String SUNBIRD_URL_SHORTNER_ENABLE = "sunbird_url_shortner_enable";
   public static final String USER_PROFILE_CONFIG = "userProfileConfig";
   public static final String PUBLIC_FIELDS = "publicFields";
+  public static final String PROFILE_USERTYPE = "profileUserType";
+  public static final String PROFILE_LOCATION = "profileLocation";
   public static final String PRIVATE_FIELDS = "privateFields";
   public static final String BATCH_START_DATE = "batchStartDate";
   public static final String BATCH_END_DATE = "batchEndDate";
