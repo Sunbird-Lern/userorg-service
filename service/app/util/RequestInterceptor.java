@@ -53,19 +53,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v2/notification", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
     apiHeaderIgnoreMap.put("/v1/file/upload", var);
-    apiHeaderIgnoreMap.put("/v1/user/forgotpassword", var);
-    apiHeaderIgnoreMap.put("/v1/object/read/list", var);
-    apiHeaderIgnoreMap.put("/v1/object/read", var);
-    apiHeaderIgnoreMap.put("/v1/object/create", var);
-    apiHeaderIgnoreMap.put("/v1/object/update", var);
-    apiHeaderIgnoreMap.put("/v1/object/delete", var);
-    apiHeaderIgnoreMap.put("/v1/object/search", var);
-    apiHeaderIgnoreMap.put("/v1/object/metrics", var);
-    apiHeaderIgnoreMap.put("/v1/client/register", var);
-    apiHeaderIgnoreMap.put("/v1/client/key/read", var);
-    apiHeaderIgnoreMap.put("/v1/notification/send", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
-    apiHeaderIgnoreMap.put("/v1/notification/audience", var);
     // making org read as public access
     apiHeaderIgnoreMap.put("/v1/org/read", var);
     // making location APIs public access
@@ -77,17 +65,12 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/otp/verify", var);
     apiHeaderIgnoreMap.put("/v1/user/get/email", var);
     apiHeaderIgnoreMap.put("/v1/user/get/phone", var);
-    apiHeaderIgnoreMap.put("/v1/user/get/loginId", var);
-    apiHeaderIgnoreMap.put("/v1/user/get/loginid", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
-    apiHeaderIgnoreMap.put("/v1/user/mock/read", var);
-    apiHeaderIgnoreMap.put("/v1/cache/clear", var);
     apiHeaderIgnoreMap.put("/private/user/v1/search", var);
     apiHeaderIgnoreMap.put("/private/user/v1/migrate", var);
     apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
     apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
-    apiHeaderIgnoreMap.put("/private/user/v1/certs/add", var);
     apiHeaderIgnoreMap.put("/v1/user/exists/email", var);
     apiHeaderIgnoreMap.put("/v1/user/exists/phone", var);
     apiHeaderIgnoreMap.put("/v1/role/read", var);

@@ -14,15 +14,12 @@ public interface ResponseMessage {
     String INVALID_OPERATION_NAME =
         "Operation name is invalid. Please provide a valid operation name";
     String INVALID_REQUESTED_DATA = "Requested data for this operation is not valid.";
-    String COURSE_ID_MISSING_ERROR = "Please provide course id.";
     String API_KEY_MISSING_ERROR = "APi key is mandatory.";
     String INTERNAL_ERROR = "Process failed,please try again later.";
     String SUCCESS_MESSAGE = "Success";
-    String COURSE_ID_MISSING = "Course id is mandatory.";
     String EMAIL_FORMAT = "Email is invalid.";
     String FIRST_NAME_MISSING = "First name is mandatory.";
     String LANGUAGE_MISSING = "Language is mandatory.";
-    String PASSWORD_MISSING = "Password is mandatory.";
     String REQUIRED_DATA_ORG_MISSING =
         "Organization Id or Provider with External Id values are required for the operation";
     String CHANNEL_SHOULD_BE_UNIQUE =
@@ -43,16 +40,11 @@ public interface ResponseMessage {
     String USERNAME_IN_USE = "Username already exists.";
     String USERID_MISSING = "UserId is mandatory.";
     String AUTH_TOKEN_MISSING = "Auth token is mandatory.";
-    String LOGIN_TYPE_ERROR = "provide login type as null.";
     String ADDRESS_REQUIRED_ERROR = "Please provide address.";
-    String EDUCATION_REQUIRED_ERROR = "Please provide education details.";
-    String JOBDETAILS_REQUIRED_ERROR = "Please provide job details.";
     String DB_INSERTION_FAIL = "DB insert operation failed.";
     String DB_UPDATE_FAIL = "Db update operation failed.";
-    String DATA_ALREADY_EXIST = "data already exist.";
-    String INVALID_DATA = "Incorrect data.";
-    String INVALID_COURSE_ID = "Course doesnot exist. Please provide a valid course identifier";
     String PHONE_NO_REQUIRED_ERROR = "Phone number is required.";
+    String INVALID_DATA = "Incorrect data.";
     String ORG_ID_MISSING = "Organization Id required.";
     String ACTOR_CONNECTION_ERROR = "Service is not able to connect with actor.";
     String USER_ALREADY_EXISTS = "User already exists for given {0}.";
@@ -64,9 +56,6 @@ public interface ResponseMessage {
     String ERROR_ATTRIBUTE_CONFLICT = "Either pass attribute {0} or {1} but not both.";
     String ADDRESS_ERROR = "In {0}, {1} is mandatory.";
     String ADDRESS_TYPE_ERROR = "Please provide correct address Type.";
-    String NAME_OF_INSTITUTION_ERROR = "Please provide name of Institution.";
-    String EDUCATION_DEGREE_ERROR = "Education degree is required.";
-    String JOB_NAME_ERROR = "Job Name is required.";
     String NAME_OF_ORGANISATION_ERROR = "Organization Name is required.";
     String ROLES_MISSING = "user role is required.";
     String EMPTY_ROLES_PROVIDED = "Roles cannot be empty.";
@@ -95,10 +84,6 @@ public interface ResponseMessage {
     String STORAGE_CONTAINER_NAME_MANDATORY = " Container name can not be null or empty.";
     String INVALID_ROLE = "Invalid role value provided in request.";
     String INVALID_SALT = "Please provide salt value.";
-    String ORG_TYPE_MANDATORY = "Org Type name is mandatory.";
-    String ORG_TYPE_ALREADY_EXIST =
-        "Org type with this name already exist.Please provide some other name.";
-    String ORG_TYPE_ID_REQUIRED_ERROR = "Org Type Id is required.";
     String TITLE_REQUIRED = "Title is required";
     String NOTE_REQUIRED = "No data to store for notes";
     String CONTENT_ID_ERROR = "Please provide content id or course id";
@@ -109,26 +94,18 @@ public interface ResponseMessage {
     String INVALID_WEBPAGE_DATA = "Invalid webPage data";
     String INVALID_MEDIA_TYPE = "Invalid media type for webPage";
     String INVALID_WEBPAGE_URL = "Invalid URL for {0}.";
-    String CONFIIRM_PASSWORD_MISSING = "Confirm password is mandatory.";
-    String CONFIIRM_PASSWORD_EMPTY = "Confirm password can not be empty.";
-    String SAME_PASSWORD_ERROR = "New password can't be same as old password.";
-    String INVALID_ORG_TYPE_ERROR = "Please provide valid orgType.";
+    String INVALID_ORG_TYPE_ERROR = "INVALID_ORG_TYPE_ERROR";
     // No need to indicate managedby is missing to user.
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "Please provide either email or phone.";
     String ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED =
         "Please provide only email or phone or managed by";
     String PHONE_ALREADY_IN_USE = "Phone already in use. Please provide different phone number.";
-    String INVALID_CLIENT_NAME = "Please provide unique valid client name";
-    String INVALID_CLIENT_ID = "Please provide valid client id";
     String UPDATE_FAILED = "Data updation failed due to invalid Request";
     String INVALID_LOCATION_ID = "Please provide valid location id.";
     String INVALID_HASHTAG_ID =
         "Please provide different hashTagId.This HashTagId is associated with some other organization.";
     String INVALID_USR_ORG_DATA =
         "Given User Data doesn't belongs to this organization. Please provide a valid one.";
-    String INVALID_VISIBILITY_REQUEST = "Private and Public fields cannot be same.";
-    String INVALID_TOPIC_NAME = "Please provide a valid toipc.";
-    String INVALID_TOPIC_DATA = "Please provide valid notification data.";
     String INVALID_NOTIFICATION_TYPE = "Please provide a valid notification type.";
     String INVALID_NOTIFICATION_TYPE_SUPPORT = "Only notification type FCM is supported.";
     String INVALID_PHONE_NUMBER = "Please send Phone and country code seprately.";
@@ -261,11 +238,9 @@ public interface ResponseMessage {
     String API_KEY_MISSING_ERROR = "API_KEY_REQUIRED_ERROR";
     String INTERNAL_ERROR = "INTERNAL_ERROR";
     String SUCCESS_MESSAGE = "SUCCESS";
-    String COURSE_ID_MISSING = "COURSE_ID_REQUIRED_ERROR";
     String EMAIL_FORMAT = "EMAIL_FORMAT_ERROR";
     String FIRST_NAME_MISSING = "FIRST_NAME_REQUIRED_ERROR";
-    String LANGUAGE_MISSING = "LANGUAGE_REQUIRED_ERROR";
-    String PASSWORD_MISSING = "PASSWORD_REQUIRED_ERROR";
+    String LANGUAGE_MISSING = "Language is mandatory.";
     String REQUIRED_DATA_ORG_MISSING = "REQUIRED_DATA_MISSING";
     String CHANNEL_SHOULD_BE_UNIQUE = "CHANNEL_SHOULD_BE_UNIQUE";
     String ERROR_DUPLICATE_ENTRY = "ERROR_DUPLICATE_ENTRY";
@@ -280,19 +255,14 @@ public interface ResponseMessage {
     String USERNAME_IN_USE = "USERNAME_IN_USE";
     String USERID_MISSING = "USERID_MISSING";
     String AUTH_TOKEN_MISSING = "X_Authenticated_Userid_MISSING";
-    String LOGIN_TYPE_ERROR = "LOGIN_TYPE_ERROR";
     String INVALID_ORG_ID = "INVALID_ORG_ID";
     String INVALID_ORG_STATUS = "INVALID_ORG_STATUS";
     String INVALID_ORG_STATUS_TRANSITION = "INVALID_ORG_STATUS_TRANSITION";
     String ADDRESS_REQUIRED_ERROR = "ADDRESS_REQUIRED_ERROR";
-    String EDUCATION_REQUIRED_ERROR = "EDUCATION_REQUIRED_ERROR";
-    String JOBDETAILS_REQUIRED_ERROR = "JOBDETAILS_REQUIRED_ERROR";
     String DB_INSERTION_FAIL = "DB_INSERTION_FAIL";
     String DB_UPDATE_FAIL = "DB_UPDATE_FAIL";
-    String DATA_ALREADY_EXIST = "DATA_ALREADY_EXIST";
-    String INVALID_DATA = "INVALID_DATA";
-    String INVALID_COURSE_ID = "INVALID_COURSE_ID";
     String PHONE_NO_REQUIRED_ERROR = "PHONE_NO_REQUIRED_ERROR";
+    String INVALID_DATA = "INVALID_DATA";
     String ORG_ID_MISSING = "ORG_ID_MISSING";
     String ACTOR_CONNECTION_ERROR = "ACTOR_CONNECTION_ERROR";
     String USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
@@ -304,9 +274,6 @@ public interface ResponseMessage {
     String ERROR_ATTRIBUTE_CONFLICT = "ERROR_ATTRIBUTE_CONFLICT";
     String ADDRESS_ERROR = "ADDRESS_ERROR";
     String ADDRESS_TYPE_ERROR = "ADDRESS_TYPE_ERROR";
-    String NAME_OF_INSTITUTION_ERROR = "NAME_OF_INSTITUTION_ERROR";
-    String EDUCATION_DEGREE_ERROR = "EDUCATION_DEGREE_ERROR";
-    String JOB_NAME_ERROR = "JOB_NAME_ERROR";
     String NAME_OF_ORGANISATION_ERROR = "NAME_OF_ORGANIZATION_ERROR";
     String ROLES_MISSING = "ROLES_REQUIRED_ERROR";
     String EMPTY_ROLES_PROVIDED = "EMPTY_ROLES_PROVIDED";
@@ -330,9 +297,6 @@ public interface ResponseMessage {
     String STORAGE_CONTAINER_NAME_MANDATORY = "STORAGE_CONTAINER_NAME_MANDATORY";
     String INVALID_ROLE = "INVALID_ROLE";
     String INVALID_SALT = "INVALID_SALT";
-    String ORG_TYPE_MANDATORY = "ORG_TYPE_MANDATORY";
-    String ORG_TYPE_ALREADY_EXIST = "ORG_TYPE_ALREADY_EXIST";
-    String ORG_TYPE_ID_REQUIRED_ERROR = "ORG_TYPE_ID_REQUIRED_ERROR";
     String TITLE_REQUIRED = "TITLE_REQUIRED";
     String NOTE_REQUIRED = "NOTE_REQUIRED";
     String CONTENT_ID_ERROR = "CONTENT_ID_OR_COURSE_ID_REQUIRED";
@@ -343,23 +307,15 @@ public interface ResponseMessage {
     String INVALID_WEBPAGE_DATA = "INVALID_WEBPAGE_DATA";
     String INVALID_MEDIA_TYPE = "INVALID_MEDIA_TYPE";
     String INVALID_WEBPAGE_URL = "INVALID_WEBPAGE_URL";
-    String CONFIIRM_PASSWORD_MISSING = "CONFIIRM_PASSWORD_MISSING";
-    String CONFIIRM_PASSWORD_EMPTY = "CONFIIRM_PASSWORD_EMPTY";
-    String SAME_PASSWORD_ERROR = "SAME_PASSWORD_ERROR";
-    String INVALID_ORG_TYPE_ERROR = "INVALID_ORG_TYPE_ERROR";
+    String INVALID_ORG_TYPE_ERROR = "Please provide valid orgType.";
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING";
     String ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED = "ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED";
     String PHONE_ALREADY_IN_USE = "PHONE_ALREADY_IN_USE";
-    String INVALID_CLIENT_NAME = "INVALID_CLIENT_NAME";
-    String INVALID_CLIENT_ID = "INVALID_CLIENT_ID";
     String UPDATE_FAILED = "UPDATE_FAILED";
     String INVALID_TYPE_VALUE = "INVALID_TYPE_VALUE";
     String INVALID_LOCATION_ID = "INVALID_LOCATION_ID";
     String INVALID_HASHTAG_ID = "INVALID_HASHTAG_ID";
     String INVALID_USR_ORG_DATA = "INVALID_USR_ORG_DATA";
-    String INVALID_VISIBILITY_REQUEST = "INVALID_VISIBILITY_REQUEST";
-    String INVALID_TOPIC_NAME = "INVALID_TOPIC_NAME";
-    String INVALID_TOPIC_DATA = "INVALID_TOPIC_DATA";
     String INVALID_NOTIFICATION_TYPE = "INVALID_NOTIFICATION_TYPE";
     String INVALID_NOTIFICATION_TYPE_SUPPORT = "INVALID_NOTIFICATION_TYPE_SUPPORT";
     String INVALID_PHONE_NUMBER = "INVALID_PHONE_NUMBER";
