@@ -16,9 +16,6 @@ public final class JsonKey {
   public static final String ACCOUNT_KEY = "sunbird_account_key";
   public static final String ACCOUNT_NAME = "sunbird_account_name";
   public static final String DOWNLOAD_LINK_EXPIRY_TIMEOUT = "download_link_expiry_timeout";
-  public static final String SIGNED_URL = "signedUrl";
-  public static final String BULK_UPLOAD_STATUS = "Status";
-  public static final String BULK_UPLOAD_ERROR = "Remarks";
   public static final String ACTION_GROUP = "action_group";
   public static final String ACTION_GROUPS = "actionGroups";
   public static final String ACTION_NAME = "actionName";
@@ -559,7 +556,6 @@ public final class JsonKey {
   public static final String EKSTEP_SIGNING_SIGN_PAYLOAD_VER = "ekstep.signing.sign.payload.ver";
   public static final String ADMINUTIL_BASE_URL = "adminutil_base_url";
   public static final String ADMINUTIL_SIGN_ENDPOINT = "adminutil_sign_endpoint";
-  public static final String FORM_API_BASE_URL = "form_api_base_url";
   public static final String FORM_API_ENDPOINT = "form_api_endpoint";
   public static final String MANAGED_TOKEN = "managedToken";
   public static final String WITH_TOKENS = "withTokens";
@@ -613,7 +609,6 @@ public final class JsonKey {
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
-  public static final String CONSENTDATA = "consentData";
   // user consent req-response attributes listing - ended
   // user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
