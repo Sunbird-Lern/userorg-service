@@ -3,6 +3,7 @@ package org.sunbird.learner.actors;
 import static org.sunbird.learner.util.Util.isNotNull;
 import static org.sunbird.learner.util.Util.isNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.location.LocationClient;
+import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
@@ -42,6 +45,7 @@ import org.sunbird.learner.organisation.external.identity.service.OrgExternalSer
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.telemetry.util.TelemetryUtil;
@@ -72,6 +76,7 @@ public class OrganisationManagementActor extends BaseActor {
       org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private LocationClient locationClient = LocationClientImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -140,7 +145,7 @@ public class OrganisationManagementActor extends BaseActor {
         }
       }
 
-      validateLocationCodeAndIds(request);
+      validateOrgLocation(request, actorMessage.getRequestContext());
 
       String passedExternalId = (String) request.get(JsonKey.EXTERNAL_ID);
       if (StringUtils.isNotBlank(passedExternalId)) {
@@ -460,7 +465,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       String existingExternalId = (String) dbOrgDetails.get(JsonKey.EXTERNAL_ID);
-      validateLocationCodeAndIds(request);
+      validateOrgLocation(request, actorMessage.getRequestContext());
       if (request.containsKey(JsonKey.CHANNEL)) {
         boolean flag =
             validateChannelUniqueness(
@@ -1382,23 +1387,41 @@ public class OrganisationManagementActor extends BaseActor {
    * This method will validate the locationId and locationCode.
    */
   @SuppressWarnings("unchecked")
-  private void validateLocationCodeAndIds(Map<String, Object> request) {
-    List<String> locationIdsList;
-    if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_IDS))) {
-      locationIdsList =
-          validator.getHierarchyLocationIds(
-              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-              (List<String>) request.get(JsonKey.LOCATION_IDS));
-      request.put(JsonKey.LOCATION_IDS, locationIdsList);
-    } else {
-      if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_CODE))) {
-        locationIdsList =
-            validator.getValidatedLocationIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                (List<String>) request.get(JsonKey.LOCATION_CODE));
-        request.put(JsonKey.LOCATION_IDS, locationIdsList);
-        request.remove(JsonKey.LOCATION_CODE);
-      }
+  private void validateOrgLocation(Map<String, Object> request, RequestContext context) {
+    List<Map<String, String>> orgLocationList =
+        (List<Map<String, String>>) request.get(JsonKey.ORG_LOCATION);
+    List<String> locList = new ArrayList<>();
+    orgLocationList
+        .stream()
+        .forEach(
+            loc -> {
+              locList.add(loc.get(JsonKey.ID));
+            });
+    List<String> locationIdsList =
+        validator.getHierarchyLocationIds(
+            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locList);
+
+    List<Map<String, String>> newOrgLocationList = new ArrayList<>();
+    List<Location> locationList =
+        locationClient.getLocationByIds(
+            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+            locationIdsList,
+            context);
+    locationList
+        .stream()
+        .forEach(
+            location -> {
+              Map<String, String> map = new HashMap<>();
+              map.put(JsonKey.ID, location.getId());
+              map.put(JsonKey.TYPE, location.getType());
+              newOrgLocationList.add(map);
+            });
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String orgLoc = mapper.writeValueAsString(newOrgLocationList);
+      request.put(JsonKey.ORG_LOCATION, orgLoc);
+    } catch (JsonProcessingException e) {
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
   }
 

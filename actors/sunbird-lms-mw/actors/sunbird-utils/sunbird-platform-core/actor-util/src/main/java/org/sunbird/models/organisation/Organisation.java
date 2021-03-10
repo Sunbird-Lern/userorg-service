@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * @desc POJO class for Organisation
@@ -42,15 +41,15 @@ public class Organisation implements Serializable {
   private String orgType;
   private String preferredLanguage;
   private String provider;
-  private String rootOrgId;
   private String slug;
   private Integer status;
   private String theme;
   private String thumbnail;
   private String updatedBy;
   private String updatedDate;
-  private List<String> locationIds;
   private Boolean isSSOEnabled;
+  private Boolean isTenant;
+  private String orgLocation;
 
   public String getId() {
     return id;
@@ -236,14 +235,6 @@ public class Organisation implements Serializable {
     this.provider = provider;
   }
 
-  public String getRootOrgId() {
-    return rootOrgId;
-  }
-
-  public void setRootOrgId(String rootOrgId) {
-    this.rootOrgId = rootOrgId;
-  }
-
   public String getSlug() {
     return slug;
   }
@@ -292,14 +283,6 @@ public class Organisation implements Serializable {
     this.updatedDate = updatedDate;
   }
 
-  public List<String> getLocationIds() {
-    return locationIds;
-  }
-
-  public void setLocationIds(List<String> locationIds) {
-    this.locationIds = locationIds;
-  }
-
   @JsonProperty(value = "isApproved")
   public Boolean isApproved() {
     return isApproved;
@@ -325,5 +308,22 @@ public class Organisation implements Serializable {
 
   public void setSSOEnabled(Boolean isSsoEnabled) {
     this.isSSOEnabled = isSsoEnabled;
+  }
+
+  @JsonProperty(value = "isTenant")
+  public Boolean isTenant() {
+    return isTenant;
+  }
+
+  public void setTenant(Boolean tenant) {
+    isTenant = tenant;
+  }
+
+  public String getOrgLocation() {
+    return orgLocation;
+  }
+
+  public void setOrgLocation(String orgLocation) {
+    this.orgLocation = orgLocation;
   }
 }

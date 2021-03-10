@@ -24,6 +24,15 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         (String) orgRequest.getRequest().get(JsonKey.ORG_NAME),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.ORG_NAME);
+    if (!(orgRequest.getRequest().containsKey(JsonKey.IS_TENANT))
+        || (orgRequest.getRequest().containsKey(JsonKey.IS_TENANT)
+            && null == orgRequest.getRequest().get(JsonKey.IS_TENANT))) {
+      throw new ProjectCommonException(
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          MessageFormat.format(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.IS_TENANT),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
     validateRootOrgChannel(orgRequest);
     validateLicense(orgRequest);
 
