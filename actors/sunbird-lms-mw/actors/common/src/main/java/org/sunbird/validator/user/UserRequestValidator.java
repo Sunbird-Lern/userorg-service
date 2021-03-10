@@ -263,6 +263,17 @@ public class UserRequestValidator extends BaseRequestValidator {
       userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
     }
 
+    validateDob(userRequest);
+
+    if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
+        && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+    } else {
+      emailVerifiedValidation(userRequest);
+    }
+  }
+
+  private void validateDob(Request userRequest) {
     if (null != userRequest.getRequest().get(JsonKey.DOB)) {
       boolean bool =
           ProjectUtil.isDateValidFormat(
@@ -271,13 +282,6 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (!bool) {
         ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
       }
-    }
-
-    if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
-        && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
-    } else {
-      emailVerifiedValidation(userRequest);
     }
   }
 
@@ -322,6 +326,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
     validateUserOrgField(userRequest);
+    validateDob(userRequest);
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
