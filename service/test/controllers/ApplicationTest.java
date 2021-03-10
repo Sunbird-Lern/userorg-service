@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.actor.service.SunbirdMWService;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.responsecode.ResponseCode;
 import play.mvc.Result;
 
@@ -25,18 +23,6 @@ public class ApplicationTest {
     String apiPath = "/v1/learner/getenrolledcoures";
     String version = BaseController.getApiVersion(apiPath);
     assertEquals("v1", version);
-  }
-
-  @Test
-  public void testCreateResponseOnExceptionSuccess() {
-    ProjectCommonException exception =
-        new ProjectCommonException(
-            ResponseCode.courseIdRequiredError.getErrorCode(),
-            ResponseCode.courseIdRequiredError.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-    Response response =
-        BaseController.createResponseOnException("v1/user/create", "POST", exception);
-    assertEquals(ResponseCode.courseIdRequiredError.getErrorCode(), response.getParams().getErr());
   }
 
   @Test(expected = RuntimeException.class)

@@ -51,9 +51,6 @@ public class ActorOperationTest {
     Assert.assertEquals("fileStorageService", ActorOperations.FILE_STORAGE_SERVICE.getValue());
     Assert.assertEquals("healthCheck", ActorOperations.HEALTH_CHECK.getValue());
     Assert.assertEquals("sendMail", ActorOperations.SEND_MAIL.getValue());
-    Assert.assertEquals("getOrgTypeList", ActorOperations.GET_ORG_TYPE_LIST.getValue());
-    Assert.assertEquals("createOrgType", ActorOperations.CREATE_ORG_TYPE.getValue());
-    Assert.assertEquals("updateOrgType", ActorOperations.UPDATE_ORG_TYPE.getValue());
     Assert.assertEquals("createNote", ActorOperations.CREATE_NOTE.getValue());
     Assert.assertEquals("updateNote", ActorOperations.UPDATE_NOTE.getValue());
     Assert.assertEquals("searchNote", ActorOperations.SEARCH_NOTE.getValue());

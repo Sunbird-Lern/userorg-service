@@ -12,8 +12,6 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_OPERATION_NAME, ResponseMessage.Message.INVALID_OPERATION_NAME),
   invalidRequestData(
       ResponseMessage.Key.INVALID_REQUESTED_DATA, ResponseMessage.Message.INVALID_REQUESTED_DATA),
-  courseIdRequired(
-      ResponseMessage.Key.COURSE_ID_MISSING_ERROR, ResponseMessage.Message.COURSE_ID_MISSING_ERROR),
   apiKeyRequired(
       ResponseMessage.Key.API_KEY_MISSING_ERROR, ResponseMessage.Message.API_KEY_MISSING_ERROR),
   internalError(ResponseMessage.Key.INTERNAL_ERROR, ResponseMessage.Message.INTERNAL_ERROR),
@@ -21,13 +19,10 @@ public enum ResponseCode {
       ResponseMessage.Key.DB_INSERTION_FAIL, ResponseMessage.Message.DB_INSERTION_FAIL),
   dbUpdateError(ResponseMessage.Key.DB_UPDATE_FAIL, ResponseMessage.Message.DB_UPDATE_FAIL),
   success(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
-  courseIdRequiredError(
-      ResponseMessage.Key.COURSE_ID_MISSING, ResponseMessage.Message.COURSE_ID_MISSING),
   emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
   firstNameRequired(
       ResponseMessage.Key.FIRST_NAME_MISSING, ResponseMessage.Message.FIRST_NAME_MISSING),
   languageRequired(ResponseMessage.Key.LANGUAGE_MISSING, ResponseMessage.Message.LANGUAGE_MISSING),
-  passwordRequired(ResponseMessage.Key.PASSWORD_MISSING, ResponseMessage.Message.PASSWORD_MISSING),
   sourceAndExternalIdValidationError(
       ResponseMessage.Key.REQUIRED_DATA_ORG_MISSING,
       ResponseMessage.Message.REQUIRED_DATA_ORG_MISSING),
@@ -58,7 +53,6 @@ public enum ResponseCode {
       ResponseMessage.Key.USERNAME_EMAIL_IN_USE, ResponseMessage.Message.USERNAME_EMAIL_IN_USE),
   keyCloakDefaultError(
       ResponseMessage.Key.KEY_CLOAK_DEFAULT_ERROR, ResponseMessage.Message.KEY_CLOAK_DEFAULT_ERROR),
-  loginTypeError(ResponseMessage.Key.LOGIN_TYPE_ERROR, ResponseMessage.Message.LOGIN_TYPE_ERROR),
   invalidOrgId(ResponseMessage.Key.INVALID_ORG_ID, ResponseMessage.Key.INVALID_ORG_ID),
   invalidOrgStatus(ResponseMessage.Key.INVALID_ORG_STATUS, ResponseMessage.Key.INVALID_ORG_STATUS),
   invalidOrgStatusTransition(
@@ -66,18 +60,9 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION),
   addressRequired(
       ResponseMessage.Key.ADDRESS_REQUIRED_ERROR, ResponseMessage.Message.ADDRESS_REQUIRED_ERROR),
-  educationRequired(
-      ResponseMessage.Key.EDUCATION_REQUIRED_ERROR,
-      ResponseMessage.Message.EDUCATION_REQUIRED_ERROR),
   phoneNoRequired(
       ResponseMessage.Key.PHONE_NO_REQUIRED_ERROR, ResponseMessage.Message.PHONE_NO_REQUIRED_ERROR),
-  jobDetailsRequired(
-      ResponseMessage.Key.JOBDETAILS_REQUIRED_ERROR,
-      ResponseMessage.Message.JOBDETAILS_REQUIRED_ERROR),
-  dataAlreadyExist(
-      ResponseMessage.Key.DATA_ALREADY_EXIST, ResponseMessage.Message.DATA_ALREADY_EXIST),
   invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA),
-  invalidCourseId(ResponseMessage.Key.INVALID_COURSE_ID, ResponseMessage.Message.INVALID_COURSE_ID),
   orgIdRequired(ResponseMessage.Key.ORG_ID_MISSING, ResponseMessage.Message.ORG_ID_MISSING),
   actorConnectionError(
       ResponseMessage.Key.ACTOR_CONNECTION_ERROR, ResponseMessage.Message.ACTOR_CONNECTION_ERROR),
@@ -94,12 +79,6 @@ public enum ResponseCode {
   addressError(ResponseMessage.Key.ADDRESS_ERROR, ResponseMessage.Message.ADDRESS_ERROR),
   addressTypeError(
       ResponseMessage.Key.ADDRESS_TYPE_ERROR, ResponseMessage.Message.ADDRESS_TYPE_ERROR),
-  educationNameError(
-      ResponseMessage.Key.NAME_OF_INSTITUTION_ERROR,
-      ResponseMessage.Message.NAME_OF_INSTITUTION_ERROR),
-  jobNameError(ResponseMessage.Key.JOB_NAME_ERROR, ResponseMessage.Message.JOB_NAME_ERROR),
-  educationDegreeError(
-      ResponseMessage.Key.EDUCATION_DEGREE_ERROR, ResponseMessage.Message.EDUCATION_DEGREE_ERROR),
   organisationNameError(
       ResponseMessage.Key.NAME_OF_ORGANISATION_ERROR,
       ResponseMessage.Message.NAME_OF_ORGANISATION_ERROR),
@@ -137,13 +116,6 @@ public enum ResponseCode {
       ResponseMessage.Message.STORAGE_CONTAINER_NAME_MANDATORY),
   invalidRole(ResponseMessage.Key.INVALID_ROLE, ResponseMessage.Message.INVALID_ROLE),
   saltValue(ResponseMessage.Key.INVALID_SALT, ResponseMessage.Message.INVALID_SALT),
-  orgTypeMandatory(
-      ResponseMessage.Key.ORG_TYPE_MANDATORY, ResponseMessage.Message.ORG_TYPE_MANDATORY),
-  orgTypeAlreadyExist(
-      ResponseMessage.Key.ORG_TYPE_ALREADY_EXIST, ResponseMessage.Message.ORG_TYPE_ALREADY_EXIST),
-  orgTypeIdRequired(
-      ResponseMessage.Key.ORG_TYPE_ID_REQUIRED_ERROR,
-      ResponseMessage.Message.ORG_TYPE_ID_REQUIRED_ERROR),
   titleRequired(ResponseMessage.Key.TITLE_REQUIRED, ResponseMessage.Message.TITLE_REQUIRED),
   noteRequired(ResponseMessage.Key.NOTE_REQUIRED, ResponseMessage.Message.NOTE_REQUIRED),
   contentIdError(ResponseMessage.Key.CONTENT_ID_ERROR, ResponseMessage.Message.CONTENT_ID_ERROR),
@@ -160,13 +132,6 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_MEDIA_TYPE, ResponseMessage.Message.INVALID_MEDIA_TYPE),
   invalidWebPageUrl(
       ResponseMessage.Key.INVALID_WEBPAGE_URL, ResponseMessage.Message.INVALID_WEBPAGE_URL),
-  newPasswordRequired(
-      ResponseMessage.Key.CONFIIRM_PASSWORD_MISSING,
-      ResponseMessage.Message.CONFIIRM_PASSWORD_MISSING),
-  newPasswordEmpty(
-      ResponseMessage.Key.CONFIIRM_PASSWORD_EMPTY, ResponseMessage.Message.CONFIIRM_PASSWORD_EMPTY),
-  samePasswordError(
-      ResponseMessage.Key.SAME_PASSWORD_ERROR, ResponseMessage.Message.SAME_PASSWORD_ERROR),
   invalidOrgType(
       ResponseMessage.Key.INVALID_ORG_TYPE_ERROR, ResponseMessage.Message.INVALID_ORG_TYPE_ERROR),
   emailorPhoneorManagedByRequired(
@@ -177,9 +142,6 @@ public enum ResponseCode {
       ResponseMessage.Message.ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED),
   PhoneNumberInUse(
       ResponseMessage.Key.PHONE_ALREADY_IN_USE, ResponseMessage.Message.PHONE_ALREADY_IN_USE),
-  invalidClientName(
-      ResponseMessage.Key.INVALID_CLIENT_NAME, ResponseMessage.Message.INVALID_CLIENT_NAME),
-  invalidClientId(ResponseMessage.Key.INVALID_CLIENT_ID, ResponseMessage.Message.INVALID_CLIENT_ID),
   updateFailed(ResponseMessage.Key.UPDATE_FAILED, ResponseMessage.Message.UPDATE_FAILED),
   invalidTypeValue(ResponseMessage.Key.INVALID_TYPE_VALUE, ResponseMessage.Key.INVALID_TYPE_VALUE),
   invalidLocationId(
@@ -188,12 +150,6 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_HASHTAG_ID, ResponseMessage.Message.INVALID_HASHTAG_ID),
   invalidUsrOrgData(
       ResponseMessage.Key.INVALID_USR_ORG_DATA, ResponseMessage.Message.INVALID_USR_ORG_DATA),
-  visibilityInvalid(
-      ResponseMessage.Key.INVALID_VISIBILITY_REQUEST,
-      ResponseMessage.Message.INVALID_VISIBILITY_REQUEST),
-  invalidTopic(ResponseMessage.Key.INVALID_TOPIC_NAME, ResponseMessage.Message.INVALID_TOPIC_NAME),
-  invalidTopicData(
-      ResponseMessage.Key.INVALID_TOPIC_DATA, ResponseMessage.Message.INVALID_TOPIC_DATA),
   invalidNotificationType(
       ResponseMessage.Key.INVALID_NOTIFICATION_TYPE,
       ResponseMessage.Message.INVALID_NOTIFICATION_TYPE),

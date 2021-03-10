@@ -21,12 +21,6 @@ public class ResponseCodeTest {
   }
 
   @Test
-  public void testGetResponse() {
-    ResponseCode respCode = ResponseCode.getResponse(ResponseCode.invalidData.getErrorCode());
-    assertEquals(ResponseCode.invalidData, respCode);
-  }
-
-  @Test
   public void testGetResponseNullCheck() {
     ResponseCode respCode = ResponseCode.getResponse(null);
     Assert.assertNull(respCode);

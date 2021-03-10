@@ -498,24 +498,6 @@ public class UserRequestValidator extends BaseRequestValidator {
   }
 
   /**
-   * This method will validate change password requested data.
-   *
-   * @param userRequest Request
-   */
-  public void validateChangePassword(Request userRequest) {
-    if (userRequest.getRequest().get(JsonKey.PASSWORD) == null
-        || (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.PASSWORD)))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.passwordRequired);
-    }
-    if (userRequest.getRequest().get(JsonKey.NEW_PASSWORD) == null) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.newPasswordRequired);
-    }
-    if (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.NEW_PASSWORD))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.newPasswordEmpty);
-    }
-  }
-
-  /**
    * This method will validate verifyUser requested data.
    *
    * @param userRequest Request
