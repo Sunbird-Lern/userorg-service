@@ -22,6 +22,7 @@ public class UserRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
   private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
+  private final String defaultMothDate = "-12-31";
 
   static {
     List<String> subTypeList =
@@ -275,12 +276,12 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   private void validateDob(Request userRequest) {
     if (null != userRequest.getRequest().get(JsonKey.DOB)) {
-      boolean bool =
-          ProjectUtil.isDateValidFormat(
-              ProjectUtil.YEAR_MONTH_DATE_FORMAT,
-              (String) userRequest.getRequest().get(JsonKey.DOB));
+      String year = (String) userRequest.getRequest().get(JsonKey.DOB);
+      boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_FORMAT, year);
       if (!bool) {
         ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
+      } else {
+        userRequest.getRequest().put(JsonKey.DOB, year + defaultMothDate);
       }
     }
   }
