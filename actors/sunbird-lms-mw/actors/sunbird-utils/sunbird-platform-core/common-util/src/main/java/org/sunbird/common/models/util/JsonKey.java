@@ -644,6 +644,7 @@ public final class JsonKey {
   public static final String PROPERTY_NAME = "name";
   public static final String PROPERTY_VALUE = "value";
   public static final String SMS_TEMPLATE_CONFIG = "smsTemplateConfig";
+  public static final String IS_MINOR = "isMinor";
 
   private JsonKey() {}
 }
