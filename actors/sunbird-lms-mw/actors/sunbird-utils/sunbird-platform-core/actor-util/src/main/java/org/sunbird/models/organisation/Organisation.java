@@ -34,15 +34,12 @@ public class Organisation implements Serializable {
   private String homeUrl;
   private String imgUrl;
   private Boolean isApproved;
-  private Boolean isDefault;
   private Boolean isRootOrg;
   private String locationId;
   private Integer noOfMembers;
   private String orgCode;
   private String orgName;
   private String orgType;
-  private String orgTypeId;
-  private String parentOrgId;
   private String preferredLanguage;
   private String provider;
   private String rootOrgId;
@@ -223,22 +220,6 @@ public class Organisation implements Serializable {
     this.orgType = orgType;
   }
 
-  public String getOrgTypeId() {
-    return orgTypeId;
-  }
-
-  public void setOrgTypeId(String orgTypeId) {
-    this.orgTypeId = orgTypeId;
-  }
-
-  public String getParentOrgId() {
-    return parentOrgId;
-  }
-
-  public void setParentOrgId(String parentOrgId) {
-    this.parentOrgId = parentOrgId;
-  }
-
   public String getPreferredLanguage() {
     return preferredLanguage;
   }
@@ -326,15 +307,6 @@ public class Organisation implements Serializable {
 
   public void setApproved(Boolean isApproved) {
     this.isApproved = isApproved;
-  }
-
-  @JsonProperty(value = "isDefault")
-  public Boolean isDefault() {
-    return isDefault;
-  }
-
-  public void setDefault(Boolean isDefault) {
-    this.isDefault = isDefault;
   }
 
   @JsonProperty(value = "isRootOrg")

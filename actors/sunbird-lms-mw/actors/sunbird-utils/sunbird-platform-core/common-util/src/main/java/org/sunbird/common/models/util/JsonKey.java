@@ -203,7 +203,6 @@ public final class JsonKey {
   public static final String ORG_IMAGE_URL = "orgImageUrl";
   public static final String ORG_JOIN_DATE = "orgJoinDate";
   public static final String ORG_LEFT_DATE = "orgLeftDate";
-  public static final String ORG_MAP_DB = "org_mapping";
   public static final String ORG_NAME = "orgName";
   public static final String ORG_TYPE = "orgType";
   public static final String ORG_TYPE_DB = "org_type";

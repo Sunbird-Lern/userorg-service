@@ -16,7 +16,10 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateCreateOrgRequest(Request orgRequest) {
-
+    validateParam(
+        (String) orgRequest.getRequest().get(JsonKey.ORG_TYPE),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ORG_TYPE);
     validateParam(
         (String) orgRequest.getRequest().get(JsonKey.ORG_NAME),
         ResponseCode.mandatoryParamsMissing,
