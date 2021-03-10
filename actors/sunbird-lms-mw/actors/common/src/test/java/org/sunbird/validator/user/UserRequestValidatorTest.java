@@ -751,7 +751,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "20-10-15");
+    requestObj.put(JsonKey.DOB, "20");
     request.setRequest(requestObj);
     try {
       userRequestValidator.createUserBasicValidation(request);
@@ -767,7 +767,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "2018-10-15");
+    requestObj.put(JsonKey.DOB, "2018");
     request.setRequest(requestObj);
     try {
       userRequestValidator.createUserBasicValidation(request);
@@ -783,7 +783,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "2018-10-15");
+    requestObj.put(JsonKey.DOB, "2018");
     requestObj.put(JsonKey.EMAIL, "asd@as");
     request.setRequest(requestObj);
     try {

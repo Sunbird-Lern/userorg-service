@@ -281,7 +281,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (!bool) {
         ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
       } else {
-        userRequest.getRequest().put(JsonKey.DOB, year + defaultMothDate);
+        userRequest
+            .getRequest()
+            .put(JsonKey.DOB, year + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE));
       }
     }
   }
