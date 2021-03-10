@@ -74,10 +74,11 @@ public class UserProfileReadService {
     }
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
-    result.put(
-        JsonKey.ROOT_ORG,
+    Map<String, Object> rootOrg =
         orgDao.getOrgById(
-            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext()));
+            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
+    rootOrg.put(JsonKey.ROOT_ORG_ID, rootOrg.get(JsonKey.ID));
+    result.put(JsonKey.ROOT_ORG, rootOrg);
     result.put(
         JsonKey.ORGANISATIONS,
         fetchUserOrgList((String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext()));
