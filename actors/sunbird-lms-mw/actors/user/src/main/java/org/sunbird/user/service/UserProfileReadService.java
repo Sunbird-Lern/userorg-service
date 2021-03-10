@@ -121,23 +121,16 @@ public class UserProfileReadService {
     }
     addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
+    result.put(JsonKey.IDENTIFIER, userId);
     Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
-//    Map<String, Object> userLocationDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_LOCATION);
 
     if (MapUtils.isNotEmpty(userTypeDetails)) {
       result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.USER_TYPE));
       result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.USER_SUB_TYPE));
-    }else
-    {
+    }else {
       result.put(JsonKey.USER_TYPE, null);
       result.put(JsonKey.USER_SUB_TYPE, null);
     }
-//    if (MapUtils.isEmpty(userLocationDetails))
-//    {
-//      result.put(JsonKey.USER_LOCATIONS, userLocationDetails.get(JsonKey.STATE));
-//      result.put(JsonKey.BLOCK, userLocationDetails.get(JsonKey.BLOCK));
-//
-//    }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
@@ -430,14 +423,12 @@ public class UserProfileReadService {
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
         List<Map<String, Object>> userLocations =
-            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context);
+            getUserLocations((List<String>) result.get(JsonKey.PROFILE_LOCATION), context);
         if (CollectionUtils.isNotEmpty(userLocations)) {
-          result.put(
-              JsonKey.PROFILE_LOCATION,
-              getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
-
+          result.put(JsonKey.USER_LOCATIONS,userLocations);
           addSchoolLocation(result, context);
           result.remove(JsonKey.LOCATION_IDS);
+          result.remove(JsonKey.PROFILE_LOCATION);
         }
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
