@@ -1060,13 +1060,10 @@ public class OrganisationManagementActor extends BaseActor {
     String provider = (String) req.get(JsonKey.PROVIDER);
     if (StringUtils.isBlank(orgId)
         && (StringUtils.isBlank(provider) || StringUtils.isBlank(externalId))) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.sourceAndExternalIdValidationError.getErrorCode(),
-              ResponseCode.sourceAndExternalIdValidationError.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
+      throw new ProjectCommonException(
+          ResponseCode.sourceAndExternalIdValidationError.getErrorCode(),
+          ResponseCode.sourceAndExternalIdValidationError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     // fetch orgid from database on basis of source and external id and put orgid
     // into request .
@@ -1087,13 +1084,10 @@ public class OrganisationManagementActor extends BaseActor {
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
     List<Map<String, Object>> list = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
     if (CollectionUtils.isEmpty(list)) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidOrgData.getErrorCode(),
-              ResponseCode.invalidOrgData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
+      throw new ProjectCommonException(
+          ResponseCode.invalidOrgData.getErrorCode(),
+          ResponseCode.invalidOrgData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     req.put(JsonKey.ORGANISATION_ID, list.get(0).get(JsonKey.ID));
     req.put(JsonKey.HASHTAGID, list.get(0).get(JsonKey.HASHTAGID));
@@ -1116,13 +1110,10 @@ public class OrganisationManagementActor extends BaseActor {
     if (StringUtils.isBlank(userId)
         && StringUtils.isBlank(userExternalId)
         && StringUtils.isBlank(userName)) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.usrValidationError.getErrorCode(),
-              ResponseCode.usrValidationError.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      sender().tell(exception, self());
-      return false;
+      throw new ProjectCommonException(
+          ResponseCode.usrValidationError.getErrorCode(),
+          ResponseCode.usrValidationError.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
     Map<String, Object> requestDbMap = new HashMap<>();
@@ -1137,24 +1128,18 @@ public class OrganisationManagementActor extends BaseActor {
               context);
       List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (list.isEmpty()) {
-        ProjectCommonException exception =
-            new ProjectCommonException(
-                ResponseCode.invalidUsrData.getErrorCode(),
-                ResponseCode.invalidUsrData.getErrorMessage(),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-        sender().tell(exception, self());
-        return false;
+        throw new ProjectCommonException(
+            ResponseCode.invalidUsrData.getErrorCode(),
+            ResponseCode.invalidUsrData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else {
       userId = getUserIdByUserLookUp(JsonKey.USERNAME.toLowerCase(), userName, context);
       if (StringUtils.isBlank(userId)) {
-        ProjectCommonException exception =
-            new ProjectCommonException(
-                ResponseCode.invalidUsrData.getErrorCode(),
-                ResponseCode.invalidUsrData.getErrorMessage(),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-        sender().tell(exception, self());
-        return false;
+        throw new ProjectCommonException(
+            ResponseCode.invalidUsrData.getErrorCode(),
+            ResponseCode.invalidUsrData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       req.put(JsonKey.USER_ID, userId);
     }
@@ -1256,11 +1241,7 @@ public class OrganisationManagementActor extends BaseActor {
         if (orgId == null) {
           return false;
         }
-        if (orgIdFromDb.equalsIgnoreCase(orgId)) {
-          return true;
-        } else {
-          return false;
-        }
+        return orgIdFromDb.equalsIgnoreCase(orgId);
       }
     }
     return false;
@@ -1286,11 +1267,7 @@ public class OrganisationManagementActor extends BaseActor {
         }
         Map<String, Object> data = list.get(0);
         String id = (String) data.get(JsonKey.ID);
-        if (id.equalsIgnoreCase(orgId)) {
-          return true;
-        } else {
-          return false;
-        }
+        return id.equalsIgnoreCase(orgId);
       }
     }
     return true;
