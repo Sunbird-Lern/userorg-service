@@ -300,81 +300,6 @@ public class UserRequestValidatorTest {
   }
 
   @Test
-  public void testValidateChangePasswordSuccess() {
-    Request request = new Request();
-    boolean response = false;
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.NEW_PASSWORD, "password1");
-    requestObj.put(JsonKey.PASSWORD, "password");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateChangePassword(request);
-      response = true;
-    } catch (ProjectCommonException e) {
-      Assert.assertNull(e);
-    }
-    assertEquals(true, response);
-  }
-
-  @Test
-  public void testValidateChangePasswordFailureWithEmptyNewPassword() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.NEW_PASSWORD, "");
-    requestObj.put(JsonKey.PASSWORD, "password");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateChangePassword(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.newPasswordEmpty.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateChangePasswordFailureWithoutNewPassword() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PASSWORD, "password");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateChangePassword(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.newPasswordRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateChangePasswordFailureWithSameOldPassword() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.NEW_PASSWORD, "password");
-    requestObj.put(JsonKey.PASSWORD, "password");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateChangePassword(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.samePasswordError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateChangePasswordFailureWithPasswordMissing() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.NEW_PASSWORD, "password");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateChangePassword(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.passwordRequired.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
   public void testCreateUserSuccess() {
     boolean response = false;
     Request request = initailizeRequest();
@@ -402,13 +327,6 @@ public class UserRequestValidatorTest {
     map1.put(JsonKey.NAME, "CUSAT");
     educationList.add(map1);
     requestObj.put(JsonKey.EDUCATION, educationList);
-
-    List<Map<String, Object>> jobProfileList = new ArrayList<>();
-    map1 = new HashMap<>();
-    map1.put(JsonKey.JOB_NAME, "SE");
-    map1.put(JsonKey.ORGANISATION_NAME, "Tarento");
-    jobProfileList.add(map1);
-    requestObj.put(JsonKey.JOB_PROFILE, jobProfileList);
     request.setRequest(requestObj);
     try {
       userRequestValidator.validateCreateUserRequest(request);
@@ -446,13 +364,6 @@ public class UserRequestValidatorTest {
     map1.put(JsonKey.NAME, "CUSAT");
     educationList.add(map1);
     requestObj.put(JsonKey.EDUCATION, educationList);
-
-    List<Map<String, Object>> jobProfileList = new ArrayList<>();
-    map1 = new HashMap<>();
-    map1.put(JsonKey.JOB_NAME, "SE");
-    map1.put(JsonKey.ORGANISATION_NAME, "Tarento");
-    jobProfileList.add(map1);
-    requestObj.put(JsonKey.JOB_PROFILE, jobProfileList);
     request.setRequest(requestObj);
     try {
       userRequestValidator.validateCreateUserRequest(request);
@@ -489,12 +400,6 @@ public class UserRequestValidatorTest {
     educationList.add(map1);
     requestObj.put(JsonKey.EDUCATION, educationList);
 
-    List<Map<String, Object>> jobProfileList = new ArrayList<>();
-    map1 = new HashMap<>();
-    map1.put(JsonKey.JOB_NAME, "SE");
-    map1.put(JsonKey.ORGANISATION_NAME, "Tarento");
-    jobProfileList.add(map1);
-    requestObj.put(JsonKey.JOB_PROFILE, jobProfileList);
     request.setRequest(requestObj);
     try {
       userRequestValidator.validateCreateUserRequest(request);
@@ -635,13 +540,6 @@ public class UserRequestValidatorTest {
     map1.put(JsonKey.NAME, "CUSAT");
     educationList.add(map1);
     requestObj.put(JsonKey.EDUCATION, educationList);
-
-    List<Map<String, Object>> jobProfileList = new ArrayList<>();
-    map1 = new HashMap<>();
-    map1.put(JsonKey.JOB_NAME, "SE");
-    map1.put(JsonKey.ORGANISATION_NAME, "Tarento");
-    jobProfileList.add(map1);
-    requestObj.put(JsonKey.JOB_PROFILE, jobProfileList);
     boolean response = false;
     request.setRequest(requestObj);
     try {
@@ -751,7 +649,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "20-10-15");
+    requestObj.put(JsonKey.DOB, "20");
     request.setRequest(requestObj);
     try {
       userRequestValidator.createUserBasicValidation(request);
@@ -767,7 +665,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "2018-10-15");
+    requestObj.put(JsonKey.DOB, "2018");
     request.setRequest(requestObj);
     try {
       userRequestValidator.createUserBasicValidation(request);
@@ -783,7 +681,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.DOB, "2018-10-15");
+    requestObj.put(JsonKey.DOB, "2018");
     requestObj.put(JsonKey.EMAIL, "asd@as");
     request.setRequest(requestObj);
     try {
@@ -990,43 +888,6 @@ public class UserRequestValidatorTest {
   }
 
   @Test
-  public void testValidateCreateUserFailureWithEmptyEducationName() {
-    Request request = initailizeRequest();
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.NAME, "");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-
-    request.getRequest().put(JsonKey.EDUCATION, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.educationNameError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyEducationDegree() {
-    Request request = initailizeRequest();
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.NAME, "name");
-    map.put(JsonKey.DEGREE, "");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-
-    request.getRequest().put(JsonKey.EDUCATION, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.educationDegreeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
   public void testValidateCreateUserFailureWithEmptyEducationAddress() {
     Request request = initailizeRequest();
     request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
@@ -1062,110 +923,6 @@ public class UserRequestValidatorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     list.add(map);
     request.getRequest().put(JsonKey.EDUCATION, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.addressError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyJobProfile() {
-    Request request = initailizeRequest();
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
-    request.getRequest().put(JsonKey.JOB_PROFILE, "");
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyJobName() {
-    Request request = initailizeRequest();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.JOB_NAME, "");
-    map.put(JsonKey.ORG_NAME, "degree");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.JOB_PROFILE, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.jobNameError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithInvalidJobProfileJoiningDate() {
-    Request request = initailizeRequest();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.JOB_NAME, "kijklo");
-    map.put(JsonKey.ORG_NAME, "degree");
-    map.put(JsonKey.JOINING_DATE, "20-15-18");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.JOB_PROFILE, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dateFormatError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithInvalidJobProfileEndDate() {
-    Request request = initailizeRequest();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.JOB_NAME, "kijklo");
-    map.put(JsonKey.ORG_NAME, "degree");
-    map.put(JsonKey.END_DATE, "20-15-18");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.JOB_PROFILE, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dateFormatError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyJobProfileOrgName() {
-    Request request = initailizeRequest();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.JOB_NAME, "kijklo");
-    map.put(JsonKey.ORG_NAME, "");
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.JOB_PROFILE, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.organisationNameError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyJobProfileCity() {
-    Request request = initailizeRequest();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.JOB_NAME, "jabName");
-    map.put(JsonKey.ORG_NAME, "orgName");
-    Map<String, Object> address = new HashMap<>();
-    address.put(JsonKey.ADDRESS_LINE1, "line1");
-    address.put(JsonKey.CITY, "");
-    map.put(JsonKey.ADDRESS, address);
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.JOB_PROFILE, list);
     try {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {

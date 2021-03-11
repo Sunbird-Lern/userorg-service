@@ -2,6 +2,7 @@ package org.sunbird.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -128,6 +129,7 @@ public class UserProfileReadService {
               (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
     }
     addFlagValue(result);
+    appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
     Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
@@ -142,6 +144,18 @@ public class UserProfileReadService {
     response.put(JsonKey.RESPONSE, result);
     return response;
   }
+
+  private void appendMinorFlag(Map<String, Object> result) {
+    String dob = (String) result.get(JsonKey.DOB);
+    if (StringUtils.isNotEmpty(dob)) {
+      int year = Integer.parseInt(dob.split("-")[0]);
+      LocalDate currentdate = LocalDate.now();
+      int currentYear = currentdate.getYear();
+      boolean isMinor = (currentYear - year < 18) ? true : false;
+      result.put(JsonKey.IS_MINOR, isMinor);
+    }
+  }
+
   private void addFlagValue(Map<String, Object> userDetails) {
     int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
     Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);

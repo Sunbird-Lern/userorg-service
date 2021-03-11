@@ -133,18 +133,6 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testUpdateOrgTypeWithExistingType() {
-    Request reqObj = new Request();
-    Map<String, Object> requestData = new HashMap<>();
-    requestData.put(JsonKey.ID, "as23-12asd234-123");
-    requestData.put(JsonKey.NAME, "orgType");
-    reqObj.setRequest(requestData);
-    reqObj.setOperation(ActorOperations.UPDATE_ORG_TYPE.getValue());
-    boolean result = testScenario(reqObj, ResponseCode.orgTypeAlreadyExist);
-    assertTrue(result);
-  }
-
-  @Test
   public void testAddUserToOrgSuccessWithUserIdAndOrgId() {
     boolean result =
         testScenario(

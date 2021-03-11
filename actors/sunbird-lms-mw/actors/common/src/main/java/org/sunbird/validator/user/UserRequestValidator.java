@@ -22,6 +22,7 @@ public class UserRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
   private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
+  private final String defaultMothDate = "-12-31";
 
   static {
     List<String> subTypeList =
@@ -263,21 +264,27 @@ public class UserRequestValidator extends BaseRequestValidator {
       userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
     }
 
-    if (null != userRequest.getRequest().get(JsonKey.DOB)) {
-      boolean bool =
-          ProjectUtil.isDateValidFormat(
-              ProjectUtil.YEAR_MONTH_DATE_FORMAT,
-              (String) userRequest.getRequest().get(JsonKey.DOB));
-      if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
-      }
-    }
+    validateDob(userRequest);
 
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
     } else {
       emailVerifiedValidation(userRequest);
+    }
+  }
+
+  private void validateDob(Request userRequest) {
+    if (null != userRequest.getRequest().get(JsonKey.DOB)) {
+      String year = (String) userRequest.getRequest().get(JsonKey.DOB);
+      boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_FORMAT, year);
+      if (!bool) {
+        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
+      } else {
+        userRequest
+            .getRequest()
+            .put(JsonKey.DOB, year + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE));
+      }
     }
   }
 
@@ -322,6 +329,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
     validateUserOrgField(userRequest);
+    validateDob(userRequest);
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
@@ -486,24 +494,6 @@ public class UserRequestValidator extends BaseRequestValidator {
                 ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LANGUAGE, JsonKey.LIST),
             ERROR_CODE);
       }
-    }
-  }
-
-  /**
-   * This method will validate change password requested data.
-   *
-   * @param userRequest Request
-   */
-  public void validateChangePassword(Request userRequest) {
-    if (userRequest.getRequest().get(JsonKey.PASSWORD) == null
-        || (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.PASSWORD)))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.passwordRequired);
-    }
-    if (userRequest.getRequest().get(JsonKey.NEW_PASSWORD) == null) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.newPasswordRequired);
-    }
-    if (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.NEW_PASSWORD))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.newPasswordEmpty);
     }
   }
 
