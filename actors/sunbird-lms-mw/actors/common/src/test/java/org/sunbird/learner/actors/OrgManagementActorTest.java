@@ -42,6 +42,8 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
+import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.validator.location.LocationRequestValidator;
@@ -60,7 +62,9 @@ import scala.concurrent.Promise;
   RequestRouter.class,
   BaseMWService.class,
   SunbirdMWService.class,
-  ActorSelection.class
+  ActorSelection.class,
+  OrgExternalService.class,
+  OrgServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -447,9 +451,75 @@ public class OrgManagementActorTest {
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
+    Map<String, Object> req = getRequestDataForOrgUpdate();
+    boolean result = testScenario(getRequest(req, ActorOperations.UPDATE_ORG.getValue()), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateOrgFailureWithInvalidReqData() {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getValidateChannelEsResponse(true));
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
+    Map<String, Object> req = getRequestDataForOrgUpdate();
+    req.remove(JsonKey.ORGANISATION_ID);
     boolean result =
         testScenario(
-            getRequest(getRequestDataForOrgUpdate(), ActorOperations.UPDATE_ORG.getValue()), null);
+            getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
+            ResponseCode.invalidRequestData);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateOrgFailureWithInvalidExternalAndProviderId() throws Exception {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getValidateChannelEsResponse(true));
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
+    Map<String, Object> req = getRequestDataForOrgUpdate();
+    req.remove(JsonKey.ORGANISATION_ID);
+    req.put(JsonKey.EXTERNAL_ID, "extId");
+    req.put(JsonKey.PROVIDER, "provider");
+    OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
+    whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
+    when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn("");
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
+            ResponseCode.invalidRequestData);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateOrgSuccess2() {
+    Response res = getRecordsByProperty(true);
+    res.getResult().put(JsonKey.EXTERNAL_ID, "extId");
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(res);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getValidateChannelEsResponse(true));
+
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
+    Map<String, Object> req = getRequestDataForOrgUpdate();
+    req.remove(JsonKey.CHANNEL);
+    req.put(JsonKey.EXTERNAL_ID, "extId");
+    boolean result = testScenario(getRequest(req, ActorOperations.UPDATE_ORG.getValue()), null);
     assertTrue(result);
   }
 

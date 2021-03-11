@@ -360,10 +360,7 @@ public class OrganisationManagementActor extends BaseActor {
       actorMessage.toLower();
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Map<String, Object> request = actorMessage.getRequest();
-      if (!(validateOrgRequest(request, actorMessage.getRequestContext()))) {
-        logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
-        return;
-      }
+      validateOrgRequest(request, actorMessage.getRequestContext());
       Map<String, Object> orgDao;
       Map<String, Object> updateOrgDao = new HashMap<>();
       String updatedBy = (String) request.get(JsonKey.REQUESTED_BY);
@@ -442,25 +439,24 @@ public class OrganisationManagementActor extends BaseActor {
     try {
       actorMessage.toLower();
       Map<String, Object> request = actorMessage.getRequest();
+      validateOrgRequest(request, actorMessage.getRequestContext());
       if (request.containsKey(JsonKey.EMAIL)
           && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
         ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
       }
       validateOrgType((String) request.get(JsonKey.ORG_TYPE), JsonKey.UPDATE);
-      if (!(validateOrgRequest(request, actorMessage.getRequestContext()))) {
-        logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID for Org update");
-        return;
-      }
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
-      OrgService orgService = new OrgServiceImpl();
+      OrgService orgService = OrgServiceImpl.getInstance();
       Map<String, Object> dbOrgDetails =
           orgService.getOrgById(orgId, actorMessage.getRequestContext());
       if (MapUtils.isEmpty(dbOrgDetails)) {
         logger.info(
             actorMessage.getRequestContext(),
             "OrganisationManagementActor: updateOrgData invalid orgId");
-        sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
-        return;
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData.getErrorCode(),
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
 
       String existingExternalId = (String) dbOrgDetails.get(JsonKey.EXTERNAL_ID);
@@ -978,10 +974,7 @@ public class OrganisationManagementActor extends BaseActor {
   private void getOrgDetails(Request actorMessage) {
     actorMessage.toLower();
     Map<String, Object> request = actorMessage.getRequest();
-    if (!(validateOrgRequest(request, actorMessage.getRequestContext()))) {
-      logger.info(actorMessage.getRequestContext(), "REQUESTED DATA IS NOT VALID");
-      return;
-    }
+    validateOrgRequest(request, actorMessage.getRequestContext());
     String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(
@@ -1026,19 +1019,16 @@ public class OrganisationManagementActor extends BaseActor {
    * @return boolean
    */
   @SuppressWarnings("unchecked")
-  private boolean validateOrgRequest(Map<String, Object> req, RequestContext context) {
+  private void validateOrgRequest(Map<String, Object> req, RequestContext context) {
     String orgId = (String) req.get(JsonKey.ORGANISATION_ID);
     String provider = (String) req.get(JsonKey.PROVIDER);
     String externalId = (String) req.get(JsonKey.EXTERNAL_ID);
     if (StringUtils.isBlank(orgId)) {
       if (StringUtils.isBlank(provider) || StringUtils.isBlank(externalId)) {
-        ProjectCommonException exception =
-            new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
-                ResponseCode.invalidRequestData.getErrorMessage(),
-                ResponseCode.CLIENT_ERROR.getResponseCode());
-        sender().tell(exception, self());
-        return false;
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData.getErrorCode(),
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       } else {
         // fetch orgid from database on basis of source and external id and put orgid
         // into request .
@@ -1047,18 +1037,14 @@ public class OrganisationManagementActor extends BaseActor {
             orgExtService.getOrgIdFromOrgExternalIdAndProvider(
                 (String) req.get(JsonKey.EXTERNAL_ID), (String) req.get(JsonKey.PROVIDER), context);
         if (StringUtils.isEmpty(organisationId)) {
-          ProjectCommonException exception =
-              new ProjectCommonException(
-                  ResponseCode.invalidRequestData.getErrorCode(),
-                  ResponseCode.invalidRequestData.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode());
-          sender().tell(exception, self());
-          return false;
+          throw new ProjectCommonException(
+              ResponseCode.invalidRequestData.getErrorCode(),
+              ResponseCode.invalidRequestData.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
         }
         req.put(JsonKey.ORGANISATION_ID, organisationId);
       }
     }
-    return true;
   }
 
   /**
