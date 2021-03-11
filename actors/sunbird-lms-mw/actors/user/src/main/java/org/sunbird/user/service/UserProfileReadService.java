@@ -110,12 +110,10 @@ public class UserProfileReadService {
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
-    String encEmail = new String();
-    String encPhone = new String();
     boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     if(isPrivate) {
-      result.put(encEmail, result.get(JsonKey.PHONE));
-      result.put(encPhone, result.get(JsonKey.EMAIL));
+      result.put((JsonKey.ENC_PHONE), result.get(JsonKey.PHONE));
+      result.put((JsonKey.ENC_EMAIL), result.get(JsonKey.EMAIL));
     }
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
@@ -128,8 +126,6 @@ public class UserProfileReadService {
     addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    result.put(JsonKey.ENC_EMAIL, encEmail);
-    result.put(JsonKey.ENC_PHONE, encPhone);
     Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
     if (MapUtils.isNotEmpty(userTypeDetails)) {
       result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
