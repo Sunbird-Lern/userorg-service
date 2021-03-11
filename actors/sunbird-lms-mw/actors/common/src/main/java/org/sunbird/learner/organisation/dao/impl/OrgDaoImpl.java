@@ -41,7 +41,7 @@ public class OrgDaoImpl implements OrgDao {
   }
 
   @Override
-  public Map<String, Object> esGetOrgByExternalId(
+  public Map<String, Object> getOrgByExternalId(
       String externalId, String provider, RequestContext context) {
     OrgExternalService orgExternalService = new OrgExternalService();
     String orgId =

@@ -26,6 +26,6 @@ public class OrgServiceImpl implements OrgService {
   @Override
   public Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
-    return orgDao.esGetOrgByExternalId(externalId, provider, context);
+    return orgDao.getOrgByExternalId(externalId, provider, context);
   }
 }
