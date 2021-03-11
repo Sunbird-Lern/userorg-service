@@ -99,7 +99,6 @@ public class UserProfileReadService {
     }
 
     getManagedToken(actorMessage, userId, result, managedBy);
-
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
         && (userId.equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
@@ -110,6 +109,13 @@ public class UserProfileReadService {
     }
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
+    }
+    String encEmail = new String();
+    String encPhone = new String();
+    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
+    if(isPrivate) {
+      result.put(encEmail, result.get(JsonKey.PHONE));
+      result.put(encPhone, result.get(JsonKey.EMAIL));
     }
     UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
@@ -122,11 +128,12 @@ public class UserProfileReadService {
     addFlagValue(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    result.put(JsonKey.ENC_EMAIL, encEmail);
+    result.put(JsonKey.ENC_PHONE, encPhone);
     Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
-
     if (MapUtils.isNotEmpty(userTypeDetails)) {
-      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.USER_TYPE));
-      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.USER_SUB_TYPE));
+      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
+      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
     }else {
       result.put(JsonKey.USER_TYPE, null);
       result.put(JsonKey.USER_SUB_TYPE, null);
@@ -135,8 +142,6 @@ public class UserProfileReadService {
     response.put(JsonKey.RESPONSE, result);
     return response;
   }
-
-
   private void addFlagValue(Map<String, Object> userDetails) {
     int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
     Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
@@ -230,8 +235,8 @@ public class UserProfileReadService {
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
-    responseMap.remove(JsonKey.ENC_EMAIL);
-    responseMap.remove(JsonKey.ENC_PHONE);
+//    responseMap.remove(JsonKey.ENC_EMAIL);
+//    responseMap.remove(JsonKey.ENC_PHONE);
     responseMap.remove(JsonKey.ADDRESS);
     return responseMap;
   }

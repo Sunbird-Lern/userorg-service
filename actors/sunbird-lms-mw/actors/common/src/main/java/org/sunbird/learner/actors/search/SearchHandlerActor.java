@@ -85,6 +85,8 @@ public class SearchHandlerActor extends BaseActor {
       if (responseList.size() != 0) {
         result.replace(JsonKey.COUNT, responseList.size());
         result.replace(JsonKey.CONTENT, responseList);
+        String encEmail = new String();
+        String encPhone = new String();
       } else {
         throw new ProjectCommonException(
             ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
@@ -107,8 +109,8 @@ public class SearchHandlerActor extends BaseActor {
     if (MapUtils.isNotEmpty(result)) {
       Map<String, Object> userTypeDetail = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
       if (MapUtils.isNotEmpty(userTypeDetail)) {
-        result.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.USER_TYPE));
-        result.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.USER_SUB_TYPE));
+        result.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
+        result.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
       }else {
         result.put(JsonKey.USER_TYPE, null);
         result.put(JsonKey.USER_SUB_TYPE, null);

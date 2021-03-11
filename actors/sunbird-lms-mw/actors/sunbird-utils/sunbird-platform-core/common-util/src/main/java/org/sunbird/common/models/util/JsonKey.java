@@ -345,6 +345,7 @@ public final class JsonKey {
   public static final String TOPICS = "topics";
   public static final String TOPN = "topn";
   public static final String TYPE = "type";
+  public static final String SUB_TYPE = "subtype";
   public static final String TNC_TYPE = "tncType";
   public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
   public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
