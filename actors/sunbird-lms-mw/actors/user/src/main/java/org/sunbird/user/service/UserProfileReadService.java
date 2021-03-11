@@ -235,8 +235,6 @@ public class UserProfileReadService {
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
-//    responseMap.remove(JsonKey.ENC_EMAIL);
-//    responseMap.remove(JsonKey.ENC_PHONE);
     responseMap.remove(JsonKey.ADDRESS);
     return responseMap;
   }

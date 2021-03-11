@@ -85,8 +85,6 @@ public class SearchHandlerActor extends BaseActor {
       if (responseList.size() != 0) {
         result.replace(JsonKey.COUNT, responseList.size());
         result.replace(JsonKey.CONTENT, responseList);
-        String encEmail = new String();
-        String encPhone = new String();
       } else {
         throw new ProjectCommonException(
             ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
