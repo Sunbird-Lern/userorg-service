@@ -33,7 +33,7 @@ public class ProjectUtil {
   /** format the date in YYYY-MM-DD hh:mm:ss:SSZ */
   private static AtomicInteger atomicInteger = new AtomicInteger();
 
-  public static final String YEAR_FORMAT = "yyyy";
+  public static final String YEAR_MONTH_DATE_FORMAT = "yyyy-MM-dd";
   private static final int randomPasswordLength = 9;
 
   protected static final String FILE_NAME[] = {
