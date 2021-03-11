@@ -22,7 +22,6 @@ public class UserRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
   private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
-  private final String defaultMothDate = "-12-31";
 
   static {
     List<String> subTypeList =
