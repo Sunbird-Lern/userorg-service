@@ -88,7 +88,7 @@ public class OrgManagementActorTest {
   private static ElasticSearchService esService;
 
   @Before
-  public void beforeEachTest() throws Exception {
+  public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(ProjectUtil.class);
@@ -322,6 +322,8 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
 
     Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.ADDRESS, new HashMap<>());
+    req.put(JsonKey.HASHTAGID, "orgId");
     req.put(JsonKey.IS_ROOT_ORG, true);
     boolean result = testScenario(getRequest(req, ActorOperations.CREATE_ORG.getValue()), null);
     assertTrue(result);
@@ -452,6 +454,8 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     Map<String, Object> req = getRequestDataForOrgUpdate();
+    req.put(JsonKey.ADDRESS, new HashMap<>());
+    req.put(JsonKey.HASHTAGID, "orgId");
     boolean result = testScenario(getRequest(req, ActorOperations.UPDATE_ORG.getValue()), null);
     assertTrue(result);
   }
