@@ -28,6 +28,7 @@ public final class JsonKey {
   public static final String ACTOR_ID = "actorId";
   public static final String ACTOR_SERVICE = "Actor service";
   public static final String ACTOR_TYPE = "actorType";
+  public static final String SUB_TYPE = "subType";
   public static final String ADD_TYPE = "addType";
   public static final String ADDED_BY = "addedBy";
   public static final String ADDED_BY_NAME = "addedByName";
