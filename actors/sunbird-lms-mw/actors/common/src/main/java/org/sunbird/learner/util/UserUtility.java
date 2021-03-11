@@ -108,11 +108,9 @@ public final class UserUtility {
   }
 
   public static Map<String, Object> decryptUserDataFrmES(Map<String, Object> userMap) {
-
     DecryptionService service = ServiceFactory.getDecryptionServiceInstance(null);
     // Decrypt user basic info
     for (String key : userKeyToDecrypt) {
-      userMap.remove(JsonKey.ENC_EMAIL);
       if (userMap.containsKey(key)) {
         if (userKeysToMasked.contains(key)) {
           userMap.put(key, maskEmailOrPhone((String) userMap.get(key), key));
