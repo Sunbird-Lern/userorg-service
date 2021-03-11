@@ -216,6 +216,8 @@ public class UserProfileReadActor extends BaseActor {
 
     if (null != result) {
       // remove email and phone no from response
+      result.remove(JsonKey.ENC_EMAIL);
+      result.remove(JsonKey.ENC_PHONE);
       result.remove(JsonKey.MISSING_FIELDS);
       result.remove(JsonKey.COMPLETENESS);
       profileReadService.updateTnc(result);
@@ -497,6 +499,8 @@ public class UserProfileReadActor extends BaseActor {
                   public Map<String, Object> apply(Tuple2<Map<String, Object>, Object> parameter) {
                     Map<String, Object> userMap = parameter._1;
                     userMap.put(JsonKey.ROOT_ORG, (Map<String, Object>) parameter._2);
+                    userMap.remove(JsonKey.ENC_EMAIL);
+                    userMap.remove(JsonKey.ENC_PHONE);
                     String requestedById =
                         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
                     if (!(((String) userMap.get(JsonKey.USER_ID))

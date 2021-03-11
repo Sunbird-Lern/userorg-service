@@ -110,12 +110,16 @@ public class UserProfileReadService {
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
+    String encEmail = (String) result.get(JsonKey.EMAIL);
+    String encPhone= (String) result.get(JsonKey.PHONE);
+
+    UserUtility.decryptUserDataFrmES(result);
+    //Its used for Private user read api to display encoded email and encoded phone in api response
     boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     if(isPrivate) {
-      result.put((JsonKey.ENC_PHONE), result.get(JsonKey.PHONE));
-      result.put((JsonKey.ENC_EMAIL), result.get(JsonKey.EMAIL));
+      result.put((JsonKey.ENC_PHONE), encPhone);
+      result.put((JsonKey.ENC_EMAIL), encEmail);
     }
-    UserUtility.decryptUserDataFrmES(result);
     updateTnc(result);
     if (null != result.get(JsonKey.ALL_TNC_ACCEPTED)) {
       result.put(
