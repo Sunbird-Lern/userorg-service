@@ -569,14 +569,16 @@ public class OrganisationManagementActor extends BaseActor {
       if (StringUtils.isNotBlank((String) updateOrgDao.get(JsonKey.CHANNEL))) {
         String reqChannel = (String) updateOrgDao.get(JsonKey.CHANNEL);
         String dbChannel = (String) dbOrgDetails.get(JsonKey.CHANNEL);
-        if (!dbChannel.equalsIgnoreCase(reqChannel)) {
+        if (StringUtils.isNotBlank(dbChannel)
+            && StringUtils.isNotBlank(reqChannel)
+            && !dbChannel.equalsIgnoreCase(reqChannel)) {
           String slug =
               Slug.makeSlug((String) updateOrgDao.getOrDefault(JsonKey.CHANNEL, ""), true);
           if (dbOrgDetails.containsKey(JsonKey.IS_ROOT_ORG)
               && (boolean) dbOrgDetails.get(JsonKey.IS_ROOT_ORG)) {
             String rootOrgId = getRootOrgIdFromSlug(slug, actorMessage.getRequestContext());
             if (StringUtils.isBlank(rootOrgId)
-                || (!StringUtils.isBlank(rootOrgId)
+                || (StringUtils.isNotBlank(rootOrgId)
                     && rootOrgId.equalsIgnoreCase((String) dbOrgDetails.get(JsonKey.ID)))) {
               updateOrgDao.put(JsonKey.SLUG, slug);
             } else {
@@ -1390,6 +1392,9 @@ public class OrganisationManagementActor extends BaseActor {
   private void validateOrgLocation(Map<String, Object> request, RequestContext context) {
     List<Map<String, String>> orgLocationList =
         (List<Map<String, String>>) request.get(JsonKey.ORG_LOCATION);
+    if (CollectionUtils.isEmpty(orgLocationList)) {
+      return;
+    }
     List<String> locList = new ArrayList<>();
     orgLocationList
         .stream()

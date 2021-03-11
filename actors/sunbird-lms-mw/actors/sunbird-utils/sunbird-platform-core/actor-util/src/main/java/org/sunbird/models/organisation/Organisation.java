@@ -41,6 +41,7 @@ public class Organisation implements Serializable {
   private String orgType;
   private String preferredLanguage;
   private String provider;
+  private String rootOrgId;
   private String slug;
   private Integer status;
   private String theme;
@@ -325,5 +326,13 @@ public class Organisation implements Serializable {
 
   public void setOrgLocation(String orgLocation) {
     this.orgLocation = orgLocation;
+  }
+
+  public String getRootOrgId() {
+    return rootOrgId;
+  }
+
+  public void setRootOrgId(String rootOrgId) {
+    this.rootOrgId = rootOrgId;
   }
 }

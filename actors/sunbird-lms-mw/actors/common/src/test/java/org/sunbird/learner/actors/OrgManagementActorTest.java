@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -59,7 +58,6 @@ import scala.concurrent.Promise;
   "com.sun.org.apache.xerces.*",
   "org.xml.*"
 })
-@Ignore
 public class OrgManagementActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
@@ -77,7 +75,7 @@ public class OrgManagementActorTest {
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(EsClientFactory.class);
 
-    CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -91,10 +89,10 @@ public class OrgManagementActorTest {
         .thenReturn(getAllRecords());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
+        .thenReturn(getUpsertRecords());
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
+        .thenReturn(getUpsertRecords());
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false))
@@ -219,6 +217,27 @@ public class OrgManagementActorTest {
   }
 
   @Test
+  public void testCreateOrgFailureWithMandatoryParamOrgTypeMissing() {
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.remove(JsonKey.ORG_TYPE);
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()),
+            ResponseCode.mandatoryParamsMissing);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateOrgFailureWithInvalidOrgTypeValue() {
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.ORG_TYPE, "invalidValue");
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.invalidValue);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateOrgSuccessWithExternalIdAndProvider() {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -281,6 +300,7 @@ public class OrgManagementActorTest {
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+    when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     boolean result =
         testScenario(
             getRequest(getRequestDataForOrgUpdate(), ActorOperations.UPDATE_ORG.getValue()), null);
@@ -293,10 +313,15 @@ public class OrgManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
     Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getValidateChannelEsResponse(true));
+    Map<String, Object> esMap = getValidateChannelEsResponse(true);
+    List<Map<String, Object>> list = (List<Map<String, Object>>) esMap.get(JsonKey.CONTENT);
+    Map<String, Object> data = list.get(0);
+    data.put(JsonKey.ID, "id");
+    promise.success(esMap);
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+    when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     Map<String, Object> map = getRequestDataForOrgUpdate();
     map.put(JsonKey.IS_ROOT_ORG, true);
     boolean result =
@@ -327,6 +352,7 @@ public class OrgManagementActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.CHANNEL, "channel");
     map.put(JsonKey.ORGANISATION_ID, "orgId");
+    map.put(JsonKey.ORG_TYPE, "board");
     return map;
   }
 
@@ -334,6 +360,7 @@ public class OrgManagementActorTest {
     map.put(JsonKey.CHANNEL, "channel");
     map.put(JsonKey.IS_ROOT_ORG, false);
     map.put(JsonKey.EXTERNAL_ID, "externalId");
+    map.put(JsonKey.ORG_TYPE, "board");
 
     return map;
   }
@@ -365,9 +392,17 @@ public class OrgManagementActorTest {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.ID, "userId");
       map.put(JsonKey.IS_DELETED, true);
+      map.put(JsonKey.CHANNEL, "channel1");
+      map.put(JsonKey.IS_ROOT_ORG, true);
       list.add(map);
     }
     res.put(JsonKey.RESPONSE, list);
+    return res;
+  }
+
+  private Response getUpsertRecords() {
+    Response res = new Response();
+    res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     return res;
   }
 
@@ -389,6 +424,7 @@ public class OrgManagementActorTest {
       Map<String, Object> content = new HashMap<>();
       content.put(JsonKey.ORGANISATION_ID, "orgId");
       content.put(JsonKey.HASHTAGID, "hashtagId");
+      content.put(JsonKey.ID, "id");
       contentList.add(content);
     }
     response.put(JsonKey.CONTENT, contentList);
@@ -401,7 +437,7 @@ public class OrgManagementActorTest {
     if (isValidChannel) {
       Map<String, Object> content = new HashMap<>();
       content.put(JsonKey.STATUS, 1);
-      content.put(JsonKey.ID, "id");
+      content.put(JsonKey.ID, "orgId");
       contentList.add(content);
     }
     response.put(JsonKey.CONTENT, contentList);
