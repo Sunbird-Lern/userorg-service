@@ -485,15 +485,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  private void trimExternalId(Request userRequest) {
-    String extIdProvider = (String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID_PROVIDER);
-    String extId = (String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID);
-    String extIdType = (String) userRequest.getRequest().get(JsonKey.EXTERNAL_ID_TYPE);
-    userRequest.getRequest().put(JsonKey.EXTERNAL_ID_PROVIDER, extIdProvider.trim());
-    userRequest.getRequest().put(JsonKey.EXTERNAL_ID, extId.trim());
-    userRequest.getRequest().put(JsonKey.EXTERNAL_ID_TYPE, extIdType.trim());
-  }
-
   private void validateLangaugeFields(Request userRequest) {
     if (userRequest.getRequest().containsKey(JsonKey.LANGUAGE)
         && null != userRequest.getRequest().get(JsonKey.LANGUAGE)) {
