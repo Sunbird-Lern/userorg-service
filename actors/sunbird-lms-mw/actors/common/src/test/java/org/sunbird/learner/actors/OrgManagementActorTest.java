@@ -107,6 +107,7 @@ public class OrgManagementActorTest {
 
     when(Util.validateRoles(Mockito.anyList())).thenReturn("SUCCESS");
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
+    when(Util.registerChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     when(ProjectUtil.getUniqueIdFromTimestamp(Mockito.anyInt())).thenReturn("time");
     when(ProjectUtil.getFormattedDate()).thenReturn("date");
     when(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES)).thenReturn("dummy");
@@ -228,12 +229,34 @@ public class OrgManagementActorTest {
   }
 
   @Test
+  public void testCreateOrgFailureWithInvalidEmailFormat() {
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.EMAIL, "invalid_email_format.com");
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.emailFormatError);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateOrgFailureWithInvalidOrgTypeValue() {
     Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
     req.put(JsonKey.ORG_TYPE, "invalidValue");
     boolean result =
         testScenario(
             getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.invalidValue);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateOrgFailureWithDuplicateChannel() {
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.ORG_TYPE, "board");
+    req.put(JsonKey.IS_ROOT_ORG, true);
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()),
+            ResponseCode.channelUniquenessInvalid);
     assertTrue(result);
   }
 

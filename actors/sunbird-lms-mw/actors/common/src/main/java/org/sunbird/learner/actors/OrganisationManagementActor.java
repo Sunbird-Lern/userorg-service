@@ -1226,10 +1226,8 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> esResult =
           elasticSearchComplexSearch(
               filters, EsIndex.sunbird.getIndexName(), EsType.organisation.getTypeName(), context);
-      if (isNotNull(esResult)
-          && esResult.containsKey(JsonKey.CONTENT)
-          && isNotNull(esResult.get(JsonKey.CONTENT))) {
-        return (((List) esResult.get(JsonKey.CONTENT)).isEmpty());
+      if (MapUtils.isNotEmpty(esResult)) {
+        return (CollectionUtils.isEmpty((List) esResult.get(JsonKey.CONTENT)));
       }
     }
     return false;
