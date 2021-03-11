@@ -184,6 +184,8 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     innerMap.put(JsonKey.IS_ROOT_ORG, isRootOrg);
     innerMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    innerMap.put(JsonKey.IS_TENANT, false);
+    innerMap.put(JsonKey.ORG_TYPE, "board");
 
     if (status != null) innerMap.put(JsonKey.STATUS, new Integer(status));
 
