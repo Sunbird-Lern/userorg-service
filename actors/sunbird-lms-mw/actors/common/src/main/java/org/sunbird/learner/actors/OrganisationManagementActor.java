@@ -137,8 +137,7 @@ public class OrganisationManagementActor extends BaseActor {
           if (bool) {
             request.put(JsonKey.SLUG, slug);
           } else {
-            sender().tell(ProjectUtil.createClientException(ResponseCode.slugIsNotUnique), self());
-            return;
+            ProjectCommonException.throwClientErrorException(ResponseCode.slugIsNotUnique);
           }
         } else {
           request.put(JsonKey.SLUG, slug);
