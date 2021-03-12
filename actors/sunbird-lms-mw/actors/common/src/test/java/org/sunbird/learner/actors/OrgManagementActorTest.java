@@ -323,7 +323,9 @@ public class OrgManagementActorTest {
     req.put(JsonKey.ADDRESS, new HashMap<>());
     req.put(JsonKey.HASHTAGID, "orgId");
     req.put(JsonKey.IS_ROOT_ORG, true);
-    boolean result = testScenario(getRequest(req, ActorOperations.CREATE_ORG.getValue()), null);
+    Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
+    reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
+    boolean result = testScenario(reqst, null);
     assertTrue(result);
   }
 
@@ -486,7 +488,9 @@ public class OrgManagementActorTest {
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.put(JsonKey.ADDRESS, new HashMap<>());
     req.put(JsonKey.HASHTAGID, "orgId");
-    boolean result = testScenario(getRequest(req, ActorOperations.UPDATE_ORG.getValue()), null);
+    Request reqst = getRequest(req, ActorOperations.UPDATE_ORG.getValue());
+    reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
+    boolean result = testScenario(reqst, null);
     assertTrue(result);
   }
 
