@@ -32,8 +32,7 @@ import org.sunbird.models.location.apirequest.UpsertLocationRequest;
     "updateLocation",
     "searchLocation",
     "deleteLocation",
-    "getRelatedLocationIds",
-    "getRelatedLocationIdsAndType"
+    "getRelatedLocationIds"
   },
   asyncTasks = {}
 )
