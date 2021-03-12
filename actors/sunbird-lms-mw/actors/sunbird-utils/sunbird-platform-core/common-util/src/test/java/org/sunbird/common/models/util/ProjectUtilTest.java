@@ -2,11 +2,8 @@ package org.sunbird.common.models.util;
 
 import static org.junit.Assert.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.junit.Assert;
@@ -109,11 +106,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGenerateRandomPasswordSuccess() {
-    assertNotNull(ProjectUtil.generateRandomPassword());
-  }
-
-  @Test
   public void testCreateCheckResponseSuccess() {
     Map<String, Object> responseMap =
         ProjectUtil.createCheckResponse("LearnerService", false, null);
@@ -190,10 +182,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   @Test
   public void testUserRoleSuccess() {
     assertEquals("PUBLIC", ProjectUtil.UserRole.PUBLIC.getValue());
-    assertEquals("CONTENT_CREATOR", ProjectUtil.UserRole.CONTENT_CREATOR.getValue());
-    assertEquals("CONTENT_REVIEWER", ProjectUtil.UserRole.CONTENT_REVIEWER.getValue());
-    assertEquals("ORG_ADMIN", ProjectUtil.UserRole.ORG_ADMIN.getValue());
-    assertEquals("ORG_MEMBER", ProjectUtil.UserRole.ORG_MEMBER.getValue());
   }
 
   @Test
@@ -282,20 +270,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testObjectTypesSuccess() {
-    assertEquals("batch", ProjectUtil.ObjectTypes.batch.getValue());
-    assertEquals("user", ProjectUtil.ObjectTypes.user.getValue());
-    assertEquals("organisation", ProjectUtil.ObjectTypes.organisation.getValue());
-  }
-
-  @Test
-  public void testSourceSuccess() {
-    assertEquals("web", ProjectUtil.Source.WEB.getValue());
-    assertEquals("android", ProjectUtil.Source.ANDROID.getValue());
-    assertEquals("ios", ProjectUtil.Source.IOS.getValue());
-  }
-
-  @Test
   public void testStatusSuccess() {
     assertEquals(1, ProjectUtil.Status.ACTIVE.getValue());
     assertEquals(0, ProjectUtil.Status.INACTIVE.getValue());
@@ -326,54 +300,14 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGetDateRangeSuccess() {
-    int noOfDays = 7;
-    Map<String, String> map = ProjectUtil.getDateRange(noOfDays);
-    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, -noOfDays);
-    assertEquals(map.get("startDate"), new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-    cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, -1);
-    assertEquals(map.get("endDate"), new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-  }
-
-  @Test
-  public void testGetDateRangeFailure() {
-    int noOfDays = 14;
-    Map<String, String> map = ProjectUtil.getDateRange(noOfDays);
-    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, -noOfDays);
-    assertEquals(map.get("startDate"), new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-    cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, noOfDays);
-    assertNotEquals(map.get("endDate"), new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-  }
-
-  @Test
-  public void testGetDateRangeFailureWithZeroDays() {
-    int noOfDays = 0;
-    Map<String, String> map = ProjectUtil.getDateRange(noOfDays);
-    assertNull(map.get("startDate"));
-    assertNull(map.get("endDate"));
-  }
-
-  @Test
-  public void testGetDateRangeFailureWithNegativeValue() {
-    int noOfDays = -100;
-    Map<String, String> map = ProjectUtil.getDateRange(noOfDays);
-    assertNull(map.get("startDate"));
-    assertNull(map.get("endDate"));
-  }
-
-  @Test
   public void testIsEmailValidFailureWithInvalidFormat() {
-    boolean bool = ProjectUtil.isEmailvalid("amit.kumartarento.com");
+    boolean bool = ProjectUtil.isEmailvalid("xyz.com");
     Assert.assertFalse(bool);
   }
 
   @Test
   public void testIsEmailValidSuccess() {
-    boolean bool = ProjectUtil.isEmailvalid("amit.kumar@tarento.com");
+    boolean bool = ProjectUtil.isEmailvalid("xyz@xyz.com");
     assertTrue(bool);
   }
 
