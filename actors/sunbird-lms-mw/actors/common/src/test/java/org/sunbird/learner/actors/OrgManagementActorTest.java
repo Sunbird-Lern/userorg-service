@@ -299,7 +299,6 @@ public class OrgManagementActorTest {
     Request req =
         getRequest(
             getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
-    req.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
     boolean result = testScenario(req, null);
     assertTrue(result);
   }
@@ -525,7 +524,6 @@ public class OrgManagementActorTest {
     Request request =
         getRequest(
             getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
-    request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
     boolean result = testScenario(request, null);
     assertTrue(result);
   }
