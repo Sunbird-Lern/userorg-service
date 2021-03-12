@@ -112,12 +112,12 @@ public class UserProfileReadService {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
     String encEmail = (String) result.get(JsonKey.EMAIL);
-    String encPhone= (String) result.get(JsonKey.PHONE);
+    String encPhone = (String) result.get(JsonKey.PHONE);
 
     UserUtility.decryptUserDataFrmES(result);
-    //Its used for Private user read api to display encoded email and encoded phone in api response
+    // Its used for Private user read api to display encoded email and encoded phone in api response
     boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
-    if(isPrivate) {
+    if (isPrivate) {
       result.put((JsonKey.ENC_PHONE), encPhone);
       result.put((JsonKey.ENC_EMAIL), encEmail);
     }
@@ -132,11 +132,12 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
+    Map<String, Object> userTypeDetails =
+        (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
     if (MapUtils.isNotEmpty(userTypeDetails)) {
       result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
       result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-    }else {
+    } else {
       result.put(JsonKey.USER_TYPE, null);
       result.put(JsonKey.USER_SUB_TYPE, null);
     }
@@ -151,7 +152,10 @@ public class UserProfileReadService {
       int year = Integer.parseInt(dob.split("-")[0]);
       LocalDate currentdate = LocalDate.now();
       int currentYear = currentdate.getYear();
-      boolean isMinor = (currentYear - year < 18) ? true : false;
+      // reason for keeping 19 instead of 18 is, all dob's will be saving with 12-31 appending to
+      // the year so 18 will be completed in the jan 1st
+      // for eg: 2004-12-31 will become major after 2023 jan 1st.
+      boolean isMinor = (currentYear - year <= 19) ? true : false;
       result.put(JsonKey.IS_MINOR, isMinor);
     }
   }
@@ -442,7 +446,7 @@ public class UserProfileReadService {
         List<Map<String, Object>> userLocations =
             getUserLocations((List<String>) result.get(JsonKey.PROFILE_LOCATION), context);
         if (CollectionUtils.isNotEmpty(userLocations)) {
-          result.put(JsonKey.USER_LOCATIONS,userLocations);
+          result.put(JsonKey.USER_LOCATIONS, userLocations);
           addSchoolLocation(result, context);
           result.remove(JsonKey.LOCATION_IDS);
           result.remove(JsonKey.PROFILE_LOCATION);
