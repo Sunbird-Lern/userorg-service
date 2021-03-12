@@ -1003,7 +1003,8 @@ public class UserManagementActor extends BaseActor {
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
-    convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
+    List<Map<String,String>> locationsIdTypeList = locationService.getValidatedRelatedLocationIdAndType((List<String>)userMap.get(JsonKey.LOCATION_CODES),request.getRequestContext());
+    userMap.put(JsonKey.PROFILE_LOCATION,locationsIdTypeList);
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);

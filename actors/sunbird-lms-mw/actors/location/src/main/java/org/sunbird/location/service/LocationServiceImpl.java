@@ -98,15 +98,16 @@ public class LocationServiceImpl implements LocationService {
                 }
             }
         }
-//        List<Map<String, String>> finalLocationTypeIdList = locationTypeIdList;
+//        List<Map<String, String>> locationTypeIdList = new ArrayList<>();
 //        locationSet.forEach(
 //                location -> {
 //                    Map<String,String> loc = new HashMap<>();
 //                    loc.put(JsonKey.TYPE,location.getType());
 //                    loc.put(JsonKey.ID,location.getId());
-//                    finalLocationTypeIdList.add(loc);
+//                    locationTypeIdList.add(loc);
 //                }
 //        );
+
         return locationSet.stream().collect(Collectors.toMap(Location::getId,Location::getType));
     }
 
