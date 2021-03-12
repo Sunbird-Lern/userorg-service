@@ -135,13 +135,6 @@ public class UserProfileReadServiceTest {
     userList3.put(JsonKey.ROLES, roles);
     userList3.put("dob", "1992-11-24");
 
-    Map<String, Object> userList3 = new HashMap<>();
-    userList3.put(JsonKey.USER_ID, "1234");
-    userList3.put(JsonKey.ORG_NAME, "subOrg");
-    userList3.put(JsonKey.IS_DELETED, false);
-    userList3.put(JsonKey.ORGANISATION_ID, "457896321012");
-    userList3.put(JsonKey.ROLES, roles);
-
     resp2.add(userList2);
     resp2.add(userList3);
     response2.put(JsonKey.RESPONSE, resp2);

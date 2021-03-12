@@ -1,7 +1,6 @@
 package org.sunbird.location.actors;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -136,27 +135,6 @@ public class LocationActorTest {
   }
 
   @Test
-  public void testUpdateLocationFailureWithoutLocationId() {
-    Map<String, Object> res = new HashMap<>(data);
-    res.remove(JsonKey.ID);
-    boolean result = testScenario(LocationActorOperation.UPDATE_LOCATION, true,null,ResponseCode.locationIdRequired);
-    assertTrue(result);
-  }
-
-
-  @Test
-  public void testUpdateLocationFailureWithLocationType() {
-
-    data.put(JsonKey.LOCATION_TYPE, "anyLocationType");
-    boolean result =
-            testScenario(
-                    LocationActorOperation.UPDATE_LOCATION, false, data, ResponseCode.invalidValue);
-    assertTrue(result);
-  }
-
-
-
-  @Test
   public void testCreateLocationFailureWithoutMandatoryParams() {
 
     data.put(JsonKey.LOCATION_TYPE, "block");
@@ -169,7 +147,6 @@ public class LocationActorTest {
     assertTrue(result);
   }
 
-
   @Test
   public void testCreateLocationFailureWithParentLocationNotAllowed() {
 
@@ -179,7 +156,6 @@ public class LocationActorTest {
             LocationActorOperation.CREATE_LOCATION, false, data, ResponseCode.parentNotAllowed);
     assertTrue(result);
   }
-
 
   @Test
   public void testDeleteLocationFailureWithInvalidLocationDeleteRequest() {
@@ -196,7 +172,6 @@ public class LocationActorTest {
             LocationActorOperation.DELETE_LOCATION, false, data, ResponseCode.invalidParameter);
     assertTrue(result);
   }
-
 
   private Map<String, Object> getContentMapFromES() {
 

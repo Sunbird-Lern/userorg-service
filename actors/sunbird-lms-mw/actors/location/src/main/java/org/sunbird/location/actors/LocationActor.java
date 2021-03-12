@@ -300,5 +300,4 @@ public class LocationActor extends BaseLocationActor {
   public int getOrder(String type) {
     return DataCacheHandler.getLocationOrderMap().get(type);
   }
-
 }

@@ -77,7 +77,6 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocationWithoutType() {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
@@ -137,7 +136,6 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocationWithoutCode() {
-
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME,LOCATION_NAME);
@@ -152,7 +150,6 @@ public class LocationControllerTest extends BaseApplicationTest {
     assertEquals(400, result.status());
   }
 
-
   @Test
   public void testUpdateLocation() {
 
@@ -166,40 +163,6 @@ public class LocationControllerTest extends BaseApplicationTest {
     JsonNode json = Json.parse(data);
     RequestBuilder req =
         new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(200, result.status());
-  }
-
-  @Test
-  public void testUpdateLocationWithoutId() {
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put(JsonKey.NAME, LOCATION_NAME);
-    requestBody.put(JsonKey.CODE, LOCATION_CODE);
-    requestMap.put(JsonKey.REQUEST, requestBody);
-    String data = TestUtil.mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-            new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(400, result.status());
-  }
-
-  @Test    //can avoid this case
-  public void testUpdateLocationWithoutNameOrCode() {
-
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put(JsonKey.CODE, LOCATION_CODE);
-    requestBody.put(JsonKey.ID, LOCATION_ID);
-    requestMap.put(JsonKey.REQUEST, requestBody);
-    String data = TestUtil.mapToJson(requestMap);
-    JsonNode json = Json.parse(data);
-    RequestBuilder req =
-            new RequestBuilder().bodyJson(json).uri(UPDATE_LOCATION_URL).method("PATCH");
     // req.headers(headerMap);
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());

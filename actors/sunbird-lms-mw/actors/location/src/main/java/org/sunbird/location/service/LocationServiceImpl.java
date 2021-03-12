@@ -98,8 +98,6 @@ public class LocationServiceImpl implements LocationService {
                 }
             }
         }
-
-
         return locationSet.stream().collect(Collectors.toMap(Location::getId,Location::getType));
     }
 
@@ -142,6 +140,4 @@ public class LocationServiceImpl implements LocationService {
                         ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
-
 }
