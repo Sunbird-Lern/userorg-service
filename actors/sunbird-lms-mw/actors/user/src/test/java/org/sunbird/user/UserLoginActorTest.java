@@ -17,7 +17,6 @@ import org.sunbird.user.actors.UserLoginActor;
 
 public class UserLoginActorTest {
 
-  private static final String INVALID_OPERATION = "INVALID_OPERATION";
   private static final Props props = Props.create(UserLoginActor.class);
   private static ActorSystem system = ActorSystem.create("system");
   private String userId = "someUserId";
