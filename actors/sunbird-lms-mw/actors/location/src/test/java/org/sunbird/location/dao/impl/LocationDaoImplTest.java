@@ -28,16 +28,6 @@ public class LocationDaoImplTest {
   }
 
   @Test
-          //(expected = Exception.class)
-  public void getRecordByPropertyTest() {
-    LocationDaoImpl dao = new LocationDaoImpl();
-    Map<String, Object> search = new HashMap<>();
-    search.put(JsonKey.CODE, "code");
-    dao.getRecordByProperty(search, new RequestContext());
-    Assert.assertTrue(true);
-  }
-
-  @Test
   public void sortByNotAddedInCaseFilterWontHaveTypeKey() {
     LocationDaoImpl dao = new LocationDaoImpl();
     SearchDTO searchDto = createSearchDtoObj();
