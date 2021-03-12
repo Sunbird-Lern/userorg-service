@@ -8,7 +8,6 @@ import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -36,22 +35,5 @@ public class UserLoginActorTest {
 
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
-  }
-
-  @Test
-  public void testUpdateUserLoginTimeFailureWithInvalidMessage() {
-    Request request = new Request();
-
-    request.setOperation(INVALID_OPERATION);
-    request.put(JsonKey.USER_ID, userId);
-
-    subject.tell(request, probe.getRef());
-
-    ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(
-        ((ProjectCommonException) exception)
-            .getCode()
-            .equals(ResponseCode.invalidRequestData.getErrorCode()));
   }
 }
