@@ -296,12 +296,11 @@ public class OrgManagementActorTest {
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
-    boolean result =
-        testScenario(
-            getRequest(
-                getRequestDataForOrgCreate(basicRequestData),
-                ActorOperations.CREATE_ORG.getValue()),
-            null);
+    Request req =
+        getRequest(
+            getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
+    req.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
+    boolean result = testScenario(req, null);
     assertTrue(result);
   }
 
@@ -523,7 +522,11 @@ public class OrgManagementActorTest {
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.remove(JsonKey.CHANNEL);
     req.put(JsonKey.EXTERNAL_ID, "extId");
-    boolean result = testScenario(getRequest(req, ActorOperations.UPDATE_ORG.getValue()), null);
+    Request request =
+        getRequest(
+            getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
+    request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
+    boolean result = testScenario(request, null);
     assertTrue(result);
   }
 
