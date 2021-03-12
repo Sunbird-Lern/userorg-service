@@ -18,6 +18,15 @@ public class LocationDaoImplTest {
     Assert.assertTrue(searchDto.getSortBy().size() == 1);
   }
 
+  @Test(expected = Exception.class)
+  public void getRecordByPropertyTest() {
+    LocationDaoImpl dao = new LocationDaoImpl();
+    Map<String, Object> search = new HashMap<>();
+    search.put(JsonKey.CODE, "code");
+    dao.getRecordByProperty(search, new RequestContext());
+    Assert.assertTrue(true);
+  }
+
   @Test
           //(expected = Exception.class)
   public void getRecordByPropertyTest() {

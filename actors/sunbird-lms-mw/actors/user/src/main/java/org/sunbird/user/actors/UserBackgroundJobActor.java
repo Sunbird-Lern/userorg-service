@@ -17,20 +17,8 @@ import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {
-    "upsertUserDetailsToES",
-    "upsertUserAddressToES",
-    "upsertUserEducationToES",
-    "upsertUserJobProfileToES",
-    "upsertUserOrgDetailsToES"
-  },
-  asyncTasks = {
-    "upsertUserDetailsToES",
-    "upsertUserAddressToES",
-    "upsertUserEducationToES",
-    "upsertUserJobProfileToES",
-    "upsertUserOrgDetailsToES"
-  },
+  tasks = {"upsertUserDetailsToES", "upsertUserOrgDetailsToES"},
+  asyncTasks = {"upsertUserDetailsToES", "upsertUserOrgDetailsToES"},
   dispatcher = "most-used-two-dispatcher"
 )
 public class UserBackgroundJobActor extends BaseActor {
@@ -43,15 +31,6 @@ public class UserBackgroundJobActor extends BaseActor {
     switch (operation) {
       case "upsertUserDetailsToES":
         saveUserDataToES(request);
-        break;
-      case "upsertUserAddressToES":
-        saveUserAddressToES(request);
-        break;
-      case "upsertUserEducationToES":
-        saveUserEducationToES(request);
-        break;
-      case "upsertUserJobProfileToES":
-        saveUserJobProfileToES(request);
         break;
       case "upsertUserOrgDetailsToES":
         saveUserOrgDetailsToES(request);
@@ -76,48 +55,6 @@ public class UserBackgroundJobActor extends BaseActor {
         ProjectUtil.EsType.user.getTypeName(),
         (String) userDetails.get(JsonKey.ID),
         userOrgMap,
-        request.getRequestContext());
-  }
-
-  private void saveUserJobProfileToES(Request request) {
-    Map<String, Object> userDetails = request.getRequest();
-    logger.info(request.getRequestContext(), "Updating saveUserJobProfileToES");
-    Map<String, Object> jobProfileMap = new HashMap<>();
-    jobProfileMap.put(JsonKey.ID, userDetails.get(JsonKey.ID));
-    jobProfileMap.put(JsonKey.JOB_PROFILE, userDetails.get(JsonKey.JOB_PROFILE));
-    upsertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) userDetails.get(JsonKey.ID),
-        jobProfileMap,
-        request.getRequestContext());
-  }
-
-  private void saveUserEducationToES(Request request) {
-    Map<String, Object> userDetails = request.getRequest();
-    logger.info(request.getRequestContext(), "Updating saveUserEducationToES");
-    Map<String, Object> educationMap = new HashMap<>();
-    educationMap.put(JsonKey.ID, userDetails.get(JsonKey.ID));
-    educationMap.put(JsonKey.EDUCATION, userDetails.get(JsonKey.EDUCATION));
-    upsertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) userDetails.get(JsonKey.ID),
-        educationMap,
-        request.getRequestContext());
-  }
-
-  private void saveUserAddressToES(Request request) {
-    Map<String, Object> userDetails = request.getRequest();
-    logger.info(request.getRequestContext(), "Updating saveUserAddressToES");
-    Map<String, Object> addressMap = new HashMap<>();
-    addressMap.put(JsonKey.ID, userDetails.get(JsonKey.ID));
-    addressMap.put(JsonKey.ADDRESS, userDetails.get(JsonKey.ADDRESS));
-    upsertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) userDetails.get(JsonKey.ID),
-        addressMap,
         request.getRequestContext());
   }
 

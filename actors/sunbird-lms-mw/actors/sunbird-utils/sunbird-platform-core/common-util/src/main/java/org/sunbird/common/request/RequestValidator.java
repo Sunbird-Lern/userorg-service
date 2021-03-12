@@ -118,23 +118,6 @@ public final class RequestValidator {
     }
   }
 
-  /** @param reqObj */
-  public static void validateCreateOrgType(Request reqObj) {
-    if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.NAME))) {
-      throw createExceptionInstance(ResponseCode.orgTypeMandatory.getErrorCode());
-    }
-  }
-
-  /** @param reqObj */
-  public static void validateUpdateOrgType(Request reqObj) {
-    if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.NAME))) {
-      throw createExceptionInstance(ResponseCode.orgTypeMandatory.getErrorCode());
-    }
-    if (StringUtils.isBlank((String) reqObj.getRequest().get(JsonKey.ID))) {
-      throw createExceptionInstance(ResponseCode.orgTypeIdRequired.getErrorCode());
-    }
-  }
-
   /**
    * Method to validate not for userId, title, note, courseId, contentId and tags
    *
@@ -190,55 +173,6 @@ public final class RequestValidator {
   public static void validateNoteId(String noteId) {
     if (StringUtils.isBlank(noteId)) {
       throw createExceptionInstance(ResponseCode.invalidNoteId.getErrorCode());
-    }
-  }
-
-  /**
-   * Method to validate
-   *
-   * @param request
-   */
-  public static void validateRegisterClient(Request request) {
-
-    if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.CLIENT_NAME))) {
-      throw createExceptionInstance(ResponseCode.invalidClientName.getErrorCode());
-    }
-  }
-
-  /**
-   * Method to validate the request for updating the client key
-   *
-   * @param clientId
-   * @param masterAccessToken
-   */
-  public static void validateUpdateClientKey(String clientId, String masterAccessToken) {
-    validateClientId(clientId);
-    if (StringUtils.isBlank(masterAccessToken)) {
-      throw createExceptionInstance(ResponseCode.invalidRequestData.getErrorCode());
-    }
-  }
-
-  /**
-   * Method to validate the request for updating the client key
-   *
-   * @param id
-   * @param type
-   */
-  public static void validateGetClientKey(String id, String type) {
-    validateClientId(id);
-    if (StringUtils.isBlank(type)) {
-      throw createExceptionInstance(ResponseCode.invalidRequestData.getErrorCode());
-    }
-  }
-
-  /**
-   * Method to validate clientId.
-   *
-   * @param clientId
-   */
-  public static void validateClientId(String clientId) {
-    if (StringUtils.isBlank(clientId)) {
-      throw createExceptionInstance(ResponseCode.invalidClientId.getErrorCode());
     }
   }
 

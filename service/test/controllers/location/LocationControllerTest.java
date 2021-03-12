@@ -35,7 +35,7 @@ import util.RequestInterceptor;
 public class LocationControllerTest extends BaseApplicationTest {
 
   private static Map<String, String[]> headerMap;
-  private static final String LOCATION_NAME = "12345";
+  private static final String LOCATION_NAME = "Laddakh";
   private static final String LOCATION_CODE = "LOC_01";
   private static final String LOCATION_TYPE = "State";
   private static final String LOCATION_ID = "123";
@@ -64,8 +64,6 @@ public class LocationControllerTest extends BaseApplicationTest {
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
     locationData.put(JsonKey.CODE, LOCATION_CODE);
-    locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
-
     locationData.put(JsonKey.LOCATION_TYPE, LOCATION_TYPE);
     requestMap.put(JsonKey.REQUEST, locationData);
     String data = TestUtil.mapToJson(requestMap);
@@ -206,7 +204,6 @@ public class LocationControllerTest extends BaseApplicationTest {
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
   }
-
 
   @Test
   public void testUpdateLocationWithType() {
