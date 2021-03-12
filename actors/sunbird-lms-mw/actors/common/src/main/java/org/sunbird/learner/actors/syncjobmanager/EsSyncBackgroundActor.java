@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -171,7 +172,17 @@ public class EsSyncBackgroundActor extends BaseActor {
   private Map<String, Object> getOrgDetails(Entry<String, Object> entry, RequestContext context) {
     logger.info(context, "EsSyncBackgroundActor: getOrgDetails called");
     Map<String, Object> orgMap = (Map<String, Object>) entry.getValue();
-    orgMap.remove(JsonKey.ORG_TYPE);
+    String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+    if (StringUtils.isNotBlank(orgLocation)) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        orgMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+      } catch (Exception e) {
+        logger.info(
+            context,
+            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+      }
+    }
     if (orgMap.containsKey(JsonKey.ADDRESS_ID)
         && !StringUtils.isBlank((String) orgMap.get(JsonKey.ADDRESS_ID))) {
       orgMap.put(
