@@ -22,7 +22,6 @@ public class UserRequestValidator extends BaseRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
   private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
-  private final String defaultMothDate = "-12-31";
 
   static {
     List<String> subTypeList =
@@ -264,7 +263,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
     }
 
-    validateDob(userRequest);
+    if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
+      validateDob(userRequest);
+    }
 
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
@@ -274,16 +275,17 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  private void validateDob(Request userRequest) {
+  public void validateDob(Request userRequest) {
     if (null != userRequest.getRequest().get(JsonKey.DOB)) {
-      String year = (String) userRequest.getRequest().get(JsonKey.DOB);
-      boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_FORMAT, year);
+      String dobValue =
+          userRequest.getRequest().get(JsonKey.DOB)
+              + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE);
+      boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_MONTH_DATE_FORMAT, dobValue);
       if (!bool) {
         ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
       } else {
-        userRequest
-            .getRequest()
-            .put(JsonKey.DOB, year + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE));
+        userRequest.getRequest().put(JsonKey.DOB, dobValue);
+        userRequest.getRequest().put(JsonKey.DOB_VALIDATION_DONE, true);
       }
     }
   }
@@ -329,7 +331,9 @@ public class UserRequestValidator extends BaseRequestValidator {
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
     validateUserOrgField(userRequest);
-    validateDob(userRequest);
+    if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
+      validateDob(userRequest);
+    }
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
