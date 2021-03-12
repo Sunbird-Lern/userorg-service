@@ -1,5 +1,7 @@
 package org.sunbird.learner.actors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -181,7 +183,15 @@ public class BackgroundJobManager extends BaseActor {
       if (!(orgList.isEmpty())) {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
-
+        try {
+          String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
+          ObjectMapper mapper = new ObjectMapper();
+          esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        } catch (JsonProcessingException e) {
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+        }
         if (MapUtils.isNotEmpty((Map<String, Object>) orgMap.get(JsonKey.ADDRESS))) {
           esMap.put(JsonKey.ADDRESS, orgMap.get(JsonKey.ADDRESS));
         } else {

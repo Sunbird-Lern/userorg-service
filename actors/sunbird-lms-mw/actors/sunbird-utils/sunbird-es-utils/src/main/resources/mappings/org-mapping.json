@@ -822,6 +822,34 @@
             "analyzer": "cs_index_analyzer",
             "search_analyzer": "cs_search_analyzer",
             "fielddata": true
+        },
+        "orgLocation": {
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "type": {
+              "type": "keyword",
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "isTenant": {
+          "type": "boolean",
+          "fields": {
+            "raw": {
+              "type": "boolean"
+            }
+          }
         }
     }
 }
