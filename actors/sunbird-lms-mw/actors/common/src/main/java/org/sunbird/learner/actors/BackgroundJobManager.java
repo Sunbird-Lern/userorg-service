@@ -167,7 +167,7 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> orgMap =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
-    if (ProjectUtil.isNotNull(orgMap)) {
+    if (MapUtils.isNotEmpty(orgMap)) {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       String id = (String) orgMap.get(JsonKey.ID);
       Response orgResponse =
