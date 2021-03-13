@@ -1233,7 +1233,7 @@ public class OrganisationManagementActor extends BaseActor {
    */
   @SuppressWarnings("unchecked")
   private boolean validateChannelUniqueness(String channel, String orgId, RequestContext context) {
-    if (!StringUtils.isBlank(channel)) {
+    if (StringUtils.isNotBlank(channel)) {
       return validateFieldUniqueness(JsonKey.CHANNEL, channel, orgId, context);
     }
     return (orgId == null);
@@ -1305,9 +1305,7 @@ public class OrganisationManagementActor extends BaseActor {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       String rootOrgId = (String) rootOrg.get(JsonKey.ID);
-      if (!StringUtils.isBlank(rootOrgId)) {
-        req.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-      } else {
+      if (StringUtils.isBlank(rootOrgId)) {
         logger.info(
             context, "OrganisationManagementActor:validateChannel: Invalid channel = " + channel);
         throw new ProjectCommonException(
@@ -1322,6 +1320,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.formatMessage(
                 ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
+      req.put(JsonKey.ROOT_ORG_ID, rootOrgId);
     } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, context)) {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
