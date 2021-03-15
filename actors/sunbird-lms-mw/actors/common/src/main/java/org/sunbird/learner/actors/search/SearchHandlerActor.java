@@ -65,8 +65,16 @@ public class SearchHandlerActor extends BaseActor {
 
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
-      throws Exception {
-    UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
+          throws Exception {
+    Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
+    if (filterMap.containsKey("userType")||filterMap.containsKey("userSubType")||filterMap.containsKey("locationId")||filterMap.containsKey("type")) {
+      UserUtility.encryptUserSearchFilterQueryDataNew(searchQueryMap);
+    }
+    else{
+      UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
+
+    }
+
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
