@@ -98,7 +98,6 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.ORG_TYPE, "board");
     requestObj.put(JsonKey.IS_TENANT, false);
     requestObj.put(JsonKey.CHANNEL, "");
     request.setRequest(requestObj);
@@ -107,7 +106,7 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateCreateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.dependentParamsMissing.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
