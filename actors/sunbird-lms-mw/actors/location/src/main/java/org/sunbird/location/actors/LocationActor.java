@@ -27,14 +27,14 @@ import org.sunbird.models.location.apirequest.UpsertLocationRequest;
  * @author Amit Kumar
  */
 @ActorConfig(
-  tasks = {
-    "createLocation",
-    "updateLocation",
-    "searchLocation",
-    "deleteLocation",
-    "getRelatedLocationIds"
-  },
-  asyncTasks = {}
+        tasks = {
+                "createLocation",
+                "updateLocation",
+                "searchLocation",
+                "deleteLocation",
+                "getRelatedLocationIds"
+        },
+        asyncTasks = {}
 )
 public class LocationActor extends BaseLocationActor {
 
@@ -68,8 +68,8 @@ public class LocationActor extends BaseLocationActor {
   private void getRelatedLocationIds(Request request) {
     Response response = new Response();
     List<String> relatedLocationIds =
-        getValidatedRelatedLocationIds(
-            (List<String>) request.get(JsonKey.LOCATION_CODES), request.getRequestContext());
+            getValidatedRelatedLocationIds(
+                    (List<String>) request.get(JsonKey.LOCATION_CODES), request.getRequestContext());
     response.getResult().put(JsonKey.RESPONSE, relatedLocationIds);
     sender().tell(response, self());
   }
@@ -78,7 +78,7 @@ public class LocationActor extends BaseLocationActor {
     try {
       ObjectMapper mapper = new ObjectMapper();
       UpsertLocationRequest locationRequest =
-          ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
+              ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
       validateUpsertLocnReq(locationRequest, JsonKey.CREATE);
       // put unique identifier in request for Id
       String id = ProjectUtil.generateUniqueId();
@@ -88,9 +88,9 @@ public class LocationActor extends BaseLocationActor {
       sender().tell(response, self());
       logger.info(request.getRequestContext(), "Insert location data to ES");
       saveDataToES(
-          mapper.convertValue(location, Map.class), JsonKey.INSERT, request.getRequestContext());
+              mapper.convertValue(location, Map.class), JsonKey.INSERT, request.getRequestContext());
       generateTelemetryForLocation(
-          id, mapper.convertValue(location, Map.class), JsonKey.CREATE, request.getContext());
+              id, mapper.convertValue(location, Map.class), JsonKey.CREATE, request.getContext());
     } catch (Exception ex) {
       logger.error(request.getRequestContext(), ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -101,19 +101,19 @@ public class LocationActor extends BaseLocationActor {
     try {
       ObjectMapper mapper = new ObjectMapper();
       UpsertLocationRequest locationRequest =
-          ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
+              ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
       validateUpsertLocnReq(locationRequest, JsonKey.UPDATE);
       Location location = mapper.convertValue(locationRequest, Location.class);
       Response response = locationDao.update(location, request.getRequestContext());
       sender().tell(response, self());
       logger.info(request.getRequestContext(), "Update location data to ES");
       saveDataToES(
-          mapper.convertValue(location, Map.class), JsonKey.UPDATE, request.getRequestContext());
+              mapper.convertValue(location, Map.class), JsonKey.UPDATE, request.getRequestContext());
       generateTelemetryForLocation(
-          location.getId(),
-          mapper.convertValue(location, Map.class),
-          JsonKey.UPDATE,
-          request.getContext());
+              location.getId(),
+              mapper.convertValue(location, Map.class),
+              JsonKey.UPDATE,
+              request.getContext());
     } catch (Exception ex) {
       logger.error(request.getRequestContext(), ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -146,7 +146,7 @@ public class LocationActor extends BaseLocationActor {
       logger.info(request.getRequestContext(), "Delete location data from ES");
       deleteDataFromES(locationId, request.getRequestContext());
       generateTelemetryForLocation(
-          locationId, new HashMap<>(), JsonKey.DELETE, request.getContext());
+              locationId, new HashMap<>(), JsonKey.DELETE, request.getContext());
     } catch (Exception ex) {
       logger.error(request.getRequestContext(), ex.getMessage(), ex);
       sender().tell(ex, self());
@@ -186,7 +186,7 @@ public class LocationActor extends BaseLocationActor {
   }
 
   public List<String> getValidatedRelatedLocationIds(
-      List<String> codeList, RequestContext context) {
+          List<String> codeList, RequestContext context) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(codeList);
     List<Location> locationList = getSearchResult(JsonKey.CODE, codeList, context);
@@ -194,9 +194,9 @@ public class LocationActor extends BaseLocationActor {
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
         List<String> resCodeList =
-            locationList.stream().map(Location::getCode).collect(Collectors.toList());
+                locationList.stream().map(Location::getCode).collect(Collectors.toList());
         List<String> invalidCodeList =
-            codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+                codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidCodeList);
       } else {
         locationIds = getValidatedRelatedLocationSet(locationList, context);
@@ -216,12 +216,12 @@ public class LocationActor extends BaseLocationActor {
     Response response = searchLocation(searchRequestMap, context);
     if (response != null) {
       List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+              (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
       ObjectMapper mapper = new ObjectMapper();
       return responseList
-          .stream()
-          .map(s -> mapper.convertValue(s, Location.class))
-          .collect(Collectors.toList());
+              .stream()
+              .map(s -> mapper.convertValue(s, Location.class))
+              .collect(Collectors.toList());
     } else {
       return new ArrayList<>();
     }
@@ -236,43 +236,37 @@ public class LocationActor extends BaseLocationActor {
 
   private void throwInvalidParameterValueException(List<String> codeList) {
     throw new ProjectCommonException(
-        ResponseCode.invalidParameterValue.getErrorCode(),
-        ProjectUtil.formatMessage(
-            ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.invalidParameterValue.getErrorCode(),
+            ProjectUtil.formatMessage(
+                    ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   public Set<String> getValidatedRelatedLocationSet(
-      List<Location> locationList, RequestContext context) {
-    Set<Location> locationSet = new HashSet<>();
+          List<Location> locationList, RequestContext context) {
+    Map<String,Location> locationSet = new HashMap<>();
     for (Location requestedLocation : locationList) {
       Set<Location> parentLocnSet = getParentLocations(requestedLocation, context);
-      if (CollectionUtils.sizeIsEmpty(locationSet)) {
-        locationSet.addAll(parentLocnSet);
-      } else {
-        for (Location currentLocation : parentLocnSet) {
-          String type = currentLocation.getType();
-          locationSet
-              .stream()
-              .forEach(
-                  location -> {
-                    if (type.equalsIgnoreCase(location.getType())
-                        && !(currentLocation.getId().equals(location.getId()))) {
-                      throw new ProjectCommonException(
-                          ResponseCode.conflictingOrgLocations.getErrorCode(),
-                          ProjectUtil.formatMessage(
-                              ResponseCode.conflictingOrgLocations.getErrorMessage(),
-                              requestedLocation.getCode(),
-                              location.getCode(),
-                              type),
-                          ResponseCode.CLIENT_ERROR.getResponseCode());
-                    }
-                  });
-          locationSet.add(currentLocation);
+      for (Location currentLocation : parentLocnSet) {
+        String type = currentLocation.getType();
+        Location location = locationSet.get(type);
+        if (null != location) {
+          if(!(currentLocation.getId().equals(location.getId()))) {
+            throw new ProjectCommonException(
+                    ResponseCode.conflictingOrgLocations.getErrorCode(),
+                    ProjectUtil.formatMessage(
+                            ResponseCode.conflictingOrgLocations.getErrorMessage(),
+                            requestedLocation.getCode(),
+                            location.getCode(),
+                            type),
+                    ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+        } else {
+          locationSet.put(type, currentLocation);
         }
       }
     }
-    return locationSet.stream().map(Location::getId).collect(Collectors.toSet());
+    return locationSet.values().stream().map(Location::getId).collect(Collectors.toSet());
   }
 
   private Set<Location> getParentLocations(Location locationObj, RequestContext context) {

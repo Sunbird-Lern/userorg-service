@@ -28,9 +28,8 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Map<String, String>> getValidatedRelatedLocationIdAndType(List<String> codeList, RequestContext context) {
-        List<Map<String,String>> locationIdAndType = new ArrayList<>();
         List<Location> locationIdTypeList = locationSearch(JsonKey.CODE, codeList, context);
-        Map<String,String> locationIdType = null;
+        List<Map<String,String>> locationIdType = null;
         List<String> codes = new ArrayList<>(codeList);
         if (CollectionUtils.isNotEmpty(locationIdTypeList)) {
             if (locationIdTypeList.size() != codes.size()) {
@@ -45,8 +44,7 @@ public class LocationServiceImpl implements LocationService {
         } else {
             throwInvalidParameterValueException(codeList);
         }
-        locationIdAndType.add(locationIdType);
-        return locationIdAndType;
+        return locationIdType;
     }
 
     private List<Location> locationSearch(String param, Object value, RequestContext context) {
@@ -68,37 +66,40 @@ public class LocationServiceImpl implements LocationService {
         return locationResponseList;
     }
 
-    public Map<String,String> getValidatedRelatedLocationList(
+    public List<Map<String,String>> getValidatedRelatedLocationList(
             List<Location> locationList, RequestContext context) {
-        Set<Location> locationSet = new HashSet<>();
+        Map<String,Location> locationMap = new HashMap<>();
         for (Location requestedLocation : locationList) {
             Set<Location> parentLocnSet = getParentLocations(requestedLocation, context);
-            if (CollectionUtils.sizeIsEmpty(locationSet)) {
-                locationSet.addAll(parentLocnSet);
-            } else {
                 for (Location currentLocation : parentLocnSet) {
                     String type = currentLocation.getType();
-                    locationSet
-                            .stream()
-                            .forEach(
-                                    location -> {
-                                        if (type.equalsIgnoreCase(location.getType())
-                                                && !(currentLocation.getId().equals(location.getId()))) {
-                                            throw new ProjectCommonException(
-                                                    ResponseCode.conflictingOrgLocations.getErrorCode(),
-                                                    ProjectUtil.formatMessage(
-                                                            ResponseCode.conflictingOrgLocations.getErrorMessage(),
-                                                            (requestedLocation).getCode(),
-                                                            location.getCode(),
-                                                            type),
-                                                    ResponseCode.CLIENT_ERROR.getResponseCode());
-                                        }
-                                    });
-                    locationSet.add(currentLocation);
+                    Location location = locationMap.get(type);
+                    if(null != location){
+                        if(!(currentLocation.getId().equals(location.getId()))) {
+                            throw new ProjectCommonException(
+                                    ResponseCode.conflictingOrgLocations.getErrorCode(),
+                                    ProjectUtil.formatMessage(
+                                            ResponseCode.conflictingOrgLocations.getErrorMessage(),
+                                            requestedLocation.getCode(),
+                                            location.getCode(),
+                                            type),
+                                    ResponseCode.CLIENT_ERROR.getResponseCode());
+                        }
+                    } else {
+                        locationMap.put(type,currentLocation);
+                    }
                 }
-            }
+
         }
-        return locationSet.stream().collect(Collectors.toMap(Location::getId,Location::getType));
+        List<Map<String, String>> locationMapList = new ArrayList<>();
+        locationMap.entrySet().forEach(
+                m->{
+                    Map<String, String> locationIdTypeMap= new HashMap();
+                   locationIdTypeMap.put(JsonKey.ID,m.getValue().getId());
+                    locationIdTypeMap.put(JsonKey.TYPE,m.getValue().getType());
+                    locationMapList.add(locationIdTypeMap);
+                });
+        return locationMapList;
     }
 
     private Set<Location> getParentLocations(Location locationObj, RequestContext context) {
