@@ -168,29 +168,21 @@ public final class UserUtility {
       }
     }
     return filterMap;
-  }
-
-
+  }//new method for modified user table containg profilelocation and profileusertype
   public static Map<String, Object> encryptUserSearchFilterQueryDataNew(Map<String, Object> map)
       throws Exception {
     Map<String, Object> filterMap = (Map<String, Object>) map.get(JsonKey.FILTERS);
     Map<String, String> userTypeAndSubType= new HashMap<>();
     Map<String, String> userLocation= new HashMap<>();
     if(filterMap.containsKey("userType")) {
-//      Map<String, Object> newKey=new HashMap<>(filterMap);
-//      filterMap.remove("userType");
-//      filterMap.put(JsonKey.PROFILE_USERTYPE,newKey.get("userType"));
-//      filterMap.put(JsonKey.PROFILE_USERTYPE, filterMap.remove("userType"));
       userTypeAndSubType.put(JsonKey.TYPE, (String) filterMap.get("userType"));
       filterMap.remove(JsonKey.USER_TYPE);
       filterMap.put(JsonKey.PROFILE_USERTYPE,userTypeAndSubType);
-    }else if (filterMap.containsKey("userSubType"))
-    {
-//      filterMap.put(JsonKey.PROFILE_USERTYPE, filterMap.remove("userSubType"));
+    }
+    else if (filterMap.containsKey("userSubType")) {
       userTypeAndSubType.put(JsonKey.SUB_TYPE, (String) filterMap.get("userSubType"));
       filterMap.remove(JsonKey.USER_SUB_TYPE);
       filterMap.put(JsonKey.PROFILE_USERTYPE,userTypeAndSubType);
-
     }
     else if (filterMap.containsKey("locationID")){
       userLocation.put(JsonKey.LOCATION_ID, (String) filterMap.get("locationId"));
