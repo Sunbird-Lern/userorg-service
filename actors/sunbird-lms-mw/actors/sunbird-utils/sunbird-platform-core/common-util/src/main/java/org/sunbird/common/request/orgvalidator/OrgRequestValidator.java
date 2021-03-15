@@ -33,7 +33,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.IS_TENANT),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    validateRootOrgChannel(orgRequest);
+    validateTenantOrgChannel(orgRequest);
     validateLicense(orgRequest);
 
     Map<String, Object> address =
@@ -45,8 +45,8 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   }
 
   private void validateLicense(Request orgRequest) {
-    if (orgRequest.getRequest().containsKey(JsonKey.IS_ROOT_ORG)
-        && (boolean) orgRequest.getRequest().get(JsonKey.IS_ROOT_ORG)
+    if (orgRequest.getRequest().containsKey(JsonKey.IS_TENANT)
+        && (boolean) orgRequest.getRequest().get(JsonKey.IS_TENANT)
         && orgRequest.getRequest().containsKey(JsonKey.LICENSE)
         && StringUtils.isBlank((String) orgRequest.getRequest().get(JsonKey.LICENSE))) {
       throw new ProjectCommonException(
@@ -76,7 +76,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
           ERROR_CODE);
     }
 
-    validateRootOrgChannel(request);
+    validateTenantOrgChannel(request);
     validateLocationIdOrCode(request);
     Map<String, Object> address = (Map<String, Object>) request.getRequest().get(JsonKey.ADDRESS);
     if (MapUtils.isNotEmpty(address)) {

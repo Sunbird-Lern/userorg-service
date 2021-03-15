@@ -67,7 +67,7 @@ public class DataCacheHandler implements Runnable {
   public static String[] bulkOrgAllowedFields = {
     JsonKey.ORGANISATION_NAME,
     JsonKey.CHANNEL,
-    JsonKey.IS_ROOT_ORG,
+    JsonKey.IS_TENANT,
     JsonKey.PROVIDER,
     JsonKey.EXTERNAL_ID,
     JsonKey.DESCRIPTION,

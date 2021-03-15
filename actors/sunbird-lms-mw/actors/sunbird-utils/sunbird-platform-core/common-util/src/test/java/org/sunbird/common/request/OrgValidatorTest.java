@@ -20,7 +20,7 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     requestObj.put(JsonKey.ORG_TYPE, "board");
     requestObj.put(JsonKey.IS_TENANT, false);
@@ -40,7 +40,7 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     requestObj.put(JsonKey.ORG_TYPE, "board");
     requestObj.put(JsonKey.IS_TENANT, false);
@@ -61,7 +61,7 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     requestObj.put(JsonKey.LICENSE, "");
     request.setRequest(requestObj);
@@ -79,7 +79,7 @@ public class OrgValidatorTest {
   public void validateCreateOrgWithOutName() {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     request.setRequest(requestObj);
     try {
@@ -98,7 +98,6 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
     requestObj.put(JsonKey.ORG_TYPE, "board");
     requestObj.put(JsonKey.IS_TENANT, false);
     requestObj.put(JsonKey.CHANNEL, "");
@@ -120,7 +119,7 @@ public class OrgValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
     requestObj.put(JsonKey.ORGANISATION_ID, "test12344");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     request.setRequest(requestObj);
     try {
@@ -140,7 +139,7 @@ public class OrgValidatorTest {
     requestObj.put(JsonKey.ORGANISATION_ID, "test2344");
     requestObj.put(JsonKey.ROOT_ORG_ID, "");
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     request.setRequest(requestObj);
     try {
@@ -160,7 +159,7 @@ public class OrgValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.STATUS, "true");
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "tpp");
     requestObj.put(JsonKey.ORGANISATION_ID, "test123444");
     request.setRequest(requestObj);
@@ -180,7 +179,7 @@ public class OrgValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.ORG_NAME, "test");
-    requestObj.put(JsonKey.IS_ROOT_ORG, true);
+    requestObj.put(JsonKey.IS_TENANT, true);
     requestObj.put(JsonKey.CHANNEL, "");
     requestObj.put(JsonKey.ORGANISATION_ID, "test123444");
     request.setRequest(requestObj);

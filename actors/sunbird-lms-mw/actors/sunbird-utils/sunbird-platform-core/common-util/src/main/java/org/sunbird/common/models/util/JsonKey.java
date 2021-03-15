@@ -148,10 +148,8 @@ public final class JsonKey {
   public static final String INSERT = "insert";
   public static final String IS_APPROVED = "isApproved";
   public static final String IS_AUTH_REQ = "isAuthReq";
-  public static final String IS_DEFAULT = "isDefault";
   public static final String IS_DELETED = "isDeleted";
   public static final String IS_REJECTED = "isRejected";
-  public static final String IS_ROOT_ORG = "isRootOrg";
   public static final String IS_SSO_ENABLED = "sso.enabled";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";

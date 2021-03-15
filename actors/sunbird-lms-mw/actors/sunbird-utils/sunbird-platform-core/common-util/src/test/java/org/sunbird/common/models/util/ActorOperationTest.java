@@ -17,20 +17,13 @@ public class ActorOperationTest {
         "createTanentPreference", ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
     Assert.assertEquals("createUser", ActorOperations.CREATE_USER.getValue());
     Assert.assertEquals("updateUser", ActorOperations.UPDATE_USER.getValue());
-    Assert.assertEquals("userAuth", ActorOperations.USER_AUTH.getValue());
     Assert.assertEquals("createOrg", ActorOperations.CREATE_ORG.getValue());
     Assert.assertEquals("updateOrg", ActorOperations.UPDATE_ORG.getValue());
     Assert.assertEquals("updateOrgStatus", ActorOperations.UPDATE_ORG_STATUS.getValue());
     Assert.assertEquals("getOrgDetails", ActorOperations.GET_ORG_DETAILS.getValue());
-    Assert.assertEquals("userAuth", ActorOperations.USER_AUTH.getValue());
     Assert.assertEquals(
         "updateUserInfoToElastic", ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     Assert.assertEquals("getRoles", ActorOperations.GET_ROLES.getValue());
-    Assert.assertEquals("approveOrganisation", ActorOperations.APPROVE_ORGANISATION.getValue());
-    Assert.assertEquals(
-        "addMemberOrganisation", ActorOperations.ADD_MEMBER_ORGANISATION.getValue());
-    Assert.assertEquals(
-        "removeMemberOrganisation", ActorOperations.REMOVE_MEMBER_ORGANISATION.getValue());
     Assert.assertEquals(
         "getUserDetailsByLoginId", ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
     Assert.assertEquals(
