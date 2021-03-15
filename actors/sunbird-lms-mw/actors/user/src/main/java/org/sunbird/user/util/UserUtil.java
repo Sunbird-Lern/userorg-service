@@ -803,7 +803,7 @@ public class UserUtil {
       try {
         Map<String, Object> searchQueryMap = new HashMap<>();
         Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.IS_ROOT_ORG, true);
+        filters.put(JsonKey.IS_TENANT, true);
         filters.put(JsonKey.CHANNEL, providers);
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);

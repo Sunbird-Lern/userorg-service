@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
   public String getRootOrgIdFromChannel(String channel, RequestContext context) {
 
     Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.IS_ROOT_ORG, true);
+    filters.put(JsonKey.IS_TENANT, true);
     if (StringUtils.isNotBlank(channel)) {
       filters.put(JsonKey.CHANNEL, channel);
     } else {
