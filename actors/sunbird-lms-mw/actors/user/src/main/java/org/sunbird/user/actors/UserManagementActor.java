@@ -186,6 +186,7 @@ public class UserManagementActor extends BaseActor {
       // If user account isManagedUser (managedBy passed in request) should be same as context
       // user_id
       userService.validateUserId(actorMessage, managedBy, actorMessage.getRequestContext());
+
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
