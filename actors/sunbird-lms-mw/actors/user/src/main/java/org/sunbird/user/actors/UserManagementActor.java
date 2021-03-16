@@ -724,7 +724,7 @@ public class UserManagementActor extends BaseActor {
       if (null == organisation) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgData);
       }
-      if (organisation.isRootOrg()) {
+      if (organisation.isTenant()) {
         subOrgRootOrgId = organisation.getId();
         if (StringUtils.isNotBlank(requestedChannel)
             && !requestedChannel.equalsIgnoreCase(organisation.getChannel())) {

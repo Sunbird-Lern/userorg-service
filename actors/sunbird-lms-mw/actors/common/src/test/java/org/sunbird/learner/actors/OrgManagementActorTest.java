@@ -134,6 +134,7 @@ public class OrgManagementActorTest {
     when(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES)).thenReturn("dummy");
     when(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_API_REQUEST_LOWER_CASE_FIELDS))
         .thenReturn("lowercase");
+    when(ProjectUtil.getConfigValue("org_index_alias")).thenReturn("org_alias");
   }
 
   @Test

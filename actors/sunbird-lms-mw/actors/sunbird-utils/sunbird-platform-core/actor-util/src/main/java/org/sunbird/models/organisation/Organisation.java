@@ -33,7 +33,6 @@ public class Organisation implements Serializable {
   private String homeUrl;
   private String imgUrl;
   private Boolean isApproved;
-  private Boolean isRootOrg;
   private String locationId;
   private Integer noOfMembers;
   private String orgCode;
@@ -291,15 +290,6 @@ public class Organisation implements Serializable {
 
   public void setApproved(Boolean isApproved) {
     this.isApproved = isApproved;
-  }
-
-  @JsonProperty(value = "isRootOrg")
-  public Boolean isRootOrg() {
-    return isRootOrg;
-  }
-
-  public void setRootOrg(Boolean isRootOrg) {
-    this.isRootOrg = isRootOrg;
   }
 
   @JsonProperty(value = "isSSOEnabled")
