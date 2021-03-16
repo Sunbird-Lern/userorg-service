@@ -431,6 +431,7 @@ public class UserManagementActor extends BaseActor {
                   break;
                 default: // do nothing
               }
+
             } catch (Exception e) {
               logger.error("Error in encrypting in the external id details", e);
               throw new ProjectCommonException(
@@ -780,7 +781,6 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.CHANNEL, channel);
       Map<String, Object> managedByInfo =
           UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
-
       convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
       ignoreOrAcceptFrameworkData(userMap, managedByInfo, actorMessage.getRequestContext());
     }
@@ -793,7 +793,6 @@ public class UserManagementActor extends BaseActor {
     } catch (Exception ex) {
       logger.error(actorMessage.getRequestContext(), ex.getMessage(), ex);
     }
-
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
@@ -1002,6 +1001,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
     UserUtil.toLower(userMap);
+    convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
@@ -1168,7 +1168,6 @@ public class UserManagementActor extends BaseActor {
         && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
       userMap.remove(JsonKey.LOCATION_IDS);
     }
-
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {

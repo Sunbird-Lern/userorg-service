@@ -76,6 +76,7 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testCreateLocationWithoutType() {
+
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
@@ -98,6 +99,7 @@ public class LocationControllerTest extends BaseApplicationTest {
     requestBody.put(JsonKey.NAME, LOCATION_NAME);
     requestBody.put(JsonKey.CODE, LOCATION_CODE);
     requestBody.put(JsonKey.ID, LOCATION_ID);
+
     requestMap.put(JsonKey.REQUEST, requestBody);
     String data = TestUtil.mapToJson(requestMap);
     JsonNode json = Json.parse(data);
