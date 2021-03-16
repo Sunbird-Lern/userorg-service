@@ -322,7 +322,6 @@ public final class JsonKey {
   public static final String TOPICS = "topics";
   public static final String TOPN = "topn";
   public static final String TYPE = "type";
-  public static final String SUB_TYPE = "subType";
   public static final String TNC_TYPE = "tncType";
   public static final String UNDEFINED_IDENTIFIER = "Undefined column name ";
   public static final String UNKNOWN_IDENTIFIER = "Unknown identifier ";
@@ -407,8 +406,6 @@ public final class JsonKey {
   public static final String SUNBIRD_URL_SHORTNER_ENABLE = "sunbird_url_shortner_enable";
   public static final String USER_PROFILE_CONFIG = "userProfileConfig";
   public static final String PUBLIC_FIELDS = "publicFields";
-  public static final String PROFILE_USERTYPE = "profileUserType";
-  public static final String PROFILE_LOCATION = "profileLocation";
   public static final String PRIVATE_FIELDS = "privateFields";
   public static final String BATCH_START_DATE = "batchStartDate";
   public static final String BATCH_END_DATE = "batchEndDate";
