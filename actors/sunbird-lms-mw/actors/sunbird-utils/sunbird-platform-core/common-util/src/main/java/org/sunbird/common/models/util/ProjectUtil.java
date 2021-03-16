@@ -34,18 +34,6 @@ public class ProjectUtil {
   private static AtomicInteger atomicInteger = new AtomicInteger();
 
   public static final String YEAR_MONTH_DATE_FORMAT = "yyyy-MM-dd";
-  private static final int randomPasswordLength = 9;
-
-  protected static final String FILE_NAME[] = {
-    "cassandratablecolumn.properties",
-    "elasticsearch.config.properties",
-    "cassandra.config.properties",
-    "dbconfig.properties",
-    "externalresource.properties",
-    "sso.properties",
-    "userencryption.properties",
-    "mailTemplates.properties"
-  };
   public static PropertiesCache propertiesCache;
   private static Pattern pattern;
   private static final String EMAIL_PATTERN =
@@ -56,9 +44,6 @@ public class ProjectUtil {
         JsonKey.COMPLETENESS, JsonKey.MISSING_FIELDS, JsonKey.PROFILE_VISIBILITY, JsonKey.LOGIN_ID
       };
 
-  private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
-  private static final String STARTDATE = "startDate";
-  private static final String ENDDATE = "endDate";
   private static ObjectMapper mapper = new ObjectMapper();
 
   static {
@@ -272,9 +257,8 @@ public class ProjectUtil {
    */
   public enum EsType {
     user(getConfigValue("user_index_alias")),
-    organisation("org"),
+    organisation(getConfigValue("org_index_alias")),
     usernotes("usernotes"),
-    telemetry("telemetry"),
     location("location"),
     userfeed("userfeed");
 

@@ -229,7 +229,9 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testEsTypeSuccess() {
     assertEquals(
         ProjectUtil.getConfigValue("user_index_alias"), ProjectUtil.EsType.user.getTypeName());
-    assertEquals("org", ProjectUtil.EsType.organisation.getTypeName());
+    assertEquals(
+        ProjectUtil.getConfigValue("org_index_alias"),
+        ProjectUtil.EsType.organisation.getTypeName());
     assertEquals("usernotes", ProjectUtil.EsType.usernotes.getTypeName());
   }
 
