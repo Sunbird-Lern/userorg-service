@@ -100,6 +100,7 @@ public class UserProfileReadService {
     }
 
     getManagedToken(actorMessage, userId, result, managedBy);
+
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
         && (userId.equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
@@ -111,16 +112,7 @@ public class UserProfileReadService {
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
-    String encEmail = (String) result.get(JsonKey.EMAIL);
-    String encPhone= (String) result.get(JsonKey.PHONE);
-
     UserUtility.decryptUserDataFrmES(result);
-    //Its used for Private user read api to display encoded email and encoded phone in api response
-    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
-    if(isPrivate) {
-      result.put((JsonKey.ENC_PHONE), encPhone);
-      result.put((JsonKey.ENC_EMAIL), encEmail);
-    }
     updateTnc(result);
     if (null != result.get(JsonKey.ALL_TNC_ACCEPTED)) {
       result.put(
@@ -132,14 +124,6 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
-    if (MapUtils.isNotEmpty(userTypeDetails)) {
-      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
-      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-    }else {
-      result.put(JsonKey.USER_TYPE, null);
-      result.put(JsonKey.USER_SUB_TYPE, null);
-    }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
@@ -252,6 +236,8 @@ public class UserProfileReadService {
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
+    responseMap.remove(JsonKey.ENC_EMAIL);
+    responseMap.remove(JsonKey.ENC_PHONE);
     responseMap.remove(JsonKey.ADDRESS);
     return responseMap;
   }
@@ -443,12 +429,14 @@ public class UserProfileReadService {
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
         List<Map<String, Object>> userLocations =
-            getUserLocations((List<String>) result.get(JsonKey.PROFILE_LOCATION), context);
+            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context);
         if (CollectionUtils.isNotEmpty(userLocations)) {
-          result.put(JsonKey.USER_LOCATIONS,userLocations);
+          result.put(
+              JsonKey.USER_LOCATIONS,
+              getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
+
           addSchoolLocation(result, context);
           result.remove(JsonKey.LOCATION_IDS);
-          result.remove(JsonKey.PROFILE_LOCATION);
         }
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
