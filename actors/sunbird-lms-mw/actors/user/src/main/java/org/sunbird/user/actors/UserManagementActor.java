@@ -59,8 +59,8 @@ import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.location.service.LocationService;
+import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -180,7 +180,7 @@ public class UserManagementActor extends BaseActor {
     if (isV4) {
       logger.info(
           actorMessage.getRequestContext(),
-  "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY));
+          "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY));
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       userMap.put(JsonKey.CREATED_BY, userId);
       // If user account isManagedUser (managedBy passed in request) should be same as context
@@ -189,7 +189,7 @@ public class UserManagementActor extends BaseActor {
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
-      profileUserType(userMap);
+      profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
   }
@@ -300,7 +300,7 @@ public class UserManagementActor extends BaseActor {
         organisation =
             organisationClient.esGetOrgByExternalId(
                 String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
-        null,
+                null,
                 actorMessage.getRequestContext());
         Map<String, Object> org =
             (Map<String, Object>) mapper.convertValue(organisation, Map.class);
@@ -428,17 +428,17 @@ public class UserManagementActor extends BaseActor {
                     // If not masked encrypt the plain text
                     map.put(JsonKey.ID, UserUtility.encryptData((String) map.get(JsonKey.ID)));
                   }
-                      break;
-                    default: // do nothing
-                  }
-                } catch (Exception e) {
-                  logger.error("Error in encrypting in the external id details", e);
-                  throw new ProjectCommonException(
-                      ResponseCode.dataEncryptionError.getErrorCode(),
-                      ResponseCode.dataEncryptionError.getErrorMessage(),
-                      ResponseCode.dataEncryptionError.getResponseCode());
-                }
-              });
+                  break;
+                default: // do nothing
+              }
+            } catch (Exception e) {
+              logger.error("Error in encrypting in the external id details", e);
+              throw new ProjectCommonException(
+                  ResponseCode.dataEncryptionError.getErrorCode(),
+                  ResponseCode.dataEncryptionError.getErrorMessage(),
+                  ResponseCode.dataEncryptionError.getResponseCode());
+            }
+          });
     }
   }
 
@@ -469,7 +469,7 @@ public class UserManagementActor extends BaseActor {
     removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
     logger.info(
         actorMessage.getRequestContext(),
-"UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+        "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
@@ -636,8 +636,7 @@ public class UserManagementActor extends BaseActor {
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
-    profileUserType(userMap);
-
+    profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
@@ -673,7 +672,7 @@ public class UserManagementActor extends BaseActor {
       if (StringUtils.isBlank(orgId)) {
         logger.info(
             actorMessage.getRequestContext(),
-    "UserManagementActor:createUser: No organisation with orgExternalId = "
+            "UserManagementActor:createUser: No organisation with orgExternalId = "
                 + orgExternalId
                 + " and channel = "
                 + channel);
@@ -688,7 +687,7 @@ public class UserManagementActor extends BaseActor {
           && !orgId.equals(userMap.get(JsonKey.ORGANISATION_ID))) {
         logger.info(
             actorMessage.getRequestContext(),
-    "UserManagementActor:createUser Mismatch of organisation from orgExternalId="
+            "UserManagementActor:createUser Mismatch of organisation from orgExternalId="
                 + orgExternalId
                 + " and channel="
                 + channel
@@ -831,7 +830,7 @@ public class UserManagementActor extends BaseActor {
     } else {
       logger.info(
           actorMessage.getRequestContext(),
-  "UserManagementActor:processUserRequest: User creation failure");
+          "UserManagementActor:processUserRequest: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
       saveUserToKafka(esResponse);
@@ -849,7 +848,7 @@ public class UserManagementActor extends BaseActor {
                     updatePasswordMap.put(JsonKey.PASSWORD, password);
                     logger.info(
                         actorMessage.getRequestContext(),
-                "Update password value passed "
+                        "Update password value passed "
                             + password
                             + " --"
                             + (String) userMap.get(JsonKey.ID));
@@ -858,34 +857,34 @@ public class UserManagementActor extends BaseActor {
                   } catch (Exception e) {
                     logger.error(
                         actorMessage.getRequestContext(),
-                "Error occurred during update password : " + e.getMessage(),
+                        "Error occurred during update password : " + e.getMessage(),
                         e);
                     return false;
                   }
                 }
               },
-                getContext().dispatcher());
+              getContext().dispatcher());
       Future<Response> future =
           saveUserToES(esResponse, actorMessage.getRequestContext())
               .zip(kcFuture)
               .map(
                   new Mapper<Tuple2<String, Boolean>, Response>() {
 
-                      @Override
-                      public Response apply(Tuple2<String, Boolean> parameter) {
-                        boolean updatePassResponse = parameter._2;
-                        logger.info(
-                            actorMessage.getRequestContext(),
-                    "UserManagementActor:processUserRequest: Response from update password call "
-                                + updatePassResponse);
-                        if (!updatePassResponse) {
-                          response.put(
-                              JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
-                        }
-                        return response;
+                    @Override
+                    public Response apply(Tuple2<String, Boolean> parameter) {
+                      boolean updatePassResponse = parameter._2;
+                      logger.info(
+                          actorMessage.getRequestContext(),
+                          "UserManagementActor:processUserRequest: Response from update password call "
+                              + updatePassResponse);
+                      if (!updatePassResponse) {
+                        response.put(
+                            JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
                       }
-                    },
-                    getContext().dispatcher());
+                      return response;
+                    }
+                  },
+                  getContext().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
 
@@ -1002,8 +1001,6 @@ public class UserManagementActor extends BaseActor {
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
     UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
-    List<Map<String,String>> locationsIdTypeList = locationService.getValidatedRelatedLocationIdAndType((List<String>)userMap.get(JsonKey.LOCATION_CODES),request.getRequestContext());
-    userMap.put(JsonKey.PROFILE_LOCATION,locationsIdTypeList);
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -1046,7 +1043,7 @@ public class UserManagementActor extends BaseActor {
     } else {
       logger.info(
           request.getRequestContext(),
-  "UserManagementActor:processUserRequest: User creation failure");
+          "UserManagementActor:processUserRequest: User creation failure");
     }
     // Enable this when you want to send full response of user attributes
     Map<String, Object> esResponse = new HashMap<>();
@@ -1067,7 +1064,7 @@ public class UserManagementActor extends BaseActor {
                   new Mapper<String, Response>() {
                     @Override
                     public Response apply(String parameter) {
-                        return syncResponse;
+                      return syncResponse;
                     }
                   },
                   context().dispatcher());
@@ -1175,17 +1172,25 @@ public class UserManagementActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      List<Map<String,String>>locationIdTypeList = locationService.getValidatedRelatedLocationIdAndType((List<String>)userMap.get(JsonKey.LOCATION_CODES),context);
+      List<Map<String, String>> locationIdTypeList =
+          locationService.getValidatedRelatedLocationIdAndType(
+              (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);
       if (locationIdTypeList != null && !locationIdTypeList.isEmpty()) {
-        userMap.put(JsonKey.PROFILE_LOCATION,locationIdTypeList);
+        try {
+          userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdTypeList));
+        } catch (Exception ex) {
+          logger.error(context, "Exception occurred while mapping", ex);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
+
         userMap.remove(JsonKey.LOCATION_CODES);
       } else {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
-                  ResponseCode.invalidParameterValue.getErrorMessage(),
-                  JsonKey.LOCATION_CODES,
-                  userMap.get(JsonKey.LOCATION_CODES)));
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                JsonKey.LOCATION_CODES,
+                userMap.get(JsonKey.LOCATION_CODES)));
       }
     }
   }
@@ -1368,7 +1373,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void validatePrimaryEmailOrPhone(
-     Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
+      Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
     String userPrimaryPhone = (String) userReqMap.get(JsonKey.PHONE);
     String userPrimaryEmail = (String) userReqMap.get(JsonKey.EMAIL);
     String recoveryEmail = (String) userDbRecord.get(JsonKey.RECOVERY_EMAIL);
@@ -1499,8 +1504,8 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> userMap, RequestContext context, String stateCode) {
     String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
     userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
-    //after all validations set userType and userSubtype to profileUsertype
-    profileUserType(userMap);
+    // after all validations set userType and userSubtype to profileUsertype
+    profileUserType(userMap, context);
   }
 
   private void validateLocationCodes(Request userRequest) {
@@ -1543,7 +1548,7 @@ public class UserManagementActor extends BaseActor {
         throw new ProjectCommonException(
             ResponseCode.invalidParameterValue.getErrorCode(),
             ProjectUtil.formatMessage(
-               ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.LOCATION_CODES),
+                ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.LOCATION_CODES),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
@@ -1615,17 +1620,22 @@ public class UserManagementActor extends BaseActor {
     return locations;
   }
 
-  private void profileUserType(Map<String,Object> userMap) {
+  private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
     Map<String, String> userTypeAndSubType = new HashMap<>();
-    if(userMap.containsKey(JsonKey.USER_TYPE)){
+    if (userMap.containsKey(JsonKey.USER_TYPE)) {
       userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
-      if(userMap.containsKey(JsonKey.USER_SUB_TYPE)){
+      if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
         userTypeAndSubType.put(JsonKey.SUB_TYPE, (String) userMap.get(JsonKey.USER_SUB_TYPE));
+      } else {
+        userTypeAndSubType.put(JsonKey.SUB_TYPE, null);
       }
-      else {
-        userTypeAndSubType.put(JsonKey.SUB_TYPE,null);
+      try {
+        userMap.put(JsonKey.PROFILE_USERTYPE, mapper.writeValueAsString(userTypeAndSubType));
+      } catch (Exception ex) {
+        logger.error(requestContext, "Exception occurred while mapping", ex);
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
-      userMap.put(JsonKey.PROFILE_USERTYPE,userTypeAndSubType);
+
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
     }
