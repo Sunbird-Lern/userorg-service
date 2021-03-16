@@ -42,7 +42,7 @@ public class OrgExternalService {
       String externalId, String provider, RequestContext context) {
     String orgId = getOrgIdFromOrgExternalIdAndProvider(externalId, provider, context);
     if (StringUtils.isNotBlank(orgId)) {
-      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORGANISATION);
+      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response orgResponse =
           getCassandraOperation()
               .getRecordById(KEYSPACE_NAME, orgDbInfo.getTableName(), orgId, context);
