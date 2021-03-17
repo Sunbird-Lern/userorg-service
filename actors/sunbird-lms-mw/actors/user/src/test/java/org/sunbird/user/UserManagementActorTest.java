@@ -42,8 +42,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
     boolean result =
         testScenario(
-            getRequest(
-                false, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
   }
@@ -73,6 +72,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
     reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCodes"));
+    reqMap.put(JsonKey.USER_TYPE, "userType");
+    reqMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
@@ -81,14 +82,40 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testUpdateUserFailureWithInvalidLocationCodes() {
+
+    reqMap.put(JsonKey.USER_TYPE, "userType");
+    reqMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
+    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("anyLocationCodes"));
+    boolean result =
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER),
+            ResponseCode.CLIENT_ERROR);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateUserFailureWithInvalidUserTypeAndSubtype() {
 
     reqMap.put(JsonKey.USER_TYPE, "anyUserType");
     reqMap.put(JsonKey.USER_SUB_TYPE, "anyUserSubType");
+    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("LocationCodes"));
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
             ResponseCode.invalidParameterValue);
+    assertTrue(result);
+  }
+
+  // @Test
+  public void testUpdateUserSuccessWithUserTypeAndSubtype() {
+
+    reqMap.put(JsonKey.USER_TYPE, "teacher");
+    reqMap.put(JsonKey.USER_SUB_TYPE, "deo");
+    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("anyLocationCodes"));
+    reqMap.remove(JsonKey.USER_NAME);
+    boolean result =
+        testScenario(getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
   }
 
@@ -175,6 +202,24 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
+  // @Test
+  public void testCreateUserSuccessWithLocationCode() {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(null);
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(
+            getRequest(
+                false,
+                false,
+                false,
+                getUpdateRequestWithLocationCodes(),
+                ActorOperations.CREATE_USER),
+            null);
+    assertTrue(result);
+  }
+
   /*  @Test
   public void testUpdateUserFailureWithLocationCodes() {
     Future<Object> future2 = Futures.future(() -> null, system.dispatcher());
@@ -197,7 +242,19 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
-        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
+        testScenario(getRequest(true, false, true, req, ActorOperations.UPDATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserFailure() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCodes"));
+    boolean result =
+        testScenario(
+            getRequest(true, false, true, req, ActorOperations.UPDATE_USER),
+            ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
 
@@ -227,6 +284,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
+
     boolean result =
         testScenario(
             getRequest(
@@ -275,7 +333,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
     boolean result =
         testScenario(
-            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.UPDATE_USER),
+            getRequest(
+                true, false, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
   }
