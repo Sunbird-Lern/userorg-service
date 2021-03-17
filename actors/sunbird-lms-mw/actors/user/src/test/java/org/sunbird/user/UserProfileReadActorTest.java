@@ -151,7 +151,6 @@ public class UserProfileReadActorTest {
     requestMap.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
-    when(ssoManager.getUsernameById(Mockito.anyString())).thenReturn(VALID_USERNAME);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
   }
