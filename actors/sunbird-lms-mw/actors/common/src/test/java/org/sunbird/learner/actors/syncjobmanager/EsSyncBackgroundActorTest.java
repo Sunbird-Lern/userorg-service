@@ -68,14 +68,6 @@ public class EsSyncBackgroundActorTest {
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyList(),
-            Mockito.any()))
-        .thenReturn(cassandraGetRecord());
-
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
 
@@ -85,6 +77,13 @@ public class EsSyncBackgroundActorTest {
 
   @Test
   public void testSync() {
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetLocationRecord());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -100,7 +99,76 @@ public class EsSyncBackgroundActorTest {
     assertTrue(true);
   }
 
-  private static Response cassandraGetRecord() {
+  @Test
+  public void testSyncOrg() {
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetOrgRecord());
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    probe.expectNoMessage();
+    assertTrue(true);
+  }
+
+  @Test
+  public void testSyncOrgFailure() {
+    Response response = cassandraGetOrgRecord();
+    Map<String, Object> org =
+        (Map<String, Object>) ((List) response.getResult().get(JsonKey.RESPONSE)).get(0);
+    org.put(JsonKey.ORG_LOCATION, "\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}");
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetOrgRecord());
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    probe.expectNoMessage();
+    assertTrue(true);
+  }
+
+  private static Response cassandraGetOrgRecord() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "anyId");
+    map.put(JsonKey.ORG_TYPE, "type");
+    map.put(JsonKey.ORG_NAME, "name");
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.ADDRESS_ID, "454981351");
+    map.put(
+        JsonKey.ORG_LOCATION,
+        "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
+    list.add(map);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
+  }
+
+  private static Response cassandraGetLocationRecord() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList();
     Map<String, Object> map = new HashMap<>();

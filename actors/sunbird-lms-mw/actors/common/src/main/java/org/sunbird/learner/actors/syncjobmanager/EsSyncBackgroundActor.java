@@ -176,7 +176,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     if (StringUtils.isNotBlank(orgLocation)) {
       try {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> orgLoc = mapper.readValue(orgLocation, Map.class);
+        List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
       } catch (Exception ex) {
         logger.error("Exception occurred while parsing orgLocation", ex);
