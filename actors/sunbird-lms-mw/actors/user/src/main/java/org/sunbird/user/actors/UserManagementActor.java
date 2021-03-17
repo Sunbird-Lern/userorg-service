@@ -92,7 +92,7 @@ public class UserManagementActor extends BaseActor {
   private static LocationClient locationClient = LocationClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
+  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private OrgExternalService orgExternalService = new OrgExternalService();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
@@ -227,7 +227,7 @@ public class UserManagementActor extends BaseActor {
 
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
-    boolean isCustodianOrgUser = isCustodianOrgUser(userMap, actorMessage.getRequestContext());
+    boolean isCustodianOrgUser = isCustodianOrgUser((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));
     encryptExternalDetails(userMap, userDbRecord);
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
@@ -305,9 +305,11 @@ public class UserManagementActor extends BaseActor {
       logger.info(
           actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
     }
-    response.put(
-        JsonKey.ERRORS,
-        ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
+    if (null != resp) {
+      response.put(
+          JsonKey.ERRORS,
+          ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
+    }
     sender().tell(response, self());
     // Managed-users should get ResetPassword Link
     if (resetPasswordLink) {
@@ -530,15 +532,12 @@ public class UserManagementActor extends BaseActor {
   }
 
   // Check if the user is Custodian Org user
-  private boolean isCustodianOrgUser(Map<String, Object> userMap, RequestContext context) {
-    boolean isCustodianOrgUser = false;
+  private boolean isCustodianOrgUser(String userRootOrgId) {
     String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    User user = userService.getUserById((String) userMap.get(JsonKey.USER_ID), context);
-    if (StringUtils.isNotBlank(custodianRootOrgId)
-        && user.getRootOrgId().equalsIgnoreCase(custodianRootOrgId)) {
-      isCustodianOrgUser = true;
+    if (StringUtils.isNotBlank(custodianRootOrgId) && StringUtils.isNotBlank(userRootOrgId)) {
+      return userRootOrgId.equalsIgnoreCase(custodianRootOrgId);
     }
-    return isCustodianOrgUser;
+    return false;
   }
 
   private void ignoreOrAcceptFrameworkData(
@@ -727,7 +726,7 @@ public class UserManagementActor extends BaseActor {
             && !fetchedRootOrgIdByChannel.equalsIgnoreCase(fetchedOrgById.getId())) {
           throwParameterMismatchException(JsonKey.CHANNEL, JsonKey.ORGANISATION_ID);
         }
-        userMap.put(JsonKey.ROOT_ORG_ID, fetchedOrgById);
+        userMap.put(JsonKey.ROOT_ORG_ID, fetchedOrgById.getId());
         userMap.put(JsonKey.CHANNEL, fetchedOrgById.getChannel());
       } else {
         if (StringUtils.isNotBlank(requestedChannel)) {
@@ -1035,14 +1034,14 @@ public class UserManagementActor extends BaseActor {
           request.getRequestContext(),
           "UserManagementActor:processUserRequest: User creation failure");
     }
-    // Enable this when you want to send full response of user attributes
     Map<String, Object> esResponse = new HashMap<>();
-    esResponse.putAll((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE));
-    esResponse.putAll(requestMap);
-    response.put(
-        JsonKey.ERRORS,
-        ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
-
+    if (null != resp) {
+      esResponse.putAll((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE));
+      esResponse.putAll(requestMap);
+      response.put(
+          JsonKey.ERRORS,
+          ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
+    }
     Response syncResponse = new Response();
     syncResponse.putAll(response.getResult());
 
