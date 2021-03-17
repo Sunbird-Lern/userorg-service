@@ -209,12 +209,6 @@ public class UserUtilityTest {
     assertNotEquals(state, response.get(0).get(JsonKey.STATE));
   }
 
-  @Test
-  public void maskEmailAndPhone() {
-
-  }
-
-
     @Test
   public void decryptUserDataSuccess() {
     String email = "test@test.com";
