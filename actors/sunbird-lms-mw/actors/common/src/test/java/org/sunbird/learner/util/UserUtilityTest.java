@@ -54,6 +54,154 @@ public class UserUtilityTest {
   }
 
   @Test
+  public void encryptUserSearchFilterQueryDataUserType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.FIRST_NAME, "test user");
+//    filterMap.put(JsonKey.EMAIL, email);
+//    filterMap.put(JsonKey.USER_NAME, userName);
+//    filterMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+//    filterMap.put(JsonKey.PROFILE_LOCATION,"location");
+    filterMap.put(JsonKey.USER_TYPE,"userType");
+//    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+//    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+//    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.USER_TYPE), response.get(JsonKey.USER_TYPE));
+//    assertNotEquals(email, response.get(JsonKey.EMAIL));
+//    assertNotEquals(
+//            "India",
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS)).get(0).get(JsonKey.COUNTRY));
+//    assertNotEquals(
+//            addressLine1,
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS))
+//                    .get(0)
+//                    .get(JsonKey.ADDRESS_LINE1));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataUserSubType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.FIRST_NAME, "test user");
+//    filterMap.put(JsonKey.EMAIL, email);
+//    filterMap.put(JsonKey.USER_NAME, userName);
+//    filterMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+//    filterMap.put(JsonKey.PROFILE_LOCATION,"location");
+//    filterMap.put(JsonKey.USER_TYPE,"userType");
+    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+//    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+//    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.USER_SUB_TYPE), response.get(JsonKey.USER_SUB_TYPE));
+//    assertNotEquals(email, response.get(JsonKey.EMAIL));
+//    assertNotEquals(
+//            "India",
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS)).get(0).get(JsonKey.COUNTRY));
+//    assertNotEquals(
+//            addressLine1,
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS))
+//                    .get(0)
+//                    .get(JsonKey.ADDRESS_LINE1));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataLocationID() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.FIRST_NAME, "test user");
+//    filterMap.put(JsonKey.EMAIL, email);
+//    filterMap.put(JsonKey.USER_NAME, userName);
+//    filterMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+//    filterMap.put(JsonKey.PROFILE_LOCATION,"location");
+//    filterMap.put(JsonKey.USER_TYPE,"userType");
+//    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+//    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.LOCATION_ID), response.get(JsonKey.LOCATION_ID));
+//    assertNotEquals(email, response.get(JsonKey.EMAIL));
+//    assertNotEquals(
+//            "India",
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS)).get(0).get(JsonKey.COUNTRY));
+//    assertNotEquals(
+//            addressLine1,
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS))
+//                    .get(0)
+//                    .get(JsonKey.ADDRESS_LINE1));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataLocationType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.FIRST_NAME, "test user");
+//    filterMap.put(JsonKey.EMAIL, email);
+//    filterMap.put(JsonKey.USER_NAME, userName);
+//    filterMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+//    filterMap.put(JsonKey.PROFILE_LOCATION,"location");
+//    filterMap.put(JsonKey.USER_TYPE,"userType");
+//    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+//    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.LOCATION_TYPE), response.get(JsonKey.LOCATION_TYPE));
+//    assertNotEquals(email, response.get(JsonKey.EMAIL));
+//    assertNotEquals(
+//            "India",
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS)).get(0).get(JsonKey.COUNTRY));
+//    assertNotEquals(
+//            addressLine1,
+//            ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS))
+//                    .get(0)
+//                    .get(JsonKey.ADDRESS_LINE1));
+  }
+
+  @Test
   public void maskEmailSuccess() {
 
     String encryptedEmailOrPhone = "83faTMUAMCytvey7r1YO0MHnqsEGnUX/aqmSu1yAxd6R1dR+YMTqHOaYHU+JJZVQP585CBoBMhM7\nLoa2aNhngY7iTVaXfgokBYvGoluOIup5RtZCQUyDc2q9XSJIZjMEILyZqVdLqh6jBDaqCJFQduEJ\nuzoARHoQChcwq6kCsZgnFWCD0sktTfn7UpvupyQMC9vfqupEDke/qFp3q+W4CiqbdO1p6iRRDot6\nSIdg78M=";
