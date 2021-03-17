@@ -42,7 +42,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
     boolean result =
         testScenario(
-            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            getRequest(
+                false, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
   }
@@ -204,17 +205,15 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccess() {
-
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
-        testScenario(getRequest(true, false, true, req, ActorOperations.UPDATE_USER), null);
+        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);
   }
 
   @Test
   public void testUpdateUserFailure() {
-
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCodes"));
     boolean result =
@@ -226,7 +225,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserUpdateEmailSuccess() {
-
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.PHONE, "4346345377");
     user.put(JsonKey.EMAIL, "username@gmail.com");
@@ -277,7 +275,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccessWithoutUserCallerId() {
-
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -291,8 +288,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
     boolean result =
         testScenario(
-            getRequest(
-                true, false, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
   }
@@ -303,7 +299,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, "teacher");
     req.put(JsonKey.USER_SUB_TYPE, "crc");
-
     Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
