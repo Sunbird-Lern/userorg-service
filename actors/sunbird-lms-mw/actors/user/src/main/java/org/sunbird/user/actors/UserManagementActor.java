@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -79,9 +77,7 @@ import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
-import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
@@ -314,7 +310,11 @@ public class UserManagementActor extends BaseActor {
       updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
+      resp =
+          userService.saveUserAttributes(
+              userRequest,
+              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
+              actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
@@ -1040,7 +1040,11 @@ public class UserManagementActor extends BaseActor {
       userRequest.putAll(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
-      resp = saveUserAttributes(userRequest, request.getRequestContext());
+      resp =
+          userService.saveUserAttributes(
+              userRequest,
+              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
+              request.getRequestContext());
     } else {
       logger.info(
           request.getRequestContext(),
@@ -1241,23 +1245,6 @@ public class UserManagementActor extends BaseActor {
     logger.info(
         context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
-  }
-
-  private Response saveUserAttributes(Map<String, Object> userMap, RequestContext context) {
-    Request request = new Request();
-    request.setRequestContext(context);
-    request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
-    request.getRequest().putAll(userMap);
-    logger.info(context, "UserManagementActor:saveUserAttributes");
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      ActorRef actorRef = getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      return (Response) Await.result(future, t.duration());
-    } catch (Exception e) {
-      logger.error(context, e.getMessage(), e);
-    }
-    return null;
   }
 
   private void removeUnwanted(Map<String, Object> reqMap) {
