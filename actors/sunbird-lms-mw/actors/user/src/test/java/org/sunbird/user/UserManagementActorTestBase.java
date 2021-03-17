@@ -1,9 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -14,13 +12,8 @@ import akka.pattern.Patterns;
 import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -52,6 +45,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.location.service.LocationService;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -92,13 +86,13 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
   public static final Props props = Props.create(UserManagementActor.class);
   public static Map<String, Object> reqMap;
   public static UserServiceImpl userService;
+  public static LocationService locationService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   public static UserClient userClient;
@@ -108,9 +102,9 @@ public abstract class UserManagementActorTestBase {
 
   @Before
   public void beforeEachTest() {
-    ActorRef actorRef = mock(ActorRef.class);
+    //    ActorRef actorRef = mock(ActorRef.class);
     PowerMockito.mockStatic(RequestRouter.class);
-    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
+    //    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
@@ -159,6 +153,9 @@ public abstract class UserManagementActorTestBase {
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
     when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
+    //    when(locationService.getValidatedRelatedLocationIdAndType(Mockito.anyList(),
+    // Mockito.any()))
+    //            .thenReturn(getLocationIdTypeList());
     when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationIdLists());
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
@@ -231,6 +228,15 @@ public abstract class UserManagementActorTestBase {
     when(organisationClient.esGetOrgByExternalId(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(org);
+  }
+
+  public List<Map<String, String>> getLocationIdTypeList() {
+    Map<String, String> idType = new HashMap<>();
+    idType.put(JsonKey.ID, "locationId");
+    idType.put(JsonKey.TYPE, "locationType");
+    List<Map<String, String>> idTypeList = new ArrayList<>();
+    idTypeList.add(idType);
+    return idTypeList;
   }
 
   public List<Location> getLocationLists() {
