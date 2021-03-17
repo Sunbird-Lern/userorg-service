@@ -134,58 +134,6 @@ public class UserUtilityTest {
   }
 
   @Test
-  public void maskEmailSuccess() {
-
-    String encryptedEmailOrPhone = "83faTMUAMCytvey7r1YO0MHnqsEGnUX/aqmSu1yAxd6R1dR+YMTqHOaYHU+JJZVQP585CBoBMhM7\nLoa2aNhngY7iTVaXfgokBYvGoluOIup5RtZCQUyDc2q9XSJIZjMEILyZqVdLqh6jBDaqCJFQduEJ\nuzoARHoQChcwq6kCsZgnFWCD0sktTfn7UpvupyQMC9vfqupEDke/qFp3q+W4CiqbdO1p6iRRDot6\nSIdg78M=";
-    String type = "email";
-    String response= new String();
-    try {
-      response = UserUtility.maskEmailOrPhone(encryptedEmailOrPhone,type);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-  @Test
-  public void maskPhoneSuccess() {
-
-    String encryptedEmailOrPhone = "3EHq5uRNS6TrtwPaonQ6bUNrOIEhbDme5CSmuHOI+LeJWA/giUyYrYFhKfDyD4LJh2069VfoAJzO\ni5A6BHjvRX3lsQT3KzpHnVVJSwW8X4i3Gveoy300T4reVL7EIcGfx2KqYVsB6+QnNoUp56PR4g==";
-    String type = "phone";
-    String response = new String();
-    try {
-      response = UserUtility.maskEmailOrPhone(encryptedEmailOrPhone, type);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-  @Test
-  public void maskPhoneValueNull() {
-
-    String encryptedEmailOrPhone = "";
-    String type = "phone";
-    String response = new String();
-    try {
-      response = UserUtility.maskEmailOrPhone(encryptedEmailOrPhone, type);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-  @Test
-  public void maskEmailValueNull() {
-
-    String encryptedEmailOrPhone = "";
-    String type = "email";
-    String response = new String();
-    try {
-      response = UserUtility.maskEmailOrPhone(encryptedEmailOrPhone, type);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-  @Test
   public void encryptUserAddressDataSuccess() {
     String city = "Bangalore";
     String addressLine1 = "xyz";
