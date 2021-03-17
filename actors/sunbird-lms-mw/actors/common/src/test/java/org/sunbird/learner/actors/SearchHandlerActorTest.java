@@ -137,6 +137,10 @@ public class SearchHandlerActorTest {
     filters.put(JsonKey.OBJECT_TYPE, objectType);
     filters.put(JsonKey.PROFILE_USERTYPE,"teacher");
     filters.put(JsonKey.PROFILE_LOCATION,"location");
+    filters.put(JsonKey.USER_TYPE,"userType");
+    filters.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    filters.put(JsonKey.LOCATION_ID,"locationID");
+    filters.put(JsonKey.LOCATION_TYPE,"type");
     filters.put(JsonKey.ROOT_ORG_ID, "ORG_001");
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);

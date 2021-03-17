@@ -21,6 +21,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
+    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION,"location");
+    userMap.put(JsonKey.USER_TYPE,"userType");
+    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    userMap.put(JsonKey.LOCATION_ID,"locationID");
+    userMap.put(JsonKey.LOCATION_TYPE,"type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
@@ -81,6 +87,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
+    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION,"location");
+    userMap.put(JsonKey.USER_TYPE,"userType");
+    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    userMap.put(JsonKey.LOCATION_ID,"locationID");
+    userMap.put(JsonKey.LOCATION_TYPE,"type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
