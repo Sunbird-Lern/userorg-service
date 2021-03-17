@@ -1,13 +1,10 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
-import controllers.usermanagement.validator.UserLoginRequestValidator;
+import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.concurrent.CompletionStage;
 
 public class UserLoginController extends BaseController {
   /**
@@ -20,9 +17,7 @@ public class UserLoginController extends BaseController {
     return handleRequest(
         ActorOperations.USER_CURRENT_LOGIN.getValue(),
         httpRequest.body().asJson(),
-        request -> {
-          new UserLoginRequestValidator().validateUpdateLoginTimeRequest((Request) request);
-          return null;
-        }, httpRequest);
+        request -> null,
+        httpRequest);
   }
 }
