@@ -66,7 +66,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserFailureWithInvalidChannelAndOrgId() {
 
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
@@ -107,7 +107,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSuccessWithUserTypeAndSubtype() {
 
     reqMap.put(JsonKey.USER_TYPE, "teacher");
