@@ -16,6 +16,7 @@ import org.sunbird.learner.util.Util;
 public class OrgDaoImpl implements OrgDao {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private OrgExternalService orgExternalService = new OrgExternalService();
   private static OrgDao orgDao = null;
 
   public static OrgDao getInstance() {
@@ -43,7 +44,6 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Map<String, Object> getOrgByExternalId(
       String externalId, String provider, RequestContext context) {
-    OrgExternalService orgExternalService = new OrgExternalService();
     String orgId =
         orgExternalService.getOrgIdFromOrgExternalIdAndProvider(externalId, provider, context);
     return getOrgById(orgId, context);

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -18,7 +18,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.CassandraUtil;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.RequestContext;
@@ -45,20 +44,22 @@ import org.sunbird.learner.util.Util;
 })
 public class OrgDaoImplTest {
 
-  private CassandraOperation cassandraOperation;
-  private static ElasticSearchService esService;
+  private static CassandraOperation cassandraOperation;
+  private static OrgExternalService orgExternalService = null;
 
-  @Before
-  public void setUp() {
+  @BeforeClass
+  public static void setUp() throws Exception {
     PowerMockito.mockStatic(Util.class);
+    orgExternalService = PowerMockito.mock(OrgExternalService.class);
+    PowerMockito.whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
+    cassandraOperation = PowerMockito.mock(CassandraOperation.class);
+    PowerMockito.mockStatic(ServiceFactory.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
   }
 
   @Test
   public void testGetOrgById() {
     try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       Response response = new Response();
       List<Map<String, Object>> orgList = new ArrayList<>();
       Map<String, Object> map = new HashMap<>();
@@ -84,9 +85,6 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByIdWithEmptyResponse() {
     try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       Response response = new Response();
       List<Map<String, Object>> orgList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, orgList);
@@ -108,9 +106,6 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByExternalId() {
     try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       Response response = new Response();
       List<Map<String, Object>> orgList = new ArrayList<>();
       Map<String, Object> map = new HashMap<>();
@@ -124,10 +119,7 @@ public class OrgDaoImplTest {
               Mockito.anyString(),
               Mockito.any(RequestContext.class)))
           .thenReturn(response);
-      OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-      PowerMockito.whenNew(OrgExternalService.class)
-          .withNoArguments()
-          .thenReturn(orgExternalService);
+
       PowerMockito.when(
               orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                   Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
@@ -156,10 +148,6 @@ public class OrgDaoImplTest {
               Mockito.anyString(),
               Mockito.any(RequestContext.class)))
           .thenReturn(response);
-      OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-      PowerMockito.whenNew(OrgExternalService.class)
-          .withNoArguments()
-          .thenReturn(orgExternalService);
       PowerMockito.when(
               orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                   Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
