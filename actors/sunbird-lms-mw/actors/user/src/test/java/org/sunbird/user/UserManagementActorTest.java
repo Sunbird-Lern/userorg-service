@@ -21,6 +21,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -386,6 +387,22 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserSuccessWithLocationCode() {
+    //    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    //    when(Patterns.ask(
+    //            Mockito.any(ActorRef.class), Mockito.any(Request.class),
+    // Mockito.any(Timeout.class)))
+    //            .thenReturn(future);
+    when(LocationServiceImpl.getInstance()).thenReturn(locationService);
+    when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+        .thenReturn(getLocationIdType());
+    reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCode"));
+    boolean result =
+        testScenario(getRequest(true, true, true, reqMap, ActorOperations.CREATE_USER), null);
     assertTrue(result);
   }
 }
