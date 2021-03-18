@@ -151,7 +151,10 @@ public class UserProfileReadService {
       int year = Integer.parseInt(dob.split("-")[0]);
       LocalDate currentdate = LocalDate.now();
       int currentYear = currentdate.getYear();
-      boolean isMinor = (currentYear - year < 18) ? true : false;
+      // reason for keeping 19 instead of 18 is, all dob's will be saving with 12-31 appending to
+      // the year so 18 will be completed in the jan 1st
+      // for eg: 2004-12-31 will become major after 2023 jan 1st.
+      boolean isMinor = (currentYear - year <= 19) ? true : false;
       result.put(JsonKey.IS_MINOR, isMinor);
     }
   }
