@@ -1,7 +1,9 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -12,8 +14,13 @@ import akka.pattern.Patterns;
 import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -45,13 +52,10 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UserManagementActor;
-import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -64,7 +68,6 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   Util.class,
   SystemSettingClientImpl.class,
-  UserService.class,
   UserServiceImpl.class,
   UserUtil.class,
   Patterns.class,
@@ -80,9 +83,7 @@ import scala.concurrent.Promise;
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
   ActorRef.class,
-  RequestRouter.class,
-  LocationService.class,
-  LocationServiceImpl.class
+  RequestRouter.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -91,30 +92,35 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
   public static final Props props = Props.create(UserManagementActor.class);
   public static Map<String, Object> reqMap;
-  public static UserService userService;
+  public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   public static UserClient userClient;
   private static OrganisationClient organisationClient;
   private LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
-  public static LocationService locationService;
 
   @Before
   public void beforeEachTest() {
+//    ActorRef actorRef = mock(ActorRef.class);
+    PowerMockito.mockStatic(RequestRouter.class);
+//    when(RequestRouter.getActor(Mockito.anyString())).thenReturn(actorRef);
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
     PowerMockito.mockStatic(BaseMWService.class);
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
-
     cassandraOperation = mock(CassandraOperationImpl.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -160,19 +166,9 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(FormApiUtilHandler.class);
     PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
         .thenReturn(getFormApiConfig());
-
-    PowerMockito.mockStatic(LocationServiceImpl.class);
-    locationService = mock(LocationServiceImpl.class);
-    when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
-        .thenReturn(getLocationIdType());
-
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getUserById(Mockito.any(), Mockito.any())).thenReturn(getUser(false));
-    when(userService.saveUserAttributes(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(getSaveResponse());
     when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
         .thenReturn("anyId");
     when(userService.getCustodianChannel(
@@ -186,11 +182,6 @@ public abstract class UserManagementActorTestBase {
     when(UserLookUpServiceImpl.getInstance()).thenReturn(userLookupService);
     when(userLookupService.insertRecords(Mockito.anyList(), Mockito.any()))
         .thenReturn(getSuccessResponse());
-
-    PowerMockito.mockStatic(EsClientFactory.class);
-    esService = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -240,15 +231,6 @@ public abstract class UserManagementActorTestBase {
     when(organisationClient.esGetOrgByExternalId(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(org);
-  }
-
-  public List<Map<String, String>> getLocationIdTypeList() {
-    Map<String, String> idType = new HashMap<>();
-    idType.put(JsonKey.ID, "locationId");
-    idType.put(JsonKey.TYPE, "locationType");
-    List<Map<String, String>> idTypeList = new ArrayList<>();
-    idTypeList.add(idType);
-    return idTypeList;
   }
 
   public List<Location> getLocationLists() {
@@ -513,20 +495,5 @@ public abstract class UserManagementActorTestBase {
       user.setRootOrgId("custodianOrgId");
     }
     return user;
-  }
-
-  public Response getSaveResponse() {
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, new HashMap<String, Object>());
-    return response;
-  }
-
-  public List<Map<String, String>> getLocationIdType() {
-    List<Map<String, String>> locationIdType = new ArrayList<>();
-    Map<String, String> idType = new HashMap<>();
-    idType.put(JsonKey.ID, "id");
-    idType.put(JsonKey.TYPE, "type");
-    locationIdType.add(idType);
-    return locationIdType;
   }
 }

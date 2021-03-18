@@ -32,7 +32,7 @@ public class RequestInterceptor {
 
   static {
     restrictedUriList = new ArrayList<>();
-    restrictedUriList.add("/v1/user/update");
+//    restrictedUriList.add("/v1/user/update");
     restrictedUriList.add("/v1/note/create");
     restrictedUriList.add("/v1/note/update");
     restrictedUriList.add("/v1/note/search");
@@ -45,6 +45,9 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
     apiHeaderIgnoreMap.put("/v3/user/create", var);
+    apiHeaderIgnoreMap.put("/v1/user/search", var);
+    apiHeaderIgnoreMap.put("/v1/user/update", var);
+    apiHeaderIgnoreMap.put("/v1/user/read",var);
     apiHeaderIgnoreMap.put("/v1/user/signup", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/service/health", var);
@@ -53,6 +56,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v2/notification", var);
     apiHeaderIgnoreMap.put("/v1/data/sync", var);
     apiHeaderIgnoreMap.put("/v1/file/upload", var);
+    apiHeaderIgnoreMap.put("/v1/user/upload", var);
     apiHeaderIgnoreMap.put("/v1/user/getuser", var);
     // making org read as public access
     apiHeaderIgnoreMap.put("/v1/org/read", var);

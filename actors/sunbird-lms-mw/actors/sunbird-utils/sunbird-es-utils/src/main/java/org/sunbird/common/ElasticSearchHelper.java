@@ -177,6 +177,8 @@ public class ElasticSearchHelper {
     if (JsonKey.FILTERS.equalsIgnoreCase(key)) {
 
       Map<String, Object> filters = (Map<String, Object>) entry.getValue();
+//      String ty = "profileUserType";
+//      filters.put(JsonKey.KEY, ty);
       for (Map.Entry<String, Object> en : filters.entrySet()) {
         query = createFilterESOpperation(en, query, constraintsMap);
       }
@@ -210,6 +212,12 @@ public class ElasticSearchHelper {
   private static BoolQueryBuilder createFilterESOpperation(
       Entry<String, Object> entry, BoolQueryBuilder query, Map<String, Float> constraintsMap) {
     String key = entry.getKey();
+//    if (key=="userType"){
+//      key.replace("userType","profileUserType.Type");
+//    }
+//    else if (key=="subType"){
+//      key.replace("userType","profileUserType.subType");
+//    }
     Object val = entry.getValue();
     if (val instanceof List && val != null) {
       query = getTermQueryFromList(val, key, query, constraintsMap);
