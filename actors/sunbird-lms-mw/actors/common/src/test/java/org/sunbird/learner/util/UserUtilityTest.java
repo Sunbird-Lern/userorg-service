@@ -53,86 +53,86 @@ public class UserUtilityTest {
             .get(JsonKey.ADDRESS_LINE1));
   }
 
-  @Test
-  public void encryptUserSearchFilterQueryDataUserType() {
-    String email = "test@test.com";
-    String userName = "test_user";
-    String city = "Bangalore";
-    String addressLine1 = "xyz";
-    Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.USER_TYPE,"userType");
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
-    Map<String, Object> response = null;
-    try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    assertEquals(filterMap.get(JsonKey.USER_TYPE), response.get(JsonKey.USER_TYPE));
-  }
+//  @Test
+//  public void encryptUserSearchFilterQueryDataUserType() {
+//    String email = "test@test.com";
+//    String userName = "test_user";
+//    String city = "Bangalore";
+//    String addressLine1 = "xyz";
+//    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.USER_TYPE,"userType");
+//    Map<String, Object> map = new HashMap<String, Object>();
+//    map.put(JsonKey.FILTERS,filterMap);
+//    Map<String, Object> response = null;
+//    try {
+//      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+//    } catch (Exception e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    assertEquals(filterMap.get(JsonKey.USER_TYPE), response.get(JsonKey.USER_TYPE));
+//  }
 
-  @Test
-  public void encryptUserSearchFilterQueryDataUserSubType() {
-    String email = "test@test.com";
-    String userName = "test_user";
-    String city = "Bangalore";
-    String addressLine1 = "xyz";
-    Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
-    Map<String, Object> response = null;
-    try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    assertEquals(filterMap.get(JsonKey.USER_SUB_TYPE), response.get(JsonKey.USER_SUB_TYPE));
-  }
+//  @Test
+//  public void encryptUserSearchFilterQueryDataUserSubType() {
+//    String email = "test@test.com";
+//    String userName = "test_user";
+//    String city = "Bangalore";
+//    String addressLine1 = "xyz";
+//    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+//    Map<String, Object> map = new HashMap<String, Object>();
+//    map.put(JsonKey.FILTERS,filterMap);
+//    Map<String, Object> response = null;
+//    try {
+//      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+//    } catch (Exception e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    assertEquals(filterMap.get(JsonKey.USER_SUB_TYPE), response.get(JsonKey.USER_SUB_TYPE));
+//  }
+//
+//  @Test
+//  public void encryptUserSearchFilterQueryDataLocationID() {
+//    String email = "test@test.com";
+//    String userName = "test_user";
+//    String city = "Bangalore";
+//    String addressLine1 = "xyz";
+//    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+//    Map<String, Object> map = new HashMap<String, Object>();
+//    map.put(JsonKey.FILTERS,filterMap);
+//    Map<String, Object> response = null;
+//    try {
+//      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+//    } catch (Exception e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    assertEquals(filterMap.get(JsonKey.LOCATION_ID), response.get(JsonKey.LOCATION_ID));
+//  }
 
-  @Test
-  public void encryptUserSearchFilterQueryDataLocationID() {
-    String email = "test@test.com";
-    String userName = "test_user";
-    String city = "Bangalore";
-    String addressLine1 = "xyz";
-    Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.LOCATION_ID,"locationID");
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
-    Map<String, Object> response = null;
-    try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    assertEquals(filterMap.get(JsonKey.LOCATION_ID), response.get(JsonKey.LOCATION_ID));
-  }
-
-  @Test
-  public void encryptUserSearchFilterQueryDataLocationType() {
-    String email = "test@test.com";
-    String userName = "test_user";
-    String city = "Bangalore";
-    String addressLine1 = "xyz";
-    Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.LOCATION_TYPE,"type");
-    Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
-    Map<String, Object> response = null;
-    try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    assertEquals(filterMap.get(JsonKey.LOCATION_TYPE), response.get(JsonKey.LOCATION_TYPE));
-  }
-
+//  @Test
+//  public void encryptUserSearchFilterQueryDataLocationType() {
+//    String email = "test@test.com";
+//    String userName = "test_user";
+//    String city = "Bangalore";
+//    String addressLine1 = "xyz";
+//    Map<String, Object> filterMap = new HashMap<String, Object>();
+//    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+//    Map<String, Object> map = new HashMap<String, Object>();
+//    map.put(JsonKey.FILTERS,filterMap);
+//    Map<String, Object> response = null;
+//    try {
+//      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+//    } catch (Exception e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+//    assertEquals(filterMap.get(JsonKey.LOCATION_TYPE), response.get(JsonKey.LOCATION_TYPE));
+//  }
+//
   @Test
   public void encryptUserAddressDataSuccess() {
     String city = "Bangalore";

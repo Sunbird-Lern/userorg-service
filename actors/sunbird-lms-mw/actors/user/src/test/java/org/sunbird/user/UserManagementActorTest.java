@@ -26,14 +26,26 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+
 public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithUserCallerId() {
+    reqMap.put(JsonKey.PASSWORD,"password@123");
     boolean result =
         testScenario(
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
-            null);
+                ResponseCode.passwordValidation);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailiureWithPasswordMismatch() {
+    reqMap.put(JsonKey.PASSWORD,"password@123");
+    boolean result =
+            testScenario(
+                    getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+                    ResponseCode.passwordValidation);
     assertTrue(result);
   }
 
@@ -205,6 +217,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccess() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -213,18 +226,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testUpdateUserFailure() {
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCodes"));
-    boolean result =
-        testScenario(
-            getRequest(true, false, true, req, ActorOperations.UPDATE_USER),
-            ResponseCode.mandatoryParamsMissing);
-    assertTrue(result);
-  }
-
-  @Test
   public void testUpdateUserUpdateEmailSuccess() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.PHONE, "4346345377");
     user.put(JsonKey.EMAIL, "username@gmail.com");
@@ -247,6 +250,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     boolean result =
         testScenario(
             getRequest(
@@ -275,6 +279,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserSuccessWithoutUserCallerId() {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     boolean result =
@@ -285,6 +290,10 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   @Test
   public void testCreateUserSuccessWithUserTypeAsTeacher() {
     reqMap.put(JsonKey.USER_TYPE, "teacher");
+
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId")
+        .thenReturn("");
 
     boolean result =
         testScenario(
@@ -299,6 +308,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, "teacher");
     req.put(JsonKey.USER_SUB_TYPE, "crc");
+    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(getUser(false));
     Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
