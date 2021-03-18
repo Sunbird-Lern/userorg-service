@@ -75,6 +75,7 @@ public class UserProfileReadService {
     }
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
+    appendUserTypeAndLocation(result,actorMessage.getRequestContext());
     result.put(
         JsonKey.ROOT_ORG,
         orgDao.getOrgById(
@@ -133,25 +134,37 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    Map<String, Object> userTypeDetails = null;
+
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, result);
+    return response;
+  }
+  public void appendUserTypeAndLocation(Map<String, Object> result,RequestContext context){
+    Map<String, Object> userTypeDetails = new HashMap<>();
     try {
       userTypeDetails = mapper.readValue((String) result.get(JsonKey.PROFILE_USERTYPE), new TypeReference<Map<String, Object>>() {});
     } catch (Exception e) {
       logger.error(
-              actorMessage.getRequestContext(), "Exception because of mapper read value" ,e);
+              context, "Exception because of mapper read value" ,e);
     }
     if (MapUtils.isNotEmpty(userTypeDetails)) {
       result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
       result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-      result.put(JsonKey.PROFILE_USERTYPE,userTypeDetails);
     }else{
       result.put(JsonKey.USER_TYPE, null);
       result.put(JsonKey.USER_SUB_TYPE, null);
-      result.put(JsonKey.PROFILE_USERTYPE, new HashMap<>());
     }
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, result);
-    return response;
+    result.put(JsonKey.PROFILE_USERTYPE,userTypeDetails);
+
+    List<Map<String, String>> userLocList=new ArrayList<>();
+    try {
+      userLocList = mapper.readValue((String) result.get(JsonKey.PROFILE_LOCATION), new TypeReference <List<Map<String, String>>>() {});
+
+    }catch (Exception ex){
+      logger.error(context, "Exception occurred while mapping", ex);
+    }
+    result.put(JsonKey.PROFILE_LOCATION,userLocList);
+
   }
 
   private void appendMinorFlag(Map<String, Object> result) {
@@ -439,13 +452,7 @@ public class UserProfileReadService {
 
   public void addExtraFieldsInUserProfileResponse(
       Map<String, Object> result, String fields, RequestContext context) {
-    List<Map<String, String>> userLocList=new ArrayList<>();
-    try {
-      userLocList =  mapper.readValue((String)result.get(JsonKey.PROFILE_LOCATION),new TypeReference<List<Map<String, String>>>() {});
-    }catch (Exception ex){
-      logger.error(context, "Exception occurred while mapping", ex);
-    }
-    result.put(JsonKey.PROFILE_LOCATION,userLocList);
+
     if (!StringUtils.isBlank(fields)) {
       result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (fields.contains(JsonKey.TOPIC)) {
@@ -458,6 +465,7 @@ public class UserProfileReadService {
         result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
+        List<Map<String, String>> userLocList=(List<Map<String, String>>)result.get(JsonKey.PROFILE_LOCATION);
         if(CollectionUtils.isNotEmpty(userLocList)) {
           List<String> locationIds = userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
           List<Map<String, Object>> userLocations =
