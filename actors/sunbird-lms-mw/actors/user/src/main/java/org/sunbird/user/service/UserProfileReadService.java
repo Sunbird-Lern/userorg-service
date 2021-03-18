@@ -153,7 +153,7 @@ public class UserProfileReadService {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
-  }
+   }
 
   private void appendMinorFlag(Map<String, Object> result) {
     String dob = (String) result.get(JsonKey.DOB);

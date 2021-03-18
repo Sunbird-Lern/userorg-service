@@ -156,7 +156,7 @@ private void backwardCompatibility(Map<String, Object> searchQueryMap) {
           logger.error(request.getRequestContext(), "Exception occurred while mapping", ex);
         }
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          userMap.put(JsonKey.LOCATION_IDS, locationIds);
+           userMap.put(JsonKey.LOCATION_IDS, locationIds);
         }
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
