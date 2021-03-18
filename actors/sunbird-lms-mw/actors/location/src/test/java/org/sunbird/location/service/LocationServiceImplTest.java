@@ -1,5 +1,6 @@
 package org.sunbird.location.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -41,7 +42,9 @@ public class LocationServiceImplTest {
     when(DataCacheHandler.getLocationOrderMap()).thenReturn(getLocationOrderMap());
     LocationService locationService = LocationServiceImpl.getInstance();
     List<String> codeList = getCodeList();
-    locationService.getValidatedRelatedLocationIdAndType(codeList, new RequestContext());
+    List<Map<String, String>> locationIdType =
+        locationService.getValidatedRelatedLocationIdAndType(codeList, new RequestContext());
+    assertEquals(result(), locationIdType);
   }
 
   public List<String> getCodeList() {
@@ -67,5 +70,14 @@ public class LocationServiceImplTest {
     orderMap.put("state", 1);
     orderMap.put("district", 2);
     return orderMap;
+  }
+
+  public static List<Map<String, String>> result() {
+    List<Map<String, String>> result = new ArrayList<>();
+    Map<String, String> idType = new HashMap<>();
+    idType.put("id", "id1");
+    idType.put("type", "state");
+    result.add(idType);
+    return result;
   }
 }
