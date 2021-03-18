@@ -133,7 +133,7 @@
         "raw": {
           "type": "keyword"
         }
-      }
+      },
       "analyzer": "cs_search_analyzer",
       "search_analyzer": "cs_search_analyzer"
     },
@@ -168,9 +168,9 @@
       "type": "keyword",
       "fields": {
         "raw": {
-          "type": "keyword",
+          "type": "keyword"
         }
-      },
+      }
     },
     "orgTypeId": {
       "type": "keyword",
