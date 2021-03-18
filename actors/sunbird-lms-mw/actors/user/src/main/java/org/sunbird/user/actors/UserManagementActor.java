@@ -707,7 +707,7 @@ public class UserManagementActor extends BaseActor {
         OrgService orgService = OrgServiceImpl.getInstance();
         Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
         if (MapUtils.isNotEmpty(orgMap)) {
-          userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+          userMap.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
         }
       }
     }
@@ -1444,8 +1444,19 @@ public class UserManagementActor extends BaseActor {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
+        String profLoc = (String) userDbRecord.get(JsonKey.PROFILE_LOCATION);
+        List<String> locationIds = null;
+        try {
+          List<Map<String, String>> profLocList =
+              mapper.readValue(profLoc, new TypeReference<List<Map<String, String>>>() {});
+          if (CollectionUtils.isNotEmpty(profLocList)) {
+            locationIds =
+                profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          }
+        } catch (Exception ex) {
+          logger.error(context, "Exception occurred while mapping", ex);
+        }
         // Get location code from user records locations Ids
-        List<String> locationIds = (List<String>) userDbRecord.get(JsonKey.LOCATION_IDS);
         logger.info(
             context,
             String.format(
