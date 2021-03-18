@@ -27,7 +27,6 @@ public final class JsonKey {
   public static final String ACTOR_TYPE = "actorType";
   public static final String ADD_TYPE = "addType";
   public static final String ADDED_BY = "addedBy";
-  public static final String ADDED_BY_NAME = "addedByName";
   public static final String ADDITIONAL_INFO = "ADDITIONAL_INFO";
   public static final String ADDRESS = "address";
   public static final String ADDRESS_DB = "address";
@@ -37,7 +36,6 @@ public final class JsonKey {
   public static final String API_ACCESS = "api_access";
   public static final String API_ACTOR_PROVIDER = "api_actor_provider";
   public static final String API_CALL = "API_CALL";
-  public static final String APPROOVE_DATE = "approvalDate";
   public static final String APPROVED_BY = "approvedBy";
   public static final String APPROVED_DATE = "approvedDate";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
@@ -76,7 +74,6 @@ public final class JsonKey {
   public static final String CREATE = "create";
   public static final String CREATED_BY = "createdBy";
   public static final String CREATED_DATE = "createdDate";
-  public static final String CURRENT_LOGIN_TIME = "currentLoginTime";
   public static final String CURRENT_STATE = "CURRENT_STATE";
   public static final String DATA = "data";
   public static final String KEY = "key";
@@ -107,7 +104,6 @@ public final class JsonKey {
   public static final String EMAIL_TEMPLATE_TYPE = "emailTemplateType";
   public static final String EMAIL_UNIQUE = "emailUnique";
   public static final String EMAIL_VERIFIED = "emailVerified";
-  public static final String EMAIL_VERIFIED_UPDATED = "emailVerifiedUpdated";
   public static final String EMBEDDED = "embedded";
   public static final String ENC_EMAIL = "encEmail";
   public static final String ENC_PHONE = "encPhone";
@@ -149,8 +145,6 @@ public final class JsonKey {
   public static final String IS_APPROVED = "isApproved";
   public static final String IS_AUTH_REQ = "isAuthReq";
   public static final String IS_DELETED = "isDeleted";
-  public static final String IS_REJECTED = "isRejected";
-  public static final String IS_SSO_ENABLED = "sso.enabled";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";
   public static final String LAST_LOGIN_TIME = "lastLoginTime";
@@ -200,11 +194,8 @@ public final class JsonKey {
   public static final String ORG_ID = "orgId";
   public static final String ORG_IMAGE_URL = "orgImageUrl";
   public static final String ORG_JOIN_DATE = "orgJoinDate";
-  public static final String ORG_LEFT_DATE = "orgLeftDate";
   public static final String ORG_NAME = "orgName";
-  public static final String ORG_TYPE = "orgType";
-  public static final String ORG_TYPE_DB = "org_type";
-  public static final String ORG_TYPE_ID = "orgTypeId";
+  public static final String ORG_TYPE = "organisationType";
   public static final String ORGANISATION = "organisation";
   public static final String ORGANISATION_ID = "organisationId";
   public static final String ORGANISATION_NAME = "orgName";

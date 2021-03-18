@@ -166,6 +166,10 @@
     },
     "orgType": {
       "type": "keyword",
+      "index": false
+    },
+    "organisationType": {
+      "type": "keyword",
       "fields": {
         "raw": {
           "type": "keyword"

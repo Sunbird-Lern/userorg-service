@@ -97,7 +97,9 @@ public class OrganisationManagementActor extends BaseActor {
           && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
         ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
       }
-      validateOrgType((String) request.get(JsonKey.ORG_TYPE), JsonKey.CREATE);
+      String orgType = (String) request.get(JsonKey.ORG_TYPE);
+      validateOrgType(orgType, JsonKey.CREATE);
+      request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
       // Channel is mandatory for all org
       channelMandatoryValidation(request);
       String channel = (String) request.get(JsonKey.CHANNEL);
@@ -310,7 +312,8 @@ public class OrganisationManagementActor extends BaseActor {
     for (OrgTypeEnum type : OrgTypeEnum.values()) {
       orgTypeList.add(type.getType());
     }
-    if (!orgTypeList.contains(orgType)) {
+
+    if (StringUtils.isNotBlank(orgType) && !orgTypeList.contains(orgType)) {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           MessageFormat.format(
@@ -413,7 +416,11 @@ public class OrganisationManagementActor extends BaseActor {
           && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
         ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
       }
-      validateOrgType((String) request.get(JsonKey.ORG_TYPE), JsonKey.UPDATE);
+      String orgType = (String) request.get(JsonKey.ORG_TYPE);
+      validateOrgType(orgType, JsonKey.UPDATE);
+      if (StringUtils.isNotBlank(orgType)) {
+        request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
+      }
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       OrgService orgService = OrgServiceImpl.getInstance();
       Map<String, Object> dbOrgDetails =
@@ -608,14 +615,19 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
-      if (StringUtils.isNotBlank(orgLocation)) {
-        try {
-          updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
-        } catch (Exception e) {
-          logger.info(
-              actorMessage.getRequestContext(),
-              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+      try {
+        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)) {
+          updateOrgDao.put(
+              JsonKey.ORG_TYPE,
+              OrgTypeEnum.getTypeByValue((Integer) updateOrgDao.get(JsonKey.ORG_TYPE)));
         }
+        if (StringUtils.isNotBlank(orgLocation)) {
+          updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        }
+      } catch (Exception e) {
+        logger.info(
+            actorMessage.getRequestContext(),
+            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
 
       Request orgRequest = new Request();

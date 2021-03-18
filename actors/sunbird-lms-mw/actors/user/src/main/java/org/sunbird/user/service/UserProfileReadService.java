@@ -112,12 +112,12 @@ public class UserProfileReadService {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
     String encEmail = (String) result.get(JsonKey.EMAIL);
-    String encPhone= (String) result.get(JsonKey.PHONE);
+    String encPhone = (String) result.get(JsonKey.PHONE);
 
     UserUtility.decryptUserDataFrmES(result);
-    //Its used for Private user read api to display encoded email and encoded phone in api response
+    // Its used for Private user read api to display encoded email and encoded phone in api response
     boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
-    if(isPrivate) {
+    if (isPrivate) {
       result.put((JsonKey.ENC_PHONE), encPhone);
       result.put((JsonKey.ENC_EMAIL), encEmail);
     }
@@ -132,11 +132,12 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    Map<String, Object> userTypeDetails = (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
+    Map<String, Object> userTypeDetails =
+        (Map<String, Object>) result.get(JsonKey.PROFILE_USERTYPE);
     if (MapUtils.isNotEmpty(userTypeDetails)) {
       result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
       result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-    }else {
+    } else {
       result.put(JsonKey.USER_TYPE, null);
       result.put(JsonKey.USER_SUB_TYPE, null);
     }
@@ -433,7 +434,7 @@ public class UserProfileReadService {
     if (!StringUtils.isBlank(fields)) {
       result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (fields.contains(JsonKey.TOPIC)) {
-        fetchTopicOfAssociatedOrgs(result, context);
+        result.put(JsonKey.TOPICS, new HashSet<>());
       }
       if (fields.contains(JsonKey.ORGANISATIONS)) {
         updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
@@ -445,7 +446,7 @@ public class UserProfileReadService {
         List<Map<String, Object>> userLocations =
             getUserLocations((List<String>) result.get(JsonKey.PROFILE_LOCATION), context);
         if (CollectionUtils.isNotEmpty(userLocations)) {
-          result.put(JsonKey.USER_LOCATIONS,userLocations);
+          result.put(JsonKey.USER_LOCATIONS, userLocations);
           addSchoolLocation(result, context);
           result.remove(JsonKey.LOCATION_IDS);
           result.remove(JsonKey.PROFILE_LOCATION);
@@ -619,63 +620,5 @@ public class UserProfileReadService {
       }
     }
     return retList;
-  }
-
-  private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
-    Set<String> topicSet = new HashSet<>();
-    List<Map<String, Object>> userOrgList =
-        (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-    if (CollectionUtils.isNotEmpty(userOrgList)) {
-      List<String> orgIdList =
-          userOrgList
-              .stream()
-              .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
-              .distinct()
-              .collect(Collectors.toList());
-
-      // fetch all org details from cassandra ...
-      if (CollectionUtils.isNotEmpty(orgIdList)) {
-        List<String> orgfields = new ArrayList<>();
-        orgfields.add(JsonKey.ID);
-        orgfields.add(JsonKey.LOCATION_ID);
-        Response userOrgResponse =
-            cassandraOperation.getPropertiesValueById(
-                OrgDb.getKeySpace(), OrgDb.getTableName(), orgIdList, orgfields, context);
-        List<Map<String, Object>> orgResponseList =
-            (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-
-        if (CollectionUtils.isNotEmpty(orgResponseList)) {
-          List<String> locationIdList = new ArrayList<>();
-          for (Map<String, Object> org : orgResponseList) {
-            String locId = (String) org.get(JsonKey.LOCATION_ID);
-            if (StringUtils.isNotBlank(locId)) {
-              locationIdList.add(locId);
-            }
-          }
-          if (CollectionUtils.isNotEmpty(locationIdList)) {
-            List<String> geoLocationFields = new ArrayList<>();
-            geoLocationFields.add(JsonKey.TOPIC);
-            Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
-            Response geoLocationResponse =
-                cassandraOperation.getPropertiesValueById(
-                    geoLocationDbInfo.getKeySpace(),
-                    geoLocationDbInfo.getTableName(),
-                    locationIdList,
-                    geoLocationFields,
-                    context);
-            List<Map<String, Object>> geoLocationResponseList =
-                (List<Map<String, Object>>) geoLocationResponse.get(JsonKey.RESPONSE);
-            List<String> topicList =
-                geoLocationResponseList
-                    .stream()
-                    .map(m -> (String) m.get(JsonKey.TOPIC))
-                    .distinct()
-                    .collect(Collectors.toList());
-            topicSet.addAll(topicList);
-          }
-        }
-      }
-    }
-    result.put(JsonKey.TOPICS, topicSet);
   }
 }
