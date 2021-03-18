@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -59,6 +57,8 @@ import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.location.service.LocationService;
+import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -77,9 +77,7 @@ import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
-import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
@@ -90,6 +88,7 @@ public class UserManagementActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private static LocationClient locationClient = LocationClientImpl.getInstance();
+  private static LocationService locationService = LocationServiceImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private OrganisationClient organisationClient = new OrganisationClientImpl();
@@ -186,6 +185,8 @@ public class UserManagementActor extends BaseActor {
 
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
+    } else {
+      profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
   }
@@ -263,11 +264,6 @@ public class UserManagementActor extends BaseActor {
         && StringUtils.isBlank((String) requestMap.get(JsonKey.RECOVERY_PHONE))) {
       requestMap.put(JsonKey.RECOVERY_PHONE, null);
     }
-    // update userSubType to null if userType is changed and subType are not provided
-    if (requestMap.containsKey(JsonKey.USER_TYPE)
-        && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
-      requestMap.put(JsonKey.USER_SUB_TYPE, null);
-    }
 
     Map<String, Boolean> userBooleanMap =
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
@@ -314,7 +310,11 @@ public class UserManagementActor extends BaseActor {
       updateUserOrganisations(actorMessage);
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      resp = saveUserAttributes(userRequest, actorMessage.getRequestContext());
+      resp =
+          userService.saveUserAttributes(
+              userRequest,
+              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
+              actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
@@ -638,7 +638,7 @@ public class UserManagementActor extends BaseActor {
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
-
+    profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
@@ -1040,7 +1040,11 @@ public class UserManagementActor extends BaseActor {
       userRequest.putAll(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
-      resp = saveUserAttributes(userRequest, request.getRequestContext());
+      resp =
+          userService.saveUserAttributes(
+              userRequest,
+              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
+              request.getRequestContext());
     } else {
       logger.info(
           request.getRequestContext(),
@@ -1172,13 +1176,17 @@ public class UserManagementActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      List<String> locationIdList =
-          locationClient.getRelatedLocationIds(
-              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-              (List<String>) userMap.get(JsonKey.LOCATION_CODES),
-              context);
-      if (locationIdList != null && !locationIdList.isEmpty()) {
-        userMap.put(JsonKey.LOCATION_IDS, locationIdList);
+      List<Map<String, String>> locationIdTypeList =
+          locationService.getValidatedRelatedLocationIdAndType(
+              (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);
+      if (locationIdTypeList != null && !locationIdTypeList.isEmpty()) {
+        try {
+          userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdTypeList));
+        } catch (Exception ex) {
+          logger.error(context, "Exception occurred while mapping", ex);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
+
         userMap.remove(JsonKey.LOCATION_CODES);
       } else {
         ProjectCommonException.throwClientErrorException(
@@ -1237,23 +1245,6 @@ public class UserManagementActor extends BaseActor {
     logger.info(
         context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
-  }
-
-  private Response saveUserAttributes(Map<String, Object> userMap, RequestContext context) {
-    Request request = new Request();
-    request.setRequestContext(context);
-    request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
-    request.getRequest().putAll(userMap);
-    logger.info(context, "UserManagementActor:saveUserAttributes");
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      ActorRef actorRef = getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      return (Response) Await.result(future, t.duration());
-    } catch (Exception e) {
-      logger.error(context, e.getMessage(), e);
-    }
-    return null;
   }
 
   private void removeUnwanted(Map<String, Object> reqMap) {
@@ -1487,7 +1478,7 @@ public class UserManagementActor extends BaseActor {
           validateUserTypeAndSubType(userMap, context, stateCode);
         }
       } else {
-        // If location is null or empty .Vlidate with default config
+        // If location is null or empty .Validate with default config
         logger.info(
             context,
             String.format("Validating UserType for state code:%s", JsonKey.DEFAULT_PERSONA));
@@ -1500,6 +1491,8 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> userMap, RequestContext context, String stateCode) {
     String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
     userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
+    // after all validations set userType and userSubtype to profileUsertype
+    profileUserType(userMap, context);
   }
 
   private void validateLocationCodes(Request userRequest) {
@@ -1612,5 +1605,26 @@ public class UserManagementActor extends BaseActor {
       locations.add(location);
     }
     return locations;
+  }
+
+  private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
+    Map<String, String> userTypeAndSubType = new HashMap<>();
+    if (userMap.containsKey(JsonKey.USER_TYPE)) {
+      userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
+      if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
+        userTypeAndSubType.put(JsonKey.SUB_TYPE, (String) userMap.get(JsonKey.USER_SUB_TYPE));
+      } else {
+        userTypeAndSubType.put(JsonKey.SUB_TYPE, null);
+      }
+      try {
+        userMap.put(JsonKey.PROFILE_USERTYPE, mapper.writeValueAsString(userTypeAndSubType));
+      } catch (Exception ex) {
+        logger.error(requestContext, "Exception occurred while mapping", ex);
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
+
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
   }
 }
