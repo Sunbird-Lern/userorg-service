@@ -149,9 +149,8 @@ public final class UserUtility {
   }
 
   public static Map<String, Object> encryptUserSearchFilterQueryData(Map<String, Object> map)
-          throws Exception {
+      throws Exception {
     Map<String, Object> filterMap = (Map<String, Object>) map.get(JsonKey.FILTERS);
-    Map<String, String> userTypeAndSubType= new HashMap<>();
     EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
     // Encrypt user basic info
     for (String key : userKeyToEncrypt) {
@@ -163,8 +162,8 @@ public final class UserUtility {
     for (String key : addressKeyToEncrypt) {
       if ((filterMap).containsKey((JsonKey.ADDRESS + "." + key))) {
         filterMap.put(
-                (JsonKey.ADDRESS + "." + key),
-                service.encryptData((String) filterMap.get(JsonKey.ADDRESS + "." + key), null));
+            (JsonKey.ADDRESS + "." + key),
+            service.encryptData((String) filterMap.get(JsonKey.ADDRESS + "." + key), null));
       }
     }
     return filterMap;

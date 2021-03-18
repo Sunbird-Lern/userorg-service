@@ -157,7 +157,7 @@ public class UserUtilityTest {
     assertNotEquals(state, response.get(0).get(JsonKey.STATE));
   }
 
-    @Test
+  @Test
   public void decryptUserDataSuccess() {
     String email = "test@test.com";
     String userName = "test_user";
