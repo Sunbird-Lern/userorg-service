@@ -333,7 +333,7 @@ public class TenantMigrationActor extends BaseActor {
                     ResponseCode.parameterMismatch.getErrorMessage(),
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
           } else {
-            migrateReq.put(JsonKey.LOCATION_IDS, result.get(JsonKey.LOCATION_IDS));
+            migrateReq.put(JsonKey.PROFILE_LOCATION, result.get(JsonKey.ORG_LOCATION));
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {

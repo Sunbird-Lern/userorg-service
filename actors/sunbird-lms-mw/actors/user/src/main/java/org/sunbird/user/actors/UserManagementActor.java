@@ -647,7 +647,7 @@ public class UserManagementActor extends BaseActor {
         OrgService orgService = OrgServiceImpl.getInstance();
         Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
         if (MapUtils.isNotEmpty(orgMap)) {
-          userMap.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+          userMap.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
         }
       }
     }
@@ -1528,9 +1528,10 @@ public class UserManagementActor extends BaseActor {
       // Throw an exception if location codes update is not passed with state code
       if (StringUtils.isBlank(stateCode)) {
         throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
+            ResponseCode.mandatoryParamsMissing.getErrorCode(),
             ProjectUtil.formatMessage(
-                ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.LOCATION_CODES),
+                ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+                JsonKey.LOCATION_CODES + " of type State"),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();

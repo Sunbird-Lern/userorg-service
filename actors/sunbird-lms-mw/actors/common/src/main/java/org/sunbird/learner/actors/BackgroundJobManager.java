@@ -35,7 +35,6 @@ import scala.concurrent.Future;
     "insertOrgInfoToElastic",
     "updateOrgInfoToElastic",
     "updateUserOrgES",
-    "removeUserOrgES",
     "insertUserNotesToElastic",
     "updateUserNotesToElastic",
   }
@@ -55,8 +54,6 @@ public class BackgroundJobManager extends BaseActor {
       insertOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.REMOVE_USER_ORG_ES.getValue())) {
-      removeUserOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ROLES_ES.getValue())) {
       updateUserRoleToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
@@ -92,40 +89,6 @@ public class BackgroundJobManager extends BaseActor {
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
         (String) result.get(JsonKey.USER_ID),
-        result,
-        actorMessage.getRequestContext());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void removeUserOrgInfoToEs(Request actorMessage) {
-    Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(),
-            (String) orgMap.get(JsonKey.USER_ID),
-            actorMessage.getRequestContext());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (result.containsKey(JsonKey.ORGANISATIONS) && null != result.get(JsonKey.ORGANISATIONS)) {
-      List<Map<String, Object>> orgMapList =
-          (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-      if (null != orgMapList) {
-        Iterator<Map<String, Object>> itr = orgMapList.iterator();
-        while (itr.hasNext()) {
-          Map<String, Object> map = itr.next();
-          if ((((String) map.get(JsonKey.USER_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.USER_ID)))
-              && (((String) map.get(JsonKey.ORGANISATION_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.ORGANISATION_ID)))) {
-            itr.remove();
-          }
-        }
-      }
-    }
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.IDENTIFIER),
         result,
         actorMessage.getRequestContext());
   }
