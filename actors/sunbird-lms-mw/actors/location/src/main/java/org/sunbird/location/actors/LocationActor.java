@@ -244,35 +244,29 @@ public class LocationActor extends BaseLocationActor {
 
   public Set<String> getValidatedRelatedLocationSet(
       List<Location> locationList, RequestContext context) {
-    Set<Location> locationSet = new HashSet<>();
+    Map<String, Location> locationSet = new HashMap<>();
     for (Location requestedLocation : locationList) {
       Set<Location> parentLocnSet = getParentLocations(requestedLocation, context);
-      if (CollectionUtils.sizeIsEmpty(locationSet)) {
-        locationSet.addAll(parentLocnSet);
-      } else {
-        for (Location currentLocation : parentLocnSet) {
-          String type = currentLocation.getType();
-          locationSet
-              .stream()
-              .forEach(
-                  location -> {
-                    if (type.equalsIgnoreCase(location.getType())
-                        && !(currentLocation.getId().equals(location.getId()))) {
-                      throw new ProjectCommonException(
-                          ResponseCode.conflictingOrgLocations.getErrorCode(),
-                          ProjectUtil.formatMessage(
-                              ResponseCode.conflictingOrgLocations.getErrorMessage(),
-                              requestedLocation.getCode(),
-                              location.getCode(),
-                              type),
-                          ResponseCode.CLIENT_ERROR.getResponseCode());
-                    }
-                  });
-          locationSet.add(currentLocation);
+      for (Location currentLocation : parentLocnSet) {
+        String type = currentLocation.getType();
+        Location location = locationSet.get(type);
+        if (null != location) {
+          if (!(currentLocation.getId().equals(location.getId()))) {
+            throw new ProjectCommonException(
+                ResponseCode.conflictingOrgLocations.getErrorCode(),
+                ProjectUtil.formatMessage(
+                    ResponseCode.conflictingOrgLocations.getErrorMessage(),
+                    requestedLocation.getCode(),
+                    location.getCode(),
+                    type),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+        } else {
+          locationSet.put(type, currentLocation);
         }
       }
     }
-    return locationSet.stream().map(Location::getId).collect(Collectors.toSet());
+    return locationSet.values().stream().map(Location::getId).collect(Collectors.toSet());
   }
 
   private Set<Location> getParentLocations(Location locationObj, RequestContext context) {
