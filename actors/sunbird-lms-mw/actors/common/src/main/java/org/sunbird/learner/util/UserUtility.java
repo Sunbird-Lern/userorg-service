@@ -168,49 +168,6 @@ public final class UserUtility {
       }
     }
     return filterMap;
-  }//new method for modified user table containg profilelocation and profileusertype
-  public static Map<String, Object> encryptUserSearchFilterQueryDataNew(Map<String, Object> map)
-      throws Exception {
-    Map<String, Object> filterMap = (Map<String, Object>) map.get(JsonKey.FILTERS);
-    Map<String, String> userTypeAndSubType= new HashMap<>();
-    Map<String, String> userLocation= new HashMap<>();
-    if(filterMap.containsKey("userType")) {
-      userTypeAndSubType.put(JsonKey.TYPE, (String) filterMap.get("userType"));
-      filterMap.remove(JsonKey.USER_TYPE);
-      filterMap.put(JsonKey.PROFILE_USERTYPE,userTypeAndSubType);
-    }
-    else if (filterMap.containsKey("userSubType")) {
-      userTypeAndSubType.put(JsonKey.SUB_TYPE, (String) filterMap.get("userSubType"));
-      filterMap.remove(JsonKey.USER_SUB_TYPE);
-      filterMap.put(JsonKey.PROFILE_USERTYPE,userTypeAndSubType);
-    }
-    else if (filterMap.containsKey("locationID")){
-      userLocation.put(JsonKey.LOCATION_ID, (String) filterMap.get("locationId"));
-      filterMap.remove(JsonKey.LOCATION_ID);
-      filterMap.put(JsonKey.PROFILE_LOCATION,userLocation);
-    }
-    else if (filterMap.containsKey("type")){
-      userLocation.put(JsonKey.LOCATION_TYPE, (String) filterMap.get("type"));
-      filterMap.remove(JsonKey.LOCATION_TYPE);
-      filterMap.put(JsonKey.PROFILE_LOCATION,userLocation);
-    }
-
-    EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
-    // Encrypt user basic info
-    for (String key : userKeyToEncrypt) {
-      if (filterMap.containsKey(key)) {
-        filterMap.put(key, service.encryptData((String) filterMap.get(key), null));
-      }
-    }
-    // Encrypt user address Info
-    for (String key : addressKeyToEncrypt) {
-      if ((filterMap).containsKey((JsonKey.ADDRESS + "." + key))) {
-        filterMap.put(
-            (JsonKey.ADDRESS + "." + key),
-            service.encryptData((String) filterMap.get(JsonKey.ADDRESS + "." + key), null));
-      }
-    }
-    return filterMap;
   }
 
   public static String encryptData(String data) throws Exception {

@@ -65,7 +65,7 @@ public class UserUtilityTest {
     map.put(JsonKey.FILTERS,filterMap);
     Map<String, Object> response = null;
     try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -85,7 +85,7 @@ public class UserUtilityTest {
     map.put(JsonKey.FILTERS,filterMap);
     Map<String, Object> response = null;
     try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -105,7 +105,7 @@ public class UserUtilityTest {
     map.put(JsonKey.FILTERS,filterMap);
     Map<String, Object> response = null;
     try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -125,7 +125,7 @@ public class UserUtilityTest {
     map.put(JsonKey.FILTERS,filterMap);
     Map<String, Object> response = null;
     try {
-      response = UserUtility.encryptUserSearchFilterQueryDataNew(map);
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
