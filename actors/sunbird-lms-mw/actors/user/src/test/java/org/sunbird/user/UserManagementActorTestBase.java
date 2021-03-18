@@ -52,10 +52,13 @@ import org.sunbird.learner.organisation.external.identity.service.OrgExternalSer
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtilHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.location.service.LocationService;
+import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UserManagementActor;
+import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -68,6 +71,7 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   Util.class,
   SystemSettingClientImpl.class,
+  UserService.class,
   UserServiceImpl.class,
   UserUtil.class,
   Patterns.class,
@@ -83,7 +87,8 @@ import scala.concurrent.Promise;
   BaseMWService.class,
   SunbirdMWService.class,
   ActorSelection.class,
-  OrgExternalService.class
+  OrgExternalService.class,
+  LocationServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -108,6 +113,7 @@ public abstract class UserManagementActorTestBase {
   protected static OrganisationClient organisationClient;
   private LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
+  public static LocationService locationService;
 
   @Before
   public void beforeEachTest() {
@@ -118,6 +124,7 @@ public abstract class UserManagementActorTestBase {
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
     when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
+
     cassandraOperation = mock(CassandraOperationImpl.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -166,9 +173,19 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(FormApiUtilHandler.class);
     PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
         .thenReturn(getFormApiConfig());
+
+    PowerMockito.mockStatic(LocationServiceImpl.class);
+    locationService = mock(LocationServiceImpl.class);
+    when(LocationServiceImpl.getInstance()).thenReturn(locationService);
+    when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+        .thenReturn(getLocationIdType());
+
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
+    when(userService.getUserById(Mockito.any(), Mockito.any())).thenReturn(getUser(false));
+    when(userService.saveUserAttributes(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(getSaveResponse());
     when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
         .thenReturn("anyId");
     when(userService.getCustodianChannel(
@@ -243,6 +260,15 @@ public abstract class UserManagementActorTestBase {
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
+  }
+
+  public List<Map<String, String>> getLocationIdTypeList() {
+    Map<String, String> idType = new HashMap<>();
+    idType.put(JsonKey.ID, "locationId");
+    idType.put(JsonKey.TYPE, "locationType");
+    List<Map<String, String>> idTypeList = new ArrayList<>();
+    idTypeList.add(idType);
+    return idTypeList;
   }
 
   public List<Location> getLocationLists() {
@@ -507,5 +533,20 @@ public abstract class UserManagementActorTestBase {
       user.setRootOrgId("custodianOrgId");
     }
     return user;
+  }
+
+  public Response getSaveResponse() {
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, new HashMap<String, Object>());
+    return response;
+  }
+
+  public List<Map<String, String>> getLocationIdType() {
+    List<Map<String, String>> locationIdType = new ArrayList<>();
+    Map<String, String> idType = new HashMap<>();
+    idType.put(JsonKey.ID, "id");
+    idType.put(JsonKey.TYPE, "type");
+    locationIdType.add(idType);
+    return locationIdType;
   }
 }
