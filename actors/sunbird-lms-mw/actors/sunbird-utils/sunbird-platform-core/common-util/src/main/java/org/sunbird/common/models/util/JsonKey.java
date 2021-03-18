@@ -419,7 +419,6 @@ public final class JsonKey {
   public static final String SUNBIRD_API_REQUEST_LOWER_CASE_FIELDS =
       "sunbird_api_request_lower_case_fields";
   public static final String ATTRIBUTE = "attribute";
-  public static final String USERID = "userid";
   public static final String ERRORS = "errors";
   public static final String ROLE_LIST = "roleList";
   public static final String CALLER_ID = "callerId";
