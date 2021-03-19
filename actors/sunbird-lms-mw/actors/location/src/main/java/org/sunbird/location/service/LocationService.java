@@ -1,10 +1,10 @@
 package org.sunbird.location.service;
 
-import org.sunbird.common.request.RequestContext;
-
 import java.util.List;
 import java.util.Map;
+import org.sunbird.common.request.RequestContext;
 
 public interface LocationService {
-    List<Map<String, String>> getValidatedRelatedLocationIdAndType(List<String> codeList, RequestContext context);
+  List<Map<String, String>> getValidatedRelatedLocationIdAndType(
+      List<String> codeList, RequestContext context);
 }

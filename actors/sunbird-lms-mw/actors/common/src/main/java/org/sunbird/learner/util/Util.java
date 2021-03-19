@@ -120,9 +120,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_DB, getDbInfoObject(KEY_SPACE_NAME, "user"));
     dbInfoMap.put(JsonKey.ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "organisation"));
     dbInfoMap.put(JsonKey.ADDRESS_DB, getDbInfoObject(KEY_SPACE_NAME, "address"));
-
-    dbInfoMap.put(JsonKey.ORG_MAP_DB, getDbInfoObject(KEY_SPACE_NAME, "org_mapping"));
-    dbInfoMap.put(JsonKey.ORG_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "org_type"));
     dbInfoMap.put(JsonKey.ROLE, getDbInfoObject(KEY_SPACE_NAME, "role"));
     dbInfoMap.put(JsonKey.URL_ACTION, getDbInfoObject(KEY_SPACE_NAME, "url_action"));
     dbInfoMap.put(JsonKey.ACTION_GROUP, getDbInfoObject(KEY_SPACE_NAME, "action_group"));
@@ -134,7 +131,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.MEDIA_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "media_type"));
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
-    dbInfoMap.put(JsonKey.GEO_LOCATION_DB, getDbInfoObject(KEY_SPACE_NAME, "geo_location"));
     dbInfoMap.put(JsonKey.SYSTEM_SETTINGS_DB, getDbInfoObject(KEY_SPACE_NAME, "system_settings"));
     dbInfoMap.put(JsonKey.USER_CERT, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_CERT));
     dbInfoMap.put(JsonKey.USER_FEED_DB, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_FEED_DB));
@@ -706,7 +702,7 @@ public final class Util {
       logger.error(context, e.getMessage(), e);
     }
     String username = "";
-    if (!(userList.isEmpty())) {
+    if (CollectionUtils.isNotEmpty(userList)) {
       userDetails = userList.get(0);
       username = (String) userDetails.get(JsonKey.USERNAME);
       logger.info(context, "Util:getUserDetails: userId = " + userId);
@@ -729,7 +725,30 @@ public final class Util {
       userDetails.remove(JsonKey.PASSWORD);
       addEmailAndPhone(userDetails);
       checkEmailAndPhoneVerified(userDetails);
-
+      List<Map<String, String>> userLocList = new ArrayList<>();
+      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+      if (StringUtils.isNotBlank(profLocation)) {
+        try {
+          userLocList = mapper.readValue(profLocation, List.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+      Map<String, Object> userTypeDetail = new HashMap<>();
+      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+      if (StringUtils.isNotBlank(profUserType)) {
+        try {
+          userTypeDetail = mapper.readValue(profUserType, Map.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileUserType to Map<String,String>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
     } else {
       logger.info(
           context,

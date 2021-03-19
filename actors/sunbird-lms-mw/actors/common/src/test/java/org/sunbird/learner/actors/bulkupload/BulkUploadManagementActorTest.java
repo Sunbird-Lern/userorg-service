@@ -354,7 +354,7 @@ public class BulkUploadManagementActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ORGANISATION_ID, refOrgId);
-    orgMap.put(JsonKey.IS_ROOT_ORG, true);
+    orgMap.put(JsonKey.IS_TENANT, true);
     orgMap.put(JsonKey.EXTERNAL_ID, "externalId");
     orgMap.put(JsonKey.PROVIDER, "provider");
     orgMap.put(JsonKey.ID, refOrgId);

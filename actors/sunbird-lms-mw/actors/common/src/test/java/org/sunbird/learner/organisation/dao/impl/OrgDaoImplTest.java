@@ -1,15 +1,13 @@
 package org.sunbird.learner.organisation.dao.impl;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -20,17 +18,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.CassandraUtil;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
+import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.Util;
-import scala.concurrent.Promise;
+import org.sunbird.models.organisation.OrgTypeEnum;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -38,9 +33,7 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   CassandraOperation.class,
   CassandraUtil.class,
-  ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
-  EsClientFactory.class,
+  OrgExternalService.class,
   Util.class
 })
 @PowerMockIgnore({
@@ -52,35 +45,35 @@ import scala.concurrent.Promise;
 })
 public class OrgDaoImplTest {
 
-  private CassandraOperation cassandraOperation;
-  private static ElasticSearchService esService;
+  private static CassandraOperation cassandraOperation;
+  private static OrgExternalService orgExternalService = null;
 
-  @Before
-  public void setUp() {
+  @BeforeClass
+  public static void setUp() throws Exception {
     PowerMockito.mockStatic(Util.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
-    esService = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    orgExternalService = PowerMockito.mock(OrgExternalService.class);
+    PowerMockito.whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
+    cassandraOperation = PowerMockito.mock(CassandraOperation.class);
+    PowerMockito.mockStatic(ServiceFactory.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
   }
 
   @Test
   public void testGetOrgById() {
     try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       Response response = new Response();
       List<Map<String, Object>> orgList = new ArrayList<>();
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.CONTACT_DETAILS, "contact");
       map.put(JsonKey.ID, "contact");
+      map.put(JsonKey.ORG_TYPE, OrgTypeEnum.BOARD.getValue());
+      map.put(
+          JsonKey.ORG_LOCATION,
+          "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
       orgList.add(map);
       response.put(JsonKey.RESPONSE, orgList);
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.any(RequestContext.class)))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
           .thenReturn(response);
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.getOrgById("1234567890", null);
@@ -94,9 +87,6 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByIdWithEmptyResponse() {
     try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       Response response = new Response();
       List<Map<String, Object>> orgList = new ArrayList<>();
       response.put(JsonKey.RESPONSE, orgList);
@@ -118,12 +108,26 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByExternalId() {
     try {
-      PowerMockito.mockStatic(EsClientFactory.class);
-      ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
-      when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-      setEsSearchResponse(getOrgSearchResponseMap());
+      Response response = new Response();
+      List<Map<String, Object>> orgList = new ArrayList<>();
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.CONTACT_DETAILS, "contact");
+      map.put(JsonKey.ID, "contact");
+      orgList.add(map);
+      response.put(JsonKey.RESPONSE, orgList);
+      when(cassandraOperation.getRecordById(
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.any(RequestContext.class)))
+          .thenReturn(response);
+
+      PowerMockito.when(
+              orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+                  Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+          .thenReturn("");
       OrgDao orgDao = OrgDaoImpl.getInstance();
-      Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);
+      Map<String, Object> resp = orgDao.getOrgByExternalId("1234567890", "provider", null);
       Assert.assertNotNull(resp);
 
     } catch (Exception e) {
@@ -134,42 +138,28 @@ public class OrgDaoImplTest {
   @Test
   public void testGetOrgByExternalIdWithEmptyResponse() {
     try {
-      PowerMockito.mockStatic(EsClientFactory.class);
-      ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
-      when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-      setEsSearchResponse(getOrgSearchEmptyResponseMap());
+      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
+      PowerMockito.mockStatic(ServiceFactory.class);
+      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+      Response response = new Response();
+      List<Map<String, Object>> orgList = new ArrayList<>();
+      response.put(JsonKey.RESPONSE, orgList);
+      when(cassandraOperation.getRecordById(
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.any(RequestContext.class)))
+          .thenReturn(response);
+      PowerMockito.when(
+              orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+                  Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+          .thenReturn("");
       OrgDao orgDao = OrgDaoImpl.getInstance();
-      Map<String, Object> resp = orgDao.esGetOrgByExternalId("1234567890", "provider", null);
+      Map<String, Object> resp = orgDao.getOrgByExternalId("1234567890", "provider", null);
       Assert.assertNotNull(resp);
 
     } catch (Exception e) {
       Assert.assertNotNull(e);
     }
-  }
-
-  public void setEsSearchResponse(Map<String, Object> esResponse) {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(esResponse);
-    when(esService.search(
-            Mockito.anyObject(), Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(promise.future());
-  }
-
-  private static Map<String, Object> getOrgSearchResponseMap() {
-    Map<String, Object> map = new HashMap<>();
-    Map<String, Object> response = new HashMap<>();
-    response.put(JsonKey.ID, "123");
-    response.put(JsonKey.ORG_NAME, "Name");
-    List contentList = new ArrayList<>();
-    contentList.add(response);
-    map.put(JsonKey.CONTENT, contentList);
-    return map;
-  }
-
-  private static Map<String, Object> getOrgSearchEmptyResponseMap() {
-    Map<String, Object> map = new HashMap<>();
-    List contentList = new ArrayList<>();
-    map.put(JsonKey.CONTENT, contentList);
-    return map;
   }
 }

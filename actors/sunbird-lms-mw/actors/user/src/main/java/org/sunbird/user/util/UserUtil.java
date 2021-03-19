@@ -610,7 +610,7 @@ public class UserUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private static List<Map<String, Object>> getUserOrgDetails(
+  public static List<Map<String, Object>> getUserOrgDetails(
       boolean isdeleted, String userId, RequestContext context) {
     List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
@@ -649,11 +649,6 @@ public class UserUtil {
       logger.error(e.getMessage(), e);
     }
     return organisations;
-  }
-
-  public static List<Map<String, Object>> getAllUserOrgDetails(
-      String userId, RequestContext context) {
-    return getUserOrgDetails(false, userId, context);
   }
 
   public static void toLower(Map<String, Object> userMap) {
@@ -803,7 +798,7 @@ public class UserUtil {
       try {
         Map<String, Object> searchQueryMap = new HashMap<>();
         Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.IS_ROOT_ORG, true);
+        filters.put(JsonKey.IS_TENANT, true);
         filters.put(JsonKey.CHANNEL, providers);
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);

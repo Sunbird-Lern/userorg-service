@@ -1,7 +1,6 @@
 package org.sunbird.learner.organisation.service.impl;
 
 import java.util.Map;
-import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
@@ -9,7 +8,6 @@ import org.sunbird.learner.organisation.service.OrgService;
 
 public class OrgServiceImpl implements OrgService {
 
-  private LoggerUtil logger = new LoggerUtil(OrgServiceImpl.class);
   private OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService = null;
 
@@ -26,8 +24,8 @@ public class OrgServiceImpl implements OrgService {
   }
 
   @Override
-  public Map<String, Object> esGetOrgByExternalId(
+  public Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
-    return orgDao.esGetOrgByExternalId(externalId, provider, context);
+    return orgDao.getOrgByExternalId(externalId, provider, context);
   }
 }
