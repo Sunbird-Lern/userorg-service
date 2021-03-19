@@ -25,6 +25,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -65,13 +66,14 @@ public class OrgDaoImplTest {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.CONTACT_DETAILS, "contact");
       map.put(JsonKey.ID, "contact");
+      map.put(JsonKey.ORG_TYPE, OrgTypeEnum.BOARD.getValue());
+      map.put(
+          JsonKey.ORG_LOCATION,
+          "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
       orgList.add(map);
       response.put(JsonKey.RESPONSE, orgList);
       when(cassandraOperation.getRecordById(
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.any(RequestContext.class)))
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
           .thenReturn(response);
       OrgDao orgDao = OrgDaoImpl.getInstance();
       Map<String, Object> resp = orgDao.getOrgById("1234567890", null);

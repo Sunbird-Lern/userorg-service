@@ -148,7 +148,7 @@ public class BackgroundJobManager extends BaseActor {
         esMap.remove(JsonKey.CONTACT_DETAILS);
         String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
         try {
-          if (esMap.containsKey(JsonKey.ORG_TYPE) && null != orgMap.get(JsonKey.ORG_TYPE)) {
+          if (esMap.containsKey(JsonKey.ORG_TYPE) && null != esMap.get(JsonKey.ORG_TYPE)) {
             esMap.put(
                 JsonKey.ORG_TYPE,
                 OrgTypeEnum.getTypeByValue((Integer) esMap.get(JsonKey.ORG_TYPE)));
