@@ -21,6 +21,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
+    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION,"location");
+    userMap.put(JsonKey.USER_TYPE,"userType");
+    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    userMap.put(JsonKey.LOCATION_ID,"locationID");
+    userMap.put(JsonKey.LOCATION_TYPE,"type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
@@ -45,6 +51,86 @@ public class UserUtilityTest {
         ((List<Map<String, Object>>) response.get(JsonKey.ADDRESS))
             .get(0)
             .get(JsonKey.ADDRESS_LINE1));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataUserType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+    filterMap.put(JsonKey.USER_TYPE,"userType");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.USER_TYPE), response.get(JsonKey.USER_TYPE));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataUserSubType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.USER_SUB_TYPE), response.get(JsonKey.USER_SUB_TYPE));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataLocationID() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.LOCATION_ID), response.get(JsonKey.LOCATION_ID));
+  }
+
+  @Test
+  public void encryptUserSearchFilterQueryDataLocationType() {
+    String email = "test@test.com";
+    String userName = "test_user";
+    String city = "Bangalore";
+    String addressLine1 = "xyz";
+    Map<String, Object> filterMap = new HashMap<String, Object>();
+    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    Map<String, Object> map = new HashMap<String, Object>();
+    map.put(JsonKey.FILTERS,filterMap);
+    Map<String, Object> response = null;
+    try {
+      response = UserUtility.encryptUserSearchFilterQueryData(map);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    assertEquals(filterMap.get(JsonKey.LOCATION_TYPE), response.get(JsonKey.LOCATION_TYPE));
   }
 
   @Test
@@ -81,6 +167,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
+    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION,"location");
+    userMap.put(JsonKey.USER_TYPE,"userType");
+    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    userMap.put(JsonKey.LOCATION_ID,"locationID");
+    userMap.put(JsonKey.LOCATION_TYPE,"type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
