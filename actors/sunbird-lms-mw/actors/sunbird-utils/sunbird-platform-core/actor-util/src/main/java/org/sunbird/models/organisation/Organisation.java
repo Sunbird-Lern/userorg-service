@@ -37,7 +37,7 @@ public class Organisation implements Serializable {
   private Integer noOfMembers;
   private String orgCode;
   private String orgName;
-  private Integer orgType;
+  private Integer organisationType;
   private String preferredLanguage;
   private String provider;
   private String rootOrgId;
@@ -211,12 +211,12 @@ public class Organisation implements Serializable {
     this.orgName = orgName;
   }
 
-  public Integer getOrgType() {
-    return orgType;
+  public Integer getOrganisationType() {
+    return organisationType;
   }
 
-  public void setOrgType(Integer orgType) {
-    this.orgType = orgType;
+  public void setOrganisationType(Integer organisationType) {
+    this.organisationType = organisationType;
   }
 
   public String getPreferredLanguage() {

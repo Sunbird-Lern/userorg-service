@@ -616,7 +616,8 @@ public class OrganisationManagementActor extends BaseActor {
 
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
       try {
-        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)) {
+        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)
+            && null != updateOrgDao.get(JsonKey.ORG_TYPE)) {
           updateOrgDao.put(
               JsonKey.ORG_TYPE,
               OrgTypeEnum.getTypeByValue((Integer) updateOrgDao.get(JsonKey.ORG_TYPE)));

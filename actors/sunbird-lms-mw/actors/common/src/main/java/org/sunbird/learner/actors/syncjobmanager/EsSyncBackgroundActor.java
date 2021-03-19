@@ -176,7 +176,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
 
     try {
-      if (orgMap.containsKey(JsonKey.ORG_TYPE)) {
+      if (orgMap.containsKey(JsonKey.ORG_TYPE) && null != orgMap.get(JsonKey.ORG_TYPE)) {
         orgMap.put(
             JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue((Integer) orgMap.get(JsonKey.ORG_TYPE)));
       }
