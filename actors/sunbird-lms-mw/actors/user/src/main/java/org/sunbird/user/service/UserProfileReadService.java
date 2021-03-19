@@ -160,16 +160,20 @@ public class UserProfileReadService {
     result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
 
     List<Map<String, String>> userLocList = new ArrayList<>();
+    List<String> locationIds = new ArrayList<>();
     try {
       userLocList =
           mapper.readValue(
               (String) result.get(JsonKey.PROFILE_LOCATION),
               new TypeReference<List<Map<String, String>>>() {});
-
+      if (CollectionUtils.isNotEmpty(userLocList)) {
+        locationIds = userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+      }
     } catch (Exception ex) {
       logger.error(context, "Exception occurred while mapping", ex);
     }
     result.put(JsonKey.PROFILE_LOCATION, userLocList);
+    result.put(JsonKey.LOCATION_IDS, locationIds);
   }
 
   private void appendMinorFlag(Map<String, Object> result) {

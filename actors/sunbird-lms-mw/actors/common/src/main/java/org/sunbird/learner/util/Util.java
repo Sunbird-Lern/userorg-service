@@ -702,7 +702,7 @@ public final class Util {
       logger.error(context, e.getMessage(), e);
     }
     String username = "";
-    if (!(userList.isEmpty())) {
+    if (CollectionUtils.isNotEmpty(userList)) {
       userDetails = userList.get(0);
       username = (String) userDetails.get(JsonKey.USERNAME);
       logger.info(context, "Util:getUserDetails: userId = " + userId);
@@ -725,7 +725,30 @@ public final class Util {
       userDetails.remove(JsonKey.PASSWORD);
       addEmailAndPhone(userDetails);
       checkEmailAndPhoneVerified(userDetails);
-
+      List<Map<String, String>> userLocList = new ArrayList<>();
+      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+      if (StringUtils.isNotBlank(profLocation)) {
+        try {
+          userLocList = mapper.readValue(profLocation, List.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+      Map<String, Object> userTypeDetail = new HashMap<>();
+      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+      if (StringUtils.isNotBlank(profUserType)) {
+        try {
+          userTypeDetail = mapper.readValue(profUserType, Map.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileUserType to Map<String,String>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
     } else {
       logger.info(
           context,
