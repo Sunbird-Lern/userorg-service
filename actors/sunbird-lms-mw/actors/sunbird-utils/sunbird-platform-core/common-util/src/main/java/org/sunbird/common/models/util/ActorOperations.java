@@ -27,7 +27,6 @@ public enum ActorOperations {
   UNBLOCK_USER("unblockUser"),
   GET_BULK_OP_STATUS("getBulkOpStatus"),
   UPDATE_USER_ORG_ES("updateUserOrgES"),
-  REMOVE_USER_ORG_ES("removeUserOrgES"),
   UPDATE_USER_ROLES_ES("updateUserRoles"),
   SYNC("sync"),
   BACKGROUND_SYNC("backgroundSync"),

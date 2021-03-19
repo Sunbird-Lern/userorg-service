@@ -37,7 +37,6 @@ public class ActorOperationTest {
     Assert.assertEquals("unblockUser", ActorOperations.UNBLOCK_USER.getValue());
     Assert.assertEquals("getBulkOpStatus", ActorOperations.GET_BULK_OP_STATUS.getValue());
     Assert.assertEquals("updateUserOrgES", ActorOperations.UPDATE_USER_ORG_ES.getValue());
-    Assert.assertEquals("removeUserOrgES", ActorOperations.REMOVE_USER_ORG_ES.getValue());
     Assert.assertEquals("updateUserRoles", ActorOperations.UPDATE_USER_ROLES_ES.getValue());
     Assert.assertEquals("sync", ActorOperations.SYNC.getValue());
     Assert.assertEquals("scheduleBulkUpload", ActorOperations.SCHEDULE_BULK_UPLOAD.getValue());
