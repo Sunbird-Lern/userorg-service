@@ -16,12 +16,24 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
 
   public void validateCreateOrgRequest(Request orgRequest) {
-
+    validateParam(
+        (String) orgRequest.getRequest().get(JsonKey.ORG_TYPE),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ORG_TYPE);
     validateParam(
         (String) orgRequest.getRequest().get(JsonKey.ORG_NAME),
         ResponseCode.mandatoryParamsMissing,
         JsonKey.ORG_NAME);
-    validateRootOrgChannel(orgRequest);
+    if (!(orgRequest.getRequest().containsKey(JsonKey.IS_TENANT))
+        || (orgRequest.getRequest().containsKey(JsonKey.IS_TENANT)
+            && null == orgRequest.getRequest().get(JsonKey.IS_TENANT))) {
+      throw new ProjectCommonException(
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          MessageFormat.format(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.IS_TENANT),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    validateTenantOrgChannel(orgRequest);
     validateLicense(orgRequest);
 
     Map<String, Object> address =
@@ -33,8 +45,8 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   }
 
   private void validateLicense(Request orgRequest) {
-    if (orgRequest.getRequest().containsKey(JsonKey.IS_ROOT_ORG)
-        && (boolean) orgRequest.getRequest().get(JsonKey.IS_ROOT_ORG)
+    if (orgRequest.getRequest().containsKey(JsonKey.IS_TENANT)
+        && (boolean) orgRequest.getRequest().get(JsonKey.IS_TENANT)
         && orgRequest.getRequest().containsKey(JsonKey.LICENSE)
         && StringUtils.isBlank((String) orgRequest.getRequest().get(JsonKey.LICENSE))) {
       throw new ProjectCommonException(
@@ -64,7 +76,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
           ERROR_CODE);
     }
 
-    validateRootOrgChannel(request);
+    validateTenantOrgChannel(request);
     validateLocationIdOrCode(request);
     Map<String, Object> address = (Map<String, Object>) request.getRequest().get(JsonKey.ADDRESS);
     if (MapUtils.isNotEmpty(address)) {

@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -27,13 +28,19 @@ import org.sunbird.learner.util.Util;
   CassandraOperationImpl.class,
   ServiceFactory.class,
   CassandraOperation.class,
-  CassandraUtil.class
+  CassandraUtil.class,
+  Util.class
 })
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
 })
 public class OrgExternalServiceTest {
 
@@ -47,6 +54,7 @@ public class OrgExternalServiceTest {
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    PowerMockito.mockStatic(Util.class);
   }
 
   @Test
@@ -92,6 +100,62 @@ public class OrgExternalServiceTest {
       String resp =
           orgExternalService.getOrgIdFromOrgExternalIdAndProvider("OrgExtid", "provider", null);
       Assert.assertEquals("anyOrgId", resp);
+
+    } catch (Exception e) {
+      Assert.assertTrue(false);
+    }
+  }
+
+  @Test
+  public void testGetOrgByOrgExtIdSuccess() {
+    try {
+      Map<String, Object> dbRequestMap = new HashMap<>();
+      dbRequestMap.put(JsonKey.EXTERNAL_ID, "orgextid");
+      dbRequestMap.put(JsonKey.PROVIDER, "provider");
+      Response response = new Response();
+      List<Map<String, Object>> orgList = new ArrayList<>();
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.ORG_ID, "anyOrgId");
+      orgList.add(map);
+      response.put(JsonKey.RESPONSE, orgList);
+      when(cassandraOperation.getRecordsByCompositeKey(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+          .thenReturn(response);
+      when(cassandraOperation.getRecordById(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+          .thenReturn(response);
+      Map<String, Object> resp =
+          orgExternalService.getOrgByOrgExternalIdAndProvider("OrgExtid", "provider", null);
+      Assert.assertNotNull(resp);
+
+    } catch (Exception e) {
+      Assert.assertTrue(false);
+    }
+  }
+
+  @Test
+  public void testGetEmptyOrgByOrgExtIdSuccess() {
+    try {
+      Map<String, Object> dbRequestMap = new HashMap<>();
+      dbRequestMap.put(JsonKey.EXTERNAL_ID, "orgextid");
+      dbRequestMap.put(JsonKey.PROVIDER, "provider");
+      Response response = new Response();
+      List<Map<String, Object>> orgList = new ArrayList<>();
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.ORG_ID, "anyOrgId");
+      orgList.add(map);
+      response.put(JsonKey.RESPONSE, orgList);
+      when(cassandraOperation.getRecordsByCompositeKey(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+          .thenReturn(response);
+      Response response1 = new Response();
+      response1.put(JsonKey.RESPONSE, null);
+      when(cassandraOperation.getRecordById(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+          .thenReturn(response1);
+      Map<String, Object> resp =
+          orgExternalService.getOrgByOrgExternalIdAndProvider("OrgExtid", "provider", null);
+      Assert.assertNotNull(resp);
 
     } catch (Exception e) {
       Assert.assertTrue(false);

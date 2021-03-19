@@ -182,8 +182,9 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.ORG_NAME, orgName);
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
-    innerMap.put(JsonKey.IS_ROOT_ORG, isRootOrg);
     innerMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    innerMap.put(JsonKey.IS_TENANT, isRootOrg);
+    innerMap.put(JsonKey.ORG_TYPE, "board");
 
     if (status != null) innerMap.put(JsonKey.STATUS, new Integer(status));
 

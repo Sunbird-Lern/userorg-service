@@ -54,7 +54,7 @@ import scala.concurrent.Promise;
 public class HealthActorTest {
 
   private static ActorSystem system;
-  Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
+  Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ROLE);
   private CassandraOperation cassandraOperation;
   private static final Props props = Props.create(HealthActor.class);
 
