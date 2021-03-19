@@ -358,7 +358,7 @@ public class TenantMigrationActor extends BaseActor {
           OrgService orgService = OrgServiceImpl.getInstance();
           Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
           if (org.apache.commons.collections.MapUtils.isNotEmpty(orgMap)) {
-            migrateReq.put(JsonKey.LOCATION_IDS, orgMap.get(JsonKey.LOCATION_IDS));
+            migrateReq.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
           }
         }
       }
@@ -514,10 +514,10 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.put(JsonKey.ROOT_ORG_ID, request.getRequest().get(JsonKey.ROOT_ORG_ID));
     userRequest.put(JsonKey.FLAGS_VALUE, request.getRequest().get(JsonKey.FLAGS_VALUE));
     userRequest.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
-    if (request.getRequest().containsKey(JsonKey.LOCATION_IDS)
+    if (request.getRequest().containsKey(JsonKey.PROFILE_LOCATION)
         && CollectionUtils.isNotEmpty(
-            (List<String>) request.getRequest().get(JsonKey.LOCATION_IDS))) {
-      userRequest.put(JsonKey.LOCATION_IDS, request.getRequest().get(JsonKey.LOCATION_IDS));
+            (List<String>) request.getRequest().get(JsonKey.PROFILE_LOCATION))) {
+      userRequest.put(JsonKey.PROFILE_LOCATION, request.getRequest().get(JsonKey.PROFILE_LOCATION));
     }
     if (request.getRequest().containsKey(JsonKey.STATUS)) {
       userRequest.put(JsonKey.STATUS, request.getRequest().get(JsonKey.STATUS));

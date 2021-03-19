@@ -577,6 +577,7 @@ public class UserProfileReadService {
               JsonKey.ORG_NAME,
               JsonKey.CHANNEL,
               JsonKey.HASHTAGID,
+              JsonKey.ORG_LOCATION,
               JsonKey.LOCATION_IDS,
               JsonKey.ID,
               JsonKey.EXTERNAL_ID);
@@ -599,7 +600,22 @@ public class UserProfileReadService {
 
     Set<String> locationSet = new HashSet<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
-      List<String> locationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
+      List<String> locationIds = null;
+      try {
+        List<Map<String, String>> orgLocList =
+            mapper.readValue(
+                (String) org.get(JsonKey.ORG_LOCATION),
+                new TypeReference<List<Map<String, String>>>() {});
+        if (CollectionUtils.isNotEmpty(orgLocList)) {
+          locationIds =
+              orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          org.put(JsonKey.ORG_LOCATION, orgLocList);
+        } else {
+          org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
+        }
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred while mapping", ex);
+      }
       if (CollectionUtils.isNotEmpty(locationIds)) {
         locationIds.forEach(
             locId -> {
@@ -608,6 +624,7 @@ public class UserProfileReadService {
               }
             });
       }
+      org.put(JsonKey.LOCATION_IDS, locationSet);
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
@@ -631,6 +648,7 @@ public class UserProfileReadService {
         usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
         usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
         usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
+        usrOrg.put(JsonKey.ORG_LOCATION, orgInfo.get(JsonKey.ORG_LOCATION));
         usrOrg.put(JsonKey.EXTERNAL_ID, orgInfo.get(JsonKey.EXTERNAL_ID));
         if (MapUtils.isNotEmpty(locationInfoMap)) {
           usrOrg.put(
