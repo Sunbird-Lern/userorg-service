@@ -128,9 +128,6 @@ public final class JsonKey {
   public static final String FIRST_NAME = "firstName";
   public static final String FRAMEWORK = "framework";
   public static final String FROM_EMAIL = "fromEmail";
-  public static final String GENDER = "gender";
-  public static final String GEO_LOCATION_DB = "geoLocationDb";
-  public static final String GRADE = "grade";
   public static final String GROUP_QUERY = "groupQuery";
   public static final String HASH_TAG_ID = "hashtagid";
   public static final String HASHTAGID = "hashTagId";
@@ -340,7 +337,6 @@ public final class JsonKey {
   public static final String VALUE = "value";
   public static final String VER = "ver";
   public static final String VERSION = "version";
-  public static final String WEB_PAGES = "webPages";
   public static final String WELCOME_MESSAGE = "welcomeMessage";
   public static final String SUNBIRD_HEALTH_CHECK_ENABLE = "sunbird_health_check_enable";
   public static final String HEALTH = "health";

@@ -19,7 +19,6 @@ public interface ResponseMessage {
     String SUCCESS_MESSAGE = "Success";
     String EMAIL_FORMAT = "Email is invalid.";
     String FIRST_NAME_MISSING = "First name is mandatory.";
-    String LANGUAGE_MISSING = "Language is mandatory.";
     String REQUIRED_DATA_ORG_MISSING =
         "Organization Id or Provider with External Id values are required for the operation";
     String CHANNEL_SHOULD_BE_UNIQUE =
@@ -91,9 +90,6 @@ public interface ResponseMessage {
     String NOTE_ID_INVALID = "Invalid note id";
     String USER_DATA_ENCRYPTION_ERROR = "Exception Occurred while encrypting user data.";
     String INVALID_PHONE_NO_FORMAT = "Please provide a valid phone number.";
-    String INVALID_WEBPAGE_DATA = "Invalid webPage data";
-    String INVALID_MEDIA_TYPE = "Invalid media type for webPage";
-    String INVALID_WEBPAGE_URL = "Invalid URL for {0}.";
     String INVALID_ORG_TYPE_ERROR = "INVALID_ORG_TYPE_ERROR";
     // No need to indicate managedby is missing to user.
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "Please provide either email or phone.";
@@ -112,7 +108,6 @@ public interface ResponseMessage {
     String INVALID_COUNTRY_CODE = "Please provide a valid country code.";
     String ERROR_DUPLICATE_ENTRIES = "System contains duplicate entry for {0}.";
     String LOCATION_ID_REQUIRED = "Please provide Location Id.";
-    String NOT_SUPPORTED = "Not Supported.";
     String RESOURCE_NOT_FOUND = "Requested resource not found";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "Max allowed size is {0}";
     String INACTIVE_USER = "User is Inactive. Please make it active to proceed.";
@@ -172,16 +167,12 @@ public interface ResponseMessage {
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "Not able to associate with root org";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "Unsupported cloud storage type {0}.";
     String ERROR_UNSUPPORTED_FIELD = "Unsupported field {0}.";
-    String ERROR_GENERATE_DOWNLOAD_LINK = "Error in generating download link.";
-    String ERROR_DOWNLOAD_LINK_UNAVAILABLE = "Download link is unavailable.";
-    String ERROR_SAVING_STORAGE_DETAILS = "Error saving storage details for download link.";
     String ERROR_CSV_NO_DATA_ROWS = "No data rows in CSV.";
     String ERROR_INACTIVE_ORG = "Organisation corresponding to given {0} ({1}) is inactive.";
     String ERROR_CONFLICTING_VALUES = "Conflicting values for {0} ({1}) and {2} ({3}).";
     String ERROR_CONFLICTING_ROOT_ORG_ID =
         "Root organisation ID of API user is conflicting with that of specified organisation ID.";
     String ERROR_UPDATE_SETTING_NOT_ALLOWED = "Update of system setting {0} is not allowed.";
-    String ERROR_UNAVAILABLE_CERTIFICATE = "Certificate is unavailable";
     String CSV_ROWS_EXCEEDS = "Number of rows in csv file is more than ";
     String BLANK_CSV_DATA =
         "Did not find any Table of Contents data. Please check and upload again.";
@@ -238,7 +229,6 @@ public interface ResponseMessage {
     String SUCCESS_MESSAGE = "SUCCESS";
     String EMAIL_FORMAT = "EMAIL_FORMAT_ERROR";
     String FIRST_NAME_MISSING = "FIRST_NAME_REQUIRED_ERROR";
-    String LANGUAGE_MISSING = "Language is mandatory.";
     String REQUIRED_DATA_ORG_MISSING = "REQUIRED_DATA_MISSING";
     String CHANNEL_SHOULD_BE_UNIQUE = "CHANNEL_SHOULD_BE_UNIQUE";
     String ERROR_DUPLICATE_ENTRY = "ERROR_DUPLICATE_ENTRY";
@@ -302,15 +292,11 @@ public interface ResponseMessage {
     String NOTE_ID_INVALID = "NOTE_ID_INVALID";
     String USER_DATA_ENCRYPTION_ERROR = "USER_DATA_ENCRYPTION_ERROR";
     String INVALID_PHONE_NO_FORMAT = "INVALID_PHONE_NO_FORMAT";
-    String INVALID_WEBPAGE_DATA = "INVALID_WEBPAGE_DATA";
-    String INVALID_MEDIA_TYPE = "INVALID_MEDIA_TYPE";
-    String INVALID_WEBPAGE_URL = "INVALID_WEBPAGE_URL";
     String INVALID_ORG_TYPE_ERROR = "Please provide valid orgType.";
     String EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING = "EMAIL_OR_PHONE_OR_MANAGEDBY_MISSING";
     String ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED = "ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED";
     String PHONE_ALREADY_IN_USE = "PHONE_ALREADY_IN_USE";
     String UPDATE_FAILED = "UPDATE_FAILED";
-    String INVALID_TYPE_VALUE = "INVALID_TYPE_VALUE";
     String INVALID_LOCATION_ID = "INVALID_LOCATION_ID";
     String INVALID_HASHTAG_ID = "INVALID_HASHTAG_ID";
     String INVALID_USR_ORG_DATA = "INVALID_USR_ORG_DATA";
@@ -319,7 +305,6 @@ public interface ResponseMessage {
     String INVALID_PHONE_NUMBER = "INVALID_PHONE_NUMBER";
     String INVALID_COUNTRY_CODE = "INVALID_COUNTRY_CODE";
     String LOCATION_ID_REQUIRED = "LOCATION_ID_REQUIRED";
-    String NOT_SUPPORTED = "NOT_SUPPORTED";
     String CHANNEL_REG_FAILED = "CHANNEL_REG_FAILED";
     String SLUG_IS_NOT_UNIQUE = "SLUG_IS_NOT_UNIQUE";
     String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
@@ -362,16 +347,12 @@ public interface ResponseMessage {
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "ERROR_NO_ROOT_ORG_ASSOCIATED";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "ERROR_ UNSUPPORTED_CLOUD_STORAGE";
     String ERROR_UNSUPPORTED_FIELD = "ERROR_UNSUPPORTED_FIELD";
-    String ERROR_GENERATE_DOWNLOAD_LINK = "ERROR_GENERATING_DOWNLOAD_LINK";
-    String ERROR_DOWNLOAD_LINK_UNAVAILABLE = "ERROR_DOWNLOAD_LINK_UNAVAILABLE";
-    String ERROR_SAVING_STORAGE_DETAILS = "ERROR_SAVING_STORAGE_DETAILS";
     String ERROR_CSV_NO_DATA_ROWS = "ERROR_CSV_NO_DATA_ROWS";
     String ERROR_INACTIVE_ORG = "ERROR_INACTIVE_ORG";
     String ERROR_DUPLICATE_ENTRIES = "ERROR_DUPLICATE_ENTRIES";
     String ERROR_CONFLICTING_VALUES = "ERROR_CONFLICTING_VALUES";
     String ERROR_CONFLICTING_ROOT_ORG_ID = "ERROR_CONFLICTING_ROOT_ORG_ID";
     String ERROR_UPDATE_SETTING_NOT_ALLOWED = "ERROR_UPDATE_SETTING_NOT_ALLOWED";
-    String ERROR_UNAVAILABLE_CERTIFICATE = "ERROR_UNAVAILABLE_CERTIFICATE";
     String CSV_ROWS_EXCEEDS = "CSV_ROWS_EXCEEDS";
     String ERROR_INVALID_OTP = "ERROR_INVALID_OTP";
     String BLANK_CSV_DATA = "BLANK_CSV_DATA";
