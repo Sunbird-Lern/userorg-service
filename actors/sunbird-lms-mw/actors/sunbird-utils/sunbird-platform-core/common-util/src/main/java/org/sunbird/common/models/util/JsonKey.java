@@ -171,7 +171,6 @@ public final class JsonKey {
   public static final String MISSING_FIELDS = "missingFields";
   public static final String MOBILE = "mobile";
   public static final String NAME = "name";
-  public static final String NO_OF_MEMBERS = "noOfMembers";
   public static final String NOT_EXISTS = "not_exists";
   public static final String NOTE = "note";
   public static final String NOTE_ID = "noteId";
@@ -185,7 +184,6 @@ public final class JsonKey {
   public static final String OPERATION_FOR = "operationFor";
   public static final String OPERATION_TYPE = "operationType";
   public static final String ORDER = "order";
-  public static final String ORG_CODE = "orgCode";
   public static final String ORG_EXT_ID_DB = "org_external_identity";
   public static final String ORG_DB = "org_db";
   public static final String ORG_ID = "orgId";
@@ -202,7 +200,6 @@ public final class JsonKey {
   public static final String OTP_PHONE_RESET_PASSWORD_TEMPLATE = "otpPhoneResetPasswordTemplate";
   public static final String VERIFY_PHONE_OTP_TEMPLATE = "verifyPhoneOtpTemplate";
   public static final String PARAMS = "params";
-  public static final String PARENT_ORG_ID = "parentOrgId";
   public static final String PASSWORD = "password";
   public static final String PDATA = "pdata";
 
@@ -210,7 +207,6 @@ public final class JsonKey {
   public static final String PHONE_UNIQUE = "phoneUnique";
   public static final String PHONE_VERIFIED = "phoneVerified";
   public static final String POSITION = "position";
-  public static final String PREFERRED_LANGUAGE = "preferredLanguage";
   public static final String PREV_STATE = "PREV_STATE";
   public static final String PRIVATE = "private";
   public static final String PROCESS_ID = "processId";
@@ -303,7 +299,6 @@ public final class JsonKey {
   public static final String TENANT_PREFERENCE_DB = "tenantPreferenceDb";
   public static final String TERM_AND_CONDITION_STATUS = "tcStatus";
   public static final String TERMS = "terms";
-  public static final String THEME = "theme";
   public static final String TITLE = "title";
   public static final String TOKEN = "token";
   public static final String TOPIC = "topic";

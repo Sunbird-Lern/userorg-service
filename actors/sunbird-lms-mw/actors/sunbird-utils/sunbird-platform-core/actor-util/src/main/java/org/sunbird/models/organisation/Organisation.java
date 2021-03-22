@@ -18,10 +18,7 @@ public class Organisation implements Serializable {
   private static final long serialVersionUID = 3617862727235741692L;
   private String id;
   private String addressId;
-  private String approvedBy;
-  private String approvedDate;
   private String channel;
-  private String communityId;
   private String contactDetail;
   private String createdBy;
   private String createdDate;
@@ -32,19 +29,13 @@ public class Organisation implements Serializable {
   private String hashTagId;
   private String homeUrl;
   private String imgUrl;
-  private Boolean isApproved;
   private String locationId;
-  private Integer noOfMembers;
-  private String orgCode;
   private String orgName;
   private Integer organisationType;
-  private String preferredLanguage;
   private String provider;
   private String rootOrgId;
   private String slug;
   private Integer status;
-  private String theme;
-  private String thumbnail;
   private String updatedBy;
   private String updatedDate;
   private Boolean isSSOEnabled;
@@ -67,36 +58,12 @@ public class Organisation implements Serializable {
     this.addressId = addressId;
   }
 
-  public String getApprovedBy() {
-    return approvedBy;
-  }
-
-  public void setApprovedBy(String approvedBy) {
-    this.approvedBy = approvedBy;
-  }
-
-  public String getApprovedDate() {
-    return approvedDate;
-  }
-
-  public void setApprovedDate(String approvedDate) {
-    this.approvedDate = approvedDate;
-  }
-
   public String getChannel() {
     return channel;
   }
 
   public void setChannel(String channel) {
     this.channel = channel;
-  }
-
-  public String getCommunityId() {
-    return communityId;
-  }
-
-  public void setCommunityId(String communityId) {
-    this.communityId = communityId;
   }
 
   public String getContactDetail() {
@@ -187,22 +154,6 @@ public class Organisation implements Serializable {
     this.locationId = locationId;
   }
 
-  public Integer getNoOfMembers() {
-    return noOfMembers;
-  }
-
-  public void setNoOfMembers(Integer noOfMembers) {
-    this.noOfMembers = noOfMembers;
-  }
-
-  public String getOrgCode() {
-    return orgCode;
-  }
-
-  public void setOrgCode(String orgCode) {
-    this.orgCode = orgCode;
-  }
-
   public String getOrgName() {
     return orgName;
   }
@@ -217,14 +168,6 @@ public class Organisation implements Serializable {
 
   public void setOrganisationType(Integer organisationType) {
     this.organisationType = organisationType;
-  }
-
-  public String getPreferredLanguage() {
-    return preferredLanguage;
-  }
-
-  public void setPreferredLanguage(String preferredLanguage) {
-    this.preferredLanguage = preferredLanguage;
   }
 
   public String getProvider() {
@@ -251,22 +194,6 @@ public class Organisation implements Serializable {
     this.status = status;
   }
 
-  public String getTheme() {
-    return theme;
-  }
-
-  public void setTheme(String theme) {
-    this.theme = theme;
-  }
-
-  public String getThumbnail() {
-    return thumbnail;
-  }
-
-  public void setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
-
   public String getUpdatedBy() {
     return updatedBy;
   }
@@ -281,15 +208,6 @@ public class Organisation implements Serializable {
 
   public void setUpdatedDate(String updatedDate) {
     this.updatedDate = updatedDate;
-  }
-
-  @JsonProperty(value = "isApproved")
-  public Boolean isApproved() {
-    return isApproved;
-  }
-
-  public void setApproved(Boolean isApproved) {
-    this.isApproved = isApproved;
   }
 
   @JsonProperty(value = "isSSOEnabled")

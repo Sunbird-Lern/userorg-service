@@ -28,7 +28,6 @@ public class User implements Serializable {
   private String firstName;
   private Boolean isDeleted;
   private List<String> language;
-  private String lastLoginTime;
   private String lastName;
   private String phone;
   private String provider;
@@ -201,14 +200,6 @@ public class User implements Serializable {
 
   public void setLanguage(List<String> language) {
     this.language = language;
-  }
-
-  public String getLastLoginTime() {
-    return lastLoginTime;
-  }
-
-  public void setLastLoginTime(String lastLoginTime) {
-    this.lastLoginTime = lastLoginTime;
   }
 
   public String getLastName() {

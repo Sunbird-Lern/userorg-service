@@ -851,7 +851,7 @@ public final class Util {
                 .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
                 .distinct()
                 .collect(Collectors.toList());
-        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.PARENT_ORG_ID, JsonKey.ID);
+        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.ID);
 
         Future<Map<String, Map<String, Object>>> orgInfoMapF =
             esService.getEsResultByListOfIds(
