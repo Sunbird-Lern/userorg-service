@@ -7,6 +7,6 @@ public interface OrgService {
 
   Map<String, Object> getOrgById(String orgId, RequestContext context);
 
-  Map<String, Object> esGetOrgByExternalId(
+  Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context);
 }

@@ -136,7 +136,7 @@ public class UserSelfDeclarationManagementActorTest {
 
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, true);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     return map;

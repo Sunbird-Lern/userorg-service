@@ -133,7 +133,7 @@ public class UserRoleActor extends UserBaseActor {
         hashTagId = (String) orgMap.get(JsonKey.HASHTAGID);
       }
     } else {
-      orgMap = orgService.esGetOrgByExternalId(externalId, provider, context);
+      orgMap = orgService.getOrgByExternalIdAndProvider(externalId, provider, context);
       if (MapUtils.isNotEmpty(orgMap)) {
         requestMap.put(JsonKey.ORGANISATION_ID, orgMap.get(JsonKey.ORGANISATION_ID));
         hashTagId = (String) orgMap.get(JsonKey.HASHTAGID);

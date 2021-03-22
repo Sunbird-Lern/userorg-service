@@ -137,7 +137,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
       if (!userOrg.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
         String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
         Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
-        if (null != organisation && !organisation.isRootOrg()) {
+        if (null != organisation && !organisation.isTenant()) {
           userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getExternalId());
           userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.getOrgName());
         }

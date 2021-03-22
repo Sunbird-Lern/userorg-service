@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,7 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 import scala.concurrent.Future;
 
 /**
@@ -34,7 +36,6 @@ import scala.concurrent.Future;
     "insertOrgInfoToElastic",
     "updateOrgInfoToElastic",
     "updateUserOrgES",
-    "removeUserOrgES",
     "insertUserNotesToElastic",
     "updateUserNotesToElastic",
   }
@@ -54,8 +55,6 @@ public class BackgroundJobManager extends BaseActor {
       insertOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.REMOVE_USER_ORG_ES.getValue())) {
-      removeUserOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ROLES_ES.getValue())) {
       updateUserRoleToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
@@ -91,40 +90,6 @@ public class BackgroundJobManager extends BaseActor {
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
         (String) result.get(JsonKey.USER_ID),
-        result,
-        actorMessage.getRequestContext());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void removeUserOrgInfoToEs(Request actorMessage) {
-    Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(),
-            (String) orgMap.get(JsonKey.USER_ID),
-            actorMessage.getRequestContext());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (result.containsKey(JsonKey.ORGANISATIONS) && null != result.get(JsonKey.ORGANISATIONS)) {
-      List<Map<String, Object>> orgMapList =
-          (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-      if (null != orgMapList) {
-        Iterator<Map<String, Object>> itr = orgMapList.iterator();
-        while (itr.hasNext()) {
-          Map<String, Object> map = itr.next();
-          if ((((String) map.get(JsonKey.USER_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.USER_ID)))
-              && (((String) map.get(JsonKey.ORGANISATION_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.ORGANISATION_ID)))) {
-            itr.remove();
-          }
-        }
-      }
-    }
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.IDENTIFIER),
         result,
         actorMessage.getRequestContext());
   }
@@ -166,7 +131,7 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> orgMap =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
-    if (ProjectUtil.isNotNull(orgMap)) {
+    if (MapUtils.isNotEmpty(orgMap)) {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       String id = (String) orgMap.get(JsonKey.ID);
       Response orgResponse =
@@ -181,6 +146,22 @@ public class BackgroundJobManager extends BaseActor {
       if (!(orgList.isEmpty())) {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
+        String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
+        try {
+          if (esMap.containsKey(JsonKey.ORG_TYPE) && null != esMap.get(JsonKey.ORG_TYPE)) {
+            esMap.put(
+                JsonKey.ORG_TYPE,
+                OrgTypeEnum.getTypeByValue((Integer) esMap.get(JsonKey.ORG_TYPE)));
+          }
+          if (StringUtils.isNotBlank(orgLocation)) {
+            ObjectMapper mapper = new ObjectMapper();
+            esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          }
+        } catch (Exception e) {
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+        }
 
         if (MapUtils.isNotEmpty((Map<String, Object>) orgMap.get(JsonKey.ADDRESS))) {
           esMap.put(JsonKey.ADDRESS, orgMap.get(JsonKey.ADDRESS));

@@ -174,9 +174,6 @@ public enum ResponseCode {
       ResponseMessage.Key.MAX_ALLOWED_SIZE_LIMIT_EXCEED,
       ResponseMessage.Message.MAX_ALLOWED_SIZE_LIMIT_EXCEED),
   inactiveUser(ResponseMessage.Key.INACTIVE_USER, ResponseMessage.Message.INACTIVE_USER),
-  userInactiveForThisOrg(
-      ResponseMessage.Key.USER_INACTIVE_FOR_THIS_ORG,
-      ResponseMessage.Message.USER_INACTIVE_FOR_THIS_ORG),
   orgDoesNotExist(ResponseMessage.Key.ORG_NOT_EXIST, ResponseMessage.Message.ORG_NOT_EXIST),
   alreadyExists(ResponseMessage.Key.ALREADY_EXISTS, ResponseMessage.Message.ALREADY_EXISTS),
   invalidValue(ResponseMessage.Key.INVALID_VALUE, ResponseMessage.Message.INVALID_VALUE),

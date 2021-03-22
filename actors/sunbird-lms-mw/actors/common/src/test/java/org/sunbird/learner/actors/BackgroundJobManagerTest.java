@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.syncjobmanager;
+package org.sunbird.learner.actors;
 
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -29,6 +29,7 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
@@ -41,6 +42,7 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   ElasticSearchHelper.class,
   EsClientFactory.class,
+  ProjectUtil.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -49,9 +51,9 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-public class EsSyncBackgroundActorTest {
+public class BackgroundJobManagerTest {
   private ActorSystem system = ActorSystem.create("system");
-  private static final Props props = Props.create(EsSyncBackgroundActor.class);
+  private static final Props props = Props.create(BackgroundJobManager.class);
   private static CassandraOperationImpl cassandraOperation;
   private ElasticSearchService esService;
 
@@ -59,6 +61,10 @@ public class EsSyncBackgroundActorTest {
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(Util.class);
+    PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.registertag(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn("");
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(EsClientFactory.class);
@@ -76,106 +82,60 @@ public class EsSyncBackgroundActorTest {
   }
 
   @Test
-  public void testSync() {
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyList(),
-            Mockito.any()))
-        .thenReturn(cassandraGetLocationRecord());
+  public void testInsertOrgInfoToEs() {
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(cassandraGetRecord());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    reqObj.setOperation(ActorOperations.INSERT_ORG_INFO_ELASTIC.getValue());
     Map<String, Object> reqMap = new HashMap<>();
-    List<String> ids = new ArrayList<>();
-    ids.add("1544646556");
-    reqMap.put(JsonKey.OBJECT_IDS, ids);
-    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
-    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqMap.put(JsonKey.ID, "1321546897");
+    reqObj.getRequest().put(JsonKey.ORGANISATION, reqMap);
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();
     assertTrue(true);
   }
 
   @Test
-  public void testSyncOrg() {
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyList(),
-            Mockito.any()))
-        .thenReturn(cassandraGetOrgRecord());
+  public void testInsertOrgInfoToEsFailure() {
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(cassandraGetRecord2());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    reqObj.setOperation(ActorOperations.INSERT_ORG_INFO_ELASTIC.getValue());
     Map<String, Object> reqMap = new HashMap<>();
-    List<String> ids = new ArrayList<>();
-    ids.add("1544646556");
-    reqMap.put(JsonKey.OBJECT_IDS, ids);
-    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqMap.put(JsonKey.ID, "1321546897");
+    reqObj.getRequest().put(JsonKey.ORGANISATION, reqMap);
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();
     assertTrue(true);
   }
 
-  @Test
-  public void testSyncOrgFailure() {
-    Response response = cassandraGetOrgRecord();
-    Map<String, Object> org =
-        (Map<String, Object>) ((List) response.getResult().get(JsonKey.RESPONSE)).get(0);
-    org.put(JsonKey.ORG_LOCATION, "\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}");
-    when(cassandraOperation.getRecordsByProperty(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyList(),
-            Mockito.any()))
-        .thenReturn(cassandraGetOrgRecord());
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    Request reqObj = new Request();
-    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
-    Map<String, Object> reqMap = new HashMap<>();
-    List<String> ids = new ArrayList<>();
-    ids.add("1544646556");
-    reqMap.put(JsonKey.OBJECT_IDS, ids);
-    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-    reqObj.getRequest().put(JsonKey.DATA, reqMap);
-    subject.tell(reqObj, probe.getRef());
-    probe.expectNoMessage();
-    assertTrue(true);
-  }
-
-  private static Response cassandraGetOrgRecord() {
+  private static Response cassandraGetRecord() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ID, "anyId");
-    map.put(JsonKey.ORG_TYPE, "type");
-    map.put(JsonKey.ORG_NAME, "name");
-    map.put(JsonKey.CHANNEL, "ch");
-    map.put(JsonKey.ADDRESS_ID, "454981351");
-    map.put(
-        JsonKey.ORG_LOCATION,
-        "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
+    String loc =
+        "[{\"id\":\"6dd69f1c-ba40-4b3b-8981-4fb6813c5e71\",\"type\":\"district\"},{\"id\":\"e9207c22-41cf-4a0d-81fb-1fbe3e34ae24\",\"type\":\"cluster\"},{\"id\":\"ccc7be29-8e40-4d0a-915b-26ec9228ac4a\",\"type\":\"state\"}]";
+    map.put(JsonKey.ORG_LOCATION, loc);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;
   }
 
-  private static Response cassandraGetLocationRecord() {
+  private static Response cassandraGetRecord2() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ID, "anyId");
-    map.put(JsonKey.NAME, "anyLocation");
-    map.put(JsonKey.CODE, "code");
-    map.put(JsonKey.PARENT_ID, "parentId");
+    String loc =
+        "{\"id\":\"6dd69f1c-ba40-4b3b-8981-4fb6813c5e71\",\"type\":\"district\"},{\"id\":\"e9207c22-41cf-4a0d-81fb-1fbe3e34ae24\",\"type\":\"cluster\"},{\"id\":\"ccc7be29-8e40-4d0a-915b-26ec9228ac4a\",\"type\":\"state\"}";
+    map.put(JsonKey.ORG_LOCATION, loc);
     list.add(map);
     response.put(JsonKey.RESPONSE, list);
     return response;

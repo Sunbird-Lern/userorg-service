@@ -90,7 +90,7 @@ public class UtilTest {
 
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, true);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     return map;
@@ -99,7 +99,7 @@ public class UtilTest {
   public static Map<String, Map<String, Object>> getEs2ResponseMap() {
     Map<String, Map<String, Object>> map2 = new HashMap<>();
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, true);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     map2.put(JsonKey.RESPONSE, map);

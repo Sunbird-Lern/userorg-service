@@ -77,6 +77,8 @@ public class User implements Serializable {
   private Map<String, String> allTncAccepted;
   private Boolean emailVerified;
   private Boolean phoneVerified;
+  private String profileUserType;
+  private String profileLocation;
 
   public Boolean getEmailVerified() {
     return emailVerified;
@@ -542,5 +544,21 @@ public class User implements Serializable {
 
   public void setUserSubType(String userSubType) {
     this.userSubType = userSubType;
+  }
+
+  public String getProfileUserType() {
+    return profileUserType;
+  }
+
+  public void setProfileUserType(String profileUserType) {
+    this.profileUserType = profileUserType;
+  }
+
+  public String getProfileLocation() {
+    return profileLocation;
+  }
+
+  public void setProfileLocation(String profileLocation) {
+    this.profileLocation = profileLocation;
   }
 }

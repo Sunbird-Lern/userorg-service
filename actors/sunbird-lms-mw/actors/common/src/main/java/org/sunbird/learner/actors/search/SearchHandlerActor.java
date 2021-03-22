@@ -2,10 +2,9 @@ package org.sunbird.learner.actors.search;
 
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,29 +65,39 @@ public class SearchHandlerActor extends BaseActor {
       onReceiveUnsupportedOperation(request.getOperation());
     }
   }
-private void backwardCompatibility(Map<String, Object> searchQueryMap) {
 
-  Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);//checks if profileuser details is passed or not and calling encryption method accordingly
-  if (MapUtils.isNotEmpty(filterMap)) {
-    if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_TYPE))) {
-      filterMap.put(JsonKey.PROFILE_USERTYPE + "." + JsonKey.TYPE, filterMap.get(JsonKey.USER_TYPE));
-      filterMap.remove(JsonKey.USER_TYPE);
-    }
-    if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_SUB_TYPE))) {
-      filterMap.put(JsonKey.PROFILE_USERTYPE + "." + JsonKey.SUB_TYPE, filterMap.get(JsonKey.USER_SUB_TYPE));
-      filterMap.remove(JsonKey.USER_SUB_TYPE);
-    }
-    if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
-      filterMap.put(JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
-      filterMap.remove(JsonKey.LOCATION_IDS);
+  private void backwardCompatibility(Map<String, Object> searchQueryMap) {
+
+    Map<String, Object> filterMap =
+        (Map<String, Object>)
+            searchQueryMap.get(
+                JsonKey.FILTERS); // checks if profileuser details is passed or not and calling
+    // encryption method accordingly
+    if (MapUtils.isNotEmpty(filterMap)) {
+      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_TYPE))) {
+        filterMap.put(
+            JsonKey.PROFILE_USERTYPE + "." + JsonKey.TYPE, filterMap.get(JsonKey.USER_TYPE));
+        filterMap.remove(JsonKey.USER_TYPE);
+      }
+      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_SUB_TYPE))) {
+        filterMap.put(
+            JsonKey.PROFILE_USERTYPE + "." + JsonKey.SUB_TYPE,
+            filterMap.get(JsonKey.USER_SUB_TYPE));
+        filterMap.remove(JsonKey.USER_SUB_TYPE);
+      }
+      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
+        filterMap.put(
+            JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+        filterMap.remove(JsonKey.LOCATION_IDS);
+      }
     }
   }
-  }
+
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
-          throws Exception {
-    //checking for Backword compatibility
-    backwardCompatibility( searchQueryMap);
+      throws Exception {
+    // checking for Backword compatibility
+    backwardCompatibility(searchQueryMap);
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
@@ -123,40 +132,26 @@ private void backwardCompatibility(Map<String, Object> searchQueryMap) {
         UserUtility.decryptUserDataFrmES(userMap);
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
-        Map<String, Object> userTypeDetail = null;
-        try {
-          userTypeDetail = mapper.readValue((String) userMap.get(JsonKey.PROFILE_USERTYPE), new TypeReference<Map<String, Object>>() {
-          });
-        } catch (Exception e) {
-          logger.error(
-                  request.getRequestContext(), "Exception because of mapper read value", e);
-        }
-        if (MapUtils.isNotEmpty(userTypeDetail)) {
+        Map<String, Object> userTypeDetail = new HashMap<>();
+        if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+          userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
           userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-          userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
         } else {
           userMap.put(JsonKey.USER_TYPE, null);
           userMap.put(JsonKey.USER_SUB_TYPE, null);
-          userMap.put(JsonKey.PROFILE_USERTYPE, new HashMap<>());
         }
-        List<String> locationIds = null;
-        try {
-          List<Map<String, String>> userLocList = mapper.readValue((String) userMap.get(JsonKey.PROFILE_LOCATION), new TypeReference<List<Map<String, String>>>() {
-          });
-          if(CollectionUtils.isNotEmpty(userLocList)) {
-            locationIds = userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-            userMap.put(JsonKey.PROFILE_LOCATION,userLocList);
-          }else
-          {
-            userMap.put(JsonKey.PROFILE_LOCATION,new ArrayList<>());
-          }
-        } catch (Exception ex) {
-          logger.error(request.getRequestContext(), "Exception occurred while mapping", ex);
+        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+        List<String> locationIds = new ArrayList<>();
+        List<Map<String, String>> userLocList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+          userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+          locationIds =
+              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
         }
-        if (CollectionUtils.isNotEmpty(locationIds)) {
-           userMap.put(JsonKey.LOCATION_IDS, locationIds);
-        }
+        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
+        userMap.put(JsonKey.LOCATION_IDS, locationIds);
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
@@ -165,6 +160,7 @@ private void backwardCompatibility(Map<String, Object> searchQueryMap) {
     sender().tell(response, self());
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
+
   private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());

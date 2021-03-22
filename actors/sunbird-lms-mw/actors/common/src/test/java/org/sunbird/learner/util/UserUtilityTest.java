@@ -21,12 +21,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
-    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
-    userMap.put(JsonKey.PROFILE_LOCATION,"location");
-    userMap.put(JsonKey.USER_TYPE,"userType");
-    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
-    userMap.put(JsonKey.LOCATION_ID,"locationID");
-    userMap.put(JsonKey.LOCATION_TYPE,"type");
+    userMap.put(JsonKey.PROFILE_USERTYPE, "teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION, "location");
+    userMap.put(JsonKey.USER_TYPE, "userType");
+    userMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
+    userMap.put(JsonKey.LOCATION_ID, "locationID");
+    userMap.put(JsonKey.LOCATION_TYPE, "type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
@@ -60,9 +60,9 @@ public class UserUtilityTest {
     String city = "Bangalore";
     String addressLine1 = "xyz";
     Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.USER_TYPE,"userType");
+    filterMap.put(JsonKey.USER_TYPE, "userType");
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
+    map.put(JsonKey.FILTERS, filterMap);
     Map<String, Object> response = null;
     try {
       response = UserUtility.encryptUserSearchFilterQueryData(map);
@@ -80,9 +80,9 @@ public class UserUtilityTest {
     String city = "Bangalore";
     String addressLine1 = "xyz";
     Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
+    filterMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
+    map.put(JsonKey.FILTERS, filterMap);
     Map<String, Object> response = null;
     try {
       response = UserUtility.encryptUserSearchFilterQueryData(map);
@@ -100,9 +100,9 @@ public class UserUtilityTest {
     String city = "Bangalore";
     String addressLine1 = "xyz";
     Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.LOCATION_ID,"locationID");
+    filterMap.put(JsonKey.LOCATION_ID, "locationID");
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
+    map.put(JsonKey.FILTERS, filterMap);
     Map<String, Object> response = null;
     try {
       response = UserUtility.encryptUserSearchFilterQueryData(map);
@@ -120,9 +120,9 @@ public class UserUtilityTest {
     String city = "Bangalore";
     String addressLine1 = "xyz";
     Map<String, Object> filterMap = new HashMap<String, Object>();
-    filterMap.put(JsonKey.LOCATION_TYPE,"type");
+    filterMap.put(JsonKey.LOCATION_TYPE, "type");
     Map<String, Object> map = new HashMap<String, Object>();
-    map.put(JsonKey.FILTERS,filterMap);
+    map.put(JsonKey.FILTERS, filterMap);
     Map<String, Object> response = null;
     try {
       response = UserUtility.encryptUserSearchFilterQueryData(map);
@@ -167,12 +167,12 @@ public class UserUtilityTest {
     userMap.put(JsonKey.FIRST_NAME, "test user");
     userMap.put(JsonKey.EMAIL, email);
     userMap.put(JsonKey.USER_NAME, userName);
-    userMap.put(JsonKey.PROFILE_USERTYPE,"teacher");
-    userMap.put(JsonKey.PROFILE_LOCATION,"location");
-    userMap.put(JsonKey.USER_TYPE,"userType");
-    userMap.put(JsonKey.USER_SUB_TYPE,"userSubType");
-    userMap.put(JsonKey.LOCATION_ID,"locationID");
-    userMap.put(JsonKey.LOCATION_TYPE,"type");
+    userMap.put(JsonKey.PROFILE_USERTYPE, "teacher");
+    userMap.put(JsonKey.PROFILE_LOCATION, "location");
+    userMap.put(JsonKey.USER_TYPE, "userType");
+    userMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
+    userMap.put(JsonKey.LOCATION_ID, "locationID");
+    userMap.put(JsonKey.LOCATION_TYPE, "type");
     List<Map<String, Object>> addressList = new ArrayList<Map<String, Object>>();
     Map<String, Object> address = new HashMap<String, Object>();
     address.put(JsonKey.COUNTRY, "India");
