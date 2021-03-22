@@ -101,7 +101,6 @@ public class BulkUploadManagementActorTest {
     reqObj.getRequest().put(JsonKey.DATA, innerMap);
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    String uploadProcessId = (String) res.get(JsonKey.PROCESS_ID);
     Assert.assertTrue(!(telemetryEnvKey.charAt(0) >= 65 && telemetryEnvKey.charAt(0) <= 90));
   }
 
