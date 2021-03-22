@@ -23,9 +23,6 @@
       "type": "long",
       "index": false
     },
-    "contactDetail": {
-      "type": "object"
-    },
     "contactdetails": {
       "type": "object"
     },
