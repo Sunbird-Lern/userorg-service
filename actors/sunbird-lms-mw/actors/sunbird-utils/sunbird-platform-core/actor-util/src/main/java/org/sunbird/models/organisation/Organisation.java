@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * @desc POJO class for Organisation
@@ -22,14 +21,10 @@ public class Organisation implements Serializable {
   private String contactDetail;
   private String createdBy;
   private String createdDate;
-  private Timestamp dateTime;
   private String description;
   private String email;
   private String externalId;
   private String hashTagId;
-  private String homeUrl;
-  private String imgUrl;
-  private String locationId;
   private String orgName;
   private Integer organisationType;
   private String provider;
@@ -90,14 +85,6 @@ public class Organisation implements Serializable {
     this.createdDate = createdDate;
   }
 
-  public Timestamp getDateTime() {
-    return dateTime;
-  }
-
-  public void setDateTime(Timestamp dateTime) {
-    this.dateTime = dateTime;
-  }
-
   public String getDescription() {
     return description;
   }
@@ -128,30 +115,6 @@ public class Organisation implements Serializable {
 
   public void setHashTagId(String hashTagId) {
     this.hashTagId = hashTagId;
-  }
-
-  public String getHomeUrl() {
-    return homeUrl;
-  }
-
-  public void setHomeUrl(String homeUrl) {
-    this.homeUrl = homeUrl;
-  }
-
-  public String getImgUrl() {
-    return imgUrl;
-  }
-
-  public void setImgUrl(String imgUrl) {
-    this.imgUrl = imgUrl;
-  }
-
-  public String getLocationId() {
-    return locationId;
-  }
-
-  public void setLocationId(String locationId) {
-    this.locationId = locationId;
   }
 
   public String getOrgName() {

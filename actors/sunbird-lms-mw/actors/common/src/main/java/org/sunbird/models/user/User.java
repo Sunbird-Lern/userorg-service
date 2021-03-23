@@ -27,7 +27,6 @@ public class User implements Serializable {
   private String email;
   private String firstName;
   private Boolean isDeleted;
-  private List<String> language;
   private String lastName;
   private String phone;
   private String provider;
@@ -192,14 +191,6 @@ public class User implements Serializable {
 
   public void setIsDeleted(Boolean isDeleted) {
     this.isDeleted = isDeleted;
-  }
-
-  public List<String> getLanguage() {
-    return language;
-  }
-
-  public void setLanguage(List<String> language) {
-    this.language = language;
   }
 
   public String getLastName() {
