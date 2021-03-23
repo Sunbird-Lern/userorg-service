@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
+import org.sunbird.models.organisation.OrgTypeEnum;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
@@ -169,9 +171,24 @@ public class EsSyncBackgroundActor extends BaseActor {
   }
 
   private Map<String, Object> getOrgDetails(Entry<String, Object> entry, RequestContext context) {
-    logger.info(context, "EsSyncBackgroundActor: getOrgDetails called");
+    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails called");
     Map<String, Object> orgMap = (Map<String, Object>) entry.getValue();
-    orgMap.remove(JsonKey.ORG_TYPE);
+    String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+
+    try {
+      if (orgMap.containsKey(JsonKey.ORG_TYPE) && null != orgMap.get(JsonKey.ORG_TYPE)) {
+        orgMap.put(
+            JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue((Integer) orgMap.get(JsonKey.ORG_TYPE)));
+      }
+      if (StringUtils.isNotBlank(orgLocation)) {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
+        orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+      }
+    } catch (Exception ex) {
+      logger.error("Exception occurred while parsing orgLocation", ex);
+    }
+
     if (orgMap.containsKey(JsonKey.ADDRESS_ID)
         && !StringUtils.isBlank((String) orgMap.get(JsonKey.ADDRESS_ID))) {
       orgMap.put(
@@ -181,7 +198,7 @@ public class EsSyncBackgroundActor extends BaseActor {
               (String) orgMap.get(JsonKey.ADDRESS_ID),
               context));
     }
-    logger.info(context, "EsSyncBackgroundActor: getOrgDetails returned");
+    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
     return orgMap;
   }
 

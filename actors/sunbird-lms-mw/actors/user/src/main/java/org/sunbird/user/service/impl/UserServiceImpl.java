@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
   public String getRootOrgIdFromChannel(String channel, RequestContext context) {
 
     Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.IS_ROOT_ORG, true);
+    filters.put(JsonKey.IS_TENANT, true);
     if (StringUtils.isNotBlank(channel)) {
       filters.put(JsonKey.CHANNEL, channel);
     } else {
@@ -479,7 +479,7 @@ public class UserServiceImpl implements UserService {
     request.setRequestContext(context);
     request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
     request.getRequest().putAll(userMap);
-    logger.info(context, "UserManagementActor:saveUserAttributes");
+    logger.info(context, "saveUserAttributes");
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       Future<Object> future = Patterns.ask(actorRef, request, t);

@@ -88,7 +88,7 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
+      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ROLE);
       getCassandraOperation()
           .getAllRecords(orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));
@@ -130,7 +130,7 @@ public class HealthActor extends BaseActor {
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
     responseList.add(ProjectUtil.createCheckResponse(JsonKey.ACTOR_SERVICE, false, null));
     try {
-      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ORG_TYPE_DB);
+      Util.DbInfo orgTypeDbInfo = Util.dbInfoMap.get(JsonKey.ROLE);
       getCassandraOperation()
           .getAllRecords(orgTypeDbInfo.getKeySpace(), orgTypeDbInfo.getTableName(), null);
       responseList.add(ProjectUtil.createCheckResponse(JsonKey.CASSANDRA_SERVICE, false, null));

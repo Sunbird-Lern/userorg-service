@@ -26,7 +26,6 @@ public class DataCacheHandler implements Runnable {
 
   private static Map<String, Object> roleMap = new ConcurrentHashMap<>();
   private static Map<String, Object> telemetryPdata = new ConcurrentHashMap<>(3);
-  private static Map<String, String> orgTypeMap = new ConcurrentHashMap<>();
   private static Map<String, String> configSettings = new ConcurrentHashMap<>();
   private static Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap =
       new ConcurrentHashMap<>();
@@ -68,7 +67,7 @@ public class DataCacheHandler implements Runnable {
   public static String[] bulkOrgAllowedFields = {
     JsonKey.ORGANISATION_NAME,
     JsonKey.CHANNEL,
-    JsonKey.IS_ROOT_ORG,
+    JsonKey.IS_TENANT,
     JsonKey.PROVIDER,
     JsonKey.EXTERNAL_ID,
     JsonKey.DESCRIPTION,
@@ -87,7 +86,6 @@ public class DataCacheHandler implements Runnable {
   public void run() {
     logger.info("DataCacheHandler:run: Cache refresh started.");
     roleCache();
-    orgTypeCache();
     cacheSystemConfig();
     cacheRoleForRead();
     cacheTelemetryPdata();
@@ -198,22 +196,6 @@ public class DataCacheHandler implements Runnable {
   }
 
   @SuppressWarnings("unchecked")
-  private void orgTypeCache() {
-    Map<String, String> tempOrgTypeMap = new ConcurrentHashMap();
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB, null);
-    List<Map<String, Object>> responseList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (null != responseList && !responseList.isEmpty()) {
-      for (Map<String, Object> resultMap : responseList) {
-        tempOrgTypeMap.put(
-            ((String) resultMap.get(JsonKey.NAME)).toLowerCase(),
-            (String) resultMap.get(JsonKey.ID));
-      }
-      orgTypeMap = tempOrgTypeMap;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
   private void roleCache() {
     Map<String, Object> tempRoleMap = new ConcurrentHashMap();
     Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ROLE_GROUP, null);
@@ -270,11 +252,6 @@ public class DataCacheHandler implements Runnable {
   /** @return the roleList */
   public static List<Map<String, String>> getUserReadRoleList() {
     return roleList;
-  }
-
-  /** @return the orgTypeMap */
-  public static Map<String, String> getOrgTypeMap() {
-    return orgTypeMap;
   }
 
   /** @return the configSettings */

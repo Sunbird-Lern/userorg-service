@@ -19,12 +19,13 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.Organisation;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
-import scala.concurrent.Promise;
 
 public class UserManagementActorTest extends UserManagementActorTestBase {
 
@@ -38,8 +39,110 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testCreateUserSuccessWithoutUserCallerId() {
+  public void testCreateUserSuccessWithIsTenantAsFalse() {
+    Organisation organisation = new Organisation();
+    organisation.setId("rootOrgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("rootOrgId");
+    organisation.setTenant(false);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
+    boolean result =
+        testScenario(
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            null);
+    assertTrue(result);
+  }
 
+  @Test
+  public void testCreateUserSuccessWithRequestedChannelAsNull() {
+    Organisation organisation = new Organisation();
+    organisation.setId("rootOrgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("rootOrgId");
+    organisation.setTenant(false);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
+    Request request =
+        getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER);
+    request.getRequest().remove(JsonKey.CHANNEL);
+    boolean result = testScenario(request, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithInvalidOrgId() {
+    Organisation organisation = new Organisation();
+    organisation.setId("rootOrgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("rootOrgId");
+    organisation.setTenant(true);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any())).thenReturn(null);
+    boolean result =
+        testScenario(
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            ResponseCode.invalidOrgData);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithInvalidChannel() {
+    Organisation organisation = new Organisation();
+    organisation.setId("rootOrgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("rootOrgId");
+    organisation.setTenant(true);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
+    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any())).thenReturn("");
+    boolean result =
+        testScenario(
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            ResponseCode.invalidParameterValue);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithChannelAndOrgIdMismatch2() {
+    Organisation organisation = new Organisation();
+    organisation.setId("orgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("id");
+    organisation.setTenant(true);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
+    boolean result =
+        testScenario(
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            ResponseCode.parameterMismatch);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserFailureWithChannelAndOrgIdMismatch() {
+    Organisation organisation = new Organisation();
+    organisation.setId("orgId");
+    organisation.setChannel("channel");
+    organisation.setRootOrgId("id");
+    organisation.setTenant(true);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
+    boolean result =
+        testScenario(
+            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+            ResponseCode.parameterMismatch);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserSuccessWithoutUserCallerId() {
+    Organisation organisation = new Organisation();
+    organisation.setId("rootOrgId");
+    organisation.setChannel("anyChannel");
+    organisation.setRootOrgId("rootOrgId");
+    organisation.setTenant(true);
+    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+        .thenReturn(organisation);
     boolean result =
         testScenario(
             getRequest(
@@ -49,7 +152,12 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testCreateUserSuccessWithOrgExternalId() {
+  public void testCreateUserSuccessWithOrgExternalId() throws Exception {
+    OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
+    whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
+    when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn("");
     reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
         testScenario(
@@ -173,20 +281,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
-  public void testCreateUserFailureWithInvalidOrg() {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(null);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
-    boolean result =
-        testScenario(
-            getRequest(
-                false, false, false, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
-            ResponseCode.invalidOrgData);
-    assertTrue(result);
-  }
-
   /*  @Test
   public void testUpdateUserFailureWithLocationCodes() {
     Future<Object> future2 = Futures.future(() -> null, system.dispatcher());
@@ -207,6 +301,12 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testUpdateUserSuccess() {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.IS_DELETED, false);
+    user.put(JsonKey.ROOT_ORG_ID, "custodianRootOrgId");
+    user.putAll(getMapObject());
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
     boolean result =
         testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
     assertTrue(result);

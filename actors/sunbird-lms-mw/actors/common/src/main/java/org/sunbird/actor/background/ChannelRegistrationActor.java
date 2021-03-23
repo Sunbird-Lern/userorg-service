@@ -99,7 +99,7 @@ public class ChannelRegistrationActor extends BaseActor {
     list.add(JsonKey.CHANNEL);
     searchDto.setFields(list);
     Map<String, Object> filter = new HashMap<>();
-    filter.put(JsonKey.IS_ROOT_ORG, true);
+    filter.put(JsonKey.IS_TENANT, true);
     searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filter);
     Future<Map<String, Object>> esResponseF =
         esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);

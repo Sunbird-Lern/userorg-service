@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 
 /**
  * @desc POJO class for Organisation
@@ -34,15 +33,11 @@ public class Organisation implements Serializable {
   private String homeUrl;
   private String imgUrl;
   private Boolean isApproved;
-  private Boolean isDefault;
-  private Boolean isRootOrg;
   private String locationId;
   private Integer noOfMembers;
   private String orgCode;
   private String orgName;
-  private String orgType;
-  private String orgTypeId;
-  private String parentOrgId;
+  private Integer organisationType;
   private String preferredLanguage;
   private String provider;
   private String rootOrgId;
@@ -52,8 +47,9 @@ public class Organisation implements Serializable {
   private String thumbnail;
   private String updatedBy;
   private String updatedDate;
-  private List<String> locationIds;
   private Boolean isSSOEnabled;
+  private Boolean isTenant;
+  private String orgLocation;
 
   public String getId() {
     return id;
@@ -215,28 +211,12 @@ public class Organisation implements Serializable {
     this.orgName = orgName;
   }
 
-  public String getOrgType() {
-    return orgType;
+  public Integer getOrganisationType() {
+    return organisationType;
   }
 
-  public void setOrgType(String orgType) {
-    this.orgType = orgType;
-  }
-
-  public String getOrgTypeId() {
-    return orgTypeId;
-  }
-
-  public void setOrgTypeId(String orgTypeId) {
-    this.orgTypeId = orgTypeId;
-  }
-
-  public String getParentOrgId() {
-    return parentOrgId;
-  }
-
-  public void setParentOrgId(String parentOrgId) {
-    this.parentOrgId = parentOrgId;
+  public void setOrganisationType(Integer organisationType) {
+    this.organisationType = organisationType;
   }
 
   public String getPreferredLanguage() {
@@ -253,14 +233,6 @@ public class Organisation implements Serializable {
 
   public void setProvider(String provider) {
     this.provider = provider;
-  }
-
-  public String getRootOrgId() {
-    return rootOrgId;
-  }
-
-  public void setRootOrgId(String rootOrgId) {
-    this.rootOrgId = rootOrgId;
   }
 
   public String getSlug() {
@@ -311,14 +283,6 @@ public class Organisation implements Serializable {
     this.updatedDate = updatedDate;
   }
 
-  public List<String> getLocationIds() {
-    return locationIds;
-  }
-
-  public void setLocationIds(List<String> locationIds) {
-    this.locationIds = locationIds;
-  }
-
   @JsonProperty(value = "isApproved")
   public Boolean isApproved() {
     return isApproved;
@@ -328,24 +292,6 @@ public class Organisation implements Serializable {
     this.isApproved = isApproved;
   }
 
-  @JsonProperty(value = "isDefault")
-  public Boolean isDefault() {
-    return isDefault;
-  }
-
-  public void setDefault(Boolean isDefault) {
-    this.isDefault = isDefault;
-  }
-
-  @JsonProperty(value = "isRootOrg")
-  public Boolean isRootOrg() {
-    return isRootOrg;
-  }
-
-  public void setRootOrg(Boolean isRootOrg) {
-    this.isRootOrg = isRootOrg;
-  }
-
   @JsonProperty(value = "isSSOEnabled")
   public Boolean isSSOEnabled() {
     return isSSOEnabled;
@@ -353,5 +299,30 @@ public class Organisation implements Serializable {
 
   public void setSSOEnabled(Boolean isSsoEnabled) {
     this.isSSOEnabled = isSsoEnabled;
+  }
+
+  @JsonProperty(value = "isTenant")
+  public Boolean isTenant() {
+    return isTenant;
+  }
+
+  public void setTenant(Boolean tenant) {
+    isTenant = tenant;
+  }
+
+  public String getOrgLocation() {
+    return orgLocation;
+  }
+
+  public void setOrgLocation(String orgLocation) {
+    this.orgLocation = orgLocation;
+  }
+
+  public String getRootOrgId() {
+    return rootOrgId;
+  }
+
+  public void setRootOrgId(String rootOrgId) {
+    this.rootOrgId = rootOrgId;
   }
 }

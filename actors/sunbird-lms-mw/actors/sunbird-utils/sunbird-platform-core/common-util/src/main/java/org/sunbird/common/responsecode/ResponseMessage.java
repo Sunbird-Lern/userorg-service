@@ -116,8 +116,6 @@ public interface ResponseMessage {
     String RESOURCE_NOT_FOUND = "Requested resource not found";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "Max allowed size is {0}";
     String INACTIVE_USER = "User is Inactive. Please make it active to proceed.";
-    String USER_INACTIVE_FOR_THIS_ORG =
-        "User is Inactive for this org. Please make it active to proceed.";
     String ORG_NOT_EXIST = "Requested organisation does not exist.";
     String ALREADY_EXISTS = "A {0} with {1} already exists. Please retry with a unique value.";
     String INVALID_VALUE = "Invalid {0}: {1}. Valid values are: {2}.";
@@ -327,7 +325,6 @@ public interface ResponseMessage {
     String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "MAX_ALLOWED_SIZE_LIMIT_EXCEED";
     String INACTIVE_USER = "INACTIVE_USER";
-    String USER_INACTIVE_FOR_THIS_ORG = "USER_INACTIVE_FOR_THIS_ORG";
     String ORG_NOT_EXIST = "ORG_NOT_EXIST";
     String ALREADY_EXISTS = "ALREADY_EXISTS";
     String INVALID_VALUE = "INVALID_VALUE";

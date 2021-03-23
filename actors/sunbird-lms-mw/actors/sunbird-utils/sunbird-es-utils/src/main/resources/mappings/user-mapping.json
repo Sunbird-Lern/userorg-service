@@ -777,6 +777,46 @@
     },
     "webPages": {
       "type": "object"
+    },
+    "profileLocation": {
+      "properties": {
+        "id": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "profileUserType": {
+      "properties": {
+        "subType": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
     }
   }
 }

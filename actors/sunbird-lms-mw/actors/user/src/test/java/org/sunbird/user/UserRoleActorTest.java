@@ -149,7 +149,8 @@ public class UserRoleActorTest {
     orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
     orgMap.put(JsonKey.HASHTAGID, "1234567890");
     when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(orgService.getOrgByExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(true, null));
   }
@@ -163,7 +164,8 @@ public class UserRoleActorTest {
     orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
     orgMap.put(JsonKey.HASHTAGID, "1234567890");
     when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(orgService.getOrgByExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(false, null));
   }
@@ -185,7 +187,8 @@ public class UserRoleActorTest {
     when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     Map<String, Object> orgMap = new HashMap<>();
     when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.esGetOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(orgService.getOrgByExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(false, ResponseCode.invalidParameterValue));
   }
