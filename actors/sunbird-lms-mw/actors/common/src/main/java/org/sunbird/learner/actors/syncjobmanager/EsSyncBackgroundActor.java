@@ -188,16 +188,6 @@ public class EsSyncBackgroundActor extends BaseActor {
     } catch (Exception ex) {
       logger.error("Exception occurred while parsing orgLocation", ex);
     }
-
-    if (orgMap.containsKey(JsonKey.ADDRESS_ID)
-        && !StringUtils.isBlank((String) orgMap.get(JsonKey.ADDRESS_ID))) {
-      orgMap.put(
-          JsonKey.ADDRESS,
-          getDetailsById(
-              Util.dbInfoMap.get(JsonKey.ADDRESS_DB),
-              (String) orgMap.get(JsonKey.ADDRESS_ID),
-              context));
-    }
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
     return orgMap;
   }

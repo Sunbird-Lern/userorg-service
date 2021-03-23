@@ -39,7 +39,6 @@ public interface ResponseMessage {
     String USERNAME_IN_USE = "Username already exists.";
     String USERID_MISSING = "UserId is mandatory.";
     String AUTH_TOKEN_MISSING = "Auth token is mandatory.";
-    String ADDRESS_REQUIRED_ERROR = "Please provide address.";
     String DB_INSERTION_FAIL = "DB insert operation failed.";
     String DB_UPDATE_FAIL = "Db update operation failed.";
     String PHONE_NO_REQUIRED_ERROR = "Phone number is required.";
@@ -53,8 +52,6 @@ public interface ResponseMessage {
     String ID_REQUIRED_ERROR = "For deleting a record, Id is required.";
     String DATA_TYPE_ERROR = "Data type of {0} should be {1}.";
     String ERROR_ATTRIBUTE_CONFLICT = "Either pass attribute {0} or {1} but not both.";
-    String ADDRESS_ERROR = "In {0}, {1} is mandatory.";
-    String ADDRESS_TYPE_ERROR = "Please provide correct address Type.";
     String NAME_OF_ORGANISATION_ERROR = "Organization Name is required.";
     String ROLES_MISSING = "user role is required.";
     String EMPTY_ROLES_PROVIDED = "Roles cannot be empty.";
@@ -246,7 +243,6 @@ public interface ResponseMessage {
     String INVALID_ORG_ID = "INVALID_ORG_ID";
     String INVALID_ORG_STATUS = "INVALID_ORG_STATUS";
     String INVALID_ORG_STATUS_TRANSITION = "INVALID_ORG_STATUS_TRANSITION";
-    String ADDRESS_REQUIRED_ERROR = "ADDRESS_REQUIRED_ERROR";
     String DB_INSERTION_FAIL = "DB_INSERTION_FAIL";
     String DB_UPDATE_FAIL = "DB_UPDATE_FAIL";
     String PHONE_NO_REQUIRED_ERROR = "PHONE_NO_REQUIRED_ERROR";
@@ -260,8 +256,6 @@ public interface ResponseMessage {
     String ID_REQUIRED_ERROR = "ID_REQUIRED_ERROR";
     String DATA_TYPE_ERROR = "DATA_TYPE_ERROR";
     String ERROR_ATTRIBUTE_CONFLICT = "ERROR_ATTRIBUTE_CONFLICT";
-    String ADDRESS_ERROR = "ADDRESS_ERROR";
-    String ADDRESS_TYPE_ERROR = "ADDRESS_TYPE_ERROR";
     String NAME_OF_ORGANISATION_ERROR = "NAME_OF_ORGANIZATION_ERROR";
     String ROLES_MISSING = "ROLES_REQUIRED_ERROR";
     String EMPTY_ROLES_PROVIDED = "EMPTY_ROLES_PROVIDED";

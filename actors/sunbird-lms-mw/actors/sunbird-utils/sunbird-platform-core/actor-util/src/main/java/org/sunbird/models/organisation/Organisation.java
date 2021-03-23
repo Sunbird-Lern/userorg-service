@@ -16,7 +16,6 @@ public class Organisation implements Serializable {
 
   private static final long serialVersionUID = 3617862727235741692L;
   private String id;
-  private String addressId;
   private String channel;
   private String contactDetail;
   private String createdBy;
@@ -43,14 +42,6 @@ public class Organisation implements Serializable {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getAddressId() {
-    return addressId;
-  }
-
-  public void setAddressId(String addressId) {
-    this.addressId = addressId;
   }
 
   public String getChannel() {

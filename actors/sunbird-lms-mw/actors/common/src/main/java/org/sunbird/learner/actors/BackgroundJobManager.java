@@ -162,12 +162,6 @@ public class BackgroundJobManager extends BaseActor {
               actorMessage.getRequestContext(),
               "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-
-        if (MapUtils.isNotEmpty((Map<String, Object>) orgMap.get(JsonKey.ADDRESS))) {
-          esMap.put(JsonKey.ADDRESS, orgMap.get(JsonKey.ADDRESS));
-        } else {
-          esMap.put(JsonKey.ADDRESS, new HashMap<>());
-        }
       }
       // Register the org into EKStep.
       String hashOrgId = (String) esMap.getOrDefault(JsonKey.HASH_TAG_ID, "");

@@ -25,13 +25,9 @@ public final class JsonKey {
   public static final String ACTOR_ID = "actorId";
   public static final String ACTOR_SERVICE = "Actor service";
   public static final String ACTOR_TYPE = "actorType";
-  public static final String ADD_TYPE = "addType";
   public static final String ADDED_BY = "addedBy";
   public static final String ADDITIONAL_INFO = "ADDITIONAL_INFO";
   public static final String ADDRESS = "address";
-  public static final String ADDRESS_DB = "address";
-  public static final String ADDRESS_ID = "addressId";
-  public static final String ADDRESS_LINE1 = "addressLine1";
   public static final String ALLOWED_LOGIN = "allowedLogin";
   public static final String API_ACCESS = "api_access";
   public static final String API_ACTOR_PROVIDER = "api_actor_provider";
@@ -55,7 +51,6 @@ public final class JsonKey {
   public static final String CHANNEL_REG_STATUS_ID = "003";
   public static final String CHANNELS = "channels";
   public static final String CHECKS = "checks";
-  public static final String CITY = "city";
   public static final String CLASS = "class";
   public static final String CODE = "code";
   public static final String COMPLETENESS = "completeness";
@@ -67,7 +62,6 @@ public final class JsonKey {
   public static final String CONTEXT = "context";
   public static final String CORRELATED_OBJECTS = "correlatedObjects";
   public static final String COUNT = "count";
-  public static final String COUNTRY = "country";
   public static final String COUNTRY_CODE = "countryCode";
   public static final String COURSE_ID = "courseId";
   public static final String COURSE_NAME = "courseName";
@@ -81,7 +75,6 @@ public final class JsonKey {
   public static final String DATE_HISTOGRAM = "DATE_HISTOGRAM";
   public static final String DEFAULT_CONSUMER_ID = "internal";
   public static final String DEFAULT_ROOT_ORG_ID = "ORG_001";
-  public static final String DEGREE = "degree";
   public static final String DELETE = "delete";
   public static final String DESCRIPTION = "description";
   public static final String DOB = "dob";

@@ -217,7 +217,6 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
 
     Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
-    req.put(JsonKey.ADDRESS, new HashMap<>());
     req.put(JsonKey.HASHTAGID, "orgId");
     req.put(JsonKey.IS_TENANT, true);
     Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
@@ -328,7 +327,6 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     Map<String, Object> req = getRequestDataForOrgUpdate();
-    req.put(JsonKey.ADDRESS, new HashMap<>());
     req.put(JsonKey.HASHTAGID, "orgId");
     Request reqst = getRequest(req, ActorOperations.UPDATE_ORG.getValue());
     reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);

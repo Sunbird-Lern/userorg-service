@@ -57,8 +57,6 @@ public enum ResponseCode {
   invalidOrgStatusTransition(
       ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION,
       ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION),
-  addressRequired(
-      ResponseMessage.Key.ADDRESS_REQUIRED_ERROR, ResponseMessage.Message.ADDRESS_REQUIRED_ERROR),
   phoneNoRequired(
       ResponseMessage.Key.PHONE_NO_REQUIRED_ERROR, ResponseMessage.Message.PHONE_NO_REQUIRED_ERROR),
   invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA),
@@ -75,9 +73,6 @@ public enum ResponseCode {
   errorAttributeConflict(
       ResponseMessage.Key.ERROR_ATTRIBUTE_CONFLICT,
       ResponseMessage.Message.ERROR_ATTRIBUTE_CONFLICT),
-  addressError(ResponseMessage.Key.ADDRESS_ERROR, ResponseMessage.Message.ADDRESS_ERROR),
-  addressTypeError(
-      ResponseMessage.Key.ADDRESS_TYPE_ERROR, ResponseMessage.Message.ADDRESS_TYPE_ERROR),
   organisationNameError(
       ResponseMessage.Key.NAME_OF_ORGANISATION_ERROR,
       ResponseMessage.Message.NAME_OF_ORGANISATION_ERROR),
