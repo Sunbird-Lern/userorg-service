@@ -42,8 +42,8 @@ public class UserOnboardingNotificationActor extends BaseActor {
         .equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
       // user created successfully send the onboarding mail
       Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
-      welcomeMailReqObj.setRequestContext(request.getRequestContext());
       if (null != welcomeMailReqObj) {
+        welcomeMailReqObj.setRequestContext(request.getRequestContext());
         tellToAnother(welcomeMailReqObj);
       }
     } else if (request
