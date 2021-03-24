@@ -462,6 +462,7 @@ public final class JsonKey {
   public static final String PREV_USED_EMAIL = "prevUsedEmail";
   public static final String PREV_USED_PHONE = "prevUsedPhone";
   public static final String MERGE_USER = "Mergeuser";
+  public static final String UPDATE_USER = "updateUser";
   public static final String FROM_ACCOUNT_ID = "fromAccountId";
   public static final String TO_ACCOUNT_ID = "toAccountId";
   public static final String USER_MERGEE_ACCOUNT = "userMergeeAccount";
