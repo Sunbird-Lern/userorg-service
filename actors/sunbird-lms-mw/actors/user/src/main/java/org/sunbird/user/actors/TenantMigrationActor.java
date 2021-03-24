@@ -235,7 +235,8 @@ public class TenantMigrationActor extends BaseActor {
     }
     targetObject =
         TelemetryUtil.generateTargetObject(
-            (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, "migrate", null);
+            (String) reqMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, "Update", null);
+    reqMap.put(JsonKey.TYPE, "MigrateUser");
     TelemetryUtil.telemetryProcessingCall(
         reqMap, targetObject, correlatedObject, request.getContext());
   }
