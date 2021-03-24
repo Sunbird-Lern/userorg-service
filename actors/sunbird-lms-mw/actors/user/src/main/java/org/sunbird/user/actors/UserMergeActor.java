@@ -59,7 +59,6 @@ public class UserMergeActor extends UserBaseActor {
   public void onReceive(Request userRequest) throws Throwable {
     Util.initializeContext(userRequest, TelemetryEnvKey.USER);
     if (producer == null) {
-
       initKafkaClient();
     }
     updateUserMergeDetails(userRequest);
