@@ -59,6 +59,7 @@ public class UserMergeActor extends UserBaseActor {
   public void onReceive(Request userRequest) throws Throwable {
     Util.initializeContext(userRequest, TelemetryEnvKey.USER);
     if (producer == null) {
+
       initKafkaClient();
     }
     updateUserMergeDetails(userRequest);
@@ -245,7 +246,7 @@ public class UserMergeActor extends UserBaseActor {
         TelemetryUtil.generateTargetObject(
             (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
             TelemetryEnvKey.USER,
-            JsonKey.MERGE_USER,
+            JsonKey.UPDATE_USER,
             null);
     TelemetryUtil.generateCorrelatedObject(
         (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
