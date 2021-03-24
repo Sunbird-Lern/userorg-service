@@ -1437,17 +1437,14 @@ public class UserManagementActor extends BaseActor {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
-        String profLoc = (String) userDbRecord.get(JsonKey.PROFILE_LOCATION);
+        // userDbRecord is record from ES , so it contains complete user data and profileLocation as
+        // List<Map<String, String>>
+        List<Map<String, String>> profLocList =
+            (List<Map<String, String>>) userDbRecord.get(JsonKey.PROFILE_LOCATION);
         List<String> locationIds = null;
-        try {
-          List<Map<String, String>> profLocList =
-              mapper.readValue(profLoc, new TypeReference<List<Map<String, String>>>() {});
-          if (CollectionUtils.isNotEmpty(profLocList)) {
-            locationIds =
-                profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-          }
-        } catch (Exception ex) {
-          logger.error(context, "Exception occurred while mapping", ex);
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationIds =
+              profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
         }
         // Get location code from user records locations Ids
         logger.info(
