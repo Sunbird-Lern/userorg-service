@@ -628,7 +628,7 @@ public class UserProfileReadService {
               }
             });
       }
-      org.put(JsonKey.LOCATION_IDS, locationSet);
+      org.put(JsonKey.LOCATION_IDS, locationIds);
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
