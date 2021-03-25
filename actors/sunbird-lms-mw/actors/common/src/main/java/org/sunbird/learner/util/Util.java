@@ -1025,4 +1025,39 @@ public final class Util {
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     return request;
   }
+
+  public static Map<String, Object> getUserDefaultValue() {
+    Map<String, Object> user = new HashMap<>();
+    user.put("avatar", null);
+    user.put("gender", null);
+    user.put("grade", null);
+    user.put("language", null);
+    user.put("lastLoginTime", null);
+    user.put("location", null);
+    user.put("profileSummary", null);
+    user.put("profileVisibility", null);
+    user.put("tempPassword", null);
+    user.put("thumbnail", null);
+    user.put("registryId", null);
+    return user;
+  }
+
+  public static Map<String, Object> getOrgDefaultValue() {
+    Map<String, Object> org = new HashMap<>();
+    org.put("dateTime", null);
+    org.put("preferredLanguage", null);
+    org.put("approvedBy", null);
+    org.put("addressId", null);
+    org.put("approvedDate", null);
+    org.put("communityId", null);
+    org.put("homeUrl", null);
+    org.put("imgUrl", null);
+    org.put("isApproved", null);
+    org.put("locationId", null);
+    org.put("noOfMembers", null);
+    org.put("orgCode", null);
+    org.put("theme", null);
+    org.put("thumbnail", null);
+    return org;
+  }
 }

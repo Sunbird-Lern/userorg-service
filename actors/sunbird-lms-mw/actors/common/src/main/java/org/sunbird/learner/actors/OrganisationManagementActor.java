@@ -615,6 +615,7 @@ public class OrganisationManagementActor extends BaseActor {
           ResponseCode.orgDoesNotExist.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
+    result.putAll(Util.getOrgDefaultValue());
     result.remove(JsonKey.CONTACT_DETAILS);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
