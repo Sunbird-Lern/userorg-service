@@ -192,20 +192,6 @@ public class EsSyncBackgroundActor extends BaseActor {
     return orgMap;
   }
 
-  private Map<String, Object> getDetailsById(DbInfo dbInfo, String userId, RequestContext context) {
-    try {
-      Response response =
-          cassandraOperation.getRecordById(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), userId, context);
-      return ((((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).isEmpty())
-          ? new HashMap<>()
-          : ((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).get(0));
-    } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
-    }
-    return null;
-  }
-
   private DbInfo getDbInfoObj(String objectType) {
     if (objectType.equals(JsonKey.USER)) {
       return Util.dbInfoMap.get(JsonKey.USER_DB);
