@@ -791,6 +791,29 @@ public final class Util {
     userDetails.remove(JsonKey.PASSWORD);
     addEmailAndPhone(userDetails);
     checkEmailAndPhoneVerified(userDetails);
+    List<Map<String, String>> userLocList = new ArrayList<>();
+    String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+    if (StringUtils.isNotBlank(profLocation)) {
+      try {
+        userLocList = mapper.readValue(profLocation, List.class);
+      } catch (Exception e) {
+        logger.info(
+            context,
+            "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+      }
+    }
+    userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+    Map<String, Object> userTypeDetail = new HashMap<>();
+    String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+    if (StringUtils.isNotBlank(profUserType)) {
+      try {
+        userTypeDetail = mapper.readValue(profUserType, Map.class);
+      } catch (Exception e) {
+        logger.info(
+            context, "Exception occurred while converting profileUserType to Map<String,String>.");
+      }
+    }
+    userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
     return userDetails;
   }
 
@@ -1058,6 +1081,10 @@ public final class Util {
     org.put("orgCode", null);
     org.put("theme", null);
     org.put("thumbnail", null);
+    org.put("isDefault", null);
+    org.put("parentOrgId", null);
+    org.put("orgTypeId", null);
+    org.put("orgType", null);
     return org;
   }
 }
