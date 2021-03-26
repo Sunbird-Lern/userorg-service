@@ -1,18 +1,14 @@
 package org.sunbird.user.actors;
 
-import akka.actor.ActorRef;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 
 public abstract class UserBaseActor extends BaseActor {
-
-  private ActorRef systemSettingActorRef;
 
   protected void generateTelemetryEvent(
       Map<String, Object> requestMap,
@@ -34,21 +30,9 @@ public abstract class UserBaseActor extends BaseActor {
       case "unblockUser":
         telemetryAction.put("UnblockUser", "user unblocked");
         break;
-      case "profileVisibility":
-        telemetryAction.put("ProfileVisibility", "profile visibility setting changed");
-        break;
       default:
         // Do Nothing
     }
-
     TelemetryUtil.telemetryProcessingCall(telemetryAction, targetObject, correlatedObject, context);
-  }
-
-  protected ActorRef getSystemSettingActorRef() {
-    if (systemSettingActorRef == null) {
-      systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
-    }
-
-    return systemSettingActorRef;
   }
 }

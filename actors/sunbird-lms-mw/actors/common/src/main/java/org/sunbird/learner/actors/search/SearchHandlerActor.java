@@ -152,6 +152,7 @@ public class SearchHandlerActor extends BaseActor {
         }
         userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
         userMap.put(JsonKey.LOCATION_IDS, locationIds);
+        userMap.putAll(Util.getUserDefaultValue());
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
@@ -173,6 +174,14 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                List<Map<String, Object>> contents =
+                    (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
+                contents
+                    .stream()
+                    .forEach(
+                        org -> {
+                          org.putAll(Util.getOrgDefaultValue());
+                        });
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
               }

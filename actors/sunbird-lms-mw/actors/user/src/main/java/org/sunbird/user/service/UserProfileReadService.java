@@ -76,6 +76,7 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage.getRequestContext());
+    result.putAll(Util.getUserDefaultValue());
     result.put(
         JsonKey.ROOT_ORG,
         orgDao.getOrgById(

@@ -15,7 +15,6 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.OrgTypeEnum;
 
 public class OrgDaoImpl implements OrgDao {
 
@@ -41,19 +40,15 @@ public class OrgDaoImpl implements OrgDao {
     if (CollectionUtils.isNotEmpty(responseList)) {
       Map<String, Object> orgMap = responseList.get(0);
       String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
-      try {
-        if (orgMap.containsKey(JsonKey.ORG_TYPE) && null != orgMap.get(JsonKey.ORG_TYPE)) {
-          orgMap.put(
-              JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue((Integer) orgMap.get(JsonKey.ORG_TYPE)));
-        }
-        if (StringUtils.isNotBlank(orgLocation)) {
+      if (StringUtils.isNotBlank(orgLocation)) {
+        try {
           ObjectMapper mapper = new ObjectMapper();
           orgMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-      } catch (Exception e) {
-        logger.info(
-            context,
-            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
       orgMap.remove(JsonKey.CONTACT_DETAILS);
       return orgMap;

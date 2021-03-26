@@ -119,7 +119,6 @@ public final class Util {
     // name.
     dbInfoMap.put(JsonKey.USER_DB, getDbInfoObject(KEY_SPACE_NAME, "user"));
     dbInfoMap.put(JsonKey.ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "organisation"));
-    dbInfoMap.put(JsonKey.ADDRESS_DB, getDbInfoObject(KEY_SPACE_NAME, "address"));
     dbInfoMap.put(JsonKey.ROLE, getDbInfoObject(KEY_SPACE_NAME, "role"));
     dbInfoMap.put(JsonKey.URL_ACTION, getDbInfoObject(KEY_SPACE_NAME, "url_action"));
     dbInfoMap.put(JsonKey.ACTION_GROUP, getDbInfoObject(KEY_SPACE_NAME, "action_group"));
@@ -792,6 +791,29 @@ public final class Util {
     userDetails.remove(JsonKey.PASSWORD);
     addEmailAndPhone(userDetails);
     checkEmailAndPhoneVerified(userDetails);
+    List<Map<String, String>> userLocList = new ArrayList<>();
+    String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+    if (StringUtils.isNotBlank(profLocation)) {
+      try {
+        userLocList = mapper.readValue(profLocation, List.class);
+      } catch (Exception e) {
+        logger.info(
+            context,
+            "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+      }
+    }
+    userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+    Map<String, Object> userTypeDetail = new HashMap<>();
+    String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+    if (StringUtils.isNotBlank(profUserType)) {
+      try {
+        userTypeDetail = mapper.readValue(profUserType, Map.class);
+      } catch (Exception e) {
+        logger.info(
+            context, "Exception occurred while converting profileUserType to Map<String,String>.");
+      }
+    }
+    userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
     return userDetails;
   }
 
@@ -851,7 +873,7 @@ public final class Util {
                 .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
                 .distinct()
                 .collect(Collectors.toList());
-        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.PARENT_ORG_ID, JsonKey.ID);
+        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.ID);
 
         Future<Map<String, Map<String, Object>>> orgInfoMapF =
             esService.getEsResultByListOfIds(
@@ -1025,5 +1047,44 @@ public final class Util {
     request.setOperation(BackgroundOperations.emailService.name());
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     return request;
+  }
+
+  public static Map<String, Object> getUserDefaultValue() {
+    Map<String, Object> user = new HashMap<>();
+    user.put("avatar", null);
+    user.put("gender", null);
+    user.put("grade", null);
+    user.put("language", null);
+    user.put("lastLoginTime", null);
+    user.put("location", null);
+    user.put("profileSummary", null);
+    user.put("profileVisibility", null);
+    user.put("tempPassword", null);
+    user.put("thumbnail", null);
+    user.put("registryId", null);
+    return user;
+  }
+
+  public static Map<String, Object> getOrgDefaultValue() {
+    Map<String, Object> org = new HashMap<>();
+    org.put("dateTime", null);
+    org.put("preferredLanguage", null);
+    org.put("approvedBy", null);
+    org.put("addressId", null);
+    org.put("approvedDate", null);
+    org.put("communityId", null);
+    org.put("homeUrl", null);
+    org.put("imgUrl", null);
+    org.put("isApproved", null);
+    org.put("locationId", null);
+    org.put("noOfMembers", null);
+    org.put("orgCode", null);
+    org.put("theme", null);
+    org.put("thumbnail", null);
+    org.put("isDefault", null);
+    org.put("parentOrgId", null);
+    org.put("orgTypeId", null);
+    org.put("orgType", null);
+    return org;
   }
 }

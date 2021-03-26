@@ -237,7 +237,7 @@ public class UserManagementActor extends BaseActor {
     updateLocationCodeToIds(
         (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS),
         actorMessage.getRequestContext());
-    UserUtil.validateUserPhoneEmailAndWebPages(
+    UserUtil.validateUserPhoneAndEmailUniqueness(
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
@@ -993,7 +993,7 @@ public class UserManagementActor extends BaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
+    UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
