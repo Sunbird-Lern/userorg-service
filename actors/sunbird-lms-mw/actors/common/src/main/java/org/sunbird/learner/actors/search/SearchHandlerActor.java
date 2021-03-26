@@ -174,8 +174,15 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                List<Map<String, Object>> contents =
+                    (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
+                contents
+                    .stream()
+                    .forEach(
+                        org -> {
+                          org.putAll(Util.getOrgDefaultValue());
+                        });
                 response.put(JsonKey.RESPONSE, responseMap);
-                responseMap.putAll(Util.getOrgDefaultValue());
                 return response;
               }
             },
