@@ -28,7 +28,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
-import org.sunbird.models.organisation.OrgTypeEnum;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
@@ -174,19 +173,14 @@ public class EsSyncBackgroundActor extends BaseActor {
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails called");
     Map<String, Object> orgMap = (Map<String, Object>) entry.getValue();
     String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
-
-    try {
-      if (orgMap.containsKey(JsonKey.ORG_TYPE) && null != orgMap.get(JsonKey.ORG_TYPE)) {
-        orgMap.put(
-            JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue((Integer) orgMap.get(JsonKey.ORG_TYPE)));
-      }
-      if (StringUtils.isNotBlank(orgLocation)) {
+    if (StringUtils.isNotBlank(orgLocation)) {
+      try {
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (Exception ex) {
+        logger.error("Exception occurred while parsing orgLocation", ex);
       }
-    } catch (Exception ex) {
-      logger.error("Exception occurred while parsing orgLocation", ex);
     }
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
     return orgMap;

@@ -18,7 +18,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.OrgTypeEnum;
 import scala.concurrent.Future;
 
 /**
@@ -147,20 +146,15 @@ public class BackgroundJobManager extends BaseActor {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
         String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
-        try {
-          if (esMap.containsKey(JsonKey.ORG_TYPE) && null != esMap.get(JsonKey.ORG_TYPE)) {
-            esMap.put(
-                JsonKey.ORG_TYPE,
-                OrgTypeEnum.getTypeByValue((Integer) esMap.get(JsonKey.ORG_TYPE)));
-          }
-          if (StringUtils.isNotBlank(orgLocation)) {
+        if (StringUtils.isNotBlank(orgLocation)) {
+          try {
             ObjectMapper mapper = new ObjectMapper();
             esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          } catch (Exception e) {
+            logger.info(
+                actorMessage.getRequestContext(),
+                "Exception occurred while converting orgLocation to List<Map<String,String>>.");
           }
-        } catch (Exception e) {
-          logger.info(
-              actorMessage.getRequestContext(),
-              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
       }
       // Register the org into EKStep.

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @desc POJO class for Organisation
@@ -34,7 +36,7 @@ public class Organisation implements Serializable {
   private String updatedDate;
   private Boolean isSSOEnabled;
   private Boolean isTenant;
-  private String orgLocation;
+  private List<Map<String, String>> orgLocation;
 
   public String getId() {
     return id;
@@ -182,19 +184,19 @@ public class Organisation implements Serializable {
     isTenant = tenant;
   }
 
-  public String getOrgLocation() {
-    return orgLocation;
-  }
-
-  public void setOrgLocation(String orgLocation) {
-    this.orgLocation = orgLocation;
-  }
-
   public String getRootOrgId() {
     return rootOrgId;
   }
 
   public void setRootOrgId(String rootOrgId) {
     this.rootOrgId = rootOrgId;
+  }
+
+  public List<Map<String, String>> getOrgLocation() {
+    return orgLocation;
+  }
+
+  public void setOrgLocation(List<Map<String, String>> orgLocation) {
+    this.orgLocation = orgLocation;
   }
 }

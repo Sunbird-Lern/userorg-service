@@ -187,6 +187,12 @@ public class OrganisationManagementActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       Organisation org = mapper.convertValue(request, Organisation.class);
       request = mapper.convertValue(org, Map.class);
+      try {
+        String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+        request.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response result =
           cassandraOperation.insertRecord(
               orgDbInfo.getKeySpace(),
@@ -315,7 +321,6 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> request = actorMessage.getRequest();
       validateOrgRequest(request, actorMessage.getRequestContext());
       Map<String, Object> orgDao;
-      Map<String, Object> updateOrgDao = new HashMap<>();
       String updatedBy = (String) request.get(JsonKey.REQUESTED_BY);
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Response result =
@@ -345,7 +350,7 @@ public class OrganisationManagementActor extends BaseActor {
         sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
         return;
       }
-
+      Map<String, Object> updateOrgDao = new HashMap<>();
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -456,11 +461,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
       Map<String, Object> updateOrgDao = new HashMap<>();
       updateOrgDao.putAll(request);
-      updateOrgDao.remove(JsonKey.ORGANISATION_ID);
       updateOrgDao.remove(JsonKey.ROOT_ORG_ID);
-      updateOrgDao.remove(JsonKey.IS_APPROVED);
-      updateOrgDao.remove(JsonKey.APPROVED_BY);
-      updateOrgDao.remove(JsonKey.APPROVED_DATE);
       updateOrgDao.remove(JsonKey.CONTACT_DETAILS);
       if (JsonKey.BULK_ORG_UPLOAD.equalsIgnoreCase(callerId)) {
         if (null == request.get(JsonKey.STATUS)) {
@@ -539,6 +540,12 @@ public class OrganisationManagementActor extends BaseActor {
       // This will remove all extra unnecessary parameter from request
       Organisation org = mapper.convertValue(updateOrgDao, Organisation.class);
       updateOrgDao = mapper.convertValue(org, Map.class);
+      try {
+        String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+        updateOrgDao.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response response =
           cassandraOperation.updateRecord(
               orgDbInfo.getKeySpace(),
@@ -565,20 +572,14 @@ public class OrganisationManagementActor extends BaseActor {
       sender().tell(response, self());
 
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
-      try {
-        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)
-            && null != updateOrgDao.get(JsonKey.ORG_TYPE)) {
-          updateOrgDao.put(
-              JsonKey.ORG_TYPE,
-              OrgTypeEnum.getTypeByValue((Integer) updateOrgDao.get(JsonKey.ORG_TYPE)));
-        }
-        if (StringUtils.isNotBlank(orgLocation)) {
+      if (StringUtils.isNotBlank(orgLocation)) {
+        try {
           updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        } catch (Exception e) {
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-      } catch (Exception e) {
-        logger.info(
-            actorMessage.getRequestContext(),
-            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
 
       Request orgRequest = new Request();
@@ -826,13 +827,6 @@ public class OrganisationManagementActor extends BaseActor {
               map.put(JsonKey.TYPE, location.getType());
               newOrgLocationList.add(map);
             });
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      String orgLoc = mapper.writeValueAsString(newOrgLocationList);
-      request.put(JsonKey.ORG_LOCATION, orgLoc);
-    } catch (JsonProcessingException e) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-    }
   }
 
   private Map<String, Object> getOrgById(String id, RequestContext context) {
