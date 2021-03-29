@@ -7,7 +7,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +31,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -78,6 +76,18 @@ public class UserConsentActorTest {
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, consentList);
+    return response;
+  }
+
+  public static Response getOrg() {
+    Map<String, Object> org = new HashMap<String, Object>();
+    org.put(JsonKey.ID, "test-organisation");
+
+    List<Map<String, Object>> orgList = new ArrayList<Map<String, Object>>();
+    orgList.add(org);
+
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, orgList);
     return response;
   }
 
@@ -164,12 +174,9 @@ public class UserConsentActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
 
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ORGANISATION_ID, "test-organisation");
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(reqMap);
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(getOrg());
 
     subject.tell(updateUserConsentRequest(), probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
