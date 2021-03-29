@@ -101,7 +101,6 @@ public class BulkUploadManagementActorTest {
     reqObj.getRequest().put(JsonKey.DATA, innerMap);
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    String uploadProcessId = (String) res.get(JsonKey.PROCESS_ID);
     Assert.assertTrue(!(telemetryEnvKey.charAt(0) >= 65 && telemetryEnvKey.charAt(0) <= 90));
   }
 
@@ -291,7 +290,7 @@ public class BulkUploadManagementActorTest {
     Assert.assertTrue(null != ex);
     Assert.assertEquals(ResponseCode.invalidColumns.getErrorCode(), ex.getCode());
     Assert.assertEquals(
-        "Invalid column: password. Valid columns are: firstName, lastName, phone, countryCode, email, userName, phoneVerified, emailVerified, roles, position, grade, location, dob, gender, language, profileSummary, subject, webPages, externalIdProvider, externalId, externalIdType, externalIds.",
+        "Invalid column: password. Valid columns are: firstName, lastName, phone, countryCode, email, userName, phoneVerified, emailVerified, roles, position, location, dob, language, profileSummary, subject, externalIdProvider, externalId, externalIdType, externalIds.",
         ex.getMessage());
   }
 

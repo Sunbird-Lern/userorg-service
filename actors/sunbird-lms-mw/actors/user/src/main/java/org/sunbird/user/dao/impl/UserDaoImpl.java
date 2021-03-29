@@ -1,27 +1,20 @@
 package org.sunbird.user.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
-import scala.concurrent.Future;
 
 /**
  * Implementation class of UserDao interface.
@@ -57,31 +50,6 @@ public class UserDaoImpl implements UserDao {
   @Override
   public Response updateUser(Map<String, Object> userMap, RequestContext context) {
     return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap, context);
-  }
-
-  @Override
-  public List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context) {
-    List<User> userList = new ArrayList<>();
-    Map<String, Object> searchRequestMap = new HashMap<>();
-    searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
-    SearchDTO searchDto = Util.createSearchDto(searchRequestMap);
-    String type = ProjectUtil.EsType.user.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-
-    if (MapUtils.isNotEmpty(result)) {
-      List<Map<String, Object>> searchResult =
-          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if (CollectionUtils.isNotEmpty(searchResult)) {
-        userList =
-            searchResult
-                .stream()
-                .map(s -> mapper.convertValue(s, User.class))
-                .collect(Collectors.toList());
-      }
-    }
-    return userList;
   }
 
   @Override

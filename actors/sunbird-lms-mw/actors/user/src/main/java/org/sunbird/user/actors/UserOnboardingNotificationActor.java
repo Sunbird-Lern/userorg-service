@@ -64,10 +64,5 @@ public class UserOnboardingNotificationActor extends BaseActor {
       ssoManager.setRequiredAction(
           (String) requestMap.get(JsonKey.USER_ID), KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD);
     }
-
-    if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.EMAIL))) {
-      ssoManager.setRequiredAction(
-          (String) requestMap.get(JsonKey.USER_ID), KeycloakRequiredActionLinkUtil.VERIFY_EMAIL);
-    }
   }
 }
