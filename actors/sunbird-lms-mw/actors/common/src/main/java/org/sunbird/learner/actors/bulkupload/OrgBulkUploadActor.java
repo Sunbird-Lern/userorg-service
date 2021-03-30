@@ -96,7 +96,6 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
             JsonKey.ORGANISATION,
             (String) req.get(JsonKey.CREATED_BY),
             request.getRequestContext());
-    req.put(JsonKey.CREATED_BY, "f326a606-fa05-4844-8dd3-c5f7e7972c21");
     processOrgBulkUpload(
         req,
         bulkUploadProcess.getId(),

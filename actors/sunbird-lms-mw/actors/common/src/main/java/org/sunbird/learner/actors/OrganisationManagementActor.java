@@ -101,9 +101,9 @@ public class OrganisationManagementActor extends BaseActor {
       validateOrgType(orgType, JsonKey.CREATE);
       request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
       // Channel is mandatory for all org
-      //      channelMandatoryValidation(request);
+      channelMandatoryValidation(request);
       String channel = (String) request.get(JsonKey.CHANNEL);
-      //      validateChannel(request, actorMessage.getRequestContext());
+      validateChannel(request, actorMessage.getRequestContext());
 
       Boolean isTenant = (Boolean) request.get(JsonKey.IS_TENANT);
       String slug = Slug.makeSlug((String) request.getOrDefault(JsonKey.CHANNEL, ""), true);
@@ -168,8 +168,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       if (null != isTenant && isTenant) {
-        //        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
-        boolean bool = true;
+        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
         request.put(
             JsonKey.IS_SSO_ROOTORG_ENABLED,
             request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)

@@ -49,8 +49,6 @@ import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
@@ -104,7 +102,6 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -704,24 +701,19 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> userMap, RequestContext context) {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    String externalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
     String fetchedRootOrgIdByChannel = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      //      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel,
-      // context);
-      //      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
-      //        throw new ProjectCommonException(
-      //            ResponseCode.invalidParameterValue.getErrorCode(),
-      //            ProjectUtil.formatMessage(
-      //                ResponseCode.invalidParameterValue.getErrorMessage(),
-      //                requestedChannel,
-      //                JsonKey.CHANNEL),
-      //            ResponseCode.CLIENT_ERROR.getResponseCode());
-      //      }
-      Map<String, Object> org = orgDao.getOrgByExternalId(externalId, channel, context);
-      String rootOrg = (String) org.get(JsonKey.ROOT_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrg);
+      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
+      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidParameterValue.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                requestedChannel,
+                JsonKey.CHANNEL),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+      userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
     }
     Organisation fetchedOrgById = null;
     if (StringUtils.isNotBlank(requestedOrgId)) {
@@ -1635,8 +1627,6 @@ public class UserManagementActor extends BaseActor {
 
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
-    } else {
-      userMap.put(JsonKey.PROFILE_USERTYPE, null);
     }
   }
 }

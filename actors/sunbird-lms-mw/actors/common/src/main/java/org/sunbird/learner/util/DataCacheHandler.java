@@ -253,19 +253,7 @@ public class DataCacheHandler implements Runnable {
     return configSettings;
   }
 
-  //  public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
-  //    return userTypeOrSubTypeConfigMap;
-  //  }
-
   public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
-    List<String> usersubtypes = new ArrayList<>();
-    usersubtypes.add("aeo");
-    usersubtypes.add("deo");
-    Map<String, List<String>> userTypeMap = new HashMap<>();
-    userTypeMap.put("teacher", new ArrayList<>());
-    userTypeMap.put("administrator", usersubtypes);
-    userTypeMap.put("student", new ArrayList<>());
-    userTypeOrSubTypeConfigMap.put(JsonKey.DEFAULT_PERSONA, userTypeMap);
     return userTypeOrSubTypeConfigMap;
   }
 
@@ -294,18 +282,7 @@ public class DataCacheHandler implements Runnable {
     return orderMap;
   }
 
-  //  public static Map<String, List<String>> getLocationTypeConfig() {
-  //    return stateLocationTypeConfigMap;
-  //  }
-
   public static Map<String, List<String>> getLocationTypeConfig() {
-    List<String> locationTypes = new ArrayList<>();
-    locationTypes.add("state");
-    locationTypes.add("district");
-    locationTypes.add("block");
-    locationTypes.add("cluster");
-    locationTypes.add("school");
-    stateLocationTypeConfigMap.put(JsonKey.DEFAULT_PERSONA, locationTypes);
     return stateLocationTypeConfigMap;
   }
 
