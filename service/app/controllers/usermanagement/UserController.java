@@ -96,6 +96,13 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> getUserByIdV4(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV4(
+        ActorOperations.GET_USER_PROFILE_V3.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
@@ -153,6 +160,25 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    return handleSearchRequest(
+        ActorOperations.USER_SEARCH.getValue(),
+        httpRequest.body().asJson(),
+        userSearchRequest -> {
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(httpRequest),
+        EsType.user.getTypeName(),
+        httpRequest);
+  }
+
   public CompletionStage<Result> userLookup(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.USER_LOOKUP.getValue(),
@@ -186,6 +212,33 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
+          return null;
+        },
+        userId,
+        JsonKey.USER_ID,
+        false,
+        httpRequest);
+  }
+
+  private CompletionStage<Result> handleGetUserProfileV4(
+      String operation, String userId, Http.Request httpRequest) {
+    final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    final String provider = httpRequest.getQueryString(JsonKey.PROVIDER);
+    final String idType = httpRequest.getQueryString(JsonKey.ID_TYPE);
+    final String withTokens = httpRequest.getQueryString(JsonKey.WITH_TOKENS);
+    userId = ProjectUtil.getLmsUserId(userId);
+    return handleRequest(
+        operation,
+        null,
+        req -> {
+          Request request = (Request) req;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          request.getContext().put(JsonKey.PRIVATE, isPrivate);
+          request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
+          request.getContext().put(JsonKey.PROVIDER, provider);
+          request.getContext().put(JsonKey.ID_TYPE, idType);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
           return null;
         },
         userId,
