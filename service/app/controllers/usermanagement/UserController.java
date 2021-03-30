@@ -96,6 +96,7 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  // removing deprecating columns
   public CompletionStage<Result> getUserByIdV4(String userId, Http.Request httpRequest) {
     return handleGetUserProfileV4(
         ActorOperations.GET_USER_PROFILE_V3.getValue(),
@@ -160,6 +161,7 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  // removing deprecating columns and disabling search with those columns
   public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(

@@ -102,7 +102,7 @@
 
   <logger name="play" level="INFO" />
   <logger name="defaultLoggerAppender" level="INFO" />
-  <!--Telemetry Loggers-->
+  <!-- Telemetry Loggers-->
   <logger name="TelemetryEventLogger" level="INFO">
     <appender-ref ref="kafka-appender" />
   </logger>
