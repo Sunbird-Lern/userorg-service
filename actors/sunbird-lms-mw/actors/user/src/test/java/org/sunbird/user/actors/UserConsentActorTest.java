@@ -61,6 +61,10 @@ public class UserConsentActorTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esUtil = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
+
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(getOrg());
   }
 
   public static Response getSuccessResponse() {
@@ -173,10 +177,6 @@ public class UserConsentActorTest {
     when(cassandraOperation.upsertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
-
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(getOrg());
 
     subject.tell(updateUserConsentRequest(), probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
