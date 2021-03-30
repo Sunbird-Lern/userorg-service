@@ -159,7 +159,6 @@ public class EsSyncBackgroundActorTest {
     map.put(JsonKey.ORG_TYPE, "type");
     map.put(JsonKey.ORG_NAME, "name");
     map.put(JsonKey.CHANNEL, "ch");
-    map.put(JsonKey.ADDRESS_ID, "454981351");
     map.put(
         JsonKey.ORG_LOCATION,
         "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");

@@ -49,6 +49,8 @@ import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
+import org.sunbird.learner.organisation.dao.OrgDao;
+import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
@@ -102,6 +104,7 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -237,7 +240,7 @@ public class UserManagementActor extends BaseActor {
     updateLocationCodeToIds(
         (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS),
         actorMessage.getRequestContext());
-    UserUtil.validateUserPhoneEmailAndWebPages(
+    UserUtil.validateUserPhoneAndEmailUniqueness(
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
@@ -701,19 +704,24 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> userMap, RequestContext context) {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
+    String channel = (String) userMap.get(JsonKey.CHANNEL);
+    String externalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
     String fetchedRootOrgIdByChannel = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
-      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                requestedChannel,
-                JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-      userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
+      //      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel,
+      // context);
+      //      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
+      //        throw new ProjectCommonException(
+      //            ResponseCode.invalidParameterValue.getErrorCode(),
+      //            ProjectUtil.formatMessage(
+      //                ResponseCode.invalidParameterValue.getErrorMessage(),
+      //                requestedChannel,
+      //                JsonKey.CHANNEL),
+      //            ResponseCode.CLIENT_ERROR.getResponseCode());
+      //      }
+      Map<String, Object> org = orgDao.getOrgByExternalId(externalId, channel, context);
+      String rootOrg = (String) org.get(JsonKey.ROOT_ORG_ID);
+      userMap.put(JsonKey.ROOT_ORG_ID, rootOrg);
     }
     Organisation fetchedOrgById = null;
     if (StringUtils.isNotBlank(requestedOrgId)) {
@@ -993,7 +1001,7 @@ public class UserManagementActor extends BaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
+    UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
@@ -1437,17 +1445,14 @@ public class UserManagementActor extends BaseActor {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
-        String profLoc = (String) userDbRecord.get(JsonKey.PROFILE_LOCATION);
+        // userDbRecord is record from ES , so it contains complete user data and profileLocation as
+        // List<Map<String, String>>
+        List<Map<String, String>> profLocList =
+            (List<Map<String, String>>) userDbRecord.get(JsonKey.PROFILE_LOCATION);
         List<String> locationIds = null;
-        try {
-          List<Map<String, String>> profLocList =
-              mapper.readValue(profLoc, new TypeReference<List<Map<String, String>>>() {});
-          if (CollectionUtils.isNotEmpty(profLocList)) {
-            locationIds =
-                profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-          }
-        } catch (Exception ex) {
-          logger.error(context, "Exception occurred while mapping", ex);
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationIds =
+              profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
         }
         // Get location code from user records locations Ids
         logger.info(
@@ -1630,6 +1635,8 @@ public class UserManagementActor extends BaseActor {
 
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    } else {
+      userMap.put(JsonKey.PROFILE_USERTYPE, null);
     }
   }
 }

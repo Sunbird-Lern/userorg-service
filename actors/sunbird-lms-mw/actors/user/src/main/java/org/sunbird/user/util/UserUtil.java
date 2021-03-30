@@ -33,7 +33,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.SocialMediaType;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
@@ -224,13 +223,10 @@ public class UserUtil {
     return userId;
   }
 
-  public static void validateUserPhoneEmailAndWebPages(
+  public static void validateUserPhoneAndEmailUniqueness(
       User user, String operationType, RequestContext context) {
     userLookupService.checkPhoneUniqueness(user, operationType, context);
     userLookupService.checkEmailUniqueness(user, operationType, context);
-    if (CollectionUtils.isNotEmpty(user.getWebPages())) {
-      SocialMediaType.validateSocialMedia(user.getWebPages());
-    }
   }
 
   public static String getDecryptedData(String value, RequestContext context) {

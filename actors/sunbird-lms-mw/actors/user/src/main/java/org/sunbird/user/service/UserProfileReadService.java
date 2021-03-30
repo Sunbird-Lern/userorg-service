@@ -76,7 +76,9 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    appendUserTypeAndLocation(result, version, actorMessage.getRequestContext());
+    if (version != "v4") {
+      appendUserTypeAndLocation(result, actorMessage.getRequestContext());
+    }
     result.put(
         JsonKey.ROOT_ORG,
         orgDao.getOrgById(
@@ -141,8 +143,7 @@ public class UserProfileReadService {
     return response;
   }
 
-  public void appendUserTypeAndLocation(
-      Map<String, Object> result, String version, RequestContext context) {
+  public void appendUserTypeAndLocation(Map<String, Object> result, RequestContext context) {
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
       userTypeDetails =
@@ -152,18 +153,14 @@ public class UserProfileReadService {
     } catch (Exception e) {
       logger.error(context, "Exception because of mapper read value", e);
     }
-    if (version != "v4") {
-      if (MapUtils.isNotEmpty(userTypeDetails)) {
-        result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
-        result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-      } else {
-        result.put(JsonKey.USER_TYPE, null);
-        result.put(JsonKey.USER_SUB_TYPE, null);
-      }
+    if (MapUtils.isNotEmpty(userTypeDetails)) {
+      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
+      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
     } else {
-      result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
-      removeUnwanted(result);
+      result.put(JsonKey.USER_TYPE, null);
+      result.put(JsonKey.USER_SUB_TYPE, null);
     }
+    result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
 
     List<Map<String, String>> userLocList = new ArrayList<>();
     List<String> locationIds = new ArrayList<>();
@@ -172,13 +169,8 @@ public class UserProfileReadService {
           mapper.readValue(
               (String) result.get(JsonKey.PROFILE_LOCATION),
               new TypeReference<List<Map<String, String>>>() {});
-      if (version != "v4") {
-        if (CollectionUtils.isNotEmpty(userLocList)) {
-          locationIds =
-              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-        }
-      } else {
-        result.put(JsonKey.PROFILE_LOCATION, userLocList);
+      if (CollectionUtils.isNotEmpty(userLocList)) {
+        locationIds = userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
       }
     } catch (Exception ex) {
       logger.error(context, "Exception occurred while mapping", ex);
@@ -639,7 +631,7 @@ public class UserProfileReadService {
               }
             });
       }
-      org.put(JsonKey.LOCATION_IDS, locationSet);
+      org.put(JsonKey.LOCATION_IDS, locationIds);
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
@@ -684,23 +676,5 @@ public class UserProfileReadService {
       }
     }
     return retList;
-  }
-
-  private void removeUnwanted(Map<String, Object> result) {
-    result.remove(JsonKey.PROFILE_SUMMARY);
-    result.remove(JsonKey.PROFILE_VISIBILITY);
-    result.remove(JsonKey.SUBJECT);
-    result.remove(JsonKey.WEB_PAGES);
-    result.remove(JsonKey.LOCATION);
-    result.remove(JsonKey.GENDER);
-    result.remove(JsonKey.GRADE);
-    result.remove(JsonKey.LANGUAGE);
-    result.remove(JsonKey.TEMPORARY_PASSWORD);
-    result.remove(JsonKey.PASSWORD);
-    result.remove(JsonKey.LAST_LOGIN_TIME);
-    result.remove(JsonKey.LOGIN_ID);
-    result.remove(JsonKey.USER_TYPE);
-    result.remove(JsonKey.USER_SUB_TYPE);
-    result.remove(JsonKey.LOCATION_IDS);
   }
 }

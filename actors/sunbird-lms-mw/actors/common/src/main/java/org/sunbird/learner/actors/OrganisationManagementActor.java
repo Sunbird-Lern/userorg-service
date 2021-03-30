@@ -101,9 +101,9 @@ public class OrganisationManagementActor extends BaseActor {
       validateOrgType(orgType, JsonKey.CREATE);
       request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
       // Channel is mandatory for all org
-      channelMandatoryValidation(request);
+      //      channelMandatoryValidation(request);
       String channel = (String) request.get(JsonKey.CHANNEL);
-      validateChannel(request, actorMessage.getRequestContext());
+      //      validateChannel(request, actorMessage.getRequestContext());
 
       Boolean isTenant = (Boolean) request.get(JsonKey.IS_TENANT);
       String slug = Slug.makeSlug((String) request.getOrDefault(JsonKey.CHANNEL, ""), true);
@@ -154,25 +154,6 @@ public class OrganisationManagementActor extends BaseActor {
       } else {
         request.put(JsonKey.STATUS, ProjectUtil.OrgStatus.ACTIVE.getValue());
       }
-
-      if (null != request.get(JsonKey.ADDRESS)) {
-        Map<String, Object> addressReq = (Map<String, Object>) request.get(JsonKey.ADDRESS);
-        request.remove(JsonKey.ADDRESS);
-        // update address if present in request
-        if (MapUtils.isNotEmpty(addressReq)) {
-          String addressId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
-          addressReq.put(JsonKey.ID, addressId);
-          addressReq.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
-
-          if (!(StringUtils.isBlank(createdBy))) {
-            addressReq.put(JsonKey.CREATED_BY, createdBy);
-          }
-          upsertAddress(addressReq);
-          request.put(JsonKey.ADDRESS_ID, addressId);
-          telemetryGenerationForOrgAddress(addressReq, request, false, actorMessage.getContext());
-        }
-      }
-
       // adding one extra filed for tag.
       if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
         request.put(
@@ -187,7 +168,8 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       if (null != isTenant && isTenant) {
-        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
+        //        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
+        boolean bool = true;
         request.put(
             JsonKey.IS_SSO_ROOTORG_ENABLED,
             request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
@@ -206,6 +188,12 @@ public class OrganisationManagementActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       Organisation org = mapper.convertValue(request, Organisation.class);
       request = mapper.convertValue(org, Map.class);
+      try {
+        String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+        request.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response result =
           cassandraOperation.insertRecord(
               orgDbInfo.getKeySpace(),
@@ -334,7 +322,6 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> request = actorMessage.getRequest();
       validateOrgRequest(request, actorMessage.getRequestContext());
       Map<String, Object> orgDao;
-      Map<String, Object> updateOrgDao = new HashMap<>();
       String updatedBy = (String) request.get(JsonKey.REQUESTED_BY);
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Response result =
@@ -364,7 +351,7 @@ public class OrganisationManagementActor extends BaseActor {
         sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
         return;
       }
-
+      Map<String, Object> updateOrgDao = new HashMap<>();
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -475,11 +462,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
       Map<String, Object> updateOrgDao = new HashMap<>();
       updateOrgDao.putAll(request);
-      updateOrgDao.remove(JsonKey.ORGANISATION_ID);
       updateOrgDao.remove(JsonKey.ROOT_ORG_ID);
-      updateOrgDao.remove(JsonKey.IS_APPROVED);
-      updateOrgDao.remove(JsonKey.APPROVED_BY);
-      updateOrgDao.remove(JsonKey.APPROVED_DATE);
       updateOrgDao.remove(JsonKey.CONTACT_DETAILS);
       if (JsonKey.BULK_ORG_UPLOAD.equalsIgnoreCase(callerId)) {
         if (null == request.get(JsonKey.STATUS)) {
@@ -490,33 +473,6 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       String updatedBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
-      Map<String, Object> addressReq = null;
-      if (null != request.get(JsonKey.ADDRESS)) {
-        addressReq = (Map<String, Object>) request.get(JsonKey.ADDRESS);
-        request.remove(JsonKey.ADDRESS);
-        boolean isAddressUpdated = false;
-        // update address if present in request
-        if (null != addressReq && addressReq.size() == 1) {
-          if (dbOrgDetails.get(JsonKey.ADDRESS_ID) != null) {
-            String addressId = (String) dbOrgDetails.get(JsonKey.ADDRESS_ID);
-            addressReq.put(JsonKey.ID, addressId);
-            isAddressUpdated = true;
-          }
-          // add new address record
-          else {
-            String addressId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
-            addressReq.put(JsonKey.ID, addressId);
-            dbOrgDetails.put(JsonKey.ADDRESS_ID, addressId);
-          }
-          if (!(StringUtils.isBlank(updatedBy))) {
-            addressReq.put(JsonKey.UPDATED_BY, updatedBy);
-          }
-          upsertAddress(addressReq);
-          telemetryGenerationForOrgAddress(
-              addressReq, dbOrgDetails, isAddressUpdated, actorMessage.getContext());
-        }
-      }
-
       if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
         request.put(
             JsonKey.HASHTAGID,
@@ -585,6 +541,12 @@ public class OrganisationManagementActor extends BaseActor {
       // This will remove all extra unnecessary parameter from request
       Organisation org = mapper.convertValue(updateOrgDao, Organisation.class);
       updateOrgDao = mapper.convertValue(org, Map.class);
+      try {
+        String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+        updateOrgDao.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response response =
           cassandraOperation.updateRecord(
               orgDbInfo.getKeySpace(),
@@ -610,25 +572,15 @@ public class OrganisationManagementActor extends BaseActor {
 
       sender().tell(response, self());
 
-      if (null != addressReq) {
-        updateOrgDao.put(JsonKey.ADDRESS, addressReq);
-      }
-
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
-      try {
-        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)
-            && null != updateOrgDao.get(JsonKey.ORG_TYPE)) {
-          updateOrgDao.put(
-              JsonKey.ORG_TYPE,
-              OrgTypeEnum.getTypeByValue((Integer) updateOrgDao.get(JsonKey.ORG_TYPE)));
-        }
-        if (StringUtils.isNotBlank(orgLocation)) {
+      if (StringUtils.isNotBlank(orgLocation)) {
+        try {
           updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        } catch (Exception e) {
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-      } catch (Exception e) {
-        logger.info(
-            actorMessage.getRequestContext(),
-            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
 
       Request orgRequest = new Request();
@@ -645,25 +597,6 @@ public class OrganisationManagementActor extends BaseActor {
       sender().tell(e, self());
       return;
     }
-  }
-
-  private void telemetryGenerationForOrgAddress(
-      Map<String, Object> addressReq,
-      Map<String, Object> orgDao,
-      boolean isAddressUpdated,
-      Map<String, Object> context) {
-
-    String addressState = JsonKey.CREATE;
-    if (isAddressUpdated) {
-      addressState = JsonKey.UPDATE;
-    }
-    Map<String, Object> targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) addressReq.get(JsonKey.ID), JsonKey.ADDRESS, addressState, null);
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    TelemetryUtil.generateCorrelatedObject(
-        (String) orgDao.get(JsonKey.ID), JsonKey.ORGANISATION, null, correlatedObject);
-    TelemetryUtil.telemetryProcessingCall(addressReq, targetObject, correlatedObject, context);
   }
 
   /** Provides the details of the Organisation */
@@ -684,17 +617,11 @@ public class OrganisationManagementActor extends BaseActor {
           ResponseCode.orgDoesNotExist.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
+    result.putAll(Util.getOrgDefaultValue());
     result.remove(JsonKey.CONTACT_DETAILS);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
-  }
-
-  /** Inserts an address if not present, else updates the existing address */
-  private void upsertAddress(Map<String, Object> addressReq) {
-    Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
-    cassandraOperation.upsertRecord(
-        orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), addressReq, null);
   }
 
   public void channelMandatoryValidation(Map<String, Object> request) {
@@ -901,13 +828,6 @@ public class OrganisationManagementActor extends BaseActor {
               map.put(JsonKey.TYPE, location.getType());
               newOrgLocationList.add(map);
             });
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      String orgLoc = mapper.writeValueAsString(newOrgLocationList);
-      request.put(JsonKey.ORG_LOCATION, orgLoc);
-    } catch (JsonProcessingException e) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-    }
   }
 
   private Map<String, Object> getOrgById(String id, RequestContext context) {

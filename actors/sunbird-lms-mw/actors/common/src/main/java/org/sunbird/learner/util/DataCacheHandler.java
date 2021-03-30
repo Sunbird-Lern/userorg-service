@@ -51,14 +51,11 @@ public class DataCacheHandler implements Runnable {
     JsonKey.EMAIL_VERIFIED,
     JsonKey.ROLES,
     JsonKey.POSITION,
-    JsonKey.GRADE,
     JsonKey.LOCATION,
     JsonKey.DOB,
-    JsonKey.GENDER,
     JsonKey.LANGUAGE,
     JsonKey.PROFILE_SUMMARY,
     JsonKey.SUBJECT,
-    JsonKey.WEB_PAGES,
     JsonKey.EXTERNAL_ID_PROVIDER,
     JsonKey.EXTERNAL_ID,
     JsonKey.EXTERNAL_ID_TYPE,
@@ -72,10 +69,7 @@ public class DataCacheHandler implements Runnable {
     JsonKey.EXTERNAL_ID,
     JsonKey.DESCRIPTION,
     JsonKey.HOME_URL,
-    JsonKey.ORG_CODE,
     JsonKey.ORG_TYPE,
-    JsonKey.PREFERRED_LANGUAGE,
-    JsonKey.THEME,
     JsonKey.CONTACT_DETAILS,
     JsonKey.LOC_ID,
     JsonKey.HASHTAGID,
@@ -259,7 +253,19 @@ public class DataCacheHandler implements Runnable {
     return configSettings;
   }
 
+  //  public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
+  //    return userTypeOrSubTypeConfigMap;
+  //  }
+
   public static Map<String, Map<String, List<String>>> getUserTypesConfig() {
+    List<String> usersubtypes = new ArrayList<>();
+    usersubtypes.add("aeo");
+    usersubtypes.add("deo");
+    Map<String, List<String>> userTypeMap = new HashMap<>();
+    userTypeMap.put("teacher", new ArrayList<>());
+    userTypeMap.put("administrator", usersubtypes);
+    userTypeMap.put("student", new ArrayList<>());
+    userTypeOrSubTypeConfigMap.put(JsonKey.DEFAULT_PERSONA, userTypeMap);
     return userTypeOrSubTypeConfigMap;
   }
 
@@ -288,7 +294,18 @@ public class DataCacheHandler implements Runnable {
     return orderMap;
   }
 
+  //  public static Map<String, List<String>> getLocationTypeConfig() {
+  //    return stateLocationTypeConfigMap;
+  //  }
+
   public static Map<String, List<String>> getLocationTypeConfig() {
+    List<String> locationTypes = new ArrayList<>();
+    locationTypes.add("state");
+    locationTypes.add("district");
+    locationTypes.add("block");
+    locationTypes.add("cluster");
+    locationTypes.add("school");
+    stateLocationTypeConfigMap.put(JsonKey.DEFAULT_PERSONA, locationTypes);
     return stateLocationTypeConfigMap;
   }
 

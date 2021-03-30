@@ -171,6 +171,7 @@ public class UserProfileReadActor extends BaseActor {
                     actorMessage.getRequestContext(),
                     "UserProfileReadActor:handle user profile read async call ");
                 result.put(JsonKey.ROOT_ORG, responseMap);
+                //                result.putAll(Util.getUserDefaultValue());
                 Response response = new Response();
                 handleUserCallAsync(result, response, actorMessage);
                 return response;

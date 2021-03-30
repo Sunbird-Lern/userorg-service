@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @desc POJO class for Organisation
@@ -17,39 +18,25 @@ public class Organisation implements Serializable {
 
   private static final long serialVersionUID = 3617862727235741692L;
   private String id;
-  private String addressId;
-  private String approvedBy;
-  private String approvedDate;
   private String channel;
-  private String communityId;
   private String contactDetail;
   private String createdBy;
   private String createdDate;
-  private Timestamp dateTime;
   private String description;
   private String email;
   private String externalId;
   private String hashTagId;
-  private String homeUrl;
-  private String imgUrl;
-  private Boolean isApproved;
-  private String locationId;
-  private Integer noOfMembers;
-  private String orgCode;
   private String orgName;
   private Integer organisationType;
-  private String preferredLanguage;
   private String provider;
   private String rootOrgId;
   private String slug;
   private Integer status;
-  private String theme;
-  private String thumbnail;
   private String updatedBy;
   private String updatedDate;
   private Boolean isSSOEnabled;
-  private Boolean isTenant;
-  private String orgLocation;
+  private Boolean isTenant = Boolean.FALSE;
+  private List<Map<String, String>> orgLocation;
 
   public String getId() {
     return id;
@@ -59,44 +46,12 @@ public class Organisation implements Serializable {
     this.id = id;
   }
 
-  public String getAddressId() {
-    return addressId;
-  }
-
-  public void setAddressId(String addressId) {
-    this.addressId = addressId;
-  }
-
-  public String getApprovedBy() {
-    return approvedBy;
-  }
-
-  public void setApprovedBy(String approvedBy) {
-    this.approvedBy = approvedBy;
-  }
-
-  public String getApprovedDate() {
-    return approvedDate;
-  }
-
-  public void setApprovedDate(String approvedDate) {
-    this.approvedDate = approvedDate;
-  }
-
   public String getChannel() {
     return channel;
   }
 
   public void setChannel(String channel) {
     this.channel = channel;
-  }
-
-  public String getCommunityId() {
-    return communityId;
-  }
-
-  public void setCommunityId(String communityId) {
-    this.communityId = communityId;
   }
 
   public String getContactDetail() {
@@ -121,14 +76,6 @@ public class Organisation implements Serializable {
 
   public void setCreatedDate(String createdDate) {
     this.createdDate = createdDate;
-  }
-
-  public Timestamp getDateTime() {
-    return dateTime;
-  }
-
-  public void setDateTime(Timestamp dateTime) {
-    this.dateTime = dateTime;
   }
 
   public String getDescription() {
@@ -163,46 +110,6 @@ public class Organisation implements Serializable {
     this.hashTagId = hashTagId;
   }
 
-  public String getHomeUrl() {
-    return homeUrl;
-  }
-
-  public void setHomeUrl(String homeUrl) {
-    this.homeUrl = homeUrl;
-  }
-
-  public String getImgUrl() {
-    return imgUrl;
-  }
-
-  public void setImgUrl(String imgUrl) {
-    this.imgUrl = imgUrl;
-  }
-
-  public String getLocationId() {
-    return locationId;
-  }
-
-  public void setLocationId(String locationId) {
-    this.locationId = locationId;
-  }
-
-  public Integer getNoOfMembers() {
-    return noOfMembers;
-  }
-
-  public void setNoOfMembers(Integer noOfMembers) {
-    this.noOfMembers = noOfMembers;
-  }
-
-  public String getOrgCode() {
-    return orgCode;
-  }
-
-  public void setOrgCode(String orgCode) {
-    this.orgCode = orgCode;
-  }
-
   public String getOrgName() {
     return orgName;
   }
@@ -217,14 +124,6 @@ public class Organisation implements Serializable {
 
   public void setOrganisationType(Integer organisationType) {
     this.organisationType = organisationType;
-  }
-
-  public String getPreferredLanguage() {
-    return preferredLanguage;
-  }
-
-  public void setPreferredLanguage(String preferredLanguage) {
-    this.preferredLanguage = preferredLanguage;
   }
 
   public String getProvider() {
@@ -251,22 +150,6 @@ public class Organisation implements Serializable {
     this.status = status;
   }
 
-  public String getTheme() {
-    return theme;
-  }
-
-  public void setTheme(String theme) {
-    this.theme = theme;
-  }
-
-  public String getThumbnail() {
-    return thumbnail;
-  }
-
-  public void setThumbnail(String thumbnail) {
-    this.thumbnail = thumbnail;
-  }
-
   public String getUpdatedBy() {
     return updatedBy;
   }
@@ -281,15 +164,6 @@ public class Organisation implements Serializable {
 
   public void setUpdatedDate(String updatedDate) {
     this.updatedDate = updatedDate;
-  }
-
-  @JsonProperty(value = "isApproved")
-  public Boolean isApproved() {
-    return isApproved;
-  }
-
-  public void setApproved(Boolean isApproved) {
-    this.isApproved = isApproved;
   }
 
   @JsonProperty(value = "isSSOEnabled")
@@ -310,19 +184,19 @@ public class Organisation implements Serializable {
     isTenant = tenant;
   }
 
-  public String getOrgLocation() {
-    return orgLocation;
-  }
-
-  public void setOrgLocation(String orgLocation) {
-    this.orgLocation = orgLocation;
-  }
-
   public String getRootOrgId() {
     return rootOrgId;
   }
 
   public void setRootOrgId(String rootOrgId) {
     this.rootOrgId = rootOrgId;
+  }
+
+  public List<Map<String, String>> getOrgLocation() {
+    return orgLocation;
+  }
+
+  public void setOrgLocation(List<Map<String, String>> orgLocation) {
+    this.orgLocation = orgLocation;
   }
 }
