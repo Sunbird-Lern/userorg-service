@@ -78,6 +78,7 @@ public class UserProfileReadService {
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
     if (version != "v4") {
       appendUserTypeAndLocation(result, actorMessage.getRequestContext());
+      result.putAll(Util.getUserDefaultValue());
     }
     result.put(
         JsonKey.ROOT_ORG,
