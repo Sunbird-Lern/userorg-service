@@ -37,8 +37,6 @@ public class User implements Serializable {
   private String phone;
   private String profileSummary;
   private Map<String, String> profileVisibility;
-  private String profileUserType;
-  private String profileLocation;
   private String provider;
   private List<String> roles;
   private String rootOrgId;
@@ -279,38 +277,6 @@ public class User implements Serializable {
 
   public void setPhone(String phone) {
     this.phone = phone;
-  }
-
-  public String getProfileSummary() {
-    return profileSummary;
-  }
-
-  public void setProfileSummary(String profileSummary) {
-    this.profileSummary = profileSummary;
-  }
-
-  public Map<String, String> getProfileVisibility() {
-    return profileVisibility;
-  }
-
-  public void setProfileVisibility(Map<String, String> profileVisibility) {
-    this.profileVisibility = profileVisibility;
-  }
-
-  public String getProfileUserType() {
-    return profileUserType;
-  }
-
-  public void setProfileUserType(String profileUserType) {
-    this.profileUserType = profileUserType;
-  }
-
-  public String getProfileLocation() {
-    return profileLocation;
-  }
-
-  public void setProfileLocation(String profileLocation) {
-    this.profileLocation = profileLocation;
   }
 
   public String getProvider() {
