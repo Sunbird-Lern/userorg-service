@@ -279,6 +279,22 @@ public class User implements Serializable {
     this.phone = phone;
   }
 
+  public String getProfileSummary() {
+    return profileSummary;
+  }
+
+  public void setProfileSummary(String profileSummary) {
+    this.profileSummary = profileSummary;
+  }
+
+  public Map<String, String> getProfileVisibility() {
+    return profileVisibility;
+  }
+
+  public void setProfileVisibility(Map<String, String> profileVisibility) {
+    this.profileVisibility = profileVisibility;
+  }
+
   public String getProvider() {
     return provider;
   }
