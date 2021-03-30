@@ -35,7 +35,7 @@ public class Organisation implements Serializable {
   private String updatedBy;
   private String updatedDate;
   private Boolean isSSOEnabled;
-  private Boolean isTenant;
+  private Boolean isTenant = Boolean.FALSE;
   private List<Map<String, String>> orgLocation;
 
   public String getId() {
