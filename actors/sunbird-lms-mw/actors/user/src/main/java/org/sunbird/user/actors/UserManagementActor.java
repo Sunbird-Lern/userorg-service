@@ -79,7 +79,6 @@ import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
-
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {},
@@ -217,7 +216,7 @@ public class UserManagementActor extends BaseActor {
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
-       UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
+        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     String version= (String) actorMessage.getContext().get(JsonKey.VERSION);
    if(version=="v2")
@@ -715,8 +714,6 @@ public class UserManagementActor extends BaseActor {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    String externalId = (String) userMap.get(JsonKey.EXTERNAL_ORG_ID);
     if (StringUtils.isNotBlank(requestedChannel)) {
       fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
