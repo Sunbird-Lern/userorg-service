@@ -92,6 +92,10 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
           updateSchoolInfoInSelfDeclaration(
               (String) userMap.get(JsonKey.USER_ID), actorMessage.getRequestContext(), userInfo);
         }
+        logger.info(
+            actorMessage.getRequestContext(),
+            "UserManagementActor:updateUserDeclarations method userDeclareEntity obj: "
+                + userDeclareEntity);
         userDeclareEntityList.add(userDeclareEntity);
       }
 
