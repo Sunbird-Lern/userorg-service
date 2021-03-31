@@ -79,10 +79,11 @@ public class UserProfileReadService {
     if (version != "v4") {
       appendUserTypeAndLocation(result, actorMessage.getRequestContext());
       result.putAll(Util.getUserDefaultValue());
+    } else {
+      result.remove(JsonKey.USER_TYPE);
+      result.remove(JsonKey.USER_SUB_TYPE);
+      result.remove(JsonKey.LOCATION_IDS);
     }
-    result.remove(JsonKey.USER_TYPE);
-    result.remove(JsonKey.USER_SUB_TYPE);
-    result.remove(JsonKey.LOCATION_IDS);
     result.put(
         JsonKey.ROOT_ORG,
         orgDao.getOrgById(
