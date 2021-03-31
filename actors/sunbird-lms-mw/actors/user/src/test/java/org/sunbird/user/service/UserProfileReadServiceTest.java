@@ -148,7 +148,7 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
-        .thenReturn(getUserDbMap("1234567890"));
+        .thenReturn(getUserDbMap("1234567890", "v4"));
     Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any()))
         .thenReturn(getValidUserResponse("1234567890"));
 
@@ -287,7 +287,7 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
-        .thenReturn(getUserDbMap("1234567890"));
+        .thenReturn(getUserDbMap("1234567890", "v3"));
     Mockito.when(userDao.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(null);
     UserProfileReadService userProfileReadService = new UserProfileReadService();
     try {
@@ -315,7 +315,7 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
-        .thenReturn(getUserDbMap("1234567890"));
+        .thenReturn(getUserDbMap("1234567890", "v4"));
     Map<String, Object> user = getValidUserResponse("1234567890");
     user.put(JsonKey.IS_DELETED, true);
     Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any())).thenReturn(user);
@@ -385,8 +385,17 @@ public class UserProfileReadServiceTest {
     return result;
   }
 
-  private Map<String, Object> getUserDbMap(String userid) throws JsonProcessingException {
+  private Map<String, Object> getUserDbMap(String userid, String version)
+      throws JsonProcessingException {
     Map<String, Object> userDbMap = new HashMap<>();
+    Map<String, Object> profileUserType = new HashMap<>();
+    profileUserType.put(JsonKey.USER_TYPE, "TEACHER");
+    profileUserType.put(JsonKey.USER_SUB_TYPE, "deo");
+    List<Map<String, Object>> profileLocation = new ArrayList<>();
+    Map<String, Object> location = new HashMap<>();
+    location.put(JsonKey.ID, "locationId");
+    location.put(JsonKey.TYPE, "locationType");
+    profileLocation.add(location);
     String[] locationIds = new String[] {"location1", "location2"};
     userDbMap.put(JsonKey.USERNAME, "validUserName");
     userDbMap.put(JsonKey.CHANNEL, "channel");
@@ -394,13 +403,19 @@ public class UserProfileReadServiceTest {
     userDbMap.put(JsonKey.ROOT_ORG_ID, "4578963210");
     userDbMap.put(JsonKey.PHONE, "9876543210");
     userDbMap.put(JsonKey.FLAGS_VALUE, 3);
-    userDbMap.put(JsonKey.USER_TYPE, "TEACHER");
     userDbMap.put(JsonKey.MASKED_PHONE, "987*****0");
     userDbMap.put(JsonKey.USER_ID, userid);
     userDbMap.put(JsonKey.ID, userid);
     userDbMap.put(JsonKey.FIRST_NAME, "Demo Name");
     userDbMap.put(JsonKey.IS_DELETED, false);
-    userDbMap.put(JsonKey.LOCATION_IDS, locationIds);
+    if (version == "v4") {
+      userDbMap.put(JsonKey.PROFILE_USERTYPE, profileUserType);
+      userDbMap.put(JsonKey.PROFILE_LOCATION, profileLocation);
+    } else {
+      userDbMap.put(JsonKey.USER_TYPE, "TEACHER");
+      userDbMap.put(JsonKey.USER_SUB_TYPE, "deo");
+      userDbMap.put(JsonKey.LOCATION_IDS, locationIds);
+    }
     // {'groupsTnc': '{"tncAcceptedOn":"2021-01-04 19:45:29:725+0530","version":"3.9.0"}'}
     Map<String, String> tncMap = new HashMap<>();
     tncMap.put("tncAcceptedOn", "2021-01-04 19:45:29:725+0530");
