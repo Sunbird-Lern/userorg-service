@@ -198,7 +198,7 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
-          if (version == "v4") {
+          if (version == JsonKey.VERSION_4) {
             request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_4);
           }
           return null;
