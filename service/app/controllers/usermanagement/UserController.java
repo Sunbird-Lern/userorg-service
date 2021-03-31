@@ -88,6 +88,29 @@ public class UserController extends BaseController {
         true,
         httpRequest);
   }
+    public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
+
+        return handleRequest(
+                ActorOperations.UPDATE_USER.getValue(),
+                httpRequest.body().asJson(),
+                req -> {
+                    Request request = (Request) req;
+                    request
+                            .getContext()
+                            .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+                    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+                    new UserRequestValidator().validateUpdateUserRequest(request);
+                    request
+                            .getContext()
+                            .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
+
+                    return null;
+                },
+                null,
+                null,
+                true,
+                httpRequest);
+    }
 
   public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
     return handleGetUserProfileV3(
