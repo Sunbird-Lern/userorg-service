@@ -408,13 +408,16 @@ public class UserProfileReadServiceTest {
     userDbMap.put(JsonKey.ID, userid);
     userDbMap.put(JsonKey.FIRST_NAME, "Demo Name");
     userDbMap.put(JsonKey.IS_DELETED, false);
-    if (version == "v4") {
-      userDbMap.put(JsonKey.PROFILE_USERTYPE, profileUserType);
-      userDbMap.put(JsonKey.PROFILE_LOCATION, profileLocation);
-    } else {
+    if (version != "v4") {
       userDbMap.put(JsonKey.USER_TYPE, "TEACHER");
       userDbMap.put(JsonKey.USER_SUB_TYPE, "deo");
       userDbMap.put(JsonKey.LOCATION_IDS, locationIds);
+    } else {
+      userDbMap.put(JsonKey.PROFILE_USERTYPE, profileUserType);
+      userDbMap.put(JsonKey.PROFILE_LOCATION, profileLocation);
+      userDbMap.remove(JsonKey.USER_TYPE);
+      userDbMap.remove(JsonKey.USER_SUB_TYPE);
+      userDbMap.remove(JsonKey.LOCATION_IDS);
     }
     // {'groupsTnc': '{"tncAcceptedOn":"2021-01-04 19:45:29:725+0530","version":"3.9.0"}'}
     Map<String, String> tncMap = new HashMap<>();
