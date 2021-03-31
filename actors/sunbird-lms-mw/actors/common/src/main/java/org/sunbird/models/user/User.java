@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * @desc POJO class for User
@@ -406,15 +407,33 @@ public class User implements Serializable {
     return profileUserType;
   }
 
-  public void setProfileUserType(String profileUserType) {
-    this.profileUserType = profileUserType;
+  public void setProfileUserType(Object profileUserType) {
+    if (profileUserType != null && !(profileUserType instanceof String)) {
+      ObjectMapper objMap = new ObjectMapper();
+      try {
+        this.profileUserType = objMap.writeValueAsString(profileUserType);
+      } catch (Exception e) {
+        this.profileUserType = "";
+      }
+    } else {
+      this.profileUserType = (String) profileUserType;
+    }
   }
 
   public String getProfileLocation() {
     return profileLocation;
   }
 
-  public void setProfileLocation(String profileLocation) {
-    this.profileLocation = profileLocation;
+  public void setProfileLocation(Object profileLocation) {
+    if (profileLocation != null && !(profileLocation instanceof String)) {
+      ObjectMapper objMap = new ObjectMapper();
+      try {
+        this.profileLocation = objMap.writeValueAsString(profileLocation);
+      } catch (Exception e) {
+        this.profileLocation = "";
+      }
+    } else {
+      this.profileLocation = (String) profileLocation;
+    }
   }
 }
