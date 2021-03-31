@@ -152,7 +152,8 @@ public class PrintEntryExitLog {
             + url
             + " , For Operation : "
             + request.getOperation();
-    String requestId = request.getRequestContext().getReqId();
+    String requestId =
+        request.getRequestContext() != null ? request.getRequestContext().getReqId() : "";
     entryLogEvent.setEdata("system", "trace", requestId, entryLogMsg, null);
     return entryLogEvent;
   }
