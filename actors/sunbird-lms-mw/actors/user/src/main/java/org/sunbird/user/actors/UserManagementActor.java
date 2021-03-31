@@ -79,7 +79,6 @@ import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
-
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
   asyncTasks = {},
@@ -103,7 +102,6 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-
 
   @Override
   public void onReceive(Request request) throws Throwable {
