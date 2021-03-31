@@ -33,7 +33,6 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
   private OrganisationClient organisationClient = new OrganisationClientImpl();
-  String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -136,7 +135,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     Response res = userOrgDao.getUserOrgDetails(userId, null, context);
     List<Map<String, Object>> userOrgLst = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-
+    String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     for (Map<String, Object> userOrg : userOrgLst) {
       if (!userOrg.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
         String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
