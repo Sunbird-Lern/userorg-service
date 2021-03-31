@@ -41,7 +41,7 @@ public class CaptchaHelper {
               .addParameter("secret", secret)
               .build()
               .toString();
-      logger.info(url);
+      logger.info("Calling Api:"+url.toString());
       String response = HttpClientUtil.postFormData(url, requestMap, headers);
       Map<String, Object> responseMap = mapper.readValue(response, Map.class);
       isCaptchaValid = (boolean) responseMap.get("success");
