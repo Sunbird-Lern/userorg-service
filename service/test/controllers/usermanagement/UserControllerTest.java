@@ -194,12 +194,23 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUpdateUserSuccess() {
+  public void testUpdateUserSuccess() throws Exception  {
     Result result =
         performTest(
             "/v1/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testUpdateUserV2Success() throws Exception  {
+    Result result =
+            performTest(
+                    "/v2/user/update",
+                    "PATCH",
+                    (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
