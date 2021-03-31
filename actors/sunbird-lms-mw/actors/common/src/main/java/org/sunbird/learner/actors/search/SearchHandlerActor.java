@@ -126,40 +126,36 @@ public class SearchHandlerActor extends BaseActor {
     }
     // Decrypt the data
     if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
-      String version = (String) request.getContext().get(JsonKey.VERSION);
-      if (version == "v2") {
-        userSearchV2(result, request);
-      } else {
-        List<Map<String, Object>> userMapList =
-            (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-        for (Map<String, Object> userMap : userMapList) {
-          UserUtility.decryptUserDataFrmES(userMap);
-          userMap.remove(JsonKey.ENC_EMAIL);
-          userMap.remove(JsonKey.ENC_PHONE);
-          Map<String, Object> userTypeDetail = new HashMap<>();
-          if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
-            userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-            userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
-            userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-          } else {
-            userMap.put(JsonKey.USER_TYPE, null);
-            userMap.put(JsonKey.USER_SUB_TYPE, null);
-          }
-          userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
-          List<String> locationIds = new ArrayList<>();
-          List<Map<String, String>> userLocList = new ArrayList<>();
-          if (CollectionUtils.isNotEmpty(
-              (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
-            userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-            locationIds =
-                userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-          }
-          userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
-          userMap.put(JsonKey.LOCATION_IDS, locationIds);
+      List<Map<String, Object>> userMapList =
+          (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      for (Map<String, Object> userMap : userMapList) {
+        UserUtility.decryptUserDataFrmES(userMap);
+        userMap.remove(JsonKey.ENC_EMAIL);
+        userMap.remove(JsonKey.ENC_PHONE);
+        Map<String, Object> userTypeDetail = new HashMap<>();
+        if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+          userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+          userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
+          userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
+        } else {
+          userMap.put(JsonKey.USER_TYPE, null);
+          userMap.put(JsonKey.USER_SUB_TYPE, null);
         }
-        String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-        updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
+        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+        List<String> locationIds = new ArrayList<>();
+        List<Map<String, String>> userLocList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+          userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+          locationIds =
+              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        }
+        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
+        userMap.put(JsonKey.LOCATION_IDS, locationIds);
+        userMap.putAll(Util.getUserDefaultValue());
       }
+      String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
+      updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
     }
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
@@ -178,6 +174,14 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                List<Map<String, Object>> contents =
+                    (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
+                contents
+                    .stream()
+                    .forEach(
+                        org -> {
+                          org.putAll(Util.getOrgDefaultValue());
+                        });
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
               }
@@ -395,29 +399,5 @@ public class SearchHandlerActor extends BaseActor {
   private Map<String, Object> getFuzzyFilterMap(Map<String, Object> searchQueryMap) {
     return (Map<String, Object>)
         ((Map<String, Object>) (searchQueryMap.get(JsonKey.FILTERS))).get(JsonKey.SEARCH_FUZZY);
-  }
-
-  private void userSearchV2(Map<String, Object> result, Request request) {
-    List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    for (Map<String, Object> userMap : userMapList) {
-      UserUtility.decryptUserDataFrmES(userMap);
-      userMap.remove(JsonKey.ENC_EMAIL);
-      userMap.remove(JsonKey.ENC_PHONE);
-      Map<String, Object> userTypeDetail = new HashMap<>();
-      if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
-        userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
-      }
-      List<String> locationIds = new ArrayList<>();
-      List<Map<String, String>> userLocList = new ArrayList<>();
-      if (CollectionUtils.isNotEmpty(
-          (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
-        userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
-      }
-    }
-    String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-    updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
-    return;
   }
 }

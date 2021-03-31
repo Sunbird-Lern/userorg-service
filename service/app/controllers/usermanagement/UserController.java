@@ -165,26 +165,6 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-  // removing deprecating columns and disabling search with those columns
-  public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
-    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
-    return handleSearchRequest(
-        ActorOperations.USER_SEARCH.getValue(),
-        httpRequest.body().asJson(),
-        userSearchRequest -> {
-          Request request = (Request) userSearchRequest;
-          request.getContext().put(JsonKey.FIELDS, requestedFields);
-          new BaseRequestValidator().validateSearchRequest(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-          return null;
-        },
-        null,
-        null,
-        getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
-        httpRequest);
-  }
-
   public CompletionStage<Result> userLookup(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.USER_LOOKUP.getValue(),
