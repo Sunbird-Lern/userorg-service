@@ -78,6 +78,8 @@ import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
 import scala.concurrent.Future;
+import org.sunbird.learner.organisation.dao.OrgDao;
+import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 
 @ActorConfig(
   tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
@@ -102,6 +104,7 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -212,24 +215,28 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
+      String version= (String) actorMessage.getContext().get(JsonKey.VERSION);
+      if(version=="v2")
+      {
+          if(userMap.containsKey(JsonKey.USER_TYPE)){
+              userMap.remove(JsonKey.USER_TYPE);
+          }
+            userMap.remove(JsonKey.LOCATION_CODES);
+            userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+            userMap.remove(JsonKey.PROFILE_LOCATION);
+
+      }else
+      {
+          if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){
+              userMap.remove(JsonKey.PROFILE_USERTYPE);
+          }
+      }
     validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
-        UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
+       UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    String version= (String) actorMessage.getContext().get(JsonKey.VERSION);
-   if(version=="v2")
-   {
-     if(userMap.containsKey(JsonKey.USER_TYPE)){
-        userMap.remove(JsonKey.USER_TYPE);
-    }
-   }else
-     {
-        if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){
-          userMap.remove(JsonKey.PROFILE_USERTYPE);
-        }
-   }
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -714,18 +721,22 @@ public class UserManagementActor extends BaseActor {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
+    String channel = (String) userMap.get(JsonKey.CHANNEL);
+    String externalId = (String) userMap.get(JsonKey.EXTERNAL_ORG_ID);
     if (StringUtils.isNotBlank(requestedChannel)) {
-      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
-      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                requestedChannel,
-                JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-      userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
+//      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
+//      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
+//        throw new ProjectCommonException(
+//            ResponseCode.invalidParameterValue.getErrorCode(),
+//            ProjectUtil.formatMessage(
+//                ResponseCode.invalidParameterValue.getErrorMessage(),
+//                requestedChannel,
+//                JsonKey.CHANNEL),
+//            ResponseCode.CLIENT_ERROR.getResponseCode());
+//      }
+      Map<String,Object> org = orgDao.getOrgByExternalId(externalId,channel,context);
+      String rootOrg = (String) org.get(JsonKey.ROOT_ORG_ID);
+      userMap.put(JsonKey.ROOT_ORG_ID, rootOrg);
     }
     Organisation fetchedOrgById = null;
     if (StringUtils.isNotBlank(requestedOrgId)) {
@@ -1513,8 +1524,8 @@ public class UserManagementActor extends BaseActor {
     // after all validations set userType and userSubtype to profileUsertype
     profileUserType(userMap, context);
   }
-
   private void validateLocationCodes(Request userRequest) {
+
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
