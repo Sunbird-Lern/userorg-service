@@ -361,7 +361,6 @@ public final class Util {
 
   /** @param req Map<String,Object> */
   public static boolean registerChannel(Map<String, Object> req, RequestContext context) {
-    logger.info(context, "channel registration for org Id = " + req.get(JsonKey.ID) + "");
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {
@@ -419,7 +418,6 @@ public final class Util {
 
   /** @param req Map<String,Object> */
   public static boolean updateChannel(Map<String, Object> req, RequestContext context) {
-    logger.info(context, "channel update for org Id = " + req.get(JsonKey.ID) + "");
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {

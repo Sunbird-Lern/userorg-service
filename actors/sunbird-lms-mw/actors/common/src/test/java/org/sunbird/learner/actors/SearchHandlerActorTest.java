@@ -109,6 +109,9 @@ public class SearchHandlerActorTest {
     filters.put(JsonKey.ID, "ORG_001");
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);
+    List<String> fields = new ArrayList<>();
+    fields.add(JsonKey.ORG_NAME);
+    innerMap.put(JsonKey.FIELDS, fields);
     Map<String, Object> contextMap = new HashMap<>();
     contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);
     reqObj.setContext(contextMap);
