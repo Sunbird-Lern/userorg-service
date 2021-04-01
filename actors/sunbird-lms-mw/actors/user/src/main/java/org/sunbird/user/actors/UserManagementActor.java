@@ -154,7 +154,7 @@ public class UserManagementActor extends BaseActor {
     logger.info(
             actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
     Map<String, Object> userMap = actorMessage.getRequest();
-    if(actorMessage.getContext().get(JsonKey.VERSION)=="v2") {
+     if(actorMessage.getContext().get(JsonKey.VERSION)=="v2") {
       userMap.remove(JsonKey.LOCATION_CODES);
       userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
       userMap.remove(JsonKey.PROFILE_LOCATION);

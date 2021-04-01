@@ -91,6 +91,7 @@ public class UserController extends BaseController {
                     new UserRequestValidator().validateUserCreateV4(request);
                     request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
                     return null;
+
                 },
                 null,
                 null,

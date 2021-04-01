@@ -223,7 +223,7 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUpdateUserV2Success() throws Exception  {
+  public void testUpdateUserV2Success() throws Exception   {
     Result result =
             performTest(
                     "/v2/user/update",
