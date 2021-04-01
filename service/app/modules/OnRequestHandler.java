@@ -51,6 +51,9 @@ public class OnRequestHandler implements ActionCreator {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
     }
+    logger.info("Original Url: "+ request.uri());
+    logger.info("Original Captcha: "+request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
+
     return new Action.Simple() {
       @Override
       public CompletionStage<Result> call(Http.Request request) {
