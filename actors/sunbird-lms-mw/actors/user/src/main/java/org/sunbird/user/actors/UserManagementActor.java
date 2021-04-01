@@ -238,6 +238,9 @@ public class UserManagementActor extends BaseActor {
       if(userMap.containsKey(JsonKey.USER_TYPE)){
         userMap.remove(JsonKey.USER_TYPE);
       }
+      userMap.remove(JsonKey.LOCATION_CODES);
+      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+      userMap.remove(JsonKey.PROFILE_LOCATION);
     }else
     {
       if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){
