@@ -121,6 +121,7 @@ public class UserController extends BaseController {
         true,
         httpRequest);
   }
+
     public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
 
         return handleRequest(

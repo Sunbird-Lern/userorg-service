@@ -154,7 +154,7 @@ public class UserManagementActor extends BaseActor {
     logger.info(
             actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
     Map<String, Object> userMap = actorMessage.getRequest();
-     if(actorMessage.getContext().get(JsonKey.VERSION)=="v2") {
+     if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2)) {
       userMap.remove(JsonKey.LOCATION_CODES);
       userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
       userMap.remove(JsonKey.PROFILE_LOCATION);
@@ -190,7 +190,7 @@ public class UserManagementActor extends BaseActor {
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
-      if(actorMessage.getContext().get(JsonKey.VERSION)=="v2")
+      if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2) )
       {
         if(userMap.containsKey(JsonKey.PROFILE_USERTYPE))
         {
@@ -233,18 +233,16 @@ public class UserManagementActor extends BaseActor {
             UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    String version= (String) actorMessage.getContext().get(JsonKey.VERSION);
-    if(version=="v2")
-    {
+    if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2) )    {
       if(userMap.containsKey(JsonKey.USER_TYPE)){
-        userMap.remove(JsonKey.USER_TYPE);
+        userMap.remove(JsonKey.USER_TYPE);//subtype also to be given after review
       }
-      userMap.remove(JsonKey.LOCATION_CODES);
+      userMap.remove(JsonKey.LOCATION_CODES);//ask if needed
       userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
       userMap.remove(JsonKey.PROFILE_LOCATION);
     }else
     {
-      if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){
+      if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){//check if needed
         userMap.remove(JsonKey.PROFILE_USERTYPE);
       }
     }
