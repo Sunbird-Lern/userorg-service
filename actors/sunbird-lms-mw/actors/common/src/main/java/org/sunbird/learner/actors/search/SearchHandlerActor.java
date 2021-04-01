@@ -96,7 +96,7 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    // checking for Backword compatibility
+    // checking for Backward compatibility
     backwardCompatibility(searchQueryMap);
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
@@ -128,6 +128,17 @@ public class SearchHandlerActor extends BaseActor {
     if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
+      Map<String, Object> userDefaultFieldValue = Util.getUserDefaultValue();
+      if (CollectionUtils.isNotEmpty(fields)) {
+        Iterator<Map.Entry<String, Object>> iterator = userDefaultFieldValue.entrySet().iterator();
+        while (iterator.hasNext()) {
+          Map.Entry<String, Object> entry = iterator.next();
+          if (!fields.contains(entry.getKey())) {
+            iterator.remove();
+          }
+        }
+      }
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
         userMap.remove(JsonKey.ENC_EMAIL);
@@ -152,7 +163,7 @@ public class SearchHandlerActor extends BaseActor {
         }
         userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
         userMap.put(JsonKey.LOCATION_IDS, locationIds);
-        userMap.putAll(Util.getUserDefaultValue());
+        userMap.putAll(userDefaultFieldValue);
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
@@ -163,6 +174,8 @@ public class SearchHandlerActor extends BaseActor {
   }
 
   private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
+    Map<String, Object> searchQueryMap = request.getRequest();
+    List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());
     Future<Response> response =
@@ -174,13 +187,24 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+                if (CollectionUtils.isNotEmpty(fields)) {
+                  Iterator<Map.Entry<String, Object>> iterator =
+                      orgDefaultFieldValue.entrySet().iterator();
+                  while (iterator.hasNext()) {
+                    Map.Entry<String, Object> entry = iterator.next();
+                    if (!fields.contains(entry.getKey())) {
+                      iterator.remove();
+                    }
+                  }
+                }
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
                     .stream()
                     .forEach(
                         org -> {
-                          org.putAll(Util.getOrgDefaultValue());
+                          org.putAll(orgDefaultFieldValue);
                         });
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
