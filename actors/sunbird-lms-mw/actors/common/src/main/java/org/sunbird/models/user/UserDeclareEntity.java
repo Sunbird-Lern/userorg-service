@@ -128,4 +128,40 @@ public class UserDeclareEntity {
   public void setOperation(String operation) {
     this.operation = operation;
   }
+
+  @Override
+  public String toString() {
+    return "UserDeclareEntity{"
+        + "operation='"
+        + operation
+        + '\''
+        + ", userId='"
+        + userId
+        + '\''
+        + ", orgId='"
+        + orgId
+        + '\''
+        + ", persona='"
+        + persona
+        + '\''
+        + ", userInfo="
+        + userInfo
+        + ", status='"
+        + status
+        + '\''
+        + ", errorType='"
+        + errorType
+        + '\''
+        + ", createdOn="
+        + createdOn
+        + ", createdBy='"
+        + createdBy
+        + '\''
+        + ", updatedOn="
+        + updatedOn
+        + ", updatedBy='"
+        + updatedBy
+        + '\''
+        + '}';
+  }
 }
