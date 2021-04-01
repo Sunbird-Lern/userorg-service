@@ -49,6 +49,10 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
     if (CollectionUtils.isNotEmpty(selfDeclaredFields)) {
       try {
         for (UserDeclareEntity userDeclareEntity : selfDeclaredFields) {
+          logger.info(
+              context,
+              "UserSelfDeclarationServiceImpl:saveUserSelfDeclareAttributes operationType: "
+                  + userDeclareEntity.getOperation());
           switch (userDeclareEntity.getOperation()) {
             case JsonKey.ADD:
               addUserSelfDeclaredDetails(userDeclareEntity, context);
@@ -125,6 +129,9 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
     Map<String, Object> extIdMap =
         mapper.convertValue(userDeclareEntity, new TypeReference<Map<String, Object>>() {});
     if (CollectionUtils.isNotEmpty(dbSelfDeclaredResults)) {
+      logger.info(
+          context,
+          "UserSelfDeclarationManagementActor:addUserSelfDeclaredDetails: deleting existing while adding ");
       userSelfDeclarationDao.deleteUserSelfDeclaredDetails(
           userDeclareEntity.getUserId(),
           userDeclareEntity.getOrgId(),
@@ -133,6 +140,15 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
     }
     extIdMap.put(JsonKey.CREATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     extIdMap.remove(JsonKey.OPERATION);
+    logger.info(
+        context,
+        "UserSelfDeclarationManagementActor:addUserSelfDeclaredDetails: printing map key and values ");
+    extIdMap
+        .entrySet()
+        .forEach(
+            entry -> {
+              logger.info("print key: " + entry.getKey() + " value: " + entry.getValue());
+            });
     userSelfDeclarationDao.insertSelfDeclaredFields(extIdMap, context);
   }
 
