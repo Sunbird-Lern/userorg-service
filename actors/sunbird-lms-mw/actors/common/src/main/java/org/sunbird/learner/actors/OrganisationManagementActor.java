@@ -240,37 +240,25 @@ public class OrganisationManagementActor extends BaseActor {
 
   private void createOrgExternalIdRecord(
       String channel, String externalId, String orgId, RequestContext context) {
-    if (StringUtils.isBlank(channel) || StringUtils.isBlank(externalId)) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          MessageFormat.format(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-              JsonKey.CHANNEL + " or " + JsonKey.EXTERNAL_ID),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
+      Map<String, Object> orgExtIdRequest = new WeakHashMap<>(3);
+      orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
+      orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
+      orgExtIdRequest.put(JsonKey.ORG_ID, orgId);
+      cassandraOperation.insertRecord(
+          JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
     }
-    Map<String, Object> orgExtIdRequest = new WeakHashMap<>(3);
-    orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
-    orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
-    orgExtIdRequest.put(JsonKey.ORG_ID, orgId);
-    cassandraOperation.insertRecord(
-        JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
   }
 
   private void deleteOrgExternalIdRecord(
       String channel, String externalId, RequestContext context) {
-    if (StringUtils.isBlank(channel) || StringUtils.isBlank(externalId)) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          MessageFormat.format(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-              JsonKey.CHANNEL + " or " + JsonKey.EXTERNAL_ID),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
+      Map<String, String> orgExtIdRequest = new WeakHashMap<>(3);
+      orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
+      orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
+      cassandraOperation.deleteRecord(
+          JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
     }
-    Map<String, String> orgExtIdRequest = new WeakHashMap<>(3);
-    orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
-    orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
-    cassandraOperation.deleteRecord(
-        JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
   }
 
   private String validateHashTagId(
