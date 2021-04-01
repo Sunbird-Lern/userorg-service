@@ -97,7 +97,7 @@ public class SearchHandlerActor extends BaseActor {
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
     String version = (String) request.getContext().get(JsonKey.VERSION);
-    if (!version.equals(JsonKey.VERSION_2)) {
+    if (version != JsonKey.VERSION_2) {
       // checking for Backword compatibility
       backwardCompatibility(searchQueryMap);
     }
@@ -138,7 +138,7 @@ public class SearchHandlerActor extends BaseActor {
         Map<String, Object> userTypeDetail = new HashMap<>();
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
-        if (!version.equals(JsonKey.VERSION_2)) {
+        if (version != JsonKey.VERSION_2) {
           if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
             userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
             userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
@@ -155,8 +155,6 @@ public class SearchHandlerActor extends BaseActor {
           }
           userMap.put(JsonKey.LOCATION_IDS, locationIds);
         }
-        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
-        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
         userMap.putAll(Util.getUserDefaultValue());
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
