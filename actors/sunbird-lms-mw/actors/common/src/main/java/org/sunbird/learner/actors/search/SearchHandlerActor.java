@@ -130,15 +130,7 @@ public class SearchHandlerActor extends BaseActor {
           (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
       Map<String, Object> userDefaultFieldValue = Util.getUserDefaultValue();
-      if (CollectionUtils.isNotEmpty(fields)) {
-        Iterator<Map.Entry<String, Object>> iterator = userDefaultFieldValue.entrySet().iterator();
-        while (iterator.hasNext()) {
-          Map.Entry<String, Object> entry = iterator.next();
-          if (!fields.contains(entry.getKey())) {
-            iterator.remove();
-          }
-        }
-      }
+      getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
         userMap.remove(JsonKey.ENC_EMAIL);
@@ -188,16 +180,7 @@ public class SearchHandlerActor extends BaseActor {
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
                 Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
-                if (CollectionUtils.isNotEmpty(fields)) {
-                  Iterator<Map.Entry<String, Object>> iterator =
-                      orgDefaultFieldValue.entrySet().iterator();
-                  while (iterator.hasNext()) {
-                    Map.Entry<String, Object> entry = iterator.next();
-                    if (!fields.contains(entry.getKey())) {
-                      iterator.remove();
-                    }
-                  }
-                }
+                getDefaultValues(orgDefaultFieldValue, fields);
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
@@ -219,6 +202,18 @@ public class SearchHandlerActor extends BaseActor {
     telemetryReq.getRequest().put("searchDto", searchDto);
     telemetryReq.setOperation("generateSearchTelemetry");
     tellToAnother(telemetryReq);
+  }
+
+  private void getDefaultValues(Map<String, Object> orgDefaultFieldValue, List<String> fields) {
+    if (CollectionUtils.isNotEmpty(fields)) {
+      Iterator<Map.Entry<String, Object>> iterator = orgDefaultFieldValue.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<String, Object> entry = iterator.next();
+        if (!fields.contains(entry.getKey())) {
+          iterator.remove();
+        }
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")
