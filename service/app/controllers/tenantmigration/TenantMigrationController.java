@@ -10,10 +10,7 @@ import play.mvc.Result;
 import util.Attrs;
 import util.Common;
 
-/**
- * @author Amit Kumar This controller will handle all the request related for user migration.
- * @author anmolgupta
- */
+/** @author anmolgupta */
 public class TenantMigrationController extends BaseController {
 
   /**

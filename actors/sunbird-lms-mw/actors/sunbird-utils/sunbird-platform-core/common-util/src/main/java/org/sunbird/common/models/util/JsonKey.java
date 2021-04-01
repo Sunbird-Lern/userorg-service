@@ -122,7 +122,6 @@ public final class JsonKey {
   public static final String FRAMEWORK = "framework";
   public static final String FROM_EMAIL = "fromEmail";
   public static final String GROUP_QUERY = "groupQuery";
-  public static final String HASH_TAG_ID = "hashtagid";
   public static final String HASHTAGID = "hashTagId";
   public static final String HEADER = "header";
   public static final String Healthy = "healthy";

@@ -72,7 +72,6 @@ public class DataCacheHandler implements Runnable {
     JsonKey.ORG_TYPE,
     JsonKey.CONTACT_DETAILS,
     JsonKey.LOC_ID,
-    JsonKey.HASHTAGID,
     JsonKey.LOCATION_CODE
   };
 

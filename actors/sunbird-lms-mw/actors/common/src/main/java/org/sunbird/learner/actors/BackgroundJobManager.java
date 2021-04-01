@@ -157,15 +157,8 @@ public class BackgroundJobManager extends BaseActor {
           }
         }
       }
-      // Register the org into EKStep.
-      String hashOrgId = (String) esMap.getOrDefault(JsonKey.HASH_TAG_ID, "");
-      logger.info(actorMessage.getRequestContext(), "hashOrgId value is ==" + hashOrgId);
-      // Just check it if hashOrgId is null or empty then replace with org id.
-      if (StringUtils.isBlank(hashOrgId)) {
-        hashOrgId = id;
-      }
       // making call to register tag
-      registertag(hashOrgId, "{}", headerMap, actorMessage.getRequestContext());
+      registertag(id, "{}", headerMap, actorMessage.getRequestContext());
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.organisation.getTypeName(),

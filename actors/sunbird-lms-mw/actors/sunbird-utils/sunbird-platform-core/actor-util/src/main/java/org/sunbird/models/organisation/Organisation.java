@@ -25,7 +25,6 @@ public class Organisation implements Serializable {
   private String description;
   private String email;
   private String externalId;
-  private String hashTagId;
   private String orgName;
   private Integer organisationType;
   private String provider;
@@ -100,14 +99,6 @@ public class Organisation implements Serializable {
 
   public void setExternalId(String externalId) {
     this.externalId = externalId;
-  }
-
-  public String getHashTagId() {
-    return hashTagId;
-  }
-
-  public void setHashTagId(String hashTagId) {
-    this.hashTagId = hashTagId;
   }
 
   public String getOrgName() {
