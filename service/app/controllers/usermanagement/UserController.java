@@ -50,7 +50,7 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-    public CompletionStage<Result> createUserV3V2(Http.Request httpRequest) {
+    public CompletionStage<Result> createUserV3V2(Http.Request httpRequest)  {
         return handleRequest(
                 ActorOperations.CREATE_USER_V3.getValue(),
                 httpRequest.body().asJson(),

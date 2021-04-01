@@ -201,6 +201,7 @@ public class UserManagementActor extends BaseActor {
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
       }
+
       profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
