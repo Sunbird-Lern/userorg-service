@@ -165,6 +165,7 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  // removing the deprecating columns and disabling search with those columns
   public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
