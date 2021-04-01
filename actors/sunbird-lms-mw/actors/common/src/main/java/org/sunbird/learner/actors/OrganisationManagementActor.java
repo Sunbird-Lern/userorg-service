@@ -753,32 +753,6 @@ public class OrganisationManagementActor extends BaseActor {
     return false;
   }
 
-  private boolean validateFieldUniqueness(
-      String key, String value, String orgId, RequestContext context) {
-    if (value != null) {
-      Map<String, Object> filters = new HashMap<>();
-      filters.put(key, value);
-      SearchDTO searchDto = new SearchDTO();
-      searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-      Future<Map<String, Object>> resultF =
-          esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
-      Map<String, Object> result =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if ((list.isEmpty())) {
-        return true;
-      } else {
-        if (orgId == null) {
-          return false;
-        }
-        Map<String, Object> data = list.get(0);
-        String id = (String) data.get(JsonKey.ID);
-        return id.equalsIgnoreCase(orgId);
-      }
-    }
-    return true;
-  }
-
   private void validateChannel(Map<String, Object> req, RequestContext context) {
     String channel = (String) req.get(JsonKey.CHANNEL);
     if (!req.containsKey(JsonKey.IS_TENANT) || !(Boolean) req.get(JsonKey.IS_TENANT)) {
