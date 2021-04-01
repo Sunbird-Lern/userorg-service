@@ -76,7 +76,7 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    if (version != JsonKey.VERSION_4) {
+    if (!version.equals(JsonKey.VERSION_4)) {
       appendUserTypeAndLocation(result, actorMessage.getRequestContext());
       result.putAll(Util.getUserDefaultValue());
     } else {
