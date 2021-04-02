@@ -198,16 +198,22 @@ public class BackgroundJobManager extends BaseActor {
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
-    logger.info(
-        actorMessage.getRequestContext(),
-        "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
-            + userDetails.get(JsonKey.ROOT_ORG_ID));
-    insertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        userId,
-        userDetails,
-        actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(userDetails)) {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
+              + userDetails.get(JsonKey.ROOT_ORG_ID));
+      insertDataToElastic(
+          ProjectUtil.EsIndex.sunbird.getIndexName(),
+          ProjectUtil.EsType.user.getTypeName(),
+          userId,
+          userDetails,
+          actorMessage.getRequestContext());
+    } else {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs invalid userId " + userId);
+    }
   }
 
   /**
@@ -228,18 +234,11 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(
         context,
         "BackgroundJobManager:insertDataToElastic: type = " + type + " identifier = " + identifier);
-    /*
-     * if (type.equalsIgnoreCase(ProjectUtil.EsType.user.getTypeName())) { // now
-     * calculate profile completeness and error filed and store it in ES
-     * ProfileCompletenessService service =
-     * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
-     * service.computeProfile(data); data.putAll(responsemap); }
-     */
     Future<String> responseF = esService.save(type, identifier, data, context);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     logger.info(
         context,
-        "Getting  ********** ES save response for type , identiofier=="
+        "Getting  ********** ES save response for type , identifier == "
             + type
             + "  "
             + identifier
