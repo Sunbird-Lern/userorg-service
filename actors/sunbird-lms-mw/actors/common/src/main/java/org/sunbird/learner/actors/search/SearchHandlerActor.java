@@ -59,8 +59,7 @@ public class SearchHandlerActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
-      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
+      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
@@ -165,9 +164,17 @@ public class SearchHandlerActor extends BaseActor {
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
-  private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
-    Map<String, Object> searchQueryMap = request.getRequest();
+  private void handleOrgSearchAsyncRequest(
+      String indexType, Map<String, Object> searchQueryMap, Request request) {
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
+    Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
+    if (filterMap.containsKey(JsonKey.IS_SCHOOL)) {
+      Boolean isSchool = (Boolean) filterMap.remove(JsonKey.IS_SCHOOL);
+      if (isSchool) {
+        filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
+      }
+    }
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());
     Future<Response> response =

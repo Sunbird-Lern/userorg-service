@@ -107,6 +107,7 @@ public class SearchHandlerActorTest {
     List<String> objectType = new ArrayList<String>();
     objectType.add("org");
     filters.put(JsonKey.ID, "ORG_001");
+    filters.put(JsonKey.IS_SCHOOL, true);
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);
     List<String> fields = new ArrayList<>();

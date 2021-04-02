@@ -125,8 +125,6 @@ public class OrgManagementActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
-
-    when(Util.validateRoles(Mockito.anyList())).thenReturn("SUCCESS");
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
     when(Util.registerChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     when(ProjectUtil.getUniqueIdFromTimestamp(Mockito.anyInt())).thenReturn("time");

@@ -618,6 +618,8 @@ public final class JsonKey {
   public static final String DOB_VALIDATION_DONE = "dobValidationDone";
   public static final String IS_TENANT = "isTenant";
   public static final String ORG_LOCATION = "orgLocation";
+  public static final String IS_SCHOOL = "isSchool";
+  public static final String ORGANISATION_TYPE = "organisationType";
 
   private JsonKey() {}
 }

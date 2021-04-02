@@ -285,16 +285,6 @@ public final class Util {
   }
 
   /**
-   * if Object is null then it will return true else false.
-   *
-   * @param obj Object
-   * @return boolean
-   */
-  public static boolean isNull(Object obj) {
-    return null == obj ? true : false;
-  }
-
-  /**
    * if Object is not null then it will return true else false.
    *
    * @param obj Object
@@ -302,26 +292,6 @@ public final class Util {
    */
   public static boolean isNotNull(Object obj) {
     return null != obj ? true : false;
-  }
-
-  /**
-   * This method will provide user name based on user id if user not found then it will return null.
-   *
-   * @param userId String
-   * @return String
-   */
-  @SuppressWarnings("unchecked")
-  public static String getUserNamebyUserId(String userId, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response result =
-        cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (!(list.isEmpty())) {
-      return (String) (list.get(0).get(JsonKey.USERNAME));
-    }
-    return null;
   }
 
   /**
@@ -343,20 +313,6 @@ public final class Util {
       return list.get(0);
     }
     return null;
-  }
-
-  public static String validateRoles(List<String> roleList) {
-    Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
-    if (null != roleMap && !roleMap.isEmpty()) {
-      for (String role : roleList) {
-        if (null == roleMap.get(role.trim())) {
-          return role + " is not a valid role.";
-        }
-      }
-    } else {
-      logger.info("Roles are not cached.Please Cache it.");
-    }
-    return JsonKey.SUCCESS;
   }
 
   /** @param req Map<String,Object> */
