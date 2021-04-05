@@ -33,7 +33,6 @@ public class ShadowUserProcessor {
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
-  private Map<String, String> hashTagIdMap = new HashMap<>();
   private Util.DbInfo bulkUploadDbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
   private Map<String, String> extOrgIdMap = new HashMap<>();
   private String custodianOrgId;
@@ -564,12 +563,7 @@ public class ShadowUserProcessor {
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
     reqMap.put(JsonKey.ROLES, roles);
-    String hashTagId = hashTagIdMap.get(organisationId);
-    if (StringUtils.isBlank(hashTagId)) {
-      hashTagId = Util.getHashTagIdFromOrgId(organisationId, context);
-      hashTagIdMap.put(organisationId, hashTagId);
-    }
-    reqMap.put(JsonKey.HASHTAGID, hashTagId);
+    reqMap.put(JsonKey.HASHTAGID, organisationId);
     reqMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
     reqMap.put(JsonKey.USER_ID, userId);
     reqMap.put(JsonKey.ORGANISATION_ID, organisationId);

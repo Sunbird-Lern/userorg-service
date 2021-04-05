@@ -472,8 +472,7 @@ public class TenantMigrationActor extends BaseActor {
   private void createUserOrgRequestAndUpdate(String userId, String orgId, RequestContext context) {
     Map<String, Object> userOrgRequest = new HashMap<>();
     userOrgRequest.put(JsonKey.ID, userId);
-    String hashTagId = Util.getHashTagIdFromOrgId(orgId, context);
-    userOrgRequest.put(JsonKey.HASHTAGID, hashTagId);
+    userOrgRequest.put(JsonKey.HASHTAGID, orgId);
     userOrgRequest.put(JsonKey.ORGANISATION_ID, orgId);
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());

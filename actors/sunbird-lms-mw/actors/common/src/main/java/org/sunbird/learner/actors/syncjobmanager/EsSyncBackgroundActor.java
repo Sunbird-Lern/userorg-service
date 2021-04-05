@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -132,18 +131,6 @@ public class EsSyncBackgroundActor extends BaseActor {
   }
 
   private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
-    if (CollectionUtils.isEmpty(objectIds)) {
-      Response response =
-          cassandraOperation.getAllRecords(
-              JsonKey.SUNBIRD, JsonKey.USER, Arrays.asList(JsonKey.ID), context);
-      List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-      objectIds = responseList.stream().map(i -> i.get(JsonKey.ID)).collect(Collectors.toList());
-    }
-    invokeUserSync(objectIds, context);
-  }
-
-  private void invokeUserSync(List<Object> objectIds, RequestContext context) {
     if (CollectionUtils.isNotEmpty(objectIds)) {
       for (Object userId : objectIds) {
         Request userRequest = new Request();
@@ -179,7 +166,7 @@ public class EsSyncBackgroundActor extends BaseActor {
         List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
       } catch (Exception ex) {
-        logger.error("Exception occurred while parsing orgLocation", ex);
+        logger.error(context, "Exception occurred while parsing orgLocation", ex);
       }
     }
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
