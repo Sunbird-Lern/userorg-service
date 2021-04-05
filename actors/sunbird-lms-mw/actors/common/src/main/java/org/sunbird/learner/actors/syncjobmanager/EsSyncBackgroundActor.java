@@ -159,9 +159,7 @@ public class EsSyncBackgroundActor extends BaseActor {
                   ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
           String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
           if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
-            esResponse.put((String) userId, true);
-          } else {
-            esResponse.put((String) userId, false);
+            esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
           }
         } else {
           logger.info(
