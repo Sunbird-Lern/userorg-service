@@ -9,10 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.router.BackgroundRequestRouter;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -66,6 +68,7 @@ public class EsSyncActor extends BaseActor {
           "EsSyncActor:triggerBackgroundSync: Exception occurred with error message = "
               + e.getMessage(),
           e);
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
   }
 }
