@@ -568,6 +568,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
 
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(

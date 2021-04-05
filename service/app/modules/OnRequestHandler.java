@@ -148,7 +148,6 @@ public class OnRequestHandler implements ActionCreator {
       } else {
         String custodianOrgHashTagid =
             DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-        ;
         channel =
             (StringUtils.isNotEmpty(custodianOrgHashTagid))
                 ? custodianOrgHashTagid
