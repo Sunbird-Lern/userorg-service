@@ -18,6 +18,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
@@ -52,6 +53,23 @@ public class ESSyncActorTest {
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertTrue(null != res);
+  }
+
+  @Test
+  public void testSyncUserSuccess() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res);
   }
 }
