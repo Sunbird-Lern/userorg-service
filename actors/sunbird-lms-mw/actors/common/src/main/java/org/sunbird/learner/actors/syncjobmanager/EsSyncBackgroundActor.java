@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -27,6 +29,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
+import scala.concurrent.Future;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
@@ -59,6 +62,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     Map<String, Object> dataMap = (Map<String, Object>) req.get(JsonKey.DATA);
 
     String objectType = (String) dataMap.get(JsonKey.OBJECT_TYPE);
+    String operationType = (String) dataMap.get(JsonKey.OPERATION_TYPE);
 
     List<Object> objectIds = new ArrayList<>();
     if (null != dataMap.get(JsonKey.OBJECT_IDS)) {
@@ -73,9 +77,9 @@ public class EsSyncBackgroundActor extends BaseActor {
     }
 
     String requestLogMsg = "";
-
+    Response finalResponse = new Response();
     if (JsonKey.USER.equals(objectType)) {
-      handleUserSyncRequest(objectIds, message.getRequestContext());
+      handleUserSyncRequest(objectIds, finalResponse, message.getRequestContext());
     } else {
       if (CollectionUtils.isNotEmpty(objectIds)) {
         requestLogMsg =
@@ -111,9 +115,11 @@ public class EsSyncBackgroundActor extends BaseActor {
               result.add((Map<String, Object>) entry.getValue());
             }
           }
-
           if (CollectionUtils.isNotEmpty(result)) {
-            esService.bulkInsert(getType(objectType), result, message.getRequestContext());
+            Future<Boolean> fBoolean =
+                esService.bulkInsert(getType(objectType), result, message.getRequestContext());
+            Boolean fResult = (Boolean) ElasticSearchHelper.getResponseFromFuture(fBoolean);
+            finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, fResult);
           }
         }
       }
@@ -128,19 +134,39 @@ public class EsSyncBackgroundActor extends BaseActor {
             + " is "
             + elapsedTime
             + " ms");
+    if (StringUtils.isNotBlank(operationType) && JsonKey.SYNC.equalsIgnoreCase(operationType)) {
+      finalResponse.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+      sender().tell(finalResponse, self());
+    }
   }
 
-  private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
+  private void handleUserSyncRequest(
+      List<Object> objectIds, Response finalResponse, RequestContext context) {
     if (CollectionUtils.isNotEmpty(objectIds)) {
+      Map<String, Object> esResponse = new HashMap<>();
       for (Object userId : objectIds) {
-        Request userRequest = new Request();
-        userRequest.setRequestContext(context);
-        userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-        userRequest.getRequest().put(JsonKey.ID, userId);
         logger.info(
-            context, "EsSyncBackgroundActor:invokeUserSync: Trigger sync of user details to ES");
-        tellToAnother(userRequest);
+            context,
+            "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
+        Map<String, Object> userDetails = Util.getUserDetails((String) userId, context);
+        if (MapUtils.isNotEmpty(userDetails)) {
+          logger.info(
+              context,
+              "EsSyncBackgroundActor:handleUserSyncRequest userRootOrgId "
+                  + userDetails.get(JsonKey.ROOT_ORG_ID));
+          Future<String> responseF =
+              esService.save(
+                  ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
+          String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
+          if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
+            esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
+          }
+        } else {
+          logger.info(
+              context, "EsSyncBackgroundActor:handleUserSyncRequest invalid userId " + userId);
+        }
       }
+      finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, esResponse);
     }
   }
 
