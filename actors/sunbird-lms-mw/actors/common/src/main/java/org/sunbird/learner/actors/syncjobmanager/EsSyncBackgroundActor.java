@@ -145,14 +145,9 @@ public class EsSyncBackgroundActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(objectIds)) {
       Map<String, Object> esResponse = new HashMap<>();
       for (Object userId : objectIds) {
-        Request userRequest = new Request();
-        userRequest.setRequestContext(context);
-        userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-        userRequest.getRequest().put(JsonKey.ID, userId);
         logger.info(
             context,
             "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
-        tellToAnother(userRequest);
         Map<String, Object> userDetails = Util.getUserDetails((String) userId, context);
         if (MapUtils.isNotEmpty(userDetails)) {
           logger.info(
