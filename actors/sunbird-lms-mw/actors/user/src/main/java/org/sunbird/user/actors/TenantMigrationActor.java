@@ -18,7 +18,6 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -313,11 +312,8 @@ public class TenantMigrationActor extends BaseActor {
         || StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
       if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))) {
         orgId = (String) migrateReq.get(JsonKey.ORG_ID);
-        Future<Map<String, Object>> resultF =
-            esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
-        Map<String, Object> result =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+        OrgService orgService = OrgServiceImpl.getInstance();
+        Map<String, Object> result = orgService.getOrgById(orgId, context);
         if (MapUtils.isEmpty(result)) {
           logger.info(
               context,
@@ -333,7 +329,9 @@ public class TenantMigrationActor extends BaseActor {
                     ResponseCode.parameterMismatch.getErrorMessage(),
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
           } else {
-            migrateReq.put(JsonKey.PROFILE_LOCATION, result.get(JsonKey.ORG_LOCATION));
+            if (MapUtils.isNotEmpty(result)) {
+              migrateReq.put(JsonKey.PROFILE_LOCATION, result.get(JsonKey.ORG_LOCATION));
+            }
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
@@ -357,7 +355,7 @@ public class TenantMigrationActor extends BaseActor {
           // Fetch locationids of the suborg and update the location of sso user
           OrgService orgService = OrgServiceImpl.getInstance();
           Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
-          if (org.apache.commons.collections.MapUtils.isNotEmpty(orgMap)) {
+          if (MapUtils.isNotEmpty(orgMap)) {
             migrateReq.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
           }
         }
