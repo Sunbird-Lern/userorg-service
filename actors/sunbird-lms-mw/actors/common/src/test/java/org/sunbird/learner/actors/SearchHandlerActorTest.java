@@ -112,6 +112,7 @@ public class SearchHandlerActorTest {
     innerMap.put(JsonKey.LIMIT, 1);
     List<String> fields = new ArrayList<>();
     fields.add(JsonKey.ORG_NAME);
+    fields.add(JsonKey.HASHTAGID);
     innerMap.put(JsonKey.FIELDS, fields);
     Map<String, Object> contextMap = new HashMap<>();
     contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);

@@ -195,6 +195,11 @@ public class SearchHandlerActor extends BaseActor {
                     .forEach(
                         org -> {
                           org.putAll(orgDefaultFieldValue);
+                          if ((CollectionUtils.isNotEmpty(fields)
+                                  && fields.contains(JsonKey.HASHTAGID))
+                              || (CollectionUtils.isEmpty(fields))) {
+                            org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
                         });
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
