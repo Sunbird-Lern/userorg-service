@@ -18,7 +18,6 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -313,11 +312,8 @@ public class TenantMigrationActor extends BaseActor {
         || StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
       if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))) {
         orgId = (String) migrateReq.get(JsonKey.ORG_ID);
-        Future<Map<String, Object>> resultF =
-            esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
-        Map<String, Object> result =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+        OrgService orgService = OrgServiceImpl.getInstance();
+        Map<String, Object> result = orgService.getOrgById(orgId, context);
         if (MapUtils.isEmpty(result)) {
           logger.info(
               context,
@@ -333,7 +329,9 @@ public class TenantMigrationActor extends BaseActor {
                     ResponseCode.parameterMismatch.getErrorMessage(),
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
           } else {
-            migrateReq.put(JsonKey.PROFILE_LOCATION, result.get(JsonKey.ORG_LOCATION));
+            if (MapUtils.isNotEmpty(result)) {
+              fetchLocationIds(context, migrateReq, result);
+            }
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
@@ -357,13 +355,26 @@ public class TenantMigrationActor extends BaseActor {
           // Fetch locationids of the suborg and update the location of sso user
           OrgService orgService = OrgServiceImpl.getInstance();
           Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
-          if (org.apache.commons.collections.MapUtils.isNotEmpty(orgMap)) {
-            migrateReq.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
+          if (MapUtils.isNotEmpty(orgMap)) {
+            fetchLocationIds(context, migrateReq, orgMap);
           }
         }
       }
     }
     return orgId;
+  }
+
+  private void fetchLocationIds(
+      RequestContext context, Map<String, Object> migrateReq, Map<String, Object> orgMap) {
+    List orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+    if (CollectionUtils.isNotEmpty(orgLocation)) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        migrateReq.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(orgLocation));
+      } catch (Exception e) {
+        logger.info(context, "Exception occurred while converting orgLocation to String.");
+      }
+    }
   }
 
   private void validateUserCustodianOrgId(String rootOrgId, RequestContext context) {
@@ -472,8 +483,7 @@ public class TenantMigrationActor extends BaseActor {
   private void createUserOrgRequestAndUpdate(String userId, String orgId, RequestContext context) {
     Map<String, Object> userOrgRequest = new HashMap<>();
     userOrgRequest.put(JsonKey.ID, userId);
-    String hashTagId = Util.getHashTagIdFromOrgId(orgId, context);
-    userOrgRequest.put(JsonKey.HASHTAGID, hashTagId);
+    userOrgRequest.put(JsonKey.HASHTAGID, orgId);
     userOrgRequest.put(JsonKey.ORGANISATION_ID, orgId);
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());

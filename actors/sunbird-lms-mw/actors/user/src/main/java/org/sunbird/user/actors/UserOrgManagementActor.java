@@ -40,10 +40,7 @@ public class UserOrgManagementActor extends BaseActor {
     // Register user to given orgId(not root orgId)
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
-      String hashTagId =
-          Util.getHashTagIdFromOrgId(
-              (String) requestMap.get(JsonKey.ORGANISATION_ID), request.getRequestContext());
-      requestMap.put(JsonKey.HASHTAGID, hashTagId);
+      requestMap.put(JsonKey.HASHTAGID, organisationId);
       if (StringUtils.isBlank(callerId)) {
         addPublicRole(requestMap);
       }
@@ -56,10 +53,7 @@ public class UserOrgManagementActor extends BaseActor {
       // Add user to root org
       addPublicRole(requestMap);
       requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
-      String hashTagId =
-          Util.getHashTagIdFromOrgId(
-              (String) requestMap.get(JsonKey.ROOT_ORG_ID), request.getRequestContext());
-      requestMap.put(JsonKey.HASHTAGID, hashTagId);
+      requestMap.put(JsonKey.HASHTAGID, organisationId);
       Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     Response response = new Response();
