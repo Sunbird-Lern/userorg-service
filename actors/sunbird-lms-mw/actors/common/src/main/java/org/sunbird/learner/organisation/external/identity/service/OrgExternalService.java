@@ -65,6 +65,7 @@ public class OrgExternalService {
                   "Exception occurred while converting orgLocation to List<Map<String,String>>.");
             }
           }
+          orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
           return orgMap;
         }
       }

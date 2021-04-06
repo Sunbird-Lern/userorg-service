@@ -59,8 +59,7 @@ public class SearchHandlerActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
-      SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchDto, request);
+      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
@@ -131,6 +130,9 @@ public class SearchHandlerActor extends BaseActor {
     if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+      List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
+      Map<String, Object> userDefaultFieldValue = Util.getUserDefaultValue();
+      getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
         userMap.remove(JsonKey.ENC_EMAIL);
@@ -169,7 +171,17 @@ public class SearchHandlerActor extends BaseActor {
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
-  private void handleOrgSearchAsyncRequest(String indexType, SearchDTO searchDto, Request request) {
+  private void handleOrgSearchAsyncRequest(
+      String indexType, Map<String, Object> searchQueryMap, Request request) {
+    List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
+    Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
+    if (filterMap.containsKey(JsonKey.IS_SCHOOL)) {
+      Boolean isSchool = (Boolean) filterMap.remove(JsonKey.IS_SCHOOL);
+      if (isSchool) {
+        filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
+      }
+    }
+    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());
     Future<Response> response =
@@ -181,13 +193,20 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+                getDefaultValues(orgDefaultFieldValue, fields);
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
                     .stream()
                     .forEach(
                         org -> {
-                          org.putAll(Util.getOrgDefaultValue());
+                          org.putAll(orgDefaultFieldValue);
+                          if ((CollectionUtils.isNotEmpty(fields)
+                                  && fields.contains(JsonKey.HASHTAGID))
+                              || (CollectionUtils.isEmpty(fields))) {
+                            org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
                         });
                 response.put(JsonKey.RESPONSE, responseMap);
                 return response;
@@ -202,6 +221,18 @@ public class SearchHandlerActor extends BaseActor {
     telemetryReq.getRequest().put("searchDto", searchDto);
     telemetryReq.setOperation("generateSearchTelemetry");
     tellToAnother(telemetryReq);
+  }
+
+  private void getDefaultValues(Map<String, Object> orgDefaultFieldValue, List<String> fields) {
+    if (CollectionUtils.isNotEmpty(fields)) {
+      Iterator<Map.Entry<String, Object>> iterator = orgDefaultFieldValue.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Map.Entry<String, Object> entry = iterator.next();
+        if (!fields.contains(entry.getKey())) {
+          iterator.remove();
+        }
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")

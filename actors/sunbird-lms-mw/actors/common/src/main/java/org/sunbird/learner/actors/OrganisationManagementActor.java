@@ -155,18 +155,6 @@ public class OrganisationManagementActor extends BaseActor {
       } else {
         request.put(JsonKey.STATUS, ProjectUtil.OrgStatus.ACTIVE.getValue());
       }
-      // adding one extra filed for tag.
-      if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
-        request.put(
-            JsonKey.HASHTAGID,
-            validateHashTagId(
-                ((String) request.get(JsonKey.HASHTAGID)),
-                JsonKey.CREATE,
-                "",
-                actorMessage.getRequestContext()));
-      } else {
-        request.put(JsonKey.HASHTAGID, uniqueId);
-      }
 
       if (null != isTenant && isTenant) {
         boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
@@ -259,36 +247,6 @@ public class OrganisationManagementActor extends BaseActor {
       cassandraOperation.deleteRecord(
           JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
     }
-  }
-
-  private String validateHashTagId(
-      String hashTagId, String opType, String orgId, RequestContext context) {
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.HASHTAGID, hashTagId);
-    SearchDTO searchDto = new SearchDTO();
-    searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Future<Map<String, Object>> resultF =
-        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    List<Map<String, Object>> dataMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-      if (!dataMapList.isEmpty()) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidHashTagId.getErrorCode(),
-            ResponseCode.invalidHashTagId.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    } else if (opType.equalsIgnoreCase(JsonKey.UPDATE) && !dataMapList.isEmpty()) {
-      Map<String, Object> orgMap = dataMapList.get(0);
-      if (!(((String) orgMap.get(JsonKey.ID)).equalsIgnoreCase(orgId))) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidHashTagId.getErrorCode(),
-            ResponseCode.invalidHashTagId.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    }
-    return hashTagId;
   }
 
   private void validateOrgType(String orgType, String operation) {
@@ -477,15 +435,6 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       String updatedBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
-      if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
-        request.put(
-            JsonKey.HASHTAGID,
-            validateHashTagId(
-                ((String) request.get(JsonKey.HASHTAGID)),
-                JsonKey.UPDATE,
-                orgId,
-                actorMessage.getRequestContext()));
-      }
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -531,7 +480,7 @@ public class OrganisationManagementActor extends BaseActor {
             || StringUtils.isNotBlank(license)) {
           Map<String, Object> tempMap = new HashMap<>();
           tempMap.put(JsonKey.CHANNEL, updateOrgDaoChannel);
-          tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.HASHTAGID));
+          tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.ID));
           tempMap.put(JsonKey.DESCRIPTION, dbOrgDetails.get(JsonKey.DESCRIPTION));
           tempMap.put(JsonKey.LICENSE, license);
           boolean bool = Util.updateChannel(tempMap, actorMessage.getRequestContext());
@@ -619,6 +568,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
 
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
@@ -751,32 +701,6 @@ public class OrganisationManagementActor extends BaseActor {
       }
     }
     return false;
-  }
-
-  private boolean validateFieldUniqueness(
-      String key, String value, String orgId, RequestContext context) {
-    if (value != null) {
-      Map<String, Object> filters = new HashMap<>();
-      filters.put(key, value);
-      SearchDTO searchDto = new SearchDTO();
-      searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-      Future<Map<String, Object>> resultF =
-          esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
-      Map<String, Object> result =
-          (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-      List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if ((list.isEmpty())) {
-        return true;
-      } else {
-        if (orgId == null) {
-          return false;
-        }
-        Map<String, Object> data = list.get(0);
-        String id = (String) data.get(JsonKey.ID);
-        return id.equalsIgnoreCase(orgId);
-      }
-    }
-    return true;
   }
 
   private void validateChannel(Map<String, Object> req, RequestContext context) {

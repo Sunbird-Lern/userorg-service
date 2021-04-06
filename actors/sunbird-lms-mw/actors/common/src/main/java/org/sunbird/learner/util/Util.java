@@ -285,16 +285,6 @@ public final class Util {
   }
 
   /**
-   * if Object is null then it will return true else false.
-   *
-   * @param obj Object
-   * @return boolean
-   */
-  public static boolean isNull(Object obj) {
-    return null == obj ? true : false;
-  }
-
-  /**
    * if Object is not null then it will return true else false.
    *
    * @param obj Object
@@ -302,26 +292,6 @@ public final class Util {
    */
   public static boolean isNotNull(Object obj) {
     return null != obj ? true : false;
-  }
-
-  /**
-   * This method will provide user name based on user id if user not found then it will return null.
-   *
-   * @param userId String
-   * @return String
-   */
-  @SuppressWarnings("unchecked")
-  public static String getUserNamebyUserId(String userId, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response result =
-        cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (!(list.isEmpty())) {
-      return (String) (list.get(0).get(JsonKey.USERNAME));
-    }
-    return null;
   }
 
   /**
@@ -345,34 +315,8 @@ public final class Util {
     return null;
   }
 
-  public static String getHashTagIdFromOrgId(String orgId, RequestContext context) {
-    String hashTagId = "";
-    Map<String, Object> organisation = getOrgDetails(orgId, context);
-    hashTagId =
-        StringUtils.isNotEmpty((String) organisation.get(JsonKey.HASHTAGID))
-            ? (String) organisation.get(JsonKey.HASHTAGID)
-            : (String) organisation.get(JsonKey.ID);
-    return hashTagId;
-  }
-
-  public static String validateRoles(List<String> roleList) {
-    Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
-    if (null != roleMap && !roleMap.isEmpty()) {
-      for (String role : roleList) {
-        if (null == roleMap.get(role.trim())) {
-          return role + " is not a valid role.";
-        }
-      }
-    } else {
-      logger.info("Roles are not cached.Please Cache it.");
-    }
-    return JsonKey.SUCCESS;
-  }
-
   /** @param req Map<String,Object> */
   public static boolean registerChannel(Map<String, Object> req, RequestContext context) {
-    logger.info(
-        context, "channel registration for hashTag Id = " + req.get(JsonKey.HASHTAGID) + "");
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {
@@ -388,8 +332,7 @@ public final class Util {
     String regStatus = "";
     try {
       logger.info(
-          context,
-          "start call for registering the channel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -399,7 +342,7 @@ public final class Util {
       Map<String, Object> channelMap = new HashMap<>();
       channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
+      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
       if (req.containsKey(JsonKey.LICENSE)
           && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, req.get(JsonKey.LICENSE));
@@ -420,12 +363,10 @@ public final class Util {
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
               reqString,
               headerMap);
-      logger.info(
-          context,
-          "end call for channel registration for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+      logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
     } catch (Exception e) {
       logger.error(
-          context, "Exception occurred while registarting channel in ekstep." + e.getMessage(), e);
+          context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
     }
 
     return regStatus.contains("OK");
@@ -433,7 +374,6 @@ public final class Util {
 
   /** @param req Map<String,Object> */
   public static boolean updateChannel(Map<String, Object> req, RequestContext context) {
-    logger.info(context, "channel update for hashTag Id = " + req.get(JsonKey.HASHTAGID) + "");
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {
@@ -448,8 +388,7 @@ public final class Util {
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(
-          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+      logger.info(context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.ID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -459,7 +398,7 @@ public final class Util {
       Map<String, Object> channelMap = new HashMap<>();
       channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
+      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
       String license = (String) req.get(JsonKey.LICENSE);
       if (StringUtils.isNotBlank(license)) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, license);
@@ -475,11 +414,10 @@ public final class Util {
                       + PropertiesCache.getInstance()
                           .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
                   + "/"
-                  + req.get(JsonKey.HASHTAGID),
+                  + req.get(JsonKey.ID),
               reqString,
               headerMap);
-      logger.info(
-          context, "end call for channel update for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+      logger.info(context, "end call for channel update for org id ==" + req.get(JsonKey.ID));
     } catch (Exception e) {
       logger.error(
           context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);

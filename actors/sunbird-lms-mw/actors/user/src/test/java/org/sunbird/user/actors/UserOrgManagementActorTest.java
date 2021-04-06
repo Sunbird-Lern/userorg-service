@@ -1,7 +1,6 @@
 package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.mockito.Mockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -44,7 +43,6 @@ public class UserOrgManagementActorTest {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.doNothing().when(Util.class, "registerUserToOrg", Mockito.anyMap(), Mockito.any());
-    when(Util.getHashTagIdFromOrgId(Mockito.anyString(), Mockito.any())).thenReturn("hashTagId");
     PowerMockito.doNothing().when(Util.class, "upsertUserOrgData", Mockito.anyMap(), Mockito.any());
   }
 

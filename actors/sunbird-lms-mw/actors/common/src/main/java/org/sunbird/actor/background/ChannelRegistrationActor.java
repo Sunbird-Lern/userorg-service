@@ -65,9 +65,9 @@ public class ChannelRegistrationActor extends BaseActor {
       RequestContext context) {
     Boolean bool = true;
     for (Map<String, Object> map : sunbirdChannelList) {
-      logger.info(context, "processing start for hashTagId " + map.get(JsonKey.HASHTAGID));
-      if (!StringUtils.isBlank((String) map.get(JsonKey.HASHTAGID))
-          && (!ekstepChannelList.contains(map.get(JsonKey.HASHTAGID)))
+      logger.info(context, "processing start for hashTagId " + map.get(JsonKey.ID));
+      if (!StringUtils.isBlank((String) map.get(JsonKey.ID))
+          && (!ekstepChannelList.contains(map.get(JsonKey.ID)))
           && (!Util.registerChannel(map, context))) {
         bool = false;
       }
@@ -94,7 +94,7 @@ public class ChannelRegistrationActor extends BaseActor {
     logger.info(context, "start call for getting List of channel from sunbird ES");
     SearchDTO searchDto = new SearchDTO();
     List<String> list = new ArrayList<>();
-    list.add(JsonKey.HASHTAGID);
+    list.add(JsonKey.ID);
     list.add(JsonKey.DESCRIPTION);
     list.add(JsonKey.CHANNEL);
     searchDto.setFields(list);

@@ -125,8 +125,6 @@ public class OrgManagementActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false));
-
-    when(Util.validateRoles(Mockito.anyList())).thenReturn("SUCCESS");
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
     when(Util.registerChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     when(ProjectUtil.getUniqueIdFromTimestamp(Mockito.anyInt())).thenReturn("time");
@@ -249,38 +247,6 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.slugIsNotUnique);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testCreateOrgFailure2() {
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
-    when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSuccess());
-    Promise<Map<String, Object>> promise = Futures.promise();
-    Map<String, Object> esMap = getValidateChannelEsResponse(true);
-    esMap.put(JsonKey.CONTENT, new ArrayList<>());
-    promise.success(esMap);
-    Promise<Map<String, Object>> promise2 = Futures.promise();
-    promise2.success(esMap);
-
-    Promise<Map<String, Object>> promise3 = Futures.promise();
-    promise3.success(getValidateChannelEsResponse(true));
-
-    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future())
-        .thenReturn(promise2.future())
-        .thenReturn(promise3.future());
-
-    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
-    req.put(JsonKey.IS_TENANT, true);
-    req.put(JsonKey.HASHTAGID, "orgId");
-    boolean result =
-        testScenario(
-            getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.invalidHashTagId);
     assertTrue(result);
   }
 
