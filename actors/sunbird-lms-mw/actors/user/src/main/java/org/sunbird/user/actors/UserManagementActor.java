@@ -49,8 +49,6 @@ import org.sunbird.common.util.Matcher;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
@@ -104,7 +102,6 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -456,6 +453,7 @@ public class UserManagementActor extends BaseActor {
                   break;
                 default: // do nothing
               }
+
             } catch (Exception e) {
               logger.error("Error in encrypting in the external id details", e);
               throw new ProjectCommonException(
@@ -475,7 +473,6 @@ public class UserManagementActor extends BaseActor {
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
       orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
-
     if (CollectionUtils.isNotEmpty(orgList)) {
       String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
       String rootOrgId = (String) actorMessage.getRequest().remove(JsonKey.ROOT_ORG_ID);
@@ -490,6 +487,7 @@ public class UserManagementActor extends BaseActor {
         createOrUpdateOrganisations(org, orgDbMap, actorMessage);
         updateUserSelfDeclaredData(actorMessage, org, userId);
       }
+
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
@@ -759,20 +757,6 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
-      //      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel,
-      // context);
-      //      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
-      //        throw new ProjectCommonException(
-      //            ResponseCode.invalidParameterValue.getErrorCode(),
-      //            ProjectUtil.formatMessage(
-      //                ResponseCode.invalidParameterValue.getErrorMessage(),
-      //                requestedChannel,
-      //                JsonKey.CHANNEL),
-      //            ResponseCode.CLIENT_ERROR.getResponseCode());
-      //      }
-      Map<String, Object> org = orgDao.getOrgByExternalId(externalId, channel, context);
-      String rootOrg = (String) org.get(JsonKey.ROOT_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrg);
     }
     Organisation fetchedOrgById = null;
     if (StringUtils.isNotBlank(requestedOrgId)) {
