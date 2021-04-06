@@ -330,7 +330,7 @@ public class TenantMigrationActor extends BaseActor {
                     StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
           } else {
             if (MapUtils.isNotEmpty(result)) {
-              migrateReq.put(JsonKey.PROFILE_LOCATION, result.get(JsonKey.ORG_LOCATION));
+              fetchLocationIds(context, migrateReq, result);
             }
           }
         }
@@ -356,12 +356,25 @@ public class TenantMigrationActor extends BaseActor {
           OrgService orgService = OrgServiceImpl.getInstance();
           Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
           if (MapUtils.isNotEmpty(orgMap)) {
-            migrateReq.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
+            fetchLocationIds(context, migrateReq, orgMap);
           }
         }
       }
     }
     return orgId;
+  }
+
+  private void fetchLocationIds(
+      RequestContext context, Map<String, Object> migrateReq, Map<String, Object> orgMap) {
+    List orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+    if (CollectionUtils.isNotEmpty(orgLocation)) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        migrateReq.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(orgLocation));
+      } catch (Exception e) {
+        logger.info(context, "Exception occurred while converting orgLocation to String.");
+      }
+    }
   }
 
   private void validateUserCustodianOrgId(String rootOrgId, RequestContext context) {
