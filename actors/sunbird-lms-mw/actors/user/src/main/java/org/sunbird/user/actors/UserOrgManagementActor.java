@@ -53,7 +53,7 @@ public class UserOrgManagementActor extends BaseActor {
       // Add user to root org
       addPublicRole(requestMap);
       requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
-      requestMap.put(JsonKey.HASHTAGID, organisationId);
+      requestMap.put(JsonKey.HASHTAGID, requestMap.get(JsonKey.ORGANISATION_ID));
       Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     Response response = new Response();
