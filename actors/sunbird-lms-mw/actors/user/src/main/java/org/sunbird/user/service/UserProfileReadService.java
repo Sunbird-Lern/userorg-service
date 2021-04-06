@@ -76,14 +76,7 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     String version = (String) actorMessage.getContext().get(JsonKey.VERSION);
-    if (!version.equals(JsonKey.VERSION_4)) {
-      appendUserTypeAndLocation(result, actorMessage.getRequestContext());
-      result.putAll(Util.getUserDefaultValue());
-    } else {
-      result.remove(JsonKey.USER_TYPE);
-      result.remove(JsonKey.USER_SUB_TYPE);
-      result.remove(JsonKey.LOCATION_IDS);
-    }
+    appendUserTypeAndLocation(result, version, actorMessage.getRequestContext());
     result.put(
         JsonKey.ROOT_ORG,
         orgDao.getOrgById(
@@ -148,7 +141,8 @@ public class UserProfileReadService {
     return response;
   }
 
-  public void appendUserTypeAndLocation(Map<String, Object> result, RequestContext context) {
+  public void appendUserTypeAndLocation(
+      Map<String, Object> result, String version, RequestContext context) {
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPE))) {
@@ -160,14 +154,6 @@ public class UserProfileReadService {
     } catch (Exception e) {
       logger.error(context, "Exception because of mapper read value", e);
     }
-    if (MapUtils.isNotEmpty(userTypeDetails)) {
-      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
-      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
-    } else {
-      result.put(JsonKey.USER_TYPE, null);
-      result.put(JsonKey.USER_SUB_TYPE, null);
-    }
-    result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
 
     List<Map<String, String>> userLocList = new ArrayList<>();
     List<String> locationIds = new ArrayList<>();
@@ -185,8 +171,23 @@ public class UserProfileReadService {
     } catch (Exception ex) {
       logger.error(context, "Exception occurred while mapping", ex);
     }
+    if (version != JsonKey.VERSION_4) {
+      if (MapUtils.isNotEmpty(userTypeDetails)) {
+        result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
+        result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
+      } else {
+        result.put(JsonKey.USER_TYPE, null);
+        result.put(JsonKey.USER_SUB_TYPE, null);
+      }
+      result.put(JsonKey.LOCATION_IDS, locationIds);
+      result.putAll(Util.getUserDefaultValue());
+    } else {
+      result.remove(JsonKey.USER_TYPE);
+      result.remove(JsonKey.USER_SUB_TYPE);
+      result.remove(JsonKey.LOCATION_IDS);
+    }
+    result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
     result.put(JsonKey.PROFILE_LOCATION, userLocList);
-    result.put(JsonKey.LOCATION_IDS, locationIds);
   }
 
   private void appendMinorFlag(Map<String, Object> result) {

@@ -236,7 +236,7 @@ public class UserControllerTest extends BaseApplicationTest {
     Result result =
         performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
-    assertEquals(getResponseStatus(result), 200);
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
@@ -302,7 +302,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testUserExistsWithValidEmail() {
     Result result = performTest(USER_EXISTS_API.concat("email/demo@gmail.com"), "GET", null);
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
-    assertEquals(getResponseStatus(result), 200);
+    assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test

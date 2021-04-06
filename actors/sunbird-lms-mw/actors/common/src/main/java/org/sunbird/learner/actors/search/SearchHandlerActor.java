@@ -143,6 +143,7 @@ public class SearchHandlerActor extends BaseActor {
             userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
             userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
             userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
+            userMap.putAll(Util.getUserDefaultValue());
           } else {
             userMap.put(JsonKey.USER_TYPE, null);
             userMap.put(JsonKey.USER_SUB_TYPE, null);
@@ -154,8 +155,11 @@ public class SearchHandlerActor extends BaseActor {
                 userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
           }
           userMap.put(JsonKey.LOCATION_IDS, locationIds);
+        } else {
+          userMap.remove(JsonKey.USER_TYPE);
+          userMap.remove(JsonKey.USER_SUB_TYPE);
+          userMap.remove(JsonKey.LOCATION_IDS);
         }
-        userMap.putAll(Util.getUserDefaultValue());
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
