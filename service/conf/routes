@@ -12,7 +12,7 @@ POST  /v4/user/create                   @controllers.usermanagement.UserControll
 POST  /v1/manageduser/create		    @controllers.usermanagement.UserController.createUserV4V2(request: play.mvc.Http.Request)
 POST  /v1/user/signup                   @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 POST  /v2/user/signup                   @controllers.usermanagement.UserController.createUserV3V2(request: play.mvc.Http.Request)
-PATCH /v1/user/update					                      @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
+PATCH /v1/user/update					              @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
 PATCH /v2/user/update					                      @controllers.usermanagement.UserController.updateUserV2(request: play.mvc.Http.Request)
 
 GET  	/v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
