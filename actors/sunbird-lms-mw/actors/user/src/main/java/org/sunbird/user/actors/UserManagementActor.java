@@ -1,4 +1,5 @@
 package org.sunbird.user.actors;
+
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
@@ -77,9 +78,6 @@ import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.Tuple2;
 import scala.concurrent.Future;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
-
 
 @ActorConfig(
         tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
@@ -104,7 +102,6 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
           UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -134,6 +131,7 @@ public class UserManagementActor extends BaseActor {
         onReceiveUnsupportedOperation("UserManagementActor");
     }
   }
+
   /**
    * This method will create user in user in cassandra and update to ES as well at same time.
    *
@@ -141,8 +139,13 @@ public class UserManagementActor extends BaseActor {
    */
   private void createUserV3(Request actorMessage) {
     logger.info(
-            actorMessage.getRequestContext(), "UserManagementActor:createUserV3 method called.");
-    createUserV3_V4(actorMessage, false);
+        actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
+    Map<String, Object> userMap = actorMessage.getRequest();
+    if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2)) {
+      userMap.remove(JsonKey.LOCATION_CODES);
+      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+      userMap.remove(JsonKey.PROFILE_LOCATION);
+    }    createUserV3_V4(actorMessage, false);
   }
   /**
    * This method will create managed user in user in cassandra and update to ES as well at same
@@ -154,15 +157,10 @@ public class UserManagementActor extends BaseActor {
   private void createUserV4(Request actorMessage) {
     logger.info(
             actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
-    Map<String, Object> userMap = actorMessage.getRequest();
-     if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2)) {
-      userMap.remove(JsonKey.LOCATION_CODES);
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-    }
     validateLocationCodes(actorMessage);
     createUserV3_V4(actorMessage, true);
   }
+
   private void createUserV3_V4(Request actorMessage, boolean isV4) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
@@ -174,6 +172,7 @@ public class UserManagementActor extends BaseActor {
             (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
                     ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
                     : "";
+
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
     String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
@@ -188,6 +187,7 @@ public class UserManagementActor extends BaseActor {
       // If user account isManagedUser (managedBy passed in request) should be same as context
       // user_id
       userService.validateUserId(actorMessage, managedBy, actorMessage.getRequestContext());
+
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
@@ -202,11 +202,11 @@ public class UserManagementActor extends BaseActor {
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
       }
-
       profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
   }
+
   private void cacheFrameworkFieldsConfig(RequestContext context) {
     if (MapUtils.isEmpty(DataCacheHandler.getFrameworkFieldsConfig())) {
       Map<String, List<String>> frameworkFieldsConfig =
@@ -219,6 +219,7 @@ public class UserManagementActor extends BaseActor {
       DataCacheHandler.setFrameworkFieldsConfig(frameworkFieldsConfig);
     }
   }
+
   @SuppressWarnings("unchecked")
   private void updateUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
@@ -227,26 +228,28 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
+    String version= (String) actorMessage.getContext().get(JsonKey.VERSION);
+    if(version=="v2")
+    {
+      if(userMap.containsKey(JsonKey.USER_TYPE)){
+        userMap.remove(JsonKey.USER_TYPE);
+      }
+      userMap.remove(JsonKey.LOCATION_CODES);
+      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+      userMap.remove(JsonKey.PROFILE_LOCATION);
+
+    }else
+    {
+      if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){
+        userMap.remove(JsonKey.PROFILE_USERTYPE);
+      }
+    }
     validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
             UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    if(actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2) )    {
-      if(userMap.containsKey(JsonKey.USER_TYPE)){
-        userMap.remove(JsonKey.USER_TYPE);//subtype also to be given after review
-      }
-      userMap.remove(JsonKey.LOCATION_CODES);//ask if needed
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-    }else
-    {
-      if(userMap.containsKey(JsonKey.PROFILE_USERTYPE)){//check if needed
-        userMap.remove(JsonKey.PROFILE_USERTYPE);
-      }
-    }
     validateUserTypeAndSubType(
             actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -254,6 +257,7 @@ public class UserManagementActor extends BaseActor {
     } else {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
     }
+
     validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));
@@ -288,6 +292,7 @@ public class UserManagementActor extends BaseActor {
             && !requestMap.containsKey(JsonKey.USER_SUB_TYPE)) {
       requestMap.put(JsonKey.USER_SUB_TYPE, null);
     }
+
     Map<String, Boolean> userBooleanMap =
             updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
     int userFlagValue = userFlagsToNum(userBooleanMap);
@@ -300,6 +305,7 @@ public class UserManagementActor extends BaseActor {
       requestMap.put(JsonKey.MANAGED_BY, null);
       resetPasswordLink = true;
     }
+
     Response response =
             cassandraOperation.updateRecord(
                     usrDbInfo.getKeySpace(),
@@ -359,6 +365,7 @@ public class UserManagementActor extends BaseActor {
     TelemetryUtil.telemetryProcessingCall(
             userMap, targetObject, correlatedObject, actorMessage.getContext());
   }
+
   private void removeUserLookupEntry(
           Map<String, Object> userLookUpData,
           Map<String, Object> userDbRecord,
@@ -382,6 +389,7 @@ public class UserManagementActor extends BaseActor {
       userLookupService.deleteRecords(reqList, requestContext);
     }
   }
+
   private void updateLocationCodeToIds(
           List<Map<String, String>> externalIds, RequestContext context) {
     List<String> locCodeLst = new ArrayList<>();
@@ -415,6 +423,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   /**
    * This method will encrypt the declared-email and declared-phone in external-id-details
    *
@@ -448,6 +457,7 @@ public class UserManagementActor extends BaseActor {
                       break;
                     default: // do nothing
                   }
+
                 } catch (Exception e) {
                   logger.error("Error in encrypting in the external id details", e);
                   throw new ProjectCommonException(
@@ -458,6 +468,7 @@ public class UserManagementActor extends BaseActor {
               });
     }
   }
+
   @SuppressWarnings("unchecked")
   private void updateUserOrganisations(Request actorMessage) {
     logger.info(
@@ -475,10 +486,12 @@ public class UserManagementActor extends BaseActor {
       if (CollectionUtils.isNotEmpty(orgListDb)) {
         orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
       }
+
       for (Map<String, Object> org : orgList) {
         createOrUpdateOrganisations(org, orgDbMap, actorMessage);
         updateUserSelfDeclaredData(actorMessage, org, userId);
       }
+
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
@@ -486,6 +499,7 @@ public class UserManagementActor extends BaseActor {
               "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
     }
   }
+
   private void updateUserSelfDeclaredData(Request actorMessage, Map org, String userId) {
     List<Map<String, Object>> declredDetails =
             userSelfDeclarationDao.getUserSelfDeclaredFields(userId, actorMessage.getRequestContext());
@@ -503,6 +517,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   @SuppressWarnings("unchecked")
   private void createOrUpdateOrganisations(
           Map<String, Object> org, Map<String, Object> orgDbMap, Request actorMessage) {
@@ -514,6 +529,7 @@ public class UserManagementActor extends BaseActor {
               null != org.get(JsonKey.ORGANISATION_ID)
                       ? (String) org.get(JsonKey.ORGANISATION_ID)
                       : (String) org.get(JsonKey.ID);
+
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
       if (null != orgId && orgDbMap.containsKey(orgId)) {
@@ -533,6 +549,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   @SuppressWarnings("unchecked")
   private void removeOrganisations(
           Map<String, Object> orgDbMap, String rootOrgId, String requestedBy, RequestContext context) {
@@ -550,6 +567,7 @@ public class UserManagementActor extends BaseActor {
       userOrgDao.updateUserOrg(userOrg, context);
     }
   }
+
   // Check if the user is Custodian Org user
   private boolean isCustodianOrgUser(String userRootOrgId) {
     String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
@@ -558,6 +576,7 @@ public class UserManagementActor extends BaseActor {
     }
     return false;
   }
+
   private void ignoreOrAcceptFrameworkData(
           Map<String, Object> userRequestMap,
           Map<String, Object> userDbRecord,
@@ -569,6 +588,7 @@ public class UserManagementActor extends BaseActor {
       userRequestMap.remove(JsonKey.FRAMEWORK);
     }
   }
+
   @SuppressWarnings("unchecked")
   private void validateUserFrameworkData(
           Map<String, Object> userRequestMap,
@@ -595,6 +615,7 @@ public class UserManagementActor extends BaseActor {
       Map<String, Object> rootOrgMap =
               Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
       String hashtagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
+
       verifyFrameworkId(hashtagId, frameworkIdList, context);
       Map<String, List<Map<String, String>>> frameworkCachedValue =
               getFrameworkDetails(frameworkIdList.get(0), context);
@@ -604,6 +625,7 @@ public class UserManagementActor extends BaseActor {
               .put(JsonKey.ID, frameworkIdList);
     }
   }
+
   private void removeFieldsFrmReq(Map<String, Object> userMap) {
     userMap.remove(JsonKey.ENC_EMAIL);
     userMap.remove(JsonKey.ENC_PHONE);
@@ -616,6 +638,7 @@ public class UserManagementActor extends BaseActor {
     // channel update is not allowed
     userMap.remove(JsonKey.CHANNEL);
   }
+
   /**
    * Method to create the new user , Username should be unique .
    *
@@ -639,8 +662,6 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.ENC_PHONE);
     actorMessage.getRequest().putAll(userMap);
 
-
-
     boolean isCustodianOrg = false;
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -657,6 +678,7 @@ public class UserManagementActor extends BaseActor {
     if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
       String orgId = validateExternalIdAndGetOrgId(userMap, actorMessage.getRequestContext());
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
+
       // Fetch locationids of the suborg and update the location of sso user
       if (!isCustodianOrg) {
         OrgService orgService = OrgServiceImpl.getInstance();
@@ -668,6 +690,7 @@ public class UserManagementActor extends BaseActor {
     }
     processUserRequest(userMap, callerId, actorMessage);
   }
+
   private String validateExternalIdAndGetOrgId(
           Map<String, Object> userMap, RequestContext context) {
     String orgExternalId = (String) userMap.get(JsonKey.ORG_EXTERNAL_ID);
@@ -705,13 +728,12 @@ public class UserManagementActor extends BaseActor {
     userMap.remove(JsonKey.ORG_EXTERNAL_ID);
     return orgId;
   }
+
   private void validateChannelAndOrganisationId(
           Map<String, Object> userMap, RequestContext context) {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    String externalId = (String) userMap.get(JsonKey.EXTERNAL_ORG_ID);
     if (StringUtils.isNotBlank(requestedChannel)) {
       fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
@@ -724,19 +746,6 @@ public class UserManagementActor extends BaseActor {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
-//      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
-//      if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
-//        throw new ProjectCommonException(
-//            ResponseCode.invalidParameterValue.getErrorCode(),
-//            ProjectUtil.formatMessage(
-//                ResponseCode.invalidParameterValue.getErrorMessage(),
-//                requestedChannel,
-//                JsonKey.CHANNEL),
-//            ResponseCode.CLIENT_ERROR.getResponseCode());
-//      }
-      Map<String,Object> org = orgDao.getOrgByExternalId(externalId,channel,context);
-      String rootOrg = (String) org.get(JsonKey.ROOT_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrg);
     }
     Organisation fetchedOrgById = null;
     if (StringUtils.isNotBlank(requestedOrgId)) {
@@ -769,12 +778,14 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   private void throwParameterMismatchException(String... param) {
     ProjectCommonException.throwClientErrorException(
             ResponseCode.parameterMismatch,
             MessageFormat.format(
                     ResponseCode.parameterMismatch.getErrorMessage(), StringFormatter.joinByComma(param)));
   }
+
   private void processUserRequestV3_V4(
           Map<String, Object> userMap,
           String signupType,
@@ -853,6 +864,7 @@ public class UserManagementActor extends BaseActor {
       Future<Boolean> kcFuture =
               Futures.future(
                       new Callable<Boolean>() {
+
                         @Override
                         public Boolean call() {
                           try {
@@ -882,6 +894,7 @@ public class UserManagementActor extends BaseActor {
                       .zip(kcFuture)
                       .map(
                               new Mapper<Tuple2<String, Boolean>, Response>() {
+
                                 @Override
                                 public Response apply(Tuple2<String, Boolean> parameter) {
                                   boolean updatePassResponse = parameter._2;
@@ -899,8 +912,10 @@ public class UserManagementActor extends BaseActor {
                               getContext().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
+
     processTelemetry(userMap, signupType, source, userId, actorMessage.getContext());
   }
+
   private void processTelemetry(
           Map<String, Object> userMap,
           String signupType,
@@ -928,14 +943,18 @@ public class UserManagementActor extends BaseActor {
     } else {
       logger.info("UserManagementActor:processUserRequest: No source found");
     }
+
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
+
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
     cassandraOperation.insertRecord(
             userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
+
     return userOrgMap;
   }
+
   private Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> lookUp = new HashMap<>();
@@ -983,6 +1002,7 @@ public class UserManagementActor extends BaseActor {
     }
     return response;
   }
+
   private Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
     Map<String, Object> userOrgMap = new HashMap<String, Object>();
     userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
@@ -994,6 +1014,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     return userOrgMap;
   }
+
   @SuppressWarnings("unchecked")
   private void processUserRequest(Map<String, Object> userMap, String callerId, Request request) {
     Map<String, Object> requestMap = null;
@@ -1028,6 +1049,7 @@ public class UserManagementActor extends BaseActor {
       response = userService.createUser(requestMap, request.getRequestContext());
       insertIntoUserLookUp(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
+
     } finally {
       if (response == null) {
         response = new Response();
@@ -1063,6 +1085,7 @@ public class UserManagementActor extends BaseActor {
     }
     Response syncResponse = new Response();
     syncResponse.putAll(response.getResult());
+
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
       Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
       Future<Response> future =
@@ -1090,6 +1113,7 @@ public class UserManagementActor extends BaseActor {
     }
     generateUserTelemetry(userMap, request, userId);
   }
+
   private void generateUserTelemetry(Map<String, Object> userMap, Request request, String userId) {
     Request telemetryReq = new Request();
     telemetryReq.getRequest().put("userMap", userMap);
@@ -1098,6 +1122,7 @@ public class UserManagementActor extends BaseActor {
     telemetryReq.setOperation("generateUserTelemetry");
     tellToAnother(telemetryReq);
   }
+
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
     int userFlagValue = 0;
     Set<Map.Entry<String, Boolean>> mapEntry = userBooleanMap.entrySet();
@@ -1108,6 +1133,7 @@ public class UserManagementActor extends BaseActor {
     }
     return userFlagValue;
   }
+
   private void setStateValidation(
           Map<String, Object> requestMap, Map<String, Boolean> userBooleanMap) {
     String rootOrgId = (String) requestMap.get(JsonKey.ROOT_ORG_ID);
@@ -1115,6 +1141,7 @@ public class UserManagementActor extends BaseActor {
     // if the user is creating for non-custodian(i.e state) the value is set as true else false
     userBooleanMap.put(JsonKey.STATE_VALIDATED, !custodianRootOrgId.equals(rootOrgId));
   }
+
   private Map<String, Boolean> updatedUserFlagsMap(
           Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
@@ -1143,6 +1170,7 @@ public class UserManagementActor extends BaseActor {
     userBooleanMap.put(JsonKey.PHONE_VERIFIED, phoneVerified);
     return userBooleanMap;
   }
+
   /**
    * This method set the default value of the user-flag if it is not present in userDbRecord
    *
@@ -1162,6 +1190,7 @@ public class UserManagementActor extends BaseActor {
     }
     return userDbRecord;
   }
+
   @SuppressWarnings("unchecked")
   private void convertValidatedLocationCodesToIDs(
           Map<String, Object> userMap, RequestContext context) {
@@ -1182,6 +1211,7 @@ public class UserManagementActor extends BaseActor {
           logger.error(context, "Exception occurred while mapping", ex);
           ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
         }
+
         userMap.remove(JsonKey.LOCATION_CODES);
       } else {
         ProjectCommonException.throwClientErrorException(
@@ -1193,6 +1223,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   private void sendEmailAndSms(Map<String, Object> userMap, RequestContext context) {
     // sendEmailAndSms
     Request EmailAndSmsRequest = new Request();
@@ -1201,6 +1232,7 @@ public class UserManagementActor extends BaseActor {
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);
   }
+
   private void sendResetPasswordLink(Map<String, Object> userMap, RequestContext context) {
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
@@ -1209,13 +1241,16 @@ public class UserManagementActor extends BaseActor {
             UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);
   }
+
   private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
+
     return esUtil.save(
             ProjectUtil.EsType.user.getTypeName(),
             (String) completeUserMap.get(JsonKey.USER_ID),
             completeUserMap,
             context);
   }
+
   private void saveUserToKafka(Map<String, Object> completeUserMap) {
     ObjectMapper mapper = new ObjectMapper();
     try {
@@ -1226,6 +1261,7 @@ public class UserManagementActor extends BaseActor {
       ex.printStackTrace();
     }
   }
+
   private void saveUserDetailsToEs(Map<String, Object> completeUserMap, RequestContext context) {
     Request userRequest = new Request();
     userRequest.setRequestContext(context);
@@ -1235,6 +1271,7 @@ public class UserManagementActor extends BaseActor {
             context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
+
   private void removeUnwanted(Map<String, Object> reqMap) {
     reqMap.remove(JsonKey.ADDRESS);
     reqMap.remove(JsonKey.EDUCATION);
@@ -1253,6 +1290,7 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
   }
+
   public static void verifyFrameworkId(
           String hashtagId, List<String> frameworkIdList, RequestContext context) {
     List<String> frameworks = DataCacheHandler.getHashtagIdFrameworkIdMap().get(hashtagId);
@@ -1269,6 +1307,7 @@ public class UserManagementActor extends BaseActor {
                 ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
   }
+
   public static Map<String, List<Map<String, String>>> getFrameworkDetails(
           String frameworkId, RequestContext context) {
     if (DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId) == null) {
@@ -1276,6 +1315,7 @@ public class UserManagementActor extends BaseActor {
     }
     return DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId);
   }
+
   @SuppressWarnings("unchecked")
   private static void handleGetFrameworkDetails(String frameworkId, RequestContext context) {
     Map<String, Object> response = ContentStoreUtil.readFramework(frameworkId, context);
@@ -1315,6 +1355,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
     logger.info(
             "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
@@ -1324,6 +1365,7 @@ public class UserManagementActor extends BaseActor {
             MessageFormat.format(
                     ResponseCode.recoveryParamsMatchException.getErrorMessage(), recoveryType, type));
   }
+
   private void validateRecoveryEmailPhone(
           Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
     String userPrimaryPhone = (String) userDbRecord.get(JsonKey.PHONE);
@@ -1341,6 +1383,7 @@ public class UserManagementActor extends BaseActor {
     validatePrimaryEmailOrPhone(userDbRecord, userReqMap);
     validatePrimaryAndRecoveryKeys(userReqMap);
   }
+
   private void validatePrimaryEmailOrPhone(
           Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
     String userPrimaryPhone = (String) userReqMap.get(JsonKey.PHONE);
@@ -1356,6 +1399,7 @@ public class UserManagementActor extends BaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
   }
+
   private void validatePrimaryAndRecoveryKeys(Map<String, Object> userReqMap) {
     String userPhone = (String) userReqMap.get(JsonKey.PHONE);
     String userEmail = (String) userReqMap.get(JsonKey.EMAIL);
@@ -1370,6 +1414,7 @@ public class UserManagementActor extends BaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
   }
+
   /**
    * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from
    * admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
@@ -1379,13 +1424,16 @@ public class UserManagementActor extends BaseActor {
   private void getManagedUsers(Request request) {
     // LUA uuid/ManagedBy Id
     String uuid = (String) request.get(JsonKey.ID);
+
     boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
+
     Map<String, Object> searchResult =
             userClient.searchManagedUser(
                     getActorRef(ActorOperations.USER_SEARCH.getValue()),
                     request,
                     request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
+
     List<Map<String, Object>> activeUserList = null;
     if (CollectionUtils.isNotEmpty(userList)) {
       activeUserList =
@@ -1477,6 +1525,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
   }
+
   private void validateUserTypeAndSubType(
           Map<String, Object> userMap, RequestContext context, String stateCode) {
     String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
@@ -1569,6 +1618,7 @@ public class UserManagementActor extends BaseActor {
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
   }
+
   /**
    * This method will validate location type
    *
@@ -1585,6 +1635,7 @@ public class UserManagementActor extends BaseActor {
     }
     return true;
   }
+
   private List<Location> createLocationLists(List<Map<String, String>> locationCodes) {
     List<Location> locations = new ArrayList<>();
     for (Map<String, String> locationMap : locationCodes) {
@@ -1614,6 +1665,7 @@ public class UserManagementActor extends BaseActor {
         logger.error(requestContext, "Exception occurred while mapping", ex);
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
+
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
     }
