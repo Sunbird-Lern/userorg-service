@@ -50,6 +50,7 @@ public class OrgDaoImpl implements OrgDao {
               "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
       }
+      orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
       orgMap.remove(JsonKey.CONTACT_DETAILS);
       return orgMap;
     }
