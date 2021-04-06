@@ -34,6 +34,23 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateCreateUserRequest(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> createUserV3(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.CREATE_USER_V3.getValue(),
@@ -50,21 +67,21 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-    public CompletionStage<Result> createUserV3V2(Http.Request httpRequest)  {
-        return handleRequest(
-                ActorOperations.CREATE_USER_V3.getValue(),
-                httpRequest.body().asJson(),
-                req -> {
-                    Request request = (Request) req;
-                    new UserRequestValidator().validateUserCreateV3(request);
-                    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-                    return null;
-                },
-                null,
-                null,
-                true,
-                httpRequest);
-    }
+  public CompletionStage<Result> createUserV3V2(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_USER_V3.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV3(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 
   public CompletionStage<Result> createUserV4(Http.Request httpRequest) {
     return handleRequest(
@@ -82,22 +99,21 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-    public CompletionStage<Result> createUserV4V2(Http.Request httpRequest) {
-        return handleRequest(
-                ActorOperations.CREATE_USER_V4.getValue(),
-                httpRequest.body().asJson(),
-                req -> {
-                    Request request = (Request) req;
-                    new UserRequestValidator().validateUserCreateV4(request);
-                    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-                    return null;
-
-                },
-                null,
-                null,
-                true,
-                httpRequest);
-    }
+  public CompletionStage<Result> createUserV4V2(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_USER_V4.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV4(request);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
 
@@ -122,30 +138,29 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-    public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
+  public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
 
-        return handleRequest(
-                ActorOperations.UPDATE_USER.getValue(),
-                httpRequest.body().asJson(),
-                req -> {
-                    Request request = (Request) req;
-                    request
-                            .getContext()
-                            .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
-                    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
-                    new UserRequestValidator().validateUpdateUserRequest(request);
-                    request
+    return handleRequest(
+        ActorOperations.UPDATE_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request
+              .getContext()
+              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+          new UserRequestValidator().validateUpdateUserRequest(request);
+          request
+              .getContext()
+              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
 
-                            .getContext()
-                            .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
-
-                    return null;
-                },
-                null,
-                null,
-                true,
-                httpRequest);
-    }
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 
   public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
     return handleGetUserProfileV3(
