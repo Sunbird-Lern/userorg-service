@@ -3,6 +3,7 @@ package controllers.organisationmanagement;
 import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.request.BaseRequestValidator;
 import org.sunbird.common.request.Request;
@@ -66,6 +67,23 @@ public class OrgController extends BaseController {
         httpRequest.body().asJson(),
         orgRequest -> {
           new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(httpRequest),
+        EsType.organisation.getTypeName(),
+        httpRequest);
+  }
+
+  public CompletionStage<Result> searchV2(Http.Request httpRequest) {
+    return handleSearchRequest(
+        ActorOperations.ORG_SEARCH.getValue(),
+        httpRequest.body().asJson(),
+        orgRequest -> {
+          Request request = (Request) orgRequest;
+          new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
+          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
         null,

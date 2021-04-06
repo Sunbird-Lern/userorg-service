@@ -166,6 +166,7 @@ public class SearchHandlerActor extends BaseActor {
 
   private void handleOrgSearchAsyncRequest(
       String indexType, Map<String, Object> searchQueryMap, Request request) {
+    String version = (String) request.getContext().get(JsonKey.VERSION);
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
     if (filterMap.containsKey(JsonKey.IS_SCHOOL)) {
@@ -194,7 +195,9 @@ public class SearchHandlerActor extends BaseActor {
                     .stream()
                     .forEach(
                         org -> {
-                          org.putAll(orgDefaultFieldValue);
+                          if (version != JsonKey.VERSION_2) {
+                            org.putAll(orgDefaultFieldValue);
+                          }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))
                               || (CollectionUtils.isEmpty(fields))) {
