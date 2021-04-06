@@ -135,6 +135,7 @@ public class UserController extends BaseController {
                     request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
                     new UserRequestValidator().validateUpdateUserRequest(request);
                     request
+
                             .getContext()
                             .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
 
