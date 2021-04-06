@@ -664,7 +664,6 @@ public class UserManagementActor extends BaseActor {
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
-
     profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
     userMap.remove(JsonKey.ENC_EMAIL);
@@ -743,8 +742,6 @@ public class UserManagementActor extends BaseActor {
     String requestedOrgId = (String) userMap.get(JsonKey.ORGANISATION_ID);
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    String externalId = (String) userMap.get(JsonKey.EXTERNAL_ORG_ID);
     if (StringUtils.isNotBlank(requestedChannel)) {
       fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
