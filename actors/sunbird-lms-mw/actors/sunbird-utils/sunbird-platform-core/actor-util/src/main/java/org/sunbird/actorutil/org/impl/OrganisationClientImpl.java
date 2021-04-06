@@ -160,6 +160,7 @@ public class OrganisationClientImpl implements OrganisationClient {
     List<Map<String, Object>> list = (List<Map<String, Object>>) esResponse.get(JsonKey.CONTENT);
     if (!list.isEmpty()) {
       map = list.get(0);
+      map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
       organisation = objectMapper.convertValue(map, Organisation.class);
     }
     return organisation;
