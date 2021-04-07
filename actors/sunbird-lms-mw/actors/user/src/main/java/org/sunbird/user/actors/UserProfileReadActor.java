@@ -171,6 +171,7 @@ public class UserProfileReadActor extends BaseActor {
                     actorMessage.getRequestContext(),
                     "UserProfileReadActor:handle user profile read async call ");
                 result.put(JsonKey.ROOT_ORG, responseMap);
+                responseMap.putAll(Util.getOrgDefaultValue());
                 result.putAll(Util.getUserDefaultValue());
                 Response response = new Response();
                 handleUserCallAsync(result, response, actorMessage);
@@ -486,6 +487,7 @@ public class UserProfileReadActor extends BaseActor {
                         ElasticSearchHelper.getResponseFromFuture(
                             fetchRootAndRegisterOrganisation(
                                 parameter, actorMessage.getRequestContext()));
+                esOrgMap.putAll(Util.getOrgDefaultValue());
                 return esOrgMap;
               }
             },
@@ -508,6 +510,7 @@ public class UserProfileReadActor extends BaseActor {
                         .equalsIgnoreCase(requestedById))) {
                       userMap = removeUserPrivateField(userMap);
                     }
+                    userMap.putAll(Util.getUserDefaultValue());
                     return userMap;
                   }
                 },
