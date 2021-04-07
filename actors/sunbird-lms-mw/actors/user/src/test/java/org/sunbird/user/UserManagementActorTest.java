@@ -175,15 +175,23 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
+  public void testCreateUserV4SuccessWithoutUserCallerIdChannelAndRootOrgId() {
+
+    boolean result =
+        testScenario(getRequest(false, false, true, reqMap, ActorOperations.CREATE_USER_V4), null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateUserFailureWithInvalidChannelAndOrgId() {
 
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
-    reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
+    //    reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
-            ResponseCode.parameterMismatch);
+            ResponseCode.invalidChannel);
     assertTrue(result);
   }
 
@@ -193,6 +201,19 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.USER_TYPE, "userType");
     reqMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("anyLocationCodes"));
+    boolean result =
+        testScenario(
+            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER),
+            ResponseCode.CLIENT_ERROR);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserFailureWithInvalidProfileUsertype() {
+
+    reqMap.put(JsonKey.USER_TYPE, "userType");
+    reqMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
+    reqMap.put(JsonKey.PROFILE_USERTYPE, Arrays.asList("anyLocationCodes"));
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER),
