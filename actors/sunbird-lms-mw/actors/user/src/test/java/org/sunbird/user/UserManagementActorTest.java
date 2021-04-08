@@ -19,7 +19,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
@@ -152,12 +151,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testCreateUserSuccessWithOrgExternalId() throws Exception {
-    OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-    whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
-    when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn("");
+  public void testCreateUserSuccessWithOrgExternalId() {
     reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
         testScenario(
@@ -356,7 +350,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testUpdateUserSuccessWithLocationSchool() {
+  public void testUpdateUserFailureWithLocationSchool() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
@@ -369,7 +363,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
                 true,
                 getUpdateRequestWithLocationCodeSchoolAsOrgExtId(),
                 ActorOperations.UPDATE_USER),
-            null);
+            ResponseCode.invalidParameterValue);
     assertTrue(result);
   }
 
