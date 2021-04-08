@@ -494,13 +494,15 @@ public final class Util {
   }
 
   public static Map<String, Object> getOrgDetails(String identifier, RequestContext context) {
-    DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Response response =
-        cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier, context);
-    List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (null != res && !res.isEmpty()) {
-      return res.get(0);
+    if (StringUtils.isNotBlank(identifier)) {
+      DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
+      Response response =
+          cassandraOperation.getRecordById(
+              orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier, context);
+      List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      if (null != res && !res.isEmpty()) {
+        return res.get(0);
+      }
     }
     return Collections.emptyMap();
   }
