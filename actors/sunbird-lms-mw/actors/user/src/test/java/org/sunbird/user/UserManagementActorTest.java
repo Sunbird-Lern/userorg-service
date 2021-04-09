@@ -200,6 +200,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.USER_TYPE, "anyUserType");
     reqMap.put(JsonKey.USER_SUB_TYPE, "anyUserSubType");
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("LocationCodes"));
+    reqMap.put(JsonKey.PROFILE_USERTYPE, Arrays.asList("userType"));
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
@@ -439,7 +440,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(true);
   }
 
-  // @Test
+  @Test
   public void testCreateUserFailureWithManagedUserLimit() {
     Map<String, Object> reqMap = getUserOrgUpdateRequest(true);
     getUpdateRequestWithDefaultFlags(reqMap);
