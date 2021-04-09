@@ -41,15 +41,6 @@ public interface UserDao {
   Response updateUser(Map<String, Object> userMap, RequestContext context);
 
   /**
-   * This method will search user from ES and return list of user details matching filter criteria.
-   *
-   * @param searchQueryMap search query for ES as a Map.
-   * @param context
-   * @return List<User> List of user.
-   */
-  List<User> searchUser(Map<String, Object> searchQueryMap, RequestContext context);
-
-  /**
    * This method will user based on userId and return user if found else throw
    * ProjectCommonException.
    *

@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +32,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import scala.concurrent.Promise;
@@ -124,6 +127,38 @@ public class EsSyncBackgroundActorTest {
   }
 
   @Test
+  public void testSyncUser() {
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetOrgRecord());
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.FIRST_NAME, "firstName");
+    when(Util.getUserDetails(Mockito.anyString(), Mockito.any())).thenReturn(user);
+    Promise<String> esPromise = Futures.promise();
+    esPromise.success("success");
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(esPromise.future());
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
   public void testSyncOrgFailure() {
     Response response = cassandraGetOrgRecord();
     Map<String, Object> org =
@@ -159,7 +194,6 @@ public class EsSyncBackgroundActorTest {
     map.put(JsonKey.ORG_TYPE, "type");
     map.put(JsonKey.ORG_NAME, "name");
     map.put(JsonKey.CHANNEL, "ch");
-    map.put(JsonKey.ADDRESS_ID, "454981351");
     map.put(
         JsonKey.ORG_LOCATION,
         "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");

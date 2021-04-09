@@ -1,6 +1,5 @@
 package modules;
 
-import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
@@ -12,13 +11,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -38,7 +32,6 @@ public class OnRequestHandler implements ActionCreator {
 
   private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
   private ObjectMapper mapper = new ObjectMapper();
-  private static String custodianOrgHashTagId;
   public static boolean isServiceHealthy = true;
 
   @Override
@@ -51,6 +44,9 @@ public class OnRequestHandler implements ActionCreator {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
     }
+    logger.info("Original Url: " + request.uri());
+    logger.info("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
+
     return new Action.Simple() {
       @Override
       public CompletionStage<Result> call(Http.Request request) {
@@ -150,7 +146,8 @@ public class OnRequestHandler implements ActionCreator {
       if (optionalChannel.isPresent()) {
         channel = optionalChannel.get();
       } else {
-        String custodianOrgHashTagid = getCustodianOrgHashTagId();
+        String custodianOrgHashTagid =
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
         channel =
             (StringUtils.isNotEmpty(custodianOrgHashTagid))
                 ? custodianOrgHashTagid
@@ -217,32 +214,6 @@ public class OnRequestHandler implements ActionCreator {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     return request;
-  }
-
-  private static String getCustodianOrgHashTagId() {
-    if (custodianOrgHashTagId != null) {
-      return custodianOrgHashTagId;
-    }
-    synchronized (OnRequestHandler.class) {
-      if (custodianOrgHashTagId == null) {
-        try {
-          // Get hash tag ID of custodian org
-          OrganisationClient orgClient = new OrganisationClientImpl();
-          ActorRef orgActorRef = RequestRouter.getActor(ActorOperations.GET_ORG_DETAILS.getValue());
-          custodianOrgHashTagId =
-              orgClient
-                  .getOrgById(
-                      orgActorRef,
-                      DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID),
-                      null)
-                  .getHashTagId();
-        } catch (ProjectCommonException e) {
-          if (e.getResponseCode() == HttpStatus.SC_NOT_FOUND) custodianOrgHashTagId = "";
-          else throw e;
-        }
-      }
-    }
-    return custodianOrgHashTagId;
   }
 
   private String getEnv(Http.Request request) {

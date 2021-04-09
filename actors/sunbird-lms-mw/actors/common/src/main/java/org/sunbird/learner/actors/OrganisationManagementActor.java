@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -155,37 +156,6 @@ public class OrganisationManagementActor extends BaseActor {
         request.put(JsonKey.STATUS, ProjectUtil.OrgStatus.ACTIVE.getValue());
       }
 
-      if (null != request.get(JsonKey.ADDRESS)) {
-        Map<String, Object> addressReq = (Map<String, Object>) request.get(JsonKey.ADDRESS);
-        request.remove(JsonKey.ADDRESS);
-        // update address if present in request
-        if (MapUtils.isNotEmpty(addressReq)) {
-          String addressId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
-          addressReq.put(JsonKey.ID, addressId);
-          addressReq.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
-
-          if (!(StringUtils.isBlank(createdBy))) {
-            addressReq.put(JsonKey.CREATED_BY, createdBy);
-          }
-          upsertAddress(addressReq);
-          request.put(JsonKey.ADDRESS_ID, addressId);
-          telemetryGenerationForOrgAddress(addressReq, request, false, actorMessage.getContext());
-        }
-      }
-
-      // adding one extra filed for tag.
-      if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
-        request.put(
-            JsonKey.HASHTAGID,
-            validateHashTagId(
-                ((String) request.get(JsonKey.HASHTAGID)),
-                JsonKey.CREATE,
-                "",
-                actorMessage.getRequestContext()));
-      } else {
-        request.put(JsonKey.HASHTAGID, uniqueId);
-      }
-
       if (null != isTenant && isTenant) {
         boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
         request.put(
@@ -206,6 +176,12 @@ public class OrganisationManagementActor extends BaseActor {
       ObjectMapper mapper = new ObjectMapper();
       Organisation org = mapper.convertValue(request, Organisation.class);
       request = mapper.convertValue(org, Map.class);
+      try {
+        String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+        request.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response result =
           cassandraOperation.insertRecord(
               orgDbInfo.getKeySpace(),
@@ -252,51 +228,25 @@ public class OrganisationManagementActor extends BaseActor {
 
   private void createOrgExternalIdRecord(
       String channel, String externalId, String orgId, RequestContext context) {
-    Map<String, Object> orgExtIdRequest = new HashMap<String, Object>();
-    orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
-    orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
-    orgExtIdRequest.put(JsonKey.ORG_ID, orgId);
-    cassandraOperation.insertRecord(
-        JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
+    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
+      Map<String, Object> orgExtIdRequest = new WeakHashMap<>(3);
+      orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
+      orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
+      orgExtIdRequest.put(JsonKey.ORG_ID, orgId);
+      cassandraOperation.insertRecord(
+          JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
+    }
   }
 
   private void deleteOrgExternalIdRecord(
       String channel, String externalId, RequestContext context) {
-    Map<String, String> orgExtIdRequest = new HashMap<String, String>();
-    orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
-    orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
-    cassandraOperation.deleteRecord(
-        JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
-  }
-
-  private String validateHashTagId(
-      String hashTagId, String opType, String orgId, RequestContext context) {
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.HASHTAGID, hashTagId);
-    SearchDTO searchDto = new SearchDTO();
-    searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Future<Map<String, Object>> resultF =
-        esService.search(searchDto, ProjectUtil.EsType.organisation.getTypeName(), context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    List<Map<String, Object>> dataMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-    if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-      if (!dataMapList.isEmpty()) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidHashTagId.getErrorCode(),
-            ResponseCode.invalidHashTagId.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    } else if (opType.equalsIgnoreCase(JsonKey.UPDATE) && !dataMapList.isEmpty()) {
-      Map<String, Object> orgMap = dataMapList.get(0);
-      if (!(((String) orgMap.get(JsonKey.ID)).equalsIgnoreCase(orgId))) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidHashTagId.getErrorCode(),
-            ResponseCode.invalidHashTagId.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
+    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
+      Map<String, String> orgExtIdRequest = new WeakHashMap<>(3);
+      orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
+      orgExtIdRequest.put(JsonKey.EXTERNAL_ID, StringUtils.lowerCase(externalId));
+      cassandraOperation.deleteRecord(
+          JsonKey.SUNBIRD, JsonKey.ORG_EXT_ID_DB, orgExtIdRequest, context);
     }
-    return hashTagId;
   }
 
   private void validateOrgType(String orgType, String operation) {
@@ -334,7 +284,6 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> request = actorMessage.getRequest();
       validateOrgRequest(request, actorMessage.getRequestContext());
       Map<String, Object> orgDao;
-      Map<String, Object> updateOrgDao = new HashMap<>();
       String updatedBy = (String) request.get(JsonKey.REQUESTED_BY);
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Response result =
@@ -364,7 +313,7 @@ public class OrganisationManagementActor extends BaseActor {
         sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
         return;
       }
-
+      Map<String, Object> updateOrgDao = new HashMap<>();
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -475,11 +424,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
       Map<String, Object> updateOrgDao = new HashMap<>();
       updateOrgDao.putAll(request);
-      updateOrgDao.remove(JsonKey.ORGANISATION_ID);
       updateOrgDao.remove(JsonKey.ROOT_ORG_ID);
-      updateOrgDao.remove(JsonKey.IS_APPROVED);
-      updateOrgDao.remove(JsonKey.APPROVED_BY);
-      updateOrgDao.remove(JsonKey.APPROVED_DATE);
       updateOrgDao.remove(JsonKey.CONTACT_DETAILS);
       if (JsonKey.BULK_ORG_UPLOAD.equalsIgnoreCase(callerId)) {
         if (null == request.get(JsonKey.STATUS)) {
@@ -490,42 +435,6 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       String updatedBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
-      Map<String, Object> addressReq = null;
-      if (null != request.get(JsonKey.ADDRESS)) {
-        addressReq = (Map<String, Object>) request.get(JsonKey.ADDRESS);
-        request.remove(JsonKey.ADDRESS);
-        boolean isAddressUpdated = false;
-        // update address if present in request
-        if (null != addressReq && addressReq.size() == 1) {
-          if (dbOrgDetails.get(JsonKey.ADDRESS_ID) != null) {
-            String addressId = (String) dbOrgDetails.get(JsonKey.ADDRESS_ID);
-            addressReq.put(JsonKey.ID, addressId);
-            isAddressUpdated = true;
-          }
-          // add new address record
-          else {
-            String addressId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
-            addressReq.put(JsonKey.ID, addressId);
-            dbOrgDetails.put(JsonKey.ADDRESS_ID, addressId);
-          }
-          if (!(StringUtils.isBlank(updatedBy))) {
-            addressReq.put(JsonKey.UPDATED_BY, updatedBy);
-          }
-          upsertAddress(addressReq);
-          telemetryGenerationForOrgAddress(
-              addressReq, dbOrgDetails, isAddressUpdated, actorMessage.getContext());
-        }
-      }
-
-      if (StringUtils.isNotBlank(((String) request.get(JsonKey.HASHTAGID)))) {
-        request.put(
-            JsonKey.HASHTAGID,
-            validateHashTagId(
-                ((String) request.get(JsonKey.HASHTAGID)),
-                JsonKey.UPDATE,
-                orgId,
-                actorMessage.getRequestContext()));
-      }
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -571,7 +480,7 @@ public class OrganisationManagementActor extends BaseActor {
             || StringUtils.isNotBlank(license)) {
           Map<String, Object> tempMap = new HashMap<>();
           tempMap.put(JsonKey.CHANNEL, updateOrgDaoChannel);
-          tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.HASHTAGID));
+          tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.ID));
           tempMap.put(JsonKey.DESCRIPTION, dbOrgDetails.get(JsonKey.DESCRIPTION));
           tempMap.put(JsonKey.LICENSE, license);
           boolean bool = Util.updateChannel(tempMap, actorMessage.getRequestContext());
@@ -585,6 +494,14 @@ public class OrganisationManagementActor extends BaseActor {
       // This will remove all extra unnecessary parameter from request
       Organisation org = mapper.convertValue(updateOrgDao, Organisation.class);
       updateOrgDao = mapper.convertValue(org, Map.class);
+      try {
+        if (CollectionUtils.isNotEmpty(org.getOrgLocation())) {
+          String orgLoc = mapper.writeValueAsString(org.getOrgLocation());
+          updateOrgDao.put(JsonKey.ORG_LOCATION, orgLoc);
+        }
+      } catch (JsonProcessingException e) {
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+      }
       Response response =
           cassandraOperation.updateRecord(
               orgDbInfo.getKeySpace(),
@@ -594,7 +511,10 @@ public class OrganisationManagementActor extends BaseActor {
       response.getResult().put(JsonKey.ORGANISATION_ID, dbOrgDetails.get(JsonKey.ID));
 
       if (StringUtils.isNotBlank(passedExternalId)) {
-        String channel = (String) request.get(JsonKey.CHANNEL);
+        String channel =
+            StringUtils.isNotBlank((String) request.get(JsonKey.CHANNEL))
+                ? (String) request.get(JsonKey.CHANNEL)
+                : (String) dbOrgDetails.get(JsonKey.CHANNEL);
         if (StringUtils.isBlank(existingExternalId)) {
           createOrgExternalIdRecord(
               channel, passedExternalId, orgId, actorMessage.getRequestContext());
@@ -610,25 +530,15 @@ public class OrganisationManagementActor extends BaseActor {
 
       sender().tell(response, self());
 
-      if (null != addressReq) {
-        updateOrgDao.put(JsonKey.ADDRESS, addressReq);
-      }
-
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
-      try {
-        if (updateOrgDao.containsKey(JsonKey.ORG_TYPE)
-            && null != updateOrgDao.get(JsonKey.ORG_TYPE)) {
-          updateOrgDao.put(
-              JsonKey.ORG_TYPE,
-              OrgTypeEnum.getTypeByValue((Integer) updateOrgDao.get(JsonKey.ORG_TYPE)));
-        }
-        if (StringUtils.isNotBlank(orgLocation)) {
+      if (StringUtils.isNotBlank(orgLocation)) {
+        try {
           updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+        } catch (Exception e) {
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-      } catch (Exception e) {
-        logger.info(
-            actorMessage.getRequestContext(),
-            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
 
       Request orgRequest = new Request();
@@ -647,25 +557,6 @@ public class OrganisationManagementActor extends BaseActor {
     }
   }
 
-  private void telemetryGenerationForOrgAddress(
-      Map<String, Object> addressReq,
-      Map<String, Object> orgDao,
-      boolean isAddressUpdated,
-      Map<String, Object> context) {
-
-    String addressState = JsonKey.CREATE;
-    if (isAddressUpdated) {
-      addressState = JsonKey.UPDATE;
-    }
-    Map<String, Object> targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) addressReq.get(JsonKey.ID), JsonKey.ADDRESS, addressState, null);
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    TelemetryUtil.generateCorrelatedObject(
-        (String) orgDao.get(JsonKey.ID), JsonKey.ORGANISATION, null, correlatedObject);
-    TelemetryUtil.telemetryProcessingCall(addressReq, targetObject, correlatedObject, context);
-  }
-
   /** Provides the details of the Organisation */
   private void getOrgDetails(Request actorMessage) {
     actorMessage.toLower();
@@ -677,6 +568,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
 
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
@@ -684,17 +576,11 @@ public class OrganisationManagementActor extends BaseActor {
           ResponseCode.orgDoesNotExist.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
+    result.putAll(Util.getOrgDefaultValue());
     result.remove(JsonKey.CONTACT_DETAILS);
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
-  }
-
-  /** Inserts an address if not present, else updates the existing address */
-  private void upsertAddress(Map<String, Object> addressReq) {
-    Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ADDRESS_DB);
-    cassandraOperation.upsertRecord(
-        orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), addressReq, null);
   }
 
   public void channelMandatoryValidation(Map<String, Object> request) {
@@ -766,35 +652,17 @@ public class OrganisationManagementActor extends BaseActor {
 
   private boolean validateChannelUniqueness(String channel, String orgId, RequestContext context) {
     if (StringUtils.isNotBlank(channel)) {
-      return validateFieldUniqueness(JsonKey.CHANNEL, channel, orgId, context);
+      Map<String, Object> filters = new HashMap<>();
+      filters.put(JsonKey.CHANNEL, channel);
+      filters.put(JsonKey.IS_TENANT, true);
+      return validateChannelUniqueness(filters, orgId, context);
     }
     return (orgId == null);
   }
 
-  private boolean validateChannelExternalIdUniqueness(
-      String channel, String externalId, String orgId, RequestContext context) {
-    OrgExternalService orgExternalService = new OrgExternalService();
-    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
-      String orgIdFromDb =
-          orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-              StringUtils.lowerCase(externalId), StringUtils.lowerCase(channel), context);
-      if (StringUtils.isEmpty(orgIdFromDb)) {
-        return true;
-      } else {
-        if (orgId == null) {
-          return false;
-        }
-        return orgIdFromDb.equalsIgnoreCase(orgId);
-      }
-    }
-    return false;
-  }
-
-  private boolean validateFieldUniqueness(
-      String key, String value, String orgId, RequestContext context) {
-    if (value != null) {
-      Map<String, Object> filters = new HashMap<>();
-      filters.put(key, value);
+  private boolean validateChannelUniqueness(
+      Map<String, Object> filters, String orgId, RequestContext context) {
+    if (MapUtils.isNotEmpty(filters)) {
       SearchDTO searchDto = new SearchDTO();
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
       Future<Map<String, Object>> resultF =
@@ -814,6 +682,25 @@ public class OrganisationManagementActor extends BaseActor {
       }
     }
     return true;
+  }
+
+  private boolean validateChannelExternalIdUniqueness(
+      String channel, String externalId, String orgId, RequestContext context) {
+    OrgExternalService orgExternalService = new OrgExternalService();
+    if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
+      String orgIdFromDb =
+          orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
+              StringUtils.lowerCase(externalId), StringUtils.lowerCase(channel), context);
+      if (StringUtils.isEmpty(orgIdFromDb)) {
+        return true;
+      } else {
+        if (orgId == null) {
+          return false;
+        }
+        return orgIdFromDb.equalsIgnoreCase(orgId);
+      }
+    }
+    return false;
   }
 
   private void validateChannel(Map<String, Object> req, RequestContext context) {
@@ -901,13 +788,6 @@ public class OrganisationManagementActor extends BaseActor {
               map.put(JsonKey.TYPE, location.getType());
               newOrgLocationList.add(map);
             });
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      String orgLoc = mapper.writeValueAsString(newOrgLocationList);
-      request.put(JsonKey.ORG_LOCATION, orgLoc);
-    } catch (JsonProcessingException e) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-    }
   }
 
   private Map<String, Object> getOrgById(String id, RequestContext context) {

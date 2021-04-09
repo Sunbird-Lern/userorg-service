@@ -24,6 +24,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.Promise;
 
@@ -86,6 +87,26 @@ public class UtilTest {
         .thenReturn(promise2.future());
     List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
+  }
+
+  @Test
+  public void testRegisterChannel() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = Util.registerChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
+  }
+
+  @Test
+  public void testUpdateChannel() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = Util.updateChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
   }
 
   public static Map<String, Object> getEsResponseMap() {

@@ -18,7 +18,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
-import org.sunbird.models.organisation.OrgTypeEnum;
 import scala.concurrent.Future;
 
 /**
@@ -147,37 +146,19 @@ public class BackgroundJobManager extends BaseActor {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
         String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
-        try {
-          if (esMap.containsKey(JsonKey.ORG_TYPE) && null != esMap.get(JsonKey.ORG_TYPE)) {
-            esMap.put(
-                JsonKey.ORG_TYPE,
-                OrgTypeEnum.getTypeByValue((Integer) esMap.get(JsonKey.ORG_TYPE)));
-          }
-          if (StringUtils.isNotBlank(orgLocation)) {
+        if (StringUtils.isNotBlank(orgLocation)) {
+          try {
             ObjectMapper mapper = new ObjectMapper();
             esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          } catch (Exception e) {
+            logger.info(
+                actorMessage.getRequestContext(),
+                "Exception occurred while converting orgLocation to List<Map<String,String>>.");
           }
-        } catch (Exception e) {
-          logger.info(
-              actorMessage.getRequestContext(),
-              "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
-
-        if (MapUtils.isNotEmpty((Map<String, Object>) orgMap.get(JsonKey.ADDRESS))) {
-          esMap.put(JsonKey.ADDRESS, orgMap.get(JsonKey.ADDRESS));
-        } else {
-          esMap.put(JsonKey.ADDRESS, new HashMap<>());
-        }
-      }
-      // Register the org into EKStep.
-      String hashOrgId = (String) esMap.getOrDefault(JsonKey.HASH_TAG_ID, "");
-      logger.info(actorMessage.getRequestContext(), "hashOrgId value is ==" + hashOrgId);
-      // Just check it if hashOrgId is null or empty then replace with org id.
-      if (StringUtils.isBlank(hashOrgId)) {
-        hashOrgId = id;
       }
       // making call to register tag
-      registertag(hashOrgId, "{}", headerMap, actorMessage.getRequestContext());
+      registertag(id, "{}", headerMap, actorMessage.getRequestContext());
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.organisation.getTypeName(),
@@ -217,16 +198,22 @@ public class BackgroundJobManager extends BaseActor {
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
-    logger.info(
-        actorMessage.getRequestContext(),
-        "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
-            + userDetails.get(JsonKey.ROOT_ORG_ID));
-    insertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        userId,
-        userDetails,
-        actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(userDetails)) {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
+              + userDetails.get(JsonKey.ROOT_ORG_ID));
+      insertDataToElastic(
+          ProjectUtil.EsIndex.sunbird.getIndexName(),
+          ProjectUtil.EsType.user.getTypeName(),
+          userId,
+          userDetails,
+          actorMessage.getRequestContext());
+    } else {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs invalid userId " + userId);
+    }
   }
 
   /**
@@ -247,18 +234,11 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(
         context,
         "BackgroundJobManager:insertDataToElastic: type = " + type + " identifier = " + identifier);
-    /*
-     * if (type.equalsIgnoreCase(ProjectUtil.EsType.user.getTypeName())) { // now
-     * calculate profile completeness and error filed and store it in ES
-     * ProfileCompletenessService service =
-     * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
-     * service.computeProfile(data); data.putAll(responsemap); }
-     */
     Future<String> responseF = esService.save(type, identifier, data, context);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     logger.info(
         context,
-        "Getting  ********** ES save response for type , identiofier=="
+        "Getting  ********** ES save response for type , identifier == "
             + type
             + "  "
             + identifier

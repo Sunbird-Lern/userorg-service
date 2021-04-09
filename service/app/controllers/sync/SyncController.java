@@ -41,6 +41,7 @@ public class SyncController extends BaseController {
       HashMap<String, Object> map = new HashMap<>();
       map.put(JsonKey.DATA, reqObj.getRequest());
       reqObj.setRequest(map);
+      setContextAndPrintEntryLog(httpRequest, reqObj);
       return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

@@ -273,22 +273,6 @@ public class ProjectUtil {
     }
   }
 
-  public enum AddressType {
-    permanent("permanent"),
-    current("current"),
-    office("office"),
-    home("home");
-    private String typeName;
-
-    private AddressType(String name) {
-      this.typeName = name;
-    }
-
-    public String getTypeName() {
-      return typeName;
-    }
-  }
-
   public static boolean isNull(Object obj) {
     return null == obj ? true : false;
   }
