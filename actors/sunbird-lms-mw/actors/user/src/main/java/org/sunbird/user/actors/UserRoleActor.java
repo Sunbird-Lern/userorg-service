@@ -135,7 +135,7 @@ public class UserRoleActor extends UserBaseActor {
     } else {
       orgMap = orgService.getOrgByExternalIdAndProvider(externalId, provider, context);
       if (MapUtils.isNotEmpty(orgMap)) {
-        requestMap.put(JsonKey.ORGANISATION_ID, orgMap.get(JsonKey.ORGANISATION_ID));
+        requestMap.put(JsonKey.ORGANISATION_ID, orgMap.get(JsonKey.ID));
         hashTagId = (String) orgMap.get(JsonKey.HASHTAGID);
       }
     }

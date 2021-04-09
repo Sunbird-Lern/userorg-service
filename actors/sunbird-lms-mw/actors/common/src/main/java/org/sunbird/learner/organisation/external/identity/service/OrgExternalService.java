@@ -1,5 +1,6 @@
 package org.sunbird.learner.organisation.external.identity.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,14 +11,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.util.Util;
 
 public class OrgExternalService {
-
-  private final String KEYSPACE_NAME = "sunbird";
-  private final String ORG_EXTERNAL_IDENTITY = "org_external_identity";
+  private LoggerUtil logger = new LoggerUtil(OrgDaoImpl.class);
+  private final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private final String ORG_EXTERNAL_IDENTITY = JsonKey.ORG_EXT_ID_DB;
 
   public String getOrgIdFromOrgExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
@@ -51,6 +54,18 @@ public class OrgExternalService {
       if (CollectionUtils.isNotEmpty(orgResList)) {
         Map<String, Object> orgMap = orgResList.get(0);
         if (MapUtils.isNotEmpty(orgMap)) {
+          String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+          if (StringUtils.isNotBlank(orgLocation)) {
+            try {
+              ObjectMapper mapper = new ObjectMapper();
+              orgMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+            } catch (Exception e) {
+              logger.info(
+                  context,
+                  "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+            }
+          }
+          orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
           return orgMap;
         }
       }

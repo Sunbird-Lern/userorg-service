@@ -237,7 +237,7 @@ public class UserManagementActor extends BaseActor {
     updateLocationCodeToIds(
         (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS),
         actorMessage.getRequestContext());
-    UserUtil.validateUserPhoneEmailAndWebPages(
+    UserUtil.validateUserPhoneAndEmailUniqueness(
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
@@ -288,13 +288,26 @@ public class UserManagementActor extends BaseActor {
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
-        Map<String, Object> organisation =
-            orgExternalService.getOrgByOrgExternalIdAndProvider(
+        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+        Organisation organisation =
+            organisationClient.esGetOrgByExternalId(
                 String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
-                String.valueOf(userDbRecord.get(JsonKey.CHANNEL)),
+                null,
                 actorMessage.getRequestContext());
+        Map<String, Object> org =
+            (Map<String, Object>) mapper.convertValue(organisation, Map.class);
         List<Map<String, Object>> orgList = new ArrayList();
-        orgList.add(organisation);
+        if (MapUtils.isNotEmpty(org)) {
+          orgList.add(org);
+        } else {
+          throw new ProjectCommonException(
+              ResponseCode.invalidParameterValue.getErrorCode(),
+              MessageFormat.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                  String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
+                  JsonKey.ORG_EXTERNAL_ID),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
         actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
         actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
         updateUserOrganisations(actorMessage);
@@ -993,7 +1006,7 @@ public class UserManagementActor extends BaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    UserUtil.validateUserPhoneEmailAndWebPages(user, JsonKey.CREATE, request.getRequestContext());
+    UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
     String userId = ProjectUtil.generateUniqueId();
@@ -1437,17 +1450,14 @@ public class UserManagementActor extends BaseActor {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
       if (CollectionUtils.isEmpty(locationCodes)) {
-        String profLoc = (String) userDbRecord.get(JsonKey.PROFILE_LOCATION);
+        // userDbRecord is record from ES , so it contains complete user data and profileLocation as
+        // List<Map<String, String>>
+        List<Map<String, String>> profLocList =
+            (List<Map<String, String>>) userDbRecord.get(JsonKey.PROFILE_LOCATION);
         List<String> locationIds = null;
-        try {
-          List<Map<String, String>> profLocList =
-              mapper.readValue(profLoc, new TypeReference<List<Map<String, String>>>() {});
-          if (CollectionUtils.isNotEmpty(profLocList)) {
-            locationIds =
-                profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-          }
-        } catch (Exception ex) {
-          logger.error(context, "Exception occurred while mapping", ex);
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationIds =
+              profLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
         }
         // Get location code from user records locations Ids
         logger.info(

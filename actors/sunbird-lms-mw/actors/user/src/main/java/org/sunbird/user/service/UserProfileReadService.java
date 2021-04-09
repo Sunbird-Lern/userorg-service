@@ -76,13 +76,17 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage.getRequestContext());
-    result.put(
-        JsonKey.ROOT_ORG,
+    result.putAll(Util.getUserDefaultValue());
+    Map<String, Object> rootOrg =
         orgDao.getOrgById(
-            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext()));
+            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(rootOrg)) {
+      rootOrg.putAll(Util.getOrgDefaultValue());
+    }
+    result.put(JsonKey.ROOT_ORG, rootOrg);
     result.put(
         JsonKey.ORGANISATIONS,
-        fetchUserOrgList((String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext()));
+        fetchUserOrgList((String) result.get(JsonKey.ID), actorMessage.getRequestContext()));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -134,6 +138,7 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    result.putAll(Util.getUserDefaultValue());
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
@@ -143,10 +148,12 @@ public class UserProfileReadService {
   public void appendUserTypeAndLocation(Map<String, Object> result, RequestContext context) {
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
-      userTypeDetails =
-          mapper.readValue(
-              (String) result.get(JsonKey.PROFILE_USERTYPE),
-              new TypeReference<Map<String, Object>>() {});
+      if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPE))) {
+        userTypeDetails =
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_USERTYPE),
+                new TypeReference<Map<String, Object>>() {});
+      }
     } catch (Exception e) {
       logger.error(context, "Exception because of mapper read value", e);
     }
@@ -162,12 +169,15 @@ public class UserProfileReadService {
     List<Map<String, String>> userLocList = new ArrayList<>();
     List<String> locationIds = new ArrayList<>();
     try {
-      userLocList =
-          mapper.readValue(
-              (String) result.get(JsonKey.PROFILE_LOCATION),
-              new TypeReference<List<Map<String, String>>>() {});
-      if (CollectionUtils.isNotEmpty(userLocList)) {
-        locationIds = userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+      if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_LOCATION))) {
+        userLocList =
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_LOCATION),
+                new TypeReference<List<Map<String, String>>>() {});
+        if (CollectionUtils.isNotEmpty(userLocList)) {
+          locationIds =
+              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        }
       }
     } catch (Exception ex) {
       logger.error(context, "Exception occurred while mapping", ex);

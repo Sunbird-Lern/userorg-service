@@ -461,7 +461,6 @@ public class UserRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    validateLangaugeFields(userRequest);
   }
 
   private void validateUserIdOrExternalId(Request userRequest) {
@@ -482,22 +481,6 @@ public class UserRequestValidator extends BaseRequestValidator {
                       StringFormatter.joinByComma(JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE),
                       JsonKey.EXTERNAL_ID_PROVIDER)))),
           ERROR_CODE);
-    }
-  }
-
-  private void validateLangaugeFields(Request userRequest) {
-    if (userRequest.getRequest().containsKey(JsonKey.LANGUAGE)
-        && null != userRequest.getRequest().get(JsonKey.LANGUAGE)) {
-      if (userRequest.getRequest().get(JsonKey.LANGUAGE) instanceof List
-          && ((List) userRequest.getRequest().get(JsonKey.LANGUAGE)).isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.languageRequired);
-      } else if (!(userRequest.getRequest().get(JsonKey.LANGUAGE) instanceof List)) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LANGUAGE, JsonKey.LIST),
-            ERROR_CODE);
-      }
     }
   }
 

@@ -1,13 +1,10 @@
 package org.sunbird.common.request.orgvalidator;
 
 import java.text.MessageFormat;
-import java.util.Map;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.AddressRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 
@@ -35,12 +32,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     }
     validateTenantOrgChannel(orgRequest);
     validateLicense(orgRequest);
-
-    Map<String, Object> address =
-        (Map<String, Object>) orgRequest.getRequest().get(JsonKey.ADDRESS);
-    if (MapUtils.isNotEmpty(address)) {
-      new AddressRequestValidator().validateAddress(address, JsonKey.ORGANISATION);
-    }
     validateLocationIdOrCode(orgRequest);
   }
 
@@ -78,10 +69,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
 
     validateTenantOrgChannel(request);
     validateLocationIdOrCode(request);
-    Map<String, Object> address = (Map<String, Object>) request.getRequest().get(JsonKey.ADDRESS);
-    if (MapUtils.isNotEmpty(address)) {
-      new AddressRequestValidator().validateAddress(address, JsonKey.ORGANISATION);
-    }
   }
 
   public void validateUpdateOrgStatusRequest(Request request) {
