@@ -32,7 +32,7 @@ public class RequestInterceptor {
 
   static {
     restrictedUriList = new ArrayList<>();
-    //    restrictedUriList.add("/v1/user/update");
+    restrictedUriList.add("/v1/user/update");
     restrictedUriList.add("/v1/note/create");
     restrictedUriList.add("/v1/note/update");
     restrictedUriList.add("/v1/note/search");

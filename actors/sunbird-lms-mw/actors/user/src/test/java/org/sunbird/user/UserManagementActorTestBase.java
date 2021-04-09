@@ -166,6 +166,8 @@ public abstract class UserManagementActorTestBase {
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
     when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
+    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationIdLists());
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
