@@ -218,8 +218,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
-    //    validateUserTypeAndSubType(
-    //        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    validateUserTypeAndSubType(
+        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
@@ -635,7 +635,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
     validateLocationCodes(actorMessage);
-    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
+    //    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
     profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
