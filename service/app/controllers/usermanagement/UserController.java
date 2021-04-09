@@ -90,21 +90,17 @@ public class UserController extends BaseController {
   }
 
   public CompletionStage<Result> getUserByIdV3(String userId, Http.Request httpRequest) {
-    String version = JsonKey.VERSION_3;
     return handleGetUserProfileV3(
         ActorOperations.GET_USER_PROFILE_V3.getValue(),
         ProjectUtil.getLmsUserId(userId),
-        version,
         httpRequest);
   }
 
   // removing deprecating columns
   public CompletionStage<Result> getUserByIdV4(String userId, Http.Request httpRequest) {
-    String version = JsonKey.VERSION_4;
     return handleGetUserProfileV3(
-        ActorOperations.GET_USER_PROFILE_V3.getValue(),
+        ActorOperations.GET_USER_PROFILE_V4.getValue(),
         ProjectUtil.getLmsUserId(userId),
-        version,
         httpRequest);
   }
 
@@ -169,13 +165,12 @@ public class UserController extends BaseController {
   public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
-        ActorOperations.USER_SEARCH.getValue(),
+        ActorOperations.USER_SEARCH_V2.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
           request.getContext().put(JsonKey.FIELDS, requestedFields);
           new BaseRequestValidator().validateSearchRequest(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
         null,
@@ -201,7 +196,7 @@ public class UserController extends BaseController {
   }
 
   private CompletionStage<Result> handleGetUserProfileV3(
-      String operation, String userId, String version, Http.Request httpRequest) {
+      String operation, String userId, Http.Request httpRequest) {
     final boolean isPrivate = httpRequest.path().contains(JsonKey.PRIVATE) ? true : false;
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     final String provider = httpRequest.getQueryString(JsonKey.PROVIDER);
@@ -218,7 +213,6 @@ public class UserController extends BaseController {
           request.getContext().put(JsonKey.WITH_TOKENS, withTokens);
           request.getContext().put(JsonKey.PROVIDER, provider);
           request.getContext().put(JsonKey.ID_TYPE, idType);
-          request.getContext().put(JsonKey.VERSION, version);
           return null;
         },
         userId,

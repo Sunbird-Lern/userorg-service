@@ -36,7 +36,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "orgSearch"},
+  tasks = {"userSearch", "userSearchV2", "orgSearch"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -56,7 +56,8 @@ public class SearchHandlerActor extends BaseActor {
         && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
       handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
@@ -95,8 +96,7 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    String version = (String) request.getContext().get(JsonKey.VERSION);
-    if (version != JsonKey.VERSION_2) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       // checking for Backword compatibility
       backwardCompatibility(searchQueryMap);
     }
@@ -140,7 +140,7 @@ public class SearchHandlerActor extends BaseActor {
         Map<String, Object> userTypeDetail = new HashMap<>();
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
-        if (version != JsonKey.VERSION_2) {
+        if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
           if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
             userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
             userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));

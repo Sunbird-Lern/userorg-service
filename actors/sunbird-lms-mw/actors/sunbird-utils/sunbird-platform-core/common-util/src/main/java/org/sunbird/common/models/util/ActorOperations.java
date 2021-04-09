@@ -10,6 +10,7 @@ public enum ActorOperations {
   CREATE_USER("createUser"),
   UPDATE_USER("updateUser"),
   GET_USER_PROFILE_V3("getUserProfileV3"),
+  GET_USER_PROFILE_V4("getUserProfileV4"),
   CREATE_ORG("createOrg"),
   UPDATE_ORG("updateOrg"),
   UPDATE_ORG_STATUS("updateOrgStatus"),
@@ -84,6 +85,7 @@ public enum ActorOperations {
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
   USER_SEARCH("userSearch"),
+  USER_SEARCH_V2("userSearchV2"),
   ORG_SEARCH("orgSearch"),
   USER_LOOKUP("userLookup"),
   GET_USER_CONSENT("getUserConsent");
