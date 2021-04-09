@@ -36,7 +36,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "orgSearch"},
+  tasks = {"userSearch", "orgSearch", "orgSearchV2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -58,7 +58,8 @@ public class SearchHandlerActor extends BaseActor {
     }
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
-    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
       handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
@@ -166,7 +167,6 @@ public class SearchHandlerActor extends BaseActor {
 
   private void handleOrgSearchAsyncRequest(
       String indexType, Map<String, Object> searchQueryMap, Request request) {
-    String version = (String) request.getContext().get(JsonKey.VERSION);
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
     if (filterMap.containsKey(JsonKey.IS_SCHOOL)) {
@@ -187,16 +187,16 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
-                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
-                getDefaultValues(orgDefaultFieldValue, fields);
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
                     .stream()
                     .forEach(
                         org -> {
-                          if (version != JsonKey.VERSION_2) {
-                            org.putAll(orgDefaultFieldValue);
+                          if (request
+                              .getOperation()
+                              .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
+                            Util.removeUnwantedFields(org);
                           }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))
