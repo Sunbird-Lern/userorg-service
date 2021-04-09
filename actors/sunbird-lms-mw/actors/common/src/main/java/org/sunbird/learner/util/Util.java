@@ -763,9 +763,11 @@ public final class Util {
   }
 
   public static void checkEmailAndPhoneVerified(Map<String, Object> userDetails) {
-    int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
-    Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
-    userDetails.putAll(userFlagMap);
+    if (null != userDetails.get(JsonKey.FLAGS_VALUE)) {
+      int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
+      Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
+      userDetails.putAll(userFlagMap);
+    }
   }
 
   public static void addMaskEmailAndPhone(Map<String, Object> userMap) {
