@@ -492,8 +492,16 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       Select selectQuery = selectBuilder.from(keyspaceName, tableName);
       Where selectWhere = selectQuery.where();
       if (key instanceof String) {
+        if (StringUtils.isBlank(String.valueOf(key))) {
+          logger.info(context, "primary key is empty or null");
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
         selectWhere.and(eq(Constants.IDENTIFIER, key));
       } else if (key instanceof Map) {
+        if (MapUtils.isEmpty((Map) key)) {
+          logger.info(context, "primary composite key is empty or null");
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
         Map<String, Object> compositeKey = (Map<String, Object>) key;
         compositeKey
             .entrySet()
