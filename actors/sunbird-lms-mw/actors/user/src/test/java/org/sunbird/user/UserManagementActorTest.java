@@ -19,7 +19,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
@@ -29,7 +28,7 @@ import scala.concurrent.Future;
 
 public class UserManagementActorTest extends UserManagementActorTestBase {
 
-  //  @Test
+  @Test
   public void testCreateUserSuccessWithUserCallerId() {
     boolean result =
         testScenario(
@@ -38,7 +37,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserSuccessWithIsTenantAsFalse() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -70,7 +69,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserFailureWithInvalidOrgId() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -102,7 +101,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserFailureWithChannelAndOrgIdMismatch2() {
     Organisation organisation = new Organisation();
     organisation.setId("orgId");
@@ -118,7 +117,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserFailureWithChannelAndOrgIdMismatch() {
     Organisation organisation = new Organisation();
     organisation.setId("orgId");
@@ -134,7 +133,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserSuccessWithoutUserCallerId() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -151,13 +150,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
-  public void testCreateUserSuccessWithOrgExternalId() throws Exception {
-    OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-    whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
-    when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn("");
+  @Test
+  public void testCreateUserSuccessWithOrgExternalId() {
     reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
         testScenario(
@@ -187,11 +181,11 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testCreateUserFailureWithInvalidChannelAndOrgId() {
 
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
-    //    reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
+    reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
-            ResponseCode.invalidChannel);
+            ResponseCode.parameterMismatch);
     assertTrue(result);
   }
 
@@ -249,7 +243,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }*/
 
-  //  @Test
+  @Test
   public void testCreateUserSuccessWithoutVersion() {
 
     boolean result =
@@ -403,7 +397,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserSuccessWithUserTypeAsTeacher() {
     reqMap.put(JsonKey.USER_TYPE, "teacher");
 

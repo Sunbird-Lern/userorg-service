@@ -152,8 +152,10 @@ public class EsSyncBackgroundActor extends BaseActor {
         if (MapUtils.isNotEmpty(userDetails)) {
           logger.info(
               context,
-              "EsSyncBackgroundActor:handleUserSyncRequest userRootOrgId "
-                  + userDetails.get(JsonKey.ROOT_ORG_ID));
+              "EsSyncBackgroundActor:handleUserSyncRequest user rootOrgId :"
+                  + userDetails.get(JsonKey.ROOT_ORG_ID)
+                  + ", userId : "
+                  + userDetails.get(JsonKey.ID));
           Future<String> responseF =
               esService.save(
                   ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
