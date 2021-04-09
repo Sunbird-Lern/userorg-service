@@ -81,7 +81,9 @@ public class UserProfileReadService {
         orgDao.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
     rootOrg.putAll(Util.getOrgDefaultValue());
-    result.put(JsonKey.ROOT_ORG, rootOrg);
+    if (version != JsonKey.VERSION_4) {
+      result.put(JsonKey.ROOT_ORG, rootOrg);
+    }
     result.put(
         JsonKey.ORGANISATIONS,
         fetchUserOrgList((String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext()));
