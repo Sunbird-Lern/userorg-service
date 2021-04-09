@@ -635,7 +635,7 @@ public class UserManagementActor extends BaseActor {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
     validateLocationCodes(actorMessage);
-    //    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
+    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
     profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
