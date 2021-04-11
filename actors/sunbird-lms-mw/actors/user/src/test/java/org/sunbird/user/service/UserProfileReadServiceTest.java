@@ -138,6 +138,7 @@ public class UserProfileReadServiceTest {
     resp2.add(userList2);
     resp2.add(userList3);
     response2.put(JsonKey.RESPONSE, resp2);
+    Util.removeUserUnwantedFields(userList2);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response2);
