@@ -168,7 +168,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(
-                false, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V2),
+                false, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_SSO_USER),
             null);
     assertTrue(result);
   }
@@ -185,7 +185,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   public void testCreateUserSuccessWithoutUserCallerIdChannelAndRootOrgIdNewVersion() {
 
     boolean result =
-        testScenario(getRequest(false, false, true, reqMap, ActorOperations.CREATE_USER_V2), null);
+        testScenario(getRequest(false, false, true, reqMap, ActorOperations.CREATE_SSO_USER), null);
     assertTrue(result);
   }
 
@@ -250,7 +250,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.PROFILE_USERTYPE, Arrays.asList("userType"));
     boolean result =
         testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER_V2),
+            getRequest(false, false, false, reqMap, ActorOperations.CREATE_SSO_USER),
             ResponseCode.invalidParameterValue);
     assertTrue(result);
   }
@@ -298,7 +298,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         .thenReturn(future);
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("locationCode"));
     boolean result =
-        testScenario(getRequest(true, true, true, reqMap, ActorOperations.CREATE_USER_V2), null);
+        testScenario(getRequest(true, true, true, reqMap, ActorOperations.CREATE_SSO_USER), null);
     assertTrue(result);
   }
 
@@ -319,7 +319,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.EXTERNAL_IDS, "anyExternalId");
     boolean result =
         testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER_V2),
+            getRequest(false, false, false, reqMap, ActorOperations.CREATE_SSO_USER),
             ResponseCode.dataTypeError);
     assertTrue(result);
   }
@@ -341,7 +341,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.ROLES, "anyRoles");
     boolean result =
         testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER_V2),
+            getRequest(false, false, false, reqMap, ActorOperations.CREATE_SSO_USER),
             ResponseCode.dataTypeError);
     assertTrue(result);
   }
@@ -363,7 +363,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.COUNTRY_CODE, "anyCode");
     boolean result =
         testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER_V2),
+            getRequest(false, false, false, reqMap, ActorOperations.CREATE_SSO_USER),
             ResponseCode.invalidCountryCode);
     assertTrue(result);
   }
@@ -580,7 +580,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(
-                true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V2),
+                true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_SSO_USER),
             null);
     assertTrue(result);
   }

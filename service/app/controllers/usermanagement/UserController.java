@@ -34,9 +34,9 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-  public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
+  public CompletionStage<Result> createSSOUser(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER_V2.getValue(),
+        ActorOperations.CREATE_SSO_USER.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
@@ -66,9 +66,9 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-  public CompletionStage<Result> createUserV3V2(Http.Request httpRequest) {
+  public CompletionStage<Result> createSSUUser(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER_V3_V2.getValue(),
+        ActorOperations.CREATE_SSU_USER.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
@@ -97,9 +97,9 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
-  public CompletionStage<Result> createUserV4V2(Http.Request httpRequest) {
+  public CompletionStage<Result> createManagedUser(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER_V4_V2.getValue(),
+        ActorOperations.CREATE_MANAGED_USER.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;

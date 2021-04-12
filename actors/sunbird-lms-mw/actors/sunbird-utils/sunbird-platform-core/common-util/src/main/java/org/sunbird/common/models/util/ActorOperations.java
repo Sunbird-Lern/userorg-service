@@ -8,7 +8,7 @@ package org.sunbird.common.models.util;
  */
 public enum ActorOperations {
   CREATE_USER("createUser"),
-  CREATE_USER_V2("createUserV2"),
+  CREATE_SSO_USER("createSSOUser"),
   UPDATE_USER("updateUser"),
   UPDATE_USER_V2("updateUserV2"),
   GET_USER_PROFILE_V3("getUserProfileV3"),
@@ -78,9 +78,9 @@ public enum ActorOperations {
   DELETE_USER_FEED("deleteUserFeed"),
   UPDATE_USER_FEED("updateUserFeed"),
   CREATE_USER_V3("createUserV3"),
-  CREATE_USER_V3_V2("createUserV3V2"),
+  CREATE_SSU_USER("createSSUUser"),
   CREATE_USER_V4("createUserV4"),
-  CREATE_USER_V4_V2("createUserV4V2"),
+  CREATE_MANAGED_USER("createManagedUser"),
   ONDEMAND_START_SCHEDULER("onDemandStartScheduler"),
   V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers"),
