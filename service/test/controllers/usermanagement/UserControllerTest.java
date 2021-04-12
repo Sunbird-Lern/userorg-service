@@ -109,6 +109,16 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testCreateUserV2SyncSuccess() {
+    Result result =
+        performTest(
+            "/v1/ssouser/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
   public void testCreateUserV3WithInvalidPassLength() {
     Result result =
         performTest(
@@ -172,6 +182,25 @@ public class UserControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 
+  @Test
+  public void testCreateUserV3V2WithCorrectPass() {
+    Result result =
+        performTest(
+            "/v2/user/signup",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
+  public void testCreateUserV4V2WithCorrectPass() {
+    Result result =
+        performTest(
+            "/v1/manageduser/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
   // @Test
   public void testCreateUserFailureWithoutContentType() {
     String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false, null);
@@ -194,10 +223,21 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testUpdateUserSuccess() {
+  public void testUpdateUserSuccess() throws Exception {
     Result result =
         performTest(
             "/v1/user/update",
+            "PATCH",
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testUpdateUserV2Success() throws Exception {
+    Result result =
+        performTest(
+            "/v2/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
