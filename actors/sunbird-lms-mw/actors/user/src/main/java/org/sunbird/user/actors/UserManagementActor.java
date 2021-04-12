@@ -688,7 +688,6 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
-    //    if (actorMessage.getContext().get(JsonKey.VERSION).equals(JsonKey.VERSION_2))
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_USER_V2.getValue())) {
       userMap.remove(JsonKey.LOCATION_CODES);
       userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
@@ -702,7 +701,7 @@ public class UserManagementActor extends BaseActor {
       }
     }
     validateLocationCodes(actorMessage);
-    //    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
+    validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
     profileUserType(userMap, actorMessage.getRequestContext());
     // remove these fields from req
@@ -745,20 +744,20 @@ public class UserManagementActor extends BaseActor {
     String channel = (String) userMap.get(JsonKey.CHANNEL);
     String orgId =
         orgExternalService.getOrgIdFromOrgExternalIdAndProvider(orgExternalId, channel, context);
-    //    if (StringUtils.isBlank(orgId)) {
-    //      logger.info(
-    //          context,
-    //          "UserManagementActor:createUser: No organisation with orgExternalId = "
-    //              + orgExternalId
-    //              + " and channel = "
-    //              + channel);
-    //      ProjectCommonException.throwClientErrorException(
-    //          ResponseCode.invalidParameterValue,
-    //          MessageFormat.format(
-    //              ResponseCode.invalidParameterValue.getErrorMessage(),
-    //              orgExternalId,
-    //              JsonKey.ORG_EXTERNAL_ID));
-    //    }
+    if (StringUtils.isBlank(orgId)) {
+      logger.info(
+          context,
+          "UserManagementActor:createUser: No organisation with orgExternalId = "
+              + orgExternalId
+              + " and channel = "
+              + channel);
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.invalidParameterValue,
+          MessageFormat.format(
+              ResponseCode.invalidParameterValue.getErrorMessage(),
+              orgExternalId,
+              JsonKey.ORG_EXTERNAL_ID));
+    }
     if (userMap.containsKey(JsonKey.ORGANISATION_ID)
         && !orgId.equals(userMap.get(JsonKey.ORGANISATION_ID))) {
       logger.info(
