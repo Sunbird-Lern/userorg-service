@@ -1,5 +1,6 @@
 package org.sunbird.user;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.*;
 
@@ -36,6 +37,18 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
+  }
+
+  @Test
+  public void testCreateUserSuccessWithUserCallerIgd() {
+    reqMap.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
+    reqMap.put(JsonKey.MANAGED_BY, "48382e16-282c-4eec-854f-c8112e4aefba");
+    boolean result =
+        testScenario(
+            getRequest(
+                true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4_V2),
+            null);
+    assertFalse(result);
   }
 
   @Test
@@ -482,6 +495,24 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
         testScenario(
             getRequest(
                 true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER),
+            null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserSuccessWithLocationCodesNewVersion() {
+    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    when(Patterns.ask(
+            Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
+        .thenReturn(future);
+    boolean result =
+        testScenario(
+            getRequest(
+                true,
+                true,
+                true,
+                getUpdateRequestWithLocationCodes(),
+                ActorOperations.UPDATE_USER_V2),
             null);
     assertTrue(result);
   }
