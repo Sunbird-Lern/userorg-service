@@ -36,13 +36,12 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> createUserV2(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER.getValue(),
+        ActorOperations.CREATE_USER_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           request.getRequest().put("sync", true);
           new UserRequestValidator().validateCreateUserRequest(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
         null,
@@ -69,12 +68,11 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> createUserV3V2(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER_V3.getValue(),
+        ActorOperations.CREATE_USER_V3_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateUserCreateV3(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
         null,
@@ -101,12 +99,11 @@ public class UserController extends BaseController {
 
   public CompletionStage<Result> createUserV4V2(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_USER_V4.getValue(),
+        ActorOperations.CREATE_USER_V4_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           new UserRequestValidator().validateUserCreateV4(request);
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           return null;
         },
         null,
@@ -141,14 +138,13 @@ public class UserController extends BaseController {
   public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
 
     return handleRequest(
-        ActorOperations.UPDATE_USER.getValue(),
+        ActorOperations.UPDATE_USER_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
           request
               .getContext()
               .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
-          request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
           new UserRequestValidator().validateUpdateUserRequest(request);
           request
               .getContext()
