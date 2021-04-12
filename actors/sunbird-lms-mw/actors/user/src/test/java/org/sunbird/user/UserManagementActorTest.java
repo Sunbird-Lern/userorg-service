@@ -1,6 +1,5 @@
 package org.sunbird.user;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.*;
 
@@ -37,18 +36,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
-  }
-
-  @Test
-  public void testCreateUserSuccessWithUserCallerIgd() {
-    reqMap.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
-    reqMap.put(JsonKey.MANAGED_BY, "48382e16-282c-4eec-854f-c8112e4aefba");
-    boolean result =
-        testScenario(
-            getRequest(
-                true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER_V4_V2),
-            null);
-    assertFalse(result);
   }
 
   @Test
