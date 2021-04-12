@@ -1044,7 +1044,7 @@ public final class Util {
     return org;
   }
 
-  public static void removeUnwantedFields(Map<String, Object> org) {
+  public static void removeOrgUnwantedFields(Map<String, Object> org) {
     org.remove("dateTime", null);
     org.remove("preferredLanguage", null);
     org.remove("approvedBy", null);
