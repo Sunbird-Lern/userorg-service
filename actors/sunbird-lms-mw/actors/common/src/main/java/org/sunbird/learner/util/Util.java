@@ -1043,7 +1043,9 @@ public final class Util {
     org.put("orgType", null);
     return org;
   }
-
+  public static void removeUnwantedFields(Map<String, Object> org) {
+    org.remove("locationIds", null);
+  }
   public static void removeOrgUnwantedFields(Map<String, Object> org) {
     org.remove("dateTime", null);
     org.remove("preferredLanguage", null);
