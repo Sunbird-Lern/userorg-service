@@ -1044,7 +1044,25 @@ public final class Util {
     return org;
   }
 
-  public static void removeOrgUnwantedFields(Map<String, Object> rootOrg) {
-    rootOrg.remove("locationIds", null);
+  public static void removeUnwantedFields(Map<String, Object> org) {
+    org.remove("dateTime", null);
+    org.remove("preferredLanguage", null);
+    org.remove("approvedBy", null);
+    org.remove("addressId", null);
+    org.remove("approvedDate", null);
+    org.remove("communityId", null);
+    org.remove("homeUrl", null);
+    org.remove("imgUrl", null);
+    org.remove("isApproved", null);
+    org.remove("locationId", null);
+    org.remove("noOfMembers", null);
+    org.remove("orgCode", null);
+    org.remove("theme", null);
+    org.remove("thumbnail", null);
+    org.remove("isDefault", null);
+    org.remove("parentOrgId", null);
+    org.remove("orgTypeId", null);
+    org.remove("orgType", null);
+    org.remove("locationIds", null);
   }
 }

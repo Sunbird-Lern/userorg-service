@@ -87,6 +87,7 @@ public enum ActorOperations {
   USER_SEARCH("userSearch"),
   USER_SEARCH_V2("userSearchV2"),
   ORG_SEARCH("orgSearch"),
+  ORG_SEARCH_V2("orgSearchV2"),
   USER_LOOKUP("userLookup"),
   GET_USER_CONSENT("getUserConsent");
 
