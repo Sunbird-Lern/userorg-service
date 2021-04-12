@@ -34,6 +34,22 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> createSSOUser(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_SSO_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request.getRequest().put("sync", true);
+          new UserRequestValidator().validateCreateUserRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> createUserV3(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.CREATE_USER_V3.getValue(),
@@ -42,6 +58,21 @@ public class UserController extends BaseController {
           Request request = (Request) req;
           new UserRequestValidator().validateUserCreateV3(request);
           request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_3);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
+  public CompletionStage<Result> createSSUUser(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_SSU_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV3(request);
           return null;
         },
         null,
@@ -66,10 +97,48 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> createManagedUser(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.CREATE_MANAGED_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new UserRequestValidator().validateUserCreateV4(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
 
     return handleRequest(
         ActorOperations.UPDATE_USER.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          request
+              .getContext()
+              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          new UserRequestValidator().validateUpdateUserRequest(request);
+          request
+              .getContext()
+              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
+
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
+
+  public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
+
+    return handleRequest(
+        ActorOperations.UPDATE_USER_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
