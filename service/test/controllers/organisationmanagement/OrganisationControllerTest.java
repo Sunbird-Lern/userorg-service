@@ -169,6 +169,14 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testSearchOrgV2Success() {
+    Result result =
+        performTest("/v2/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testSearchOrgFailureWithoutFilters() {
     Result result = performTest("/v1/org/search", "POST", searchOrganisationRequest(status, null));
     assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
