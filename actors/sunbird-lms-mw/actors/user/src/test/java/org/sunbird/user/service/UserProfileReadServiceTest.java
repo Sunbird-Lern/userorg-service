@@ -138,7 +138,7 @@ public class UserProfileReadServiceTest {
     resp2.add(userList2);
     resp2.add(userList3);
     response2.put(JsonKey.RESPONSE, resp2);
-    Util.removeUserUnwantedFields(userList2);
+    //Util.removeUserUnwantedFields(userList2);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response2);
@@ -170,7 +170,7 @@ public class UserProfileReadServiceTest {
     locIds.add("location1");
     locIds.add("location2");
     org.put(JsonKey.LOCATION_IDS, locIds);
-    Util.removeOrgUnwantedFields(org);
+    //Util.removeOrgUnwantedFields(org);
     List<Map<String, Object>> orgList = new ArrayList<>();
     orgList.add(org);
     Response orgRes = new Response();
