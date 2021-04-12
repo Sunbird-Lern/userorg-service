@@ -288,13 +288,26 @@ public class UserManagementActor extends BaseActor {
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
-        Map<String, Object> organisation =
-            orgExternalService.getOrgByOrgExternalIdAndProvider(
+        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+        Organisation organisation =
+            organisationClient.esGetOrgByExternalId(
                 String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
-                String.valueOf(userDbRecord.get(JsonKey.CHANNEL)),
+                null,
                 actorMessage.getRequestContext());
+        Map<String, Object> org =
+            (Map<String, Object>) mapper.convertValue(organisation, Map.class);
         List<Map<String, Object>> orgList = new ArrayList();
-        orgList.add(organisation);
+        if (MapUtils.isNotEmpty(org)) {
+          orgList.add(org);
+        } else {
+          throw new ProjectCommonException(
+              ResponseCode.invalidParameterValue.getErrorCode(),
+              MessageFormat.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                  String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
+                  JsonKey.ORG_EXTERNAL_ID),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
         actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
         actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
         updateUserOrganisations(actorMessage);

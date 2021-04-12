@@ -77,13 +77,16 @@ public class UserProfileReadService {
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage.getRequestContext());
     result.putAll(Util.getUserDefaultValue());
-    result.put(
-        JsonKey.ROOT_ORG,
+    Map<String, Object> rootOrg =
         orgDao.getOrgById(
-            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext()));
+            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(rootOrg)) {
+      rootOrg.putAll(Util.getOrgDefaultValue());
+    }
+    result.put(JsonKey.ROOT_ORG, rootOrg);
     result.put(
         JsonKey.ORGANISATIONS,
-        fetchUserOrgList((String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext()));
+        fetchUserOrgList((String) result.get(JsonKey.ID), actorMessage.getRequestContext()));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -135,6 +138,7 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    result.putAll(Util.getUserDefaultValue());
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
