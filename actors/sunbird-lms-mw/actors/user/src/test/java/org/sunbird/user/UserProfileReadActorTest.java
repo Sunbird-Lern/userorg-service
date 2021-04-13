@@ -337,37 +337,6 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
-  @Test
-  public void testGetUserProfileV4Failure() throws Exception {
-    Request reqObj = new Request();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.REQUESTED_BY, VALID_USER_ID);
-    innerMap.put(JsonKey.PRIVATE, false);
-    innerMap.put(JsonKey.VERSION, JsonKey.VERSION_4);
-    innerMap.put(JsonKey.PROVIDER, JsonKey.VERSION_2);
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.USER_ID, VALID_USER_ID);
-    reqMap.put(JsonKey.ROOT_ORG_ID, "validRootOrgId");
-    reqObj.setRequest(reqMap);
-    reqObj.setContext(innerMap);
-    reqObj.setOperation(ActorOperations.GET_USER_PROFILE_V4.getValue());
-    setEsResponse(getUserResponseMap());
-
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.USER_ID, VALID_USER_ID);
-
-    UserProfileReadService userProfileReadService = PowerMockito.mock(UserProfileReadService.class);
-    PowerMockito.whenNew(UserProfileReadService.class)
-        .withNoArguments()
-        .thenReturn(userProfileReadService);
-    Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, getUserResponseMap());
-    PowerMockito.when(userProfileReadService.getUserProfileData(reqObj)).thenReturn(response);
-
-    boolean result = testScenario(reqObj, ResponseCode.mandatoryParamsMissing);
-    assertTrue(result);
-  }
-
   // @Test
   public void testGetUserProfileV3SuccessWithFieldDeclaration() {
     Request reqObj = getProfileReadV3request(VALID_USER_ID, JsonKey.EXTERNAL_IDS);
