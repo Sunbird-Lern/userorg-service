@@ -36,7 +36,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "orgSearch", "orgSearchV2"},
+  tasks = {"userSearch", "userSearchV2", "orgSearch", "orgSearchV2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -56,7 +56,8 @@ public class SearchHandlerActor extends BaseActor {
         && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
@@ -96,8 +97,10 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    // checking for Backward compatibility
-    backwardCompatibility(searchQueryMap);
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+      // checking for Backword compatibility
+      backwardCompatibility(searchQueryMap);
+    }
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
@@ -136,26 +139,30 @@ public class SearchHandlerActor extends BaseActor {
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
         Map<String, Object> userTypeDetail = new HashMap<>();
-        if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
-          userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-          userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
-          userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-        } else {
-          userMap.put(JsonKey.USER_TYPE, null);
-          userMap.put(JsonKey.USER_SUB_TYPE, null);
-        }
-        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(
-            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
-          userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-          locationIds =
-              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+          if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+            userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+            userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
+            userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
+            userMap.putAll(Util.getUserDefaultValue());
+          } else {
+            userMap.put(JsonKey.USER_TYPE, null);
+            userMap.put(JsonKey.USER_SUB_TYPE, null);
+          }
+          if (CollectionUtils.isNotEmpty(
+              (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+            userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+            locationIds =
+                userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          }
+          userMap.put(JsonKey.LOCATION_IDS, locationIds);
+        } else {
+          userMap.remove(JsonKey.USER_TYPE);
+          userMap.remove(JsonKey.USER_SUB_TYPE);
+          userMap.remove(JsonKey.LOCATION_IDS);
         }
-        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
-        userMap.put(JsonKey.LOCATION_IDS, locationIds);
-        userMap.putAll(userDefaultFieldValue);
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());

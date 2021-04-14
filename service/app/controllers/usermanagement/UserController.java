@@ -165,6 +165,14 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  // removing deprecating columns
+  public CompletionStage<Result> getUserByIdV4(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV3(
+        ActorOperations.GET_USER_PROFILE_V4.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
@@ -208,6 +216,25 @@ public class UserController extends BaseController {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleSearchRequest(
         ActorOperations.USER_SEARCH.getValue(),
+        httpRequest.body().asJson(),
+        userSearchRequest -> {
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(httpRequest),
+        EsType.user.getTypeName(),
+        httpRequest);
+  }
+
+  // removing the deprecating columns and disabling search with those columns
+  public CompletionStage<Result> searchUserV2(Http.Request httpRequest) {
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    return handleSearchRequest(
+        ActorOperations.USER_SEARCH_V2.getValue(),
         httpRequest.body().asJson(),
         userSearchRequest -> {
           Request request = (Request) userSearchRequest;
