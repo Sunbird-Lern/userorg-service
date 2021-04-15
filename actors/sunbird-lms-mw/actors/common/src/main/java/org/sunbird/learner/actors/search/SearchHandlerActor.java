@@ -162,6 +162,7 @@ public class SearchHandlerActor extends BaseActor {
           userMap.remove(JsonKey.USER_TYPE);
           userMap.remove(JsonKey.USER_SUB_TYPE);
           userMap.remove(JsonKey.LOCATION_IDS);
+          Util.removeUserUnwantedFields(userMap);
         }
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
@@ -203,7 +204,7 @@ public class SearchHandlerActor extends BaseActor {
                           if (request
                               .getOperation()
                               .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-                            Util.removeUnwantedFields(org);
+                            Util.removeOrgUnwantedFields(org);
                           }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))

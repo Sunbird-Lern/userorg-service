@@ -156,7 +156,6 @@ public final class JsonKey {
   public static final String MAP = "map";
   public static final String MASKED_EMAIL = "maskedEmail";
   public static final String MASKED_PHONE = "maskedPhone";
-  public static final String MEDIA_TYPE_DB = "mediaTypeDB";
   public static final String MESSAGE = "message";
   public static final String MESSAGE_ID = "X-msgId";
   public static final String METHOD = "method";
