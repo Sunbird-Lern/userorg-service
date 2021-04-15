@@ -1704,8 +1704,8 @@ public class UserManagementActor extends BaseActor {
         if (CollectionUtils.isNotEmpty(profLocList)) {
           locationCodes =
                   profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+          userMap.put(JsonKey.LOCATION_CODES, locationCodes);
         }
-        userMap.put(JsonKey.LOCATION_CODES, locationCodes);
         userMap.remove(JsonKey.PROFILE_LOCATION);
       }
     }
