@@ -136,59 +136,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Assert.assertNull(exp);
   }
 
-  @Test
-  public void testGetUsernameById() {
-    String result = keyCloakService.getUsernameById("1234-567-890");
-    Assert.assertNotNull(result);
-  }
-
-  @Test
-  public void testUserUpdateTestSuccessWithAllData() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    request.put(JsonKey.FIRST_NAME, userName);
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USERNAME, userName);
-    request.put(JsonKey.PROVIDER, "ntp");
-    String result = keyCloakService.updateUser(request, null);
-    Assert.assertNotNull(result);
-  }
-
-  @Test
-  public void testUpdateUserSuccessWithoutProvider() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    request.put(JsonKey.FIRST_NAME, userName);
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.COUNTRY_CODE, "+91");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USERNAME, userName);
-    String result = keyCloakService.updateUser(request, null);
-    Assert.assertNotNull(result);
-  }
-
-  @Test
-  public void testUpdateUserSuccessWithoutProviderAndCountryCode() {
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    request.put(JsonKey.FIRST_NAME, userName);
-    request.put(JsonKey.PHONE, "9870060000");
-    request.put(JsonKey.EMAIL, userName.substring(0, 10));
-    request.put(JsonKey.USERNAME, userName);
-    String result = keyCloakService.updateUser(request, null);
-    Assert.assertNotNull(result);
-  }
-
-  @Test
-  public void testUpdateUserSuccessWithoutAnyField() {
-
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USER_ID, userId.get(JsonKey.USER_ID));
-    String result = keyCloakService.updateUser(request, null);
-    Assert.assertNotNull(result);
-  }
-
   @Test(expected = ProjectCommonException.class)
   public void testDeactivateUserSuccess() {
 
@@ -213,18 +160,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
         null);
   }
 
-  @Test
-  public void testAddUserLoginTimeSuccess() {
-    boolean response = keyCloakService.addUserLoginTime(userId.get(JsonKey.USER_ID));
-    Assert.assertEquals(true, response);
-  }
-
-  @Test
-  public void testGetLastLoginTimeSuccess() {
-    String lastLoginTime = keyCloakService.getLastLoginTime(userId.get(JsonKey.USER_ID));
-    Assert.assertNull(lastLoginTime);
-  }
-
   @Ignore
   public void testActiveUserSuccess() {
     Map<String, Object> reqMap = new HashMap<>();
@@ -244,45 +179,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
       Assert.assertEquals(ResponseCode.invalidUsrData.getErrorMessage(), e.getMessage());
       Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
     }
-  }
-
-  @Test
-  public void testIsEmailVerifiedSuccess() {
-    boolean response = keyCloakService.isEmailVerified(userId.get(JsonKey.USER_ID));
-    Assert.assertEquals(false, response);
-  }
-
-  @Test
-  public void testSetEmailVerifiedSuccessWithVerifiedFalse() {
-    keyCloakService.setEmailVerifiedAsFalse(userId.get(JsonKey.USER_ID));
-    boolean response = keyCloakService.isEmailVerified(userId.get(JsonKey.USER_ID));
-    Assert.assertNotEquals(true, response);
-  }
-
-  @Test
-  public void testSetEmailVerifiedSuccessWithVerifiedUpdateFalse() {
-    keyCloakService.setEmailVerifiedUpdatedFlag(userId.get(JsonKey.USER_ID), "false");
-    String response = keyCloakService.getEmailVerifiedUpdatedFlag(userId.get(JsonKey.USER_ID));
-    Assert.assertEquals(false + "", response);
-  }
-
-  @Test
-  public void testSetEmailVerifiedTrueSuccessWithVerifiedTrue() {
-    keyCloakService.setEmailVerifiedUpdatedFlag(userId.get(JsonKey.USER_ID), "true");
-    String response = keyCloakService.getEmailVerifiedUpdatedFlag(userId.get(JsonKey.USER_ID));
-    Assert.assertEquals(true + "", response);
-  }
-
-  @Test
-  public void testSetEmailVerifiedSuccessWithVerifiedTrue() {
-    String response = keyCloakService.setEmailVerifiedTrue(userId.get(JsonKey.USER_ID));
-    Assert.assertEquals(JsonKey.SUCCESS, response);
-  }
-
-  @Test
-  public void testDoPasswordUpdateSuccess() {
-    boolean response = keyCloakService.doPasswordUpdate(userId.get(JsonKey.USER_ID), "password");
-    Assert.assertEquals(true, response);
   }
 
   @Test

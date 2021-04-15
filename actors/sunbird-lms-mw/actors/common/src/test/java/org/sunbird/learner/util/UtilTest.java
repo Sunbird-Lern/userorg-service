@@ -24,6 +24,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import scala.concurrent.Promise;
 
@@ -88,9 +89,29 @@ public class UtilTest {
     Assert.assertNotNull(res);
   }
 
+  @Test
+  public void testRegisterChannel() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = Util.registerChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
+  }
+
+  @Test
+  public void testUpdateChannel() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = Util.updateChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
+  }
+
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, true);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     return map;
@@ -99,7 +120,7 @@ public class UtilTest {
   public static Map<String, Map<String, Object>> getEs2ResponseMap() {
     Map<String, Map<String, Object>> map2 = new HashMap<>();
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, true);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     map2.put(JsonKey.RESPONSE, map);

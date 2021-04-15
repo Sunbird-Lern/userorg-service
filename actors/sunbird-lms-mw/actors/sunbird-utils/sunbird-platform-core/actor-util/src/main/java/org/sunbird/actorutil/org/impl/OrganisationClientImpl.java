@@ -129,7 +129,6 @@ public class OrganisationClientImpl implements OrganisationClient {
       // Convert contact details (received from ES) format from map to
       // JSON string (as in Cassandra contact details are stored as text)
       Map<String, Object> map = (Map) response.get(JsonKey.RESPONSE);
-      map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
       organisation = objectMapper.convertValue(map, Organisation.class);
     } else if (obj instanceof ProjectCommonException) {
       throw (ProjectCommonException) obj;
@@ -177,7 +176,6 @@ public class OrganisationClientImpl implements OrganisationClient {
     if (MapUtils.isEmpty(map)) {
       return null;
     } else {
-      map.put(JsonKey.CONTACT_DETAILS, String.valueOf(map.get(JsonKey.CONTACT_DETAILS)));
       return objectMapper.convertValue(map, Organisation.class);
     }
   }
@@ -202,7 +200,6 @@ public class OrganisationClientImpl implements OrganisationClient {
     List<Map<String, Object>> orgMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
     if (CollectionUtils.isNotEmpty(orgMapList)) {
       for (Map<String, Object> orgMap : orgMapList) {
-        orgMap.put(JsonKey.CONTACT_DETAILS, String.valueOf(orgMap.get(JsonKey.CONTACT_DETAILS)));
         orgList.add(objectMapper.convertValue(orgMap, Organisation.class));
       }
       return orgList;

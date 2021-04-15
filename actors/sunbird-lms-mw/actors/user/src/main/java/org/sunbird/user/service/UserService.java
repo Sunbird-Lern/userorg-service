@@ -44,4 +44,7 @@ public interface UserService {
       List<String> encUserNameList, RequestContext context);
 
   Response userLookUpByKey(String key, String value, List<String> fields, RequestContext context);
+
+  Response saveUserAttributes(
+      Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
 }

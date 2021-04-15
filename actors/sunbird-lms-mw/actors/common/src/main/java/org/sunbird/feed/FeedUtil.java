@@ -86,7 +86,7 @@ public class FeedUtil {
     List<Map<String, String>> orgList = new CopyOnWriteArrayList<>();
     Map<String, String> orgMap = new HashMap<>();
     filters.put(JsonKey.CHANNEL, channel);
-    filters.put(JsonKey.IS_ROOT_ORG, true);
+    filters.put(JsonKey.IS_TENANT, true);
     if (!orgIdMap.isEmpty() && orgIdMap.containsKey(channel)) {
       orgMap = (Map<String, String>) orgIdMap.get(channel);
     } else {

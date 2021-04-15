@@ -7,6 +7,6 @@ public interface OrgDao {
 
   Map<String, Object> getOrgById(String orgId, RequestContext context);
 
-  Map<String, Object> esGetOrgByExternalId(
+  Map<String, Object> getOrgByExternalId(
       String externalId, String provider, RequestContext context);
 }

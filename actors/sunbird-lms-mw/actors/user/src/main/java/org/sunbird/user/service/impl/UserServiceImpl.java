@@ -1,6 +1,8 @@
 package org.sunbird.user.service.impl;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -42,8 +45,11 @@ import org.sunbird.user.dao.UserLookupDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class UserServiceImpl implements UserService {
 
@@ -146,7 +152,7 @@ public class UserServiceImpl implements UserService {
   public String getRootOrgIdFromChannel(String channel, RequestContext context) {
 
     Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.IS_ROOT_ORG, true);
+    filters.put(JsonKey.IS_TENANT, true);
     if (StringUtils.isNotBlank(channel)) {
       filters.put(JsonKey.CHANNEL, channel);
     } else {
@@ -465,5 +471,22 @@ public class UserServiceImpl implements UserService {
         .stream()
         .map(p -> new AdminUtilRequestData(parentId, (String) p.get(JsonKey.ID)))
         .collect(Collectors.toList());
+  }
+
+  public Response saveUserAttributes(
+      Map<String, Object> userMap, ActorRef actorRef, RequestContext context) {
+    Request request = new Request();
+    request.setRequestContext(context);
+    request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
+    request.getRequest().putAll(userMap);
+    logger.info(context, "saveUserAttributes");
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      return (Response) Await.result(future, t.duration());
+    } catch (Exception e) {
+      logger.error(context, e.getMessage(), e);
+    }
+    return null;
   }
 }

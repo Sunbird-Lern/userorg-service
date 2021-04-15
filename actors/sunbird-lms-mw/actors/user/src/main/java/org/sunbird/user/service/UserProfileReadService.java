@@ -1,7 +1,9 @@
 package org.sunbird.user.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -73,13 +75,18 @@ public class UserProfileReadService {
     }
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
-    result.put(
-        JsonKey.ROOT_ORG,
+    appendUserTypeAndLocation(result, actorMessage.getRequestContext());
+    result.putAll(Util.getUserDefaultValue());
+    Map<String, Object> rootOrg =
         orgDao.getOrgById(
-            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext()));
+            (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(rootOrg)) {
+      rootOrg.putAll(Util.getOrgDefaultValue());
+    }
+    result.put(JsonKey.ROOT_ORG, rootOrg);
     result.put(
         JsonKey.ORGANISATIONS,
-        fetchUserOrgList((String) result.get(JsonKey.USER_ID), actorMessage.getRequestContext()));
+        fetchUserOrgList((String) result.get(JsonKey.ID), actorMessage.getRequestContext()));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -99,7 +106,6 @@ public class UserProfileReadService {
     }
 
     getManagedToken(actorMessage, userId, result, managedBy);
-
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
         && (userId.equalsIgnoreCase(requestedById) || userId.equalsIgnoreCase(managedForId))
@@ -111,7 +117,16 @@ public class UserProfileReadService {
     if (StringUtils.isNotBlank((String) actorMessage.getContext().get(JsonKey.FIELDS))) {
       addExtraFieldsInUserProfileResponse(result, requestFields, actorMessage.getRequestContext());
     }
+    String encEmail = (String) result.get(JsonKey.EMAIL);
+    String encPhone = (String) result.get(JsonKey.PHONE);
+
     UserUtility.decryptUserDataFrmES(result);
+    // Its used for Private user read api to display encoded email and encoded phone in api response
+    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
+    if (isPrivate) {
+      result.put((JsonKey.ENC_PHONE), encPhone);
+      result.put((JsonKey.ENC_EMAIL), encEmail);
+    }
     updateTnc(result);
     if (null != result.get(JsonKey.ALL_TNC_ACCEPTED)) {
       result.put(
@@ -120,11 +135,69 @@ public class UserProfileReadService {
               (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
     }
     addFlagValue(result);
+    appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    result.putAll(Util.getUserDefaultValue());
+
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
     return response;
+  }
+
+  public void appendUserTypeAndLocation(Map<String, Object> result, RequestContext context) {
+    Map<String, Object> userTypeDetails = new HashMap<>();
+    try {
+      if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPE))) {
+        userTypeDetails =
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_USERTYPE),
+                new TypeReference<Map<String, Object>>() {});
+      }
+    } catch (Exception e) {
+      logger.error(context, "Exception because of mapper read value", e);
+    }
+    if (MapUtils.isNotEmpty(userTypeDetails)) {
+      result.put(JsonKey.USER_TYPE, userTypeDetails.get(JsonKey.TYPE));
+      result.put(JsonKey.USER_SUB_TYPE, userTypeDetails.get(JsonKey.SUB_TYPE));
+    } else {
+      result.put(JsonKey.USER_TYPE, null);
+      result.put(JsonKey.USER_SUB_TYPE, null);
+    }
+    result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
+
+    List<Map<String, String>> userLocList = new ArrayList<>();
+    List<String> locationIds = new ArrayList<>();
+    try {
+      if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_LOCATION))) {
+        userLocList =
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_LOCATION),
+                new TypeReference<List<Map<String, String>>>() {});
+        if (CollectionUtils.isNotEmpty(userLocList)) {
+          locationIds =
+              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        }
+      }
+    } catch (Exception ex) {
+      logger.error(context, "Exception occurred while mapping", ex);
+    }
+    result.put(JsonKey.PROFILE_LOCATION, userLocList);
+    result.put(JsonKey.LOCATION_IDS, locationIds);
+  }
+
+  private void appendMinorFlag(Map<String, Object> result) {
+    String dob = (String) result.get(JsonKey.DOB);
+    if (StringUtils.isNotEmpty(dob)) {
+      int year = Integer.parseInt(dob.split("-")[0]);
+      LocalDate currentdate = LocalDate.now();
+      int currentYear = currentdate.getYear();
+      // reason for keeping 19 instead of 18 is, all dob's will be saving with 12-31 appending to
+      // the year so 18 will be completed in the jan 1st
+      // for eg: 2004-12-31 will become major after 2023 jan 1st.
+      boolean isMinor = (currentYear - year <= 19) ? true : false;
+      result.put(JsonKey.IS_MINOR, isMinor);
+    }
   }
 
   private void addFlagValue(Map<String, Object> userDetails) {
@@ -220,8 +293,6 @@ public class UserProfileReadService {
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
-    responseMap.remove(JsonKey.ENC_EMAIL);
-    responseMap.remove(JsonKey.ENC_PHONE);
     responseMap.remove(JsonKey.ADDRESS);
     return responseMap;
   }
@@ -403,7 +474,7 @@ public class UserProfileReadService {
     if (!StringUtils.isBlank(fields)) {
       result.put(JsonKey.LAST_LOGIN_TIME, Long.parseLong("0"));
       if (fields.contains(JsonKey.TOPIC)) {
-        fetchTopicOfAssociatedOrgs(result, context);
+        result.put(JsonKey.TOPICS, new HashSet<>());
       }
       if (fields.contains(JsonKey.ORGANISATIONS)) {
         updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
@@ -412,15 +483,18 @@ public class UserProfileReadService {
         result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
-        List<Map<String, Object>> userLocations =
-            getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context);
-        if (CollectionUtils.isNotEmpty(userLocations)) {
-          result.put(
-              JsonKey.USER_LOCATIONS,
-              getUserLocations((List<String>) result.get(JsonKey.LOCATION_IDS), context));
-
-          addSchoolLocation(result, context);
-          result.remove(JsonKey.LOCATION_IDS);
+        List<Map<String, String>> userLocList =
+            (List<Map<String, String>>) result.get(JsonKey.PROFILE_LOCATION);
+        if (CollectionUtils.isNotEmpty(userLocList)) {
+          List<String> locationIds =
+              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          List<Map<String, Object>> userLocations = getUserLocations(locationIds, context);
+          if (CollectionUtils.isNotEmpty(userLocations)) {
+            result.put(JsonKey.USER_LOCATIONS, userLocations);
+            addSchoolLocation(result, context);
+            result.remove(JsonKey.LOCATION_IDS);
+            result.remove(JsonKey.PROFILE_LOCATION);
+          }
         }
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
@@ -517,6 +591,7 @@ public class UserProfileReadService {
               JsonKey.ORG_NAME,
               JsonKey.CHANNEL,
               JsonKey.HASHTAGID,
+              JsonKey.ORG_LOCATION,
               JsonKey.LOCATION_IDS,
               JsonKey.ID,
               JsonKey.EXTERNAL_ID);
@@ -539,7 +614,22 @@ public class UserProfileReadService {
 
     Set<String> locationSet = new HashSet<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
-      List<String> locationIds = (List<String>) org.get(JsonKey.LOCATION_IDS);
+      List<String> locationIds = null;
+      try {
+        List<Map<String, String>> orgLocList =
+            mapper.readValue(
+                (String) org.get(JsonKey.ORG_LOCATION),
+                new TypeReference<List<Map<String, String>>>() {});
+        if (CollectionUtils.isNotEmpty(orgLocList)) {
+          locationIds =
+              orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          org.put(JsonKey.ORG_LOCATION, orgLocList);
+        } else {
+          org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
+        }
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred while mapping", ex);
+      }
       if (CollectionUtils.isNotEmpty(locationIds)) {
         locationIds.forEach(
             locId -> {
@@ -548,6 +638,7 @@ public class UserProfileReadService {
               }
             });
       }
+      org.put(JsonKey.LOCATION_IDS, locationIds);
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
@@ -571,6 +662,7 @@ public class UserProfileReadService {
         usrOrg.put(JsonKey.CHANNEL, orgInfo.get(JsonKey.CHANNEL));
         usrOrg.put(JsonKey.HASHTAGID, orgInfo.get(JsonKey.HASHTAGID));
         usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
+        usrOrg.put(JsonKey.ORG_LOCATION, orgInfo.get(JsonKey.ORG_LOCATION));
         usrOrg.put(JsonKey.EXTERNAL_ID, orgInfo.get(JsonKey.EXTERNAL_ID));
         if (MapUtils.isNotEmpty(locationInfoMap)) {
           usrOrg.put(
@@ -591,63 +683,5 @@ public class UserProfileReadService {
       }
     }
     return retList;
-  }
-
-  private void fetchTopicOfAssociatedOrgs(Map<String, Object> result, RequestContext context) {
-    Set<String> topicSet = new HashSet<>();
-    List<Map<String, Object>> userOrgList =
-        (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-    if (CollectionUtils.isNotEmpty(userOrgList)) {
-      List<String> orgIdList =
-          userOrgList
-              .stream()
-              .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
-              .distinct()
-              .collect(Collectors.toList());
-
-      // fetch all org details from cassandra ...
-      if (CollectionUtils.isNotEmpty(orgIdList)) {
-        List<String> orgfields = new ArrayList<>();
-        orgfields.add(JsonKey.ID);
-        orgfields.add(JsonKey.LOCATION_ID);
-        Response userOrgResponse =
-            cassandraOperation.getPropertiesValueById(
-                OrgDb.getKeySpace(), OrgDb.getTableName(), orgIdList, orgfields, context);
-        List<Map<String, Object>> orgResponseList =
-            (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
-
-        if (CollectionUtils.isNotEmpty(orgResponseList)) {
-          List<String> locationIdList = new ArrayList<>();
-          for (Map<String, Object> org : orgResponseList) {
-            String locId = (String) org.get(JsonKey.LOCATION_ID);
-            if (StringUtils.isNotBlank(locId)) {
-              locationIdList.add(locId);
-            }
-          }
-          if (CollectionUtils.isNotEmpty(locationIdList)) {
-            List<String> geoLocationFields = new ArrayList<>();
-            geoLocationFields.add(JsonKey.TOPIC);
-            Util.DbInfo geoLocationDbInfo = Util.dbInfoMap.get(JsonKey.GEO_LOCATION_DB);
-            Response geoLocationResponse =
-                cassandraOperation.getPropertiesValueById(
-                    geoLocationDbInfo.getKeySpace(),
-                    geoLocationDbInfo.getTableName(),
-                    locationIdList,
-                    geoLocationFields,
-                    context);
-            List<Map<String, Object>> geoLocationResponseList =
-                (List<Map<String, Object>>) geoLocationResponse.get(JsonKey.RESPONSE);
-            List<String> topicList =
-                geoLocationResponseList
-                    .stream()
-                    .map(m -> (String) m.get(JsonKey.TOPIC))
-                    .distinct()
-                    .collect(Collectors.toList());
-            topicSet.addAll(topicList);
-          }
-        }
-      }
-    }
-    result.put(JsonKey.TOPICS, topicSet);
   }
 }

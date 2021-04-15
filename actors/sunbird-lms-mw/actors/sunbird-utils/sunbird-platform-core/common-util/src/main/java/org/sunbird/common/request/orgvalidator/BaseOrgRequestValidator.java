@@ -19,16 +19,16 @@ public class BaseOrgRequestValidator extends BaseRequestValidator {
         JsonKey.ORGANISATION_ID);
   }
 
-  public void validateRootOrgChannel(Request request) {
-    if ((null != request.getRequest().get(JsonKey.IS_ROOT_ORG)
-            && (Boolean) request.getRequest().get(JsonKey.IS_ROOT_ORG))
+  public void validateTenantOrgChannel(Request request) {
+    if ((null != request.getRequest().get(JsonKey.IS_TENANT)
+            && (Boolean) request.getRequest().get(JsonKey.IS_TENANT))
         && StringUtils.isEmpty((String) request.getRequest().get(JsonKey.CHANNEL))) {
       throw new ProjectCommonException(
           ResponseCode.dependentParameterMissing.getErrorCode(),
           MessageFormat.format(
               ResponseCode.dependentParameterMissing.getErrorMessage(),
               JsonKey.CHANNEL,
-              JsonKey.IS_ROOT_ORG),
+              JsonKey.IS_TENANT),
           ERROR_CODE);
     }
   }

@@ -2,18 +2,12 @@ package org.sunbird.services.sso.impl;
 
 import static java.util.Arrays.asList;
 import static org.sunbird.common.models.util.ProjectUtil.isNotNull;
-import static org.sunbird.common.models.util.ProjectUtil.isNull;
 
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.RSATokenVerifier;
 import org.keycloak.admin.client.Keycloak;
@@ -25,7 +19,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.services.sso.SSOManager;
 
 /**
@@ -36,11 +29,6 @@ import org.sunbird.services.sso.SSOManager;
 public class KeyCloakServiceImpl implements SSOManager {
   private LoggerUtil logger = new LoggerUtil(KeyCloakServiceImpl.class);
   private Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
-  private static final String URL =
-      KeyCloakConnectionProvider.SSO_URL
-          + "realms/"
-          + KeyCloakConnectionProvider.SSO_REALM
-          + "/protocol/openid-connect/token";
 
   private static PublicKey SSO_PUBLIC_KEY = null;
 
@@ -87,82 +75,6 @@ public class KeyCloakServiceImpl implements SSOManager {
       logger.error(context, "updatePassword: Exception occurred: ", e);
     }
     return false;
-  }
-
-  @Override
-  public String updateUser(Map<String, Object> request, RequestContext context) {
-    String userId = (String) request.get(JsonKey.USER_ID);
-    String fedUserId = getFederatedUserId(userId);
-    UserRepresentation ur = null;
-    UserResource resource = null;
-    boolean needTobeUpdate = false;
-    try {
-      resource = keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      ur = resource.toRepresentation();
-    } catch (Exception e) {
-      ProjectUtil.createAndThrowInvalidUserDataException();
-    }
-
-    // set the UserRepresantation with the map value...
-    if (isNotNull(request.get(JsonKey.FIRST_NAME))) {
-      needTobeUpdate = true;
-      ur.setFirstName((String) request.get(JsonKey.FIRST_NAME));
-    }
-    if (isNotNull(request.get(JsonKey.LAST_NAME))) {
-      needTobeUpdate = true;
-      ur.setLastName((String) request.get(JsonKey.LAST_NAME));
-    }
-    if (isNotNull(request.get(JsonKey.EMAIL))) {
-      needTobeUpdate = true;
-      ur.setEmail((String) request.get(JsonKey.EMAIL));
-      ur.setEmailVerified(false);
-
-      Map<String, List<String>> map = ur.getAttributes();
-      List<String> list = new ArrayList<>();
-      list.add("false");
-      if (map == null) {
-        map = new HashMap<>();
-      }
-      map.put(JsonKey.EMAIL_VERIFIED_UPDATED, list);
-      ur.setAttributes(map);
-    }
-    if (!StringUtils.isBlank((String) request.get(JsonKey.PHONE))) {
-      needTobeUpdate = true;
-      Map<String, List<String>> map = ur.getAttributes();
-      List<String> list = new ArrayList<>();
-      list.add((String) request.get(JsonKey.PHONE));
-      if (map == null) {
-        map = new HashMap<>();
-      }
-      map.put(JsonKey.PHONE, list);
-      ur.setAttributes(map);
-    }
-
-    if (!StringUtils.isBlank((String) request.get(JsonKey.COUNTRY_CODE))) {
-      needTobeUpdate = true;
-      Map<String, List<String>> map = ur.getAttributes();
-      if (map == null) {
-        map = new HashMap<>();
-      }
-      List<String> list = new ArrayList<>();
-      list.add(PropertiesCache.getInstance().getProperty("sunbird_default_country_code"));
-      if (!StringUtils.isBlank((String) request.get(JsonKey.COUNTRY_CODE))) {
-        list.add(0, (String) request.get(JsonKey.COUNTRY_CODE));
-      }
-      map.put(JsonKey.COUNTRY_CODE, list);
-      ur.setAttributes(map);
-    }
-
-    try {
-      // if user sending any basic profile data
-      // then no need to make api call to keycloak to update profile.
-      if (needTobeUpdate) {
-        resource.update(ur);
-      }
-    } catch (Exception ex) {
-      ProjectUtil.createAndThrowInvalidUserDataException();
-    }
-    return JsonKey.SUCCESS;
   }
 
   /**
@@ -228,7 +140,7 @@ public class KeyCloakServiceImpl implements SSOManager {
   private void makeUserActiveOrInactive(String userId, boolean status, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
-      logger.info("makeUserActiveOrInactive: fedration id formed: " + fedUserId);
+      logger.info(context, "makeUserActiveOrInactive: fedration id formed: " + fedUserId);
       validateUserId(fedUserId);
       Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
       UserResource resource =
@@ -240,7 +152,9 @@ public class KeyCloakServiceImpl implements SSOManager {
       }
     } catch (Exception e) {
       logger.error(
-          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ", e);
+          context,
+          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
+          e);
       ProjectUtil.createAndThrowInvalidUserDataException();
     }
   }
@@ -258,174 +172,12 @@ public class KeyCloakServiceImpl implements SSOManager {
     }
   }
 
-  @Override
-  public boolean isEmailVerified(String userId) {
-    String fedUserId = getFederatedUserId(userId);
-    UserResource resource =
-        keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-    if (isNull(resource)) {
-      return false;
-    }
-    return resource.toRepresentation().isEmailVerified();
-  }
-
-  @Override
-  public void setEmailVerifiedUpdatedFlag(String userId, String flag) {
-    String fedUserId = getFederatedUserId(userId);
-    UserResource resource =
-        keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-    UserRepresentation user = resource.toRepresentation();
-    Map<String, List<String>> map = user.getAttributes();
-    List<String> list = new ArrayList<>();
-    list.add(flag);
-    if (map == null) {
-      map = new HashMap<>();
-    }
-    map.put(JsonKey.EMAIL_VERIFIED_UPDATED, list);
-    user.setAttributes(map);
-    resource.update(user);
-  }
-
-  @Override
-  public String getEmailVerifiedUpdatedFlag(String userId) {
-    String fedUserId = getFederatedUserId(userId);
-    UserResource resource =
-        keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-    UserRepresentation user = resource.toRepresentation();
-    Map<String, List<String>> map = user.getAttributes();
-    List<String> list = null;
-    if (MapUtils.isNotEmpty(map)) {
-      list = map.get(JsonKey.EMAIL_VERIFIED_UPDATED);
-    }
-    if (CollectionUtils.isNotEmpty(list)) {
-      return list.get(0);
-    } else {
-      return "";
-    }
-  }
-
-  /**
-   * This method will do the user password update.
-   *
-   * @param userId String
-   * @param password String
-   * @return boolean true/false
-   */
-  @Override
-  public boolean doPasswordUpdate(String userId, String password) {
-    boolean response = false;
-    try {
-      String fedUserId = getFederatedUserId(userId);
-      UserResource resource =
-          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      CredentialRepresentation newCredential = new CredentialRepresentation();
-      newCredential.setValue(password);
-      newCredential.setType(CredentialRepresentation.PASSWORD);
-      newCredential.setTemporary(true);
-      resource.resetPassword(newCredential);
-      response = true;
-    } catch (Exception ex) {
-      logger.error(ex.getMessage(), ex);
-    }
-    return response;
-  }
-
-  @Override
-  public String getLastLoginTime(String userId) {
-    String lastLoginTime = null;
-    try {
-      String fedUserId = getFederatedUserId(userId);
-      UserResource resource =
-          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      UserRepresentation ur = resource.toRepresentation();
-      Map<String, List<String>> map = ur.getAttributes();
-      if (map == null) {
-        map = new HashMap<>();
-      }
-      List<String> list = map.get(JsonKey.LAST_LOGIN_TIME);
-      if (list != null && !list.isEmpty()) {
-        lastLoginTime = list.get(0);
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-    }
-    return lastLoginTime;
-  }
-
-  @Override
-  public boolean addUserLoginTime(String userId) {
-    boolean response = true;
-    try {
-      String fedUserId = getFederatedUserId(userId);
-      UserResource resource =
-          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      UserRepresentation ur = resource.toRepresentation();
-      Map<String, List<String>> map = ur.getAttributes();
-      List<String> list = new ArrayList<>();
-      if (map == null) {
-        map = new HashMap<>();
-      }
-      List<String> currentLogTime = map.get(JsonKey.CURRENT_LOGIN_TIME);
-      if (currentLogTime == null || currentLogTime.isEmpty()) {
-        currentLogTime = new ArrayList<>();
-        currentLogTime.add(Long.toString(System.currentTimeMillis()));
-      } else {
-        list.add(currentLogTime.get(0));
-        currentLogTime.clear();
-        currentLogTime.add(0, Long.toString(System.currentTimeMillis()));
-      }
-      map.put(JsonKey.CURRENT_LOGIN_TIME, currentLogTime);
-      map.put(JsonKey.LAST_LOGIN_TIME, list);
-      ur.setAttributes(map);
-      resource.update(ur);
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-      response = false;
-    }
-    return response;
-  }
-
   private String getFederatedUserId(String userId) {
     return String.join(
         ":",
         "f",
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYCLOAK_USER_FEDERATION_PROVIDER_ID),
         userId);
-  }
-
-  @Override
-  public String setEmailVerifiedTrue(String userId) {
-    updateEmailVerifyStatus(userId, true);
-    return JsonKey.SUCCESS;
-  }
-
-  @Override
-  public String setEmailVerifiedAsFalse(String userId) {
-    updateEmailVerifyStatus(userId, false);
-    return JsonKey.SUCCESS;
-  }
-
-  /**
-   * This method will update user email verified status
-   *
-   * @param userId String
-   * @param status boolean
-   * @throws ProjectCommonException
-   */
-  private void updateEmailVerifyStatus(String userId, boolean status) {
-    try {
-      String fedUserId = getFederatedUserId(userId);
-      UserResource resource =
-          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      UserRepresentation ur = resource.toRepresentation();
-      ur.setEmailVerified(status);
-      if (isNotNull(resource)) {
-        resource.update(ur);
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-      ProjectUtil.createAndThrowInvalidUserDataException();
-    }
   }
 
   @Override
@@ -436,25 +188,7 @@ public class KeyCloakServiceImpl implements SSOManager {
 
     UserRepresentation userRepresentation = resource.toRepresentation();
     userRepresentation.setRequiredActions(asList(requiredAction));
-    if (KeycloakRequiredActionLinkUtil.VERIFY_EMAIL.equalsIgnoreCase(requiredAction)) {
-      userRepresentation.setEmailVerified(false);
-    }
     resource.update(userRepresentation);
-  }
-
-  @Override
-  public String getUsernameById(String userId) {
-    String fedUserId = getFederatedUserId(userId);
-    try {
-      UserResource resource =
-          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      UserRepresentation ur = resource.toRepresentation();
-      return ur.getUsername();
-    } catch (Exception e) {
-      logger.error("KeyCloakServiceImpl:getUsernameById: User not found for userId = " + userId, e);
-    }
-    logger.info("getUsernameById: User not found for userId = " + userId);
-    return "";
   }
 
   @Override

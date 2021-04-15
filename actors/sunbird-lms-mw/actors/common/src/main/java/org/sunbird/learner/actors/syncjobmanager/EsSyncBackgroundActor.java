@@ -1,19 +1,19 @@
 package org.sunbird.learner.actors.syncjobmanager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -27,6 +27,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.learner.util.Util.DbInfo;
+import scala.concurrent.Future;
 
 /** Background sync of data between Cassandra and Elastic Search. */
 @ActorConfig(
@@ -41,7 +42,6 @@ public class EsSyncBackgroundActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
-
     if (ActorOperations.BACKGROUND_SYNC.getValue().equalsIgnoreCase(operation)) {
       sync(request);
     } else {
@@ -53,12 +53,10 @@ public class EsSyncBackgroundActor extends BaseActor {
     logger.info(message.getRequestContext(), "EsSyncBackgroundActor: sync called");
     long startTime = System.currentTimeMillis();
     Map<String, Object> req = message.getRequest();
-    Map<String, Object> responseMap = new HashMap<>();
-    List<Map<String, Object>> reponseList = null;
-    List<Map<String, Object>> result = new ArrayList<>();
     Map<String, Object> dataMap = (Map<String, Object>) req.get(JsonKey.DATA);
 
     String objectType = (String) dataMap.get(JsonKey.OBJECT_TYPE);
+    String operationType = (String) dataMap.get(JsonKey.OPERATION_TYPE);
 
     List<Object> objectIds = new ArrayList<>();
     if (null != dataMap.get(JsonKey.OBJECT_IDS)) {
@@ -71,52 +69,11 @@ public class EsSyncBackgroundActor extends BaseActor {
           ResponseCode.invalidObjectType.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
-    String requestLogMsg = "";
-
+    Response finalResponse = new Response();
     if (JsonKey.USER.equals(objectType)) {
-      handleUserSyncRequest(objectIds, message.getRequestContext());
+      handleUserSyncRequest(objectIds, finalResponse, message.getRequestContext());
     } else {
-      if (CollectionUtils.isNotEmpty(objectIds)) {
-        requestLogMsg =
-            MessageFormat.format(
-                "type = {0} and IDs = {1}", objectType, Arrays.toString(objectIds.toArray()));
-
-        logger.info(
-            message.getRequestContext(),
-            "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " started");
-        Response response =
-            cassandraOperation.getRecordsByProperty(
-                dbInfo.getKeySpace(),
-                dbInfo.getTableName(),
-                JsonKey.ID,
-                objectIds,
-                message.getRequestContext());
-        reponseList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-        logger.info(
-            message.getRequestContext(),
-            "EsSyncBackgroundActor:sync: Fetching data for " + requestLogMsg + " completed");
-        if (CollectionUtils.isNotEmpty(reponseList)) {
-          for (Map<String, Object> map : reponseList) {
-            responseMap.put((String) map.get(JsonKey.ID), map);
-          }
-          Iterator<Entry<String, Object>> itr = responseMap.entrySet().iterator();
-          if (objectType.equals(JsonKey.ORGANISATION)) {
-            while (itr.hasNext()) {
-              result.add(getOrgDetails(itr.next(), message.getRequestContext()));
-            }
-          } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
-            while (itr.hasNext()) {
-              Entry<String, Object> entry = itr.next();
-              result.add((Map<String, Object>) entry.getValue());
-            }
-          }
-
-          if (CollectionUtils.isNotEmpty(result)) {
-            esService.bulkInsert(getType(objectType), result, message.getRequestContext());
-          }
-        }
-      }
+      handleOrgAndLocationSync(objectIds, objectType, finalResponse, message.getRequestContext());
     }
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
@@ -128,32 +85,142 @@ public class EsSyncBackgroundActor extends BaseActor {
             + " is "
             + elapsedTime
             + " ms");
+    if (StringUtils.isNotBlank(operationType) && JsonKey.SYNC.equalsIgnoreCase(operationType)) {
+      finalResponse.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+      sender().tell(finalResponse, self());
+    }
   }
 
-  private void handleUserSyncRequest(List<Object> objectIds, RequestContext context) {
-    if (CollectionUtils.isEmpty(objectIds)) {
+  private void handleOrgAndLocationSync(
+      List<Object> objectIds,
+      String objectType,
+      Response finalResponse,
+      RequestContext requestContext) {
+    if (CollectionUtils.isNotEmpty(objectIds)) {
+      String requestLogMsg =
+          MessageFormat.format(
+              "type = {0} and IDs = {1}", objectType, Arrays.toString(objectIds.toArray()));
+      logger.info(
+          requestContext,
+          "EsSyncBackgroundActor:handleOrgAndLocationSync: Fetching data for "
+              + requestLogMsg
+              + " started");
+      Map<String, Object> responseMap = new HashMap<>();
+      Util.DbInfo dbInfo = getDbInfoObj(objectType);
       Response response =
-          cassandraOperation.getAllRecords(
-              JsonKey.SUNBIRD, JsonKey.USER, Arrays.asList(JsonKey.ID), context);
+          cassandraOperation.getRecordsByProperty(
+              dbInfo.getKeySpace(), dbInfo.getTableName(), JsonKey.ID, objectIds, requestContext);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-      objectIds = responseList.stream().map(i -> i.get(JsonKey.ID)).collect(Collectors.toList());
+      logger.info(
+          requestContext,
+          "EsSyncBackgroundActor:handleOrgAndLocationSync: Fetching data for "
+              + requestLogMsg
+              + " completed");
+      if (CollectionUtils.isNotEmpty(responseList)) {
+        for (Map<String, Object> map : responseList) {
+          String objectId = (String) map.get(JsonKey.ID);
+          try {
+            logger.info(
+                requestContext,
+                "EsSyncBackgroundActor:handleOrgAndLocationSync for objectType :"
+                    + objectType
+                    + " for id : "
+                    + map.get(JsonKey.ID));
+            String esResponse = "";
+            if (objectType.equals(JsonKey.ORGANISATION)) {
+              esResponse =
+                  saveDataToEs(
+                      getType(objectType),
+                      objectId,
+                      getOrgDetails(map, requestContext),
+                      requestContext);
+            } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
+              esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
+            }
+            if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {
+              responseMap.put(
+                  objectId, ((objectId).equalsIgnoreCase((String) map.get(JsonKey.ID))));
+            }
+          } catch (Exception ex) {
+            logger.error(
+                requestContext,
+                "Exception occurred while making sync call for "
+                    + objectType
+                    + ", id : "
+                    + objectId,
+                ex);
+            responseMap.put(objectId, false);
+          }
+        }
+      } else {
+        logger.info(
+            requestContext,
+            "EsSyncBackgroundActor:handleOrgAndLocationSync invalid Ids " + objectIds);
+      }
+      finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, responseMap);
     }
-    invokeUserSync(objectIds, context);
   }
 
-  private void invokeUserSync(List<Object> objectIds, RequestContext context) {
+  private void handleUserSyncRequest(
+      List<Object> objectIds, Response finalResponse, RequestContext context) {
     if (CollectionUtils.isNotEmpty(objectIds)) {
+      Map<String, Object> esResponse = new HashMap<>();
       for (Object userId : objectIds) {
-        Request userRequest = new Request();
-        userRequest.setRequestContext(context);
-        userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-        userRequest.getRequest().put(JsonKey.ID, userId);
-        logger.info(
-            context, "EsSyncBackgroundActor:invokeUserSync: Trigger sync of user details to ES");
-        tellToAnother(userRequest);
+        try {
+          logger.info(
+              context,
+              "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
+          Map<String, Object> userDetails = Util.getUserDetails((String) userId, context);
+          if (MapUtils.isNotEmpty(userDetails)) {
+            logger.info(
+                context,
+                "EsSyncBackgroundActor:handleUserSyncRequest user rootOrgId :"
+                    + userDetails.get(JsonKey.ROOT_ORG_ID)
+                    + ", userId : "
+                    + userDetails.get(JsonKey.ID));
+            String response =
+                saveDataToEs(
+                    ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
+            if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
+              esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
+            }
+          } else {
+            logger.info(
+                context, "EsSyncBackgroundActor:handleUserSyncRequest invalid userId " + userId);
+          }
+        } catch (Exception ex) {
+          logger.error(
+              context,
+              "Exception occurred while making sync call for user with id : " + userId,
+              ex);
+          finalResponse.put((String) userId, false);
+        }
+      }
+      finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, esResponse);
+    }
+  }
+
+  private String saveDataToEs(
+      String esType, String id, Map<String, Object> data, RequestContext context) {
+    Future<String> responseF = esService.save(esType, id, data, context);
+    return (String) ElasticSearchHelper.getResponseFromFuture(responseF);
+  }
+
+  private Map<String, Object> getOrgDetails(Map<String, Object> orgMap, RequestContext context) {
+    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails called");
+    String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+    if (StringUtils.isNotBlank(orgLocation)) {
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
+        orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+      } catch (Exception ex) {
+        logger.error(context, "Exception occurred while parsing orgLocation", ex);
       }
     }
+    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
+    return orgMap;
   }
 
   private String getType(String objectType) {
@@ -168,37 +235,6 @@ public class EsSyncBackgroundActor extends BaseActor {
     return type;
   }
 
-  private Map<String, Object> getOrgDetails(Entry<String, Object> entry, RequestContext context) {
-    logger.info(context, "EsSyncBackgroundActor: getOrgDetails called");
-    Map<String, Object> orgMap = (Map<String, Object>) entry.getValue();
-    orgMap.remove(JsonKey.ORG_TYPE);
-    if (orgMap.containsKey(JsonKey.ADDRESS_ID)
-        && !StringUtils.isBlank((String) orgMap.get(JsonKey.ADDRESS_ID))) {
-      orgMap.put(
-          JsonKey.ADDRESS,
-          getDetailsById(
-              Util.dbInfoMap.get(JsonKey.ADDRESS_DB),
-              (String) orgMap.get(JsonKey.ADDRESS_ID),
-              context));
-    }
-    logger.info(context, "EsSyncBackgroundActor: getOrgDetails returned");
-    return orgMap;
-  }
-
-  private Map<String, Object> getDetailsById(DbInfo dbInfo, String userId, RequestContext context) {
-    try {
-      Response response =
-          cassandraOperation.getRecordById(
-              dbInfo.getKeySpace(), dbInfo.getTableName(), userId, context);
-      return ((((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).isEmpty())
-          ? new HashMap<>()
-          : ((List<Map<String, Object>>) response.get(JsonKey.RESPONSE)).get(0));
-    } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
-    }
-    return null;
-  }
-
   private DbInfo getDbInfoObj(String objectType) {
     if (objectType.equals(JsonKey.USER)) {
       return Util.dbInfoMap.get(JsonKey.USER_DB);
@@ -207,7 +243,6 @@ public class EsSyncBackgroundActor extends BaseActor {
     } else if (objectType.equals(JsonKey.LOCATION)) {
       return Util.dbInfoMap.get(JsonKey.LOCATION);
     }
-
     return null;
   }
 }

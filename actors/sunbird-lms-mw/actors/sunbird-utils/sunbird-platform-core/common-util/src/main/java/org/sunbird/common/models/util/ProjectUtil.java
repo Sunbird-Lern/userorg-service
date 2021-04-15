@@ -34,18 +34,6 @@ public class ProjectUtil {
   private static AtomicInteger atomicInteger = new AtomicInteger();
 
   public static final String YEAR_MONTH_DATE_FORMAT = "yyyy-MM-dd";
-  private static final int randomPasswordLength = 9;
-
-  protected static final String FILE_NAME[] = {
-    "cassandratablecolumn.properties",
-    "elasticsearch.config.properties",
-    "cassandra.config.properties",
-    "dbconfig.properties",
-    "externalresource.properties",
-    "sso.properties",
-    "userencryption.properties",
-    "mailTemplates.properties"
-  };
   public static PropertiesCache propertiesCache;
   private static Pattern pattern;
   private static final String EMAIL_PATTERN =
@@ -56,9 +44,6 @@ public class ProjectUtil {
         JsonKey.COMPLETENESS, JsonKey.MISSING_FIELDS, JsonKey.PROFILE_VISIBILITY, JsonKey.LOGIN_ID
       };
 
-  private static String YYYY_MM_DD_FORMATTER = "yyyy-MM-dd";
-  private static final String STARTDATE = "startDate";
-  private static final String ENDDATE = "endDate";
   private static ObjectMapper mapper = new ObjectMapper();
 
   static {
@@ -162,23 +147,6 @@ public class ProjectUtil {
     }
   }
 
-  public enum Source {
-    WEB("web"),
-    ANDROID("android"),
-    IOS("ios"),
-    APP("app");
-
-    private String value;
-
-    Source(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return this.value;
-    }
-  }
-
   public enum UserLookupType {
     USERNAME(JsonKey.USER_LOOKUP_FILED_USER_NAME),
     EMAIL(JsonKey.EMAIL),
@@ -219,11 +187,7 @@ public class ProjectUtil {
   }
 
   public enum UserRole {
-    PUBLIC("PUBLIC"),
-    CONTENT_CREATOR("CONTENT_CREATOR"),
-    CONTENT_REVIEWER("CONTENT_REVIEWER"),
-    ORG_ADMIN("ORG_ADMIN"),
-    ORG_MEMBER("ORG_MEMBER");
+    PUBLIC("PUBLIC");
 
     private String value;
 
@@ -293,31 +257,14 @@ public class ProjectUtil {
    */
   public enum EsType {
     user(getConfigValue("user_index_alias")),
-    organisation("org"),
+    organisation(getConfigValue("org_index_alias")),
     usernotes("usernotes"),
-    telemetry("telemetry"),
     location("location"),
     userfeed("userfeed");
 
     private String typeName;
 
     EsType(String name) {
-      this.typeName = name;
-    }
-
-    public String getTypeName() {
-      return typeName;
-    }
-  }
-
-  public enum AddressType {
-    permanent("permanent"),
-    current("current"),
-    office("office"),
-    home("home");
-    private String typeName;
-
-    private AddressType(String name) {
       this.typeName = name;
     }
 
@@ -507,34 +454,6 @@ public class ProjectUtil {
       throw e;
     }
     return tagStatus;
-  }
-
-  public enum ObjectTypes {
-    user("user"),
-    organisation("organisation"),
-    batch("batch");
-
-    private String value;
-
-    private ObjectTypes(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
-  }
-
-  public static String generateRandomPassword() {
-    String SALTCHARS = "abcdef12345ghijklACDEFGHmnopqrs67IJKLMNOP890tuvQRSTUwxyzVWXYZ";
-    StringBuilder salt = new StringBuilder();
-    Random rnd = new Random();
-    while (salt.length() < randomPasswordLength) { // length of the random string.
-      int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-      salt.append(SALTCHARS.charAt(index));
-    }
-    String saltStr = salt.toString();
-    return saltStr;
   }
 
   /**
@@ -758,29 +677,6 @@ public class ProjectUtil {
    */
   public static <T> T convertToRequestPojo(Request request, Class<T> clazz) {
     return mapper.convertValue(request.getRequest(), clazz);
-  }
-
-  /**
-   * This method will take number of days in request and provide date range. Date range is
-   * calculated as STARTDATE and ENDDATE, start date will be current date minus provided number of
-   * days and ENDDATE will be current date minus one day. If date is less than equal to zero then it
-   * will return empty map.
-   *
-   * @param numDays Number of days.
-   * @return Map with STARTDATE and ENDDATE key in YYYY_MM_DD_FORMATTER format.
-   */
-  public static Map<String, String> getDateRange(int numDays) {
-    Map<String, String> map = new HashMap<>();
-    if (numDays <= 0) {
-      return map;
-    }
-    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, -numDays);
-    map.put(STARTDATE, new SimpleDateFormat(YYYY_MM_DD_FORMATTER).format(cal.getTime()));
-    cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-    cal.add(Calendar.DATE, -1);
-    map.put(ENDDATE, new SimpleDateFormat(YYYY_MM_DD_FORMATTER).format(cal.getTime()));
-    return map;
   }
 
   /**

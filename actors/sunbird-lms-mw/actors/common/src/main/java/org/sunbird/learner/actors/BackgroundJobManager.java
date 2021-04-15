@@ -1,5 +1,6 @@
 package org.sunbird.learner.actors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,6 @@ import scala.concurrent.Future;
     "insertOrgInfoToElastic",
     "updateOrgInfoToElastic",
     "updateUserOrgES",
-    "removeUserOrgES",
     "insertUserNotesToElastic",
     "updateUserNotesToElastic",
   }
@@ -54,8 +54,6 @@ public class BackgroundJobManager extends BaseActor {
       insertOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.REMOVE_USER_ORG_ES.getValue())) {
-      removeUserOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ROLES_ES.getValue())) {
       updateUserRoleToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
@@ -91,40 +89,6 @@ public class BackgroundJobManager extends BaseActor {
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
         (String) result.get(JsonKey.USER_ID),
-        result,
-        actorMessage.getRequestContext());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void removeUserOrgInfoToEs(Request actorMessage) {
-    Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.user.getTypeName(),
-            (String) orgMap.get(JsonKey.USER_ID),
-            actorMessage.getRequestContext());
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (result.containsKey(JsonKey.ORGANISATIONS) && null != result.get(JsonKey.ORGANISATIONS)) {
-      List<Map<String, Object>> orgMapList =
-          (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
-      if (null != orgMapList) {
-        Iterator<Map<String, Object>> itr = orgMapList.iterator();
-        while (itr.hasNext()) {
-          Map<String, Object> map = itr.next();
-          if ((((String) map.get(JsonKey.USER_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.USER_ID)))
-              && (((String) map.get(JsonKey.ORGANISATION_ID))
-                  .equalsIgnoreCase((String) orgMap.get(JsonKey.ORGANISATION_ID)))) {
-            itr.remove();
-          }
-        }
-      }
-    }
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.IDENTIFIER),
         result,
         actorMessage.getRequestContext());
   }
@@ -166,7 +130,7 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> orgMap =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
-    if (ProjectUtil.isNotNull(orgMap)) {
+    if (MapUtils.isNotEmpty(orgMap)) {
       Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
       String id = (String) orgMap.get(JsonKey.ID);
       Response orgResponse =
@@ -181,22 +145,20 @@ public class BackgroundJobManager extends BaseActor {
       if (!(orgList.isEmpty())) {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
-
-        if (MapUtils.isNotEmpty((Map<String, Object>) orgMap.get(JsonKey.ADDRESS))) {
-          esMap.put(JsonKey.ADDRESS, orgMap.get(JsonKey.ADDRESS));
-        } else {
-          esMap.put(JsonKey.ADDRESS, new HashMap<>());
+        String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
+        if (StringUtils.isNotBlank(orgLocation)) {
+          try {
+            ObjectMapper mapper = new ObjectMapper();
+            esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          } catch (Exception e) {
+            logger.info(
+                actorMessage.getRequestContext(),
+                "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+          }
         }
       }
-      // Register the org into EKStep.
-      String hashOrgId = (String) esMap.getOrDefault(JsonKey.HASH_TAG_ID, "");
-      logger.info(actorMessage.getRequestContext(), "hashOrgId value is ==" + hashOrgId);
-      // Just check it if hashOrgId is null or empty then replace with org id.
-      if (StringUtils.isBlank(hashOrgId)) {
-        hashOrgId = id;
-      }
       // making call to register tag
-      registertag(hashOrgId, "{}", headerMap, actorMessage.getRequestContext());
+      registertag(id, "{}", headerMap, actorMessage.getRequestContext());
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.organisation.getTypeName(),
@@ -236,16 +198,22 @@ public class BackgroundJobManager extends BaseActor {
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
-    logger.info(
-        actorMessage.getRequestContext(),
-        "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
-            + userDetails.get(JsonKey.ROOT_ORG_ID));
-    insertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        userId,
-        userDetails,
-        actorMessage.getRequestContext());
+    if (MapUtils.isNotEmpty(userDetails)) {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
+              + userDetails.get(JsonKey.ROOT_ORG_ID));
+      insertDataToElastic(
+          ProjectUtil.EsIndex.sunbird.getIndexName(),
+          ProjectUtil.EsType.user.getTypeName(),
+          userId,
+          userDetails,
+          actorMessage.getRequestContext());
+    } else {
+      logger.info(
+          actorMessage.getRequestContext(),
+          "BackGroundJobManager:updateUserInfoToEs invalid userId " + userId);
+    }
   }
 
   /**
@@ -266,18 +234,11 @@ public class BackgroundJobManager extends BaseActor {
     logger.info(
         context,
         "BackgroundJobManager:insertDataToElastic: type = " + type + " identifier = " + identifier);
-    /*
-     * if (type.equalsIgnoreCase(ProjectUtil.EsType.user.getTypeName())) { // now
-     * calculate profile completeness and error filed and store it in ES
-     * ProfileCompletenessService service =
-     * ProfileCompletenessFactory.getInstance(); Map<String, Object> responsemap =
-     * service.computeProfile(data); data.putAll(responsemap); }
-     */
     Future<String> responseF = esService.save(type, identifier, data, context);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     logger.info(
         context,
-        "Getting  ********** ES save response for type , identiofier=="
+        "Getting  ********** ES save response for type , identifier == "
             + type
             + "  "
             + identifier

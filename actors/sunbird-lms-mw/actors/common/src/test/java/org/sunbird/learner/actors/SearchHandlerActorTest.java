@@ -107,8 +107,13 @@ public class SearchHandlerActorTest {
     List<String> objectType = new ArrayList<String>();
     objectType.add("org");
     filters.put(JsonKey.ID, "ORG_001");
+    filters.put(JsonKey.IS_SCHOOL, true);
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);
+    List<String> fields = new ArrayList<>();
+    fields.add(JsonKey.ORG_NAME);
+    fields.add(JsonKey.HASHTAGID);
+    innerMap.put(JsonKey.FIELDS, fields);
     Map<String, Object> contextMap = new HashMap<>();
     contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);
     reqObj.setContext(contextMap);
@@ -135,6 +140,12 @@ public class SearchHandlerActorTest {
     List<String> objectType = new ArrayList<String>();
     objectType.add("user");
     filters.put(JsonKey.OBJECT_TYPE, objectType);
+    filters.put(JsonKey.PROFILE_USERTYPE, "teacher");
+    filters.put(JsonKey.PROFILE_LOCATION, "location");
+    filters.put(JsonKey.USER_TYPE, "userType");
+    filters.put(JsonKey.USER_SUB_TYPE, "userSubType");
+    filters.put(JsonKey.LOCATION_ID, "locationID");
+    filters.put(JsonKey.LOCATION_TYPE, "type");
     filters.put(JsonKey.ROOT_ORG_ID, "ORG_001");
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);

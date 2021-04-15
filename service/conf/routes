@@ -44,12 +44,6 @@ PATCH	/v1/org/status/update @controllers.organisationmanagement.OrgController.up
 POST  /v1/org/read          @controllers.organisationmanagement.OrgController.getOrgDetails(request: play.mvc.Http.Request)
 POST  /v1/org/search		    @controllers.organisationmanagement.OrgController.search(request: play.mvc.Http.Request)
 
-POST  /v1/org/member/add		@controllers.organisationmanagement.OrgMemberController.addMemberToOrganisation(request: play.mvc.Http.Request)
-POST  /v1/org/member/remove	@controllers.organisationmanagement.OrgMemberController.removeMemberFromOrganisation(request: play.mvc.Http.Request)
-
-POST	/v1/org/type/create	@controllers.organisationmanagement.OrgTypeController.createOrgType(request: play.mvc.Http.Request)
-PATCH	/v1/org/type/update	@controllers.organisationmanagement.OrgTypeController.updateOrgType(request: play.mvc.Http.Request)
-GET		/v1/org/type/list		@controllers.organisationmanagement.OrgTypeController.listOrgType(request: play.mvc.Http.Request)
 GET    /v1/user/exists/:key/:value         @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 
 #Sync
