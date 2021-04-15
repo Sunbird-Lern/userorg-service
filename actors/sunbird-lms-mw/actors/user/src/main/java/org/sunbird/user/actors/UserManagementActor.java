@@ -80,7 +80,17 @@ import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
+  tasks = {
+    "createUser",
+    "createSSOUser",
+    "updateUser",
+    "updateUserV2",
+    "createUserV3",
+    "createUserV4",
+    "createManagedUser",
+    "createSSUUser",
+    "getManagedUsers"
+  },
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -115,13 +125,25 @@ public class UserManagementActor extends BaseActor {
       case "createUser": // create User [v1,v2,v3]
         createUser(request);
         break;
+      case "createSSOUser":
+        createUser(request);
+        break;
       case "updateUser":
         updateUser(request);
         break;
-      case "createUserV3": // signup [/v1/user/signup]
+      case "updateUserV2":
+        updateUser(request);
+        break;
+      case "createSSUUser":
         createUserV3(request);
         break;
-      case "createUserV4": // managedUser creation
+      case "createUserV3V2":
+        createUserV3(request);
+        break;
+      case "createUserV4":
+        createUserV4(request);
+        break;
+      case "createManagedUser": // managedUser creation new version
         createUserV4(request);
         break;
       case "getManagedUsers": // managedUser search
@@ -152,6 +174,12 @@ public class UserManagementActor extends BaseActor {
   private void createUserV4(Request actorMessage) {
     logger.info(
         actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
+    Map<String, Object> userMap = actorMessage.getRequest();
+    if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
+    }
     validateLocationCodes(actorMessage);
     createUserV3_V4(actorMessage, true);
   }
@@ -186,6 +214,11 @@ public class UserManagementActor extends BaseActor {
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
+      if (actorMessage
+          .getOperation()
+          .equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+        setProfileUsertypeAndLocation(userMap, actorMessage);
+      }
       profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
@@ -218,6 +251,9 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
+    }
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -633,6 +669,9 @@ public class UserManagementActor extends BaseActor {
     userRequestValidator.validateCreateUserRequest(actorMessage);
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
+    }
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSO_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
     }
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
@@ -1224,7 +1263,6 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
-
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
@@ -1624,6 +1662,7 @@ public class UserManagementActor extends BaseActor {
 
   private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
     Map<String, String> userTypeAndSubType = new HashMap<>();
+    userMap.remove(JsonKey.PROFILE_USERTYPE);
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
       userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
       if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
@@ -1640,6 +1679,28 @@ public class UserManagementActor extends BaseActor {
 
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
+  }
+
+  private void setProfileUsertypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
+    if (!actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+        Map<String, Object> userTypeAndSubType =
+            (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+      }
+    }
+    if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+      userMap.remove(JsonKey.LOCATION_CODES);
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
     }
   }
 }
