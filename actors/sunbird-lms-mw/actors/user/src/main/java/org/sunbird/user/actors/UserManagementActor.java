@@ -1697,8 +1697,10 @@ public class UserManagementActor extends BaseActor {
     }
     if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
       userMap.remove(JsonKey.LOCATION_CODES);
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
     }
   }
 }
