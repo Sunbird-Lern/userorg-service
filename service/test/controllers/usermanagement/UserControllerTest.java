@@ -264,6 +264,14 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testGetUserDetailsSuccessByUserIdV4() {
+    Result result =
+        performTest("/v4/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testGetUserDetailsV3SuccessByUserId() {
     Result result =
         performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
@@ -288,6 +296,13 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testSearchUserSuccess() {
     Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testSearchUserSuccessV2() {
+    Result result = performTest("/v2/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }

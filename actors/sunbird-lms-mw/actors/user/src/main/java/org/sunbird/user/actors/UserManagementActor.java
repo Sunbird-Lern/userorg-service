@@ -82,13 +82,13 @@ import scala.concurrent.Future;
 @ActorConfig(
   tasks = {
     "createUser",
-    "createUserV2",
+    "createSSOUser",
     "updateUser",
     "updateUserV2",
     "createUserV3",
     "createUserV4",
-    "createUserV3V2",
-    "createUserV4V2",
+    "createManagedUser",
+    "createSSUUser",
     "getManagedUsers"
   },
   asyncTasks = {},
@@ -125,25 +125,25 @@ public class UserManagementActor extends BaseActor {
       case "createUser": // create User [v1,v2,v3]
         createUser(request);
         break;
-      case "createUserV2": // create User [v1,v2,v3] new version
+      case "createSSOUser":
         createUser(request);
         break;
       case "updateUser":
         updateUser(request);
         break;
-      case "updateUserV2": // new version
+      case "updateUserV2":
         updateUser(request);
         break;
-      case "createUserV3": // signup [/v1/user/signup]
+      case "createSSUUser":
         createUserV3(request);
         break;
-      case "createUserV3V2": // signup [/v1/user/signup] new version
+      case "createUserV3V2":
         createUserV3(request);
         break;
-      case "createUserV4": // managedUser creation
+      case "createUserV4":
         createUserV4(request);
         break;
-      case "createUserV4V2": // managedUser creation new version
+      case "createManagedUser": // managedUser creation new version
         createUserV4(request);
         break;
       case "getManagedUsers": // managedUser search
@@ -177,10 +177,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     if (actorMessage
         .getOperation()
-        .equalsIgnoreCase(ActorOperations.CREATE_USER_V4_V2.getValue())) {
-      userMap.remove(JsonKey.LOCATION_CODES);
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
     }
     validateLocationCodes(actorMessage);
     createUserV3_V4(actorMessage, true);
@@ -218,16 +216,9 @@ public class UserManagementActor extends BaseActor {
     } else {
       if (actorMessage
           .getOperation()
-          .equalsIgnoreCase(ActorOperations.CREATE_USER_V3_V2.getValue())) {
-        if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-          userMap.remove(JsonKey.USER_TYPE);
-          Map<String, Object> userTypeAndSubType = new HashMap<>();
-          userTypeAndSubType = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-          userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-          userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
-        }
+          .equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+        setProfileUsertypeAndLocation(userMap, actorMessage);
       }
-
       profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
@@ -261,16 +252,7 @@ public class UserManagementActor extends BaseActor {
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
-      if (userMap.containsKey(JsonKey.USER_TYPE)) {
-        userMap.remove(JsonKey.USER_TYPE); // subtype also to be given after review
-      }
-      userMap.remove(JsonKey.LOCATION_CODES); // ask if needed
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-    } else {
-      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) { // check if needed
-        userMap.remove(JsonKey.PROFILE_USERTYPE);
-      }
+      setProfileUsertypeAndLocation(userMap, actorMessage);
     }
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
@@ -688,17 +670,8 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
-    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_USER_V2.getValue())) {
-      userMap.remove(JsonKey.LOCATION_CODES);
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-        userMap.remove(JsonKey.USER_TYPE);
-        Map<String, Object> userTypeAndSubType = new HashMap<>();
-        userTypeAndSubType = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
-      }
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSO_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
     }
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
@@ -1290,7 +1263,6 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
-
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
@@ -1512,12 +1484,6 @@ public class UserManagementActor extends BaseActor {
 
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
-    if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-      Map<String, Object> userTypeAndSubType = new HashMap<>();
-      userTypeAndSubType = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-      userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-      userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
-    }
     if (null != userMap.get(JsonKey.USER_TYPE)) {
       List<String> locationCodes = (List<String>) userMap.get(JsonKey.LOCATION_CODES);
       List<Location> locations = new ArrayList<>();
@@ -1696,9 +1662,7 @@ public class UserManagementActor extends BaseActor {
 
   private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
     Map<String, String> userTypeAndSubType = new HashMap<>();
-    if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-      userMap.remove(JsonKey.PROFILE_USERTYPE);
-    }
+    userMap.remove(JsonKey.PROFILE_USERTYPE);
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
       userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
       if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
@@ -1715,6 +1679,35 @@ public class UserManagementActor extends BaseActor {
 
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
+  }
+
+  private void setProfileUsertypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
+    if (!actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+        Map<String, Object> userTypeAndSubType =
+            (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+      }
+    }
+    if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+      userMap.remove(JsonKey.LOCATION_CODES);
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        List<Map<String, String>> profLocList =
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+        List<String> locationCodes = null;
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationCodes =
+              profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+          userMap.put(JsonKey.LOCATION_CODES, locationCodes);
+        }
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
     }
   }
 }
