@@ -4,6 +4,7 @@ package org.sunbird.notification.utils;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.provider.ISmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
+import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProviderFactory;
 
 /**
  * This class will provide object of factory.
@@ -22,6 +23,9 @@ public class SMSFactory {
   public static ISmsProvider getInstance(String objectName) {
     if ("91SMS".equalsIgnoreCase(objectName)) {
       ISmsProviderFactory factory = new Msg91SmsProviderFactory();
+      return factory.create();
+    } else if ("NIC".equalsIgnoreCase(objectName)) {
+      ISmsProviderFactory factory = new NICGatewaySmsProviderFactory();
       return factory.create();
     } else {
       ISmsProviderFactory factory = new Msg91SmsProviderFactory();
