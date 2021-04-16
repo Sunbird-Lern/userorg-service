@@ -137,7 +137,7 @@ public class UserManagementActor extends BaseActor {
       case "createSSUUser":
         createUserV3(request);
         break;
-      case "createUserV3V2":
+      case "createUserV3":
         createUserV3(request);
         break;
       case "createUserV4":
@@ -1697,8 +1697,17 @@ public class UserManagementActor extends BaseActor {
     }
     if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
       userMap.remove(JsonKey.LOCATION_CODES);
-      userMap.put(JsonKey.LOCATION_CODES, userMap.get(JsonKey.PROFILE_LOCATION));
-      userMap.remove(JsonKey.PROFILE_LOCATION);
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        List<Map<String, String>> profLocList =
+                (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+        List<String> locationCodes = null;
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationCodes =
+                  profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+          userMap.put(JsonKey.LOCATION_CODES, locationCodes);
+        }
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
     }
   }
 }
