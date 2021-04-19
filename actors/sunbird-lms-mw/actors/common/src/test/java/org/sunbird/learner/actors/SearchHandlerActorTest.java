@@ -85,6 +85,16 @@ public class SearchHandlerActorTest {
     innerMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     innerMap.put(JsonKey.ORGANISATIONS, orgList);
     innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
+    Map<String, Object> userType = new HashMap<>();
+    userType.put(JsonKey.TYPE, "type");
+    userType.put(JsonKey.SUB_TYPE, "subType");
+    innerMap.put(JsonKey.PROFILE_USERTYPE, userType);
+    List<Map<String, String>> locList = new ArrayList<>();
+    Map<String, String> locn = new HashMap<>();
+    locn.put(JsonKey.ID, "456465464");
+    locn.put(JsonKey.TYPE, "type");
+    locList.add(locn);
+    innerMap.put(JsonKey.PROFILE_LOCATION, locList);
     content.add(innerMap);
     response.put(JsonKey.CONTENT, content);
     return response;
