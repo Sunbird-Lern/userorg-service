@@ -146,18 +146,16 @@ public class SearchHandlerActor extends BaseActor {
             userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
             userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
             userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-            userMap.putAll(Util.getUserDefaultValue());
-          } else {
-            userMap.put(JsonKey.USER_TYPE, null);
-            userMap.put(JsonKey.USER_SUB_TYPE, null);
           }
           if (CollectionUtils.isNotEmpty(
               (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
             userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
             locationIds =
                 userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+            userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
+            userMap.put(JsonKey.LOCATION_IDS, locationIds);
           }
-          userMap.put(JsonKey.LOCATION_IDS, locationIds);
+          userMap.putAll(userDefaultFieldValue);
         } else {
           userMap.remove(JsonKey.USER_TYPE);
           userMap.remove(JsonKey.USER_SUB_TYPE);
