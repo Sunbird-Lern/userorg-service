@@ -220,6 +220,14 @@ public class SearchHandlerActorTest {
 
   @Test
   public void searchUserWithObjectTypeAsOrg() {
+    PowerMockito.mockStatic(EsClientFactory.class);
+    ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(createResponseGet(true));
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+
     PowerMockito.mockStatic(SunbirdMWService.class);
     SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     PowerMockito.mockStatic(BaseMWService.class);
