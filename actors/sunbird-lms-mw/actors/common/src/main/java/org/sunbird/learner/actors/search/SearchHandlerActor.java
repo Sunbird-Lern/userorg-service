@@ -142,17 +142,18 @@ public class SearchHandlerActor extends BaseActor {
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
         if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
-          if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+          if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)
+              && MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
             userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
             userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
             userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
           }
-          if (CollectionUtils.isNotEmpty(
-              (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+          if (userMap.containsKey(JsonKey.PROFILE_LOCATION)
+              && CollectionUtils.isNotEmpty(
+                  (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
             userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
             locationIds =
                 userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-            userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
             userMap.put(JsonKey.LOCATION_IDS, locationIds);
           }
           userMap.putAll(userDefaultFieldValue);
