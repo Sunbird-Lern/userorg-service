@@ -162,7 +162,7 @@ public class SearchHandlerActor extends BaseActor {
           userMap.remove(JsonKey.USER_TYPE);
           userMap.remove(JsonKey.USER_SUB_TYPE);
           userMap.remove(JsonKey.LOCATION_IDS);
-          Util.removeUserUnwantedFields(userMap);
+          Util.getUserDefaultValue().keySet().stream().forEach(key -> userMap.remove(key));
         }
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
@@ -195,6 +195,8 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+                getDefaultValues(orgDefaultFieldValue, fields);
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
@@ -204,7 +206,14 @@ public class SearchHandlerActor extends BaseActor {
                           if (request
                               .getOperation()
                               .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-                            Util.removeOrgUnwantedFields(org);
+                            Util.getOrgDefaultValue()
+                                .keySet()
+                                .stream()
+                                .forEach(key -> org.remove(key));
+                            org.remove(JsonKey.LOCATION_IDS);
+                          } else {
+                            // Put all default value for backward compatibility
+                            org.putAll(orgDefaultFieldValue);
                           }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))

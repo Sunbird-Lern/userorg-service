@@ -35,7 +35,6 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.search.SearchHandlerActor;
-import org.sunbird.learner.util.Util;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -114,7 +113,6 @@ public class SearchHandlerActorTest {
     List<String> fields = new ArrayList<>();
     fields.add(JsonKey.ORG_NAME);
     fields.add(JsonKey.HASHTAGID);
-    Util.removeUnwantedFields(innerMap);
     innerMap.put(JsonKey.FIELDS, fields);
     Map<String, Object> contextMap = new HashMap<>();
     contextMap.put(JsonKey.FIELDS, JsonKey.ORG_NAME);
