@@ -77,6 +77,7 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage);
+    result.putAll(Util.getUserDefaultValue());
     Map<String, Object> rootOrg =
         orgDao.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
@@ -85,7 +86,7 @@ public class UserProfileReadService {
       if (actorMessage
           .getOperation()
           .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-        Util.removeOrgUnwantedFields(rootOrg);
+        Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
       }
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
@@ -146,7 +147,7 @@ public class UserProfileReadService {
     if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-      Util.removeUserUnwantedFields(result);
+      Util.getUserDefaultValue().keySet().stream().forEach(key -> result.remove(key));
     }
 
     Response response = new Response();
