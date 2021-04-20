@@ -1,6 +1,7 @@
 package org.sunbird.learner.organisation.dao.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +43,18 @@ public class OrgDaoImpl implements OrgDao {
       if (CollectionUtils.isNotEmpty(responseList)) {
         Map<String, Object> orgMap = responseList.get(0);
         String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+        List orgLocationList = new ArrayList<>();
         if (StringUtils.isNotBlank(orgLocation)) {
           try {
             ObjectMapper mapper = new ObjectMapper();
-            orgMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+            orgLocationList = mapper.readValue(orgLocation, List.class);
           } catch (Exception e) {
             logger.info(
                 context,
                 "Exception occurred while converting orgLocation to List<Map<String,String>>.");
           }
         }
+        orgMap.put(JsonKey.ORG_LOCATION, orgLocationList);
         orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
         orgMap.remove(JsonKey.CONTACT_DETAILS);
         return orgMap;

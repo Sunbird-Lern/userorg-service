@@ -1,6 +1,7 @@
 package org.sunbird.learner.organisation.external.identity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,16 +56,18 @@ public class OrgExternalService {
         Map<String, Object> orgMap = orgResList.get(0);
         if (MapUtils.isNotEmpty(orgMap)) {
           String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+          List<Map<String, String>> orgLoc = new ArrayList<>();
           if (StringUtils.isNotBlank(orgLocation)) {
             try {
               ObjectMapper mapper = new ObjectMapper();
-              orgMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+              orgLoc = mapper.readValue(orgLocation, List.class);
             } catch (Exception e) {
               logger.info(
                   context,
                   "Exception occurred while converting orgLocation to List<Map<String,String>>.");
             }
           }
+          orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
           orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
           return orgMap;
         }
