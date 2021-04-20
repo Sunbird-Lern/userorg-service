@@ -531,15 +531,17 @@ public class OrganisationManagementActor extends BaseActor {
       sender().tell(response, self());
 
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
+      List orgLocationList = new ArrayList<>();
       if (StringUtils.isNotBlank(orgLocation)) {
         try {
-          updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          orgLocationList = mapper.readValue(orgLocation, List.class);
         } catch (Exception e) {
           logger.info(
               actorMessage.getRequestContext(),
               "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
       }
+      updateOrgDao.put(JsonKey.ORG_LOCATION, orgLocationList);
 
       Request orgRequest = new Request();
       orgRequest.setRequestContext(actorMessage.getRequestContext());

@@ -190,15 +190,16 @@ public class EsSyncBackgroundActor extends BaseActor {
   private Map<String, Object> getOrgDetails(Map<String, Object> orgMap, RequestContext context) {
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails called");
     String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+    List<Map<String, String>> orgLoc = new ArrayList<>();
     if (StringUtils.isNotBlank(orgLocation)) {
       try {
         ObjectMapper mapper = new ObjectMapper();
-        List<Map<String, String>> orgLoc = mapper.readValue(orgLocation, List.class);
-        orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+        orgLoc = mapper.readValue(orgLocation, List.class);
       } catch (Exception ex) {
         logger.error(context, "Exception occurred while parsing orgLocation", ex);
       }
     }
+    orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
     logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
     return orgMap;
   }
