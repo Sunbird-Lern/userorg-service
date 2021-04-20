@@ -127,7 +127,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_organisation"));
     dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
     dbInfoMap.put(JsonKey.USER_NOTES_DB, getDbInfoObject(KEY_SPACE_NAME, "user_notes"));
-    dbInfoMap.put(JsonKey.MEDIA_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "media_type"));
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
     dbInfoMap.put(JsonKey.SYSTEM_SETTINGS_DB, getDbInfoObject(KEY_SPACE_NAME, "system_settings"));
@@ -1007,20 +1006,6 @@ public final class Util {
     return user;
   }
 
-  public static void removeUserUnwantedFields(Map<String, Object> result) {
-    result.remove("avatar", null);
-    result.remove("gender", null);
-    result.remove("grade", null);
-    result.remove("language", null);
-    result.remove("lastLoginTime", null);
-    result.remove("location", null);
-    result.remove("profileSummary", null);
-    result.remove("profileVisibility", null);
-    result.remove("tempPassword", null);
-    result.remove("thumbnail", null);
-    result.remove("registryId", null);
-  }
-
   public static Map<String, Object> getOrgDefaultValue() {
     Map<String, Object> org = new HashMap<>();
     org.put("dateTime", null);
@@ -1042,31 +1027,5 @@ public final class Util {
     org.put("orgTypeId", null);
     org.put("orgType", null);
     return org;
-  }
-
-  public static void removeUnwantedFields(Map<String, Object> org) {
-    org.remove("locationIds", null);
-  }
-
-  public static void removeOrgUnwantedFields(Map<String, Object> org) {
-    org.remove("dateTime", null);
-    org.remove("preferredLanguage", null);
-    org.remove("approvedBy", null);
-    org.remove("addressId", null);
-    org.remove("approvedDate", null);
-    org.remove("communityId", null);
-    org.remove("homeUrl", null);
-    org.remove("imgUrl", null);
-    org.remove("isApproved", null);
-    org.remove("locationId", null);
-    org.remove("noOfMembers", null);
-    org.remove("orgCode", null);
-    org.remove("theme", null);
-    org.remove("thumbnail", null);
-    org.remove("isDefault", null);
-    org.remove("parentOrgId", null);
-    org.remove("orgTypeId", null);
-    org.remove("orgType", null);
-    org.remove("locationIds", null);
   }
 }
