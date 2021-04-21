@@ -69,7 +69,7 @@ public class PrintEntryExitLog {
         if (MapUtils.isNotEmpty(response.getResult())) {
           if (null != url && url.equalsIgnoreCase("/private/user/v1/lookup")) {
             if (null != url && CollectionUtils.isNotEmpty(
-                    (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE))) {
+                (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE))) {
               List<Map<String, Object>> resList =
                   (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
               params.add(resList.get(0));
