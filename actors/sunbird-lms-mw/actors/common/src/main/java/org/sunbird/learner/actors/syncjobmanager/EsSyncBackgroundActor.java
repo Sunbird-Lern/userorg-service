@@ -120,25 +120,37 @@ public class EsSyncBackgroundActor extends BaseActor {
       if (CollectionUtils.isNotEmpty(responseList)) {
         for (Map<String, Object> map : responseList) {
           String objectId = (String) map.get(JsonKey.ID);
-          logger.info(
-              requestContext,
-              "EsSyncBackgroundActor:handleOrgAndLocationSync for objectType :"
-                  + objectType
-                  + " for id : "
-                  + map.get(JsonKey.ID));
-          String esResponse = "";
-          if (objectType.equals(JsonKey.ORGANISATION)) {
-            esResponse =
-                saveDataToEs(
-                    getType(objectType),
-                    objectId,
-                    getOrgDetails(map, requestContext),
-                    requestContext);
-          } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
-            esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
-          }
-          if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {
-            responseMap.put(objectId, ((objectId).equalsIgnoreCase((String) map.get(JsonKey.ID))));
+          try {
+            logger.info(
+                requestContext,
+                "EsSyncBackgroundActor:handleOrgAndLocationSync for objectType :"
+                    + objectType
+                    + " for id : "
+                    + map.get(JsonKey.ID));
+            String esResponse = "";
+            if (objectType.equals(JsonKey.ORGANISATION)) {
+              esResponse =
+                  saveDataToEs(
+                      getType(objectType),
+                      objectId,
+                      getOrgDetails(map, requestContext),
+                      requestContext);
+            } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
+              esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
+            }
+            if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {
+              responseMap.put(
+                  objectId, ((objectId).equalsIgnoreCase((String) map.get(JsonKey.ID))));
+            }
+          } catch (Exception ex) {
+            logger.error(
+                requestContext,
+                "Exception occurred while making sync call for "
+                    + objectType
+                    + ", id : "
+                    + objectId,
+                ex);
+            responseMap.put(objectId, false);
           }
         }
       } else {
@@ -155,26 +167,34 @@ public class EsSyncBackgroundActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(objectIds)) {
       Map<String, Object> esResponse = new HashMap<>();
       for (Object userId : objectIds) {
-        logger.info(
-            context,
-            "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
-        Map<String, Object> userDetails = Util.getUserDetails((String) userId, context);
-        if (MapUtils.isNotEmpty(userDetails)) {
+        try {
           logger.info(
               context,
-              "EsSyncBackgroundActor:handleUserSyncRequest user rootOrgId :"
-                  + userDetails.get(JsonKey.ROOT_ORG_ID)
-                  + ", userId : "
-                  + userDetails.get(JsonKey.ID));
-          String response =
-              saveDataToEs(
-                  ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
-          if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
-            esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
+              "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
+          Map<String, Object> userDetails = Util.getUserDetails((String) userId, context);
+          if (MapUtils.isNotEmpty(userDetails)) {
+            logger.info(
+                context,
+                "EsSyncBackgroundActor:handleUserSyncRequest user rootOrgId :"
+                    + userDetails.get(JsonKey.ROOT_ORG_ID)
+                    + ", userId : "
+                    + userDetails.get(JsonKey.ID));
+            String response =
+                saveDataToEs(
+                    ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
+            if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
+              esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
+            }
+          } else {
+            logger.info(
+                context, "EsSyncBackgroundActor:handleUserSyncRequest invalid userId " + userId);
           }
-        } else {
-          logger.info(
-              context, "EsSyncBackgroundActor:handleUserSyncRequest invalid userId " + userId);
+        } catch (Exception ex) {
+          logger.error(
+              context,
+              "Exception occurred while making sync call for user with id : " + userId,
+              ex);
+          finalResponse.put((String) userId, false);
         }
       }
       finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, esResponse);
