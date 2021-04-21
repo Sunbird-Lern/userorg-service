@@ -76,7 +76,7 @@ public class TelemetryWriter {
         (List<Map<String, Object>>) request.get(JsonKey.CORRELATED_OBJECTS);
     Map<String, Object> params = (Map<String, Object>) request.get(JsonKey.PARAMS);
     Map<String, Object> props = (Map<String, Object>) params.get(JsonKey.PROPS);
-    if (props.containsKey(JsonKey.TYPE)) {
+    if (props != null && props.containsKey(JsonKey.TYPE)) {
       String type = (String) props.get(JsonKey.TYPE);
       params.put(JsonKey.TYPE, type);
     }
