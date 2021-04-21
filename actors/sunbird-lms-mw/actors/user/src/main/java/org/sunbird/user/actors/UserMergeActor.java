@@ -245,7 +245,7 @@ public class UserMergeActor extends UserBaseActor {
         TelemetryUtil.generateTargetObject(
             (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
             TelemetryEnvKey.USER,
-            JsonKey.UPDATE_USER,
+            JsonKey.UPDATE,
             null);
     TelemetryUtil.generateCorrelatedObject(
         (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),

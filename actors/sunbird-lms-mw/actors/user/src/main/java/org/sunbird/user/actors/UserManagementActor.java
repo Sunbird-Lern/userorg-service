@@ -80,7 +80,17 @@ import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
-  tasks = {"createUser", "updateUser", "createUserV3", "createUserV4", "getManagedUsers"},
+  tasks = {
+    "createUser",
+    "createSSOUser",
+    "updateUser",
+    "updateUserV2",
+    "createUserV3",
+    "createUserV4",
+    "createManagedUser",
+    "createSSUUser",
+    "getManagedUsers"
+  },
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -115,13 +125,25 @@ public class UserManagementActor extends BaseActor {
       case "createUser": // create User [v1,v2,v3]
         createUser(request);
         break;
+      case "createSSOUser":
+        createUser(request);
+        break;
       case "updateUser":
         updateUser(request);
         break;
-      case "createUserV3": // signup [/v1/user/signup]
+      case "updateUserV2":
+        updateUser(request);
+        break;
+      case "createSSUUser":
         createUserV3(request);
         break;
-      case "createUserV4": // managedUser creation
+      case "createUserV3":
+        createUserV3(request);
+        break;
+      case "createUserV4":
+        createUserV4(request);
+        break;
+      case "createManagedUser": // managedUser creation new version
         createUserV4(request);
         break;
       case "getManagedUsers": // managedUser search
@@ -152,6 +174,12 @@ public class UserManagementActor extends BaseActor {
   private void createUserV4(Request actorMessage) {
     logger.info(
         actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
+    Map<String, Object> userMap = actorMessage.getRequest();
+    if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
+    }
     validateLocationCodes(actorMessage);
     createUserV3_V4(actorMessage, true);
   }
@@ -186,6 +214,11 @@ public class UserManagementActor extends BaseActor {
       // If managedUser limit is set, validate total number of managed users against it
       UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
     } else {
+      if (actorMessage
+          .getOperation()
+          .equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+        setProfileUsertypeAndLocation(userMap, actorMessage);
+      }
       profileUserType(userMap, actorMessage.getRequestContext());
     }
     processUserRequestV3_V4(userMap, signupType, source, managedBy, actorMessage);
@@ -218,6 +251,9 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
+    }
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -634,6 +670,9 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
     }
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSO_USER.getValue())) {
+      setProfileUsertypeAndLocation(userMap, actorMessage);
+    }
     validateLocationCodes(actorMessage);
     validateChannelAndOrganisationId(userMap, actorMessage.getRequestContext());
     validatePrimaryAndRecoveryKeys(userMap);
@@ -831,7 +870,36 @@ public class UserManagementActor extends BaseActor {
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
-      Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
+      // create an enum for associationMechanism
+      if ((actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue()))
+          || (actorMessage
+              .getOperation()
+              .equalsIgnoreCase(ActorOperations.CREATE_USER_V3.getValue()))) {
+        if ((userMap.containsKey(JsonKey.ORGANISATION_ID))
+            || (userMap.containsKey(JsonKey.EXTERNAL_IDS))) {
+          userMap.put(
+              JsonKey.ASSOCIATION_TYPE,
+              AssociationMechanismEnum.getValueByType(JsonKey.SELF_DECLARATION));
+        }
+      }
+      Map<String, Object> orgMap =
+          saveUserOrgInfo(
+              userMap,
+              actorMessage
+                  .getRequestContext()); // add values associationMechanism and additionalValues to
+                                         // userMap
+      // Decrypt the bitset of associationMechanism to Map of flags and then add that to es
+      //      Integer associationMechanism = orgMap.get(JsonKey.ASSOCIATION_MECHANISM);
+      //      for(
+      //      int getBit(int n, int k) {
+      //        return (n >> k) & 1;
+      //      })
+      //      create a method to getType by passing value - update the associationtype in usermap
+      // with true flag
+      if (userMap.containsKey(JsonKey.ASSOCIATION_TYPE)) {
+        userMap.put(JsonKey.IS_SSO, false);
+        userMap.remove(JsonKey.ASSOCIATION_TYPE);
+      }
       esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
     } else {
       logger.info(
@@ -929,7 +997,9 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
+    Map<String, Object> userOrgMap =
+        createUserOrgRequestData(
+            userMap); // add values associationMechanism and additionalValues to userOrgMap
     cassandraOperation.insertRecord(
         userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
 
@@ -993,6 +1063,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
+    //    userOrgMap.put(JsonKey.ASSOCIATION_MECHANISM, userMap.get(JsonKey.associationtype));
     return userOrgMap;
   }
 
@@ -1224,7 +1295,6 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
-
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
@@ -1624,6 +1694,7 @@ public class UserManagementActor extends BaseActor {
 
   private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
     Map<String, String> userTypeAndSubType = new HashMap<>();
+    userMap.remove(JsonKey.PROFILE_USERTYPE);
     if (userMap.containsKey(JsonKey.USER_TYPE)) {
       userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
       if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
@@ -1640,6 +1711,92 @@ public class UserManagementActor extends BaseActor {
 
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
+  }
+
+  private void setProfileUsertypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
+    if (!actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+        Map<String, Object> userTypeAndSubType =
+            (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+      }
+    }
+    if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
+      userMap.remove(JsonKey.LOCATION_CODES);
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        List<Map<String, String>> profLocList =
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+        List<String> locationCodes = null;
+        if (CollectionUtils.isNotEmpty(profLocList)) {
+          locationCodes =
+              profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+          userMap.put(JsonKey.LOCATION_CODES, locationCodes);
+        }
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
+    }
+  }
+
+  private enum AssociationMechanismEnum {
+    SSO("sso", 1),
+    SELF_DECLARATION("self_declaration", 2),
+    SYSTEM_UPLOAD("system_upload", 3);
+    private String type;
+    private int value;
+
+    AssociationMechanismEnum(String type, int value) {
+      this.type = type;
+      this.value = value;
+    }
+
+    public int getValue() {
+      return value;
+    }
+
+    public String getType() {
+      return type;
+    }
+
+    public static int getValueByType(String type) {
+      List<String> associationTypeList = new ArrayList<>();
+      for (AssociationMechanismEnum associationMechanism : AssociationMechanismEnum.values()) {
+        associationTypeList.add(associationMechanism.getType());
+        if (associationMechanism.getType().equalsIgnoreCase(type)) {
+          return associationMechanism.getValue();
+        }
+      }
+      throw new ProjectCommonException(
+          ResponseCode.invalidValue.getErrorCode(),
+          MessageFormat.format(
+              ResponseCode.invalidValue.getErrorMessage(),
+              JsonKey.ASSOCIATION_TYPE,
+              type,
+              associationTypeList),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
+    public static String getTypeByValue(int value) {
+      List<Integer> associationValueList = new ArrayList<>();
+      for (AssociationMechanismEnum associationMechanism : AssociationMechanismEnum.values()) {
+        associationValueList.add(associationMechanism.getValue());
+        if (associationValueList.contains(value)) {
+          return associationMechanism.getType();
+        }
+      }
+      throw new ProjectCommonException(
+          ResponseCode.invalidValue.getErrorCode(),
+          MessageFormat.format(
+              ResponseCode.invalidValue.getErrorMessage(),
+              JsonKey.ASSOCIATION_VALUE,
+              value,
+              associationValueList),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }
