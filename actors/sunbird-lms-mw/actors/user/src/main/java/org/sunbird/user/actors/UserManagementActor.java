@@ -870,36 +870,7 @@ public class UserManagementActor extends BaseActor {
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
-      // create an enum for associationMechanism
-      if ((actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue()))
-          || (actorMessage
-              .getOperation()
-              .equalsIgnoreCase(ActorOperations.CREATE_USER_V3.getValue()))) {
-        if ((userMap.containsKey(JsonKey.ORGANISATION_ID))
-            || (userMap.containsKey(JsonKey.EXTERNAL_IDS))) {
-          userMap.put(
-              JsonKey.ASSOCIATION_TYPE,
-              AssociationMechanismEnum.getValueByType(JsonKey.SELF_DECLARATION));
-        }
-      }
-      Map<String, Object> orgMap =
-          saveUserOrgInfo(
-              userMap,
-              actorMessage
-                  .getRequestContext()); // add values associationMechanism and additionalValues to
-                                         // userMap
-      // Decrypt the bitset of associationMechanism to Map of flags and then add that to es
-      //      Integer associationMechanism = orgMap.get(JsonKey.ASSOCIATION_MECHANISM);
-      //      for(
-      //      int getBit(int n, int k) {
-      //        return (n >> k) & 1;
-      //      })
-      //      create a method to getType by passing value - update the associationtype in usermap
-      // with true flag
-      if (userMap.containsKey(JsonKey.ASSOCIATION_TYPE)) {
-        userMap.put(JsonKey.IS_SSO, false);
-        userMap.remove(JsonKey.ASSOCIATION_TYPE);
-      }
+      Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
       esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
     } else {
       logger.info(
@@ -997,9 +968,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap =
-        createUserOrgRequestData(
-            userMap); // add values associationMechanism and additionalValues to userOrgMap
+    Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
     cassandraOperation.insertRecord(
         userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
 
@@ -1063,7 +1032,6 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
-    //    userOrgMap.put(JsonKey.ASSOCIATION_MECHANISM, userMap.get(JsonKey.associationtype));
     return userOrgMap;
   }
 
@@ -1740,63 +1708,6 @@ public class UserManagementActor extends BaseActor {
         }
         userMap.remove(JsonKey.PROFILE_LOCATION);
       }
-    }
-  }
-
-  private enum AssociationMechanismEnum {
-    SSO("sso", 1),
-    SELF_DECLARATION("self_declaration", 2),
-    SYSTEM_UPLOAD("system_upload", 3);
-    private String type;
-    private int value;
-
-    AssociationMechanismEnum(String type, int value) {
-      this.type = type;
-      this.value = value;
-    }
-
-    public int getValue() {
-      return value;
-    }
-
-    public String getType() {
-      return type;
-    }
-
-    public static int getValueByType(String type) {
-      List<String> associationTypeList = new ArrayList<>();
-      for (AssociationMechanismEnum associationMechanism : AssociationMechanismEnum.values()) {
-        associationTypeList.add(associationMechanism.getType());
-        if (associationMechanism.getType().equalsIgnoreCase(type)) {
-          return associationMechanism.getValue();
-        }
-      }
-      throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
-          MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(),
-              JsonKey.ASSOCIATION_TYPE,
-              type,
-              associationTypeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-
-    public static String getTypeByValue(int value) {
-      List<Integer> associationValueList = new ArrayList<>();
-      for (AssociationMechanismEnum associationMechanism : AssociationMechanismEnum.values()) {
-        associationValueList.add(associationMechanism.getValue());
-        if (associationValueList.contains(value)) {
-          return associationMechanism.getType();
-        }
-      }
-      throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
-          MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(),
-              JsonKey.ASSOCIATION_VALUE,
-              value,
-              associationValueList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }
