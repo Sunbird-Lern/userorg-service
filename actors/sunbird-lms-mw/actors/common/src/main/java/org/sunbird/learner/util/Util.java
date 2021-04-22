@@ -561,6 +561,9 @@ public final class Util {
     reqMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     reqMap.put(JsonKey.IS_DELETED, false);
+    if ((context.getOp()).equals("createSSOUser")) {
+      reqMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanismEnum.getValueByType(JsonKey.SSO));
+    }
     if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {
       reqMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.HASHTAGID));
     }
