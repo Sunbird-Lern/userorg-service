@@ -26,6 +26,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
@@ -151,6 +152,78 @@ public class EsSyncBackgroundActorTest {
     ids.add("1544646556");
     reqMap.put(JsonKey.OBJECT_IDS, ids);
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void testSyncUserFailure() {
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetOrgRecord());
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.FIRST_NAME, "firstName");
+    when(Util.getUserDetails(Mockito.anyString(), Mockito.any())).thenReturn(user);
+    Promise<String> esPromise = Futures.promise();
+    esPromise.failure(new Exception());
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenThrow(
+            new ProjectCommonException(
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode()));
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
+    reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    subject.tell(reqObj, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void testSyncOrgFailure2() {
+    when(cassandraOperation.getRecordsByProperty(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList(),
+            Mockito.any()))
+        .thenReturn(cassandraGetOrgRecord());
+    Map<String, Object> org = new HashMap<>();
+    org.put(JsonKey.FIRST_NAME, "firstName");
+    when(Util.getOrgDetails(Mockito.anyString(), Mockito.any())).thenReturn(org);
+    Promise<String> esPromise = Futures.promise();
+    esPromise.failure(new Exception());
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenThrow(
+            new ProjectCommonException(
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode()));
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.BACKGROUND_SYNC.getValue());
+    Map<String, Object> reqMap = new HashMap<>();
+    List<String> ids = new ArrayList<>();
+    ids.add("1544646556");
+    reqMap.put(JsonKey.OBJECT_IDS, ids);
+    reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
     reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     subject.tell(reqObj, probe.getRef());
