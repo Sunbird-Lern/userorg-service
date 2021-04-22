@@ -105,10 +105,10 @@ public class UserProfileReadServiceTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
-    Map<String, Object> userList = new HashMap<>();
-    userList.put(JsonKey.USER_ID, "1234");
-    userList.put(JsonKey.IS_DELETED, false);
-    resp.add(userList);
+    Map<String, Object> resMap = new HashMap<>();
+    resMap.put(JsonKey.USER_ID, "1234");
+    resMap.put(JsonKey.IS_DELETED, false);
+    resp.add(resMap);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -291,10 +291,10 @@ public class UserProfileReadServiceTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
-    Map<String, Object> userList = new HashMap<>();
-    userList.put(JsonKey.USER_ID, "1234");
-    userList.put(JsonKey.IS_DELETED, false);
-    resp.add(userList);
+    Map<String, Object> resMap = new HashMap<>();
+    resMap.put(JsonKey.USER_ID, "1234");
+    resMap.put(JsonKey.IS_DELETED, false);
+    resp.add(resMap);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -335,8 +335,11 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
+
+    Map userResponseMap = getValidUserResponse("1234567890");
+    userResponseMap.remove(JsonKey.ROOT_ORG_ID);
     Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(getValidUserResponse("1234567890"));
+        .thenReturn(userResponseMap);
 
     UserOrgDao userOrgDao = PowerMockito.mock(UserOrgDao.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
