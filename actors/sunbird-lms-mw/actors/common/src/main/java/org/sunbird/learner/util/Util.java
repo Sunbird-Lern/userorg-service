@@ -1003,6 +1003,12 @@ public final class Util {
     user.put("tempPassword", null);
     user.put("thumbnail", null);
     user.put("registryId", null);
+    user.put("accesscode", null);
+    user.put("subject", null);
+    user.put("webPages", null);
+    user.put("currentLoginTime", null);
+    user.put("password", null);
+    user.put("loginId", null);
     return user;
   }
 
