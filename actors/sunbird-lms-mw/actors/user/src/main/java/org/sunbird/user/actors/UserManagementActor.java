@@ -1705,11 +1705,11 @@ public class UserManagementActor extends BaseActor {
       userMap.remove(JsonKey.LOCATION_CODES);
       if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
         List<Map<String, String>> profLocList =
-                (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
         List<String> locationCodes = null;
         if (CollectionUtils.isNotEmpty(profLocList)) {
           locationCodes =
-                  profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+              profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
           userMap.put(JsonKey.LOCATION_CODES, locationCodes);
         }
         userMap.remove(JsonKey.PROFILE_LOCATION);

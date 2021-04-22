@@ -164,7 +164,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithOrgExternalIdNewVersion() {
-    reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
         testScenario(
             getRequest(
