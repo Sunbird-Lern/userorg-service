@@ -165,6 +165,7 @@ public class UserProfileReadServiceTest {
     org.put(JsonKey.ORG_NAME, "org name");
     org.put(JsonKey.HASHTAGID, "4578963210");
     org.put(JsonKey.CHANNEL, "channel");
+    org.put(JsonKey.ORGANISATION_TYPE, 2);
     List<String> locIds = new ArrayList<>();
     locIds.add("location1");
     locIds.add("location2");
@@ -175,7 +176,7 @@ public class UserProfileReadServiceTest {
     orgRes.getResult().put(JsonKey.RESPONSE, orgList);
 
     Map<String, Object> locn = new HashMap<>();
-    org.put(JsonKey.ID, "location1");
+    locn.put(JsonKey.ID, "location1");
     locn.put(JsonKey.CODE, "code1");
     locn.put(JsonKey.NAME, "locn 1");
     locn.put(JsonKey.TYPE, "state");
@@ -225,6 +226,7 @@ public class UserProfileReadServiceTest {
                 Mockito.anyList(),
                 Mockito.anyList(),
                 Mockito.any()))
+        .thenReturn(orgRes)
         .thenReturn(orgRes)
         .thenReturn(orgRes)
         .thenReturn(orgRes)
@@ -349,6 +351,7 @@ public class UserProfileReadServiceTest {
     org.put(JsonKey.ORG_NAME, "org name");
     org.put(JsonKey.HASHTAGID, "4578963210");
     org.put(JsonKey.CHANNEL, "channel");
+    org.put(JsonKey.ORGANISATION_TYPE, 2);
     List<String> locIds = new ArrayList<>();
     locIds.add("location1");
     locIds.add("location2");
@@ -359,7 +362,7 @@ public class UserProfileReadServiceTest {
     orgRes.getResult().put(JsonKey.RESPONSE, orgList);
 
     Map<String, Object> locn = new HashMap<>();
-    org.put(JsonKey.ID, "location1");
+    locn.put(JsonKey.ID, "location1");
     locn.put(JsonKey.CODE, "code1");
     locn.put(JsonKey.NAME, "locn 1");
     locn.put(JsonKey.TYPE, "state");
