@@ -34,6 +34,7 @@ public final class JsonKey {
   public static final String API_CALL = "API_CALL";
   public static final String APPROVED_BY = "approvedBy";
   public static final String APPROVED_DATE = "approvedDate";
+  public static final String ASSOCIATION_TYPE = "associationType";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
   public static final String AUTH_WITH_MASTER_KEY = "authWithMasterKey";
   public static final String AUTHORIZATION = "Authorization";
@@ -134,6 +135,7 @@ public final class JsonKey {
   public static final String IS_APPROVED = "isApproved";
   public static final String IS_AUTH_REQ = "isAuthReq";
   public static final String IS_DELETED = "isDeleted";
+  public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";
   public static final String LAST_LOGIN_TIME = "lastLoginTime";
@@ -548,6 +550,7 @@ public final class JsonKey {
   public static final String SUBMITTED = "SUBMITTED";
   public static final String VALIDATED = "VALIDATED";
   public static final String REJECTED = "REJECTED";
+  public static final String SELF_DECLARATION = "self_Declaration";
   public static final String SELF_DECLARED_ERROR = "ERROR";
   public static final String SELF_DECLARED_MANDATORY_FIELDS = "self_declared_mandatory_fields";
   public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";

@@ -73,6 +73,7 @@ import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.user.util.AssociationMechanismEnum;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
@@ -871,6 +872,8 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
       Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
+      orgMap.remove(JsonKey.ASSOCIATION_TYPE);
+      orgMap.put(JsonKey.IS_SELF_DECLARATION, true); // will come under organisations in response
       esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
     } else {
       logger.info(
@@ -1032,6 +1035,9 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
+    userOrgMap.put(
+        JsonKey.ASSOCIATION_TYPE,
+        AssociationMechanismEnum.getValueByType(JsonKey.SELF_DECLARATION));
     return userOrgMap;
   }
 
@@ -1699,11 +1705,11 @@ public class UserManagementActor extends BaseActor {
       userMap.remove(JsonKey.LOCATION_CODES);
       if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
         List<Map<String, String>> profLocList =
-                (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
         List<String> locationCodes = null;
         if (CollectionUtils.isNotEmpty(profLocList)) {
           locationCodes =
-                  profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+              profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
           userMap.put(JsonKey.LOCATION_CODES, locationCodes);
         }
         userMap.remove(JsonKey.PROFILE_LOCATION);
