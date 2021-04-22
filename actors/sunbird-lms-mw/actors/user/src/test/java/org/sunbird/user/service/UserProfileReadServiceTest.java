@@ -105,10 +105,10 @@ public class UserProfileReadServiceTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
-    Map<String, Object> userList = new HashMap<>();
-    userList.put(JsonKey.USER_ID, "1234");
-    userList.put(JsonKey.IS_DELETED, false);
-    resp.add(userList);
+    Map<String, Object> resMap = new HashMap<>();
+    resMap.put(JsonKey.USER_ID, "1234");
+    resMap.put(JsonKey.IS_DELETED, false);
+    resp.add(resMap);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -165,6 +165,7 @@ public class UserProfileReadServiceTest {
     org.put(JsonKey.ORG_NAME, "org name");
     org.put(JsonKey.HASHTAGID, "4578963210");
     org.put(JsonKey.CHANNEL, "channel");
+    org.put(JsonKey.ORGANISATION_TYPE, 2);
     List<String> locIds = new ArrayList<>();
     locIds.add("location1");
     locIds.add("location2");
@@ -175,7 +176,7 @@ public class UserProfileReadServiceTest {
     orgRes.getResult().put(JsonKey.RESPONSE, orgList);
 
     Map<String, Object> locn = new HashMap<>();
-    org.put(JsonKey.ID, "location1");
+    locn.put(JsonKey.ID, "location1");
     locn.put(JsonKey.CODE, "code1");
     locn.put(JsonKey.NAME, "locn 1");
     locn.put(JsonKey.TYPE, "state");
@@ -225,6 +226,7 @@ public class UserProfileReadServiceTest {
                 Mockito.anyList(),
                 Mockito.anyList(),
                 Mockito.any()))
+        .thenReturn(orgRes)
         .thenReturn(orgRes)
         .thenReturn(orgRes)
         .thenReturn(orgRes)
@@ -289,10 +291,10 @@ public class UserProfileReadServiceTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
-    Map<String, Object> userList = new HashMap<>();
-    userList.put(JsonKey.USER_ID, "1234");
-    userList.put(JsonKey.IS_DELETED, false);
-    resp.add(userList);
+    Map<String, Object> resMap = new HashMap<>();
+    resMap.put(JsonKey.USER_ID, "1234");
+    resMap.put(JsonKey.IS_DELETED, false);
+    resp.add(resMap);
     response.put(JsonKey.RESPONSE, resp);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -333,8 +335,11 @@ public class UserProfileReadServiceTest {
     PowerMockito.mockStatic(Util.class);
     Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
         .thenReturn(getUserDbMap("1234567890"));
+
+    Map userResponseMap = getValidUserResponse("1234567890");
+    userResponseMap.remove(JsonKey.ROOT_ORG_ID);
     Mockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(getValidUserResponse("1234567890"));
+        .thenReturn(userResponseMap);
 
     UserOrgDao userOrgDao = PowerMockito.mock(UserOrgDao.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
@@ -349,6 +354,7 @@ public class UserProfileReadServiceTest {
     org.put(JsonKey.ORG_NAME, "org name");
     org.put(JsonKey.HASHTAGID, "4578963210");
     org.put(JsonKey.CHANNEL, "channel");
+    org.put(JsonKey.ORGANISATION_TYPE, 2);
     List<String> locIds = new ArrayList<>();
     locIds.add("location1");
     locIds.add("location2");
@@ -359,7 +365,7 @@ public class UserProfileReadServiceTest {
     orgRes.getResult().put(JsonKey.RESPONSE, orgList);
 
     Map<String, Object> locn = new HashMap<>();
-    org.put(JsonKey.ID, "location1");
+    locn.put(JsonKey.ID, "location1");
     locn.put(JsonKey.CODE, "code1");
     locn.put(JsonKey.NAME, "locn 1");
     locn.put(JsonKey.TYPE, "state");

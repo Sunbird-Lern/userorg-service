@@ -137,7 +137,7 @@ public class UserManagementActor extends BaseActor {
       case "createSSUUser":
         createUserV3(request);
         break;
-      case "createUserV3V2":
+      case "createUserV3":
         createUserV3(request);
         break;
       case "createUserV4":

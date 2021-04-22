@@ -37,6 +37,7 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -77,6 +78,7 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage);
+    result.putAll(Util.getUserDefaultValue());
     Map<String, Object> rootOrg =
         orgDao.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
@@ -85,7 +87,7 @@ public class UserProfileReadService {
       if (actorMessage
           .getOperation()
           .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-        Util.removeOrgUnwantedFields(rootOrg);
+        Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
       }
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
@@ -146,7 +148,7 @@ public class UserProfileReadService {
     if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-      Util.removeUserUnwantedFields(result);
+      Util.getUserDefaultValue().keySet().stream().forEach(key -> result.remove(key));
     }
 
     Response response = new Response();
@@ -612,7 +614,8 @@ public class UserProfileReadService {
               JsonKey.ORG_LOCATION,
               JsonKey.LOCATION_IDS,
               JsonKey.ID,
-              JsonKey.EXTERNAL_ID);
+              JsonKey.EXTERNAL_ID,
+              JsonKey.ORGANISATION_TYPE);
       Response userOrgResponse =
           cassandraOperation.getPropertiesValueById(
               OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
@@ -682,6 +685,12 @@ public class UserProfileReadService {
         usrOrg.put(JsonKey.LOCATION_IDS, orgInfo.get(JsonKey.LOCATION_IDS));
         usrOrg.put(JsonKey.ORG_LOCATION, orgInfo.get(JsonKey.ORG_LOCATION));
         usrOrg.put(JsonKey.EXTERNAL_ID, orgInfo.get(JsonKey.EXTERNAL_ID));
+        if (null != orgInfo.get(JsonKey.ORGANISATION_TYPE)) {
+          int orgType = (int) orgInfo.get(JsonKey.ORGANISATION_TYPE);
+          boolean isSchool =
+              (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+          usrOrg.put(JsonKey.IS_SCHOOL, isSchool);
+        }
         if (MapUtils.isNotEmpty(locationInfoMap)) {
           usrOrg.put(
               JsonKey.LOCATIONS,
