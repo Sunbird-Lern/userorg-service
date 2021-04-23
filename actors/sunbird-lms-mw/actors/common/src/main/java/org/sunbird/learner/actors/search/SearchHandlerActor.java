@@ -26,6 +26,7 @@ import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Future;
@@ -142,27 +143,33 @@ public class SearchHandlerActor extends BaseActor {
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
         if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
-          if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
-            userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-            userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
-            userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-            userMap.putAll(Util.getUserDefaultValue());
-          } else {
-            userMap.put(JsonKey.USER_TYPE, null);
-            userMap.put(JsonKey.USER_SUB_TYPE, null);
+          if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+            if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+              userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+              userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
+              userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
+            } else {
+              userMap.put(JsonKey.USER_TYPE, null);
+              userMap.put(JsonKey.USER_SUB_TYPE, null);
+            }
           }
-          if (CollectionUtils.isNotEmpty(
-              (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
-            userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-            locationIds =
-                userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+          if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+            if (CollectionUtils.isNotEmpty(
+                (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+              userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+              locationIds =
+                  userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+              userMap.put(JsonKey.LOCATION_IDS, locationIds);
+            } else {
+              userMap.put(JsonKey.LOCATION_IDS, null);
+            }
           }
-          userMap.put(JsonKey.LOCATION_IDS, locationIds);
+          userMap.putAll(userDefaultFieldValue);
         } else {
           userMap.remove(JsonKey.USER_TYPE);
           userMap.remove(JsonKey.USER_SUB_TYPE);
           userMap.remove(JsonKey.LOCATION_IDS);
-          Util.removeUserUnwantedFields(userMap);
+          Util.getUserDefaultValue().keySet().stream().forEach(key -> userMap.remove(key));
         }
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
@@ -195,6 +202,8 @@ public class SearchHandlerActor extends BaseActor {
                     request.getRequestContext(),
                     "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
                 Response response = new Response();
+                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+                getDefaultValues(orgDefaultFieldValue, fields);
                 List<Map<String, Object>> contents =
                     (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
                 contents
@@ -204,12 +213,28 @@ public class SearchHandlerActor extends BaseActor {
                           if (request
                               .getOperation()
                               .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-                            Util.removeOrgUnwantedFields(org);
+                            Util.getOrgDefaultValue()
+                                .keySet()
+                                .stream()
+                                .forEach(key -> org.remove(key));
+                            org.remove(JsonKey.LOCATION_IDS);
+                          } else {
+                            // Put all default value for backward compatibility
+                            org.putAll(orgDefaultFieldValue);
                           }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))
                               || (CollectionUtils.isEmpty(fields))) {
                             org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
+                          if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
+                            int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
+                            boolean isSchool =
+                                (orgType
+                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                                    ? true
+                                    : false;
+                            org.put(JsonKey.IS_SCHOOL, isSchool);
                           }
                         });
                 response.put(JsonKey.RESPONSE, responseMap);
