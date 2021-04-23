@@ -15,13 +15,9 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.common.models.util.*;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.ProjectUtil.OrgStatus;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
@@ -561,9 +557,7 @@ public final class Util {
     reqMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     reqMap.put(JsonKey.IS_DELETED, false);
-    if ((context.getOp()).equals("createSSOUser")) {
-      reqMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanismEnum.getValueByType(JsonKey.SSO));
-    }
+    reqMap.put(JsonKey.ASSOCIATION_TYPE, userMap.get(JsonKey.ASSOCIATION_TYPE));
     if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {
       reqMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.HASHTAGID));
     }

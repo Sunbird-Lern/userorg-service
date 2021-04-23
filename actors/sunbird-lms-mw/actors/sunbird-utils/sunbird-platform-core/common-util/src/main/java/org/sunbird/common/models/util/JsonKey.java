@@ -624,6 +624,8 @@ public final class JsonKey {
   public static final String ES_SYNC_RESPONSE = "esSyncResponse";
   public static final String ASSOCIATION_TYPE = "associationType";
   public static final String SSO = "sso";
+  public static final String SELF_DECLARATION = "self_Declaration";
+  public static final String IS_SSO = "isSSO";
 
   private JsonKey() {}
 }
