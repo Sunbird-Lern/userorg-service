@@ -872,8 +872,7 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
       Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
-      orgMap.remove(JsonKey.ASSOCIATION_TYPE);
-      orgMap.put(JsonKey.IS_SELF_DECLARATION, true); // will come under organisations in response
+      orgMap.put(JsonKey.IS_SELF_DECLARATION, true);
       esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
     } else {
       logger.info(
@@ -1036,7 +1035,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     userOrgMap.put(
-        JsonKey.ASSOCIATION_TYPE,
+        JsonKey.ASSOCIATION_MECHANISM,
         AssociationMechanismEnum.getValueByType(JsonKey.SELF_DECLARATION));
     return userOrgMap;
   }

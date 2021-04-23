@@ -39,7 +39,7 @@ public enum AssociationMechanismEnum {
         ResponseCode.invalidValue.getErrorCode(),
         MessageFormat.format(
             ResponseCode.invalidValue.getErrorMessage(),
-            JsonKey.ASSOCIATION_TYPE,
+            JsonKey.ASSOCIATION_MECHANISM,
             type,
             associationTypeList),
         ResponseCode.CLIENT_ERROR.getResponseCode());
