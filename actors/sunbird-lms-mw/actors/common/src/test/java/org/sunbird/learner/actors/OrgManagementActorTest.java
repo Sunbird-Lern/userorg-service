@@ -199,6 +199,35 @@ public class OrgManagementActorTest {
   }
 
   @Test
+  public void testGetOrgDetails() {
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.ORGANISATION_ID, "54652139879");
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getByIdEsResponse(false));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetOrgDetailsFailure() {
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.ORGANISATION_ID, "54652139879");
+    Promise<Map<String, Object>> promise = Futures.promise();
+    Map<String, Object> esRes = getByIdEsResponse(true);
+    promise.success(esRes);
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()),
+            ResponseCode.orgDoesNotExist);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateOrgSuccess() {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -467,9 +496,21 @@ public class OrgManagementActorTest {
       content.put(JsonKey.ORGANISATION_ID, "orgId");
       content.put(JsonKey.HASHTAGID, "hashtagId");
       content.put(JsonKey.ID, "id");
+      content.put(JsonKey.ORGANISATION_TYPE, 2);
       contentList.add(content);
     }
     response.put(JsonKey.CONTENT, contentList);
+    return response;
+  }
+
+  private Map<String, Object> getByIdEsResponse(boolean empty) {
+    Map<String, Object> response = new HashMap<>();
+    if (!empty) {
+      response.put(JsonKey.ORGANISATION_ID, "orgId");
+      response.put(JsonKey.HASHTAGID, "hashtagId");
+      response.put(JsonKey.ID, "id");
+      response.put(JsonKey.ORGANISATION_TYPE, 2);
+    }
     return response;
   }
 

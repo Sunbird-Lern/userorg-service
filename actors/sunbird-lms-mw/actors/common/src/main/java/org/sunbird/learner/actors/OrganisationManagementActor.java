@@ -570,8 +570,15 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
-
+    if (MapUtils.isNotEmpty(result)) {
+      result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+      if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
+        int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
+        boolean isSchool =
+            (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+        result.put(JsonKey.IS_SCHOOL, isSchool);
+      }
+    }
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
           ResponseCode.orgDoesNotExist.getErrorCode(),
