@@ -135,7 +135,6 @@ public final class JsonKey {
   public static final String IS_APPROVED = "isApproved";
   public static final String IS_AUTH_REQ = "isAuthReq";
   public static final String IS_DELETED = "isDeleted";
-  public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";
   public static final String LAST_LOGIN_TIME = "lastLoginTime";
@@ -550,7 +549,6 @@ public final class JsonKey {
   public static final String SUBMITTED = "SUBMITTED";
   public static final String VALIDATED = "VALIDATED";
   public static final String REJECTED = "REJECTED";
-  public static final String SELF_DECLARATION = "self_Declaration";
   public static final String SELF_DECLARED_ERROR = "ERROR";
   public static final String SELF_DECLARED_MANDATORY_FIELDS = "self_declared_mandatory_fields";
   public static final String SELF_DECLARED_OPTIONAL_FIELDS = "self_declared_optional_fields";
