@@ -1035,7 +1035,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     userOrgMap.put(
-        JsonKey.ASSOCIATION_MECHANISM,
+        JsonKey.ASSOCIATION_TYPE,
         AssociationMechanismEnum.getValueByType(JsonKey.SELF_DECLARATION));
     return userOrgMap;
   }
