@@ -5,11 +5,6 @@ public class AssociationMechanism {
   public static int SSO = 1;
   public static int SELF_DECLARATION = 2;
   public static int SYSTEM_UPLOAD = 4;
-
-  public AssociationMechanism(String associationName) {
-    this.associationName = associationName;
-  }
-
   private String associationName;
   private int associationType;
 

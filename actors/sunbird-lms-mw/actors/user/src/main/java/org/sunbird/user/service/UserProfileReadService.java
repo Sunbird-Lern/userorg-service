@@ -261,6 +261,16 @@ public class UserProfileReadService {
     for (Map<String, Object> userOrg : userOrgList) {
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
+        AssociationMechanism associationMechanism = new AssociationMechanism();
+        if (userOrg.containsKey(JsonKey.ASSOCIATION_TYPE)) {
+          int associationType = (int) userOrg.get(JsonKey.ASSOCIATION_TYPE);
+          associationMechanism.setAssociationType(associationType);
+          userOrg.put(JsonKey.IS_SSO, associationMechanism.isAssociationType(associationType));
+          userOrg.put(
+              JsonKey.IS_SELF_DECLARATION, associationMechanism.isAssociationType(associationType));
+          userOrg.put(
+              JsonKey.IS_SYSTEM_UPLOAD, associationMechanism.isAssociationType(associationType));
+        }
         usrOrgList.add(userOrg);
       }
     }
