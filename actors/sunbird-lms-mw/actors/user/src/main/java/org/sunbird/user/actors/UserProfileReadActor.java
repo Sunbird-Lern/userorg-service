@@ -41,7 +41,6 @@ import scala.concurrent.Future;
   tasks = {
     "getUserDetailsByLoginId",
     "getUserProfileV3",
-    "getUserProfileV4",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -64,9 +63,6 @@ public class UserProfileReadActor extends BaseActor {
     String operation = request.getOperation();
     switch (operation) {
       case "getUserProfileV3":
-        getUserProfileV3(request);
-        break;
-      case "getUserProfileV4":
         getUserProfileV3(request);
         break;
       case "getUserDetailsByLoginId":
