@@ -118,10 +118,10 @@ public class UserManagementActor extends BaseActor {
       case "updateUser":
         updateUser(request);
         break;
-      case "createUserV3":
+      case "createUserV3": // signup [/v1/user/signup]
         createUserV3(request);
         break;
-      case "createUserV4":// managedUser creation
+      case "createUserV4": // managedUser creation
         createUserV4(request);
         break;
       case "getManagedUsers": // managedUser search
@@ -1224,7 +1224,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
-    
+
     return esUtil.save(
         ProjectUtil.EsType.user.getTypeName(),
         (String) completeUserMap.get(JsonKey.USER_ID),
