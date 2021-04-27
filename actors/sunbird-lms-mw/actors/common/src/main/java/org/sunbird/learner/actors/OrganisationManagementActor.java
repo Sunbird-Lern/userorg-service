@@ -780,7 +780,9 @@ public class OrganisationManagementActor extends BaseActor {
           .stream()
           .forEach(
               loc -> {
-                finalLocList.add(loc.get(JsonKey.ID));
+                if (loc.containsKey(JsonKey.ID)) {
+                  finalLocList.add(loc.get(JsonKey.ID));
+                }
               });
       // If request orglocation is a list of map , which doesn't have location id, but has location
       // code
@@ -789,12 +791,15 @@ public class OrganisationManagementActor extends BaseActor {
             .stream()
             .forEach(
                 loc -> {
-                  finalLocList.add(loc.get(JsonKey.CODE));
+                  if (loc.containsKey(JsonKey.CODE)) {
+                    finalLocList.add(loc.get(JsonKey.CODE));
+                  }
                 });
-        locList =
-            validator.getValidatedLocationIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                (List<String>) request.get(JsonKey.LOCATION_CODE));
+        if (CollectionUtils.isNotEmpty(finalLocList)) {
+          locList =
+              validator.getValidatedLocationIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), finalLocList);
+        }
       }
     }
     List<String> locationIdsList =
