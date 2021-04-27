@@ -95,7 +95,7 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    // checking for Backword compatibility
+    // checking for Backward compatibility
     backwardCompatibility(searchQueryMap);
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
