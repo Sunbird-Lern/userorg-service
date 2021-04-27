@@ -146,16 +146,18 @@ public class BackgroundJobManager extends BaseActor {
         esMap = orgList.get(0);
         esMap.remove(JsonKey.CONTACT_DETAILS);
         String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
+        List orgLocationList = new ArrayList<>();
         if (StringUtils.isNotBlank(orgLocation)) {
           try {
             ObjectMapper mapper = new ObjectMapper();
-            esMap.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+            orgLocationList = mapper.readValue(orgLocation, List.class);
           } catch (Exception e) {
             logger.info(
                 actorMessage.getRequestContext(),
                 "Exception occurred while converting orgLocation to List<Map<String,String>>.");
           }
         }
+        esMap.put(JsonKey.ORG_LOCATION, orgLocationList);
       }
       // making call to register tag
       registertag(id, "{}", headerMap, actorMessage.getRequestContext());
