@@ -74,19 +74,4 @@ public class OrgController extends BaseController {
         EsType.organisation.getTypeName(),
         httpRequest);
   }
-
-  public CompletionStage<Result> searchV2(Http.Request httpRequest) {
-    return handleSearchRequest(
-        ActorOperations.ORG_SEARCH_V2.getValue(),
-        httpRequest.body().asJson(),
-        orgRequest -> {
-          new BaseRequestValidator().validateSearchRequest((Request) orgRequest);
-          return null;
-        },
-        null,
-        null,
-        getAllRequestHeaders(httpRequest),
-        EsType.organisation.getTypeName(),
-        httpRequest);
-  }
 }
