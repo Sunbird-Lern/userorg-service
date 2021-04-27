@@ -169,7 +169,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  //  @Test
+  @Test
   public void testCreateUserFailureWithInvalidChannelAndOrgId() {
 
     reqMap.put(JsonKey.CHANNEL, "anyReqChannel");
@@ -324,7 +324,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     user.put(JsonKey.EMAIL, "username@gmail.com");
     user.put(JsonKey.USERNAME, "username");
     user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
-    user.put(JsonKey.USER_TYPE, "rootOrgId");
     when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
         .thenReturn(true);
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
