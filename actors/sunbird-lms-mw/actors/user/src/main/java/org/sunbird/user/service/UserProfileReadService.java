@@ -168,7 +168,7 @@ public class UserProfileReadService {
     } catch (Exception e) {
       logger.error(
           actormessage.getRequestContext(),
-          "Exception because of mapper read value" + (String) result.get(JsonKey.PROFILE_USERTYPE),
+          "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPE),
           e);
     }
 
