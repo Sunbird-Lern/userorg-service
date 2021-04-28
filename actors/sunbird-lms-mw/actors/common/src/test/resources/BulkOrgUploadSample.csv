@@ -1,2 +1,2 @@
-orgName,isTenant,channel,externalId,provider,description,homeUrl,organisationType,contactDetail
-hello001,false,,1119,ugc,technical,googlehome,,"[{'name':'abcd','age':110},{'fax':123456}]"
+orgName,isTenant,channel,externalId,provider,description,homeUrl,organisationType,contactDetail,locationCode
+hello001,false,,1119,ugc,technical,googlehome,school,"[{'name':'abcd','age':110},{'fax':123456}]",40

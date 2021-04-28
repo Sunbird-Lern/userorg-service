@@ -166,7 +166,10 @@ public class UserProfileReadService {
                 new TypeReference<Map<String, Object>>() {});
       }
     } catch (Exception e) {
-      logger.error(actormessage.getRequestContext(), "Exception because of mapper read value", e);
+      logger.error(
+          actormessage.getRequestContext(),
+          "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPE),
+          e);
     }
 
     List<Map<String, String>> userLocList = new ArrayList<>();
@@ -183,7 +186,10 @@ public class UserProfileReadService {
         }
       }
     } catch (Exception ex) {
-      logger.error(actormessage.getRequestContext(), "Exception occurred while mapping", ex);
+      logger.error(
+          actormessage.getRequestContext(),
+          "Exception occurred while mapping " + (String) result.get(JsonKey.PROFILE_LOCATION),
+          ex);
     }
     if (actormessage
         .getOperation()
@@ -511,7 +517,15 @@ public class UserProfileReadService {
           List<Map<String, Object>> userLocations = getUserLocations(locationIds, context);
           if (CollectionUtils.isNotEmpty(userLocations)) {
             result.put(JsonKey.USER_LOCATIONS, userLocations);
-            addSchoolLocation(result, context);
+            // For adding school, request need to have fields=locations,organisations, as externalid
+            // id is populated with this request only
+            if (fields.contains(JsonKey.ORGANISATIONS)) {
+              try {
+                addSchoolLocation(result, context);
+              } catch (Exception e) {
+                logger.error("Not able to fetch school details in user read - user location", e);
+              }
+            }
             result.remove(JsonKey.LOCATION_IDS);
             result.remove(JsonKey.PROFILE_LOCATION);
           }
@@ -545,15 +559,20 @@ public class UserProfileReadService {
       for (int i = 0; i < organisations.size(); i++) {
         String organisationId = (String) organisations.get(i).get(JsonKey.ORGANISATION_ID);
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
-          Map<String, Object> filterMap = new HashMap<>();
-          Map<String, Object> searchQueryMap = new HashMap<>();
-          filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
-          filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
-          filterMap.put(JsonKey.CODE, organisations.get(i).get(JsonKey.EXTERNAL_ID));
-          searchQueryMap.put(JsonKey.FILTERS, filterMap);
-          Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
-          if (MapUtils.isNotEmpty(schoolLocation)) {
-            userLocation.add(schoolLocation);
+          if (StringUtils.isNotBlank((String) organisations.get(i).get(JsonKey.ORG_NAME))
+              && StringUtils.isNotBlank((String) organisations.get(i).get(JsonKey.EXTERNAL_ID))) {
+            Map<String, Object> filterMap = new HashMap<>();
+            Map<String, Object> searchQueryMap = new HashMap<>();
+            filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+            filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+            filterMap.put(JsonKey.CODE, organisations.get(i).get(JsonKey.EXTERNAL_ID));
+            searchQueryMap.put(JsonKey.FILTERS, filterMap);
+            Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
+            if (MapUtils.isNotEmpty(schoolLocation)) {
+              userLocation.add(schoolLocation);
+            }
+          } else {
+            logger.info(context, "School details are blank for orgid = " + organisationId);
           }
         }
       }
@@ -637,19 +656,24 @@ public class UserProfileReadService {
     for (Map<String, Object> org : orgInfoMap.values()) {
       List<String> locationIds = null;
       try {
-        List<Map<String, String>> orgLocList =
-            mapper.readValue(
-                (String) org.get(JsonKey.ORG_LOCATION),
-                new TypeReference<List<Map<String, String>>>() {});
-        if (CollectionUtils.isNotEmpty(orgLocList)) {
-          locationIds =
-              orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-          org.put(JsonKey.ORG_LOCATION, orgLocList);
-        } else {
-          org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
+        if (StringUtils.isNotBlank((String) org.get(JsonKey.ORG_LOCATION))) {
+          List<Map<String, String>> orgLocList =
+              mapper.readValue(
+                  (String) org.get(JsonKey.ORG_LOCATION),
+                  new TypeReference<List<Map<String, String>>>() {});
+          if (CollectionUtils.isNotEmpty(orgLocList)) {
+            locationIds =
+                orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+            org.put(JsonKey.ORG_LOCATION, orgLocList);
+          } else {
+            org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
+          }
         }
       } catch (Exception ex) {
-        logger.error(context, "Exception occurred while mapping", ex);
+        logger.error(
+            context,
+            "Exception occurred while mapping " + (String) org.get(JsonKey.ORG_LOCATION),
+            ex);
       }
       if (CollectionUtils.isNotEmpty(locationIds)) {
         locationIds.forEach(
