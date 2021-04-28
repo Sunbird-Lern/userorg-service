@@ -821,6 +821,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
+    userMap.remove(JsonKey.DOB_VALIDATION_DONE);
     Response response =
         cassandraOperation.insertRecord(
             usrDbInfo.getKeySpace(),
