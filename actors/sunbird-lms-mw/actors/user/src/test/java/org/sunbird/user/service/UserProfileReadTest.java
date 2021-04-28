@@ -168,6 +168,7 @@ public class UserProfileReadTest {
     org.put(JsonKey.HASHTAGID, "4578963210");
     org.put(JsonKey.CHANNEL, "channel");
     org.put(JsonKey.ORGANISATION_TYPE, 2);
+    org.put(JsonKey.ORG_LOCATION, "{orgLocation:45");
     List<String> locIds = new ArrayList<>();
     locIds.add("location1");
     locIds.add("location2");
