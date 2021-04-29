@@ -570,8 +570,15 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
-
+    if (MapUtils.isNotEmpty(result)) {
+      result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+      if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
+        int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
+        boolean isSchool =
+            (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+        result.put(JsonKey.IS_SCHOOL, isSchool);
+      }
+    }
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
           ResponseCode.orgDoesNotExist.getErrorCode(),
@@ -775,26 +782,31 @@ public class OrganisationManagementActor extends BaseActor {
       }
     } else {
       List<String> finalLocList = locList;
-      // If request orgLocation is a list of map , which has location id, not location code
+      // If request orglocation is a list of map , which has location id, not location code
       orgLocationList
           .stream()
           .forEach(
               loc -> {
-                finalLocList.add(loc.get(JsonKey.ID));
+                if (loc.containsKey(JsonKey.ID)) {
+                  finalLocList.add(loc.get(JsonKey.ID));
+                }
               });
-      // If request orgLocation is a list of map , which doesn't have location id, but has location
+      // If request orglocation is a list of map , which doesn't have location id, but has location
       // code
       if (CollectionUtils.isEmpty(finalLocList)) {
         orgLocationList
             .stream()
             .forEach(
                 loc -> {
-                  finalLocList.add(loc.get(JsonKey.CODE));
+                  if (loc.containsKey(JsonKey.CODE)) {
+                    finalLocList.add(loc.get(JsonKey.CODE));
+                  }
                 });
-        locList =
-            validator.getValidatedLocationIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                (List<String>) request.get(JsonKey.LOCATION_CODE));
+        if (CollectionUtils.isNotEmpty(finalLocList)) {
+          locList =
+              validator.getValidatedLocationIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), finalLocList);
+        }
       }
     }
     List<String> locationIdsList =
