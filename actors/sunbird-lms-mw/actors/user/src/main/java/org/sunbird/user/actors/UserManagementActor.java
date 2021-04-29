@@ -253,6 +253,13 @@ public class UserManagementActor extends BaseActor {
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       setProfileUsertypeAndLocation(userMap, actorMessage);
+    } else {
+      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        userMap.remove(JsonKey.PROFILE_LOCATION);
+      }
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+        userMap.remove(JsonKey.PROFILE_USERTYPE);
+      }
     }
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
