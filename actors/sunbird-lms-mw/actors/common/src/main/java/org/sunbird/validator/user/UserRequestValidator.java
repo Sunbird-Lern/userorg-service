@@ -126,6 +126,9 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.PHONE))) {
       validatePhone((String) userRequest.getRequest().get(JsonKey.PHONE));
     }
+    if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
+      validateDob(userRequest);
+    }
   }
 
   public void validateCreateUserV3Request(Request userRequest) {
