@@ -41,4 +41,19 @@ public enum OrgTypeEnum {
             ResponseCode.invalidValue.getErrorMessage(), JsonKey.ORG_TYPE, type, orgTypeList),
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
+
+  public static String getTypeByValue(int value) {
+    List<Integer> orgValueList = new ArrayList<>();
+    for (OrgTypeEnum orgType : OrgTypeEnum.values()) {
+      orgValueList.add(orgType.getValue());
+      if (orgType.getValue() == value) {
+        return orgType.getType();
+      }
+    }
+    throw new ProjectCommonException(
+        ResponseCode.invalidOrgType.getErrorCode(),
+        MessageFormat.format(
+            ResponseCode.invalidOrgType.getErrorMessage(), JsonKey.ORG_TYPE, value, orgValueList),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
 }
