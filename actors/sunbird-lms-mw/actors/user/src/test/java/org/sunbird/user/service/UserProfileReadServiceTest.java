@@ -162,6 +162,9 @@ public class UserProfileReadServiceTest {
     Mockito.when(userOrgDao.getUserOrgListByUserId(Mockito.anyString(), Mockito.any()))
         .thenReturn(response2);
 
+    AssociationMechanism associationMechanism = PowerMockito.mock(AssociationMechanism.class);
+    Mockito.when(associationMechanism.isAssociationType(Mockito.anyInt())).thenReturn(true);
+
     Map<String, Object> org = new HashMap<>();
     org.put(JsonKey.ID, "4578963210");
     org.put(JsonKey.ORGANISATION_ID, "4578963210");
