@@ -206,6 +206,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     reqMap.put(JsonKey.USER_TYPE, "userType");
     reqMap.put(JsonKey.USER_SUB_TYPE, "userSubType");
     reqMap.put(JsonKey.LOCATION_CODES, Arrays.asList("anyLocationCodes"));
+    reqMap.put(JsonKey.ASSOCIATION_TYPE, "1");
+
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER),
@@ -390,6 +392,8 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.IS_DELETED, false);
     user.put(JsonKey.ROOT_ORG_ID, "custodianRootOrgId");
+    user.put(JsonKey.ASSOCIATION_TYPE, "1");
+
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
