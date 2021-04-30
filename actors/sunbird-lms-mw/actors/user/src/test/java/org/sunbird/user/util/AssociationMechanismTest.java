@@ -35,4 +35,12 @@ public class AssociationMechanismTest {
     associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
     Assert.assertEquals(3, associationMechanism.getAssociationType());
   }
+
+  @Test
+  public void removeAssociationTypeTest() {
+    AssociationMechanism associationMechanism = new AssociationMechanism();
+    associationMechanism.setAssociationType(3);
+    associationMechanism.removeAssociationType(AssociationMechanism.SELF_DECLARATION);
+    Assert.assertEquals(1, associationMechanism.getAssociationType());
+  }
 }
