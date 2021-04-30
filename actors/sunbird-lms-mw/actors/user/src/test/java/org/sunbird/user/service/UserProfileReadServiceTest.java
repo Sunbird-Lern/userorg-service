@@ -134,6 +134,7 @@ public class UserProfileReadServiceTest {
     userList3.put(JsonKey.ORGANISATION_ID, "457896321012");
     userList3.put(JsonKey.ROLES, roles);
     userList3.put("dob", "1992-11-24");
+    userList3.put(JsonKey.ASSOCIATION_TYPE, 2);
 
     resp2.add(userList2);
     resp2.add(userList3);
@@ -161,9 +162,6 @@ public class UserProfileReadServiceTest {
     Mockito.when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
     Mockito.when(userOrgDao.getUserOrgListByUserId(Mockito.anyString(), Mockito.any()))
         .thenReturn(response2);
-
-    AssociationMechanism associationMechanism = PowerMockito.mock(AssociationMechanism.class);
-    Mockito.when(associationMechanism.isAssociationType(Mockito.anyInt())).thenReturn(true);
 
     Map<String, Object> org = new HashMap<>();
     org.put(JsonKey.ID, "4578963210");
