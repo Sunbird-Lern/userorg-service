@@ -72,6 +72,7 @@ public class SearchHandlerActorTest {
     innerMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     innerMap.put(JsonKey.ORGANISATIONS, orgList);
     innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
+    innerMap.put(JsonKey.ORGANISATION_TYPE, 2);
     Map<String, Object> userType = new HashMap<>();
     userType.put(JsonKey.TYPE, "type");
     userType.put(JsonKey.SUB_TYPE, "subType");
