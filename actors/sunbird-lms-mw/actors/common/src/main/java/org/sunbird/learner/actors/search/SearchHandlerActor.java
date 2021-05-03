@@ -87,10 +87,20 @@ public class SearchHandlerActor extends BaseActor {
             filterMap.get(JsonKey.USER_SUB_TYPE));
         filterMap.remove(JsonKey.USER_SUB_TYPE);
       }
-      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
-        filterMap.put(
-            JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
-        filterMap.remove(JsonKey.LOCATION_IDS);
+      if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof String) {
+        if (StringUtils.isNotEmpty((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
+      } else if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof List) {
+        if (CollectionUtils.isNotEmpty((List) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
       }
     }
   }
