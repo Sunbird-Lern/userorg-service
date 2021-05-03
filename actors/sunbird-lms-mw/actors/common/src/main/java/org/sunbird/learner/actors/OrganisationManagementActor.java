@@ -390,6 +390,8 @@ public class OrganisationManagementActor extends BaseActor {
           && !validateChannelUniqueness(
               (String) request.get(JsonKey.CHANNEL),
               (String) request.get(JsonKey.ORGANISATION_ID),
+              (String) dbOrgDetails.get(JsonKey.ROOT_ORG_ID),
+              (Boolean) dbOrgDetails.get(JsonKey.IS_TENANT),
               actorMessage.getRequestContext())) {
         logger.info(actorMessage.getRequestContext(), "Channel validation failed");
         ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
@@ -397,6 +399,12 @@ public class OrganisationManagementActor extends BaseActor {
       // allow lower case values for source and externalId to the database
       if (request.get(JsonKey.PROVIDER) != null) {
         request.put(JsonKey.PROVIDER, ((String) request.get(JsonKey.PROVIDER)).toLowerCase());
+      } else {
+        String reqChannel = (String) request.get(JsonKey.CHANNEL);
+        String dbChannel = (String) dbOrgDetails.get(JsonKey.CHANNEL);
+        if (StringUtils.isNotBlank(reqChannel) && !reqChannel.equalsIgnoreCase(dbChannel)) {
+          request.put(JsonKey.PROVIDER, reqChannel.toLowerCase());
+        }
       }
 
       String passedExternalId = (String) request.get(JsonKey.EXTERNAL_ID);
@@ -650,7 +658,6 @@ public class OrganisationManagementActor extends BaseActor {
 
   private Map<String, Object> elasticSearchComplexSearch(
       Map<String, Object> filters, String type, RequestContext context) {
-
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> resultF = esService.search(searchDTO, type, context);
@@ -659,18 +666,23 @@ public class OrganisationManagementActor extends BaseActor {
     return esResponse;
   }
 
-  private boolean validateChannelUniqueness(String channel, String orgId, RequestContext context) {
+  private boolean validateChannelUniqueness(
+      String channel, String orgId, String rootOrgId, Boolean isTenant, RequestContext context) {
     if (StringUtils.isNotBlank(channel)) {
       Map<String, Object> filters = new HashMap<>();
       filters.put(JsonKey.CHANNEL, channel);
       filters.put(JsonKey.IS_TENANT, true);
-      return validateChannelUniqueness(filters, orgId, context);
+      return validateChannelUniqueness(filters, orgId, rootOrgId, isTenant, context);
     }
     return (orgId == null);
   }
 
   private boolean validateChannelUniqueness(
-      Map<String, Object> filters, String orgId, RequestContext context) {
+      Map<String, Object> filters,
+      String orgId,
+      String rootOrgId,
+      Boolean isTenant,
+      RequestContext context) {
     if (MapUtils.isNotEmpty(filters)) {
       SearchDTO searchDto = new SearchDTO();
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
@@ -684,10 +696,16 @@ public class OrganisationManagementActor extends BaseActor {
       } else {
         if (orgId == null) {
           return false;
+        } else {
+          // in case of org update (orgId, isTenant & rootOrgId is not null )
+          Map<String, Object> data = list.get(0);
+          String id = (String) data.get(JsonKey.ID);
+          if (isTenant) {
+            return id.equalsIgnoreCase(orgId);
+          } else {
+            return id.equalsIgnoreCase(rootOrgId);
+          }
         }
-        Map<String, Object> data = list.get(0);
-        String id = (String) data.get(JsonKey.ID);
-        return id.equalsIgnoreCase(orgId);
       }
     }
     return true;
@@ -731,7 +749,8 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.formatMessage(
                 ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
-    } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, context)) {
+    } else if (!validateChannelUniqueness(
+        (String) req.get(JsonKey.CHANNEL), null, null, null, context)) {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
       throw new ProjectCommonException(
