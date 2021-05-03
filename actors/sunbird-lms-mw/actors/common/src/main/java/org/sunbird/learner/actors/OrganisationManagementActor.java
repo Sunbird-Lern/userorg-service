@@ -140,7 +140,7 @@ public class OrganisationManagementActor extends BaseActor {
         request.remove(JsonKey.PROVIDER);
       }
 
-      String createdBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
+      String createdBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       request.put(JsonKey.CREATED_BY, createdBy);
       request.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
       String uniqueId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
@@ -390,7 +390,6 @@ public class OrganisationManagementActor extends BaseActor {
           && !validateChannelUniqueness(
               (String) request.get(JsonKey.CHANNEL),
               (String) request.get(JsonKey.ORGANISATION_ID),
-              (String) dbOrgDetails.get(JsonKey.ROOT_ORG_ID),
               (Boolean) dbOrgDetails.get(JsonKey.IS_TENANT),
               actorMessage.getRequestContext())) {
         logger.info(actorMessage.getRequestContext(), "Channel validation failed");
@@ -442,7 +441,7 @@ public class OrganisationManagementActor extends BaseActor {
         updateOrgDao.remove(JsonKey.STATUS);
       }
 
-      String updatedBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
+      String updatedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -667,22 +666,18 @@ public class OrganisationManagementActor extends BaseActor {
   }
 
   private boolean validateChannelUniqueness(
-      String channel, String orgId, String rootOrgId, Boolean isTenant, RequestContext context) {
+      String channel, String orgId, Boolean isTenant, RequestContext context) {
     if (StringUtils.isNotBlank(channel)) {
       Map<String, Object> filters = new HashMap<>();
       filters.put(JsonKey.CHANNEL, channel);
       filters.put(JsonKey.IS_TENANT, true);
-      return validateChannelUniqueness(filters, orgId, rootOrgId, isTenant, context);
+      return validateChannelUniqueness(filters, orgId, isTenant, context);
     }
     return (orgId == null);
   }
 
   private boolean validateChannelUniqueness(
-      Map<String, Object> filters,
-      String orgId,
-      String rootOrgId,
-      Boolean isTenant,
-      RequestContext context) {
+      Map<String, Object> filters, String orgId, Boolean isTenant, RequestContext context) {
     if (MapUtils.isNotEmpty(filters)) {
       SearchDTO searchDto = new SearchDTO();
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
@@ -691,19 +686,27 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if ((list.isEmpty())) {
-        return true;
+      if (CollectionUtils.isEmpty(list)) {
+        if (StringUtils.isBlank(orgId)) {
+          return true;
+        } else {
+          if (isTenant) {
+            return true;
+          } else {
+            return false;
+          }
+        }
       } else {
-        if (orgId == null) {
+        if (StringUtils.isBlank(orgId)) {
           return false;
         } else {
-          // in case of org update (orgId, isTenant & rootOrgId is not null )
           Map<String, Object> data = list.get(0);
           String id = (String) data.get(JsonKey.ID);
           if (isTenant) {
             return id.equalsIgnoreCase(orgId);
           } else {
-            return id.equalsIgnoreCase(rootOrgId);
+            // for suborg channel should be valid
+            return true;
           }
         }
       }
@@ -749,8 +752,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.formatMessage(
                 ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
-    } else if (!validateChannelUniqueness(
-        (String) req.get(JsonKey.CHANNEL), null, null, null, context)) {
+    } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, null, context)) {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
       throw new ProjectCommonException(
