@@ -26,6 +26,7 @@ import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Future;
@@ -86,10 +87,20 @@ public class SearchHandlerActor extends BaseActor {
             filterMap.get(JsonKey.USER_SUB_TYPE));
         filterMap.remove(JsonKey.USER_SUB_TYPE);
       }
-      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
-        filterMap.put(
-            JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
-        filterMap.remove(JsonKey.LOCATION_IDS);
+      if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof String) {
+        if (StringUtils.isNotEmpty((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
+      } else if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof List) {
+        if (CollectionUtils.isNotEmpty((List) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
       }
     }
   }
@@ -225,6 +236,15 @@ public class SearchHandlerActor extends BaseActor {
                                   && fields.contains(JsonKey.HASHTAGID))
                               || (CollectionUtils.isEmpty(fields))) {
                             org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
+                          if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
+                            int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
+                            boolean isSchool =
+                                (orgType
+                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                                    ? true
+                                    : false;
+                            org.put(JsonKey.IS_SCHOOL, isSchool);
                           }
                         });
                 response.put(JsonKey.RESPONSE, responseMap);

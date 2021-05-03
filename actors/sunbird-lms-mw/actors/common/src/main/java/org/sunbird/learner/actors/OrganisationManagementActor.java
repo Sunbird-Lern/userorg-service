@@ -570,8 +570,15 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
-
+    if (MapUtils.isNotEmpty(result)) {
+      result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+      if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
+        int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
+        boolean isSchool =
+            (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+        result.put(JsonKey.IS_SCHOOL, isSchool);
+      }
+    }
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
           ResponseCode.orgDoesNotExist.getErrorCode(),
@@ -759,22 +766,52 @@ public class OrganisationManagementActor extends BaseActor {
   }
 
   private void validateOrgLocation(Map<String, Object> request, RequestContext context) {
+    List<String> locList = new ArrayList<>();
     List<Map<String, String>> orgLocationList =
         (List<Map<String, String>>) request.get(JsonKey.ORG_LOCATION);
     if (CollectionUtils.isEmpty(orgLocationList)) {
-      return;
+      // Request is from org upload
+      if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_CODE))) {
+        locList =
+            validator.getValidatedLocationIds(
+                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                (List<String>) request.get(JsonKey.LOCATION_CODE));
+        request.remove(JsonKey.LOCATION_CODE);
+      } else {
+        return;
+      }
+    } else {
+      List<String> finalLocList = locList;
+      // If request orglocation is a list of map , which has location id, not location code
+      orgLocationList
+          .stream()
+          .forEach(
+              loc -> {
+                if (loc.containsKey(JsonKey.ID)) {
+                  finalLocList.add(loc.get(JsonKey.ID));
+                }
+              });
+      // If request orglocation is a list of map , which doesn't have location id, but has location
+      // code
+      if (CollectionUtils.isEmpty(finalLocList)) {
+        orgLocationList
+            .stream()
+            .forEach(
+                loc -> {
+                  if (loc.containsKey(JsonKey.CODE)) {
+                    finalLocList.add(loc.get(JsonKey.CODE));
+                  }
+                });
+        if (CollectionUtils.isNotEmpty(finalLocList)) {
+          locList =
+              validator.getValidatedLocationIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), finalLocList);
+        }
+      }
     }
-    List<String> locList = new ArrayList<>();
-    orgLocationList
-        .stream()
-        .forEach(
-            loc -> {
-              locList.add(loc.get(JsonKey.ID));
-            });
     List<String> locationIdsList =
         validator.getHierarchyLocationIds(
             getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locList);
-
     List<Map<String, String>> newOrgLocationList = new ArrayList<>();
     List<Location> locationList =
         locationClient.getLocationByIds(
@@ -790,6 +827,7 @@ public class OrganisationManagementActor extends BaseActor {
               map.put(JsonKey.TYPE, location.getType());
               newOrgLocationList.add(map);
             });
+    request.put(JsonKey.ORG_LOCATION, newOrgLocationList);
   }
 
   private Map<String, Object> getOrgById(String id, RequestContext context) {

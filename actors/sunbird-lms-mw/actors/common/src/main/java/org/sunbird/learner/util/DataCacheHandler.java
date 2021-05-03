@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -147,9 +148,13 @@ public class DataCacheHandler implements Runnable {
   }
 
   private void cacheTelemetryPdata() {
+    String telemetryPdataVer = DataCacheHandler.getConfigSettings().get("telemetry_pdata_ver");
+    if (StringUtils.isBlank(telemetryPdataVer)) {
+      telemetryPdataVer = ProjectUtil.getConfigValue("telemetry_pdata_ver");
+    }
     telemetryPdata.put("telemetry_pdata_id", ProjectUtil.getConfigValue("telemetry_pdata_id"));
     telemetryPdata.put("telemetry_pdata_pid", ProjectUtil.getConfigValue("telemetry_pdata_pid"));
-    telemetryPdata.put("telemetry_pdata_ver", ProjectUtil.getConfigValue("telemetry_pdata_ver"));
+    telemetryPdata.put("telemetry_pdata_ver", telemetryPdataVer);
   }
 
   private void cacheRoleForRead() {
