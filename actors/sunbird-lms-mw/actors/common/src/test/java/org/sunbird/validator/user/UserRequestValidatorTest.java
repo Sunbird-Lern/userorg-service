@@ -791,6 +791,7 @@ public class UserRequestValidatorTest {
     requestObj.put(JsonKey.PHONE, "9321234123");
     requestObj.put(JsonKey.PHONE_VERIFIED, true);
     requestObj.put(JsonKey.FIRST_NAME, "test123");
+    requestObj.put(JsonKey.DOB, "2000");
     request.setRequest(requestObj);
     return request;
   }
