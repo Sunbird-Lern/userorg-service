@@ -1,17 +1,17 @@
 package org.sunbird.notification.sms.providerimpl;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Consts;
+import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
-import org.sunbird.notification.utils.SmsTemplateUtil;
 
 public class NICGatewaySmsProvider implements ISmsProvider {
   private static LoggerUtil logger = new LoggerUtil(NICGatewaySmsProvider.class);
@@ -38,70 +38,77 @@ public class NICGatewaySmsProvider implements ISmsProvider {
   }
 
   @Override
-  public boolean send(List<String> phoneNumber, String smsText) {
-    return false;
+  public boolean send(List<String> phoneNumbers, String smsText) {
+    phoneNumbers
+        .stream()
+        .forEach(
+            phone -> {
+              sendSms(phone, smsText);
+            });
+    return true;
   }
 
   public boolean sendSms(String mobileNumber, String smsText) {
     try {
       String recipient = mobileNumber;
+      if (recipient.length() == 10) {
+        // add country code to mobile number
+        recipient = "91" + recipient;
+      }
       String messageBody = smsText;
       // add dlt template
       String dltTemplateId = getTemplateId(smsText);
       // URL encode message body
-      messageBody = URLEncoder.encode(messageBody, "UTF-8");
+      messageBody = URLEncoder.encode(messageBody, Consts.UTF_8);
       // Construct URL
-      StringBuffer URI = new StringBuffer();
-      URI.append(baseUrl);
-      URI.append("?username=" + userName);
-      URI.append("&pin=" + password);
+      StringBuffer URI = new StringBuffer(baseUrl);
+      URI.append("?username=" + URLEncoder.encode(userName, Consts.UTF_8));
+      URI.append("&pin=" + URLEncoder.encode(password, Consts.UTF_8));
       URI.append("&signature=" + senderId);
       URI.append("&mnumber=" + recipient);
-      URI.append("&message=" + messageBody);
+      URI.append("&message=" + URLEncoder.encode(messageBody, Consts.UTF_8));
       URI.append("&msgType=" + "UC");
       URI.append("&dlt_entity_id=" + dltEntityId);
       URI.append("&dlt_template_id=" + dltTemplateId);
-      String result = "";
 
-      URL url = new URL(URI.toString());
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      if (connection.getResponseCode() != 200) {
+      Map<String, String> headers = new HashMap<>();
+      headers.put("Content-Type", "application/json");
+      headers.put("Accept", "application/json");
+      String response = HttpClientUtil.get(URI.toString(), headers);
+      if (StringUtils.isNotBlank(response)) {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> resultMap;
+        resultMap = mapper.readValue(response, Map.class);
+        logger.info("NICGatewaySmsProvider:Result:" + resultMap);
+        return true;
+      } else {
         return false;
       }
-      BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-      StringBuffer sb = new StringBuffer();
-      String line;
-      while ((line = rd.readLine()) != null) {
-        sb.append(line);
-      }
-      rd.close();
-      result = sb.toString();
-      logger.info("NICGatewaySmsProvider:Result:" + result);
-      return true;
     } catch (Exception ex) {
       logger.error("Exception occurred while sending sms.", ex);
       return false;
     }
   }
 
-  private String getTemplateId(String sms) {
-    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
-    for (String key : smsTemplateConfig.keySet()) {
-      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
-      if (sms.matches(pattern)) {
-        return smsTemplateConfig.get(key);
-      }
-    }
-    return "";
-  }
-
   /** this method will do the SMS properties initialization. */
   public static boolean init() {
     baseUrl = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_base_url");
     senderId = System.getenv("nic_sms_gateway_provider_senderid");
+    if (JsonUtil.isStringNullOREmpty(senderId)) {
+      senderId = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_senderid");
+    }
     userName = System.getenv("nic_sms_gateway_provider_username");
+    if (JsonUtil.isStringNullOREmpty(userName)) {
+      userName = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_username");
+    }
     password = System.getenv("nic_sms_gateway_provider_password");
+    if (JsonUtil.isStringNullOREmpty(password)) {
+      password = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_password");
+    }
     dltEntityId = System.getenv("diksha_dlt_entity_id");
+    if (JsonUtil.isStringNullOREmpty(dltEntityId)) {
+      dltEntityId = PropertiesCache.getInstance().getProperty("diksha_dlt_entity_id");
+    }
     return validateSettings();
   }
 

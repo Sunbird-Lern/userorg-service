@@ -85,6 +85,7 @@ public class HttpClientUtil {
             "Response from get call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        logger.info("Response from get call status : " + status + " - " + response);
         return "";
       }
     } catch (Exception ex) {
@@ -123,6 +124,7 @@ public class HttpClientUtil {
             "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        logger.info("Response from post call status : " + status + " - " + response);
         return "";
       }
     } catch (Exception ex) {
@@ -165,9 +167,13 @@ public class HttpClientUtil {
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
         logger.info(
-            "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
+            "Response from postFormData call : "
+                + sl.getStatusCode()
+                + " - "
+                + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        logger.info("Response from postFormData call status : " + status + " - " + response);
         return "";
       }
     } catch (Exception ex) {
@@ -206,6 +212,7 @@ public class HttpClientUtil {
             "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        logger.info("Response from patch call status : " + status + " - " + response);
         return "";
       }
     } catch (Exception ex) {

@@ -1,6 +1,7 @@
 /** */
 package org.sunbird.notification.utils;
 
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.provider.ISmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
@@ -13,18 +14,19 @@ import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProviderFactory;
  */
 public class SMSFactory {
 
+  public static final String defaultProvider = ProjectUtil.getConfigValue("sms_gateway_provider");
+
   /**
    * This method will provide SMS Provide object to trigger the SMS it will by default return
    * Msg91SmsProvider class instance
    *
-   * @param objectName String ,{"91SMS","some other impl"}
    * @return ISmsProvider
    */
-  public static ISmsProvider getInstance(String objectName) {
-    if ("91SMS".equalsIgnoreCase(objectName)) {
+  public static ISmsProvider getInstance() {
+    if ("91SMS".equalsIgnoreCase(defaultProvider)) {
       ISmsProviderFactory factory = new Msg91SmsProviderFactory();
       return factory.create();
-    } else if ("NIC".equalsIgnoreCase(objectName)) {
+    } else if ("NIC".equalsIgnoreCase(defaultProvider)) {
       ISmsProviderFactory factory = new NICGatewaySmsProviderFactory();
       return factory.create();
     } else {

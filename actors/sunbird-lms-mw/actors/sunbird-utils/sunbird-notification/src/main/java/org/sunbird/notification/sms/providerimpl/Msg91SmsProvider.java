@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,7 +19,6 @@ import org.sunbird.notification.sms.Sms;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
-import org.sunbird.notification.utils.SmsTemplateUtil;
 
 public class Msg91SmsProvider implements ISmsProvider {
   private static LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
@@ -180,17 +178,6 @@ public class Msg91SmsProvider implements ISmsProvider {
     } finally {
       closeHttpResource(httpClient);
     }
-  }
-
-  private String getTemplateId(String sms) {
-    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
-    for (String key : smsTemplateConfig.keySet()) {
-      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
-      if (sms.matches(pattern)) {
-        return smsTemplateConfig.get(key);
-      }
-    }
-    return "";
   }
 
   /**

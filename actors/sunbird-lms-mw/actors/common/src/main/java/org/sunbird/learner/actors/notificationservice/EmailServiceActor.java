@@ -228,7 +228,7 @@ public class EmailServiceActor extends BaseActor {
     logger.info(
         context, "EmailServiceActor:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
     try {
-      ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
+      ISmsProvider smsProvider = SMSFactory.getInstance();
       smsProvider.send(phones, smsText);
     } catch (Exception e) {
       logger.error(
