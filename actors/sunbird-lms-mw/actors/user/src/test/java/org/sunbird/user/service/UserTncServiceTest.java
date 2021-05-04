@@ -164,4 +164,19 @@ public class UserTncServiceTest {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
   }
+
+  @Test
+  public void validateReportViewerTncTest() {
+    UserTncService tncService = new UserTncService();
+    Map<String, Object> user = new HashMap<>();
+    List<String> roles = new ArrayList<>();
+    roles.add("REPORT_VIEWER");
+    user.put(JsonKey.USER_ID, "1234");
+    user.put(JsonKey.ROLES, roles);
+    try {
+      tncService.validateReportViewerTnc(user, "reportViewerTnc", null);
+    } catch (ProjectCommonException ex) {
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+    }
+  }
 }
