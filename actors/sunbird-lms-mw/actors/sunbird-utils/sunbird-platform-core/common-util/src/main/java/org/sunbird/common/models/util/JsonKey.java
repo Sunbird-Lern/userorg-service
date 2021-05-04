@@ -134,7 +134,7 @@ public final class JsonKey {
   public static final String INSERT = "insert";
   public static final String IS_APPROVED = "isApproved";
   public static final String IS_SSO = "isSSO";
-  public static final String IS_SELF_DECLARATION = "isSelfDeclared";
+  public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String IS_SYSTEM_UPLOAD = "isSystemUpload";
   public static final String IS_AUTH_REQ = "isAuthReq";
   public static final String IS_DELETED = "isDeleted";
