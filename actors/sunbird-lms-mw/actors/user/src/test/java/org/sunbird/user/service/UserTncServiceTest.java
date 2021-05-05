@@ -160,21 +160,7 @@ public class UserTncServiceTest {
     searchMap.put(JsonKey.ORGANISATION_ID, "4567");
     try {
       tncService.validateOrgAdminTnc(null, "orgAdminTnc", searchMap);
-    } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
-    }
-  }
-
-  @Test
-  public void validateReportViewerTncTest() {
-    UserTncService tncService = new UserTncService();
-    Map<String, Object> user = new HashMap<>();
-    List<String> roles = new ArrayList<>();
-    roles.add("REPORT_VIEWER");
-    user.put(JsonKey.USER_ID, "1234");
-    user.put(JsonKey.ROLES, roles);
-    try {
-      tncService.validateReportViewerTnc(user, "reportViewerTnc", null);
+      tncService.validateOrgAdminTnc(null, "reportViewerTnc", searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
