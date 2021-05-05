@@ -352,7 +352,7 @@ public final class JsonKey {
   public static final String DEFAULT_FRAMEWORK = "defaultFramework";
   public static final String EXTERNAL_ID_PROVIDER = "externalIdProvider";
   public static final String SUNBIRD_INSTALLATION_DISPLAY_NAME =
-      "sunbird_installation_display_name";
+      "sunbird_installation_display_name_for_sms";
   public static final String USR_EXT_IDNT_TABLE = "usr_external_identity";
   public static final String RESPONSE_CODE = "responseCode";
   public static final String OK = "ok";
