@@ -119,7 +119,10 @@ public class UserTncService {
   public void validateOrgAdminTnc(
       RequestContext context, String tncType, Map<String, Object> user) {
     // check if it is org admin TnC and user is not an admin of the organisation
-    if (JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, tncType, context)) {
+    // OR check if it is report viewer tnc and user not having the report viewer role
+    if ((JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, JsonKey.ORG_ADMIN, context))
+        || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
+            && !roleCheck(user, JsonKey.REPORT_VIEWER, context))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
@@ -129,38 +132,20 @@ public class UserTncService {
     }
   }
 
-  public void validateReportViewerTnc(
-      Map<String, Object> user, String tncType, RequestContext context) {
-    // Check if it is report viewer tnc
-    if (JsonKey.REPORT_VIEWER_TNC.equals(tncType) && !roleCheck(user, tncType, context)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidParameterValue,
-          MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(),
-              user.get(JsonKey.ID),
-              JsonKey.USER_ID));
-    }
-  }
-
-  private boolean roleCheck(Map<String, Object> user, String tncType, RequestContext context) {
-    if (JsonKey.ORG_ADMIN_TNC.equals(tncType)) {
-      Map<String, Object> searchMap = new LinkedHashMap<>(2);
-      searchMap.put(JsonKey.USER_ID, user.get(JsonKey.ID));
-      searchMap.put(JsonKey.ORGANISATION_ID, user.get(JsonKey.ROOT_ORG_ID));
-      Response res =
-          cassandraOperation.getRecordsByCompositeKey(
-              JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
-      List<Map<String, Object>> orgDetails = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(orgDetails)) {
-        Map<String, Object> org = orgDetails.get(0);
-        if (MapUtils.isNotEmpty(org)) {
-          List<String> roles = (List<String>) org.get(JsonKey.ROLES);
-          return roles.contains(JsonKey.ORG_ADMIN);
-        }
+  private boolean roleCheck(Map<String, Object> user, String role, RequestContext context) {
+    Map<String, Object> searchMap = new LinkedHashMap<>(2);
+    searchMap.put(JsonKey.USER_ID, user.get(JsonKey.ID));
+    searchMap.put(JsonKey.ORGANISATION_ID, user.get(JsonKey.ROOT_ORG_ID));
+    Response res =
+        cassandraOperation.getRecordsByCompositeKey(
+            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
+    List<Map<String, Object>> orgDetails = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(orgDetails)) {
+      Map<String, Object> org = orgDetails.get(0);
+      if (MapUtils.isNotEmpty(org)) {
+        List<String> roles = (List<String>) org.get(JsonKey.ROLES);
+        return roles.contains(role);
       }
-    } else if (JsonKey.REPORT_VIEWER_TNC.equals(tncType)) {
-      List<String> roles = (List<String>) user.get(JsonKey.ROLES);
-      return roles.contains(JsonKey.REPORT_VIEWER);
     }
     return false;
   }

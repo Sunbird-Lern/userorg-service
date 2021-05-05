@@ -63,7 +63,6 @@ public class UserTnCActor extends BaseActor {
     Map<String, Object> user = tncService.getUserById(userId, requestContext);
     tncService.isAccountManagedUser(isManagedUser, user);
     tncService.validateOrgAdminTnc(requestContext, tncType, user);
-    tncService.validateReportViewerTnc(user, tncType, requestContext);
     if (JsonKey.TNC_CONFIG.equals(tncType)) {
       updateUserTncConfig(user, acceptedTnC, requestContext, context);
     } else {
