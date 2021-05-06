@@ -116,8 +116,7 @@ public class UserTncService {
     }
   }
 
-  public void validateOrgAdminTnc(
-      RequestContext context, String tncType, Map<String, Object> user) {
+  public void validateRoleForTnc(RequestContext context, String tncType, Map<String, Object> user) {
     // check if it is org admin TnC and user is not an admin of the organisation
     // OR check if it is report viewer tnc and user not having the report viewer role
     if ((JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, JsonKey.ORG_ADMIN, context))
