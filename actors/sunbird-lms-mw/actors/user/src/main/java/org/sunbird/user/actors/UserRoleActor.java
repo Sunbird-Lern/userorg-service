@@ -2,7 +2,6 @@ package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
@@ -23,8 +22,8 @@ import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.org.UserOrg;
-import org.sunbird.user.dao.UserOrgDao;
-import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.UserRoleDao;
+import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles"},
@@ -71,44 +70,45 @@ public class UserRoleActor extends UserBaseActor {
     logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRoles called");
 
     Map<String, Object> requestMap = actorMessage.getRequest();
-    RoleService.validateRoles((List<String>) requestMap.get(JsonKey.ROLES));
+    List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
+    RoleService.validateRoles(roles);
 
-    String hashTagId = getHashTagIdForOrg(requestMap, actorMessage.getRequestContext());
-    if (StringUtils.isBlank(hashTagId)) return;
+    // String hashTagId = getHashTagIdForOrg(requestMap, actorMessage.getRequestContext());
+    // if (StringUtils.isBlank(hashTagId)) return;
 
-    String userId = (String) requestMap.get(JsonKey.USER_ID);
-    String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    userRoleDao.createUserRole(requestMap, actorMessage.getRequestContext());
     // update userOrg role with requested roles.
-    Map<String, Object> userOrgDBMap = new HashMap<>();
+    // Map<String, Object> userOrgDBMap = new HashMap<>();
 
-    Map<String, Object> searchMap = new LinkedHashMap<>(2);
-    searchMap.put(JsonKey.USER_ID, userId);
-    searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
-    Response res =
-        cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, actorMessage.getRequestContext());
-    List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    dataList
-        .stream()
-        .forEach(
-            (dataMap) -> {
-              if (null != dataMap.get(JsonKey.IS_DELETED)
-                  && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
-                responseList.add(dataMap);
-              }
-            });
+    // Map<String, Object> searchMap = new LinkedHashMap<>(2);
+    // searchMap.put(JsonKey.USER_ID, userId);
+    // searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
+    // Response res =
+    // cassandraOperation.getRecordsByCompositeKey(
+    // JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, actorMessage.getRequestContext());
+    // List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
+    // List<Map<String, Object>> responseList = new ArrayList<>();
+    /*dataList
+    .stream()
+    .forEach(
+        (dataMap) -> {
+          if (null != dataMap.get(JsonKey.IS_DELETED)
+              && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+            responseList.add(dataMap);
+          }
+        });*/
 
-    if (CollectionUtils.isEmpty(responseList)) {
+    /*if (CollectionUtils.isEmpty(responseList)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrOrgData, null);
     }
 
     userOrgDBMap.put(JsonKey.ORGANISATION, responseList.get(0));
 
     UserOrg userOrg = prepareUserOrg(requestMap, hashTagId, userOrgDBMap);
-    UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
+    UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();*/
 
-    Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
+    // Response response = userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
     sender().tell(response, self());
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       syncUserRoles(JsonKey.ORGANISATION, userId, actorMessage.getRequestContext());
