@@ -75,18 +75,29 @@ public class FormApiUtilHandler {
       data = mapper.readValue(response, Map.class);
       if (MapUtils.isNotEmpty(data)) {
         data = (Map<String, Object>) data.get(JsonKey.RESULT);
+      } else {
+        logger.info(
+            context,
+            "FormApiUtilHandler:fetchFormApiConfigDetails Form-Config is empty for state : "
+                + reqObject.getRequest().getSubType());
       }
 
     } catch (IOException e) {
       logger.error(
           context,
-          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred while getting form-config for state:"
+              + reqObject.getRequest().getSubType()
+              + " "
+              + e.getMessage(),
           e);
 
     } catch (Exception e) {
       logger.error(
           context,
-          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred while getting form-config for state:"
+              + reqObject.getRequest().getSubType()
+              + " "
+              + e.getMessage(),
           e);
     }
 
