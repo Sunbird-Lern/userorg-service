@@ -159,7 +159,8 @@ public class UserTncServiceTest {
     searchMap.put(JsonKey.USER_ID, "1234");
     searchMap.put(JsonKey.ORGANISATION_ID, "4567");
     try {
-      tncService.validateRoleForTnc(null, "orgAdminTnc", searchMap);
+      tncService.validateRoleForTnc(null, JsonKey.ORG_ADMIN_TNC, searchMap);
+      tncService.validateRoleForTnc(null, JsonKey.REPORT_VIEWER_TNC, searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
