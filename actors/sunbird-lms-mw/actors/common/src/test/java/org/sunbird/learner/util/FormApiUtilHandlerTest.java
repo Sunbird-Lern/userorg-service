@@ -55,6 +55,16 @@ public class FormApiUtilHandlerTest {
         "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
   }
 
+  @Test
+  public void testGetFormApiEmptyConfig() {
+
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+        .thenReturn("");
+    Map<String, Object> dataConfigMap =
+        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+    Assert.assertEquals(0, dataConfigMap.size());
+  }
+
   public String getFormApiResponse() {
     String formData =
         "{ \"id\": \"api.form.read\", \"params\": { \"resmsgid\": \"5ebb6cb5-07a0-4407-8013-b45043270d7a\", \"msgid\": \"3af660bf-fc92-4c93-acd1-36ad81cb8f35\", \"status\": \"successful\" }, \"responseCode\": \"OK\", \"result\":"
