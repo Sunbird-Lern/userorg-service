@@ -36,6 +36,16 @@ public class FormApiUtilHandlerTest {
   }
 
   @Test
+  public void testGetFormApiEmptyConfig() {
+
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+        .thenReturn("");
+    Map<String, Object> dataConfigMap =
+        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+    Assert.assertEquals(0, dataConfigMap.size());
+  }
+
+  @Test
   public void testprepareFormApiUtilPayload() {
     FormUtilRequest req = new FormUtilRequest();
     req.setComponent("component");
@@ -53,16 +63,6 @@ public class FormApiUtilHandlerTest {
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());
     Assert.assertEquals(
         "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-  }
-
-  @Test
-  public void testGetFormApiEmptyConfig() {
-
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
-        .thenReturn("");
-    Map<String, Object> dataConfigMap =
-        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertEquals(0, dataConfigMap.size());
   }
 
   public String getFormApiResponse() {
