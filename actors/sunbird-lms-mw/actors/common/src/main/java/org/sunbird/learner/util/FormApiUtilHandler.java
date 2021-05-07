@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
@@ -72,21 +73,38 @@ public class FormApiUtilHandler {
                   + ProjectUtil.getConfigValue(JsonKey.FORM_API_ENDPOINT),
               body,
               headers);
-      data = mapper.readValue(response, Map.class);
-      if (MapUtils.isNotEmpty(data)) {
-        data = (Map<String, Object>) data.get(JsonKey.RESULT);
+      if (StringUtils.isNotEmpty(response)) {
+        data = mapper.readValue(response, Map.class);
+        if (MapUtils.isNotEmpty(data)) {
+          data = (Map<String, Object>) data.get(JsonKey.RESULT);
+        } else {
+          logger.info(
+              context,
+              "FormApiUtilHandler:fetchFormApiConfigDetails Form-Config is empty for state : "
+                  + reqObject.getRequest().getSubType());
+        }
+      } else {
+        logger.info(
+            context,
+            "FormApiUtilHandler:fetchFormApiConfigDetails Form-Config api response is empty for state : "
+                + reqObject.getRequest().getSubType());
       }
-
     } catch (IOException e) {
       logger.error(
           context,
-          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred while getting form-config for state:"
+              + reqObject.getRequest().getSubType()
+              + " "
+              + e.getMessage(),
           e);
 
     } catch (Exception e) {
       logger.error(
           context,
-          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred : " + e.getMessage(),
+          "FormApiUtilHandler:fetchFormApiConfigDetails Exception occurred while getting form-config for state:"
+              + reqObject.getRequest().getSubType()
+              + " "
+              + e.getMessage(),
           e);
     }
 
