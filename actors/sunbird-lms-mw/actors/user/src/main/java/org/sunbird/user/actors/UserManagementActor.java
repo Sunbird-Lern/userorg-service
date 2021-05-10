@@ -358,7 +358,11 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+      if (StringUtils.isNotBlank(callerId)) {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+      } else {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+      }
 
       resp =
           userService.saveUserAttributes(

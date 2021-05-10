@@ -607,6 +607,7 @@ public final class Util {
         reqMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
       }
       reqMap.put(JsonKey.UPDATED_BY, userMap.get(JsonKey.UPDATED_BY));
+      reqMap.put(JsonKey.ASSOCIATION_TYPE, userMap.get(JsonKey.ASSOCIATION_TYPE));
       reqMap.put(JsonKey.IS_DELETED, false);
       reqMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {
