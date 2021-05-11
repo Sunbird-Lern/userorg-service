@@ -119,14 +119,15 @@ public class UserRequestValidator extends BaseRequestValidator {
       userRequest.getRequest().put(JsonKey.EMAIL_VERIFIED, null);
       userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
     }
-    phoneVerifiedValidation(userRequest);
-    emailVerifiedValidation(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       validateEmail((String) userRequest.getRequest().get(JsonKey.EMAIL));
     }
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.PHONE))) {
       validatePhone((String) userRequest.getRequest().get(JsonKey.PHONE));
+    }
+    if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
+      validateDob(userRequest);
     }
   }
 
@@ -192,7 +193,6 @@ public class UserRequestValidator extends BaseRequestValidator {
           (String) userRequest.getRequest().get(JsonKey.PHONE),
           (String) userRequest.getRequest().get(JsonKey.COUNTRY_CODE));
     }
-    phoneVerifiedValidation(userRequest);
   }
 
   private void phoneVerifiedValidation(Request userRequest) {
@@ -270,8 +270,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
-    } else {
-      emailVerifiedValidation(userRequest);
     }
   }
 
@@ -461,7 +459,6 @@ public class UserRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    validateLangaugeFields(userRequest);
   }
 
   private void validateUserIdOrExternalId(Request userRequest) {
@@ -482,22 +479,6 @@ public class UserRequestValidator extends BaseRequestValidator {
                       StringFormatter.joinByComma(JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE),
                       JsonKey.EXTERNAL_ID_PROVIDER)))),
           ERROR_CODE);
-    }
-  }
-
-  private void validateLangaugeFields(Request userRequest) {
-    if (userRequest.getRequest().containsKey(JsonKey.LANGUAGE)
-        && null != userRequest.getRequest().get(JsonKey.LANGUAGE)) {
-      if (userRequest.getRequest().get(JsonKey.LANGUAGE) instanceof List
-          && ((List) userRequest.getRequest().get(JsonKey.LANGUAGE)).isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.languageRequired);
-      } else if (!(userRequest.getRequest().get(JsonKey.LANGUAGE) instanceof List)) {
-        throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LANGUAGE, JsonKey.LIST),
-            ERROR_CODE);
-      }
     }
   }
 

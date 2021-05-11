@@ -22,7 +22,6 @@ public enum ResponseCode {
   emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
   firstNameRequired(
       ResponseMessage.Key.FIRST_NAME_MISSING, ResponseMessage.Message.FIRST_NAME_MISSING),
-  languageRequired(ResponseMessage.Key.LANGUAGE_MISSING, ResponseMessage.Message.LANGUAGE_MISSING),
   sourceAndExternalIdValidationError(
       ResponseMessage.Key.REQUIRED_DATA_ORG_MISSING,
       ResponseMessage.Message.REQUIRED_DATA_ORG_MISSING),
@@ -58,8 +57,6 @@ public enum ResponseCode {
   invalidOrgStatusTransition(
       ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION,
       ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION),
-  addressRequired(
-      ResponseMessage.Key.ADDRESS_REQUIRED_ERROR, ResponseMessage.Message.ADDRESS_REQUIRED_ERROR),
   phoneNoRequired(
       ResponseMessage.Key.PHONE_NO_REQUIRED_ERROR, ResponseMessage.Message.PHONE_NO_REQUIRED_ERROR),
   invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA),
@@ -76,9 +73,6 @@ public enum ResponseCode {
   errorAttributeConflict(
       ResponseMessage.Key.ERROR_ATTRIBUTE_CONFLICT,
       ResponseMessage.Message.ERROR_ATTRIBUTE_CONFLICT),
-  addressError(ResponseMessage.Key.ADDRESS_ERROR, ResponseMessage.Message.ADDRESS_ERROR),
-  addressTypeError(
-      ResponseMessage.Key.ADDRESS_TYPE_ERROR, ResponseMessage.Message.ADDRESS_TYPE_ERROR),
   organisationNameError(
       ResponseMessage.Key.NAME_OF_ORGANISATION_ERROR,
       ResponseMessage.Message.NAME_OF_ORGANISATION_ERROR),
@@ -126,12 +120,6 @@ public enum ResponseCode {
       ResponseMessage.Message.USER_DATA_ENCRYPTION_ERROR),
   phoneNoFormatError(
       ResponseMessage.Key.INVALID_PHONE_NO_FORMAT, ResponseMessage.Message.INVALID_PHONE_NO_FORMAT),
-  invalidWebPageData(
-      ResponseMessage.Key.INVALID_WEBPAGE_DATA, ResponseMessage.Message.INVALID_WEBPAGE_DATA),
-  invalidMediaType(
-      ResponseMessage.Key.INVALID_MEDIA_TYPE, ResponseMessage.Message.INVALID_MEDIA_TYPE),
-  invalidWebPageUrl(
-      ResponseMessage.Key.INVALID_WEBPAGE_URL, ResponseMessage.Message.INVALID_WEBPAGE_URL),
   invalidOrgType(
       ResponseMessage.Key.INVALID_ORG_TYPE_ERROR, ResponseMessage.Message.INVALID_ORG_TYPE_ERROR),
   emailorPhoneorManagedByRequired(
@@ -143,7 +131,6 @@ public enum ResponseCode {
   PhoneNumberInUse(
       ResponseMessage.Key.PHONE_ALREADY_IN_USE, ResponseMessage.Message.PHONE_ALREADY_IN_USE),
   updateFailed(ResponseMessage.Key.UPDATE_FAILED, ResponseMessage.Message.UPDATE_FAILED),
-  invalidTypeValue(ResponseMessage.Key.INVALID_TYPE_VALUE, ResponseMessage.Key.INVALID_TYPE_VALUE),
   invalidLocationId(
       ResponseMessage.Key.INVALID_LOCATION_ID, ResponseMessage.Message.INVALID_LOCATION_ID),
   invalidHashTagId(
@@ -163,7 +150,6 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_COUNTRY_CODE, ResponseMessage.Message.INVALID_COUNTRY_CODE),
   locationIdRequired(
       ResponseMessage.Key.LOCATION_ID_REQUIRED, ResponseMessage.Message.LOCATION_ID_REQUIRED),
-  functionalityMissing(ResponseMessage.Key.NOT_SUPPORTED, ResponseMessage.Message.NOT_SUPPORTED),
   channelRegFailed(
       ResponseMessage.Key.CHANNEL_REG_FAILED, ResponseMessage.Message.CHANNEL_REG_FAILED),
   slugIsNotUnique(
@@ -174,9 +160,6 @@ public enum ResponseCode {
       ResponseMessage.Key.MAX_ALLOWED_SIZE_LIMIT_EXCEED,
       ResponseMessage.Message.MAX_ALLOWED_SIZE_LIMIT_EXCEED),
   inactiveUser(ResponseMessage.Key.INACTIVE_USER, ResponseMessage.Message.INACTIVE_USER),
-  userInactiveForThisOrg(
-      ResponseMessage.Key.USER_INACTIVE_FOR_THIS_ORG,
-      ResponseMessage.Message.USER_INACTIVE_FOR_THIS_ORG),
   orgDoesNotExist(ResponseMessage.Key.ORG_NOT_EXIST, ResponseMessage.Message.ORG_NOT_EXIST),
   alreadyExists(ResponseMessage.Key.ALREADY_EXISTS, ResponseMessage.Message.ALREADY_EXISTS),
   invalidValue(ResponseMessage.Key.INVALID_VALUE, ResponseMessage.Message.INVALID_VALUE),
@@ -266,15 +249,6 @@ public enum ResponseCode {
       ResponseMessage.Message.ERROR_UNSUPPORTED_CLOUD_STORAGE),
   errorUnsupportedField(
       ResponseMessage.Key.ERROR_UNSUPPORTED_FIELD, ResponseMessage.Message.ERROR_UNSUPPORTED_FIELD),
-  errorGenerateDownloadLink(
-      ResponseMessage.Key.ERROR_GENERATE_DOWNLOAD_LINK,
-      ResponseMessage.Message.ERROR_GENERATE_DOWNLOAD_LINK),
-  errorUnavailableDownloadLink(
-      ResponseMessage.Key.ERROR_DOWNLOAD_LINK_UNAVAILABLE,
-      ResponseMessage.Message.ERROR_DOWNLOAD_LINK_UNAVAILABLE),
-  errorSavingStorageDetails(
-      ResponseMessage.Key.ERROR_SAVING_STORAGE_DETAILS,
-      ResponseMessage.Message.ERROR_SAVING_STORAGE_DETAILS),
   errorCsvNoDataRows(
       ResponseMessage.Key.ERROR_CSV_NO_DATA_ROWS, ResponseMessage.Message.ERROR_CSV_NO_DATA_ROWS),
   errorInactiveOrg(
@@ -290,9 +264,6 @@ public enum ResponseCode {
   errorUpdateSettingNotAllowed(
       ResponseMessage.Key.ERROR_UPDATE_SETTING_NOT_ALLOWED,
       ResponseMessage.Message.ERROR_UPDATE_SETTING_NOT_ALLOWED),
-  errorUnavailableCertificate(
-      ResponseMessage.Key.ERROR_UNAVAILABLE_CERTIFICATE,
-      ResponseMessage.Message.ERROR_UNAVAILABLE_CERTIFICATE),
   csvRowsExceeds(ResponseMessage.Key.CSV_ROWS_EXCEEDS, ResponseMessage.Message.CSV_ROWS_EXCEEDS),
   blankCsvData(ResponseMessage.Key.BLANK_CSV_DATA, ResponseMessage.Message.BLANK_CSV_DATA),
   fileNotFound(ResponseMessage.Key.ERR_FILE_NOT_FOUND, ResponseMessage.Message.ERR_FILE_NOT_FOUND),

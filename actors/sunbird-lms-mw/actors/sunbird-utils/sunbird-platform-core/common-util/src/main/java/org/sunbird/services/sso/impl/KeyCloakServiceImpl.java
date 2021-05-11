@@ -19,7 +19,6 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
 import org.sunbird.services.sso.SSOManager;
 
 /**
@@ -30,11 +29,6 @@ import org.sunbird.services.sso.SSOManager;
 public class KeyCloakServiceImpl implements SSOManager {
   private LoggerUtil logger = new LoggerUtil(KeyCloakServiceImpl.class);
   private Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
-  private static final String URL =
-      KeyCloakConnectionProvider.SSO_URL
-          + "realms/"
-          + KeyCloakConnectionProvider.SSO_REALM
-          + "/protocol/openid-connect/token";
 
   private static PublicKey SSO_PUBLIC_KEY = null;
 
@@ -146,7 +140,7 @@ public class KeyCloakServiceImpl implements SSOManager {
   private void makeUserActiveOrInactive(String userId, boolean status, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
-      logger.info("makeUserActiveOrInactive: fedration id formed: " + fedUserId);
+      logger.info(context, "makeUserActiveOrInactive: fedration id formed: " + fedUserId);
       validateUserId(fedUserId);
       Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
       UserResource resource =
@@ -158,7 +152,9 @@ public class KeyCloakServiceImpl implements SSOManager {
       }
     } catch (Exception e) {
       logger.error(
-          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ", e);
+          context,
+          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
+          e);
       ProjectUtil.createAndThrowInvalidUserDataException();
     }
   }
@@ -192,9 +188,6 @@ public class KeyCloakServiceImpl implements SSOManager {
 
     UserRepresentation userRepresentation = resource.toRepresentation();
     userRepresentation.setRequiredActions(asList(requiredAction));
-    if (KeycloakRequiredActionLinkUtil.VERIFY_EMAIL.equalsIgnoreCase(requiredAction)) {
-      userRepresentation.setEmailVerified(false);
-    }
     resource.update(userRepresentation);
   }
 

@@ -42,8 +42,8 @@ public class UserOnboardingNotificationActor extends BaseActor {
         .equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
       // user created successfully send the onboarding mail
       Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
-      welcomeMailReqObj.setRequestContext(request.getRequestContext());
       if (null != welcomeMailReqObj) {
+        welcomeMailReqObj.setRequestContext(request.getRequestContext());
         tellToAnother(welcomeMailReqObj);
       }
     } else if (request
@@ -63,11 +63,6 @@ public class UserOnboardingNotificationActor extends BaseActor {
     if (StringUtils.isBlank((String) requestMap.get(JsonKey.PASSWORD))) {
       ssoManager.setRequiredAction(
           (String) requestMap.get(JsonKey.USER_ID), KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD);
-    }
-
-    if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.EMAIL))) {
-      ssoManager.setRequiredAction(
-          (String) requestMap.get(JsonKey.USER_ID), KeycloakRequiredActionLinkUtil.VERIFY_EMAIL);
     }
   }
 }

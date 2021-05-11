@@ -245,7 +245,7 @@ public class UserMergeActor extends UserBaseActor {
         TelemetryUtil.generateTargetObject(
             (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
             TelemetryEnvKey.USER,
-            JsonKey.MERGE_USER,
+            JsonKey.UPDATE,
             null);
     TelemetryUtil.generateCorrelatedObject(
         (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
@@ -257,6 +257,7 @@ public class UserMergeActor extends UserBaseActor {
         JsonKey.TO_ACCOUNT_ID,
         null,
         correlatedObject);
+    telemetryMap.put(JsonKey.TYPE, JsonKey.MERGE_USER);
     telemetryMap.remove(JsonKey.ID);
     telemetryMap.remove(JsonKey.USER_ID);
     TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);

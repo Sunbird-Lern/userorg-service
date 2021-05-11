@@ -33,7 +33,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.SocialMediaType;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
@@ -224,13 +223,10 @@ public class UserUtil {
     return userId;
   }
 
-  public static void validateUserPhoneEmailAndWebPages(
+  public static void validateUserPhoneAndEmailUniqueness(
       User user, String operationType, RequestContext context) {
     userLookupService.checkPhoneUniqueness(user, operationType, context);
     userLookupService.checkEmailUniqueness(user, operationType, context);
-    if (CollectionUtils.isNotEmpty(user.getWebPages())) {
-      SocialMediaType.validateSocialMedia(user.getWebPages());
-    }
   }
 
   public static String getDecryptedData(String value, RequestContext context) {
@@ -610,7 +606,7 @@ public class UserUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private static List<Map<String, Object>> getUserOrgDetails(
+  public static List<Map<String, Object>> getUserOrgDetails(
       boolean isdeleted, String userId, RequestContext context) {
     List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
@@ -649,11 +645,6 @@ public class UserUtil {
       logger.error(e.getMessage(), e);
     }
     return organisations;
-  }
-
-  public static List<Map<String, Object>> getAllUserOrgDetails(
-      String userId, RequestContext context) {
-    return getUserOrgDetails(false, userId, context);
   }
 
   public static void toLower(Map<String, Object> userMap) {
@@ -803,7 +794,7 @@ public class UserUtil {
       try {
         Map<String, Object> searchQueryMap = new HashMap<>();
         Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.IS_ROOT_ORG, true);
+        filters.put(JsonKey.IS_TENANT, true);
         filters.put(JsonKey.CHANNEL, providers);
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);

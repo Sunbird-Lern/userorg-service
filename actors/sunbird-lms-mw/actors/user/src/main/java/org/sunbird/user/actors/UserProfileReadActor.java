@@ -41,6 +41,7 @@ import scala.concurrent.Future;
   tasks = {
     "getUserDetailsByLoginId",
     "getUserProfileV3",
+    "getUserProfileV4",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -63,6 +64,9 @@ public class UserProfileReadActor extends BaseActor {
     String operation = request.getOperation();
     switch (operation) {
       case "getUserProfileV3":
+        getUserProfileV3(request);
+        break;
+      case "getUserProfileV4":
         getUserProfileV3(request);
         break;
       case "getUserDetailsByLoginId":
@@ -171,6 +175,10 @@ public class UserProfileReadActor extends BaseActor {
                     actorMessage.getRequestContext(),
                     "UserProfileReadActor:handle user profile read async call ");
                 result.put(JsonKey.ROOT_ORG, responseMap);
+                if (MapUtils.isNotEmpty(responseMap)) {
+                  responseMap.putAll(Util.getOrgDefaultValue());
+                }
+                result.putAll(Util.getUserDefaultValue());
                 Response response = new Response();
                 handleUserCallAsync(result, response, actorMessage);
                 return response;
@@ -485,6 +493,9 @@ public class UserProfileReadActor extends BaseActor {
                         ElasticSearchHelper.getResponseFromFuture(
                             fetchRootAndRegisterOrganisation(
                                 parameter, actorMessage.getRequestContext()));
+                if (MapUtils.isNotEmpty(esOrgMap)) {
+                  esOrgMap.putAll(Util.getOrgDefaultValue());
+                }
                 return esOrgMap;
               }
             },
@@ -507,6 +518,7 @@ public class UserProfileReadActor extends BaseActor {
                         .equalsIgnoreCase(requestedById))) {
                       userMap = removeUserPrivateField(userMap);
                     }
+                    userMap.putAll(Util.getUserDefaultValue());
                     return userMap;
                   }
                 },

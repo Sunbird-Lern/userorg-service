@@ -311,22 +311,6 @@ public class UserRequestValidatorTest {
     List<String> language = new ArrayList<>();
     language.add("English");
     requestObj.put(JsonKey.LANGUAGE, language);
-    List<Map<String, Object>> addressList = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ADDRESS_LINE1, "test");
-    map.put(JsonKey.CITY, "Bangalore");
-    map.put(JsonKey.COUNTRY, "India");
-    map.put(JsonKey.ADD_TYPE, "current");
-    addressList.add(map);
-    requestObj.put(JsonKey.ADDRESS, addressList);
-
-    List<Map<String, Object>> educationList = new ArrayList<>();
-    Map<String, Object> map1 = new HashMap<>();
-    map1.put(JsonKey.COURSE_NAME, "M.C.A");
-    map1.put(JsonKey.DEGREE, "Master");
-    map1.put(JsonKey.NAME, "CUSAT");
-    educationList.add(map1);
-    requestObj.put(JsonKey.EDUCATION, educationList);
     request.setRequest(requestObj);
     try {
       userRequestValidator.validateCreateUserRequest(request);
@@ -335,77 +319,6 @@ public class UserRequestValidatorTest {
       Assert.assertNull(e);
     }
     assertEquals(true, response);
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithWrongAddType() {
-    Request request = initailizeRequest();
-    Map<String, Object> requestObj = request.getRequest();
-    List<String> roles = new ArrayList<String>();
-    roles.add("PUBLIC");
-    roles.add("CONTENT-CREATOR");
-    requestObj.put(JsonKey.ROLE, roles);
-    List<String> language = new ArrayList<>();
-    language.add("English");
-    requestObj.put(JsonKey.LANGUAGE, language);
-    List<Map<String, Object>> addressList = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ADDRESS_LINE1, "test");
-    map.put(JsonKey.CITY, "Bangalore");
-    map.put(JsonKey.COUNTRY, "India");
-    map.put(JsonKey.ADD_TYPE, "lmlkmkl");
-    addressList.add(map);
-    requestObj.put(JsonKey.ADDRESS, addressList);
-
-    List<Map<String, Object>> educationList = new ArrayList<>();
-    Map<String, Object> map1 = new HashMap<>();
-    map1.put(JsonKey.COURSE_NAME, "M.C.A");
-    map1.put(JsonKey.DEGREE, "Master");
-    map1.put(JsonKey.NAME, "CUSAT");
-    educationList.add(map1);
-    requestObj.put(JsonKey.EDUCATION, educationList);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.addressTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyAddType() {
-    Request request = initailizeRequest();
-    Map<String, Object> requestObj = request.getRequest();
-    List<String> roles = new ArrayList<String>();
-    roles.add("PUBLIC");
-    roles.add("CONTENT-CREATOR");
-    requestObj.put(JsonKey.ROLE, roles);
-    List<String> language = new ArrayList<>();
-    language.add("English");
-    requestObj.put(JsonKey.LANGUAGE, language);
-    List<Map<String, Object>> addressList = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ADDRESS_LINE1, "test");
-    map.put(JsonKey.CITY, "Bangalore");
-    map.put(JsonKey.COUNTRY, "India");
-    map.put(JsonKey.ADD_TYPE, "");
-    addressList.add(map);
-    requestObj.put(JsonKey.ADDRESS, addressList);
-
-    List<Map<String, Object>> educationList = new ArrayList<>();
-    Map<String, Object> map1 = new HashMap<>();
-    map1.put(JsonKey.COURSE_NAME, "M.C.A");
-    map1.put(JsonKey.DEGREE, "Master");
-    map1.put(JsonKey.NAME, "CUSAT");
-    educationList.add(map1);
-    requestObj.put(JsonKey.EDUCATION, educationList);
-
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.addressError.getErrorCode(), e.getCode());
-    }
   }
 
   @Test
@@ -524,22 +437,6 @@ public class UserRequestValidatorTest {
     List<String> language = new ArrayList<>();
     language.add("English");
     requestObj.put(JsonKey.LANGUAGE, language);
-    List<Map<String, Object>> addressList = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ADDRESS_LINE1, "test");
-    map.put(JsonKey.CITY, "Bangalore");
-    map.put(JsonKey.COUNTRY, "India");
-    map.put(JsonKey.ADD_TYPE, "current");
-    addressList.add(map);
-    requestObj.put(JsonKey.ADDRESS, addressList);
-
-    List<Map<String, Object>> educationList = new ArrayList<>();
-    Map<String, Object> map1 = new HashMap<>();
-    map1.put(JsonKey.COURSE_NAME, "M.C.A");
-    map1.put(JsonKey.DEGREE, "Master");
-    map1.put(JsonKey.NAME, "CUSAT");
-    educationList.add(map1);
-    requestObj.put(JsonKey.EDUCATION, educationList);
     boolean response = false;
     request.setRequest(requestObj);
     try {
@@ -728,73 +625,6 @@ public class UserRequestValidatorTest {
   }
 
   @Test
-  public void testValidateCreateUserRequestFailureWithInvalidAddress() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL, "test123@test.com");
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
-    requestObj.put(JsonKey.USERNAME, "test123");
-    requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.ADDRESS, "");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidaeCreateUserRequestFailureWithInvalidEducation() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL, "test123@test.com");
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
-    requestObj.put(JsonKey.USERNAME, "test123");
-    requestObj.put(JsonKey.FIRST_NAME, "test123");
-    requestObj.put(JsonKey.EDUCATION, "");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserRequestFailureWithInvalidAddressType() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL, "test123@test.com");
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
-    requestObj.put(JsonKey.USERNAME, "test123");
-    requestObj.put(JsonKey.FIRST_NAME, "test123");
-    List<Map<String, Object>> addressList = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ADDRESS_LINE1, "test");
-    map.put(JsonKey.CITY, "Bangalore");
-    map.put(JsonKey.COUNTRY, "India");
-    map.put(JsonKey.ADD_TYPE, "localr");
-    addressList.add(map);
-    requestObj.put(JsonKey.ADDRESS, addressList);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.addressTypeError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
   public void testValidateCreateUserRequestFailureWithInvalidCountryCode() {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
@@ -888,50 +718,6 @@ public class UserRequestValidatorTest {
   }
 
   @Test
-  public void testValidateCreateUserFailureWithEmptyEducationAddress() {
-    Request request = initailizeRequest();
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.NAME, "name");
-    map.put(JsonKey.DEGREE, "degree");
-    Map<String, Object> address = new HashMap<>();
-    address.put(JsonKey.ADDRESS_LINE1, "");
-    map.put(JsonKey.ADDRESS, address);
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.EDUCATION, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.addressError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testValidateCreateUserFailureWithEmptyEducationCity() {
-    Request request = initailizeRequest();
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
-
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.NAME, "name");
-    map.put(JsonKey.DEGREE, "degree");
-    Map<String, Object> address = new HashMap<>();
-    address.put(JsonKey.ADDRESS_LINE1, "line1");
-    address.put(JsonKey.CITY, "");
-    map.put(JsonKey.ADDRESS, address);
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(map);
-    request.getRequest().put(JsonKey.EDUCATION, list);
-    try {
-      userRequestValidator.validateCreateUserRequest(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.addressError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
   public void testValidateCreateUserFailureWithInvalidPhoneFormat() {
     Request request = new Request();
     request.getRequest().put(JsonKey.EMAIL, "asd@asd.com");
@@ -1005,6 +791,7 @@ public class UserRequestValidatorTest {
     requestObj.put(JsonKey.PHONE, "9321234123");
     requestObj.put(JsonKey.PHONE_VERIFIED, true);
     requestObj.put(JsonKey.FIRST_NAME, "test123");
+    requestObj.put(JsonKey.DOB, "2000");
     request.setRequest(requestObj);
     return request;
   }

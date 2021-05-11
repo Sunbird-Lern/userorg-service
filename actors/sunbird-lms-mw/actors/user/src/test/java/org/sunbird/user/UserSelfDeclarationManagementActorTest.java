@@ -36,6 +36,7 @@ import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
+import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
@@ -43,8 +44,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.actors.UserSelfDeclarationManagementActor;
-import org.sunbird.user.dao.UserOrgDao;
-import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
@@ -59,9 +58,7 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   UserUtil.class,
-  DataCacheHandler.class,
-  UserOrgDaoImpl.class,
-  UserOrgDao.class
+  DataCacheHandler.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -77,7 +74,6 @@ public class UserSelfDeclarationManagementActorTest {
   private static CassandraOperationImpl cassandraOperation;
   private ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService;
-  private static UserOrgDao userOrgDao;
 
   @BeforeClass
   public static void setUp() {
@@ -114,10 +110,31 @@ public class UserSelfDeclarationManagementActorTest {
         Mockito.anyMap(),
         Mockito.any());
 
+    List userOrgLst = new LinkedList<HashMap<String, Object>>();
+    Map userOrg = new HashMap();
+    userOrg.put(JsonKey.ORGANISATION_ID, "someStateSubOrgId");
+    userOrg.put(JsonKey.EXTERNAL_ID, "someStateExternalId");
+    userOrgLst.add(userOrg);
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, userOrgLst);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+
     PowerMockito.mockStatic(Util.class);
     when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
 
     PowerMockito.mockStatic(UserUtil.class);
+    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
+    Map userInfo = new HashMap();
+    userInfo.put(JsonKey.DECLARED_EMAIL, "9909090909");
+    userInfo.put(JsonKey.DECLARED_PHONE, "abc@tenant.com");
+    userDeclareEntity.setUserId("userid");
+    userDeclareEntity.setOperation("add");
+    userDeclareEntity.setPersona("somePersona");
+    userDeclareEntity.setUserInfo(userInfo);
+    Mockito.when(UserUtil.createUserDeclaredObject(Mockito.anyMap(), Mockito.anyString()))
+        .thenReturn(userDeclareEntity);
 
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
@@ -128,15 +145,11 @@ public class UserSelfDeclarationManagementActorTest {
         .thenReturn(promise.future());
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
-
-    userOrgDao = Mockito.mock(UserOrgDao.class);
-    PowerMockito.mockStatic(UserOrgDaoImpl.class);
-    when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
   }
 
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_ROOT_ORG, true);
+    map.put(JsonKey.IS_TENANT, false);
     map.put(JsonKey.ID, "rootOrgId");
     map.put(JsonKey.CHANNEL, "anyChannel");
     return map;
@@ -345,28 +358,11 @@ public class UserSelfDeclarationManagementActorTest {
     return userDeclareEntity;
   }
 
-  // @Test
+  @Test
   public void testUpdateUserSelfDeclarations() throws Exception {
 
-    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
-    Map userInfo = new HashMap();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "9909090909");
-    userInfo.put(JsonKey.DECLARED_PHONE, "abc@tenant.com");
-    userDeclareEntity.setUserId("userid");
-    userDeclareEntity.setOperation("add");
-    userDeclareEntity.setPersona("somePersona");
-    userDeclareEntity.setUserInfo(userInfo);
     Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
 
-    List userOrgLst = new LinkedList<HashMap<String, Object>>();
-    Map userOrg = new HashMap();
-    userOrg.put(JsonKey.ORGANISATION_ID, "someStateSubOrgId");
-    userOrg.put(JsonKey.EXTERNAL_ID, "someStateExternalId");
-    userOrgLst.add(userOrg);
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, userOrgLst);
-    when(userOrgDao.getUserOrgDetails(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response);
     doNothing()
         .when(
             UserUtil.class,
@@ -374,12 +370,9 @@ public class UserSelfDeclarationManagementActorTest {
             Mockito.anyList(),
             Mockito.anyMap(),
             Mockito.any());
-    when(UserUtil.class, "createUserDeclaredObject", Mockito.anyMap(), Mockito.anyString())
-        .thenReturn(userDeclareEntity);
     boolean result =
         testScenario(
-            getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS),
-            null);
+            getRequest(true, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS), null);
     assertTrue(result);
   }
 
@@ -438,6 +431,7 @@ public class UserSelfDeclarationManagementActorTest {
     innerMap.put(JsonKey.REQUESTED_BY, "requestedBy");
     reqObj.setRequest(reqMap);
     reqObj.setContext(innerMap);
+    reqObj.setRequestContext(new RequestContext());
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;
   }

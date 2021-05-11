@@ -295,8 +295,8 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     String rootOrgId = "";
     Map<String, Object> orgMap = responseList.get(0);
     boolean isRootOrg = false;
-    if (null != orgMap.get(JsonKey.IS_ROOT_ORG)) {
-      isRootOrg = (boolean) orgMap.get(JsonKey.IS_ROOT_ORG);
+    if (null != orgMap.get(JsonKey.IS_TENANT)) {
+      isRootOrg = (boolean) orgMap.get(JsonKey.IS_TENANT);
     } else {
       isRootOrg = false;
     }

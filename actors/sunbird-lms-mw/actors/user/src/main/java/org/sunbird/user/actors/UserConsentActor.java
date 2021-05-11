@@ -11,7 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -22,6 +21,8 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.learner.organisation.dao.OrgDao;
+import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.UserConsentService;
@@ -29,7 +30,6 @@ import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserConsentServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.DateUtil;
-import scala.concurrent.Future;
 
 @ActorConfig(
   tasks = {"updateUserConsent", "getUserConsent"},
@@ -40,6 +40,7 @@ public class UserConsentActor extends BaseActor {
   private UserService userService = UserServiceImpl.getInstance();
   private UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private OrgDao orgDao = OrgDaoImpl.getInstance();
 
   enum CONSENT_CONSUMER_TYPE {
     ORGANISATION;
@@ -193,11 +194,7 @@ public class UserConsentActor extends BaseActor {
   private void validateConsumerId(String consumerId, RequestContext context) {
     Map<String, Object> org = null;
     try {
-      Future<Map<String, Object>> esResponseF =
-          esUtil.getDataByIdentifier(
-              ProjectUtil.EsType.organisation.getTypeName(), consumerId, context);
-      org = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResponseF);
-
+      org = orgDao.getOrgById(consumerId, context);
     } catch (Exception ex) {
       throw new ProjectCommonException(
           ResponseCode.internalError.getErrorCode(),

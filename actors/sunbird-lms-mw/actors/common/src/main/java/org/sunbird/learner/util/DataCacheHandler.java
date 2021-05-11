@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
@@ -26,7 +27,6 @@ public class DataCacheHandler implements Runnable {
 
   private static Map<String, Object> roleMap = new ConcurrentHashMap<>();
   private static Map<String, Object> telemetryPdata = new ConcurrentHashMap<>(3);
-  private static Map<String, String> orgTypeMap = new ConcurrentHashMap<>();
   private static Map<String, String> configSettings = new ConcurrentHashMap<>();
   private static Map<String, Map<String, List<Map<String, String>>>> frameworkCategoriesMap =
       new ConcurrentHashMap<>();
@@ -52,14 +52,11 @@ public class DataCacheHandler implements Runnable {
     JsonKey.EMAIL_VERIFIED,
     JsonKey.ROLES,
     JsonKey.POSITION,
-    JsonKey.GRADE,
     JsonKey.LOCATION,
     JsonKey.DOB,
-    JsonKey.GENDER,
     JsonKey.LANGUAGE,
     JsonKey.PROFILE_SUMMARY,
     JsonKey.SUBJECT,
-    JsonKey.WEB_PAGES,
     JsonKey.EXTERNAL_ID_PROVIDER,
     JsonKey.EXTERNAL_ID,
     JsonKey.EXTERNAL_ID_TYPE,
@@ -68,18 +65,14 @@ public class DataCacheHandler implements Runnable {
   public static String[] bulkOrgAllowedFields = {
     JsonKey.ORGANISATION_NAME,
     JsonKey.CHANNEL,
-    JsonKey.IS_ROOT_ORG,
+    JsonKey.IS_TENANT,
     JsonKey.PROVIDER,
     JsonKey.EXTERNAL_ID,
     JsonKey.DESCRIPTION,
     JsonKey.HOME_URL,
-    JsonKey.ORG_CODE,
     JsonKey.ORG_TYPE,
-    JsonKey.PREFERRED_LANGUAGE,
-    JsonKey.THEME,
     JsonKey.CONTACT_DETAILS,
     JsonKey.LOC_ID,
-    JsonKey.HASHTAGID,
     JsonKey.LOCATION_CODE
   };
 
@@ -87,7 +80,6 @@ public class DataCacheHandler implements Runnable {
   public void run() {
     logger.info("DataCacheHandler:run: Cache refresh started.");
     roleCache();
-    orgTypeCache();
     cacheSystemConfig();
     cacheRoleForRead();
     cacheTelemetryPdata();
@@ -156,9 +148,13 @@ public class DataCacheHandler implements Runnable {
   }
 
   private void cacheTelemetryPdata() {
+    String telemetryPdataVer = DataCacheHandler.getConfigSettings().get("telemetry_pdata_ver");
+    if (StringUtils.isBlank(telemetryPdataVer)) {
+      telemetryPdataVer = ProjectUtil.getConfigValue("telemetry_pdata_ver");
+    }
     telemetryPdata.put("telemetry_pdata_id", ProjectUtil.getConfigValue("telemetry_pdata_id"));
     telemetryPdata.put("telemetry_pdata_pid", ProjectUtil.getConfigValue("telemetry_pdata_pid"));
-    telemetryPdata.put("telemetry_pdata_ver", ProjectUtil.getConfigValue("telemetry_pdata_ver"));
+    telemetryPdata.put("telemetry_pdata_ver", telemetryPdataVer);
   }
 
   private void cacheRoleForRead() {
@@ -195,22 +191,6 @@ public class DataCacheHandler implements Runnable {
     tempConfigSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
     tempConfigSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
     configSettings = tempConfigSettings;
-  }
-
-  @SuppressWarnings("unchecked")
-  private void orgTypeCache() {
-    Map<String, String> tempOrgTypeMap = new ConcurrentHashMap();
-    Response response = cassandraOperation.getAllRecords(KEY_SPACE_NAME, JsonKey.ORG_TYPE_DB, null);
-    List<Map<String, Object>> responseList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (null != responseList && !responseList.isEmpty()) {
-      for (Map<String, Object> resultMap : responseList) {
-        tempOrgTypeMap.put(
-            ((String) resultMap.get(JsonKey.NAME)).toLowerCase(),
-            (String) resultMap.get(JsonKey.ID));
-      }
-      orgTypeMap = tempOrgTypeMap;
-    }
   }
 
   @SuppressWarnings("unchecked")
@@ -270,11 +250,6 @@ public class DataCacheHandler implements Runnable {
   /** @return the roleList */
   public static List<Map<String, String>> getUserReadRoleList() {
     return roleList;
-  }
-
-  /** @return the orgTypeMap */
-  public static Map<String, String> getOrgTypeMap() {
-    return orgTypeMap;
   }
 
   /** @return the configSettings */
