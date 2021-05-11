@@ -116,10 +116,12 @@ public class UserTncService {
     }
   }
 
-  public void validateOrgAdminTnc(
-      RequestContext context, String tncType, Map<String, Object> user) {
+  public void validateRoleForTnc(RequestContext context, String tncType, Map<String, Object> user) {
     // check if it is org admin TnC and user is not an admin of the organisation
-    if (JsonKey.ORG_ADMIN_TNC.equals(tncType) && !isOrgAdmin(user, context)) {
+    // OR check if it is report viewer tnc and user not having the report viewer role
+    if ((JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, JsonKey.ORG_ADMIN, context))
+        || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
+            && !roleCheck(user, JsonKey.REPORT_VIEWER, context))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
@@ -129,7 +131,7 @@ public class UserTncService {
     }
   }
 
-  private boolean isOrgAdmin(Map<String, Object> user, RequestContext context) {
+  private boolean roleCheck(Map<String, Object> user, String role, RequestContext context) {
     Map<String, Object> searchMap = new LinkedHashMap<>(2);
     searchMap.put(JsonKey.USER_ID, user.get(JsonKey.ID));
     searchMap.put(JsonKey.ORGANISATION_ID, user.get(JsonKey.ROOT_ORG_ID));
@@ -141,7 +143,7 @@ public class UserTncService {
       Map<String, Object> org = orgDetails.get(0);
       if (MapUtils.isNotEmpty(org)) {
         List<String> roles = (List<String>) org.get(JsonKey.ROLES);
-        return roles.contains(JsonKey.ORG_ADMIN);
+        return roles.contains(role);
       }
     }
     return false;

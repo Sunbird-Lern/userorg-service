@@ -602,6 +602,8 @@ public final class JsonKey {
   public static final String FEED_LIMIT = "feed_limit";
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
+  public static final String REPORT_VIEWER = "REPORT_VIEWER";
+  public static final String REPORT_VIEWER_TNC = "reportViewerTnc";
   public static final String REQUEST_ID = "requestid";
   public static final String LOCATION_TYPE_SCHOOL = "school";
   public static final String UPDATE_USER_SCHOOL_ORG = "updateUserSchoolOrg";

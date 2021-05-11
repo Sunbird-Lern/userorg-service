@@ -9,7 +9,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
@@ -18,8 +17,9 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
+import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserTncService;
 
 @ActorConfig(
@@ -29,9 +29,9 @@ import org.sunbird.user.service.UserTncService;
 )
 public class UserTnCActor extends BaseActor {
   private UserTncService tncService = new UserTncService();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private ObjectMapper mapper = new ObjectMapper();
+
+  UserDao userDao = UserDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -62,7 +62,7 @@ public class UserTnCActor extends BaseActor {
     tncService.validateLatestTncVersion(request, tncType);
     Map<String, Object> user = tncService.getUserById(userId, requestContext);
     tncService.isAccountManagedUser(isManagedUser, user);
-    tncService.validateOrgAdminTnc(requestContext, tncType, user);
+    tncService.validateRoleForTnc(requestContext, tncType, user);
     if (JsonKey.TNC_CONFIG.equals(tncType)) {
       updateUserTncConfig(user, acceptedTnC, requestContext, context);
     } else {
@@ -120,9 +120,7 @@ public class UserTnCActor extends BaseActor {
         logger.error(requestContext, "Exception occurred while mapping", ex);
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
-      response =
-          cassandraOperation.updateRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, requestContext);
+      response = userDao.updateUser(userMap, requestContext);
       sender().tell(response, self());
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
         // In ES this field is getting stored as Map<String, Map<String,String>>
@@ -161,9 +159,7 @@ public class UserTnCActor extends BaseActor {
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
           JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
-      response =
-          cassandraOperation.updateRecord(
-              usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userMap, requestContext);
+      response = userDao.updateUser(userMap, requestContext);
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
         tncService.syncUserDetails(userMap, requestContext);
       }
