@@ -288,21 +288,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public void validateDob(Request userRequest) {
-    if (null != userRequest.getRequest().get(JsonKey.DOB)) {
-      String dobValue =
-          userRequest.getRequest().get(JsonKey.DOB)
-              + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE);
-      boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_MONTH_DATE_FORMAT, dobValue);
-      if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
-      } else {
-        userRequest.getRequest().put(JsonKey.DOB, dobValue);
-        userRequest.getRequest().put(JsonKey.DOB_VALIDATION_DONE, true);
-      }
-    }
-  }
-
   private void emailVerifiedValidation(Request userRequest) {
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       if (null != userRequest.getRequest().get(JsonKey.EMAIL_VERIFIED)) {
