@@ -34,6 +34,7 @@ public final class JsonKey {
   public static final String API_CALL = "API_CALL";
   public static final String APPROVED_BY = "approvedBy";
   public static final String APPROVED_DATE = "approvedDate";
+  public static final String ASSOCIATION_TYPE = "associationtype";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
   public static final String AUTH_WITH_MASTER_KEY = "authWithMasterKey";
   public static final String AUTHORIZATION = "Authorization";
@@ -137,6 +138,9 @@ public final class JsonKey {
   public static final String INFO = "info";
   public static final String INSERT = "insert";
   public static final String IS_APPROVED = "isApproved";
+  public static final String IS_SSO = "isSSO";
+  public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
+  public static final String IS_SYSTEM_UPLOAD = "isSystemUpload";
   public static final String IS_AUTH_REQ = "isAuthReq";
   public static final String IS_DELETED = "isDeleted";
   public static final String JOB_PROFILE = "jobProfile";
