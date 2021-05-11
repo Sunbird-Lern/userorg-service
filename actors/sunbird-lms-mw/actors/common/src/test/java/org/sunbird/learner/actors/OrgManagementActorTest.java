@@ -45,6 +45,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.location.Location;
 import org.sunbird.validator.location.LocationRequestValidator;
 import scala.concurrent.Promise;
 
@@ -195,6 +196,35 @@ public class OrgManagementActorTest {
         getRequest(
             getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
     boolean result = testScenario(req, null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetOrgDetails() {
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.ORGANISATION_ID, "54652139879");
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getByIdEsResponse(false));
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetOrgDetailsFailure() {
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.ORGANISATION_ID, "54652139879");
+    Promise<Map<String, Object>> promise = Futures.promise();
+    Map<String, Object> esRes = getByIdEsResponse(true);
+    promise.success(esRes);
+    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    boolean result =
+        testScenario(
+            getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()),
+            ResponseCode.orgDoesNotExist);
     assertTrue(result);
   }
 
@@ -404,6 +434,139 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
+  @Test
+  public void testCreateOrgFail2() throws Exception {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    when(cassandraOperation.insertRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getSuccess());
+    Promise<Map<String, Object>> promise = Futures.promise();
+    Map<String, Object> esMap = getValidateChannelEsResponse(true);
+    esMap.put(JsonKey.CONTENT, new ArrayList<>());
+    promise.success(esMap);
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    PowerMockito.mockStatic(LocationClientImpl.class);
+    LocationClient locationClient = mock(LocationClientImpl.class);
+    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
+    LocationClientImpl client = mock(LocationClientImpl.class);
+    whenNew(LocationClientImpl.class).withNoArguments().thenReturn(client);
+    List<String> locList = new ArrayList<>();
+    locList.add("54646");
+    LocationRequestValidator locationRequestValidator =
+        PowerMockito.mock(LocationRequestValidator.class);
+    whenNew(LocationRequestValidator.class).withNoArguments().thenReturn(locationRequestValidator);
+    when(locationRequestValidator.getHierarchyLocationIds(Mockito.any(), Mockito.anyList()))
+        .thenReturn(locList);
+    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists());
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.HASHTAGID, "orgId");
+    req.put(JsonKey.IS_TENANT, true);
+    List<String> locCode = new ArrayList<>();
+    locCode.add("state");
+    req.put(JsonKey.LOCATION_CODE, locCode);
+    Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
+    boolean result = testScenario(reqst, ResponseCode.invalidParameterValue);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateOrgFail1() throws Exception {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    when(cassandraOperation.insertRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getSuccess());
+    Promise<Map<String, Object>> promise = Futures.promise();
+    Map<String, Object> esMap = getValidateChannelEsResponse(true);
+    esMap.put(JsonKey.CONTENT, new ArrayList<>());
+    promise.success(esMap);
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    PowerMockito.mockStatic(LocationClientImpl.class);
+    LocationClient locationClient = mock(LocationClientImpl.class);
+    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
+    LocationClientImpl client = mock(LocationClientImpl.class);
+    whenNew(LocationClientImpl.class).withNoArguments().thenReturn(client);
+    List<String> locList = new ArrayList<>();
+    locList.add("54646");
+    LocationRequestValidator locationRequestValidator =
+        PowerMockito.mock(LocationRequestValidator.class);
+    whenNew(LocationRequestValidator.class).withNoArguments().thenReturn(locationRequestValidator);
+    when(locationRequestValidator.getHierarchyLocationIds(Mockito.any(), Mockito.anyList()))
+        .thenReturn(locList);
+    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists());
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.HASHTAGID, "orgId");
+    req.put(JsonKey.IS_TENANT, true);
+    List<Map<String, String>> orgLocation = new ArrayList<>();
+    Map<String, String> orgLoc1 = new HashMap<>();
+    orgLoc1.put(JsonKey.ID, "54646");
+    orgLoc1.put(JsonKey.TYPE, "state");
+    orgLocation.add(orgLoc1);
+    req.put(JsonKey.ORG_LOCATION, orgLocation);
+    Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
+    boolean result = testScenario(reqst, ResponseCode.invalidParameterValue);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testCreateOrgFail3() throws Exception {
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
+    when(cassandraOperation.insertRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getSuccess());
+    Promise<Map<String, Object>> promise = Futures.promise();
+    Map<String, Object> esMap = getValidateChannelEsResponse(true);
+    esMap.put(JsonKey.CONTENT, new ArrayList<>());
+    promise.success(esMap);
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    PowerMockito.mockStatic(LocationClientImpl.class);
+    LocationClient locationClient = mock(LocationClientImpl.class);
+    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
+    LocationClientImpl client = mock(LocationClientImpl.class);
+    whenNew(LocationClientImpl.class).withNoArguments().thenReturn(client);
+    List<String> locList = new ArrayList<>();
+    locList.add("54646");
+    LocationRequestValidator locationRequestValidator =
+        PowerMockito.mock(LocationRequestValidator.class);
+    whenNew(LocationRequestValidator.class).withNoArguments().thenReturn(locationRequestValidator);
+    when(locationRequestValidator.getHierarchyLocationIds(Mockito.any(), Mockito.anyList()))
+        .thenReturn(locList);
+    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists());
+    Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
+    req.put(JsonKey.HASHTAGID, "orgId");
+    req.put(JsonKey.IS_TENANT, true);
+    List<Map<String, String>> orgLocation = new ArrayList<>();
+    Map<String, String> orgLoc1 = new HashMap<>();
+    orgLoc1.put(JsonKey.CODE, "ST001");
+    orgLoc1.put(JsonKey.TYPE, "state");
+    orgLocation.add(orgLoc1);
+    req.put(JsonKey.ORG_LOCATION, orgLocation);
+    Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
+    boolean result = testScenario(reqst, ResponseCode.invalidParameterValue);
+    assertTrue(result);
+  }
+
+  public List<Location> getLocationLists() {
+    List<Location> locations = new ArrayList<>();
+    Location location = new Location();
+    location.setType(JsonKey.STATE);
+    location.setCode("locationCode");
+    location.setId("54646");
+    locations.add(location);
+    return locations;
+  }
+
   private Response getSuccess() {
     Response res = new Response();
     res.setResponseCode(ResponseCode.OK);
@@ -467,9 +630,21 @@ public class OrgManagementActorTest {
       content.put(JsonKey.ORGANISATION_ID, "orgId");
       content.put(JsonKey.HASHTAGID, "hashtagId");
       content.put(JsonKey.ID, "id");
+      content.put(JsonKey.ORGANISATION_TYPE, 2);
       contentList.add(content);
     }
     response.put(JsonKey.CONTENT, contentList);
+    return response;
+  }
+
+  private Map<String, Object> getByIdEsResponse(boolean empty) {
+    Map<String, Object> response = new HashMap<>();
+    if (!empty) {
+      response.put(JsonKey.ORGANISATION_ID, "orgId");
+      response.put(JsonKey.HASHTAGID, "hashtagId");
+      response.put(JsonKey.ID, "id");
+      response.put(JsonKey.ORGANISATION_TYPE, 2);
+    }
     return response;
   }
 

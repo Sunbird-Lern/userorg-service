@@ -119,14 +119,15 @@ public class UserRequestValidator extends BaseRequestValidator {
       userRequest.getRequest().put(JsonKey.EMAIL_VERIFIED, null);
       userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
     }
-    phoneVerifiedValidation(userRequest);
-    emailVerifiedValidation(userRequest);
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       validateEmail((String) userRequest.getRequest().get(JsonKey.EMAIL));
     }
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.PHONE))) {
       validatePhone((String) userRequest.getRequest().get(JsonKey.PHONE));
+    }
+    if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
+      validateDob(userRequest);
     }
   }
 
@@ -192,7 +193,6 @@ public class UserRequestValidator extends BaseRequestValidator {
           (String) userRequest.getRequest().get(JsonKey.PHONE),
           (String) userRequest.getRequest().get(JsonKey.COUNTRY_CODE));
     }
-    phoneVerifiedValidation(userRequest);
   }
 
   private void phoneVerifiedValidation(Request userRequest) {
@@ -270,8 +270,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
-    } else {
-      emailVerifiedValidation(userRequest);
     }
   }
 

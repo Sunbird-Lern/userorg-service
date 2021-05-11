@@ -140,7 +140,7 @@ public class OrganisationManagementActor extends BaseActor {
         request.remove(JsonKey.PROVIDER);
       }
 
-      String createdBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
+      String createdBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       request.put(JsonKey.CREATED_BY, createdBy);
       request.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
       String uniqueId = ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv());
@@ -390,6 +390,7 @@ public class OrganisationManagementActor extends BaseActor {
           && !validateChannelUniqueness(
               (String) request.get(JsonKey.CHANNEL),
               (String) request.get(JsonKey.ORGANISATION_ID),
+              (Boolean) dbOrgDetails.get(JsonKey.IS_TENANT),
               actorMessage.getRequestContext())) {
         logger.info(actorMessage.getRequestContext(), "Channel validation failed");
         ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
@@ -397,6 +398,12 @@ public class OrganisationManagementActor extends BaseActor {
       // allow lower case values for source and externalId to the database
       if (request.get(JsonKey.PROVIDER) != null) {
         request.put(JsonKey.PROVIDER, ((String) request.get(JsonKey.PROVIDER)).toLowerCase());
+      } else {
+        String reqChannel = (String) request.get(JsonKey.CHANNEL);
+        String dbChannel = (String) dbOrgDetails.get(JsonKey.CHANNEL);
+        if (StringUtils.isNotBlank(reqChannel) && !reqChannel.equalsIgnoreCase(dbChannel)) {
+          request.put(JsonKey.PROVIDER, reqChannel.toLowerCase());
+        }
       }
 
       String passedExternalId = (String) request.get(JsonKey.EXTERNAL_ID);
@@ -434,7 +441,7 @@ public class OrganisationManagementActor extends BaseActor {
         updateOrgDao.remove(JsonKey.STATUS);
       }
 
-      String updatedBy = (String) actorMessage.getRequest().get(JsonKey.REQUESTED_BY);
+      String updatedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       if (!(StringUtils.isBlank(updatedBy))) {
         updateOrgDao.put(JsonKey.UPDATED_BY, updatedBy);
       }
@@ -531,15 +538,17 @@ public class OrganisationManagementActor extends BaseActor {
       sender().tell(response, self());
 
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
+      List orgLocationList = new ArrayList<>();
       if (StringUtils.isNotBlank(orgLocation)) {
         try {
-          updateOrgDao.put(JsonKey.ORG_LOCATION, mapper.readValue(orgLocation, List.class));
+          orgLocationList = mapper.readValue(orgLocation, List.class);
         } catch (Exception e) {
           logger.info(
               actorMessage.getRequestContext(),
               "Exception occurred while converting orgLocation to List<Map<String,String>>.");
         }
       }
+      updateOrgDao.put(JsonKey.ORG_LOCATION, orgLocationList);
 
       Request orgRequest = new Request();
       orgRequest.setRequestContext(actorMessage.getRequestContext());
@@ -568,8 +577,15 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.EsType.organisation.getTypeName(), orgId, actorMessage.getRequestContext());
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
-
+    if (MapUtils.isNotEmpty(result)) {
+      result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+      if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
+        int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
+        boolean isSchool =
+            (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+        result.put(JsonKey.IS_SCHOOL, isSchool);
+      }
+    }
     if (MapUtils.isEmpty(result)) {
       throw new ProjectCommonException(
           ResponseCode.orgDoesNotExist.getErrorCode(),
@@ -641,7 +657,6 @@ public class OrganisationManagementActor extends BaseActor {
 
   private Map<String, Object> elasticSearchComplexSearch(
       Map<String, Object> filters, String type, RequestContext context) {
-
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> resultF = esService.search(searchDTO, type, context);
@@ -650,18 +665,19 @@ public class OrganisationManagementActor extends BaseActor {
     return esResponse;
   }
 
-  private boolean validateChannelUniqueness(String channel, String orgId, RequestContext context) {
+  private boolean validateChannelUniqueness(
+      String channel, String orgId, Boolean isTenant, RequestContext context) {
     if (StringUtils.isNotBlank(channel)) {
       Map<String, Object> filters = new HashMap<>();
       filters.put(JsonKey.CHANNEL, channel);
       filters.put(JsonKey.IS_TENANT, true);
-      return validateChannelUniqueness(filters, orgId, context);
+      return validateChannelUniqueness(filters, orgId, isTenant, context);
     }
     return (orgId == null);
   }
 
   private boolean validateChannelUniqueness(
-      Map<String, Object> filters, String orgId, RequestContext context) {
+      Map<String, Object> filters, String orgId, Boolean isTenant, RequestContext context) {
     if (MapUtils.isNotEmpty(filters)) {
       SearchDTO searchDto = new SearchDTO();
       searchDto.getAdditionalProperties().put(JsonKey.FILTERS, filters);
@@ -670,15 +686,29 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> result =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
       List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
-      if ((list.isEmpty())) {
-        return true;
-      } else {
-        if (orgId == null) {
-          return false;
+      if (CollectionUtils.isEmpty(list)) {
+        if (StringUtils.isBlank(orgId)) {
+          return true;
+        } else {
+          if (isTenant) {
+            return true;
+          } else {
+            return false;
+          }
         }
-        Map<String, Object> data = list.get(0);
-        String id = (String) data.get(JsonKey.ID);
-        return id.equalsIgnoreCase(orgId);
+      } else {
+        if (StringUtils.isBlank(orgId)) {
+          return false;
+        } else {
+          Map<String, Object> data = list.get(0);
+          String id = (String) data.get(JsonKey.ID);
+          if (isTenant) {
+            return id.equalsIgnoreCase(orgId);
+          } else {
+            // for suborg channel should be valid
+            return true;
+          }
+        }
       }
     }
     return true;
@@ -722,7 +752,7 @@ public class OrganisationManagementActor extends BaseActor {
             ProjectUtil.formatMessage(
                 ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
-    } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, context)) {
+    } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, null, context)) {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
       throw new ProjectCommonException(
@@ -757,22 +787,52 @@ public class OrganisationManagementActor extends BaseActor {
   }
 
   private void validateOrgLocation(Map<String, Object> request, RequestContext context) {
+    List<String> locList = new ArrayList<>();
     List<Map<String, String>> orgLocationList =
         (List<Map<String, String>>) request.get(JsonKey.ORG_LOCATION);
     if (CollectionUtils.isEmpty(orgLocationList)) {
-      return;
+      // Request is from org upload
+      if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_CODE))) {
+        locList =
+            validator.getValidatedLocationIds(
+                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
+                (List<String>) request.get(JsonKey.LOCATION_CODE));
+        request.remove(JsonKey.LOCATION_CODE);
+      } else {
+        return;
+      }
+    } else {
+      List<String> finalLocList = locList;
+      // If request orglocation is a list of map , which has location id, not location code
+      orgLocationList
+          .stream()
+          .forEach(
+              loc -> {
+                if (loc.containsKey(JsonKey.ID)) {
+                  finalLocList.add(loc.get(JsonKey.ID));
+                }
+              });
+      // If request orglocation is a list of map , which doesn't have location id, but has location
+      // code
+      if (CollectionUtils.isEmpty(finalLocList)) {
+        orgLocationList
+            .stream()
+            .forEach(
+                loc -> {
+                  if (loc.containsKey(JsonKey.CODE)) {
+                    finalLocList.add(loc.get(JsonKey.CODE));
+                  }
+                });
+        if (CollectionUtils.isNotEmpty(finalLocList)) {
+          locList =
+              validator.getValidatedLocationIds(
+                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), finalLocList);
+        }
+      }
     }
-    List<String> locList = new ArrayList<>();
-    orgLocationList
-        .stream()
-        .forEach(
-            loc -> {
-              locList.add(loc.get(JsonKey.ID));
-            });
     List<String> locationIdsList =
         validator.getHierarchyLocationIds(
             getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locList);
-
     List<Map<String, String>> newOrgLocationList = new ArrayList<>();
     List<Location> locationList =
         locationClient.getLocationByIds(
@@ -788,6 +848,7 @@ public class OrganisationManagementActor extends BaseActor {
               map.put(JsonKey.TYPE, location.getType());
               newOrgLocationList.add(map);
             });
+    request.put(JsonKey.ORG_LOCATION, newOrgLocationList);
   }
 
   private Map<String, Object> getOrgById(String id, RequestContext context) {

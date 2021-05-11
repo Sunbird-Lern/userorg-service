@@ -127,7 +127,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_organisation"));
     dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
     dbInfoMap.put(JsonKey.USER_NOTES_DB, getDbInfoObject(KEY_SPACE_NAME, "user_notes"));
-    dbInfoMap.put(JsonKey.MEDIA_TYPE_DB, getDbInfoObject(KEY_SPACE_NAME, "media_type"));
     dbInfoMap.put(
         JsonKey.TENANT_PREFERENCE_DB, getDbInfoObject(KEY_SPACE_NAME, "tenant_preference"));
     dbInfoMap.put(JsonKey.SYSTEM_SETTINGS_DB, getDbInfoObject(KEY_SPACE_NAME, "system_settings"));
@@ -840,7 +839,7 @@ public final class Util {
   public static Request sendOnboardingMail(Map<String, Object> emailTemplateMap) {
     Request request = null;
     if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       String welcomeSubject = propertiesCache.getProperty(JsonKey.ONBOARDING_MAIL_SUBJECT);
       emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
       List<String> reciptientsMail = new ArrayList<>();
@@ -921,7 +920,7 @@ public final class Util {
 
   public static void sendSMS(Map<String, Object> userMap) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PHONE))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       setRequiredActionLink(userMap);
       if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
           && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
@@ -962,7 +961,7 @@ public final class Util {
       logger.info("Util:sendResetPassMail: Email not sent as generated link is empty");
       return null;
     } else if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       String welcomeSubject = propertiesCache.getProperty(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
       emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
       List<String> reciptientsMail = new ArrayList<>();
@@ -1004,6 +1003,12 @@ public final class Util {
     user.put("tempPassword", null);
     user.put("thumbnail", null);
     user.put("registryId", null);
+    user.put("accesscode", null);
+    user.put("subject", null);
+    user.put("webPages", null);
+    user.put("currentLoginTime", null);
+    user.put("password", null);
+    user.put("loginId", null);
     return user;
   }
 

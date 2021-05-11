@@ -26,6 +26,7 @@ import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import scala.concurrent.Future;
@@ -36,7 +37,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "orgSearch"},
+  tasks = {"userSearch", "userSearchV2", "orgSearch", "orgSearchV2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -56,9 +57,11 @@ public class SearchHandlerActor extends BaseActor {
         && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
-    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())) {
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
       handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
@@ -84,10 +87,20 @@ public class SearchHandlerActor extends BaseActor {
             filterMap.get(JsonKey.USER_SUB_TYPE));
         filterMap.remove(JsonKey.USER_SUB_TYPE);
       }
-      if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
-        filterMap.put(
-            JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
-        filterMap.remove(JsonKey.LOCATION_IDS);
+      if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof String) {
+        if (StringUtils.isNotEmpty((CharSequence) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
+      } else if (filterMap.get(JsonKey.LOCATION_IDS) != null
+          && filterMap.get(JsonKey.LOCATION_IDS) instanceof List) {
+        if (CollectionUtils.isNotEmpty((List) filterMap.get(JsonKey.LOCATION_IDS))) {
+          filterMap.put(
+              JsonKey.PROFILE_LOCATION + "." + JsonKey.ID, filterMap.get(JsonKey.LOCATION_IDS));
+          filterMap.remove(JsonKey.LOCATION_IDS);
+        }
       }
     }
   }
@@ -95,8 +108,10 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    // checking for Backward compatibility
-    backwardCompatibility(searchQueryMap);
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+      // checking for Backword compatibility
+      backwardCompatibility(searchQueryMap);
+    }
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
@@ -135,26 +150,37 @@ public class SearchHandlerActor extends BaseActor {
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
         Map<String, Object> userTypeDetail = new HashMap<>();
-        if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
-          userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-          userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
-          userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
-        } else {
-          userMap.put(JsonKey.USER_TYPE, null);
-          userMap.put(JsonKey.USER_SUB_TYPE, null);
-        }
-        userMap.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
         List<String> locationIds = new ArrayList<>();
         List<Map<String, String>> userLocList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(
-            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
-          userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-          locationIds =
-              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+          if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+            if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
+              userTypeDetail = (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+              userMap.put(JsonKey.USER_TYPE, userTypeDetail.get(JsonKey.TYPE));
+              userMap.put(JsonKey.USER_SUB_TYPE, userTypeDetail.get(JsonKey.SUB_TYPE));
+            } else {
+              userMap.put(JsonKey.USER_TYPE, null);
+              userMap.put(JsonKey.USER_SUB_TYPE, null);
+            }
+          }
+          if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+            if (CollectionUtils.isNotEmpty(
+                (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+              userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+              locationIds =
+                  userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+              userMap.put(JsonKey.LOCATION_IDS, locationIds);
+            } else {
+              userMap.put(JsonKey.LOCATION_IDS, null);
+            }
+          }
+          userMap.putAll(userDefaultFieldValue);
+        } else {
+          userMap.remove(JsonKey.USER_TYPE);
+          userMap.remove(JsonKey.USER_SUB_TYPE);
+          userMap.remove(JsonKey.LOCATION_IDS);
+          Util.getUserDefaultValue().keySet().stream().forEach(key -> userMap.remove(key));
         }
-        userMap.put(JsonKey.PROFILE_LOCATION, userLocList);
-        userMap.put(JsonKey.LOCATION_IDS, locationIds);
-        userMap.putAll(userDefaultFieldValue);
       }
       String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
       updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
@@ -194,11 +220,31 @@ public class SearchHandlerActor extends BaseActor {
                     .stream()
                     .forEach(
                         org -> {
-                          org.putAll(orgDefaultFieldValue);
+                          if (request
+                              .getOperation()
+                              .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
+                            Util.getOrgDefaultValue()
+                                .keySet()
+                                .stream()
+                                .forEach(key -> org.remove(key));
+                            org.remove(JsonKey.LOCATION_IDS);
+                          } else {
+                            // Put all default value for backward compatibility
+                            org.putAll(orgDefaultFieldValue);
+                          }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))
                               || (CollectionUtils.isEmpty(fields))) {
                             org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
+                          if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
+                            int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
+                            boolean isSchool =
+                                (orgType
+                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                                    ? true
+                                    : false;
+                            org.put(JsonKey.IS_SCHOOL, isSchool);
                           }
                         });
                 response.put(JsonKey.RESPONSE, responseMap);
