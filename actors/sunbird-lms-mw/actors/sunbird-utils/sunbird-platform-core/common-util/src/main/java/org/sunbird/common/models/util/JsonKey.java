@@ -75,6 +75,11 @@ public final class JsonKey {
   public static final String DATE_HISTOGRAM = "DATE_HISTOGRAM";
   public static final String DEFAULT_CONSUMER_ID = "internal";
   public static final String DEFAULT_ROOT_ORG_ID = "ORG_001";
+  public static final String ASSOCIATION_TYPE = "associationType";
+  public static final String SSO = "sso";
+  public static final String SELF_DECLARATION = "self_Declaration";
+  public static final String SYSTEM_UPLOAD = "system_Upload";
+  public static final String IS_SSO = "isSSO";
   public static final String DELETE = "delete";
   public static final String DESCRIPTION = "description";
   public static final String DOB = "dob";
@@ -317,6 +322,7 @@ public final class JsonKey {
   public static final String USER_NOTES_DB = "userNotes_db";
   public static final String USER_ORG = "user_organisation";
   public static final String USER_ORG_DB = "user_org_db";
+  public static final String USER_ROLES = "user_roles";
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USER_DECLARATION_DB = "user_declarations";
