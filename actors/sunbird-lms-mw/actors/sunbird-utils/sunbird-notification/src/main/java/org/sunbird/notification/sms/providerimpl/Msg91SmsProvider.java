@@ -84,8 +84,8 @@ public class Msg91SmsProvider implements ISmsProvider {
    * @return boolean
    */
   private boolean sendSmsUsingPost(String mobileNumber, String smsText) {
-    logger.debug("Msg91SmsProvider@Sending " + smsText + "  to mobileNumber " + mobileNumber);
-    logger.debug(
+    logger.info("Msg91SmsProvider@Sending " + smsText + "  to mobileNumber " + mobileNumber);
+    logger.info(
         "Msg91SmsProvider@SMS Provider parameters \n"
             + "Gateway - "
             + baseUrl
@@ -119,7 +119,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         // add dlt template id header
         String templateId = getTemplateId(smsText);
         path = baseUrl + postUrl + "?DLT_TE_ID=" + templateId;
-        logger.debug("Msg91SmsProvider -Executing request - " + path);
+        logger.info("Msg91SmsProvider -Executing request - " + path);
 
         HttpPost httpPost = new HttpPost(path);
 
@@ -128,6 +128,7 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // add authkey header
         httpPost.setHeader("authkey", authKey);
+        logger.debug("Msg91SmsProvider -request header- " + httpPost.getAllHeaders());
 
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
@@ -145,7 +146,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         String providerDetailsString = JsonUtil.toJson(providerDetails);
 
         if (!JsonUtil.isStringNullOREmpty(providerDetailsString)) {
-          logger.debug("Msg91SmsProvider - Body - " + providerDetailsString);
+          logger.info("Msg91SmsProvider - Body - " + providerDetailsString);
 
           HttpEntity entity =
               new ByteArrayEntity(providerDetailsString.getBytes(StandardCharsets.UTF_8));
