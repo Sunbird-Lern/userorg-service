@@ -59,6 +59,7 @@ public class UserTncServiceTest {
   @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(DataCacheHandler.class);
+    PowerMockito.mockStatic(ServiceFactory.class);
     Map<String, String> config = new HashMap<>();
     config.put(JsonKey.TNC_CONFIG, tncConfig);
     config.put("groups", groupsConfig);
@@ -68,7 +69,6 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdTest() {
-    PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
@@ -89,7 +89,6 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdForLockedAccountTest() {
-    PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
@@ -112,7 +111,6 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdForEmptyResultTest() {
-    PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
@@ -141,27 +139,55 @@ public class UserTncServiceTest {
 
   @Test
   public void validateOrgAdminTncTest() {
-    PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
-    List<Map<String, Object>> orgs = new ArrayList<>();
-    Map<String, Object> org = new HashMap<>();
-    org.put(JsonKey.ORGANISATION_ID, "4567");
-    org.put(JsonKey.ROLES, Arrays.asList("PUBLIC"));
-    orgs.add(org);
+    List<Map<String, Object>> orgs = orgResponse();
     response.put(JsonKey.RESPONSE, orgs);
     when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
     UserTncService tncService = new UserTncService();
-    Map<String, Object> searchMap = new LinkedHashMap<>(2);
-    searchMap.put(JsonKey.USER_ID, "1234");
-    searchMap.put(JsonKey.ORGANISATION_ID, "4567");
+    Map<String, Object> searchMap = userOrgData();
     try {
-      tncService.validateOrgAdminTnc(null, "orgAdminTnc", searchMap);
+      tncService.validateRoleForTnc(null, "orgAdminTnc", searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
+  }
+
+  @Test
+  public void reportViewerTncTest() {
+    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Response response = new Response();
+    List<Map<String, Object>> orgs = orgResponse();
+    response.put(JsonKey.RESPONSE, orgs);
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    UserTncService tncService = new UserTncService();
+    Map<String, Object> searchMap = userOrgData();
+    try {
+      tncService.validateRoleForTnc(null, "reportViewerTnc", searchMap);
+    } catch (ProjectCommonException ex) {
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+    }
+  }
+
+  private List<Map<String, Object>> orgResponse() {
+    List<Map<String, Object>> orgs = new ArrayList<>();
+    Map<String, Object> org = new HashMap<>();
+    org.put(JsonKey.ORGANISATION_ID, "4567");
+    org.put(JsonKey.ROLES, Arrays.asList("PUBLIC"));
+    orgs.add(org);
+    return orgs;
+  }
+
+  private Map<String, Object> userOrgData() {
+    Map<String, Object> searchMap = new LinkedHashMap<>(2);
+    searchMap.put(JsonKey.USER_ID, "1234");
+    searchMap.put(JsonKey.ORGANISATION_ID, "4567");
+    return searchMap;
   }
 }
