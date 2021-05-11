@@ -134,7 +134,6 @@ public class UserProfileReadServiceTest {
     userList3.put(JsonKey.ORGANISATION_ID, "457896321012");
     userList3.put(JsonKey.ROLES, roles);
     userList3.put("dob", "1992-11-24");
-    userList3.put(JsonKey.ASSOCIATION_TYPE, 2);
 
     resp2.add(userList2);
     resp2.add(userList3);
