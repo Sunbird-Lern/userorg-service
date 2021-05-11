@@ -73,7 +73,6 @@ import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.AssociationMechanism;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
@@ -358,12 +357,6 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      if (StringUtils.isNotBlank(callerId)) {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
-      } else {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
-      }
-
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -568,10 +561,6 @@ public class UserManagementActor extends BaseActor {
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setOrganisationId(
             (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
-        AssociationMechanism associationMechanism = new AssociationMechanism();
-        associationMechanism.setAssociationType(userOrg.getAssociationType());
-        associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
-        userOrg.setAssociationType(associationMechanism.getAssociationType());
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
@@ -580,7 +569,6 @@ public class UserManagementActor extends BaseActor {
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
         userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
-        userOrg.setAssociationType(AssociationMechanism.SELF_DECLARATION);
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
@@ -1105,7 +1093,6 @@ public class UserManagementActor extends BaseActor {
       userRequest.putAll(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
-      userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SSO);
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -1118,7 +1105,6 @@ public class UserManagementActor extends BaseActor {
     }
     Map<String, Object> esResponse = new HashMap<>();
     if (null != resp) {
-      resp.put(JsonKey.IS_SSO, true);
       esResponse.putAll((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE));
       esResponse.putAll(requestMap);
       response.put(
