@@ -18,7 +18,9 @@ public class FormApiUtil {
         || MapUtils.isEmpty(stateProfileConfigMap.get(stateCode))) {
       Map<String, Object> profileConfigMap =
           FormApiUtilHandler.getFormApiConfig(stateCode, context);
-      stateProfileConfigMap.put(stateCode, profileConfigMap);
+      if (MapUtils.isNotEmpty(profileConfigMap)) {
+        stateProfileConfigMap.put(stateCode, profileConfigMap);
+      }
     }
     return stateProfileConfigMap.get(stateCode);
   }

@@ -114,7 +114,11 @@ public class DataCacheHandler implements Runnable {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
         Map<String, List<String>> userTypeConfigMap = FormApiUtil.getUserTypeConfig(formData);
-        userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
+        if (MapUtils.isNotEmpty(userTypeConfigMap)) {
+          userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
+        } else {
+          userTypeOrSubTypeConfigMap.remove(stateCode);
+        }
       }
     }
   }
@@ -126,7 +130,11 @@ public class DataCacheHandler implements Runnable {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
         List<String> locationCodeLists = FormApiUtil.getLocationTypeConfigMap(formData);
-        stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
+        if (CollectionUtils.isNotEmpty(locationCodeLists)) {
+          stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
+        } else {
+          stateLocationTypeConfigMap.remove(stateCode);
+        }
       }
     }
   }
