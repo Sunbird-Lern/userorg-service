@@ -105,6 +105,7 @@ public class UserManagementActor extends BaseActor {
   private OrgExternalService orgExternalService = new OrgExternalService();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+  private Util.DbInfo userRoleDb = Util.dbInfoMap.get(JsonKey.USER_ROLES);
   private ObjectMapper mapper = new ObjectMapper();
   private ActorRef systemSettingActorRef = null;
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
@@ -868,12 +869,7 @@ public class UserManagementActor extends BaseActor {
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
-    Response response =
-        cassandraOperation.insertRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            userMap,
-            actorMessage.getRequestContext());
+    Response response = userService.createUser(userMap, actorMessage.getRequestContext());
     insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
@@ -977,6 +973,14 @@ public class UserManagementActor extends BaseActor {
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
+    if (userOrgMap.containsKey(JsonKey.ROLES)) {
+      Map<String, Object> rolesMap = new HashMap<>();
+      rolesMap.put(JsonKey.ROLES, userOrgMap.get(JsonKey.ROLES));
+      rolesMap.put(JsonKey.USER_ID, userOrgMap.get(JsonKey.USER_ID));
+      userOrgMap.remove(JsonKey.ROLES);
+      cassandraOperation.insertRecord(
+          userRoleDb.getKeySpace(), userRoleDb.getTableName(), rolesMap, context);
+    }
     cassandraOperation.insertRecord(
         userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
 
