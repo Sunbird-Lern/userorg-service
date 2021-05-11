@@ -849,20 +849,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
-    if (StringUtils.isEmpty(managedBy)) {
-      userFlagsMap.put(
-          JsonKey.EMAIL_VERIFIED,
-          (Boolean)
-              (userMap.get(JsonKey.EMAIL_VERIFIED) != null
-                  ? userMap.get(JsonKey.EMAIL_VERIFIED)
-                  : false));
-      userFlagsMap.put(
-          JsonKey.PHONE_VERIFIED,
-          (Boolean)
-              (userMap.get(JsonKey.PHONE_VERIFIED) != null
-                  ? userMap.get(JsonKey.PHONE_VERIFIED)
-                  : false));
-    }
+
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
@@ -1067,8 +1054,6 @@ public class UserManagementActor extends BaseActor {
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     // checks if the user is belongs to state and sets a validation flag
     setStateValidation(requestMap, userFlagsMap);
-    userFlagsMap.put(JsonKey.EMAIL_VERIFIED, (Boolean) userMap.get(JsonKey.EMAIL_VERIFIED));
-    userFlagsMap.put(JsonKey.PHONE_VERIFIED, (Boolean) userMap.get(JsonKey.PHONE_VERIFIED));
     int userFlagValue = userFlagsToNum(userFlagsMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     Response response = null;
@@ -1173,18 +1158,7 @@ public class UserManagementActor extends BaseActor {
   private Map<String, Boolean> updatedUserFlagsMap(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
-    setUserFlagValue(userDbRecord, JsonKey.EMAIL, JsonKey.EMAIL_VERIFIED);
-    setUserFlagValue(userDbRecord, JsonKey.PHONE, JsonKey.PHONE_VERIFIED);
-    boolean emailVerified =
-        (boolean)
-            (userMap.containsKey(JsonKey.EMAIL_VERIFIED)
-                ? userMap.get(JsonKey.EMAIL_VERIFIED)
-                : userDbRecord.get(JsonKey.EMAIL_VERIFIED));
-    boolean phoneVerified =
-        (boolean)
-            (userMap.containsKey(JsonKey.PHONE_VERIFIED)
-                ? userMap.get(JsonKey.PHONE_VERIFIED)
-                : userDbRecord.get(JsonKey.PHONE_VERIFIED));
+
     // for existing users, it won't contain state-validation
     // adding in release-2.4.0
     // userDbRecord- record from es.
@@ -1194,8 +1168,6 @@ public class UserManagementActor extends BaseActor {
       userBooleanMap.put(
           JsonKey.STATE_VALIDATED, (boolean) userDbRecord.get(JsonKey.STATE_VALIDATED));
     }
-    userBooleanMap.put(JsonKey.EMAIL_VERIFIED, emailVerified);
-    userBooleanMap.put(JsonKey.PHONE_VERIFIED, phoneVerified);
     return userBooleanMap;
   }
 

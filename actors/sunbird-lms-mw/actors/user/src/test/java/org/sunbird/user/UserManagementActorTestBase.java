@@ -447,8 +447,6 @@ public abstract class UserManagementActorTestBase {
     reqMap.put(JsonKey.EMAIL, "email@email.com");
     reqMap.put(JsonKey.LANGUAGE, new ArrayList<>());
     reqMap.put(JsonKey.DOB, "1992");
-    reqMap.put(JsonKey.EMAIL_VERIFIED, true);
-    reqMap.put(JsonKey.PHONE_VERIFIED, true);
     reqMap.put(JsonKey.ADDRESS, new ArrayList<>());
     return reqMap;
   }
@@ -490,8 +488,6 @@ public abstract class UserManagementActorTestBase {
   }
 
   public Map<String, Object> getUpdateRequestWithDefaultFlags(Map<String, Object> reqObj) {
-    reqObj.put(JsonKey.EMAIL_VERIFIED, false);
-    reqObj.put(JsonKey.PHONE_VERIFIED, false);
     reqObj.put(JsonKey.STATE_VALIDATED, false);
     return reqObj;
   }

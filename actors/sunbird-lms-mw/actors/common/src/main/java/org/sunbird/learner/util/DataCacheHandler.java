@@ -48,8 +48,6 @@ public class DataCacheHandler implements Runnable {
     JsonKey.COUNTRY_CODE,
     JsonKey.EMAIL,
     JsonKey.USERNAME,
-    JsonKey.PHONE_VERIFIED,
-    JsonKey.EMAIL_VERIFIED,
     JsonKey.ROLES,
     JsonKey.POSITION,
     JsonKey.LOCATION,
