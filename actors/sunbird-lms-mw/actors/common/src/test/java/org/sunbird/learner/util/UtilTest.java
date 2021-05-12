@@ -109,6 +109,20 @@ public class UtilTest {
     Assert.assertNotNull(bool);
   }
 
+  @Test
+  public void testRegisterUserToOrg() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "123456");
+    map.put(JsonKey.USER_ID, "123456");
+    map.put(JsonKey.ORGANISATION_ID, "123456");
+    map.put(JsonKey.IS_DELETED, false);
+    map.put(JsonKey.ASSOCIATION_TYPE, "1");
+    Response response = new Response();
+    when(cassandraOperationImpl.insertRecord(JsonKey.SUNBIRD, "user_organisation", map, null))
+        .thenReturn(response);
+    Assert.assertNotNull(response);
+  }
+
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.IS_TENANT, true);
