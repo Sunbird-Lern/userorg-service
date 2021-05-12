@@ -69,6 +69,7 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
+import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
@@ -1035,6 +1036,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
+    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
   }
 
