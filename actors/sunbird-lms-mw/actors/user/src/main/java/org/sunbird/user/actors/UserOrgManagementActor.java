@@ -38,7 +38,6 @@ public class UserOrgManagementActor extends BaseActor {
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
       requestMap.put(JsonKey.HASHTAGID, organisationId);
-      if (StringUtils.isBlank(callerId)) {}
       Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)

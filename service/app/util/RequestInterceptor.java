@@ -32,6 +32,7 @@ public class RequestInterceptor {
 
   static {
     restrictedUriList = new ArrayList<>();
+    restrictedUriList.add("/v1/user/update");
     restrictedUriList.add("/v1/note/create");
     restrictedUriList.add("/v1/note/update");
     restrictedUriList.add("/v1/note/search");
@@ -42,9 +43,7 @@ public class RequestInterceptor {
     // ---------------------------
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
-    apiHeaderIgnoreMap.put("/v1/manageduser/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
-    apiHeaderIgnoreMap.put("/v1/user/update", var);
     apiHeaderIgnoreMap.put("/v2/org/search", var);
     apiHeaderIgnoreMap.put("/v3/user/create", var);
     apiHeaderIgnoreMap.put("/v1/user/signup", var);

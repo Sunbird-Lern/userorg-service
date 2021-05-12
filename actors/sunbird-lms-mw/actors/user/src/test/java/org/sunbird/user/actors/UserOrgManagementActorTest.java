@@ -78,7 +78,6 @@ public class UserOrgManagementActorTest {
     reqMap.put(JsonKey.CALLER_ID, "anyCallerId");
     reqMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
     reqMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
-    Util.registerUserToOrg(reqMap, request.getRequestContext());
     request.setRequest(reqMap);
     request.setOperation("insertUserOrgDetails");
     return request;

@@ -157,8 +157,7 @@ public class OrganisationManagementActor extends BaseActor {
       }
 
       if (null != isTenant && isTenant) {
-        //        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
-        boolean bool = true;
+        boolean bool = Util.registerChannel(request, actorMessage.getRequestContext());
         request.put(
             JsonKey.IS_SSO_ROOTORG_ENABLED,
             request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
