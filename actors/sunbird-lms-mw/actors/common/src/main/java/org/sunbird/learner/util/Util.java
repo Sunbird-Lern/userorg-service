@@ -125,7 +125,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_ACTION_ROLE, getDbInfoObject(KEY_SPACE_NAME, "user_action_role"));
     dbInfoMap.put(JsonKey.ROLE_GROUP, getDbInfoObject(KEY_SPACE_NAME, "role_group"));
     dbInfoMap.put(JsonKey.USER_ORG_DB, getDbInfoObject(KEY_SPACE_NAME, "user_organisation"));
-    dbInfoMap.put(JsonKey.USER_ROLES, getDbInfoObject(KEY_SPACE_NAME, "user_roles"));
     dbInfoMap.put(JsonKey.BULK_OP_DB, getDbInfoObject(KEY_SPACE_NAME, "bulk_upload_process"));
     dbInfoMap.put(JsonKey.USER_NOTES_DB, getDbInfoObject(KEY_SPACE_NAME, "user_notes"));
     dbInfoMap.put(
@@ -557,17 +556,7 @@ public final class Util {
     reqMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
     reqMap.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     if (null != userMap.get(JsonKey.ROLES)) {
-      Map<String, Object> roleMap = new WeakHashMap<>();
-      roleMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
-      roleMap.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      Util.DbInfo usrRolesDb = Util.dbInfoMap.get(JsonKey.USER_ROLES);
-      try {
-        cassandraOperation.insertRecord(
-            usrRolesDb.getKeySpace(), usrRolesDb.getTableName(), roleMap, context);
-      } catch (Exception e) {
-        logger.error(context, e.getMessage(), e);
-      }
-      reqMap.remove(JsonKey.ROLES);
+      reqMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     }
     reqMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());

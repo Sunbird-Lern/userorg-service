@@ -317,7 +317,6 @@ public final class JsonKey {
   public static final String USER_NOTES_DB = "userNotes_db";
   public static final String USER_ORG = "user_organisation";
   public static final String USER_ORG_DB = "user_org_db";
-  public static final String USER_ROLES = "user_roles";
   public static final String USERIDS = "userIds";
   public static final String USERNAME = "userName";
   public static final String USER_DECLARATION_DB = "user_declarations";
