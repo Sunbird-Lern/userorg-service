@@ -79,7 +79,6 @@ public final class JsonKey {
   public static final String SSO = "sso";
   public static final String SELF_DECLARATION = "self_Declaration";
   public static final String SYSTEM_UPLOAD = "system_Upload";
-  public static final String IS_SSO = "isSSO";
   public static final String DELETE = "delete";
   public static final String DESCRIPTION = "description";
   public static final String DOB = "dob";
@@ -137,6 +136,7 @@ public final class JsonKey {
   public static final String INFO = "info";
   public static final String INSERT = "insert";
   public static final String IS_APPROVED = "isApproved";
+  public static final String IS_SSO = "isSSO";
   public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String IS_SYSTEM_UPLOAD = "isSystemUpload";
   public static final String IS_AUTH_REQ = "isAuthReq";
