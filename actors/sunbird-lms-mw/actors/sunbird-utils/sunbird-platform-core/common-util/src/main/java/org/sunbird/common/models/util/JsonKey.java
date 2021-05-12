@@ -76,9 +76,6 @@ public final class JsonKey {
   public static final String DATE_HISTOGRAM = "DATE_HISTOGRAM";
   public static final String DEFAULT_CONSUMER_ID = "internal";
   public static final String DEFAULT_ROOT_ORG_ID = "ORG_001";
-  public static final String SSO = "sso";
-  public static final String SELF_DECLARATION = "self_Declaration";
-  public static final String SYSTEM_UPLOAD = "system_Upload";
   public static final String DELETE = "delete";
   public static final String DESCRIPTION = "description";
   public static final String DOB = "dob";
