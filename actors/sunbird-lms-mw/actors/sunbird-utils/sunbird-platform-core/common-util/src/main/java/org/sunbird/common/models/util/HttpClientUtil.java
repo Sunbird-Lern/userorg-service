@@ -227,7 +227,9 @@ public class HttpClientUtil {
         StatusLine sl = response.getStatusLine();
         logger.debug(
             "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        return new String(bytes);
+        String resp = new String(bytes);
+        logger.info("Got response from patch call : " + resp);
+        return resp;
       } else {
         getErrorResponse(response, "PATCH");
         return "";
