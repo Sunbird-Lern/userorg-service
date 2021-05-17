@@ -90,6 +90,10 @@ public class DataCacheHandler implements Runnable {
 
   // Get form data config
   private void cacheFormApiDataConfig() {
+    formApiDataConfigMap = new ConcurrentHashMap<>();
+    userTypeOrSubTypeConfigMap = new ConcurrentHashMap<>();
+    stateLocationTypeConfigMap = new ConcurrentHashMap<>();
+
     for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
       String stateCode = itr.getKey();
       RequestContext reqContext = new RequestContext();
@@ -98,7 +102,7 @@ public class DataCacheHandler implements Runnable {
       Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
       logger.info(
           reqContext,
-          String.format("Cache update for form api statecode:%s is not found", stateCode));
+          String.format("Cache update for form api stateCode:%s is not found", stateCode));
       if (MapUtils.isNotEmpty(formDataMap)) {
         formApiDataConfigMap.put(stateCode, formDataMap);
         cacheUserTypeOrSubTypeConfig();
