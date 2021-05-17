@@ -423,7 +423,7 @@ public final class Util {
       logger.error(
           context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
     }
-    return regStatus.contains("SUCCESS");
+    return regStatus.contains("OK");
   }
 
   public static void initializeContext(Request request, String env) {
