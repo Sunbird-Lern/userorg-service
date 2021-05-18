@@ -387,7 +387,8 @@ public final class Util {
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -397,7 +398,7 @@ public final class Util {
       Map<String, Object> channelMap = new HashMap<>();
       channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
+      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
       String license = (String) req.get(JsonKey.LICENSE);
       if (StringUtils.isNotBlank(license)) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, license);
@@ -416,12 +417,13 @@ public final class Util {
                   + req.get(JsonKey.ID),
               reqString,
               headerMap);
-      logger.info(context, "end call for channel update for org id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       logger.error(
           context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
     }
-    return regStatus.contains("SUCCESS");
+    return regStatus.contains("OK");
   }
 
   public static void initializeContext(Request request, String env) {
@@ -839,7 +841,7 @@ public final class Util {
   public static Request sendOnboardingMail(Map<String, Object> emailTemplateMap) {
     Request request = null;
     if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       String welcomeSubject = propertiesCache.getProperty(JsonKey.ONBOARDING_MAIL_SUBJECT);
       emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
       List<String> reciptientsMail = new ArrayList<>();
@@ -920,7 +922,7 @@ public final class Util {
 
   public static void sendSMS(Map<String, Object> userMap) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PHONE))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       setRequiredActionLink(userMap);
       if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
           && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
@@ -961,7 +963,7 @@ public final class Util {
       logger.info("Util:sendResetPassMail: Email not sent as generated link is empty");
       return null;
     } else if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = propertiesCache.getProperty(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       String welcomeSubject = propertiesCache.getProperty(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
       emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
       List<String> reciptientsMail = new ArrayList<>();

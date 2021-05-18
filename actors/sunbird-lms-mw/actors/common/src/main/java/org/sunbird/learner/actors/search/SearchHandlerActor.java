@@ -200,6 +200,14 @@ public class SearchHandlerActor extends BaseActor {
         filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
       }
     }
+
+    if (ActorOperations.ORG_SEARCH.getValue().equalsIgnoreCase(request.getOperation())
+        && filterMap.containsKey(JsonKey.IS_ROOT_ORG)) {
+      Boolean isRootOrg = (Boolean) filterMap.remove(JsonKey.IS_ROOT_ORG);
+      if (isRootOrg) {
+        filterMap.put(JsonKey.IS_TENANT, true);
+      }
+    }
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         esService.search(searchDto, indexType, request.getRequestContext());
@@ -231,6 +239,7 @@ public class SearchHandlerActor extends BaseActor {
                           } else {
                             // Put all default value for backward compatibility
                             org.putAll(orgDefaultFieldValue);
+                            org.put(JsonKey.IS_ROOT_ORG, org.get(JsonKey.IS_TENANT));
                           }
                           if ((CollectionUtils.isNotEmpty(fields)
                                   && fields.contains(JsonKey.HASHTAGID))
