@@ -128,6 +128,5 @@ public class SetUserDefaultValueTest {
     UserUtil.setUserDefaultValueForV3(userMap, null);
     assertNotNull(userMap.get(JsonKey.USERNAME));
     assertNotNull(userMap.get(JsonKey.STATUS));
-    assertNotNull(userMap.get(JsonKey.ROLES));
   }
 }
