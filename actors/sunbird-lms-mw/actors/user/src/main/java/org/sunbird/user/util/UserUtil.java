@@ -329,9 +329,6 @@ public class UserUtil {
   }
 
   public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
-    List<String> roles = new ArrayList<>();
-    roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
-    userMap.put(JsonKey.ROLES, roles);
     userMap.put(
         JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
     // Since global settings are introduced, profile visibility map should be empty during user
@@ -368,11 +365,6 @@ public class UserUtil {
 
   public static void setUserDefaultValue(
       Map<String, Object> userMap, String callerId, RequestContext context) {
-    if (StringUtils.isBlank(callerId)) {
-      List<String> roles = new ArrayList<>();
-      roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
-      userMap.put(JsonKey.ROLES, roles);
-    }
     if (!StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
       userMap.put(
           JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
