@@ -878,12 +878,7 @@ public class UserManagementActor extends BaseActor {
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
-    Response response =
-        cassandraOperation.insertRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            userMap,
-            actorMessage.getRequestContext());
+    Response response = userService.createUser(userMap, actorMessage.getRequestContext());
     insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
