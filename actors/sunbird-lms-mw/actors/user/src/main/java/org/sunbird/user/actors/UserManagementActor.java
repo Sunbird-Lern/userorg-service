@@ -1573,7 +1573,6 @@ public class UserManagementActor extends BaseActor {
 
   private void validateLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    userRequest.getRequest().put(JsonKey.STATE_ID, "123456");
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
