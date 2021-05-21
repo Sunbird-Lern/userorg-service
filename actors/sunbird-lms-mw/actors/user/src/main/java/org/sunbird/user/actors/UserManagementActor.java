@@ -360,13 +360,9 @@ public class UserManagementActor extends BaseActor {
         List<Organisation> organisations =
             organisationClient.esSearchOrgByFilter(filters, actorMessage.getRequestContext());
         if (organisations.size() == 0 || organisations.size() > 1) {
-          throw new ProjectCommonException(
-              ResponseCode.invalidParameterValue.getErrorCode(),
-              MessageFormat.format(
-                  ResponseCode.invalidParameterValue.getErrorMessage(),
-                  String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
-                  JsonKey.ORG_EXTERNAL_ID),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          logger.info(
+              actorMessage.getRequestContext(),
+              "Got empty search result by orgExternalId and orgLocationId : " + filters);
         } else {
           Map<String, Object> org =
               (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);
@@ -1577,6 +1573,7 @@ public class UserManagementActor extends BaseActor {
 
   private void validateLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
+    userRequest.getRequest().put(JsonKey.STATE_ID, "123456");
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),
@@ -1643,17 +1640,23 @@ public class UserManagementActor extends BaseActor {
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
         // for create-MUA we allow locations upto district for remaining we will validate all.
-        if ((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+        if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+                    || userRequest
+                        .getOperation()
+                        .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))
                 && ((location.getType().equals(JsonKey.STATE))
                     || (location.getType().equals(JsonKey.DISTRICT))))
-            || !userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())) {
+            || (!userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
+                && !userRequest
+                    .getOperation()
+                    .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
           isValidLocationType(location.getType(), typeList);
-          String stateId = "";
+          String stateId = null;
+          if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
+            stateId = location.getId();
+          }
           if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
             set.add(location.getCode());
-            if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
-              stateId = location.getId();
-            }
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
             userRequest.getRequest().put(JsonKey.STATE_ID, stateId);

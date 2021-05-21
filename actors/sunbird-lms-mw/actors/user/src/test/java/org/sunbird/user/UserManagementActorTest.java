@@ -533,7 +533,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
                 true,
                 getUpdateRequestWithLocationCodeSchoolAsOrgExtId(),
                 ActorOperations.UPDATE_USER),
-            ResponseCode.invalidParameterValue);
+            null);
     assertTrue(result);
   }
 
@@ -561,7 +561,7 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
                 true,
                 getUpdateRequestWithLocationCodeSchoolAsOrgExtId(),
                 ActorOperations.UPDATE_USER_V2),
-            ResponseCode.invalidParameterValue);
+            null);
     assertTrue(result);
   }
 
