@@ -333,17 +333,33 @@ public class UserManagementActor extends BaseActor {
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
         OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
-        Organisation organisation =
-            organisationClient.esGetOrgByExternalId(
-                String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
-                null,
-                actorMessage.getRequestContext());
-        Map<String, Object> org =
-            (Map<String, Object>) mapper.convertValue(organisation, Map.class);
-        List<Map<String, Object>> orgList = new ArrayList();
-        if (MapUtils.isNotEmpty(org)) {
-          orgList.add(org);
+        Map<String, Object> filters = new HashMap<>();
+        filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {
+          filters.put(
+              String.join(".", JsonKey.ORG_LOCATION, JsonKey.ID), userMap.get(JsonKey.STATE_ID));
         } else {
+          logger.info(
+              actorMessage.getRequestContext(), "profileLocation is empty in user update request.");
+          List<Map<String, String>> profileLocation =
+              (List<Map<String, String>>) userDbRecord.get(JsonKey.PROFILE_LOCATION);
+          profileLocation
+              .stream()
+              .forEach(
+                  loc -> {
+                    String locType = loc.get(JsonKey.TYPE);
+                    if (JsonKey.STATE.equalsIgnoreCase(locType)) {
+                      filters.put(
+                          String.join(".", JsonKey.ORG_LOCATION, JsonKey.ID), loc.get(JsonKey.ID));
+                    }
+                  });
+        }
+        logger.info(
+            actorMessage.getRequestContext(),
+            "fetching org by orgExternalId and orgLocationId : " + filters);
+        List<Organisation> organisations =
+            organisationClient.esSearchOrgByFilter(filters, actorMessage.getRequestContext());
+        if (organisations.size() == 0 || organisations.size() > 1) {
           throw new ProjectCommonException(
               ResponseCode.invalidParameterValue.getErrorCode(),
               MessageFormat.format(
@@ -351,10 +367,17 @@ public class UserManagementActor extends BaseActor {
                   String.valueOf(userMap.get(JsonKey.ORG_EXTERNAL_ID)),
                   JsonKey.ORG_EXTERNAL_ID),
               ResponseCode.CLIENT_ERROR.getResponseCode());
+        } else {
+          Map<String, Object> org =
+              (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);
+          List<Map<String, Object>> orgList = new ArrayList();
+          if (MapUtils.isNotEmpty(org)) {
+            orgList.add(org);
+          }
+          actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
+          actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
+          updateUserOrganisations(actorMessage);
         }
-        actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
-        actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
-        updateUserOrganisations(actorMessage);
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
@@ -1625,11 +1648,15 @@ public class UserManagementActor extends BaseActor {
                     || (location.getType().equals(JsonKey.DISTRICT))))
             || !userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())) {
           isValidLocationType(location.getType(), typeList);
+          String stateId = "";
           if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
             set.add(location.getCode());
+            if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
+              stateId = location.getId();
+            }
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
+            userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
           }
         }
       }

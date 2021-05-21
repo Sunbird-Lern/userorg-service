@@ -7,8 +7,10 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -509,6 +511,16 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserFailureWithLocationSchool() {
+    Map<String, Object> user = new HashMap<>();
+    user.putAll(getMapObject());
+    List<Map<String, String>> profileLoc = new ArrayList<>();
+    Map<String, String> profileLoc1 = new HashMap<>();
+    profileLoc1.put(JsonKey.TYPE, "state");
+    profileLoc1.put(JsonKey.ID, "1231231-2312-12312");
+    profileLoc.add(profileLoc1);
+    user.put(JsonKey.PROFILE_LOCATION, profileLoc);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
@@ -527,6 +539,16 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testUpdateUserFailureWithLocationSchoolNewVersion() {
+    Map<String, Object> user = new HashMap<>();
+    user.putAll(getMapObject());
+    List<Map<String, String>> profileLoc = new ArrayList<>();
+    Map<String, String> profileLoc1 = new HashMap<>();
+    profileLoc1.put(JsonKey.TYPE, "state");
+    profileLoc1.put(JsonKey.ID, "1231231-2312-12312");
+    profileLoc.add(profileLoc1);
+    user.put(JsonKey.PROFILE_LOCATION, profileLoc);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
