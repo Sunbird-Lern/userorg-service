@@ -365,13 +365,7 @@ public class UserUtil {
 
   public static void setUserDefaultValue(
       Map<String, Object> userMap, String callerId, RequestContext context) {
-    if (null == userMap.get(JsonKey.EMAIL_VERIFIED)) {
-      userMap.put(JsonKey.EMAIL_VERIFIED, true);
-    }
-    if (null == userMap.get(JsonKey.PHONE_VERIFIED)) {
-      userMap.put(JsonKey.PHONE_VERIFIED, true);
-    }
-
+    
     if (!StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
       userMap.put(
           JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
