@@ -43,4 +43,11 @@ public class AssociationMechanismTest {
     associationMechanism.removeAssociationType(AssociationMechanism.SELF_DECLARATION);
     Assert.assertEquals(1, associationMechanism.getAssociationType());
   }
+
+  @Test
+  public void setAssociationTypeTest() {
+    AssociationMechanism associationMechanism = new AssociationMechanism();
+    associationMechanism.setAssociationType(1);
+    Assert.assertEquals(associationMechanism.SSO, associationMechanism.getAssociationType());
+  }
 }
