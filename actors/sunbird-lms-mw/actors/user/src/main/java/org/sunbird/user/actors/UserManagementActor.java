@@ -1646,6 +1646,7 @@ public class UserManagementActor extends BaseActor {
         }
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
+      String stateId = null;
       for (Location location : locationList) {
         // for create-MUA we allow locations upto district for remaining we will validate all.
         if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
@@ -1659,7 +1660,6 @@ public class UserManagementActor extends BaseActor {
                     .getOperation()
                     .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
           isValidLocationType(location.getType(), typeList);
-          String stateId = null;
           if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
             stateId = location.getId();
           }
@@ -1667,9 +1667,11 @@ public class UserManagementActor extends BaseActor {
             set.add(location.getCode());
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-            userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
           }
         }
+      }
+      if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {
+        userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
