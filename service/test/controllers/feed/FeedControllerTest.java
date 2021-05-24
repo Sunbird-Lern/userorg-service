@@ -50,7 +50,8 @@ public class FeedControllerTest extends BaseApplicationTest {
   public void testGetUserFeed() {
     PowerMockito.mockStatic(FeedRequestValidator.class);
     PowerMockito.when(
-            FeedRequestValidator.userIdValidation(Mockito.anyString(), Mockito.anyString()))
+            FeedRequestValidator.userIdValidation(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
         .thenReturn(true)
         .thenReturn(false);
     Http.RequestBuilder req =

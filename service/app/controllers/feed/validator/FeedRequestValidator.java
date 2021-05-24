@@ -13,7 +13,7 @@ public class FeedRequestValidator extends BaseRequestValidator {
   public static boolean userIdValidation(
       String accessTokenUserId, String managedForUserId, String requestUserId) {
     if (!StringUtils.equalsIgnoreCase(accessTokenUserId, requestUserId)
-        || !StringUtils.equalsIgnoreCase(managedForUserId, requestUserId)) {
+        && !StringUtils.equalsIgnoreCase(managedForUserId, requestUserId)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
     return true;
