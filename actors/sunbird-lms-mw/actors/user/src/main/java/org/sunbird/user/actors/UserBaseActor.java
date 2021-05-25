@@ -27,12 +27,12 @@ public abstract class UserBaseActor extends BaseActor {
             telemetryAction, targetObject, correlatedObject, context);
         break;
       case "blockUser":
-        telemetryAction.put("BlockUser", "user blocked");
+        telemetryAction.put(JsonKey.BLOCK_USER, "user blocked");
         TelemetryUtil.telemetryProcessingCall(
             JsonKey.BLOCK_USER, telemetryAction, targetObject, correlatedObject, context);
         break;
       case "unblockUser":
-        telemetryAction.put("UnblockUser", "user unblocked");
+        telemetryAction.put(JsonKey.UNBLOCK_USER, "user unblocked");
         TelemetryUtil.telemetryProcessingCall(
             JsonKey.UNBLOCK_USER, telemetryAction, targetObject, correlatedObject, context);
         break;
