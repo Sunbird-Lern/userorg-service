@@ -33,7 +33,6 @@ public class UserOrgManagementActor extends BaseActor {
 
   private void insertUserOrgDetails(Request request) {
     Map<String, Object> requestMap = request.getRequest();
-    String callerId = (String) requestMap.get(JsonKey.CALLER_ID);
     // Register user to given orgId(not root orgId)
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
