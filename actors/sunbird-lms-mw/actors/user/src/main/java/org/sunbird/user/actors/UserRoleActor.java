@@ -3,12 +3,14 @@ package org.sunbird.user.actors;
 import java.util.*;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.organisation.service.OrgService;
@@ -81,6 +83,10 @@ public class UserRoleActor extends UserBaseActor {
           actorMessage.getRequestContext());
     } else {
       logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     generateTelemetryEvent(
         requestMap,
