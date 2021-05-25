@@ -270,11 +270,6 @@ public class UserMergeActor extends UserBaseActor {
             TelemetryEnvKey.USER,
             JsonKey.UPDATE,
             null);
-    TelemetryUtil.generateCorrelatedObject(
-        (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
-        JsonKey.FROM_ACCOUNT_ID,
-        null,
-        correlatedObject);
     telemetryMap.put(JsonKey.TYPE, JsonKey.BLOCK_USER);
     // Generating Audit event for deleted/mergee/from_user user
     TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
