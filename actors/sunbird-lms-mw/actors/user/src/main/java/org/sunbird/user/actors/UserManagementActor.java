@@ -1100,6 +1100,9 @@ public class UserManagementActor extends BaseActor {
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
       userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SSO);
+      if (StringUtils.isNotBlank(callerId) && callerId.equalsIgnoreCase(JsonKey.BULK_USER_UPLOAD)) {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+      }
       resp =
           userService.saveUserAttributes(
               userRequest,
