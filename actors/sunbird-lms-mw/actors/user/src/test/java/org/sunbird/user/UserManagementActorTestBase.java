@@ -1,6 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -171,7 +172,9 @@ public abstract class UserManagementActorTestBase {
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
-    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("locationCode1"), Mockito.any()))
+        .thenReturn(getFormApiConfig());
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("default"), Mockito.any()))
         .thenReturn(getFormApiConfig());
 
     PowerMockito.mockStatic(LocationServiceImpl.class);
@@ -285,6 +288,7 @@ public abstract class UserManagementActorTestBase {
   }
 
   public Map<String, Object> getFormApiConfig() {
+    Map<String, Object> formStateData = new HashMap<>();
     Map<String, Object> formData = new HashMap<>();
     Map<String, Object> formMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
@@ -301,7 +305,7 @@ public abstract class UserManagementActorTestBase {
     options.add(option);
 
     templateOptionsMap.put(JsonKey.OPTIONS, options);
-    subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
+    subPersonConfig.put(JsonKey.CODE, JsonKey.STATE);
     subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
     userTypeConfigList.add(subPersonConfig);
     children.put("teacher", userTypeConfigList);
@@ -311,7 +315,8 @@ public abstract class UserManagementActorTestBase {
     dataMap.put(JsonKey.FIELDS, fieldsList);
     formMap.put(JsonKey.DATA, dataMap);
     formData.put(JsonKey.FORM, formMap);
-    return formData;
+    formStateData.put(JsonKey.DEFAULT_PERSONA, formData);
+    return formStateData;
   }
 
   public Response getOrgFromCassandra() {
@@ -409,7 +414,8 @@ public abstract class UserManagementActorTestBase {
 
   public Map<String, List<String>> getLocationTypeConfig() {
     Map<String, List<String>> locationTypeConfig = new HashMap<>();
-    locationTypeConfig.put("locationCode", Arrays.asList("school", "state"));
+    locationTypeConfig.put("locationCode1", Arrays.asList("school", "state"));
+    // locationTypeConfig.put("default", Arrays.asList("school", "state"));
     return locationTypeConfig;
   }
 

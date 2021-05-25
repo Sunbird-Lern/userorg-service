@@ -1593,16 +1593,17 @@ public class UserManagementActor extends BaseActor {
             userProfileConfigMap =
                 FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
             if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-              List<String> locationTypeList =
-                  FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
+              Map<String, Object> formData =
+                  (Map<String, Object>) userProfileConfigMap.get(stateCode);
+              List<String> locationTypeList = FormApiUtil.getLocationTypeConfigMap(formData);
               if (CollectionUtils.isNotEmpty(locationTypeList)) {
                 locationTypeConfigMap.put(stateCode, locationTypeList);
               }
             }
           }
         } else {
-          List<String> locationTypeList =
-              FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
+          Map<String, Object> formData = (Map<String, Object>) userProfileConfigMap.get(stateCode);
+          List<String> locationTypeList = FormApiUtil.getLocationTypeConfigMap(formData);
           if (CollectionUtils.isNotEmpty(locationTypeList)) {
             locationTypeConfigMap.put(stateCode, locationTypeList);
           }
