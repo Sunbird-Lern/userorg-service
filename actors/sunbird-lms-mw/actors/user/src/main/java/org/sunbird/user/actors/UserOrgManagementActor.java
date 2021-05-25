@@ -1,14 +1,11 @@
 package org.sunbird.user.actors;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.learner.util.Util;
 
@@ -41,9 +38,6 @@ public class UserOrgManagementActor extends BaseActor {
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
     if (StringUtils.isNotBlank(organisationId)) {
       requestMap.put(JsonKey.HASHTAGID, organisationId);
-      if (StringUtils.isBlank(callerId)) {
-        addPublicRole(requestMap);
-      }
       Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)
@@ -51,7 +45,6 @@ public class UserOrgManagementActor extends BaseActor {
             && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
         || StringUtils.isBlank(organisationId)) {
       // Add user to root org
-      addPublicRole(requestMap);
       requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
       requestMap.put(JsonKey.HASHTAGID, requestMap.get(JsonKey.ORGANISATION_ID));
       Util.registerUserToOrg(requestMap, request.getRequestContext());
@@ -59,12 +52,6 @@ public class UserOrgManagementActor extends BaseActor {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(response, self());
-  }
-
-  private void addPublicRole(Map<String, Object> requestMap) {
-    List<String> roles = new ArrayList<>();
-    roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
-    requestMap.put(JsonKey.ROLES, roles);
   }
 
   private void updateUserOrgDetails(Request request) {
@@ -76,7 +63,6 @@ public class UserOrgManagementActor extends BaseActor {
     if ((StringUtils.isNotBlank(organisationId)
             && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
         || StringUtils.isBlank(organisationId)) {
-      addPublicRole(requestMap);
       Util.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     Response response = new Response();

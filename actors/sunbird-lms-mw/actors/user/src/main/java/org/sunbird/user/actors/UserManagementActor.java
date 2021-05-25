@@ -69,6 +69,7 @@ import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
+import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
@@ -357,6 +358,11 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
+      if (StringUtils.isNotBlank(callerId)) {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+      } else {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+      }
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -561,6 +567,10 @@ public class UserManagementActor extends BaseActor {
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setOrganisationId(
             (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
+        AssociationMechanism associationMechanism = new AssociationMechanism();
+        associationMechanism.setAssociationType(userOrg.getAssociationType());
+        associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
+        userOrg.setAssociationType(associationMechanism.getAssociationType());
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
@@ -868,12 +878,7 @@ public class UserManagementActor extends BaseActor {
     final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
-    Response response =
-        cassandraOperation.insertRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            userMap,
-            actorMessage.getRequestContext());
+    Response response = userService.createUser(userMap, actorMessage.getRequestContext());
     insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
@@ -1040,6 +1045,7 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
+    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
   }
 
@@ -1093,6 +1099,7 @@ public class UserManagementActor extends BaseActor {
       userRequest.putAll(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
+      userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SSO);
       resp =
           userService.saveUserAttributes(
               userRequest,

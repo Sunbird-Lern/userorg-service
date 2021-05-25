@@ -128,6 +128,7 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // add authkey header
         httpPost.setHeader("authkey", authKey);
+        logger.debug("Msg91SmsProvider -request header- " + httpPost.getAllHeaders());
 
         List<String> mobileNumbers = new ArrayList<>();
         mobileNumbers.add(tempMobileNumber);
