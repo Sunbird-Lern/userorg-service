@@ -23,16 +23,21 @@ public abstract class UserBaseActor extends BaseActor {
     switch (objectType) {
       case "userLevel":
         telemetryAction.put("AssignRole", "role assigned at user level");
+        TelemetryUtil.telemetryProcessingCall(
+            telemetryAction, targetObject, correlatedObject, context);
         break;
       case "blockUser":
         telemetryAction.put("BlockUser", "user blocked");
+        TelemetryUtil.telemetryProcessingCall(
+            JsonKey.BLOCK_USER, telemetryAction, targetObject, correlatedObject, context);
         break;
       case "unblockUser":
         telemetryAction.put("UnblockUser", "user unblocked");
+        TelemetryUtil.telemetryProcessingCall(
+            JsonKey.UNBLOCK_USER, telemetryAction, targetObject, correlatedObject, context);
         break;
       default:
         // Do Nothing
     }
-    TelemetryUtil.telemetryProcessingCall(telemetryAction, targetObject, correlatedObject, context);
   }
 }

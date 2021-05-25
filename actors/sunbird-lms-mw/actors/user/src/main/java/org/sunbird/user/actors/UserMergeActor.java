@@ -243,7 +243,7 @@ public class UserMergeActor extends UserBaseActor {
     context.put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
-            (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
+            (String) telemetryMap.get(JsonKey.TO_ACCOUNT_ID),
             TelemetryEnvKey.USER,
             JsonKey.UPDATE,
             null);
@@ -260,6 +260,23 @@ public class UserMergeActor extends UserBaseActor {
     telemetryMap.put(JsonKey.TYPE, JsonKey.MERGE_USER);
     telemetryMap.remove(JsonKey.ID);
     telemetryMap.remove(JsonKey.USER_ID);
+    // Generating Audit event for merger/to_user user
+    TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
+
+    correlatedObject = new ArrayList<>();
+    targetObject =
+        TelemetryUtil.generateTargetObject(
+            (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
+            TelemetryEnvKey.USER,
+            JsonKey.UPDATE,
+            null);
+    TelemetryUtil.generateCorrelatedObject(
+        (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
+        JsonKey.FROM_ACCOUNT_ID,
+        null,
+        correlatedObject);
+    telemetryMap.put(JsonKey.TYPE, JsonKey.BLOCK_USER);
+    // Generating Audit event for deleted/mergee/from_user user
     TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
   }
 
