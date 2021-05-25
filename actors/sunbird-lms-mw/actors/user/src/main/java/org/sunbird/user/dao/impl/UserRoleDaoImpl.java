@@ -2,14 +2,13 @@ package org.sunbird.user.dao.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
+import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.UserRole;
@@ -17,7 +16,7 @@ import org.sunbird.user.dao.UserRoleDao;
 
 public final class UserRoleDaoImpl implements UserRoleDao {
 
-  private static final String TABLE_NAME = JsonKey.USER_ROLE;
+  private static final String TABLE_NAME = JsonKey.USER_ROLES;
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private ObjectMapper mapper = new ObjectMapper();
@@ -39,28 +38,33 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   }
 
   @Override
-  public Response createUserRole(UserRole userRole, RequestContext context) {
-    return cassandraOperation.insertRecord(
-        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userRole, Map.class), context);
-  }
-
-  @Override
-  public void createUserRole(Map userRequest, RequestContext context)
-      throws JsonProcessingException {
+  public List<Map<String, Object>> createUserRole(Map userRequest, RequestContext context) {
     List<String> roles = (List<String>) userRequest.get(JsonKey.ROLES);
-    String userId = (String) userRequest.get(JsonKey.USER_ID);
-    String organisationId = (String) userRequest.get(JsonKey.ORGANISATION_ID);
-    List<Map> scopeList = new LinkedList();
-    Map<String, String> scopeMap = new HashMap<>();
-    scopeMap.put("orgId", organisationId);
-    scopeList.add(scopeMap);
-    for (String role : roles) {
-      UserRole userRole = new UserRole();
-      userRole.setRole(role);
-      userRole.setUserId(userId);
-      userRole.setScope(mapper.writeValueAsString(scopeList));
-      cassandraOperation.insertRecord(
-          Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userRole, Map.class), context);
+    List<Map<String, Object>> userRoleList = new ArrayList<>();
+    try {
+      String userId = (String) userRequest.get(JsonKey.USER_ID);
+      String organisationId = (String) userRequest.get(JsonKey.ORGANISATION_ID);
+      List<Map> scopeList = new LinkedList();
+      Map<String, String> scopeMap = new HashMap<>();
+      scopeMap.put("orgId", organisationId);
+      scopeList.add(scopeMap);
+      for (String role : roles) {
+        UserRole userRole = new UserRole();
+        userRole.setRole(role);
+        userRole.setUserId(userId);
+        userRole.setScope(mapper.writeValueAsString(scopeList));
+        userRole.setCreatedBy(userId);
+        userRole.setCreatedDate(ProjectUtil.getFormattedDate());
+        Map userRoleMap = mapper.convertValue(userRole, Map.class);
+        userRoleList.add(userRoleMap);
+        cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userRoleMap, context);
+      }
+    } catch (JsonProcessingException e) {
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
+    return userRoleList;
   }
 }

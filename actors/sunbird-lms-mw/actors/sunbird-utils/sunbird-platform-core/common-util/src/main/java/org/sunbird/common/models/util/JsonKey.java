@@ -623,6 +623,7 @@ public final class JsonKey {
   public static final String SYNC = "sync";
   public static final String ES_SYNC_RESPONSE = "esSyncResponse";
   public static final String USER_ROLE = "user_role";
+  public static final String USER_ROLES = "user_roles";
 
   private JsonKey() {}
 }

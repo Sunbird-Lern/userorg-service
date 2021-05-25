@@ -336,6 +336,7 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_USER_INFO_VALUE, ResponseMessage.Message.INVALID_USER_INFO_VALUE),
   invalidConsentStatus(
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
+  roleSaveError(ResponseMessage.Key.ROLE_SAVE_ERROR, ResponseMessage.Message.ROLE_SAVE_ERROR),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
