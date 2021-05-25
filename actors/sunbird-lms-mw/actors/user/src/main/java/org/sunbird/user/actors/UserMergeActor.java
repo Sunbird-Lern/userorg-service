@@ -3,7 +3,6 @@ package org.sunbird.user.actors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +34,10 @@ import org.sunbird.telemetry.dto.Actor;
 import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Target;
 import org.sunbird.telemetry.dto.Telemetry;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
+import org.sunbird.user.service.impl.UserMergeServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
 import org.sunbird.user.util.UserUtil;
@@ -139,7 +138,9 @@ public class UserMergeActor extends UserBaseActor {
               });
 
       // create telemetry event for merge
-      triggerUserMergeTelemetry(telemetryMap, merger, userRequest.getContext());
+      logger.info("UserMergeActor:triggerUserMergeTelemetry: generating telemetry event for merge");
+      new UserMergeServiceImpl()
+          .triggerUserMergeTelemetry(telemetryMap, merger, userRequest.getContext());
 
     } else {
       logger.info("UserMergeActor:updateUserMergeDetails: User mergee is not exist : " + mergeeId);
@@ -231,48 +232,6 @@ public class UserMergeActor extends UserBaseActor {
     target.setType(JsonKey.TELEMETRY_TARGET_USER_MERGE_TYPE);
     mergeUserEvent.setObject(target);
     return mergeUserEvent;
-  }
-
-  private void triggerUserMergeTelemetry(
-      Map telemetryMap, User merger, Map<String, Object> context) {
-    logger.info("UserMergeActor:triggerUserMergeTelemetry: generating telemetry event for merge");
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    Map<String, String> rollUp = new HashMap<>();
-    rollUp.put("l1", merger.getRootOrgId());
-    context.put(JsonKey.ROLLUP, rollUp);
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) telemetryMap.get(JsonKey.TO_ACCOUNT_ID),
-            TelemetryEnvKey.USER,
-            JsonKey.UPDATE,
-            null);
-    TelemetryUtil.generateCorrelatedObject(
-        (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
-        JsonKey.FROM_ACCOUNT_ID,
-        null,
-        correlatedObject);
-    TelemetryUtil.generateCorrelatedObject(
-        (String) telemetryMap.get(JsonKey.TO_ACCOUNT_ID),
-        JsonKey.TO_ACCOUNT_ID,
-        null,
-        correlatedObject);
-    telemetryMap.put(JsonKey.TYPE, JsonKey.MERGE_USER);
-    telemetryMap.remove(JsonKey.ID);
-    telemetryMap.remove(JsonKey.USER_ID);
-    // Generating Audit event for merger/to_user user
-    TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
-
-    correlatedObject = new ArrayList<>();
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) telemetryMap.get(JsonKey.FROM_ACCOUNT_ID),
-            TelemetryEnvKey.USER,
-            JsonKey.UPDATE,
-            null);
-    telemetryMap.put(JsonKey.TYPE, JsonKey.BLOCK_USER);
-    // Generating Audit event for deleted/mergee/from_user user
-    TelemetryUtil.telemetryProcessingCall(telemetryMap, targetObject, correlatedObject, context);
   }
 
   private void mergeUserDetailsToEs(Request userRequest) {
