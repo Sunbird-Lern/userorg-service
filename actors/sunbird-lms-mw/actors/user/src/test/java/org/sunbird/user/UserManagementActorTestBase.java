@@ -449,7 +449,6 @@ public abstract class UserManagementActorTestBase {
     reqMap.put(JsonKey.DOB, "1992");
     reqMap.put(JsonKey.EMAIL_VERIFIED, true);
     reqMap.put(JsonKey.PHONE_VERIFIED, true);
-    reqMap.put(JsonKey.ADDRESS, new ArrayList<>());
     return reqMap;
   }
 
