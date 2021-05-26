@@ -13,12 +13,12 @@ public class FeedRequestValidatorTest {
 
   @Test
   public void userIdValidationTestSuccess() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-789", "123-456-789"));
+    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-789", null, "123-456-789"));
   }
 
   @Test(expected = ProjectCommonException.class)
   public void userIdValidationTestFailure() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-7890", "123-456-789"));
+    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-7890", null, "123-456-789"));
   }
 
   @Test(expected = ProjectCommonException.class)
@@ -44,7 +44,8 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.DATA, dataMap);
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
+    Assert.assertTrue(
+        FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId", "someUserId"));
   }
 
   @Test
@@ -56,7 +57,8 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId"));
+    Assert.assertTrue(
+        FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId", "someUserId"));
   }
 
   @Test
@@ -68,6 +70,7 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(FeedRequestValidator.validateFeedDeleteRequest(reqObj, "someUserId"));
+    Assert.assertTrue(
+        FeedRequestValidator.validateFeedDeleteRequest(reqObj, "someUserId", "someUserId"));
   }
 }
