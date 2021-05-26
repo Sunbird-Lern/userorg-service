@@ -377,6 +377,11 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
+      if (StringUtils.isNotBlank(callerId)) {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+      } else {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+      }
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -581,6 +586,10 @@ public class UserManagementActor extends BaseActor {
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setOrganisationId(
             (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
+        AssociationMechanism associationMechanism = new AssociationMechanism();
+        associationMechanism.setAssociationType(userOrg.getAssociationType());
+        associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
+        userOrg.setAssociationType(associationMechanism.getAssociationType());
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
         orgDbMap.remove(orgId);
       } else {
@@ -1109,6 +1118,10 @@ public class UserManagementActor extends BaseActor {
       userRequest.putAll(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
+      userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SSO);
+      if (StringUtils.isNotBlank(callerId) && callerId.equalsIgnoreCase(JsonKey.BULK_USER_UPLOAD)) {
+        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+      }
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -1626,17 +1639,24 @@ public class UserManagementActor extends BaseActor {
           if (CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
             userProfileConfigMap =
                 FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
-            List<String> locationTypeList =
-                FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-            locationTypeConfigMap.put(stateCode, locationTypeList);
+            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
+              List<String> locationTypeList =
+                  FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
+              if (CollectionUtils.isNotEmpty(locationTypeList)) {
+                locationTypeConfigMap.put(stateCode, locationTypeList);
+              }
+            }
           }
         } else {
           List<String> locationTypeList =
               FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-          locationTypeConfigMap.put(stateCode, locationTypeList);
+          if (CollectionUtils.isNotEmpty(locationTypeList)) {
+            locationTypeConfigMap.put(stateCode, locationTypeList);
+          }
         }
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
+      String stateId = null;
       for (Location location : locationList) {
         // for create-MUA we allow locations upto district for remaining we will validate all.
         if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
@@ -1650,7 +1670,6 @@ public class UserManagementActor extends BaseActor {
                     .getOperation()
                     .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
           isValidLocationType(location.getType(), typeList);
-          String stateId = null;
           if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
             stateId = location.getId();
           }
@@ -1658,9 +1677,11 @@ public class UserManagementActor extends BaseActor {
             set.add(location.getCode());
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-            userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
           }
         }
+      }
+      if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {
+        userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }

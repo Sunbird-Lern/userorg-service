@@ -29,6 +29,16 @@ public class UserOrg implements Serializable {
   private String updatedDate;
   private String userId;
 
+  public int getAssociationType() {
+    return associationType;
+  }
+
+  public void setAssociationType(int associationType) {
+    this.associationType = associationType;
+  }
+
+  private int associationType;
+
   public static long getSerialVersionUID() {
     return serialVersionUID;
   }

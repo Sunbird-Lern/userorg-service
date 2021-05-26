@@ -387,7 +387,8 @@ public final class Util {
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -397,7 +398,7 @@ public final class Util {
       Map<String, Object> channelMap = new HashMap<>();
       channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
+      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
       String license = (String) req.get(JsonKey.LICENSE);
       if (StringUtils.isNotBlank(license)) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, license);
@@ -416,12 +417,13 @@ public final class Util {
                   + req.get(JsonKey.ID),
               reqString,
               headerMap);
-      logger.info(context, "end call for channel update for org id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       logger.error(
           context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
     }
-    return regStatus.contains("SUCCESS");
+    return regStatus.contains("OK");
   }
 
   public static void initializeContext(Request request, String env) {
@@ -561,6 +563,7 @@ public final class Util {
     reqMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     reqMap.put(JsonKey.IS_DELETED, false);
+    reqMap.put(JsonKey.ASSOCIATION_TYPE, userMap.get(JsonKey.ASSOCIATION_TYPE));
     if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {
       reqMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.HASHTAGID));
     }
@@ -606,6 +609,7 @@ public final class Util {
         reqMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
       }
       reqMap.put(JsonKey.UPDATED_BY, userMap.get(JsonKey.UPDATED_BY));
+      reqMap.put(JsonKey.ASSOCIATION_TYPE, userMap.get(JsonKey.ASSOCIATION_TYPE));
       reqMap.put(JsonKey.IS_DELETED, false);
       reqMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.HASHTAGID))) {

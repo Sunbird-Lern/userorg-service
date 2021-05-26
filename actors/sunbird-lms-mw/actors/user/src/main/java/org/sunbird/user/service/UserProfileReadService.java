@@ -67,6 +67,7 @@ public class UserProfileReadService {
     String id = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
+    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     String userId;
     // Check whether its normal read by id call or read by externalId call
     validateProviderAndIdType(provider, idType);
@@ -108,7 +109,7 @@ public class UserProfileReadService {
             + managedForId
             + " managedBy "
             + managedBy);
-    if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
+    if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
 
@@ -129,7 +130,6 @@ public class UserProfileReadService {
 
     UserUtility.decryptUserDataFrmES(result);
     // Its used for Private user read api to display encoded email and encoded phone in api response
-    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     if (isPrivate) {
       result.put((JsonKey.ENC_PHONE), encPhone);
       result.put((JsonKey.ENC_EMAIL), encEmail);
@@ -268,7 +268,7 @@ public class UserProfileReadService {
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
         AssociationMechanism associationMechanism = new AssociationMechanism();
-        if (userOrg.containsKey(JsonKey.ASSOCIATION_TYPE)) {
+        if (null != userOrg.get(JsonKey.ASSOCIATION_TYPE)) {
           int associationType = (int) userOrg.get(JsonKey.ASSOCIATION_TYPE);
           associationMechanism.setAssociationType(associationType);
           userOrg.put(
