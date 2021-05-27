@@ -34,7 +34,7 @@ public final class JsonKey {
   public static final String API_CALL = "API_CALL";
   public static final String APPROVED_BY = "approvedBy";
   public static final String APPROVED_DATE = "approvedDate";
-  public static final String ASSOCIATION_TYPE = "associationtype";
+  public static final String ASSOCIATION_TYPE = "associationType";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
   public static final String AUTH_WITH_MASTER_KEY = "authWithMasterKey";
   public static final String AUTHORIZATION = "Authorization";
