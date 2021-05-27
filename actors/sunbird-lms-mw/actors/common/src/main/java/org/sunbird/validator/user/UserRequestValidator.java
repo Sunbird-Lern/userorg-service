@@ -695,30 +695,24 @@ public class UserRequestValidator extends BaseRequestValidator {
       }
       if (!userTypeConfigMap.containsKey(stateCode)) {
         // Get profile data config
-        Map<String, Object> userProfileConfigMap = FormApiUtil.getProfileConfig(stateCode, context);
+        Map<String, List<String>> userProfileConfigMap =
+            FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
         if (MapUtils.isEmpty(userProfileConfigMap)) {
           // Get Default Config
           stateCode = JsonKey.DEFAULT_PERSONA;
-          if (MapUtils.isEmpty(userTypeConfigMap.get(stateCode))) {
-            userProfileConfigMap = FormApiUtil.getProfileConfig(stateCode, context);
+          userProfileConfigMap = userTypeConfigMap.get(stateCode);
+          if (MapUtils.isEmpty(userProfileConfigMap)) {
+            userProfileConfigMap =
+                FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
             if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-              Map<String, Object> formData =
-                  (Map<String, Object>) userProfileConfigMap.get(stateCode);
-              Map<String, List<String>> userTypeConfig = FormApiUtil.getUserTypeConfig(formData);
-              if (MapUtils.isNotEmpty(userTypeConfig)) {
-                userTypeConfigMap.put(stateCode, userTypeConfig);
-              }
+              userTypeConfigMap.put(stateCode, userProfileConfigMap);
             } else {
               logger.info(
                   context, String.format("Form Config not found for stateCode:%s", stateCode));
             }
           }
         } else {
-          Map<String, Object> formData = (Map<String, Object>) userProfileConfigMap.get(stateCode);
-          Map<String, List<String>> userTypeConfig = FormApiUtil.getUserTypeConfig(formData);
-          if (MapUtils.isNotEmpty(userTypeConfig)) {
-            userTypeConfigMap.put(stateCode, userTypeConfig);
-          }
+          userTypeConfigMap.put(stateCode, userProfileConfigMap);
         }
       }
 
