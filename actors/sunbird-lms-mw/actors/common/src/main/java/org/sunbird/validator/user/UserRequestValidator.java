@@ -693,6 +693,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (StringUtils.isBlank(stateCode)) {
         stateCode = JsonKey.DEFAULT_PERSONA;
       }
+      
       if (!userTypeConfigMap.containsKey(stateCode)) {
         // Get profile data config
         Map<String, List<String>> userProfileConfigMap =
