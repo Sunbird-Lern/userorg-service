@@ -288,7 +288,6 @@ public abstract class UserManagementActorTestBase {
   }
 
   public Map<String, Object> getFormApiConfig() {
-    Map<String, Object> formStateData = new HashMap<>();
     Map<String, Object> formData = new HashMap<>();
     Map<String, Object> formMap = new HashMap<>();
     Map<String, Object> dataMap = new HashMap<>();
@@ -305,7 +304,7 @@ public abstract class UserManagementActorTestBase {
     options.add(option);
 
     templateOptionsMap.put(JsonKey.OPTIONS, options);
-    subPersonConfig.put(JsonKey.CODE, JsonKey.STATE);
+    subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
     subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
     userTypeConfigList.add(subPersonConfig);
     children.put("teacher", userTypeConfigList);
@@ -315,8 +314,7 @@ public abstract class UserManagementActorTestBase {
     dataMap.put(JsonKey.FIELDS, fieldsList);
     formMap.put(JsonKey.DATA, dataMap);
     formData.put(JsonKey.FORM, formMap);
-    formStateData.put(JsonKey.DEFAULT_PERSONA, formData);
-    return formStateData;
+    return formData;
   }
 
   public Response getOrgFromCassandra() {
@@ -453,7 +451,6 @@ public abstract class UserManagementActorTestBase {
     reqMap.put(JsonKey.EMAIL, "email@email.com");
     reqMap.put(JsonKey.LANGUAGE, new ArrayList<>());
     reqMap.put(JsonKey.DOB, "1992");
-    reqMap.put(JsonKey.ADDRESS, new ArrayList<>());
     return reqMap;
   }
 
