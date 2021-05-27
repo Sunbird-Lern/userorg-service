@@ -947,7 +947,7 @@ public final class Util {
       } else {
         countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
       }
-      ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
+      ISmsProvider smsProvider = SMSFactory.getInstance();
       logger.info("SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE));
       boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms);
       logger.info("Response from smsProvider : " + response);
