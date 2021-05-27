@@ -1649,7 +1649,6 @@ public class UserManagementActor extends BaseActor {
             set.add(location.getCode());
           } else {
             userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-            userRequest.getRequest().put(JsonKey.UPDATE_USER_SCHOOL_ORG, true);
           }
         }
       }
