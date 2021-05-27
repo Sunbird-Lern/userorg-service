@@ -44,13 +44,9 @@ public class UserTypeActor extends UserBaseActor {
         DataCacheHandler.getUserTypesConfig();
     Map<String, List<String>> userTypeLists = userTypeConfigList.get(JsonKey.DEFAULT_PERSONA);
     if (MapUtils.isEmpty(userTypeLists)) {
-      Map<String, Object> userProfileConfigMap =
-          FormApiUtil.getProfileConfig(JsonKey.DEFAULT_PERSONA, request.getRequestContext());
-      if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-        Map<String, Object> formData =
-            (Map<String, Object>) userProfileConfigMap.get(JsonKey.DEFAULT_PERSONA);
-        userTypeLists = FormApiUtil.getUserTypeConfig(formData);
-      }
+      userTypeLists =
+          FormApiUtil.getUserTypeConfig(
+              FormApiUtil.getProfileConfig(JsonKey.DEFAULT_PERSONA, request.getRequestContext()));
     }
     for (Map.Entry<String, List<String>> itr : userTypeLists.entrySet()) {
       Map<String, String> userTypeMap = new HashMap<>();
