@@ -114,11 +114,6 @@ public class UserRequestValidator extends BaseRequestValidator {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.OnlyEmailorPhoneorManagedByRequired);
     }
-
-    if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.MANAGED_BY))) {
-      userRequest.getRequest().put(JsonKey.EMAIL_VERIFIED, null);
-      userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
-    }
     validatePassword((String) userRequest.getRequest().get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
       validateEmail((String) userRequest.getRequest().get(JsonKey.EMAIL));
@@ -195,22 +190,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
   }
 
-  private void phoneVerifiedValidation(Request userRequest) {
-    if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.PHONE))) {
-      if (null != userRequest.getRequest().get(JsonKey.PHONE_VERIFIED)) {
-        if (userRequest.getRequest().get(JsonKey.PHONE_VERIFIED) instanceof Boolean) {
-          if (!((boolean) userRequest.getRequest().get(JsonKey.PHONE_VERIFIED))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.phoneVerifiedError);
-          }
-        } else {
-          ProjectCommonException.throwClientErrorException(ResponseCode.phoneVerifiedError);
-        }
-      } else {
-        ProjectCommonException.throwClientErrorException(ResponseCode.phoneVerifiedError);
-      }
-    }
-  }
-
   /**
    * This method will do basic validation for user request object.
    *
@@ -226,15 +205,6 @@ public class UserRequestValidator extends BaseRequestValidator {
           ResponseCode.dataTypeError.getErrorCode(),
           ProjectUtil.formatMessage(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.ROLES, JsonKey.LIST),
-          ERROR_CODE);
-    }
-    if (userRequest.getRequest().containsKey(JsonKey.LANGUAGE)
-        && null != userRequest.getRequest().get(JsonKey.LANGUAGE)
-        && !(userRequest.getRequest().get(JsonKey.LANGUAGE) instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LANGUAGE, JsonKey.LIST),
           ERROR_CODE);
     }
   }
@@ -258,11 +228,6 @@ public class UserRequestValidator extends BaseRequestValidator {
           ResponseCode.OnlyEmailorPhoneorManagedByRequired);
     }
 
-    if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.MANAGED_BY))) {
-      userRequest.getRequest().put(JsonKey.EMAIL_VERIFIED, null);
-      userRequest.getRequest().put(JsonKey.PHONE_VERIFIED, null);
-    }
-
     if ((null == userRequest.getRequest().get(JsonKey.DOB_VALIDATION_DONE))) {
       validateDob(userRequest);
     }
@@ -284,22 +249,6 @@ public class UserRequestValidator extends BaseRequestValidator {
       } else {
         userRequest.getRequest().put(JsonKey.DOB, dobValue);
         userRequest.getRequest().put(JsonKey.DOB_VALIDATION_DONE, true);
-      }
-    }
-  }
-
-  private void emailVerifiedValidation(Request userRequest) {
-    if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
-      if (null != userRequest.getRequest().get(JsonKey.EMAIL_VERIFIED)) {
-        if (userRequest.getRequest().get(JsonKey.EMAIL_VERIFIED) instanceof Boolean) {
-          if (!((boolean) userRequest.getRequest().get(JsonKey.EMAIL_VERIFIED))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.emailVerifiedError);
-          }
-        } else {
-          ProjectCommonException.throwClientErrorException(ResponseCode.emailVerifiedError);
-        }
-      } else {
-        ProjectCommonException.throwClientErrorException(ResponseCode.emailVerifiedError);
       }
     }
   }
@@ -744,6 +693,7 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (StringUtils.isBlank(stateCode)) {
         stateCode = JsonKey.DEFAULT_PERSONA;
       }
+      
       if (!userTypeConfigMap.containsKey(stateCode)) {
         // Get profile data config
         Map<String, List<String>> userProfileConfigMap =

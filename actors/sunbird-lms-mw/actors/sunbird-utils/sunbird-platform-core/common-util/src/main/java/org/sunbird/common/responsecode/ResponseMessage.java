@@ -62,9 +62,6 @@ public interface ResponseMessage {
     String CONTENT_TYPE_ERROR = "Please add Content-Type header with value application/json";
     String INVALID_PROPERTY_ERROR = "Invalid property {0}.";
     String USER_ACCOUNT_BLOCKED = "User account has been blocked .";
-    String EMAIL_VERIFY_ERROR = "Please provide a verified email in order to create user.";
-    String PHONE_VERIFY_ERROR =
-        "Please provide a verified phone number in order to create/update user.";
     String DATA_SIZE_EXCEEDED = "Maximum upload data size should be {0}";
     String USER_ALREADY_ACTIVE = "User is already active.";
     String USER_ALREADY_INACTIVE = "User is already inactive.";
@@ -262,8 +259,6 @@ public interface ResponseMessage {
     String CONTENT_TYPE_ERROR = "CONTENT_TYPE_ERROR";
     String INVALID_PROPERTY_ERROR = "INVALID_PROPERTY_ERROR";
     String USER_ACCOUNT_BLOCKED = "USER_ACCOUNT_BLOCKED";
-    String EMAIL_VERIFY_ERROR = "EMAIL_VERIFY_ERROR";
-    String PHONE_VERIFY_ERROR = "PHONE_VERIFY_ERROR";
     String DATA_SIZE_EXCEEDED = "DATA_SIZE_EXCEEDED";
     String USER_ALREADY_ACTIVE = "USER_ALREADY_ACTIVE";
     String USER_ALREADY_INACTIVE = "USER_ALREADY_INACTIVE";

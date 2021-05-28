@@ -108,9 +108,6 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       if (mandatoryColumnsObject != null) {
         validateMandatoryFields(userMap, task, mandatoryColumnsObject);
       }
-      if (userMap.get(JsonKey.PHONE) != null) {
-        userMap.put(JsonKey.PHONE_VERIFIED, true);
-      }
       try {
         String roles = (String) userMap.get(JsonKey.ROLES);
         if (roles != null) {
@@ -202,12 +199,6 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         orgName = organisation.getOrgName();
       }
 
-      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.PHONE))) {
-        userMap.put(JsonKey.PHONE_VERIFIED, true);
-      }
-      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.EMAIL))) {
-        userMap.put(JsonKey.EMAIL_VERIFIED, true);
-      }
       String userId = (String) userMap.get(JsonKey.USER_ID);
       if (StringUtils.isEmpty(userId)) {
         userMap.put(JsonKey.CREATED_BY, uploadedBy);
