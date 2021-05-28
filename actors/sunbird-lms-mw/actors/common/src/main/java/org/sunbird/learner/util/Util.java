@@ -387,7 +387,8 @@ public final class Util {
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -397,7 +398,7 @@ public final class Util {
       Map<String, Object> channelMap = new HashMap<>();
       channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
+      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
       String license = (String) req.get(JsonKey.LICENSE);
       if (StringUtils.isNotBlank(license)) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, license);
@@ -416,12 +417,13 @@ public final class Util {
                   + req.get(JsonKey.ID),
               reqString,
               headerMap);
-      logger.info(context, "end call for channel update for org id ==" + req.get(JsonKey.ID));
+      logger.info(
+          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       logger.error(
           context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
     }
-    return regStatus.contains("SUCCESS");
+    return regStatus.contains("OK");
   }
 
   public static void initializeContext(Request request, String env) {
@@ -945,7 +947,7 @@ public final class Util {
       } else {
         countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
       }
-      ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
+      ISmsProvider smsProvider = SMSFactory.getInstance();
       logger.info("SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE));
       boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms);
       logger.info("Response from smsProvider : " + response);
@@ -1011,6 +1013,8 @@ public final class Util {
     user.put("currentLoginTime", null);
     user.put("password", null);
     user.put("loginId", null);
+    user.put(JsonKey.EMAIL_VERIFIED, true);
+    user.put(JsonKey.PHONE_VERIFIED, true);
     return user;
   }
 

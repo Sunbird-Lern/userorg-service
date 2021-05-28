@@ -32,9 +32,7 @@ public final class JsonKey {
   public static final String API_ACCESS = "api_access";
   public static final String API_ACTOR_PROVIDER = "api_actor_provider";
   public static final String API_CALL = "API_CALL";
-  public static final String APPROVED_BY = "approvedBy";
-  public static final String APPROVED_DATE = "approvedDate";
-  public static final String ASSOCIATION_TYPE = "associationtype";
+  public static final String ASSOCIATION_TYPE = "associationType";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
   public static final String AUTH_WITH_MASTER_KEY = "authWithMasterKey";
   public static final String AUTHORIZATION = "Authorization";
@@ -631,6 +629,10 @@ public final class JsonKey {
   public static final String USER_ROLE = "user_role";
   public static final String USER_ROLES = "user_roles";
   public static final Object SCOPE = "scope";
+  public static final String IS_ROOT_ORG = "isRootOrg";
+  public static final String STATE_ID = "stateId";
+  public static final String BLOCK_USER = "BlockUser";
+  public static final String UNBLOCK_USER = "UnblockUser";
 
   private JsonKey() {}
 }

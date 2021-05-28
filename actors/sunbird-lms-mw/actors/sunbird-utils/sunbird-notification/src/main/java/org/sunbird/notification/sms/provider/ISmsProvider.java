@@ -1,8 +1,21 @@
 package org.sunbird.notification.sms.provider;
 
 import java.util.List;
+import java.util.Map;
+import org.sunbird.notification.utils.SmsTemplateUtil;
 
 public interface ISmsProvider {
+
+  default String getTemplateId(String sms) {
+    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
+    for (String key : smsTemplateConfig.keySet()) {
+      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
+      if (sms.matches(pattern)) {
+        return smsTemplateConfig.get(key);
+      }
+    }
+    return "";
+  }
 
   /**
    * This method will send the SMS with default country code. default country code value will differ
