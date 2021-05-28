@@ -678,7 +678,8 @@
           "analyzer": "cs_search_analyzer",
           "search_analyzer": "cs_search_analyzer"
         }
-      },
+      }
+    },
     "rootOrgId": {
       "type": "keyword",
       "fields": {
