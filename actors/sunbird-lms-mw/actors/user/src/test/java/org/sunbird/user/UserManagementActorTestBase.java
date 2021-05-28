@@ -293,20 +293,24 @@ public abstract class UserManagementActorTestBase {
     Map<String, Object> dataMap = new HashMap<>();
     List<Map<String, Object>> fieldsList = new ArrayList<>();
     Map<String, Object> field = new HashMap<>();
-
     Map<String, Object> children = new HashMap<>();
     List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
+
     Map<String, Object> subPersonConfig = new HashMap<>();
     Map<String, Object> templateOptionsMap = new HashMap<>();
     List<Map<String, String>> options = new ArrayList<>();
     Map<String, String> option = new HashMap<>();
     option.put(JsonKey.VALUE, "crc");
     options.add(option);
-
     templateOptionsMap.put(JsonKey.OPTIONS, options);
     subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
     subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
-    userTypeConfigList.add(subPersonConfig);
+    userTypeConfigList.add(subPersonConfig); // For subpersona config
+
+    Map<String, Object> stateConfig = new HashMap<>();
+    stateConfig.put(JsonKey.CODE, JsonKey.STATE);
+    userTypeConfigList.add(stateConfig); // For state config
+
     children.put("teacher", userTypeConfigList);
     field.put(JsonKey.CODE, JsonKey.PERSONA);
     field.put(JsonKey.CHILDREN, children);
