@@ -56,8 +56,9 @@ public final class UserRoleDaoImpl implements UserRoleDao {
         userRole.setCreatedBy(userId);
         userRole.setCreatedDate(ProjectUtil.getFormattedDate());
         Map userRoleMap = mapper.convertValue(userRole, Map.class);
-        userRoleList.add(userRoleMap);
         cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userRoleMap, context);
+        userRoleMap.put(JsonKey.SCOPE, scopeList);
+        userRoleList.add(userRoleMap);
       }
     } catch (JsonProcessingException e) {
       throw new ProjectCommonException(
