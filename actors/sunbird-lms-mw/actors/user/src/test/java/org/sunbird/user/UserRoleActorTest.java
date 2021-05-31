@@ -170,29 +170,6 @@ public class UserRoleActorTest {
     assertTrue(testScenario(false, null));
   }
 
-  @Test
-  public void testAssignRolesFailure() {
-    PowerMockito.mockStatic(OrgServiceImpl.class);
-    OrgService orgService = PowerMockito.mock(OrgService.class);
-    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
-    Map<String, Object> orgMap = new HashMap<>();
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    assertTrue(testScenario(false, ResponseCode.CLIENT_ERROR));
-  }
-
-  @Test
-  public void testAssignRolesFailureWithInvalidOrgId() {
-    PowerMockito.mockStatic(OrgServiceImpl.class);
-    OrgService orgService = PowerMockito.mock(OrgService.class);
-    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
-    Map<String, Object> orgMap = new HashMap<>();
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.getOrgByExternalIdAndProvider(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(orgMap);
-    assertTrue(testScenario(false, ResponseCode.invalidParameterValue));
-  }
-
   private boolean testScenario(boolean isOrgIdReq, ResponseCode errorResponse) {
     return testScenario(false, isOrgIdReq, errorResponse);
   }
@@ -225,10 +202,13 @@ public class UserRoleActorTest {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
+      Response res1 = probe.expectMsgClass(duration("100 second"), Response.class);
+      if (res1.getResult().size() <= 1) {
+        return false;
+      }
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorResponse.getErrorCode())
-          || res.getResponseCode() == errorResponse.getResponseCode();
+      return res.getResponseCode() == errorResponse.getResponseCode();
     }
   }
 
