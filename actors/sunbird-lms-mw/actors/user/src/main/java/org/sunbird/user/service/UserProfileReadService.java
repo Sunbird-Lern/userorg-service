@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
@@ -40,8 +41,10 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.UserRoleDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -261,10 +264,41 @@ public class UserProfileReadService {
 
   private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
+
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    List<Map<String, Object>> userRolesList =
+        userRoleDao.getUserRoles(userId, null, requestContext);
+    Map<String, List<String>> userOrgRoles = new HashMap<>();
+    for (Map userRole : userRolesList) {
+      List<Map<String, String>> scopeMap = null;
+      try {
+        scopeMap =
+            mapper.readValue(
+                (String) userRole.get(JsonKey.SCOPE),
+                new ArrayList<Map<String, String>>().getClass());
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      }
+      for (Map scope : scopeMap) {
+        String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
+        String role = (String) userRole.get(JsonKey.ROLE);
+        if (userOrgRoles.containsKey(orgId)) {
+          List<String> roles = userOrgRoles.get(orgId);
+          roles.add(role);
+          userOrgRoles.put(orgId, roles);
+        } else {
+          userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+        }
+      }
+    }
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     for (Map<String, Object> userOrg : userOrgList) {
+      String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
+      if (userOrgRoles.containsKey(organisationId)) {
+        userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
+      }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
         AssociationMechanism associationMechanism = new AssociationMechanism();
