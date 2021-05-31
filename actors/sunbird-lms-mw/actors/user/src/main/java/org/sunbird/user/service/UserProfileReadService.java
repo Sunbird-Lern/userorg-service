@@ -264,7 +264,6 @@ public class UserProfileReadService {
 
   private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
-
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
@@ -279,7 +278,10 @@ public class UserProfileReadService {
                 (String) userRole.get(JsonKey.SCOPE),
                 new ArrayList<Map<String, String>>().getClass());
       } catch (JsonProcessingException e) {
-        e.printStackTrace();
+        logger.error(
+            requestContext,
+            "Exception because of mapper read value" + (String) userRole.get(JsonKey.SCOPE),
+            e);
       }
       for (Map scope : scopeMap) {
         String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
