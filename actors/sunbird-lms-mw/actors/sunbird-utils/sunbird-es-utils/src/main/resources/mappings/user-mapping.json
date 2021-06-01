@@ -630,6 +630,7 @@
           "search_analyzer": "cs_search_analyzer"
         },
         "scope": {
+          "type": "nested",
           "properties": {
             "orgId": {
               "type": "keyword",
