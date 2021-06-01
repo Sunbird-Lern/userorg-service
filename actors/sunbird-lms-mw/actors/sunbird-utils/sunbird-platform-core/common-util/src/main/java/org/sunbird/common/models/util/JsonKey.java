@@ -628,7 +628,7 @@ public final class JsonKey {
   public static final String ES_SYNC_RESPONSE = "esSyncResponse";
   public static final String USER_ROLE = "user_role";
   public static final String USER_ROLES = "user_roles";
-  public static final Object SCOPE = "scope";
+  public static final String SCOPE = "scope";
   public static final String IS_ROOT_ORG = "isRootOrg";
   public static final String STATE_ID = "stateId";
   public static final String BLOCK_USER = "BlockUser";

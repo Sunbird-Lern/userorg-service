@@ -19,7 +19,6 @@ import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
 import org.sunbird.common.models.util.ProjectUtil.OrgStatus;
 import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.common.models.util.datasecurity.DataMaskingService;
@@ -140,6 +139,7 @@ public final class Util {
 
     dbInfoMap.put(JsonKey.USER_LOOKUP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
     dbInfoMap.put(JsonKey.LOCATION, getDbInfoObject(KEY_SPACE_NAME, JsonKey.LOCATION));
+    dbInfoMap.put(JsonKey.USER_ROLES, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_ROLES));
   }
 
   /**
@@ -629,7 +629,7 @@ public final class Util {
   @SuppressWarnings("unchecked")
   public static Map<String, Object> getUserDetails(String userId, RequestContext context) {
     logger.info(context, "get user profile method call started user Id : " + userId);
-    Util.DbInfo userDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
+    DbInfo userDbInfo = dbInfoMap.get(JsonKey.USER_DB);
     Response response = null;
     List<Map<String, Object>> userList = null;
     Map<String, Object> userDetails = null;
@@ -691,6 +691,8 @@ public final class Util {
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+      List<Map<String, Object>> userRoleList = getUserRoles(userId, context);
+      userDetails.put(JsonKey.ROLES, userRoleList);
     } else {
       logger.info(
           context,
@@ -698,6 +700,39 @@ public final class Util {
     }
     userDetails.put(JsonKey.USERNAME, username);
     return userDetails;
+  }
+
+  public static List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
+    DbInfo userRoleDbInfo = dbInfoMap.get(JsonKey.USER_ROLES);
+    List<String> userIds = new ArrayList<>();
+    userIds.add(userId);
+    Response result =
+        cassandraOperation.getRecordsByPrimaryKeys(
+            userRoleDbInfo.getKeySpace(),
+            userRoleDbInfo.getTableName(),
+            userIds,
+            JsonKey.USER_ID,
+            context);
+    List<Map<String, Object>> userRoleList =
+        (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+    userRoleList
+        .stream()
+        .forEach(
+            userRole -> {
+              try {
+                String dbScope = (String) userRole.get(JsonKey.SCOPE);
+                if (StringUtils.isNotBlank(dbScope)) {
+                  List<Map<String, String>> scope = mapper.readValue(dbScope, ArrayList.class);
+                  userRole.put(JsonKey.SCOPE, scope);
+                }
+              } catch (Exception e) {
+                logger.error(
+                    context,
+                    "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
+                    e);
+              }
+            });
+    return userRoleList;
   }
 
   // Convert Json String tnc format to object to store in Elastic
@@ -787,20 +822,19 @@ public final class Util {
   }
 
   public static List<Map<String, Object>> getUserOrgDetails(String userId, RequestContext context) {
-    List<Map<String, Object>> userOrgDataList = new ArrayList<>();
-    List<Map<String, Object>> userOrganisations = new ArrayList<>();
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
+    List<Map<String, Object>> userOrgDataList;
     try {
-      List<String> ids = new ArrayList<>();
-      ids.add(userId);
-      Util.DbInfo orgUsrDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+      List<String> userIds = new ArrayList<>();
+      userIds.add(userId);
+      DbInfo orgUsrDbInfo = dbInfoMap.get(JsonKey.USER_ORG_DB);
       Response result =
           cassandraOperation.getRecordsByPrimaryKeys(
               orgUsrDbInfo.getKeySpace(),
               orgUsrDbInfo.getTableName(),
-              ids,
+              userIds,
               JsonKey.USER_ID,
               context);
-      List<Map<String, Object>> userOrgList = new ArrayList<>();
       userOrgDataList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       userOrgDataList
           .stream()
@@ -819,25 +853,28 @@ public final class Util {
                 .distinct()
                 .collect(Collectors.toList());
         List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.ID);
-
-        Future<Map<String, Map<String, Object>>> orgInfoMapF =
-            esService.getEsResultByListOfIds(
-                organisationIds, fields, EsType.organisation.getTypeName(), context);
-        Map<String, Map<String, Object>> orgInfoMap =
-            (Map<String, Map<String, Object>>)
-                ElasticSearchHelper.getResponseFromFuture(orgInfoMapF);
-
+        DbInfo orgDbInfo = dbInfoMap.get(JsonKey.ORG_DB);
+        Response orgResult =
+            cassandraOperation.getPropertiesValueById(
+                orgDbInfo.getKeySpace(),
+                orgDbInfo.getTableName(),
+                organisationIds,
+                fields,
+                context);
+        List<Map<String, Object>> orgDataList =
+            (List<Map<String, Object>>) orgResult.get(JsonKey.RESPONSE);
+        Map<String, Map<String, Object>> orgInfoMap = new HashMap<>();
+        orgDataList.stream().forEach(org -> orgInfoMap.put((String) org.get(JsonKey.ID), org));
         for (Map<String, Object> userOrg : userOrgList) {
-          Map<String, Object> esOrgMap = orgInfoMap.get(userOrg.get(JsonKey.ORGANISATION_ID));
-          esOrgMap.remove(JsonKey.ID);
-          userOrg.putAll(esOrgMap);
-          userOrganisations.add(userOrg);
+          Map<String, Object> orgMap = orgInfoMap.get(userOrg.get(JsonKey.ORGANISATION_ID));
+          userOrg.put(JsonKey.ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
+          userOrg.remove(JsonKey.ROLES);
         }
       }
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
-    return userOrganisations;
+    return userOrgList;
   }
 
   public static Request sendOnboardingMail(Map<String, Object> emailTemplateMap) {
