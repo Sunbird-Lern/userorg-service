@@ -392,11 +392,9 @@ public class UserControllerTest extends BaseApplicationTest {
     frameworkMap = getFrameworkDetails(frameworkId, success);
     innerMap.put(JsonKey.USER_ID, userId);
     innerMap.put(JsonKey.FRAMEWORK, frameworkMap);
-    innerMap.put(JsonKey.PHONE_VERIFIED, true);
     innerMap.put(JsonKey.PHONE, phoneNumber);
     innerMap.put(JsonKey.COUNTRY_CODE, "+91");
     innerMap.put(JsonKey.EMAIL, emailId);
-    innerMap.put(JsonKey.EMAIL_VERIFIED, true);
     request.put(JsonKey.REQUEST, innerMap);
     return request;
   }
@@ -422,8 +420,6 @@ public class UserControllerTest extends BaseApplicationTest {
     Map<String, Object> requestMap = new HashMap<>();
 
     Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.PHONE_VERIFIED, true);
-    innerMap.put(JsonKey.EMAIL_VERIFIED, true);
     innerMap.put(JsonKey.PHONE, phoneNumber);
     innerMap.put(JsonKey.COUNTRY_CODE, "+91");
     innerMap.put(JsonKey.EMAIL, emailId);

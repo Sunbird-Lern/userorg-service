@@ -1013,6 +1013,8 @@ public final class Util {
     user.put("currentLoginTime", null);
     user.put("password", null);
     user.put("loginId", null);
+    user.put(JsonKey.EMAIL_VERIFIED, true);
+    user.put(JsonKey.PHONE_VERIFIED, true);
     return user;
   }
 

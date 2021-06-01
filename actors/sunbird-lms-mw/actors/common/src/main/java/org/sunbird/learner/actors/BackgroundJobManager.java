@@ -69,22 +69,14 @@ public class BackgroundJobManager extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void updateUserRoleToEs(Request actorMessage) {
-    List<String> roles = (List<String>) actorMessage.getRequest().get(JsonKey.ROLES);
+    List<Map<String, Object>> roles =
+        (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ROLES);
     String type = (String) actorMessage.get(JsonKey.TYPE);
     Map<String, Object> result = new HashMap<>();
     result.put(JsonKey.USER_ID, actorMessage.get(JsonKey.USER_ID));
     if (type.equals(JsonKey.USER)) {
       result.put(JsonKey.ROLES, roles);
-    } else if (type.equals(JsonKey.ORGANISATION)) {
-      Map<String, Object> searchMap = new LinkedHashMap<>(2);
-      searchMap.put(JsonKey.USER_ID, actorMessage.get(JsonKey.USER_ID));
-      Response res =
-          cassandraOperation.getRecordsByCompositeKey(
-              JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, actorMessage.getRequestContext());
-      List<Map<String, Object>> dataList = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-      result.put(JsonKey.ORGANISATIONS, dataList);
     }
-
     updateDataToElastic(
         ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),

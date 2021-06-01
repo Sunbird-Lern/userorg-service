@@ -21,7 +21,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.Util;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 
@@ -99,9 +98,7 @@ public class IdentifierFreeUpActor extends BaseActor {
       updatedUserMap.put(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
       updatedUserMap.put(JsonKey.EMAIL, null);
       updatedUserMap.put(JsonKey.MASKED_EMAIL, null);
-      updatedUserMap.put(JsonKey.EMAIL_VERIFIED, false);
-      updatedUserMap.put(
-          JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.EMAIL_VERIFIED, userDbMap));
+      updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagvalue(userDbMap));
     }
   }
 
@@ -110,19 +107,16 @@ public class IdentifierFreeUpActor extends BaseActor {
       updatedUserMap.put(JsonKey.PREV_USED_PHONE, userDbMap.get(JsonKey.PHONE));
       updatedUserMap.put(JsonKey.PHONE, null);
       updatedUserMap.put(JsonKey.MASKED_PHONE, null);
-      updatedUserMap.put(JsonKey.PHONE_VERIFIED, false);
       updatedUserMap.put(JsonKey.COUNTRY_CODE, null);
-      updatedUserMap.put(
-          JsonKey.FLAGS_VALUE, calculateFlagvalue(UserFlagEnum.PHONE_VERIFIED, userDbMap));
+      updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagvalue(userDbMap));
     }
   }
 
-  private int calculateFlagvalue(UserFlagEnum identifier, Map<String, Object> userDbMap) {
+  private int calculateFlagvalue(Map<String, Object> userDbMap) {
     int flagsValue = 0;
     if (userDbMap.get(JsonKey.FLAGS_VALUE) != null
-        && (int) userDbMap.get(JsonKey.FLAGS_VALUE) > 0) {
-      flagsValue = (int) userDbMap.get(JsonKey.FLAGS_VALUE);
-      flagsValue = flagsValue - identifier.getUserFlagValue();
+        && (int) userDbMap.get(JsonKey.FLAGS_VALUE) >= 4) {
+      flagsValue = 4;
     }
     return flagsValue;
   }
