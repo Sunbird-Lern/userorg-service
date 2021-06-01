@@ -45,8 +45,7 @@ public class UserProfileUpdateActor extends BaseActor {
 
   private void saveUserAttributes(Request request) {
     Map<String, Object> userMap = request.getRequest();
-    String operationType = (String) userMap.get(JsonKey.OPERATION_TYPE);
-    userMap.remove(JsonKey.OPERATION_TYPE);
+    String operationType = (String) userMap.remove(JsonKey.OPERATION_TYPE);
     List<Future<Object>> futures = getFutures(userMap, operationType, request.getRequestContext());
     Future<Iterable<Object>> futuresSequence = Futures.sequence(futures, getContext().dispatcher());
     Future<Response> consolidatedFutureResponse = getConsolidatedFutureResponse(futuresSequence);
@@ -98,7 +97,7 @@ public class UserProfileUpdateActor extends BaseActor {
   private List<Future<Object>> getFutures(
       Map<String, Object> userMap, String operationType, RequestContext context) {
     List<Future<Object>> futures = new ArrayList<>();
-
+    String callerId = (String) userMap.remove(JsonKey.CALLER_ID);
     if (CollectionUtils.isNotEmpty((List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS))) {
       List<Map<String, String>> externalIds =
           (List<Map<String, String>>) userMap.get(JsonKey.EXTERNAL_IDS);
@@ -122,7 +121,7 @@ public class UserProfileUpdateActor extends BaseActor {
 
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORGANISATION_ID))
         || StringUtils.isNotBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
-      futures.add(saveUserOrgDetails(userMap, operationType, context));
+      futures.add(saveUserOrgDetails(userMap, callerId, operationType, context));
     }
 
     return futures;
@@ -145,14 +144,15 @@ public class UserProfileUpdateActor extends BaseActor {
   }
 
   private Future<Object> saveUserOrgDetails(
-      Map<String, Object> userMap, String operationType, RequestContext context) {
+      Map<String, Object> userMap, String callerId, String operationType, RequestContext context) {
     String actorOperation = UserActorOperations.UPDATE_USER_ORG_DETAILS.getValue();
 
     if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
       actorOperation = UserActorOperations.INSERT_USER_ORG_DETAILS.getValue();
     }
-
-    return saveUserAttributes(userMap, actorOperation, context);
+    Map<String, Object> reqMap = new HashMap<>(userMap);
+    reqMap.put(JsonKey.CALLER_ID, callerId);
+    return saveUserAttributes(reqMap, actorOperation, context);
   }
 
   private Future<Object> saveUserAttributes(
