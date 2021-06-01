@@ -81,10 +81,11 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        logger.info(
+        logger.debug(
             "Response from get call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        getErrorResponse(response, "GET");
         return "";
       }
     } catch (Exception ex) {
@@ -98,6 +99,26 @@ public class HttpClientUtil {
           logger.error("Exception occurred while closing get response object", ex);
         }
       }
+    }
+  }
+
+  private static void getErrorResponse(CloseableHttpResponse response, String method) {
+    try {
+      HttpEntity httpEntity = response.getEntity();
+      byte[] bytes = EntityUtils.toByteArray(httpEntity);
+      StatusLine sl = response.getStatusLine();
+      String resp = new String(bytes);
+      logger.info(
+          "Response from : "
+              + method
+              + " call "
+              + resp
+              + " status "
+              + sl.getStatusCode()
+              + " - "
+              + sl.getReasonPhrase());
+    } catch (Exception ex) {
+      logger.error("Exception occurred while fetching response", ex);
     }
   }
 
@@ -119,10 +140,11 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        logger.info(
+        logger.debug(
             "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        getErrorResponse(response, "POST");
         return "";
       }
     } catch (Exception ex) {
@@ -164,10 +186,11 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        logger.info(
+        logger.debug(
             "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
         return new String(bytes);
       } else {
+        getErrorResponse(response, "POST FORM DATA");
         return "";
       }
     } catch (Exception ex) {
@@ -202,10 +225,13 @@ public class HttpClientUtil {
         HttpEntity httpEntity = response.getEntity();
         byte[] bytes = EntityUtils.toByteArray(httpEntity);
         StatusLine sl = response.getStatusLine();
-        logger.info(
+        logger.debug(
             "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        return new String(bytes);
+        String resp = new String(bytes);
+        logger.info("Got response from patch call : " + resp);
+        return resp;
       } else {
+        getErrorResponse(response, "PATCH");
         return "";
       }
     } catch (Exception ex) {

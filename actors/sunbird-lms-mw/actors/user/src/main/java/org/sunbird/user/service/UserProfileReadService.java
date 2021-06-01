@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
@@ -40,8 +41,10 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.UserRoleDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
@@ -67,6 +70,7 @@ public class UserProfileReadService {
     String id = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
+    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     String userId;
     // Check whether its normal read by id call or read by externalId call
     validateProviderAndIdType(provider, idType);
@@ -108,7 +112,7 @@ public class UserProfileReadService {
             + managedForId
             + " managedBy "
             + managedBy);
-    if (StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
+    if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
 
@@ -129,7 +133,6 @@ public class UserProfileReadService {
 
     UserUtility.decryptUserDataFrmES(result);
     // Its used for Private user read api to display encoded email and encoded phone in api response
-    boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
     if (isPrivate) {
       result.put((JsonKey.ENC_PHONE), encPhone);
       result.put((JsonKey.ENC_EMAIL), encEmail);
@@ -263,8 +266,41 @@ public class UserProfileReadService {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    List<Map<String, Object>> userRolesList =
+        userRoleDao.getUserRoles(userId, null, requestContext);
+    Map<String, List<String>> userOrgRoles = new HashMap<>();
+    for (Map userRole : userRolesList) {
+      List<Map<String, String>> scopeMap = null;
+      try {
+        scopeMap =
+            mapper.readValue(
+                (String) userRole.get(JsonKey.SCOPE),
+                new ArrayList<Map<String, String>>().getClass());
+      } catch (JsonProcessingException e) {
+        logger.error(
+            requestContext,
+            "Exception because of mapper read value" + (String) userRole.get(JsonKey.SCOPE),
+            e);
+      }
+      for (Map scope : scopeMap) {
+        String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
+        String role = (String) userRole.get(JsonKey.ROLE);
+        if (userOrgRoles.containsKey(orgId)) {
+          List<String> roles = userOrgRoles.get(orgId);
+          roles.add(role);
+          userOrgRoles.put(orgId, roles);
+        } else {
+          userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+        }
+      }
+    }
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     for (Map<String, Object> userOrg : userOrgList) {
+      String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
+      if (userOrgRoles.containsKey(organisationId)) {
+        userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
+      }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
         AssociationMechanism associationMechanism = new AssociationMechanism();

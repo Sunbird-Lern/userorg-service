@@ -85,7 +85,9 @@ public class RequestInterceptor {
     String requestedForUserID = null;
     JsonNode jsonBody = request.body().asJson();
     try {
-      if (!(jsonBody == null)) { // for search and update and create_mui api's
+      if (!(jsonBody == null)
+          && !(jsonBody.get(JsonKey.REQUEST)
+              == null)) { // for search and update and create_mui api's
         if (!(jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID) == null)) {
           requestedForUserID = jsonBody.get(JsonKey.REQUEST).get(JsonKey.USER_ID).asText();
         }

@@ -554,7 +554,7 @@ public class ProjectUtil {
 
       VelocityEngine ve = new VelocityEngine();
       ve.init(props);
-      smsTemplate.put("newline", "\n");
+      smsTemplate.put("newline", " ");
       smsTemplate.put(
           "instanceName",
           StringUtils.isBlank(smsTemplate.get("instanceName"))

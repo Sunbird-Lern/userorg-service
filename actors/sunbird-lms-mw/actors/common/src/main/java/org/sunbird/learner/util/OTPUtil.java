@@ -115,7 +115,7 @@ public final class OTPUtil {
     } else {
       countryCode = (String) otpMap.get(JsonKey.COUNTRY_CODE);
     }
-    ISmsProvider smsProvider = SMSFactory.getInstance("91SMS");
+    ISmsProvider smsProvider = SMSFactory.getInstance();
 
     logger.info(
         context,

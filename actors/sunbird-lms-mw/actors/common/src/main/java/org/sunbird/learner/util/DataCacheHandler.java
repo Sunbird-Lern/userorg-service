@@ -48,8 +48,6 @@ public class DataCacheHandler implements Runnable {
     JsonKey.COUNTRY_CODE,
     JsonKey.EMAIL,
     JsonKey.USERNAME,
-    JsonKey.PHONE_VERIFIED,
-    JsonKey.EMAIL_VERIFIED,
     JsonKey.ROLES,
     JsonKey.POSITION,
     JsonKey.LOCATION,
@@ -90,6 +88,10 @@ public class DataCacheHandler implements Runnable {
 
   // Get form data config
   private void cacheFormApiDataConfig() {
+    formApiDataConfigMap = new ConcurrentHashMap<>();
+    userTypeOrSubTypeConfigMap = new ConcurrentHashMap<>();
+    stateLocationTypeConfigMap = new ConcurrentHashMap<>();
+
     for (Map.Entry<String, Map<String, Object>> itr : formApiDataConfigMap.entrySet()) {
       String stateCode = itr.getKey();
       RequestContext reqContext = new RequestContext();
@@ -98,7 +100,7 @@ public class DataCacheHandler implements Runnable {
       Map<String, Object> formDataMap = FormApiUtilHandler.getFormApiConfig(stateCode, reqContext);
       logger.info(
           reqContext,
-          String.format("Cache update for form api statecode:%s is not found", stateCode));
+          String.format("Cache update for form api stateCode:%s is not found", stateCode));
       if (MapUtils.isNotEmpty(formDataMap)) {
         formApiDataConfigMap.put(stateCode, formDataMap);
         cacheUserTypeOrSubTypeConfig();
@@ -114,7 +116,11 @@ public class DataCacheHandler implements Runnable {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
         Map<String, List<String>> userTypeConfigMap = FormApiUtil.getUserTypeConfig(formData);
-        userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
+        if (MapUtils.isNotEmpty(userTypeConfigMap)) {
+          userTypeOrSubTypeConfigMap.put(stateCode, userTypeConfigMap);
+        } else {
+          userTypeOrSubTypeConfigMap.remove(stateCode);
+        }
       }
     }
   }
@@ -126,7 +132,11 @@ public class DataCacheHandler implements Runnable {
         String stateCode = itr.getKey();
         Map<String, Object> formData = itr.getValue();
         List<String> locationCodeLists = FormApiUtil.getLocationTypeConfigMap(formData);
-        stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
+        if (CollectionUtils.isNotEmpty(locationCodeLists)) {
+          stateLocationTypeConfigMap.put(stateCode, locationCodeLists);
+        } else {
+          stateLocationTypeConfigMap.remove(stateCode);
+        }
       }
     }
   }
