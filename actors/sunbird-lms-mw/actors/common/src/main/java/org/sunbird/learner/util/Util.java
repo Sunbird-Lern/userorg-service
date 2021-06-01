@@ -719,8 +719,8 @@ public final class Util {
         .stream()
         .forEach(
             userRole -> {
-              String dbScope = (String) userRole.get(JsonKey.SCOPE);
               try {
+                String dbScope = (String) userRole.get(JsonKey.SCOPE);
                 if (StringUtils.isNotBlank(dbScope)) {
                   List<Map<String, String>> scope = mapper.readValue(dbScope, ArrayList.class);
                   userRole.put(JsonKey.SCOPE, scope);

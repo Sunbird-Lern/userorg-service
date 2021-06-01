@@ -140,62 +140,6 @@ public class UtilTest {
     Assert.assertNotNull(response);
   }
 
-  @Test
-  public void testGetUserRoles() {
-    List<Map<String, Object>> userRoleDetails = new ArrayList<>();
-    Map<String, Object> userRoleMap = new HashMap<>();
-    userRoleMap.put("role", "CONTENT_CREATOR");
-    userRoleMap.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    userRoleMap.put("scope", "[{\"orgId\":\"4578963210\"}]");
-    userRoleDetails.add(userRoleMap);
-    Map<String, Object> userRoleMap1 = new HashMap<>();
-    userRoleMap1.put("role", "COURSE_CREATOR");
-    userRoleMap1.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    userRoleMap1.put("scope", "[{\"orgId\":\"4578963210\"}]");
-    userRoleDetails.add(userRoleMap1);
-    List<String> userIds = new ArrayList<>();
-    userIds.add("4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, userRoleDetails);
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperationImpl cassandraOperationImpl = mock(CassandraOperationImpl.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, JsonKey.USER_ROLES, userIds, JsonKey.USER_ID, null))
-        .thenReturn(response);
-    List<Map<String, Object>> userRoles =
-        Util.getUserRoles("4a3ded8a-d731-4f58-a722-e63b00925cd0", null);
-    Assert.assertNotNull(userRoles);
-  }
-
-  @Test
-  public void testGetUserRolesWithScopeNull() {
-    List<Map<String, Object>> userRoleDetails = new ArrayList<>();
-    Map<String, Object> userRoleMap = new HashMap<>();
-    userRoleMap.put("role", "CONTENT_CREATOR");
-    userRoleMap.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    userRoleMap.put("scope", "[{\"orgId\":\"4578963210\"}]");
-    userRoleDetails.add(userRoleMap);
-    Map<String, Object> userRoleMap1 = new HashMap<>();
-    userRoleMap1.put("role", "COURSE_CREATOR");
-    userRoleMap1.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    userRoleMap1.put("scope", "[{orgId]");
-    userRoleDetails.add(userRoleMap1);
-    List<String> userIds = new ArrayList<>();
-    userIds.add("4a3ded8a-d731-4f58-a722-e63b00925cd0");
-    Response response = new Response();
-    response.getResult().put(JsonKey.RESPONSE, userRoleDetails);
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperationImpl cassandraOperationImpl = mock(CassandraOperationImpl.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, JsonKey.USER_ROLES, userIds, JsonKey.USER_ID, null))
-        .thenReturn(response);
-    List<Map<String, Object>> userRoles =
-        Util.getUserRoles("4a3ded8a-d731-4f58-a722-e63b00925cd0", null);
-    Assert.assertNotNull(userRoles);
-  }
-
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.IS_TENANT, true);
