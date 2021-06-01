@@ -849,6 +849,7 @@ public class UserManagementActor extends BaseActor {
       String managedBy,
       Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
+    removeUnwanted(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
       // check phone and uniqueness using user look table
@@ -1317,6 +1318,7 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
+    Util.getUserDefaultValue().keySet().stream().forEach(key -> reqMap.remove(key));
   }
 
   public static void verifyFrameworkId(
