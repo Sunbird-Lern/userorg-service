@@ -702,7 +702,7 @@ public final class Util {
     return userDetails;
   }
 
-  private static List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
+  public static List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
     DbInfo userRoleDbInfo = dbInfoMap.get(JsonKey.USER_ROLES);
     List<String> userIds = new ArrayList<>();
     userIds.add(userId);
@@ -721,10 +721,11 @@ public final class Util {
             userRole -> {
               String dbScope = (String) userRole.get(JsonKey.SCOPE);
               try {
-                List<Map<String, String>> scope =
-                    mapper.readValue(dbScope, new ArrayList<Map<String, String>>().getClass());
-                userRole.put(JsonKey.SCOPE, scope);
-              } catch (JsonProcessingException e) {
+                if (StringUtils.isNotBlank(dbScope)) {
+                  List<Map<String, String>> scope = mapper.readValue(dbScope, ArrayList.class);
+                  userRole.put(JsonKey.SCOPE, scope);
+                }
+              } catch (Exception e) {
                 logger.error(
                     context,
                     "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
