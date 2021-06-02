@@ -22,9 +22,6 @@ public class AssociationMechanismTest {
   public void isAssociationTypeTest() {
     AssociationMechanism associationMechanism = new AssociationMechanism();
     associationMechanism.setAssociationType(1);
-    associationMechanism.setAssociationName("SSO");
-    String name = associationMechanism.getAssociationName();
-    Assert.assertEquals("SSO", name);
     Assert.assertEquals(true, associationMechanism.isAssociationType(AssociationMechanism.SSO));
   }
 
