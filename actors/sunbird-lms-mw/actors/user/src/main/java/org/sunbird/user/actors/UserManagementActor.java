@@ -623,13 +623,6 @@ public class UserManagementActor extends BaseActor {
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);
       userOrg.setOrgLeftDate(ProjectUtil.getFormattedDate());
-      AssociationMechanism associationMechanism = new AssociationMechanism();
-      if (null != userOrgDbMap.get(JsonKey.ASSOCIATION_TYPE)) {
-        associationMechanism.setAssociationType(
-            (int) ((Map<String, Object>) userOrgDbMap.get(id)).get(JsonKey.ASSOCIATION_TYPE));
-      }
-      associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
-      userOrg.setAssociationType(associationMechanism.getAssociationType());
       userOrgDao.updateUserOrg(userOrg, context);
     }
   }
