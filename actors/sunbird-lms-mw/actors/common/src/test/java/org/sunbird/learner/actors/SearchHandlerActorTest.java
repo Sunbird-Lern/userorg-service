@@ -68,6 +68,17 @@ public class SearchHandlerActorTest {
     List<Map<String, Object>> orgList = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ORGANISATION_ID, "anyOrgId");
+    orgList.add(orgMap);
+    List<Map<String, Object>> roles = new ArrayList<>();
+    Map<String, Object> role = new HashMap<>();
+    role.put(JsonKey.ROLE, "COURSE_CREATOR");
+    List<Map<String, String>> scopes = new ArrayList<>();
+    Map<String, String> scope = new HashMap<>();
+    scope.put(JsonKey.ORGANISATION_ID, "anyOrgId");
+    scopes.add(scope);
+    role.put(JsonKey.SCOPE, scopes);
+    roles.add(role);
+    innerMap.put(JsonKey.ROLES, roles);
 
     innerMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     innerMap.put(JsonKey.ORGANISATIONS, orgList);
@@ -162,6 +173,7 @@ public class SearchHandlerActorTest {
     filters.put(JsonKey.LOCATION_ID, "locationID");
     filters.put(JsonKey.LOCATION_TYPE, "type");
     filters.put(JsonKey.ROOT_ORG_ID, "ORG_001");
+    filters.put(JsonKey.ORGANISATIONS + "." + JsonKey.ROLES, "COURSE_CREATOR");
     innerMap.put(JsonKey.FILTERS, filters);
     innerMap.put(JsonKey.LIMIT, 1);
     Map<String, Object> contextMap = new HashMap<>();
