@@ -377,11 +377,8 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      if (StringUtils.isNotBlank(callerId)) {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
-      } else {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
-      }
+      userRequest.put(JsonKey.CALLER_ID, callerId);
+
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -529,20 +526,21 @@ public class UserManagementActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(orgList)) {
       String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
       String rootOrgId = (String) actorMessage.getRequest().remove(JsonKey.ROOT_ORG_ID);
-      List<Map<String, Object>> orgListDb =
+      List<Map<String, Object>> userOrgListDb =
           UserUtil.getUserOrgDetails(false, userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+      Map<String, Object> userOrgDbMap = new HashMap<>();
+      if (CollectionUtils.isNotEmpty(userOrgListDb)) {
+        userOrgListDb.forEach(
+            userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
       }
 
       for (Map<String, Object> org : orgList) {
-        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        createOrUpdateOrganisations(org, userOrgDbMap, actorMessage);
         updateUserSelfDeclaredData(actorMessage, org, userId);
       }
 
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
           actorMessage.getRequestContext(),
           "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
@@ -569,11 +567,12 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void createOrUpdateOrganisations(
-      Map<String, Object> org, Map<String, Object> orgDbMap, Request actorMessage) {
+      Map<String, Object> org, Map<String, Object> userOrgDbMap, Request actorMessage) {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     if (MapUtils.isNotEmpty(org)) {
-      UserOrg userOrg = mapper.convertValue(org, UserOrg.class); // this is wrong conversion
+      UserOrg userOrg =
+          mapper.convertValue(org, UserOrg.class); // setting userOrg fields from org details
       String orgId =
           null != org.get(JsonKey.ORGANISATION_ID)
               ? (String) org.get(JsonKey.ORGANISATION_ID)
@@ -581,23 +580,27 @@ public class UserManagementActor extends BaseActor {
 
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
-      if (null != orgId && orgDbMap.containsKey(orgId)) {
+      if (null != orgId && userOrgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setOrganisationId(
-            (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
+            (String) ((Map<String, Object>) userOrgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
         AssociationMechanism associationMechanism = new AssociationMechanism();
-        associationMechanism.setAssociationType(userOrg.getAssociationType());
+        if (null != userOrgDbMap.get(JsonKey.ASSOCIATION_TYPE)) {
+          associationMechanism.setAssociationType(
+              (int) ((Map<String, Object>) userOrgDbMap.get(orgId)).get(JsonKey.ASSOCIATION_TYPE));
+        }
         associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
         userOrg.setAssociationType(associationMechanism.getAssociationType());
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
-        orgDbMap.remove(orgId);
+        userOrgDbMap.remove(orgId);
       } else {
         userOrg.setHashTagId((String) (org.get(JsonKey.HASHTAGID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
         userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
+        userOrg.setAssociationType(AssociationMechanism.SELF_DECLARATION);
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
@@ -605,15 +608,18 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void removeOrganisations(
-      Map<String, Object> orgDbMap, String rootOrgId, String requestedBy, RequestContext context) {
-    Set<String> ids = orgDbMap.keySet();
+      Map<String, Object> userOrgDbMap,
+      String rootOrgId,
+      String requestedBy,
+      RequestContext context) {
+    Set<String> ids = userOrgDbMap.keySet();
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     ids.remove(rootOrgId);
     ObjectMapper mapper = new ObjectMapper();
     for (String id : ids) {
-      UserOrg userOrg = mapper.convertValue(orgDbMap.get(id), UserOrg.class);
+      UserOrg userOrg = mapper.convertValue(userOrgDbMap.get(id), UserOrg.class);
       userOrg.setDeleted(true);
-      userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(id)).get(JsonKey.ID));
+      userOrg.setId((String) ((Map<String, Object>) userOrgDbMap.get(id)).get(JsonKey.ID));
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);
       userOrg.setOrgLeftDate(ProjectUtil.getFormattedDate());
@@ -849,6 +855,7 @@ public class UserManagementActor extends BaseActor {
       String managedBy,
       Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
+    removeUnwanted(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
       // check phone and uniqueness using user look table
@@ -1317,6 +1324,7 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
+    Util.getUserDefaultValue().keySet().stream().forEach(key -> reqMap.remove(key));
   }
 
   public static void verifyFrameworkId(

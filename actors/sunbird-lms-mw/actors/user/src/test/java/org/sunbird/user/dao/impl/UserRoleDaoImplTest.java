@@ -4,10 +4,7 @@ import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,13 +44,33 @@ public class UserRoleDaoImplTest {
     when(cassandraOperationImpl.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
+    Response getRolesRes = new Response();
+    Map<String, Object> roleMap = new HashMap<>();
+    roleMap.put("role", "somerole");
+    roleMap.put("userId", "someuserId");
+    roleMap.put("scope", "[{\"orgnaisationId\":\"someOrgId\"}]");
+    List<Map> roleList = new ArrayList<>();
+    roleList.add(roleMap);
+    getRolesRes.put(JsonKey.RESPONSE, roleList);
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordById(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRolesRes);
   }
 
   @Test
-  public void createUserRole() {
+  public void testCreateUserRole() {
     UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
     List<Map<String, Object>> res =
         userRoleDao.createUserRole(createUserRoleRequest(), new RequestContext());
+    Assert.assertNotNull(res);
+  }
+
+  @Test
+  public void testGetUserRole() {
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    List<Map<String, Object>> res =
+        userRoleDao.getUserRoles("someUserId", "someRole", new RequestContext());
     Assert.assertNotNull(res);
   }
 

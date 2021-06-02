@@ -403,6 +403,62 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testUpdateUserSuccessv2() {
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.ORG_EXTERNAL_ID, "orgExtId");
+    req.put(JsonKey.STATE_ID, "statelocid");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.IS_DELETED, false);
+    user.put(JsonKey.ROOT_ORG_ID, "custodianRootOrgId");
+    reqMap.put(JsonKey.ASSOCIATION_TYPE, "1");
+
+    user.putAll(getMapObject());
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
+    boolean result =
+        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserSuccessv3() {
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.ORG_EXTERNAL_ID, "orgExtId");
+    req.put(JsonKey.USER_ID, "userId");
+    req.put(JsonKey.STATE_ID, "statelocid");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.IS_DELETED, false);
+    user.put(JsonKey.ROOT_ORG_ID, "custodianRootOrgId");
+    reqMap.put(JsonKey.ASSOCIATION_TYPE, "1");
+    Organisation org = new Organisation();
+    org.setId("id");
+    org.setRootOrgId("rootOrgId");
+    org.setChannel("channel");
+    org.setOrgName("orgName");
+    List<Organisation> orgList = new ArrayList<>();
+    orgList.add(org);
+    user.putAll(getMapObject());
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
+    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(orgList);
+
+    Map<String, Object> userOrg = new HashMap<>();
+    userOrg.put(JsonKey.USER_ID, "userId");
+    userOrg.put(JsonKey.USER_ID, "id");
+    List<Map<String, Object>> userOrgListDb = new ArrayList<>();
+    userOrgListDb.add(userOrg);
+    when(UserUtil.getUserOrgDetails(Mockito.anyBoolean(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(userOrgListDb);
+
+    boolean result =
+        testScenario(getRequest(true, true, true, req, ActorOperations.UPDATE_USER), null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testUpdateUserSuccessNewVersion() {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
