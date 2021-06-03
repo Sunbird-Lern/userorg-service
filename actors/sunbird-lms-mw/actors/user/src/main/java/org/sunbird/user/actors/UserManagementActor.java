@@ -246,7 +246,6 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-    validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
@@ -262,6 +261,7 @@ public class UserManagementActor extends BaseActor {
         userMap.remove(JsonKey.PROFILE_USERTYPE);
       }
     }
+    validateLocationCodes(actorMessage);
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
