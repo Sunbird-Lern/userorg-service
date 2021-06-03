@@ -328,7 +328,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   }
 
   protected void performBatchUpdate(List<BulkUploadProcessTask> records, RequestContext context) {
-    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
+    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = BulkUploadProcessTaskDaoImpl.getInstance();
     try {
       bulkUploadProcessTaskDao.updateBatchRecord(records, context);
     } catch (Exception ex) {

@@ -33,9 +33,9 @@ import org.sunbird.validator.user.UserRequestValidator;
 )
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
-  private UserClient userClient = new UserClientImpl();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
-  private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
+  private UserClient userClient = UserClientImpl.getInstance();
+  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   @Override

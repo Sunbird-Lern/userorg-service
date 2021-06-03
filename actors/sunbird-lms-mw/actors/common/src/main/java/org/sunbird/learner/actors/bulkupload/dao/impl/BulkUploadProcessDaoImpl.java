@@ -25,6 +25,13 @@ public class BulkUploadProcessDaoImpl implements BulkUploadProcessDao {
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String TABLE_NAME = "bulk_upload_process";
 
+  public static BulkUploadProcessDao bulkUploadProcessDao = null;
+
+  public static synchronized BulkUploadProcessDao getInstance() {
+    if (bulkUploadProcessDao == null) bulkUploadProcessDao = new BulkUploadProcessDaoImpl();
+    return bulkUploadProcessDao;
+  }
+
   @Override
   public Response create(BulkUploadProcess bulkUploadProcess, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(bulkUploadProcess, Map.class);
