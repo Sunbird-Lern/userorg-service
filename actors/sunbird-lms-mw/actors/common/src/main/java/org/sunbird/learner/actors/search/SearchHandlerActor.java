@@ -114,6 +114,7 @@ public class SearchHandlerActor extends BaseActor {
     }
     UserUtility.encryptUserSearchFilterQueryData(searchQueryMap);
     extractOrFilter(searchQueryMap);
+    modifySearchQueryReqForNewRoleStructure(searchQueryMap);
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
     Future<Map<String, Object>> resultF =
@@ -147,11 +148,12 @@ public class SearchHandlerActor extends BaseActor {
       getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
+        updateUserSearchResponseWithOrgLevelRole(userMap);
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
-        Map<String, Object> userTypeDetail = new HashMap<>();
-        List<String> locationIds = new ArrayList<>();
-        List<Map<String, String>> userLocList = new ArrayList<>();
+        Map<String, Object> userTypeDetail;
+        List<String> locationIds;
+        List<Map<String, String>> userLocList;
         if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
           if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
             if (MapUtils.isNotEmpty((Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE))) {
@@ -188,6 +190,45 @@ public class SearchHandlerActor extends BaseActor {
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
+  }
+
+  private void updateUserSearchResponseWithOrgLevelRole(Map<String, Object> userMap) {
+    List<Map<String, Object>> roles = (List<Map<String, Object>>) userMap.remove(JsonKey.ROLES);
+    List<Map<String, Object>> organisations =
+        (List<Map<String, Object>>) userMap.get(JsonKey.ORGANISATIONS);
+    Map<String, Map<String, Object>> userOrgIdMap = new HashMap<>();
+    organisations
+        .stream()
+        .forEach(
+            org -> {
+              org.put(JsonKey.ROLES, new ArrayList<String>());
+              userOrgIdMap.put((String) org.get(JsonKey.ORGANISATION_ID), org);
+            });
+    roles
+        .stream()
+        .forEach(
+            role -> {
+              String userRole = (String) role.get(JsonKey.ROLE);
+              List<Map<String, String>> scopes =
+                  (List<Map<String, String>>) role.get(JsonKey.SCOPE);
+              scopes
+                  .stream()
+                  .forEach(
+                      scope -> {
+                        String orgId = scope.get(JsonKey.ORGANISATION_ID);
+                        Map<String, Object> userOrg = userOrgIdMap.get(orgId);
+                        ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                      });
+            });
+    userMap.put(JsonKey.ROLES, new ArrayList<>());
+  }
+
+  private void modifySearchQueryReqForNewRoleStructure(Map<String, Object> searchQueryMap) {
+    Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
+    Object roles = filterMap.remove(JsonKey.ORGANISATIONS + "." + JsonKey.ROLES);
+    if (null != roles) {
+      filterMap.put(JsonKey.ROLES + "." + JsonKey.ROLE, roles);
+    }
   }
 
   private void handleOrgSearchAsyncRequest(
