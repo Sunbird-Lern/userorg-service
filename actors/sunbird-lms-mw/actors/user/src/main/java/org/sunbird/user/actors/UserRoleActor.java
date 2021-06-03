@@ -66,6 +66,7 @@ public class UserRoleActor extends UserBaseActor {
     Response response = new Response();
     Map<String, Object> requestMap = actorMessage.getRequest();
     requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
+    requestMap.put(JsonKey.ROLE_OPERATION, "assignRole");
     List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     RoleService.validateRoles(roles);
 
