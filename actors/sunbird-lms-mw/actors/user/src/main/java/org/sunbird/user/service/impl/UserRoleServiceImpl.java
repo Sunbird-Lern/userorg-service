@@ -38,11 +38,12 @@ public class UserRoleServiceImpl implements UserRoleService {
     String scopeListString = createRoleScope(scopeList, userRequest);
     userRequest.put(JsonKey.SCOPE_STR, scopeListString);
     String roleOperation = (String) userRequest.get(JsonKey.ROLE_OPERATION);
-    if (StringUtils.isNotEmpty(roleOperation) && !JsonKey.ROLE_OPERATION.equals(roleOperation)) {
+    if (StringUtils.isNotEmpty(roleOperation) && !JsonKey.CREATE.equals(roleOperation)) {
       List<Map<String, String>> dbUserRoleListToDelete = new ArrayList<>();
       List<Map<String, Object>> dbUserRoleListToUpdate = new ArrayList<>();
-      createUserRoleInsertUpdateDeleteList(
-          userRequest, dbUserRoleListToUpdate, dbUserRoleListToDelete, userRolesToInsert, context);
+      userRolesToInsert =
+          createUserRoleInsertUpdateDeleteList(
+              userRequest, dbUserRoleListToUpdate, dbUserRoleListToDelete, context);
       // Update existing role scope, if same role is in request
       if (CollectionUtils.isNotEmpty(dbUserRoleListToUpdate)) {
         userRoleDao.updateRoleScope(dbUserRoleListToUpdate, context);
@@ -52,8 +53,9 @@ public class UserRoleServiceImpl implements UserRoleService {
       if (CollectionUtils.isNotEmpty(dbUserRoleListToDelete)) {
         userRoleDao.deleteUserRole(dbUserRoleListToDelete, context);
       }
+    } else {
+      userRolesToInsert = (List<String>) userRequest.get(JsonKey.ROLES);
     }
-
     if (CollectionUtils.isNotEmpty(userRolesToInsert)) {
       List<Map<String, Object>> userRoleListToInsert =
           createUserRoleInsertList(userRolesToInsert, userRequest);
@@ -92,14 +94,14 @@ public class UserRoleServiceImpl implements UserRoleService {
     return scopeListString;
   }
 
-  private void createUserRoleInsertUpdateDeleteList(
+  private List<String> createUserRoleInsertUpdateDeleteList(
       Map userRequest,
       List<Map<String, Object>> dbUserRoleListToUpdate,
       List<Map<String, String>> dbUserRoleListToDelete,
-      List<String> userRolesToInsert,
       RequestContext context) {
     String userId = (String) userRequest.get(JsonKey.USER_ID);
     List<String> roles = (List<String>) userRequest.get(JsonKey.ROLES);
+    List<String> userRolesToInsert = new ArrayList<>();
     // Fetch roles in DB for the user
     List<Map<String, Object>> dbUserRoleList = userRoleDao.getUserRoles(userId, "", context);
     if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
@@ -131,6 +133,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       // If no records in db, insert the roles in request
       userRolesToInsert = roles;
     }
+    return userRolesToInsert;
   }
 
   private List<Map<String, Object>> createUserRoleInsertList(
