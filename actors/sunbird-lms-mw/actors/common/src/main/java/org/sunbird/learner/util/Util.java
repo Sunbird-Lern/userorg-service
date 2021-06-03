@@ -557,9 +557,6 @@ public final class Util {
     Map<String, Object> reqMap = new WeakHashMap<>();
     reqMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
     reqMap.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-    if (null != userMap.get(JsonKey.ROLES)) {
-      reqMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
-    }
     reqMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ORGANISATION_ID));
     reqMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     reqMap.put(JsonKey.IS_DELETED, false);

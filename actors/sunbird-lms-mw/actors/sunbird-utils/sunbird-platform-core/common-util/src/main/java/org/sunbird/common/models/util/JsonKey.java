@@ -633,6 +633,7 @@ public final class JsonKey {
   public static final String STATE_ID = "stateId";
   public static final String BLOCK_USER = "BlockUser";
   public static final String UNBLOCK_USER = "UnblockUser";
+  public static final String ROLE_OPERATION = "roleOperation";
 
   private JsonKey() {}
 }

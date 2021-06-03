@@ -71,8 +71,10 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
+import org.sunbird.user.service.UserRoleService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.user.service.impl.UserRoleServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
@@ -113,6 +115,7 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -1057,7 +1060,6 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
-    userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
   }
@@ -1103,6 +1105,13 @@ public class UserManagementActor extends BaseActor {
       if (!isPasswordUpdated) {
         response.put(JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
       }
+    }
+    // update roles to user_roles
+    if (null != requestMap.get(JsonKey.ROLES)) {
+      requestMap.put(JsonKey.ROLE_OPERATION, JsonKey.CREATE);
+      List<Map<String, Object>> formattedRoles =
+          userRoleService.updateUserRole(requestMap, request.getRequestContext());
+      requestMap.put(JsonKey.ROLES, formattedRoles);
     }
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {

@@ -61,6 +61,7 @@ import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.user.service.impl.UserRoleServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
@@ -89,7 +90,8 @@ import scala.concurrent.Promise;
   SunbirdMWService.class,
   ActorSelection.class,
   OrgExternalService.class,
-  LocationServiceImpl.class
+  LocationServiceImpl.class,
+  UserRoleServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -115,6 +117,7 @@ public abstract class UserManagementActorTestBase {
   private LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static LocationService locationService;
+  public static UserRoleServiceImpl userRoleService;
 
   @Before
   public void beforeEachTest() {
@@ -263,6 +266,22 @@ public abstract class UserManagementActorTestBase {
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
+
+    List<Map<String, Object>> userRoleListResponse = new ArrayList<>();
+    List<Map<String, Object>> scopeList = new ArrayList<>();
+    Map<String, Object> scopeMap = new HashMap();
+    scopeMap.put(JsonKey.ORGANISATION_ID, "someOrg");
+    scopeList.add(scopeMap);
+    Map<String, Object> userRoleMap = new HashMap();
+    userRoleMap.put(JsonKey.ROLE, "role");
+    userRoleMap.put(JsonKey.SCOPE, scopeList);
+    userRoleListResponse.add(userRoleMap);
+
+    PowerMockito.mockStatic(UserRoleServiceImpl.class);
+    userRoleService = mock(UserRoleServiceImpl.class);
+    when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
+    when(userRoleService.updateUserRole(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userRoleListResponse);
   }
 
   public List<Map<String, String>> getLocationIdTypeList() {
