@@ -19,6 +19,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.user.dao.UserRoleDao;
 
@@ -61,9 +62,8 @@ public class UserRoleDaoImplTest {
   @Test
   public void testCreateUserRole() {
     UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
-    List<Map<String, Object>> res =
-        userRoleDao.createUserRole(createUserRoleRequest(), new RequestContext());
-    Assert.assertNotNull(res);
+    Response response = userRoleDao.assignUserRole(createUserRoleRequest(), new RequestContext());
+    Assert.assertNotNull(null != response && response.getResponseCode() == ResponseCode.OK);
   }
 
   @Test
@@ -74,11 +74,13 @@ public class UserRoleDaoImplTest {
     Assert.assertNotNull(res);
   }
 
-  Map createUserRoleRequest() {
+  List<Map<String, Object>> createUserRoleRequest() {
+    List<Map<String, Object>> res = new ArrayList<>();
     Map<String, Object> userRoleReq = new HashMap<>();
     userRoleReq.put(JsonKey.USER_ID, "ramdomUserId");
     userRoleReq.put(JsonKey.ORGANISATION_ID, "randomOrgID");
-    userRoleReq.put(JsonKey.ROLES, Arrays.asList("Admin", "Editor"));
-    return userRoleReq;
+    userRoleReq.put(JsonKey.ROLES, "Admin");
+    res.add(userRoleReq);
+    return res;
   }
 }
