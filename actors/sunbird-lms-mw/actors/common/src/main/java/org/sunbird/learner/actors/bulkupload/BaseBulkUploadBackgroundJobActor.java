@@ -10,6 +10,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.BulkUploadJsonKey;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -58,7 +59,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
 
   public void handleBulkUploadBackground(Request request, Function function) {
     String processId = (String) request.get(JsonKey.PROCESS_ID);
-    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
+    BulkUploadProcessDao bulkUploadDao = BulkUploadProcessDaoImpl.getInstance();
     String logMessagePrefix =
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:handleBulkUploadBackground:{0}: ", processId);
@@ -89,12 +90,13 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
     }
 
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
-    bulkUploadDao.update(bulkUploadProcess, request.getRequestContext());
+    Response response = bulkUploadDao.update(bulkUploadProcess, request.getRequestContext());
+    sender().tell(response, self());
   }
 
   public void processBulkUpload(
       BulkUploadProcess bulkUploadProcess, Function function, RequestContext context) {
-    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
+    BulkUploadProcessTaskDao bulkUploadProcessTaskDao = BulkUploadProcessTaskDaoImpl.getInstance();
     String logMessagePrefix =
         MessageFormat.format(
             "BaseBulkUploadBackGroundJobActor:processBulkUpload:{0}: ", bulkUploadProcess.getId());
@@ -166,7 +168,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
     bulkUploadProcess.setFailureResult(ProjectUtil.convertMapToJsonString(failureList));
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.COMPLETED.getValue());
     logger.info(context, logMessagePrefix + "completed");
-    BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
+    BulkUploadProcessDao bulkUploadDao = BulkUploadProcessDaoImpl.getInstance();
     bulkUploadDao.update(bulkUploadProcess, context);
   }
 

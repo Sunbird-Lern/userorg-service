@@ -33,9 +33,9 @@ import org.sunbird.validator.user.UserRequestValidator;
 )
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
-  private UserClient userClient = new UserClientImpl();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
-  private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
+  private UserClient userClient = UserClientImpl.getInstance();
+  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
 
   @Override
@@ -118,11 +118,13 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
                   x -> {
                     roleList.add(x.trim());
                   });
-          if (!roleList.contains(ProjectUtil.UserRole.PUBLIC.getValue())) {
-            roleList.add(ProjectUtil.UserRole.PUBLIC.getValue());
+          if (roleList.contains(ProjectUtil.UserRole.PUBLIC.getValue())) {
+            roleList.remove(ProjectUtil.UserRole.PUBLIC.getValue());
           }
-          userMap.put(JsonKey.ROLES, roleList);
-          RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
+          if (CollectionUtils.isNotEmpty(roleList)) {
+            userMap.put(JsonKey.ROLES, roleList);
+            RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
+          }
         }
         userRequestValidator.validateUserType(userMap, null, context);
       } catch (Exception ex) {
@@ -207,6 +209,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       } else {
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
         callUpdateUser(userMap, task, orgName, context);
+        if (userMap.containsKey(JsonKey.ROLES)) {
+          callAssignRole(userMap, task, context);
+        }
       }
     } catch (Exception e) {
       logger.error(context, "Error in process user" + data, e);
@@ -271,6 +276,37 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       ObjectMapper mapper = new ObjectMapper();
       task.setData(mapper.writeValueAsString(user));
       setSuccessTaskStatus(task, ProjectUtil.BulkProcessStatus.COMPLETED, user, JsonKey.UPDATE);
+    }
+  }
+
+  private void callAssignRole(
+      Map<String, Object> user, BulkUploadProcessTask task, RequestContext context)
+      throws JsonProcessingException {
+    logger.info(context, "UserBulkUploadBackgroundJobActor: callAssignRole called");
+    try {
+      userClient.updateUser(getActorRef(ActorOperations.ASSIGN_ROLES.getValue()), user, context);
+    } catch (Exception ex) {
+      logger.error(
+          context,
+          "UserBulkUploadBackgroundJobActor:callAssignRole: Exception occurred with error message = "
+              + ex.getMessage(),
+          ex);
+      user.put(JsonKey.ERROR_MSG, ex.getMessage());
+      setTaskStatus(
+          task,
+          ProjectUtil.BulkProcessStatus.FAILED,
+          ex.getMessage(),
+          user,
+          ActorOperations.ASSIGN_ROLES.getValue());
+    }
+    if (task.getStatus() != ProjectUtil.BulkProcessStatus.FAILED.getValue()) {
+      ObjectMapper mapper = new ObjectMapper();
+      task.setData(mapper.writeValueAsString(user));
+      setSuccessTaskStatus(
+          task,
+          ProjectUtil.BulkProcessStatus.COMPLETED,
+          user,
+          ActorOperations.ASSIGN_ROLES.getValue());
     }
   }
 
