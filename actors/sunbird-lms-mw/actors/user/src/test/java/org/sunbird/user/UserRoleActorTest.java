@@ -132,7 +132,7 @@ public class UserRoleActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     cassandraOperation.deleteRecord(
         Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());

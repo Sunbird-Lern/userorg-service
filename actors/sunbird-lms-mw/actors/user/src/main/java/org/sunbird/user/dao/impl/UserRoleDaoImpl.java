@@ -42,7 +42,13 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   public Response updateRoleScope(List<Map<String, Object>> userRoleMap, RequestContext context) {
     Response result = null;
     for (Map<String, Object> dataMap : userRoleMap) {
-      result = cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, dataMap, context);
+
+      Map<String, Object> compositeKey = new LinkedHashMap<>(2);
+      compositeKey.put(JsonKey.USER_ID, dataMap.remove(JsonKey.USER_ID));
+      compositeKey.put(JsonKey.ROLE, dataMap.remove(JsonKey.ROLE));
+      result =
+          cassandraOperation.updateRecord(
+              Util.KEY_SPACE_NAME, TABLE_NAME, dataMap, compositeKey, context);
     }
     return result;
   }

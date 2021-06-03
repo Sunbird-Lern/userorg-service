@@ -66,7 +66,6 @@ public class UserRoleServiceImpl implements UserRoleService {
               e.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
               e.put(JsonKey.SCOPE, finalScopeListString);
               dbUserRoleListToUpdate.add(e);
-              e.put(JsonKey.SCOPE, scopeList);
               userRoleListResponse.add(e);
             } else {
               Map userRoleDelete = new HashMap();
@@ -112,12 +111,17 @@ public class UserRoleServiceImpl implements UserRoleService {
       userRole.setCreatedDate(ProjectUtil.getFormattedDate());
       Map userRoleMap = mapper.convertValue(userRole, Map.class);
       userRoleListToInsert.add(userRoleMap);
-      userRoleMap.put(JsonKey.SCOPE, scopeList);
       userRoleListResponse.add(userRoleMap);
     }
     // Insert roles to DB
     if (CollectionUtils.isNotEmpty(userRoleListToInsert)) {
       userRoleDao.assignUserRole(userRoleListToInsert, context);
+    }
+    if (CollectionUtils.isNotEmpty(userRoleListResponse)) {
+      userRoleListResponse.forEach(
+          map -> {
+            map.put(JsonKey.SCOPE, scopeList);
+          });
     }
     // Return updated role list to save to ES
     return userRoleListResponse;
