@@ -148,7 +148,7 @@ public class SearchHandlerActor extends BaseActor {
       getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
-        updateUserSearchResponseWithOrgLevelRole(userMap);
+        updateUserSearchResponseWithOrgLevelRole(userMap, request.getRequestContext());
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
         Map<String, Object> userTypeDetail;
@@ -192,34 +192,45 @@ public class SearchHandlerActor extends BaseActor {
     generateSearchTelemetryEvent(searchDto, filterObjectType, result, request.getContext());
   }
 
-  private void updateUserSearchResponseWithOrgLevelRole(Map<String, Object> userMap) {
-    List<Map<String, Object>> roles = (List<Map<String, Object>>) userMap.remove(JsonKey.ROLES);
-    List<Map<String, Object>> organisations =
-        (List<Map<String, Object>>) userMap.get(JsonKey.ORGANISATIONS);
-    Map<String, Map<String, Object>> userOrgIdMap = new HashMap<>();
-    organisations
-        .stream()
-        .forEach(
-            org -> {
-              org.put(JsonKey.ROLES, new ArrayList<String>());
-              userOrgIdMap.put((String) org.get(JsonKey.ORGANISATION_ID), org);
-            });
-    roles
-        .stream()
-        .forEach(
-            role -> {
-              String userRole = (String) role.get(JsonKey.ROLE);
-              List<Map<String, String>> scopes =
-                  (List<Map<String, String>>) role.get(JsonKey.SCOPE);
-              scopes
-                  .stream()
-                  .forEach(
-                      scope -> {
-                        String orgId = scope.get(JsonKey.ORGANISATION_ID);
-                        Map<String, Object> userOrg = userOrgIdMap.get(orgId);
-                        ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
-                      });
-            });
+  private void updateUserSearchResponseWithOrgLevelRole(
+      Map<String, Object> userMap, RequestContext context) {
+    try {
+      List<Map<String, Object>> roles = (List<Map<String, Object>>) userMap.remove(JsonKey.ROLES);
+      List<Map<String, Object>> organisations =
+          (List<Map<String, Object>>) userMap.get(JsonKey.ORGANISATIONS);
+      Map<String, Map<String, Object>> userOrgIdMap = new HashMap<>();
+      organisations
+          .stream()
+          .forEach(
+              org -> {
+                org.put(JsonKey.ROLES, new ArrayList<String>());
+                userOrgIdMap.put((String) org.get(JsonKey.ORGANISATION_ID), org);
+              });
+      if (CollectionUtils.isNotEmpty(roles)) {
+        roles
+            .stream()
+            .forEach(
+                role -> {
+                  String userRole = (String) role.get(JsonKey.ROLE);
+                  List<Map<String, String>> scopes =
+                      (List<Map<String, String>>) role.get(JsonKey.SCOPE);
+                  scopes
+                      .stream()
+                      .forEach(
+                          scope -> {
+                            String orgId = scope.get(JsonKey.ORGANISATION_ID);
+                            Map<String, Object> userOrg = userOrgIdMap.get(orgId);
+                            ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                          });
+                });
+      }
+    } catch (Exception ex) {
+      logger.error(
+          context,
+          "SearchHandlerActor:updateUserSearchResponseWithOrgLevelRole: Exception occurred with error message = "
+              + ex.getMessage(),
+          ex);
+    }
     userMap.put(JsonKey.ROLES, new ArrayList<>());
   }
 
