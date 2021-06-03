@@ -62,7 +62,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       dbUserRoleList.forEach(
           e -> {
             if (roles.stream().filter(d -> d.equals(e.get(JsonKey.ROLE))).count() >= 1) {
-              e.put(JsonKey.UPDATED_BY, userId);
+              e.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
               e.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
               e.put(JsonKey.SCOPE, finalScopeListString);
               dbUserRoleListToUpdate.add(e);
@@ -108,7 +108,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       userRole.setRole(role);
       userRole.setUserId(userId);
       userRole.setScope(scopeListString);
-      userRole.setCreatedBy(userId);
+      userRole.setCreatedBy((String) userRequest.get(JsonKey.REQUESTED_BY));
       userRole.setCreatedDate(ProjectUtil.getFormattedDate());
       Map userRoleMap = mapper.convertValue(userRole, Map.class);
       userRoleListToInsert.add(userRoleMap);
