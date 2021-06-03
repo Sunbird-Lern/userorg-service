@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
@@ -38,7 +39,9 @@ public class UserRoleServiceImpl implements UserRoleService {
     String organisationId = (String) userRequest.get(JsonKey.ORGANISATION_ID);
     List<Map> scopeList = new LinkedList();
     Map<String, String> scopeMap = new HashMap<>();
-    scopeMap.put(JsonKey.ORGANISATION_ID, organisationId);
+    if (StringUtils.isNotBlank(organisationId)) {
+      scopeMap.put(JsonKey.ORGANISATION_ID, organisationId);
+    }
     scopeList.add(scopeMap);
     String scopeListString = null;
     try {
@@ -74,11 +77,6 @@ public class UserRoleServiceImpl implements UserRoleService {
               dbUserRoleListToDelete.add(userRoleDelete);
             }
           });
-      /* List<Map<String, Object>> dbUserRoleListToUpdate = dbUserRoleList
-      .stream()
-      .filter(
-              e -> (roles.stream().filter(d -> d.equals(e.get(JsonKey.ROLE))).count()) >= 1)
-      .collect(Collectors.toList());*/
       // Fetch roles not in DB from request roles list
       userRolesToInsert =
           roles
@@ -100,22 +98,23 @@ public class UserRoleServiceImpl implements UserRoleService {
       // If no records in db, insert the roles in request
       userRolesToInsert = roles;
     }
-
-    List<Map<String, Object>> userRoleListToInsert = new ArrayList<>();
-    for (String role : userRolesToInsert) {
-      UserRole userRole = new UserRole();
-      userRole.setRole(role);
-      userRole.setUserId(userId);
-      userRole.setScope(scopeListString);
-      userRole.setCreatedBy((String) userRequest.get(JsonKey.REQUESTED_BY));
-      userRole.setCreatedDate(ProjectUtil.getFormattedDate());
-      Map userRoleMap = mapper.convertValue(userRole, Map.class);
-      userRoleListToInsert.add(userRoleMap);
-      userRoleListResponse.add(userRoleMap);
-    }
-    // Insert roles to DB
-    if (CollectionUtils.isNotEmpty(userRoleListToInsert)) {
-      userRoleDao.assignUserRole(userRoleListToInsert, context);
+    if (CollectionUtils.isNotEmpty(userRolesToInsert)) {
+      List<Map<String, Object>> userRoleListToInsert = new ArrayList<>();
+      for (String role : userRolesToInsert) {
+        UserRole userRole = new UserRole();
+        userRole.setRole(role);
+        userRole.setUserId(userId);
+        userRole.setScope(scopeListString);
+        userRole.setCreatedBy((String) userRequest.get(JsonKey.REQUESTED_BY));
+        userRole.setCreatedDate(ProjectUtil.getFormattedDate());
+        Map userRoleMap = mapper.convertValue(userRole, Map.class);
+        userRoleListToInsert.add(userRoleMap);
+        userRoleListResponse.add(userRoleMap);
+      }
+      // Insert roles to DB
+      if (CollectionUtils.isNotEmpty(userRoleListToInsert)) {
+        userRoleDao.assignUserRole(userRoleListToInsert, context);
+      }
     }
     if (CollectionUtils.isNotEmpty(userRoleListResponse)) {
       userRoleListResponse.forEach(

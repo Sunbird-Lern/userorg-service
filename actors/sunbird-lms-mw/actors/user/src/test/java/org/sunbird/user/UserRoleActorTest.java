@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -166,6 +167,7 @@ public class UserRoleActorTest {
     assertTrue(testScenario(true, null));
   }
 
+  @Ignore
   @Test
   public void testAssignRolesSuccessWithoutOrgId() {
     PowerMockito.mockStatic(OrgServiceImpl.class);
@@ -280,11 +282,6 @@ public class UserRoleActorTest {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
-    orgMap.put(JsonKey.USER_ID, "USER_ID");
-    orgMap.put(JsonKey.ROLE, "anyRole");
-    list.add(orgMap);
-    orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole1");
