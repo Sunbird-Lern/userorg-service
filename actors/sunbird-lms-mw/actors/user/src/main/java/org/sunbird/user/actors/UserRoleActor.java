@@ -17,8 +17,8 @@ import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
-import org.sunbird.user.dao.UserRoleDao;
-import org.sunbird.user.dao.impl.UserRoleDaoImpl;
+import org.sunbird.user.service.UserRoleService;
+import org.sunbird.user.service.impl.UserRoleServiceImpl;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles"},
@@ -65,12 +65,13 @@ public class UserRoleActor extends UserBaseActor {
     logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRoles called");
     Response response = new Response();
     Map<String, Object> requestMap = actorMessage.getRequest();
+    requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
     List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     RoleService.validateRoles(roles);
 
-    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     List<Map<String, Object>> userRolesList =
-        userRoleDao.createUserRole(requestMap, actorMessage.getRequestContext());
+        userRoleService.updateUserRole(requestMap, actorMessage.getRequestContext());
     if (!userRolesList.isEmpty()) {
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     }
