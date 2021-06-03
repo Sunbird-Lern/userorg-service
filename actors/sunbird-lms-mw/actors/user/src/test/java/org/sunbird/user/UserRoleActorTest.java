@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -167,22 +166,6 @@ public class UserRoleActorTest {
     assertTrue(testScenario(true, null));
   }
 
-  @Ignore
-  @Test
-  public void testAssignRolesSuccessWithoutOrgId() {
-    PowerMockito.mockStatic(OrgServiceImpl.class);
-    OrgService orgService = PowerMockito.mock(OrgService.class);
-    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
-    Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
-    orgMap.put(JsonKey.HASHTAGID, "1234567890");
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.getOrgByExternalIdAndProvider(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(orgMap);
-    assertTrue(testScenario(false, null));
-  }
-
   private boolean testScenario(boolean isOrgIdReq, ResponseCode errorResponse) {
     return testScenario(false, isOrgIdReq, errorResponse);
   }
@@ -264,6 +247,7 @@ public class UserRoleActorTest {
     reqObj.put(JsonKey.USER_ID, "USER_ID");
     reqObj.put(JsonKey.HASHTAGID, "HASHTAGID");
     reqObj.put(JsonKey.PROVIDER, "PROVIDER");
+    reqObj.put(JsonKey.ROLE_OPERATION, "assignRole");
     if (isOrgIdReq) {
       reqObj.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
     }
