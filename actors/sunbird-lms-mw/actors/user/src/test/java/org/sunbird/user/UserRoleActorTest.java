@@ -125,6 +125,17 @@ public class UserRoleActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordByPropertyResponse());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
+    when(cassandraOperation.batchInsert(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(getSuccessResponse());
+    when(cassandraOperation.updateRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(getSuccessResponse());
+    cassandraOperation.deleteRecord(
+        Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
@@ -245,6 +256,7 @@ public class UserRoleActorTest {
     Request reqObj = new Request();
     List roleLst = new ArrayList();
     roleLst.add("anyRole");
+    roleLst.add("anyRole1");
     reqObj.put(JsonKey.ROLES, roleLst);
     reqObj.put(JsonKey.EXTERNAL_ID, "EXTERNAL_ID");
     reqObj.put(JsonKey.USER_ID, "USER_ID");
@@ -262,6 +274,28 @@ public class UserRoleActorTest {
     promise.success(createResponseGet(isResponseRequired));
     when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any()))
         .thenReturn(promise.future());
+  }
+
+  private static Response getCassandraUserRoleResponse() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.USER_ID, "USER_ID");
+    orgMap.put(JsonKey.ROLE, "anyRole");
+    list.add(orgMap);
+    orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.USER_ID, "USER_ID");
+    orgMap.put(JsonKey.ROLE, "anyRole1");
+    list.add(orgMap);
+    orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.USER_ID, "USER_ID");
+    orgMap.put(JsonKey.ROLE, "anyRole2");
+    list.add(orgMap);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
   }
 
   private static Response getCassandraResponse() {
