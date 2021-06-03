@@ -53,10 +53,7 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRoleDao.deleteUserRole(dbUserRoleListToDelete, context);
       }
     }
-    if (CollectionUtils.isEmpty(userRolesToInsert)) {
-      // If no records in db, insert the roles in request
-      userRolesToInsert = (List<String>) userRequest.get(JsonKey.ROLES);
-    }
+
     if (CollectionUtils.isNotEmpty(userRolesToInsert)) {
       List<Map<String, Object>> userRoleListToInsert =
           createUserRoleInsertList(userRolesToInsert, userRequest);
@@ -130,6 +127,9 @@ public class UserRoleServiceImpl implements UserRoleService {
                       (dbUserRoleList.stream().filter(d -> d.get(JsonKey.ROLE).equals(e)).count())
                           < 1)
               .collect(Collectors.toList());
+    } else {
+      // If no records in db, insert the roles in request
+      userRolesToInsert = roles;
     }
   }
 
