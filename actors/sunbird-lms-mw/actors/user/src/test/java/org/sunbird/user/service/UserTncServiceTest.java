@@ -137,12 +137,12 @@ public class UserTncServiceTest {
   }
 
   @Test
-  public void validateOrgAdminTncTest() {
+  public void acceptOrgAdminTncTest() {
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleResponse());
+        .thenReturn(getCassandraUserRoleAdminResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
@@ -153,12 +153,12 @@ public class UserTncServiceTest {
   }
 
   @Test
-  public void acceptOrgAdminTncTest() {
+  public void validateOrgAdminTncTest() {
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleAdminResponse());
+        .thenReturn(getCassandraUserRoleResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
