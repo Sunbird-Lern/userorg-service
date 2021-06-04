@@ -1,6 +1,7 @@
 package org.sunbird.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -8,11 +9,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
@@ -30,6 +30,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.user.dao.UserRoleDao;
+import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 
 public class UserTncService {
   private static LoggerUtil logger = new LoggerUtil(UserTncService.class);
@@ -132,21 +134,37 @@ public class UserTncService {
   }
 
   private boolean roleCheck(Map<String, Object> user, String role, RequestContext context) {
-    Map<String, Object> searchMap = new LinkedHashMap<>(2);
-    searchMap.put(JsonKey.USER_ID, user.get(JsonKey.ID));
-    searchMap.put(JsonKey.ORGANISATION_ID, user.get(JsonKey.ROOT_ORG_ID));
-    Response res =
-        cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
-    List<Map<String, Object>> orgDetails = (List<Map<String, Object>>) res.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(orgDetails)) {
-      Map<String, Object> org = orgDetails.get(0);
-      if (MapUtils.isNotEmpty(org)) {
-        List<String> roles = (List<String>) org.get(JsonKey.ROLES);
-        return roles.contains(role);
-      }
+    AtomicBoolean isRoleExists = new AtomicBoolean(false);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    List<Map<String, Object>> dbUserRoleList =
+        userRoleDao.getUserRoles((String) user.get(JsonKey.ID), role, context);
+    if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
+      ObjectMapper mapper = new ObjectMapper();
+      TypeReference<List<Map<String, Object>>> scopeType =
+          new TypeReference<List<Map<String, Object>>>() {};
+      dbUserRoleList.forEach(
+          e -> {
+            if (role.equals(e.get(JsonKey.ROLE))) {
+              String scope = (String) e.get(JsonKey.SCOPE);
+              /*if(StringUtils.isNotBlank(scope) && scope.contains((String) user.get(JsonKey.ROOT_ORG_ID))){
+                isRoleExists.set(true);
+              }*/
+              if (StringUtils.isNotBlank(scope)
+                  && scope.contains((String) user.get(JsonKey.ROOT_ORG_ID))) {
+                List<Map<String, Object>> scopeList = mapper.convertValue(scope, scopeType);
+                scopeList.forEach(
+                    scopeMap -> {
+                      if (scopeMap
+                          .get(JsonKey.ORGANISATION_ID)
+                          .equals((String) user.get(JsonKey.ROOT_ORG_ID))) {
+                        isRoleExists.set(true);
+                      }
+                    });
+              }
+            }
+          });
     }
-    return false;
+    return isRoleExists.get();
   }
 
   // Convert Acceptance tnc object as a Json String in cassandra table
