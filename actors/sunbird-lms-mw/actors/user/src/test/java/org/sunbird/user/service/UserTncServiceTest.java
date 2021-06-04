@@ -4,7 +4,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -141,12 +140,25 @@ public class UserTncServiceTest {
   public void validateOrgAdminTncTest() {
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    Response response = new Response();
-    List<Map<String, Object>> orgs = orgResponse();
-    response.put(JsonKey.RESPONSE, orgs);
-    when(cassandraOperationImpl.getRecordsByCompositeKey(
+    when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
+        .thenReturn(getCassandraUserRoleResponse());
+    UserTncService tncService = new UserTncService();
+    Map<String, Object> searchMap = userOrgData();
+    try {
+      tncService.validateRoleForTnc(null, "orgAdminTnc", searchMap);
+    } catch (ProjectCommonException ex) {
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+    }
+  }
+
+  @Test
+  public void acceptOrgAdminTncTest() {
+    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleAdminResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
@@ -160,12 +172,9 @@ public class UserTncServiceTest {
   public void reportViewerTncTest() {
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    Response response = new Response();
-    List<Map<String, Object>> orgs = orgResponse();
-    response.put(JsonKey.RESPONSE, orgs);
-    when(cassandraOperationImpl.getRecordsByCompositeKey(
+    when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
+        .thenReturn(getCassandraUserRoleResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
@@ -175,19 +184,34 @@ public class UserTncServiceTest {
     }
   }
 
-  private List<Map<String, Object>> orgResponse() {
-    List<Map<String, Object>> orgs = new ArrayList<>();
-    Map<String, Object> org = new HashMap<>();
-    org.put(JsonKey.ORGANISATION_ID, "4567");
-    org.put(JsonKey.ROLES, Arrays.asList("PUBLIC"));
-    orgs.add(org);
-    return orgs;
+  private static Response getCassandraUserRoleResponse() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.USER_ID, "1234");
+    orgMap.put(JsonKey.ROLE, "PUBLIC");
+    list.add(orgMap);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
+  }
+
+  private static Response getCassandraUserRoleAdminResponse() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.USER_ID, "1234");
+    orgMap.put(JsonKey.ROLE, "ORG_ADMIN");
+    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"4567\"}]");
+    list.add(orgMap);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
   }
 
   private Map<String, Object> userOrgData() {
     Map<String, Object> searchMap = new LinkedHashMap<>(2);
     searchMap.put(JsonKey.USER_ID, "1234");
     searchMap.put(JsonKey.ORGANISATION_ID, "4567");
+    searchMap.put(JsonKey.ROOT_ORG_ID, "4567");
     return searchMap;
   }
 }

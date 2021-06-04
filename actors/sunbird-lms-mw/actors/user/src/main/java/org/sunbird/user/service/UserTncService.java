@@ -140,18 +140,18 @@ public class UserTncService {
         userRoleDao.getUserRoles((String) user.get(JsonKey.ID), role, context);
     if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
       ObjectMapper mapper = new ObjectMapper();
-      TypeReference<List<Map<String, Object>>> scopeType =
-          new TypeReference<List<Map<String, Object>>>() {};
       dbUserRoleList.forEach(
           e -> {
             if (role.equals(e.get(JsonKey.ROLE))) {
               String scope = (String) e.get(JsonKey.SCOPE);
-              /*if(StringUtils.isNotBlank(scope) && scope.contains((String) user.get(JsonKey.ROOT_ORG_ID))){
-                isRoleExists.set(true);
-              }*/
-              if (StringUtils.isNotBlank(scope)
-                  && scope.contains((String) user.get(JsonKey.ROOT_ORG_ID))) {
-                List<Map<String, Object>> scopeList = mapper.convertValue(scope, scopeType);
+              if (StringUtils.isNotBlank(scope)) {
+                List<Map<String, Object>> scopeList = new ArrayList<>();
+                try {
+                  scopeList =
+                      mapper.readValue(scope, new TypeReference<List<Map<String, Object>>>() {});
+                } catch (JsonProcessingException ex) {
+                  logger.error("JsonParsing error while parsing role scope", ex);
+                }
                 scopeList.forEach(
                     scopeMap -> {
                       if (scopeMap
