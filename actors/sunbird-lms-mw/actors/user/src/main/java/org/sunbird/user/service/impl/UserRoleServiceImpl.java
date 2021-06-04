@@ -78,7 +78,9 @@ public class UserRoleServiceImpl implements UserRoleService {
   private String createRoleScope(List<Map> scopeList, Map userRequest) {
     Map<String, String> scopeMap = new HashMap<>();
     String organisationId = (String) userRequest.get(JsonKey.ORGANISATION_ID);
-    if (StringUtils.isNotBlank(organisationId)) {
+    if (JsonKey.CREATE.equals(userRequest.get(JsonKey.ROLE_OPERATION))) {
+      scopeMap.put(JsonKey.ORGANISATION_ID, (String) userRequest.get(JsonKey.ROOT_ORG_ID));
+    } else {
       scopeMap.put(JsonKey.ORGANISATION_ID, organisationId);
     }
     scopeList.add(scopeMap);

@@ -1083,6 +1083,8 @@ public class UserManagementActor extends BaseActor {
     UserUtil.addMaskEmailAndMaskPhone(userMap);
     requestMap = UserUtil.encryptUserData(userMap);
     Map<String, Object> userLookUpData = new HashMap<>(requestMap);
+    // removing roles from requestMap, so it won't get save in user table
+    List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     removeUnwanted(requestMap);
     requestMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
@@ -1107,7 +1109,8 @@ public class UserManagementActor extends BaseActor {
       }
     }
     // update roles to user_roles
-    if (null != requestMap.get(JsonKey.ROLES)) {
+    if (CollectionUtils.isNotEmpty(roles)) {
+      requestMap.put(JsonKey.ROLES, roles);
       requestMap.put(JsonKey.ROLE_OPERATION, JsonKey.CREATE);
       List<Map<String, Object>> formattedRoles =
           userRoleService.updateUserRole(requestMap, request.getRequestContext());
@@ -1333,6 +1336,7 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
+    reqMap.remove(JsonKey.ROLES);
     Util.getUserDefaultValue().keySet().stream().forEach(key -> reqMap.remove(key));
   }
 
