@@ -284,7 +284,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       throws JsonProcessingException {
     logger.info(context, "UserBulkUploadBackgroundJobActor: callAssignRole called");
     try {
-      userClient.updateUser(getActorRef(ActorOperations.ASSIGN_ROLES.getValue()), user, context);
+      userClient.assignRolesToUser(
+          getActorRef(ActorOperations.ASSIGN_ROLES.getValue()), user, context);
     } catch (Exception ex) {
       logger.error(
           context,

@@ -57,6 +57,13 @@ public class UserClientImpl implements UserClient {
   }
 
   @Override
+  public void assignRolesToUser(
+      ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
+    logger.info(context, "updateUser called");
+    upsertUser(actorRef, userMap, ActorOperations.ASSIGN_ROLES.getValue(), context);
+  }
+
+  @Override
   public void esVerifyPhoneUniqueness(RequestContext context) {
     esVerifyFieldUniqueness(JsonKey.ENC_PHONE, JsonKey.PHONE, context);
   }
