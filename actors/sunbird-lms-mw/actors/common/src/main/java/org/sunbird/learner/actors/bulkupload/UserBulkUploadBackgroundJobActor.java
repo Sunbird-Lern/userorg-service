@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
@@ -208,7 +209,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         callCreateUser(userMap, task, orgName, context);
       } else {
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
-        callUpdateUser(userMap, task, orgName, context);
+        Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
+        callUpdateUser(newUserReqMap, task, orgName, context);
         if (userMap.containsKey(JsonKey.ROLES)) {
           callAssignRole(userMap, task, context);
         }
