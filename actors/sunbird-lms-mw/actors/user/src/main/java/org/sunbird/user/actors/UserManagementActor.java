@@ -1337,7 +1337,15 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
     reqMap.remove(JsonKey.ROLES);
-    Util.getUserDefaultValue().keySet().stream().forEach(key -> reqMap.remove(key));
+    Util.getUserDefaultValue()
+        .keySet()
+        .stream()
+        .forEach(
+            key -> {
+              if (!JsonKey.PASSWORD.equalsIgnoreCase(key)) {
+                reqMap.remove(key);
+              }
+            });
   }
 
   public static void verifyFrameworkId(
