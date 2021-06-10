@@ -308,6 +308,13 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testSearchUserSuccessV3() {
+    Result result = performTest("/v3/user/search", "POST", searchUserRequest(new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testUserLookupFailure() {
     Map<String, Object> reqMap = new HashMap<>();
     Result result = TestUtil.performTest("/private/user/v1/lookup", "POST", reqMap, application);
