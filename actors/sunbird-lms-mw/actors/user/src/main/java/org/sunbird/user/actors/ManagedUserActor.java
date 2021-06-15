@@ -66,7 +66,7 @@ import scala.concurrent.Future;
 public class ManagedUserActor extends BaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private LocationClient locationClient = LocationClientImpl.getInstance();
-  private UserClient userClient = new UserClientImpl();
+  private UserClient userClient = UserClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
@@ -354,38 +354,34 @@ public class ManagedUserActor extends BaseActor {
     } else {
       Future<Boolean> kcFuture =
           Futures.future(
-              new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() {
-                  try {
-                    Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
-                    updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
-                    updatePasswordMap.put(JsonKey.PASSWORD, password);
-                    logger.info(
-                        actorMessage.getRequestContext(),
-                        "Update password value passed "
-                            + password
-                            + " --"
-                            + (String) userMap.get(JsonKey.ID));
-                    return UserUtil.updatePassword(
-                        updatePasswordMap, actorMessage.getRequestContext());
-                  } catch (Exception e) {
-                    logger.error(
-                        actorMessage.getRequestContext(),
-                        "Error occurred during update password : " + e.getMessage(),
-                        e);
-                    return false;
-                  }
-                }
-              },
+              (Callable<Boolean>)
+                  () -> {
+                    try {
+                      Map<String, Object> updatePasswordMap = new HashMap<>();
+                      updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
+                      updatePasswordMap.put(JsonKey.PASSWORD, password);
+                      logger.info(
+                          actorMessage.getRequestContext(),
+                          "Update password value passed "
+                              + password
+                              + " --"
+                              + userMap.get(JsonKey.ID));
+                      return UserUtil.updatePassword(
+                          updatePasswordMap, actorMessage.getRequestContext());
+                    } catch (Exception e) {
+                      logger.error(
+                          actorMessage.getRequestContext(),
+                          "Error occurred during update password : " + e.getMessage(),
+                          e);
+                      return false;
+                    }
+                  },
               getContext().dispatcher());
       Future<Response> future =
           saveUserToES(esResponse, actorMessage.getRequestContext())
               .zip(kcFuture)
               .map(
-                  new Mapper<Tuple2<String, Boolean>, Response>() {
-
+                  new Mapper<>() {
                     @Override
                     public Response apply(Tuple2<String, Boolean> parameter) {
                       boolean updatePassResponse = parameter._2;

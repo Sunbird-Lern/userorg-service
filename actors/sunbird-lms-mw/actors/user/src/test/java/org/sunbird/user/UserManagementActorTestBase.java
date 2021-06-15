@@ -82,6 +82,7 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
+  UserClient.class,
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
@@ -112,7 +113,7 @@ public abstract class UserManagementActorTestBase {
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
-  public static UserClient userClient;
+  // public static UserClientImpl userClient;
   protected static OrganisationClient organisationClient;
   private LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
@@ -163,8 +164,8 @@ public abstract class UserManagementActorTestBase {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
-    PowerMockito.mockStatic(UserClientImpl.class);
-    userClient = mock(UserClientImpl.class);
+    // PowerMockito.mockStatic(UserClientImpl.class);
+    // userClient = mock(UserClientImpl.class);
     PowerMockito.mockStatic(LocationClientImpl.class);
     locationClient = mock(LocationClientImpl.class);
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
