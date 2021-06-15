@@ -52,7 +52,6 @@ import org.sunbird.learner.organisation.external.identity.service.OrgExternalSer
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.models.user.Feed;
-import org.sunbird.user.UserManagementActorTestBase;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.MigrationUtils;
@@ -86,7 +85,7 @@ import org.sunbird.user.util.MigrationUtils;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-public class TenantMigrationActorTest extends UserManagementActorTestBase {
+public class TenantMigrationActorTest {
   Props props = Props.create(TenantMigrationActor.class);
   ActorSystem system = ActorSystem.create("system");
 

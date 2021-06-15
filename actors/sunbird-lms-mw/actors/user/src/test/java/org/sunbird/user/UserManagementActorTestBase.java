@@ -440,23 +440,6 @@ public abstract class UserManagementActorTestBase {
     return locationTypeConfig;
   }
 
-  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    subject.tell(reqObj, probe.getRef());
-
-    if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.OK;
-    } else {
-      ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
-    }
-  }
-
   public Map<String, Object> getExternalIdMap() {
 
     Map<String, Object> reqMap = new HashMap<>();
@@ -570,5 +553,58 @@ public abstract class UserManagementActorTestBase {
     idType.put(JsonKey.TYPE, "type");
     locationIdType.add(idType);
     return locationIdType;
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode, Props props) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(
+      Request reqObj, ResponseCode errorCode, ResponseCode responseCode, Props props) {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (responseCode != null) {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      return null != res && res.getResponseCode() == responseCode;
+    }
+    if (errorCode != null) {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+    return true;
   }
 }
