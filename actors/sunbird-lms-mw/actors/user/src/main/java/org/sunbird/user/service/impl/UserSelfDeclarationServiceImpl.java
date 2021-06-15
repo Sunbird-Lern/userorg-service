@@ -8,14 +8,12 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
@@ -25,7 +23,6 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
 
   private LoggerUtil logger = new LoggerUtil(UserSelfDeclarationServiceImpl.class);
   private static UserSelfDeclarationService selfDeclarationService = null;
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();

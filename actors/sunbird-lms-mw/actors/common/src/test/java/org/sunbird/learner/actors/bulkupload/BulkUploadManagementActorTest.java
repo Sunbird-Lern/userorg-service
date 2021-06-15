@@ -290,7 +290,7 @@ public class BulkUploadManagementActorTest {
     Assert.assertTrue(null != ex);
     Assert.assertEquals(ResponseCode.invalidColumns.getErrorCode(), ex.getCode());
     Assert.assertEquals(
-        "Invalid column: password. Valid columns are: firstName, lastName, phone, countryCode, email, userName, phoneVerified, emailVerified, roles, position, location, dob, language, profileSummary, subject, externalIdProvider, externalId, externalIdType, externalIds.",
+        "Invalid column: password. Valid columns are: firstName, lastName, phone, countryCode, email, userName, roles, position, location, dob, language, profileSummary, subject, externalIdProvider, externalId, externalIdType, externalIds.",
         ex.getMessage());
   }
 

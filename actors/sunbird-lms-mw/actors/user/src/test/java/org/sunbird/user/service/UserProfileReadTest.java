@@ -1,5 +1,6 @@
 package org.sunbird.user.service;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -36,8 +37,10 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
+import org.sunbird.user.dao.UserRoleDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
+import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Promise;
 
@@ -55,7 +58,9 @@ import scala.concurrent.Promise;
   Util.class,
   ElasticSearchRestHighImpl.class,
   EsClientFactory.class,
-  ElasticSearchHelper.class
+  ElasticSearchHelper.class,
+  UserRoleDao.class,
+  UserRoleDaoImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -269,6 +274,24 @@ public class UserProfileReadTest {
     PowerMockito.mockStatic(UserUtil.class);
     when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(externalIds);
+
+    PowerMockito.mockStatic(UserRoleDaoImpl.class);
+    UserRoleDao userRoleDao = PowerMockito.mock(UserRoleDao.class);
+    Mockito.when(UserRoleDaoImpl.getInstance()).thenReturn(userRoleDao);
+    List<Map<String, Object>> userRoleDetails = new ArrayList<>();
+    Map<String, Object> userRoleMap = new HashMap<>();
+    userRoleMap.put("role", "CONTENT_CREATOR");
+    userRoleMap.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
+    userRoleMap.put("scope", "[{\"orgId\":\"4578963210\"}]");
+    userRoleDetails.add(userRoleMap);
+    Map<String, Object> userRoleMap1 = new HashMap<>();
+    userRoleMap1.put("role", "COURSE_CREATOR");
+    userRoleMap1.put("userid", "4a3ded8a-d731-4f58-a722-e63b00925cd0");
+    userRoleMap1.put("scope", "[{\"orgId\":\"4578963210\"}]");
+    userRoleDetails.add(userRoleMap1);
+    Mockito.when(
+            userRoleDao.getUserRoles(Mockito.anyString(), nullable(String.class), Mockito.any()))
+        .thenReturn(userRoleDetails);
 
     Response response1 =
         userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));

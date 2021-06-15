@@ -329,8 +329,6 @@ public class UserRequestValidatorTest {
     requestObj.put(JsonKey.PHONE, "9321234123");
     requestObj.put(JsonKey.COUNTRY_CODE, "+91");
     requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
     request.setRequest(requestObj);
     try {
       userRequestValidator.phoneValidation(request);
@@ -348,8 +346,6 @@ public class UserRequestValidatorTest {
     requestObj.put(JsonKey.PHONE, "+9321234123");
     requestObj.put(JsonKey.COUNTRY_CODE, "+91");
     requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
     request.setRequest(requestObj);
     try {
       userRequestValidator.phoneValidation(request);
@@ -365,61 +361,11 @@ public class UserRequestValidatorTest {
     requestObj.put(JsonKey.PHONE, "+9321234123");
     requestObj.put(JsonKey.COUNTRY_CODE, "+91968");
     requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
     request.setRequest(requestObj);
     try {
       userRequestValidator.phoneValidation(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.invalidCountryCode.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testPhoneValidationFailureWithEmptyPhoneVerified() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.COUNTRY_CODE, "+91");
-    requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, "");
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.phoneValidation(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testPhoneValidationFailureWithPhoneVerifiedFalse() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.COUNTRY_CODE, "+91");
-    requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, false);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.phoneValidation(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testPhoneValidationFailureWithPhoneVerifiedNull() {
-    Request request = new Request();
-    Map<String, Object> requestObj = new HashMap<>();
-    requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.COUNTRY_CODE, "+91");
-    requestObj.put(JsonKey.PROVIDER, "sunbird");
-    requestObj.put(JsonKey.PHONE_VERIFIED, null);
-    request.setRequest(requestObj);
-    try {
-      userRequestValidator.phoneValidation(request);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
     }
   }
 
@@ -611,7 +557,6 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.PHONE, "9321234123");
     requestObj.put(JsonKey.EMAIL, "test123@test.com");
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
     requestObj.put(JsonKey.LANGUAGE, "");
@@ -629,9 +574,7 @@ public class UserRequestValidatorTest {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
     requestObj.put(JsonKey.EMAIL, "test123@test.com");
-    requestObj.put(JsonKey.EMAIL_VERIFIED, true);
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.FIRST_NAME, "test123");
     request.setRequest(requestObj);
@@ -651,7 +594,6 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
     requestObj.put(JsonKey.FIRST_NAME, "test123");
     requestObj.put(JsonKey.EMAIL, "");
     requestObj.put(JsonKey.PHONE, "");
@@ -678,7 +620,7 @@ public class UserRequestValidatorTest {
     }
   }
 
-  @Test
+  /* @Test
   public void testValidateCreateUserFailureWithoutPhoneVerified() {
     Request request = initailizeRequest();
     request.getRequest().put(JsonKey.PHONE, "7894561230");
@@ -687,41 +629,35 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
     }
-  }
+  }*/
 
   @Test
   public void testValidateCreateUserSuccess() {
     Request request = initailizeRequest();
     request.getRequest().put(JsonKey.PHONE, "7894561230");
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, "");
     try {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
     }
   }
 
-  @Test
+  /*@Test
   public void testValidateCreateUserFailureWithPhoneVerifiedFalse() {
     Request request = initailizeRequest();
     request.getRequest().put(JsonKey.PHONE, "7894561230");
-    request.getRequest().put(JsonKey.PHONE_VERIFIED, false);
     try {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.phoneVerifiedError.getErrorCode(), e.getCode());
     }
-  }
+  }*/
 
   @Test
   public void testValidateCreateUserFailureWithInvalidPhoneFormat() {
     Request request = new Request();
     request.getRequest().put(JsonKey.EMAIL, "asd@asd.com");
-    request.getRequest().put(JsonKey.EMAIL_VERIFIED, true);
     request.getRequest().put(JsonKey.PHONE, "9874561230");
     request.getRequest().put(JsonKey.COUNTRY_CODE, "+001");
     request.getRequest().put(JsonKey.USERNAME, "98745");
@@ -774,9 +710,7 @@ public class UserRequestValidatorTest {
       Request request = new Request();
       request.getRequest().put(JsonKey.FIRST_NAME, "test name");
       request.getRequest().put(JsonKey.EMAIL, "test@test.com");
-      request.getRequest().put(JsonKey.EMAIL_VERIFIED, true);
       request.getRequest().put(JsonKey.PHONE, "9663890445");
-      request.getRequest().put(JsonKey.PHONE_VERIFIED, true);
       new UserRequestValidator().validateUserCreateV3(request);
     } catch (Exception e) {
       response = false;
@@ -789,7 +723,6 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.USERNAME, "test123");
     requestObj.put(JsonKey.PHONE, "9321234123");
-    requestObj.put(JsonKey.PHONE_VERIFIED, true);
     requestObj.put(JsonKey.FIRST_NAME, "test123");
     requestObj.put(JsonKey.DOB, "2000");
     request.setRequest(requestObj);

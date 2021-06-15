@@ -71,8 +71,10 @@ import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
+import org.sunbird.user.service.UserRoleService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.user.service.impl.UserRoleServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
@@ -113,6 +115,7 @@ public class UserManagementActor extends BaseActor {
   private static UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -246,7 +249,6 @@ public class UserManagementActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-    validateLocationCodes(actorMessage);
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
@@ -262,6 +264,7 @@ public class UserManagementActor extends BaseActor {
         userMap.remove(JsonKey.PROFILE_USERTYPE);
       }
     }
+    validateLocationCodes(actorMessage);
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -377,11 +380,8 @@ public class UserManagementActor extends BaseActor {
       }
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
-      if (StringUtils.isNotBlank(callerId)) {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
-      } else {
-        userRequest.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
-      }
+      userRequest.put(JsonKey.CALLER_ID, callerId);
+
       resp =
           userService.saveUserAttributes(
               userRequest,
@@ -529,20 +529,21 @@ public class UserManagementActor extends BaseActor {
     if (CollectionUtils.isNotEmpty(orgList)) {
       String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
       String rootOrgId = (String) actorMessage.getRequest().remove(JsonKey.ROOT_ORG_ID);
-      List<Map<String, Object>> orgListDb =
+      List<Map<String, Object>> userOrgListDb =
           UserUtil.getUserOrgDetails(false, userId, actorMessage.getRequestContext());
-      Map<String, Object> orgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(orgListDb)) {
-        orgListDb.forEach(org -> orgDbMap.put((String) org.get(JsonKey.ORGANISATION_ID), org));
+      Map<String, Object> userOrgDbMap = new HashMap<>();
+      if (CollectionUtils.isNotEmpty(userOrgListDb)) {
+        userOrgListDb.forEach(
+            userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
       }
 
       for (Map<String, Object> org : orgList) {
-        createOrUpdateOrganisations(org, orgDbMap, actorMessage);
+        createOrUpdateOrganisations(org, userOrgDbMap, actorMessage);
         updateUserSelfDeclaredData(actorMessage, org, userId);
       }
 
       String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(orgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+      removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
           actorMessage.getRequestContext(),
           "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
@@ -569,11 +570,12 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void createOrUpdateOrganisations(
-      Map<String, Object> org, Map<String, Object> orgDbMap, Request actorMessage) {
+      Map<String, Object> org, Map<String, Object> userOrgDbMap, Request actorMessage) {
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
     if (MapUtils.isNotEmpty(org)) {
-      UserOrg userOrg = mapper.convertValue(org, UserOrg.class); // this is wrong conversion
+      UserOrg userOrg =
+          mapper.convertValue(org, UserOrg.class); // setting userOrg fields from org details
       String orgId =
           null != org.get(JsonKey.ORGANISATION_ID)
               ? (String) org.get(JsonKey.ORGANISATION_ID)
@@ -581,23 +583,27 @@ public class UserManagementActor extends BaseActor {
 
       userOrg.setUserId(userId);
       userOrg.setDeleted(false);
-      if (null != orgId && orgDbMap.containsKey(orgId)) {
+      if (null != orgId && userOrgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
         userOrg.setOrganisationId(
-            (String) ((Map<String, Object>) orgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
+            (String) ((Map<String, Object>) userOrgDbMap.get(orgId)).get(JsonKey.ORGANISATION_ID));
         AssociationMechanism associationMechanism = new AssociationMechanism();
-        associationMechanism.setAssociationType(userOrg.getAssociationType());
+        if (null != userOrgDbMap.get(JsonKey.ASSOCIATION_TYPE)) {
+          associationMechanism.setAssociationType(
+              (int) ((Map<String, Object>) userOrgDbMap.get(orgId)).get(JsonKey.ASSOCIATION_TYPE));
+        }
         associationMechanism.appendAssociationType(AssociationMechanism.SELF_DECLARATION);
         userOrg.setAssociationType(associationMechanism.getAssociationType());
         userOrgDao.updateUserOrg(userOrg, actorMessage.getRequestContext());
-        orgDbMap.remove(orgId);
+        userOrgDbMap.remove(orgId);
       } else {
         userOrg.setHashTagId((String) (org.get(JsonKey.HASHTAGID)));
         userOrg.setOrgJoinDate(ProjectUtil.getFormattedDate());
         userOrg.setAddedBy((String) actorMessage.getContext().get(JsonKey.REQUESTED_BY));
         userOrg.setId(ProjectUtil.getUniqueIdFromTimestamp(actorMessage.getEnv()));
         userOrg.setOrganisationId((String) (org.get(JsonKey.ID)));
+        userOrg.setAssociationType(AssociationMechanism.SELF_DECLARATION);
         userOrgDao.createUserOrg(userOrg, actorMessage.getRequestContext());
       }
     }
@@ -605,15 +611,18 @@ public class UserManagementActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void removeOrganisations(
-      Map<String, Object> orgDbMap, String rootOrgId, String requestedBy, RequestContext context) {
-    Set<String> ids = orgDbMap.keySet();
+      Map<String, Object> userOrgDbMap,
+      String rootOrgId,
+      String requestedBy,
+      RequestContext context) {
+    Set<String> ids = userOrgDbMap.keySet();
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     ids.remove(rootOrgId);
     ObjectMapper mapper = new ObjectMapper();
     for (String id : ids) {
-      UserOrg userOrg = mapper.convertValue(orgDbMap.get(id), UserOrg.class);
+      UserOrg userOrg = mapper.convertValue(userOrgDbMap.get(id), UserOrg.class);
       userOrg.setDeleted(true);
-      userOrg.setId((String) ((Map<String, Object>) orgDbMap.get(id)).get(JsonKey.ID));
+      userOrg.setId((String) ((Map<String, Object>) userOrgDbMap.get(id)).get(JsonKey.ID));
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);
       userOrg.setOrgLeftDate(ProjectUtil.getFormattedDate());
@@ -849,6 +858,7 @@ public class UserManagementActor extends BaseActor {
       String managedBy,
       Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
+    removeUnwanted(userMap);
     UserUtil.toLower(userMap);
     if (StringUtils.isEmpty(managedBy)) {
       // check phone and uniqueness using user look table
@@ -878,20 +888,7 @@ public class UserManagementActor extends BaseActor {
     userMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     userFlagsMap.put(JsonKey.STATE_VALIDATED, false);
-    if (StringUtils.isEmpty(managedBy)) {
-      userFlagsMap.put(
-          JsonKey.EMAIL_VERIFIED,
-          (Boolean)
-              (userMap.get(JsonKey.EMAIL_VERIFIED) != null
-                  ? userMap.get(JsonKey.EMAIL_VERIFIED)
-                  : false));
-      userFlagsMap.put(
-          JsonKey.PHONE_VERIFIED,
-          (Boolean)
-              (userMap.get(JsonKey.PHONE_VERIFIED) != null
-                  ? userMap.get(JsonKey.PHONE_VERIFIED)
-                  : false));
-    }
+
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     final String password = (String) userMap.get(JsonKey.PASSWORD);
@@ -1063,7 +1060,6 @@ public class UserManagementActor extends BaseActor {
     userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
-    userOrgMap.put(JsonKey.ROLES, userMap.get(JsonKey.ROLES));
     userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
   }
@@ -1087,13 +1083,13 @@ public class UserManagementActor extends BaseActor {
     UserUtil.addMaskEmailAndMaskPhone(userMap);
     requestMap = UserUtil.encryptUserData(userMap);
     Map<String, Object> userLookUpData = new HashMap<>(requestMap);
+    // removing roles from requestMap, so it won't get save in user table
+    List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     removeUnwanted(requestMap);
     requestMap.put(JsonKey.IS_DELETED, false);
     Map<String, Boolean> userFlagsMap = new HashMap<>();
     // checks if the user is belongs to state and sets a validation flag
     setStateValidation(requestMap, userFlagsMap);
-    userFlagsMap.put(JsonKey.EMAIL_VERIFIED, (Boolean) userMap.get(JsonKey.EMAIL_VERIFIED));
-    userFlagsMap.put(JsonKey.PHONE_VERIFIED, (Boolean) userMap.get(JsonKey.PHONE_VERIFIED));
     int userFlagValue = userFlagsToNum(userFlagsMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     Response response = null;
@@ -1111,6 +1107,14 @@ public class UserManagementActor extends BaseActor {
       if (!isPasswordUpdated) {
         response.put(JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
       }
+    }
+    // update roles to user_roles
+    if (CollectionUtils.isNotEmpty(roles)) {
+      requestMap.put(JsonKey.ROLES, roles);
+      requestMap.put(JsonKey.ROLE_OPERATION, JsonKey.CREATE);
+      List<Map<String, Object>> formattedRoles =
+          userRoleService.updateUserRole(requestMap, request.getRequestContext());
+      requestMap.put(JsonKey.ROLES, formattedRoles);
     }
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
@@ -1202,18 +1206,7 @@ public class UserManagementActor extends BaseActor {
   private Map<String, Boolean> updatedUserFlagsMap(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
-    setUserFlagValue(userDbRecord, JsonKey.EMAIL, JsonKey.EMAIL_VERIFIED);
-    setUserFlagValue(userDbRecord, JsonKey.PHONE, JsonKey.PHONE_VERIFIED);
-    boolean emailVerified =
-        (boolean)
-            (userMap.containsKey(JsonKey.EMAIL_VERIFIED)
-                ? userMap.get(JsonKey.EMAIL_VERIFIED)
-                : userDbRecord.get(JsonKey.EMAIL_VERIFIED));
-    boolean phoneVerified =
-        (boolean)
-            (userMap.containsKey(JsonKey.PHONE_VERIFIED)
-                ? userMap.get(JsonKey.PHONE_VERIFIED)
-                : userDbRecord.get(JsonKey.PHONE_VERIFIED));
+
     // for existing users, it won't contain state-validation
     // adding in release-2.4.0
     // userDbRecord- record from es.
@@ -1223,8 +1216,6 @@ public class UserManagementActor extends BaseActor {
       userBooleanMap.put(
           JsonKey.STATE_VALIDATED, (boolean) userDbRecord.get(JsonKey.STATE_VALIDATED));
     }
-    userBooleanMap.put(JsonKey.EMAIL_VERIFIED, emailVerified);
-    userBooleanMap.put(JsonKey.PHONE_VERIFIED, phoneVerified);
     return userBooleanMap;
   }
 
@@ -1345,6 +1336,16 @@ public class UserManagementActor extends BaseActor {
     reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
     reqMap.remove(JsonKey.EXTERNAL_IDS);
     reqMap.remove(JsonKey.ORGANISATION_ID);
+    reqMap.remove(JsonKey.ROLES);
+    Util.getUserDefaultValue()
+        .keySet()
+        .stream()
+        .forEach(
+            key -> {
+              if (!JsonKey.PASSWORD.equalsIgnoreCase(key)) {
+                reqMap.remove(key);
+              }
+            });
   }
 
   public static void verifyFrameworkId(
