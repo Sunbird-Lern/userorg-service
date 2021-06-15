@@ -1,6 +1,7 @@
 package org.sunbird.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -60,6 +61,7 @@ import org.sunbird.models.user.User;
 import org.sunbird.user.actors.UserManagementActor;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.user.service.impl.UserRoleServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import scala.concurrent.Future;
@@ -88,7 +90,8 @@ import scala.concurrent.Promise;
   SunbirdMWService.class,
   ActorSelection.class,
   OrgExternalService.class,
-  LocationServiceImpl.class
+  LocationServiceImpl.class,
+  UserRoleServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -114,6 +117,7 @@ public abstract class UserManagementActorTestBase {
   private LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static LocationService locationService;
+  public static UserRoleServiceImpl userRoleService;
 
   @Before
   public void beforeEachTest() {
@@ -171,7 +175,9 @@ public abstract class UserManagementActorTestBase {
     when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
         .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
-    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(Mockito.any(), Mockito.any()))
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("locationCode1"), Mockito.any()))
+        .thenReturn(getFormApiConfig());
+    PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("default"), Mockito.any()))
         .thenReturn(getFormApiConfig());
 
     PowerMockito.mockStatic(LocationServiceImpl.class);
@@ -260,6 +266,22 @@ public abstract class UserManagementActorTestBase {
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
+
+    List<Map<String, Object>> userRoleListResponse = new ArrayList<>();
+    List<Map<String, Object>> scopeList = new ArrayList<>();
+    Map<String, Object> scopeMap = new HashMap();
+    scopeMap.put(JsonKey.ORGANISATION_ID, "someOrg");
+    scopeList.add(scopeMap);
+    Map<String, Object> userRoleMap = new HashMap();
+    userRoleMap.put(JsonKey.ROLE, "role");
+    userRoleMap.put(JsonKey.SCOPE, scopeList);
+    userRoleListResponse.add(userRoleMap);
+
+    PowerMockito.mockStatic(UserRoleServiceImpl.class);
+    userRoleService = mock(UserRoleServiceImpl.class);
+    when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
+    when(userRoleService.updateUserRole(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userRoleListResponse);
   }
 
   public List<Map<String, String>> getLocationIdTypeList() {
@@ -290,20 +312,24 @@ public abstract class UserManagementActorTestBase {
     Map<String, Object> dataMap = new HashMap<>();
     List<Map<String, Object>> fieldsList = new ArrayList<>();
     Map<String, Object> field = new HashMap<>();
-
     Map<String, Object> children = new HashMap<>();
     List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
+
     Map<String, Object> subPersonConfig = new HashMap<>();
     Map<String, Object> templateOptionsMap = new HashMap<>();
     List<Map<String, String>> options = new ArrayList<>();
     Map<String, String> option = new HashMap<>();
     option.put(JsonKey.VALUE, "crc");
     options.add(option);
-
     templateOptionsMap.put(JsonKey.OPTIONS, options);
     subPersonConfig.put(JsonKey.CODE, JsonKey.SUB_PERSONA);
     subPersonConfig.put(JsonKey.TEMPLATE_OPTIONS, templateOptionsMap);
-    userTypeConfigList.add(subPersonConfig);
+    userTypeConfigList.add(subPersonConfig); // For subpersona config
+
+    Map<String, Object> stateConfig = new HashMap<>();
+    stateConfig.put(JsonKey.CODE, JsonKey.STATE);
+    userTypeConfigList.add(stateConfig); // For state config
+
     children.put("teacher", userTypeConfigList);
     field.put(JsonKey.CODE, JsonKey.PERSONA);
     field.put(JsonKey.CHILDREN, children);
@@ -409,7 +435,8 @@ public abstract class UserManagementActorTestBase {
 
   public Map<String, List<String>> getLocationTypeConfig() {
     Map<String, List<String>> locationTypeConfig = new HashMap<>();
-    locationTypeConfig.put("locationCode", Arrays.asList("school", "state"));
+    locationTypeConfig.put("locationCode1", Arrays.asList("school", "state"));
+    // locationTypeConfig.put("default", Arrays.asList("school", "state"));
     return locationTypeConfig;
   }
 
@@ -447,8 +474,6 @@ public abstract class UserManagementActorTestBase {
     reqMap.put(JsonKey.EMAIL, "email@email.com");
     reqMap.put(JsonKey.LANGUAGE, new ArrayList<>());
     reqMap.put(JsonKey.DOB, "1992");
-    reqMap.put(JsonKey.EMAIL_VERIFIED, true);
-    reqMap.put(JsonKey.PHONE_VERIFIED, true);
     return reqMap;
   }
 
@@ -489,8 +514,6 @@ public abstract class UserManagementActorTestBase {
   }
 
   public Map<String, Object> getUpdateRequestWithDefaultFlags(Map<String, Object> reqObj) {
-    reqObj.put(JsonKey.EMAIL_VERIFIED, false);
-    reqObj.put(JsonKey.PHONE_VERIFIED, false);
     reqObj.put(JsonKey.STATE_VALIDATED, false);
     return reqObj;
   }

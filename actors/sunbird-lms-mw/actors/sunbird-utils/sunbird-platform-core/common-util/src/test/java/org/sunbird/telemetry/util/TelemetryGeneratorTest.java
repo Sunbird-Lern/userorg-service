@@ -54,7 +54,6 @@ public class TelemetryGeneratorTest {
     params.put(JsonKey.LAST_NAME, "LName");
     params.put(JsonKey.ID, "1234785963014789564123");
     params.put(JsonKey.USER_ID, "9512357468214597623");
-    params.put(JsonKey.EMAIL_VERIFIED, true);
     params.put("targetObject", target);
     params.put(JsonKey.QUERY, "hello");
     params.put(JsonKey.FILTERS, new HashMap<>());

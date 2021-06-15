@@ -104,8 +104,6 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.EMAIL, "userPrimaryEmail");
     userDbMap.put(JsonKey.PHONE, "9876543210");
     userDbMap.put(JsonKey.PREV_USED_EMAIL, null);
-    userDbMap.put(JsonKey.EMAIL_VERIFIED, true);
-    userDbMap.put(JsonKey.PHONE_VERIFIED, true);
     userDbMap.put(JsonKey.PREV_USED_PHONE, null);
     userDbMap.put(JsonKey.MASKED_EMAIL, "user*******");
     userDbMap.put(JsonKey.MASKED_PHONE, "98***08908");
@@ -147,12 +145,10 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.EMAIL, "userPrimaryEmail");
     userDbMap.put(JsonKey.PHONE, "9876543210");
     userDbMap.put(JsonKey.PREV_USED_EMAIL, null);
-    userDbMap.put(JsonKey.EMAIL_VERIFIED, true);
-    userDbMap.put(JsonKey.PHONE_VERIFIED, true);
     userDbMap.put(JsonKey.PREV_USED_PHONE, null);
     userDbMap.put(JsonKey.MASKED_EMAIL, "user*******");
     userDbMap.put(JsonKey.MASKED_PHONE, "98***08908");
-    userDbMap.put(JsonKey.FLAGS_VALUE, 3);
+    userDbMap.put(JsonKey.FLAGS_VALUE, 7);
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);

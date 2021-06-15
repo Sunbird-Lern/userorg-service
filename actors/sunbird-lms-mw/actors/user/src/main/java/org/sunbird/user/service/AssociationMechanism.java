@@ -5,16 +5,8 @@ public class AssociationMechanism {
   public static int SSO = 1;
   public static int SELF_DECLARATION = 2;
   public static int SYSTEM_UPLOAD = 4;
-  private String associationName;
-  private int associationType;
 
-  public String getAssociationName() {
-    return associationName;
-  }
-
-  public void setAssociationName(String associationName) {
-    this.associationName = associationName;
-  }
+  private int associationType = 0;
 
   public int getAssociationType() {
     return associationType;
@@ -34,16 +26,5 @@ public class AssociationMechanism {
 
   public boolean isAssociationType(int associationType) {
     return (this.associationType & associationType) == associationType;
-  }
-
-  @Override
-  public String toString() {
-    return " - Association{"
-        + "associationName='"
-        + associationName
-        + '\''
-        + ", associationType="
-        + associationType
-        + '}';
   }
 }

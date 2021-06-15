@@ -30,6 +30,14 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String TABLE_NAME = "bulk_upload_process_task";
 
+  public static BulkUploadProcessTaskDao bulkUploadProcessTaskDao = null;
+
+  public static synchronized BulkUploadProcessTaskDao getInstance() {
+    if (bulkUploadProcessTaskDao == null)
+      bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
+    return bulkUploadProcessTaskDao;
+  }
+
   @Override
   public String create(BulkUploadProcessTask bulkUploadProcessTask, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(bulkUploadProcessTask, Map.class);

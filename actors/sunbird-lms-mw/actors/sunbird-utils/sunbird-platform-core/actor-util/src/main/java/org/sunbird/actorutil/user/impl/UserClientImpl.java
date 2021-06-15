@@ -31,6 +31,18 @@ public class UserClientImpl implements UserClient {
   private static LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
 
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  public static UserClient userClient = null;
+
+  public static UserClient getInstance() {
+    if (userClient == null) {
+      synchronized (UserClientImpl.class) {
+        if (userClient == null) {
+          userClient = new UserClientImpl();
+        }
+      }
+    }
+    return userClient;
+  }
 
   @Override
   public String createUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
@@ -42,6 +54,13 @@ public class UserClientImpl implements UserClient {
   public void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
     logger.info(context, "updateUser called");
     upsertUser(actorRef, userMap, ActorOperations.UPDATE_USER.getValue(), context);
+  }
+
+  @Override
+  public void assignRolesToUser(
+      ActorRef actorRef, Map<String, Object> userMap, RequestContext context) {
+    logger.info(context, "updateUser called");
+    upsertUser(actorRef, userMap, ActorOperations.ASSIGN_ROLES.getValue(), context);
   }
 
   @Override

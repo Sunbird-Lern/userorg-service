@@ -20,24 +20,12 @@ public class UserFlagUtilTest {
   @Test
   public void testGetFlagValue() {
     Assert.assertEquals(
-        2, UserFlagUtil.getFlagValue(UserFlagEnum.EMAIL_VERIFIED.getUserFlagType(), true));
-    Assert.assertEquals(
-        1, UserFlagUtil.getFlagValue(UserFlagEnum.PHONE_VERIFIED.getUserFlagType(), true));
-    Assert.assertEquals(
         4, UserFlagUtil.getFlagValue(UserFlagEnum.STATE_VALIDATED.getUserFlagType(), true));
   }
 
   @Test
   public void testAssignUserFlagValues() {
-    Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(1);
-    Assert.assertEquals(true, userFlagMap.get(JsonKey.PHONE_VERIFIED));
-    userFlagMap = UserFlagUtil.assignUserFlagValues(2);
-    Assert.assertEquals(true, userFlagMap.get(JsonKey.EMAIL_VERIFIED));
-    userFlagMap = UserFlagUtil.assignUserFlagValues(4);
+    Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(4);
     Assert.assertEquals(true, userFlagMap.get(JsonKey.STATE_VALIDATED));
-    userFlagMap = UserFlagUtil.assignUserFlagValues(5);
-    Assert.assertEquals(true, userFlagMap.get(JsonKey.PHONE_VERIFIED));
-    userFlagMap = UserFlagUtil.assignUserFlagValues(6);
-    Assert.assertEquals(true, userFlagMap.get(JsonKey.EMAIL_VERIFIED));
   }
 }

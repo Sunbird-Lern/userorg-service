@@ -82,7 +82,7 @@ public class SendOTPActorTest {
     PowerMockito.mockStatic(SMSFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(mockCassandraOperation);
-    when(SMSFactory.getInstance(Mockito.anyString())).thenReturn(iSmsProvider);
+    when(SMSFactory.getInstance()).thenReturn(iSmsProvider);
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
     PowerMockito.mockStatic(DefaultDecryptionServiceImpl.class);
     PowerMockito.mockStatic(DefaultEncryptionServivceImpl.class);

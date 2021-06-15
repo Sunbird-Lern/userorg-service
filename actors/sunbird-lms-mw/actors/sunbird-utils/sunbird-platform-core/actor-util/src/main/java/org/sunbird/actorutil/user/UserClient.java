@@ -27,6 +27,15 @@ public interface UserClient {
   void updateUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context);
 
   /**
+   * Assign user roles.
+   *
+   * @param actorRef Actor reference
+   * @param userMap User details
+   * @param context
+   */
+  void assignRolesToUser(ActorRef actorRef, Map<String, Object> userMap, RequestContext context);
+
+  /**
    * Verify phone uniqueness across all users in the system.
    *
    * @param context

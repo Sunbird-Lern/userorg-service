@@ -8,8 +8,6 @@ import org.sunbird.common.models.util.JsonKey;
  * added, please add value as 2 pow (position-1)
  */
 public enum UserFlagEnum {
-  PHONE_VERIFIED(JsonKey.PHONE_VERIFIED, 1),
-  EMAIL_VERIFIED(JsonKey.EMAIL_VERIFIED, 2),
   STATE_VALIDATED(JsonKey.STATE_VALIDATED, 4);
 
   private String userFlagType;
