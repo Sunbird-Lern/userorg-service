@@ -107,7 +107,7 @@ public class ManagedUserActor extends BaseActor {
     if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
-      setProfileUserTypeAndLocation(userMap, actorMessage);
+      setProfileUserTypeAndLocation(userMap);
     }
     validateLocationCodes(actorMessage);
 
@@ -139,32 +139,18 @@ public class ManagedUserActor extends BaseActor {
     processUserRequestV4(userMap, signupType, source, managedBy, actorMessage);
   }
 
-  private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
-    if (!actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
-      userMap.remove(JsonKey.USER_TYPE);
-      userMap.remove(JsonKey.USER_SUB_TYPE);
-      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-        Map<String, Object> userTypeAndSubType =
-            (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+  private void setProfileUserTypeAndLocation(Map<String, Object> userMap) {
+    userMap.remove(JsonKey.LOCATION_CODES);
+    if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+      List<Map<String, String>> profLocList =
+          (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+      List<String> locationCodes = null;
+      if (CollectionUtils.isNotEmpty(profLocList)) {
+        locationCodes =
+            profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+        userMap.put(JsonKey.LOCATION_CODES, locationCodes);
       }
-    }
-    if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
-      userMap.remove(JsonKey.LOCATION_CODES);
-      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
-        List<Map<String, String>> profLocList =
-            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-        List<String> locationCodes = null;
-        if (CollectionUtils.isNotEmpty(profLocList)) {
-          locationCodes =
-              profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
-          userMap.put(JsonKey.LOCATION_CODES, locationCodes);
-        }
-        userMap.remove(JsonKey.PROFILE_LOCATION);
-      }
+      userMap.remove(JsonKey.PROFILE_LOCATION);
     }
   }
 
