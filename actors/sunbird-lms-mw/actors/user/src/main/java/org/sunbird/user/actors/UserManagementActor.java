@@ -1058,17 +1058,13 @@ public class UserManagementActor extends BaseActor {
   }
 
   private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
-    if (!actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
-      userMap.remove(JsonKey.USER_TYPE);
-      userMap.remove(JsonKey.USER_SUB_TYPE);
-      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-        Map<String, Object> userTypeAndSubType =
-            (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
-      }
+    userMap.remove(JsonKey.USER_TYPE);
+    userMap.remove(JsonKey.USER_SUB_TYPE);
+    if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
+      Map<String, Object> userTypeAndSubType =
+          (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
+      userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+      userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
     }
     if (!actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSU_USER.getValue())) {
       userMap.remove(JsonKey.LOCATION_CODES);
