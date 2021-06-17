@@ -20,6 +20,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.user.actors.UserUpdateActor;
 import org.sunbird.user.util.UserUtil;
@@ -241,22 +242,29 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
   }
 
   @Test
-  public void testUpdateUserSuccessWithLocationCodesNewVersion() {
+  public void testUpdateUserSuccessWithLocationCodesNewVersion2() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
+    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationLists2());
     boolean result =
         testScenario(
             getRequest(
-                true,
-                true,
-                true,
-                getUpdateRequestWithLocationCodes(),
-                ActorOperations.UPDATE_USER_V2),
-            null,
+                true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER),
+            ResponseCode.mandatoryParamsMissing,
             props);
     assertTrue(result);
+  }
+
+  public List<Location> getLocationLists2() {
+    List<Location> locations = new ArrayList<>();
+    Location location = new Location();
+    location.setType("cluster");
+    location.setCode("locationCode");
+    locations.add(location);
+    return locations;
   }
 
   @Test

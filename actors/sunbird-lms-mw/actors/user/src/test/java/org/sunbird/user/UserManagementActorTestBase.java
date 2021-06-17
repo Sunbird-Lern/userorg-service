@@ -115,7 +115,7 @@ public abstract class UserManagementActorTestBase {
   public static ElasticSearchService esService;
   // public static UserClientImpl userClient;
   protected static OrganisationClient organisationClient;
-  private LocationClient locationClient;
+  public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static LocationService locationService;
   public static UserRoleServiceImpl userRoleService;
