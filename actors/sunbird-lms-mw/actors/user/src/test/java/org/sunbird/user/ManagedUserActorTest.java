@@ -135,6 +135,16 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       List<Map<String, String>> profileLocn = new ArrayList<>();
       profileLocn.add(proLocn);
       reqObj.getRequest().put(JsonKey.PROFILE_LOCATION, profileLocn);
+      reqObj.getRequest().put(JsonKey.PHONE, "987654879");
+      reqObj.getRequest().put(JsonKey.EMAIL, "abc@xyz.com");
+      reqObj.getRequest().put(JsonKey.USERNAME, "userName");
+      Map<String, String> externalId = new HashMap<>();
+      externalId.put(JsonKey.ID, "id");
+      externalId.put(JsonKey.ID_TYPE, "idType");
+      externalId.put(JsonKey.PROVIDER, "provider");
+      List<Map<String, String>> externalIds = new ArrayList<>();
+      externalIds.add(externalId);
+      reqObj.getRequest().put(JsonKey.EXTERNAL_IDS, externalIds);
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
