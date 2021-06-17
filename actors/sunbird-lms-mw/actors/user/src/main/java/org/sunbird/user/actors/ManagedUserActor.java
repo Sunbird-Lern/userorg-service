@@ -288,22 +288,14 @@ public class ManagedUserActor extends BaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
-    if (StringUtils.isEmpty(managedBy)) {
-      // check phone and uniqueness using user look table
-      userLookupService.checkPhoneUniqueness(
-          (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      userLookupService.checkEmailUniqueness(
-          (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
-    } else {
-      String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-      String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-      userMap.put(JsonKey.CHANNEL, channel);
-      Map<String, Object> managedByInfo =
-          UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
-      convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
-      ignoreOrAcceptFrameworkData(userMap, managedByInfo, actorMessage.getRequestContext());
-    }
+    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
+    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    userMap.put(JsonKey.CHANNEL, channel);
+    Map<String, Object> managedByInfo =
+        UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
+    convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
+    ignoreOrAcceptFrameworkData(userMap, managedByInfo, actorMessage.getRequestContext());
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
