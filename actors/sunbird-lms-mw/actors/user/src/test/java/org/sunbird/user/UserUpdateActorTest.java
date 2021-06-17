@@ -227,6 +227,20 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testUpdateUserWithLocationCodesFailure() {
+    Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
+    when(Patterns.ask(
+            Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
+        .thenReturn(future);
+    Request req =
+        getRequest(
+            true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER);
+    req.getRequest().put(JsonKey.LOCATION_CODES, "locationCode");
+    boolean result = testScenario(req, ResponseCode.dataTypeError, props);
+    assertTrue(result);
+  }
+
+  @Test
   public void testUpdateUserSuccessWithLocationCodesNewVersion() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
@@ -307,6 +321,11 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
   public void testUpdateUserSuccessWithoutUserCallerId() {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
+    Request reqObj = getRequest(false, true, true, req, ActorOperations.UPDATE_USER);
+    reqObj.getRequest().put(JsonKey.PROFILE_LOCATION, null);
+    reqObj.getRequest().put(JsonKey.PROFILE_USERTYPE, null);
+    reqObj.getRequest().put(JsonKey.TNC_ACCEPTED_ON, null);
+    reqObj.getRequest().put(JsonKey.USER_TYPE, null);
     boolean result =
         testScenario(getRequest(false, true, true, req, ActorOperations.UPDATE_USER), null, props);
     assertTrue(result);
