@@ -256,6 +256,24 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> searchUserV3(Http.Request httpRequest) {
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    return handleSearchRequest(
+        ActorOperations.USER_SEARCH_V3.getValue(),
+        httpRequest.body().asJson(),
+        userSearchRequest -> {
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(httpRequest),
+        EsType.user.getTypeName(),
+        httpRequest);
+  }
+
   public CompletionStage<Result> userLookup(Http.Request httpRequest) {
     return handleRequest(
         ActorOperations.USER_LOOKUP.getValue(),

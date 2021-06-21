@@ -37,7 +37,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "userSearchV2", "orgSearch", "orgSearchV2"},
+  tasks = {"userSearch", "userSearchV2", "userSearchV3", "orgSearch", "orgSearchV2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -58,7 +58,8 @@ public class SearchHandlerActor extends BaseActor {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
-        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V3.getValue())) {
       handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
@@ -108,7 +109,8 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+    String searchVersion = request.getOperation();
+    if (searchVersion.equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       // checking for Backword compatibility
       backwardCompatibility(searchQueryMap);
     }
@@ -148,7 +150,9 @@ public class SearchHandlerActor extends BaseActor {
       getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
-        updateUserSearchResponseWithOrgLevelRole(userMap, request.getRequestContext());
+        if (!searchVersion.equalsIgnoreCase(ActorOperations.USER_SEARCH_V3.getValue())) {
+          updateUserSearchResponseWithOrgLevelRole(userMap, request.getRequestContext());
+        }
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
         Map<String, Object> userTypeDetail;
