@@ -19,6 +19,7 @@ GET     /v1/user/read/:uid				        @controllers.usermanagement.UserController
 GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
 GET  	/v3/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
 GET  	/v4/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV4(uid:String, request: play.mvc.Http.Request)
+GET  	/v5/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV5(uid:String, request: play.mvc.Http.Request)
 GET     /private/user/v1/read/:externalId       @controllers.usermanagement.UserController.getUserByIdV3(externalId:String, request: play.mvc.Http.Request)
 
 POST    /v1/user/getuser                        @controllers.usermanagement.UserController.getUserByLoginId(request: play.mvc.Http.Request)

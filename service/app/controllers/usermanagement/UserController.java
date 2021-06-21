@@ -173,6 +173,13 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> getUserByIdV5(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV3(
+        ActorOperations.GET_USER_PROFILE_V5.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
