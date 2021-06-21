@@ -41,7 +41,6 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.common.util.Matcher;
-import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
@@ -108,11 +107,11 @@ public class UserManagementActor extends BaseActor {
     switch (operation) {
       case "createUser": // create User [v1,v2,v3]
       case "createSSOUser":
-        createUser(request);
+        createSSOUser(request);
         break;
       case "createUserV3":
       case "createSSUUser":
-        createUserV3(request);
+        createSSUUser(request);
         break;
       default:
         onReceiveUnsupportedOperation("UserManagementActor");
@@ -124,21 +123,20 @@ public class UserManagementActor extends BaseActor {
    *
    * @param actorMessage
    */
-  private void createUserV3(Request actorMessage) {
+  private void createSSUUser(Request actorMessage) {
     logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor:createUserV3 method called.");
+        actorMessage.getRequestContext(), "UserManagementActor:createSSUUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String signupType =
-        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
+        actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
             ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
             : "";
     String source =
-        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
+        actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
             ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
             : "";
 
-    String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
     String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
     String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
@@ -147,7 +145,7 @@ public class UserManagementActor extends BaseActor {
       setProfileUserTypeAndLocation(userMap, actorMessage);
     }
     profileUserType(userMap, actorMessage.getRequestContext());
-    processUserRequestV3(userMap, signupType, source, managedBy, actorMessage);
+    processSSUUser(userMap, signupType, source, actorMessage);
   }
 
   private void cacheFrameworkFieldsConfig(RequestContext context) {
@@ -163,61 +161,12 @@ public class UserManagementActor extends BaseActor {
     }
   }
 
-  private void ignoreOrAcceptFrameworkData(
-      Map<String, Object> userRequestMap,
-      Map<String, Object> userDbRecord,
-      RequestContext context) {
-    try {
-      validateUserFrameworkData(userRequestMap, userDbRecord, context);
-    } catch (ProjectCommonException pce) {
-      // Could be that the framework id or value - is invalid, missing.
-      userRequestMap.remove(JsonKey.FRAMEWORK);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void validateUserFrameworkData(
-      Map<String, Object> userRequestMap,
-      Map<String, Object> userDbRecord,
-      RequestContext context) {
-    if (userRequestMap.containsKey(JsonKey.FRAMEWORK)) {
-      Map<String, Object> framework = (Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK);
-      List<String> frameworkIdList;
-      if (framework.get(JsonKey.ID) instanceof String) {
-        String frameworkIdString = (String) framework.remove(JsonKey.ID);
-        frameworkIdList = new ArrayList<>();
-        frameworkIdList.add(frameworkIdString);
-        framework.put(JsonKey.ID, frameworkIdList);
-      } else {
-        frameworkIdList = (List<String>) framework.get(JsonKey.ID);
-      }
-      userRequestMap.put(JsonKey.FRAMEWORK, framework);
-      List<String> frameworkFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
-      List<String> frameworkMandatoryFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.MANDATORY_FIELDS);
-      userRequestValidator.validateMandatoryFrameworkFields(
-          userRequestMap, frameworkFields, frameworkMandatoryFields);
-      Map<String, Object> rootOrgMap =
-          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
-      String hashtagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
-
-      verifyFrameworkId(hashtagId, frameworkIdList, context);
-      Map<String, List<Map<String, String>>> frameworkCachedValue =
-          getFrameworkDetails(frameworkIdList.get(0), context);
-      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK)).remove(JsonKey.ID);
-      userRequestValidator.validateFrameworkCategoryValues(userRequestMap, frameworkCachedValue);
-      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK))
-          .put(JsonKey.ID, frameworkIdList);
-    }
-  }
-
   /**
    * Method to create the new user , Username should be unique .
    *
    * @param actorMessage Request
    */
-  private void createUser(Request actorMessage) {
+  private void createSSOUser(Request actorMessage) {
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
@@ -264,7 +213,7 @@ public class UserManagementActor extends BaseActor {
         }
       }
     }
-    processUserRequest(userMap, callerId, actorMessage);
+    processSSOUser(userMap, callerId, actorMessage);
   }
 
   private String validateExternalIdAndGetOrgId(
@@ -362,31 +311,16 @@ public class UserManagementActor extends BaseActor {
             ResponseCode.parameterMismatch.getErrorMessage(), StringFormatter.joinByComma(param)));
   }
 
-  private void processUserRequestV3(
-      Map<String, Object> userMap,
-      String signupType,
-      String source,
-      String managedBy,
-      Request actorMessage) {
+  private void processSSUUser(
+      Map<String, Object> userMap, String signUpType, String source, Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
-    if (StringUtils.isEmpty(managedBy)) {
-      // check phone and uniqueness using user look table
-      userLookupService.checkPhoneUniqueness(
-          (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
-      userLookupService.checkEmailUniqueness(
-          (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
-    } else {
-      String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-      String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-      userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-      userMap.put(JsonKey.CHANNEL, channel);
-      Map<String, Object> managedByInfo =
-          UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
-      convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
-      ignoreOrAcceptFrameworkData(userMap, managedByInfo, actorMessage.getRequestContext());
-    }
+    // check phone and uniqueness using user look table
+    userLookupService.checkPhoneUniqueness(
+        (String) userMap.get(JsonKey.PHONE), actorMessage.getRequestContext());
+    userLookupService.checkEmailUniqueness(
+        (String) userMap.get(JsonKey.EMAIL), actorMessage.getRequestContext());
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
@@ -473,7 +407,7 @@ public class UserManagementActor extends BaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
 
-    processTelemetry(userMap, signupType, source, userId, actorMessage.getContext());
+    processTelemetry(userMap, signUpType, source, userId, actorMessage.getContext());
   }
 
   private void processTelemetry(
@@ -494,16 +428,11 @@ public class UserManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(signupType)) {
       TelemetryUtil.generateCorrelatedObject(
           signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    } else {
-      logger.info("UserManagementActor:processUserRequest: No signupType found");
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    } else {
-      logger.info("UserManagementActor:processUserRequest: No source found");
     }
-
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
 
@@ -576,7 +505,7 @@ public class UserManagementActor extends BaseActor {
   }
 
   @SuppressWarnings("unchecked")
-  private void processUserRequest(Map<String, Object> userMap, String callerId, Request request) {
+  private void processSSOUser(Map<String, Object> userMap, String callerId, Request request) {
     Map<String, Object> requestMap = null;
     UserUtil.setUserDefaultValue(userMap, callerId, request.getRequestContext());
     ObjectMapper mapper = new ObjectMapper();
@@ -814,71 +743,6 @@ public class UserManagementActor extends BaseActor {
             });
   }
 
-  public static void verifyFrameworkId(
-      String hashtagId, List<String> frameworkIdList, RequestContext context) {
-    List<String> frameworks = DataCacheHandler.getHashtagIdFrameworkIdMap().get(hashtagId);
-    String frameworkId = frameworkIdList.get(0);
-    if (frameworks != null && frameworks.contains(frameworkId)) {
-      return;
-    } else {
-      Map<String, List<Map<String, String>>> frameworkDetails =
-          getFrameworkDetails(frameworkId, context);
-      if (frameworkDetails == null)
-        throw new ProjectCommonException(
-            ResponseCode.errorNoFrameworkFound.getErrorCode(),
-            ResponseCode.errorNoFrameworkFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-  }
-
-  public static Map<String, List<Map<String, String>>> getFrameworkDetails(
-      String frameworkId, RequestContext context) {
-    if (DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId) == null) {
-      handleGetFrameworkDetails(frameworkId, context);
-    }
-    return DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static void handleGetFrameworkDetails(String frameworkId, RequestContext context) {
-    Map<String, Object> response = ContentStoreUtil.readFramework(frameworkId, context);
-    Map<String, List<Map<String, String>>> frameworkCacheMap = new HashMap<>();
-    List<String> supportedfFields = DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
-    Map<String, Object> result = (Map<String, Object>) response.get(JsonKey.RESULT);
-    if (MapUtils.isNotEmpty(result)) {
-      Map<String, Object> frameworkDetails = (Map<String, Object>) result.get(JsonKey.FRAMEWORK);
-      if (MapUtils.isNotEmpty(frameworkDetails)) {
-        List<Map<String, Object>> frameworkCategories =
-            (List<Map<String, Object>>) frameworkDetails.get(JsonKey.CATEGORIES);
-        if (CollectionUtils.isNotEmpty(frameworkCategories)) {
-          for (Map<String, Object> frameworkCategoriesValue : frameworkCategories) {
-            String frameworkField = (String) frameworkCategoriesValue.get(JsonKey.CODE);
-            if (supportedfFields.contains(frameworkField)) {
-              List<Map<String, String>> listOfFields = new ArrayList<>();
-              List<Map<String, Object>> frameworkTermList =
-                  (List<Map<String, Object>>) frameworkCategoriesValue.get(JsonKey.TERMS);
-              if (CollectionUtils.isNotEmpty(frameworkTermList)) {
-                for (Map<String, Object> frameworkTerm : frameworkTermList) {
-                  String id = (String) frameworkTerm.get(JsonKey.IDENTIFIER);
-                  String name = (String) frameworkTerm.get(JsonKey.NAME);
-                  Map<String, String> writtenValue = new HashMap<>();
-                  writtenValue.put(JsonKey.ID, id);
-                  writtenValue.put(JsonKey.NAME, name);
-                  listOfFields.add(writtenValue);
-                }
-              }
-              if (StringUtils.isNotBlank(frameworkField)
-                  && CollectionUtils.isNotEmpty(listOfFields))
-                frameworkCacheMap.put(frameworkField, listOfFields);
-            }
-            if (MapUtils.isNotEmpty(frameworkCacheMap))
-              DataCacheHandler.updateFrameworkCategoriesMap(frameworkId, frameworkCacheMap);
-          }
-        }
-      }
-    }
-  }
-
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
     logger.info(
         "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
@@ -1013,7 +877,7 @@ public class UserManagementActor extends BaseActor {
    * @param type
    * @return
    */
-  public static boolean isValidLocationType(String type, List<String> typeList) {
+  public static void isValidLocationType(String type, List<String> typeList) {
     if (null != type && !typeList.contains(type.toLowerCase())) {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
@@ -1021,7 +885,6 @@ public class UserManagementActor extends BaseActor {
               ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    return true;
   }
 
   private List<Location> createLocationLists(List<Map<String, String>> locationCodes) {

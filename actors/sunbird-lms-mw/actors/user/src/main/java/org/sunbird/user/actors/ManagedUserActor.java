@@ -82,13 +82,13 @@ public class ManagedUserActor extends BaseActor {
     switch (operation) {
       case "createUserV4":
       case "createManagedUser": // managedUser creation new version
-        createUserV4(request);
+        createManagedUser(request);
         break;
       case "getManagedUsers": // managedUser search
         getManagedUsers(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserManagementActor");
+        onReceiveUnsupportedOperation("ManagedUserActor");
     }
   }
 
@@ -99,7 +99,7 @@ public class ManagedUserActor extends BaseActor {
    *
    * @param actorMessage
    */
-  private void createUserV4(Request actorMessage) {
+  private void createManagedUser(Request actorMessage) {
     logger.info(
         actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
     actorMessage.toLower();
@@ -112,19 +112,15 @@ public class ManagedUserActor extends BaseActor {
     validateLocationCodes(actorMessage);
 
     String signupType =
-        (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
+        actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
             ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
             : "";
     String source =
-        (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
+        actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
             ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
             : "";
 
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
-    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    userMap.put(JsonKey.CHANNEL, channel);
     logger.info(
         actorMessage.getRequestContext(),
         "validateUserId :: requestedId: " + actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -660,16 +656,11 @@ public class ManagedUserActor extends BaseActor {
     if (StringUtils.isNotBlank(signupType)) {
       TelemetryUtil.generateCorrelatedObject(
           signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    } else {
-      logger.info("UserManagementActor:processUserRequest: No signupType found");
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(
           source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    } else {
-      logger.info("UserManagementActor:processUserRequest: No source found");
     }
-
     TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
 
