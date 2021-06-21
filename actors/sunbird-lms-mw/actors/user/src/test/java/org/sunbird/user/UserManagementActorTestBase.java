@@ -82,6 +82,7 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
+  UserClient.class,
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
@@ -112,9 +113,9 @@ public abstract class UserManagementActorTestBase {
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
-  public static UserClient userClient;
+  // public static UserClientImpl userClient;
   protected static OrganisationClient organisationClient;
-  private LocationClient locationClient;
+  public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static LocationService locationService;
   public static UserRoleServiceImpl userRoleService;
@@ -163,8 +164,8 @@ public abstract class UserManagementActorTestBase {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
-    PowerMockito.mockStatic(UserClientImpl.class);
-    userClient = mock(UserClientImpl.class);
+    // PowerMockito.mockStatic(UserClientImpl.class);
+    // userClient = mock(UserClientImpl.class);
     PowerMockito.mockStatic(LocationClientImpl.class);
     locationClient = mock(LocationClientImpl.class);
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
@@ -440,23 +441,6 @@ public abstract class UserManagementActorTestBase {
     return locationTypeConfig;
   }
 
-  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    subject.tell(reqObj, probe.getRef());
-
-    if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.OK;
-    } else {
-      ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
-    }
-  }
-
   public Map<String, Object> getExternalIdMap() {
 
     Map<String, Object> reqMap = new HashMap<>();
@@ -570,5 +554,58 @@ public abstract class UserManagementActorTestBase {
     idType.put(JsonKey.TYPE, "type");
     locationIdType.add(idType);
     return locationIdType;
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode, Props props) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(
+      Request reqObj, ResponseCode errorCode, ResponseCode responseCode, Props props) {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (responseCode != null) {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      return null != res && res.getResponseCode() == responseCode;
+    }
+    if (errorCode != null) {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+    return true;
   }
 }
