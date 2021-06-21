@@ -86,7 +86,7 @@ public class UserUpdateActor extends BaseActor {
         updateUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserManagementActor");
+        onReceiveUnsupportedOperation("UserUpdateActor");
     }
   }
 
