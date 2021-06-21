@@ -42,6 +42,7 @@ import scala.concurrent.Future;
     "getUserDetailsByLoginId",
     "getUserProfileV3",
     "getUserProfileV4",
+    "getUserProfileV5",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -67,6 +68,9 @@ public class UserProfileReadActor extends BaseActor {
         getUserProfileV3(request);
         break;
       case "getUserProfileV4":
+        getUserProfileV3(request);
+        break;
+      case "getUserProfileV5":
         getUserProfileV3(request);
         break;
       case "getUserDetailsByLoginId":
