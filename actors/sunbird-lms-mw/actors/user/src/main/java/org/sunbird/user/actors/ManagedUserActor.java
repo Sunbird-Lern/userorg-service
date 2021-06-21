@@ -16,7 +16,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -47,7 +46,6 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.location.service.LocationService;
 import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
@@ -63,7 +61,7 @@ import scala.concurrent.Future;
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
-public class ManagedUserActor extends BaseActor {
+public class ManagedUserActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private LocationClient locationClient = LocationClientImpl.getInstance();
   private UserClient userClient = UserClientImpl.getInstance();
@@ -636,32 +634,6 @@ public class ManagedUserActor extends BaseActor {
         (String) completeUserMap.get(JsonKey.USER_ID),
         completeUserMap,
         context);
-  }
-
-  private void processTelemetry(
-      Map<String, Object> userMap,
-      String signupType,
-      String source,
-      String userId,
-      Map<String, Object> context) {
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    Map<String, String> rollUp = new HashMap<>();
-    rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    context.put(JsonKey.ROLLUP, rollUp);
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
-    TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
-    if (StringUtils.isNotBlank(signupType)) {
-      TelemetryUtil.generateCorrelatedObject(
-          signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    }
-    if (StringUtils.isNotBlank(source)) {
-      TelemetryUtil.generateCorrelatedObject(
-          source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    }
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
 
   /**

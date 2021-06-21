@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -56,7 +55,6 @@ import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserRoleService;
@@ -80,7 +78,7 @@ import scala.concurrent.Future;
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
-public class UserManagementActor extends BaseActor {
+public class UserManagementActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private static LocationClient locationClient = LocationClientImpl.getInstance();
@@ -167,7 +165,6 @@ public class UserManagementActor extends BaseActor {
    * @param actorMessage Request
    */
   private void createSSOUser(Request actorMessage) {
-    Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
@@ -408,32 +405,6 @@ public class UserManagementActor extends BaseActor {
     }
 
     processTelemetry(userMap, signUpType, source, userId, actorMessage.getContext());
-  }
-
-  private void processTelemetry(
-      Map<String, Object> userMap,
-      String signupType,
-      String source,
-      String userId,
-      Map<String, Object> context) {
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    Map<String, String> rollUp = new HashMap<>();
-    rollUp.put("l1", (String) userMap.get(JsonKey.ROOT_ORG_ID));
-    context.put(JsonKey.ROLLUP, rollUp);
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
-    TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
-    if (StringUtils.isNotBlank(signupType)) {
-      TelemetryUtil.generateCorrelatedObject(
-          signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
-    }
-    if (StringUtils.isNotBlank(source)) {
-      TelemetryUtil.generateCorrelatedObject(
-          source, StringUtils.capitalize(JsonKey.REQUEST_SOURCE), null, correlatedObject);
-    }
-    TelemetryUtil.telemetryProcessingCall(userMap, targetObject, correlatedObject, context);
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {

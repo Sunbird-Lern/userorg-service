@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
@@ -45,7 +44,6 @@ import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.org.UserOrg;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
@@ -64,7 +62,7 @@ import org.sunbird.validator.user.UserRequestValidator;
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
-public class UserUpdateActor extends BaseActor {
+public class UserUpdateActor extends UserBaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
@@ -253,13 +251,11 @@ public class UserUpdateActor extends BaseActor {
       completeUserDetails.putAll(requestMap);
       saveUserDetailsToEs(completeUserDetails, actorMessage.getRequestContext());
     }
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-    TelemetryUtil.telemetryProcessingCall(
-        userMap, targetObject, correlatedObject, actorMessage.getContext());
+    generateTelemetryEvent(
+        userMap,
+        (String) userMap.get(JsonKey.USER_ID),
+        actorMessage.getOperation(),
+        actorMessage.getContext());
   }
 
   private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
