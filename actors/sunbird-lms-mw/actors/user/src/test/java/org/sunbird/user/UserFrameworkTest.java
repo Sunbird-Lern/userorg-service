@@ -3,13 +3,13 @@ package org.sunbird.user;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.actor.Props;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -23,6 +23,7 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.user.actors.UserUpdateActor;
 
 @PowerMockIgnore({
   "javax.management.*",
@@ -32,8 +33,9 @@ import org.sunbird.learner.util.Util;
   "javax.crypto.*"
 })
 @PrepareForTest({DataCacheHandler.class, ContentStoreUtil.class})
-@Ignore
 public class UserFrameworkTest extends UserManagementActorTestBase {
+
+  public final Props props = Props.create(UserUpdateActor.class);
 
   @Before
   public void beforeTest() {
@@ -50,35 +52,35 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
-    boolean res = testScenario(reqObj, null);
+    boolean res = testScenario(reqObj, null, props);
     assertTrue(res);
   }
 
   @Test
   public void testUpdateUserFrameworkFailureInvalidGradeLevel() {
     Request reqObj = getRequest("gradeLevel", "SomeWrongGrade");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue);
+    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
     assertTrue(res);
   }
 
   @Test
   public void testUpdateUserFrameworkFailureInvalidMedium() {
     Request reqObj = getRequest("medium", "glish");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue);
+    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
     assertTrue(res);
   }
 
   @Test
   public void testUpdateUserFrameworkFailureInvalidBoard() {
     Request reqObj = getRequest("board", "RBCS");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue);
+    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
     assertTrue(res);
   }
 
   @Test
   public void testUpdateUserFrameworkFailureInvalidFrameworkId() {
     Request reqObj = getRequest(JsonKey.ID, "invalidFrameworkId");
-    boolean res = testScenario(reqObj, ResponseCode.errorNoFrameworkFound);
+    boolean res = testScenario(reqObj, ResponseCode.errorNoFrameworkFound, props);
     assertTrue(res);
   }
 
