@@ -91,6 +91,7 @@ public enum ActorOperations {
   UPDATE_USER_CONSENT("updateUserConsent"),
   USER_SEARCH("userSearch"),
   USER_SEARCH_V2("userSearchV2"),
+  USER_SEARCH_V3("userSearchV3"),
   ORG_SEARCH("orgSearch"),
   ORG_SEARCH_V2("orgSearchV2"),
   USER_LOOKUP("userLookup"),
