@@ -359,15 +359,15 @@ public class UserManagementActor extends UserBaseActor {
                 @Override
                 public Boolean call() {
                   try {
-                    Map<String, Object> updatePasswordMap = new HashMap<String, Object>();
-                    updatePasswordMap.put(JsonKey.ID, (String) userMap.get(JsonKey.ID));
+                    Map<String, Object> updatePasswordMap = new HashMap<>();
+                    updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
                     updatePasswordMap.put(JsonKey.PASSWORD, password);
                     logger.info(
                         actorMessage.getRequestContext(),
                         "Update password value passed "
                             + password
                             + " --"
-                            + (String) userMap.get(JsonKey.ID));
+                            + userMap.get(JsonKey.ID));
                     return UserUtil.updatePassword(
                         updatePasswordMap, actorMessage.getRequestContext());
                   } catch (Exception e) {
