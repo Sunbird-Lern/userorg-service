@@ -1,14 +1,11 @@
 package org.sunbird.user;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
-import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.Arrays;
 import java.util.Map;
@@ -23,7 +20,7 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
 import scala.concurrent.Future;
 
-public class UserManagementActorTest extends UserManagementActorTestBase {
+public class SSOUserCreateActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testCreateUserSuccessWithUserCallerId() {
@@ -49,24 +46,6 @@ public class UserManagementActorTest extends UserManagementActorTestBase {
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
             null);
     assertTrue(result);
-  }
-
-  @Test
-  public void testCreateUserV3Failure() {
-    Organisation organisation = new Organisation();
-    organisation.setId("rootOrgId");
-    organisation.setChannel("anyChannel");
-    organisation.setRootOrgId("rootOrgId");
-    organisation.setTenant(false);
-    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(organisation);
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    subject.tell(
-        getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_SSU_USER),
-        probe.getRef());
-    Exception ex = probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
-    assertNotNull(ex);
   }
 
   @Test

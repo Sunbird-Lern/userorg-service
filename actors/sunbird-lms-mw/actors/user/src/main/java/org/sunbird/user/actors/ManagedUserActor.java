@@ -37,7 +37,6 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
@@ -109,15 +108,6 @@ public class ManagedUserActor extends UserBaseActor {
     }
     validateLocationCodes(actorMessage);
 
-    String signupType =
-        actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
-
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
     logger.info(
         actorMessage.getRequestContext(),
@@ -130,7 +120,7 @@ public class ManagedUserActor extends UserBaseActor {
 
     // If managedUser limit is set, validate total number of managed users against it
     UserUtil.validateManagedUserLimit(managedBy, actorMessage.getRequestContext());
-    processUserRequestV4(userMap, signupType, source, managedBy, actorMessage);
+    processUserRequestV4(userMap, managedBy, actorMessage);
   }
 
   private void setProfileUserTypeAndLocation(Map<String, Object> userMap) {
@@ -158,11 +148,11 @@ public class ManagedUserActor extends UserBaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
-      // As of now locationCode can take array of only locationcodes and map of locationCodes which
+      // As of now locationCode can take array of only locationCodes and map of locationCodes which
       // include type and code of the location
       String stateCode = null;
       List<String> set = new ArrayList<>();
-      List<Location> locationList = new ArrayList<>();
+      List<Location> locationList;
       if (((List) locationCodes).get(0) instanceof String) {
         List<String> locations = (List<String>) locationCodes;
         locationList =
@@ -220,32 +210,13 @@ public class ManagedUserActor extends UserBaseActor {
         }
       }
       List<String> typeList = locationTypeConfigMap.get(stateCode);
-      String stateId = null;
       for (Location location : locationList) {
-        // for create-MUA we allow locations upto district for remaining we will validate all.
-        if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                    || userRequest
-                        .getOperation()
-                        .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))
-                && ((location.getType().equals(JsonKey.STATE))
-                    || (location.getType().equals(JsonKey.DISTRICT))))
-            || (!userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                && !userRequest
-                    .getOperation()
-                    .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
+        // for create-MUA we allow locations upto district
+        if ((location.getType().equals(JsonKey.STATE))
+            || (location.getType().equals(JsonKey.DISTRICT))) {
           isValidLocationType(location.getType(), typeList);
-          if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
-            stateId = location.getId();
-          }
-          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-            set.add(location.getCode());
-          } else {
-            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          }
+          set.add(location.getCode());
         }
-      }
-      if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {
-        userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
@@ -274,11 +245,7 @@ public class ManagedUserActor extends UserBaseActor {
   }
 
   private void processUserRequestV4(
-      Map<String, Object> userMap,
-      String signupType,
-      String source,
-      String managedBy,
-      Request actorMessage) {
+      Map<String, Object> userMap, String managedBy, Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
@@ -372,7 +339,7 @@ public class ManagedUserActor extends UserBaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
 
-    processTelemetry(userMap, signupType, source, userId, actorMessage.getContext());
+    processTelemetry(userMap, null, null, userId, actorMessage.getContext());
   }
 
   private void removeUnwanted(Map<String, Object> reqMap) {
@@ -628,14 +595,6 @@ public class ManagedUserActor extends UserBaseActor {
     return userOrgMap;
   }
 
-  private Future<String> saveUserToES(Map<String, Object> completeUserMap, RequestContext context) {
-    return esUtil.save(
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) completeUserMap.get(JsonKey.USER_ID),
-        completeUserMap,
-        context);
-  }
-
   /**
    * Get managed user list for LUA uuid (JsonKey.ID) and fetch encrypted token for eac user from
    * admin utils if the JsonKey.WITH_TOKENS value sent in query param is true
@@ -682,16 +641,5 @@ public class ManagedUserActor extends UserBaseActor {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, responseMap);
     sender().tell(response, self());
-  }
-
-  private void saveUserToKafka(Map<String, Object> completeUserMap) {
-    ObjectMapper mapper = new ObjectMapper();
-    try {
-      String event = mapper.writeValueAsString(completeUserMap);
-      // user_events
-      KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
   }
 }

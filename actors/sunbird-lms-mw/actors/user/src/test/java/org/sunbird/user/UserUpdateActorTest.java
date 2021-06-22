@@ -7,6 +7,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -210,6 +211,28 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
         testScenario(
             getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V2), null, props);
     assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserUpdateEmailSuccessNewVersion2() {
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    user.put(JsonKey.USER_TYPE, "teacher");
+    user.put(JsonKey.USER_SUB_TYPE, null);
+    user.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+        .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(user);
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V2), probe.getRef());
+    assertTrue(true);
   }
 
   @Test

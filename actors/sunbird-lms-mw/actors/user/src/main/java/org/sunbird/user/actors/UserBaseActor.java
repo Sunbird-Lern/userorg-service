@@ -1,16 +1,65 @@
 package org.sunbird.user.actors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actorutil.systemsettings.SystemSettingClient;
+import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.TelemetryEnvKey;
+import org.sunbird.common.request.RequestContext;
+import org.sunbird.kafka.client.KafkaClient;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import scala.concurrent.Future;
 
 public abstract class UserBaseActor extends BaseActor {
+
+  protected SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+  protected ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+
+  protected void cacheFrameworkFieldsConfig(RequestContext context) {
+    if (MapUtils.isEmpty(DataCacheHandler.getFrameworkFieldsConfig())) {
+      Map<String, List<String>> frameworkFieldsConfig =
+          systemSettingClient.getSystemSettingByFieldAndKey(
+              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+              JsonKey.USER_PROFILE_CONFIG,
+              JsonKey.FRAMEWORK,
+              new TypeReference<Map<String, List<String>>>() {},
+              context);
+      DataCacheHandler.setFrameworkFieldsConfig(frameworkFieldsConfig);
+    }
+  }
+
+  protected Future<String> saveUserToES(
+      Map<String, Object> completeUserMap, RequestContext context) {
+    return esUtil.save(
+        ProjectUtil.EsType.user.getTypeName(),
+        (String) completeUserMap.get(JsonKey.USER_ID),
+        completeUserMap,
+        context);
+  }
+
+  protected void saveUserToKafka(Map<String, Object> completeUserMap) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String event = mapper.writeValueAsString(completeUserMap);
+      // user_events
+      KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
 
   protected void processTelemetry(
       Map<String, Object> userMap,

@@ -58,7 +58,7 @@ import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.user.actors.UserManagementActor;
+import org.sunbird.user.actors.SSOUserCreateActor;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserRoleServiceImpl;
@@ -108,7 +108,7 @@ import scala.concurrent.Promise;
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
-  public static final Props props = Props.create(UserManagementActor.class);
+  public final Props props = Props.create(SSOUserCreateActor.class);
   public static Map<String, Object> reqMap;
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;

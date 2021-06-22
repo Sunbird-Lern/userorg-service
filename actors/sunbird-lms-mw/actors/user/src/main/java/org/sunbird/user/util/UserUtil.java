@@ -331,8 +331,6 @@ public class UserUtil {
   public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
     userMap.put(
         JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
-    // Since global settings are introduced, profile visibility map should be empty during user
-    // creation
     userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     userMap.put(JsonKey.IS_DELETED, false);
     userMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
@@ -491,9 +489,6 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user, context);
     }
-    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
-      updateExternalIdsStatus(user.getExternalIds());
-    }
   }
 
   /**
@@ -513,14 +508,6 @@ public class UserUtil {
       return (!((encEmailOrPhone).equalsIgnoreCase(dbEmailOrPhone)));
     }
     return false;
-  }
-
-  private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
-    externalIds.forEach(
-        externalIdMap -> {
-          // Needed in 3.2
-          // externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
-        });
   }
 
   private static Optional<Map<String, String>> checkExternalID(

@@ -291,11 +291,11 @@ public class UserUpdateActor extends UserBaseActor {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
-      // As of now locationCode can take array of only locationcodes and map of locationCodes which
+      // As of now locationCode can take array of only locationCodes and map of locationCodes which
       // include type and code of the location
       String stateCode = null;
       List<String> set = new ArrayList<>();
-      List<Location> locationList = new ArrayList<>();
+      List<Location> locationList;
       if (((List) locationCodes).get(0) instanceof String) {
         List<String> locations = (List<String>) locationCodes;
         locationList =
@@ -355,26 +355,14 @@ public class UserUpdateActor extends UserBaseActor {
       List<String> typeList = locationTypeConfigMap.get(stateCode);
       String stateId = null;
       for (Location location : locationList) {
-        // for create-MUA we allow locations upto district for remaining we will validate all.
-        if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                    || userRequest
-                        .getOperation()
-                        .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))
-                && ((location.getType().equals(JsonKey.STATE))
-                    || (location.getType().equals(JsonKey.DISTRICT))))
-            || (!userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                && !userRequest
-                    .getOperation()
-                    .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
-          isValidLocationType(location.getType(), typeList);
-          if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
-            stateId = location.getId();
-          }
-          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-            set.add(location.getCode());
-          } else {
-            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          }
+        isValidLocationType(location.getType(), typeList);
+        if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
+          stateId = location.getId();
+        }
+        if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+          set.add(location.getCode());
+        } else {
+          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
         }
       }
       if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {

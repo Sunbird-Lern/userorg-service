@@ -38,7 +38,7 @@ import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.user.actors.UserManagementActor;
+import org.sunbird.user.actors.UserRoleActor;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -91,7 +91,7 @@ public class UserAssignRoleTest {
   @BeforeClass
   public static void setUp() throws Exception {
     system = ActorSystem.create("system");
-    props = Props.create(UserManagementActor.class);
+    props = Props.create(UserRoleActor.class);
 
     userOrg.put(JsonKey.ID, ID);
     userOrg.put(JsonKey.ORGANISATION_ID, orgId);
