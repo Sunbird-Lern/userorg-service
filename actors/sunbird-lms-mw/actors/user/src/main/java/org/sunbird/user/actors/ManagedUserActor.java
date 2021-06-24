@@ -1,6 +1,5 @@
 package org.sunbird.user.actors;
 
-import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -34,9 +32,9 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
@@ -52,7 +50,6 @@ import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
-import scala.Tuple2;
 import scala.concurrent.Future;
 
 @ActorConfig(
@@ -272,7 +269,6 @@ public class ManagedUserActor extends UserBaseActor {
 
     int userFlagValue = userFlagsToNum(userFlagsMap);
     userMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
-    final String password = (String) userMap.get(JsonKey.PASSWORD);
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
     Response response = userService.createUser(userMap, actorMessage.getRequestContext());
@@ -288,58 +284,34 @@ public class ManagedUserActor extends UserBaseActor {
           "UserManagementActor:processUserRequest: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      saveUserToKafka(esResponse);
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        String event = mapper.writeValueAsString(esResponse);
+        // user_events
+        KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
       sender().tell(response, self());
     } else {
-      Future<Boolean> kcFuture =
-          Futures.future(
-              (Callable<Boolean>)
-                  () -> {
-                    try {
-                      Map<String, Object> updatePasswordMap = new HashMap<>();
-                      updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
-                      updatePasswordMap.put(JsonKey.PASSWORD, password);
-                      logger.info(
-                          actorMessage.getRequestContext(),
-                          "Update password value passed "
-                              + password
-                              + " --"
-                              + userMap.get(JsonKey.ID));
-                      return UserUtil.updatePassword(
-                          updatePasswordMap, actorMessage.getRequestContext());
-                    } catch (Exception e) {
-                      logger.error(
-                          actorMessage.getRequestContext(),
-                          "Error occurred during update password : " + e.getMessage(),
-                          e);
-                      return false;
-                    }
-                  },
-              getContext().dispatcher());
       Future<Response> future =
-          saveUserToES(esResponse, actorMessage.getRequestContext())
-              .zip(kcFuture)
+          esUtil
+              .save(
+                  ProjectUtil.EsType.user.getTypeName(),
+                  (String) esResponse.get(JsonKey.USER_ID),
+                  esResponse,
+                  actorMessage.getRequestContext())
               .map(
                   new Mapper<>() {
                     @Override
-                    public Response apply(Tuple2<String, Boolean> parameter) {
-                      boolean updatePassResponse = parameter._2;
-                      logger.info(
-                          actorMessage.getRequestContext(),
-                          "UserManagementActor:processUserRequest: Response from update password call "
-                              + updatePassResponse);
-                      if (!updatePassResponse) {
-                        response.put(
-                            JsonKey.ERROR_MSG, ResponseMessage.Message.ERROR_USER_UPDATE_PASSWORD);
-                      }
+                    public Response apply(String parameter) {
                       return response;
                     }
                   },
-                  getContext().dispatcher());
+                  context().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
-
-    processTelemetry(userMap, null, null, userId, actorMessage.getContext());
+    generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
   }
 
   private void removeUnwanted(Map<String, Object> reqMap) {

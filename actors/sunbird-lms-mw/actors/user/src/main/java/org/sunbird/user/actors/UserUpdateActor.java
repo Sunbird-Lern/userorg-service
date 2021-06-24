@@ -157,7 +157,6 @@ public class UserUpdateActor extends UserBaseActor {
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
-    // As of now disallowing updating manageble user's phone/email, will le allowed in next release
     boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
         && ((StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL))
@@ -242,7 +241,6 @@ public class UserUpdateActor extends UserBaseActor {
           ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
     }
     sender().tell(response, self());
-    // Managed-users should get ResetPassword Link
     if (resetPasswordLink) {
       sendResetPasswordLink(requestMap, actorMessage.getRequestContext());
     }
@@ -251,11 +249,8 @@ public class UserUpdateActor extends UserBaseActor {
       completeUserDetails.putAll(requestMap);
       saveUserDetailsToEs(completeUserDetails, actorMessage.getRequestContext());
     }
-    generateTelemetryEvent(
-        userMap,
-        (String) userMap.get(JsonKey.USER_ID),
-        actorMessage.getOperation(),
-        actorMessage.getContext());
+    generateUserTelemetry(
+        userMap, actorMessage, (String) userMap.get(JsonKey.USER_ID), JsonKey.UPDATE);
   }
 
   private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {

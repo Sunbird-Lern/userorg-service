@@ -3,6 +3,7 @@ package org.sunbird.user.actors;
 import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -72,11 +75,11 @@ public class SSOUserCreateActor extends UserBaseActor {
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private OrgExternalService orgExternalService = new OrgExternalService();
-  private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private ObjectMapper mapper = new ObjectMapper();
   private ActorRef systemSettingActorRef = null;
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -235,7 +238,12 @@ public class SSOUserCreateActor extends UserBaseActor {
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
       Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
       Future<Response> future =
-          saveUserToES(userDetails, request.getRequestContext())
+          esUtil
+              .save(
+                  ProjectUtil.EsType.user.getTypeName(),
+                  (String) userDetails.get(JsonKey.USER_ID),
+                  userDetails,
+                  request.getRequestContext())
               .map(
                   new Mapper<String, Response>() {
                     @Override
@@ -249,24 +257,13 @@ public class SSOUserCreateActor extends UserBaseActor {
       if (null != resp) {
         saveUserDetailsToEs(esResponse, request.getRequestContext());
       }
-      /*The pattern of this call was incorrect that it tells the ES actor after sending a response. In a high load system,
-      this could be fatal, due to this it was  throw an error that the user is not found . so shifted this line after saving to ES */
       sender().tell(response, self());
     }
     requestMap.put(JsonKey.PASSWORD, userMap.get(JsonKey.PASSWORD));
     if (StringUtils.isNotBlank(callerId)) {
       sendEmailAndSms(requestMap, request.getRequestContext());
     }
-    generateUserTelemetry(userMap, request, userId);
-  }
-
-  private void generateUserTelemetry(Map<String, Object> userMap, Request request, String userId) {
-    Request telemetryReq = new Request();
-    telemetryReq.getRequest().put("userMap", userMap);
-    telemetryReq.getRequest().put("userId", userId);
-    telemetryReq.setContext(request.getContext());
-    telemetryReq.setOperation("generateUserTelemetry");
-    tellToAnother(telemetryReq);
+    generateUserTelemetry(userMap, request, userId, JsonKey.CREATE);
   }
 
   private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
@@ -693,5 +690,18 @@ public class SSOUserCreateActor extends UserBaseActor {
     EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     tellToAnother(EmailAndSmsRequest);
+  }
+
+  private void cacheFrameworkFieldsConfig(RequestContext context) {
+    if (MapUtils.isEmpty(DataCacheHandler.getFrameworkFieldsConfig())) {
+      Map<String, List<String>> frameworkFieldsConfig =
+          systemSettingClient.getSystemSettingByFieldAndKey(
+              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+              JsonKey.USER_PROFILE_CONFIG,
+              JsonKey.FRAMEWORK,
+              new TypeReference<Map<String, List<String>>>() {},
+              context);
+      DataCacheHandler.setFrameworkFieldsConfig(frameworkFieldsConfig);
+    }
   }
 }

@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +17,12 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actorutil.systemsettings.SystemSettingClient;
+import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
@@ -28,6 +33,7 @@ import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
@@ -57,6 +63,8 @@ public class SSUUserCreateActor extends UserBaseActor {
   private ObjectMapper mapper = new ObjectMapper();
   private ActorRef systemSettingActorRef = null;
   private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -86,14 +94,6 @@ public class SSUUserCreateActor extends UserBaseActor {
         actorMessage.getRequestContext(), "UserManagementActor:createSSUUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
-    String signUpType =
-        actorMessage.getContext().get(JsonKey.SIGNUP_TYPE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.SIGNUP_TYPE)
-            : "";
-    String source =
-        actorMessage.getContext().get(JsonKey.REQUEST_SOURCE) != null
-            ? (String) actorMessage.getContext().get(JsonKey.REQUEST_SOURCE)
-            : "";
     userMap.put(
         JsonKey.ROOT_ORG_ID, DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID));
     userMap.put(
@@ -102,11 +102,10 @@ public class SSUUserCreateActor extends UserBaseActor {
       setProfileUserTypeAndLocation(userMap, actorMessage);
     }
     profileUserType(userMap, actorMessage.getRequestContext());
-    processSSUUser(userMap, signUpType, source, actorMessage);
+    processSSUUser(userMap, actorMessage);
   }
 
-  private void processSSUUser(
-      Map<String, Object> userMap, String signUpType, String source, Request actorMessage) {
+  private void processSSUUser(Map<String, Object> userMap, Request actorMessage) {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
@@ -146,43 +145,51 @@ public class SSUUserCreateActor extends UserBaseActor {
           "UserManagementActor:processUserRequest: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      saveUserToKafka(esResponse);
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        String event = mapper.writeValueAsString(esResponse);
+        // user_events
+        KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
       sender().tell(response, self());
     } else {
       Future<Boolean> kcFuture =
           Futures.future(
-              new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() {
-                  try {
-                    Map<String, Object> updatePasswordMap = new HashMap<>();
-                    updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
-                    updatePasswordMap.put(JsonKey.PASSWORD, password);
-                    logger.info(
-                        actorMessage.getRequestContext(),
-                        "Update password value passed "
-                            + password
-                            + " --"
-                            + userMap.get(JsonKey.ID));
-                    return UserUtil.updatePassword(
-                        updatePasswordMap, actorMessage.getRequestContext());
-                  } catch (Exception e) {
-                    logger.error(
-                        actorMessage.getRequestContext(),
-                        "Error occurred during update password : " + e.getMessage(),
-                        e);
-                    return false;
-                  }
-                }
-              },
+              (Callable<Boolean>)
+                  () -> {
+                    try {
+                      Map<String, Object> updatePasswordMap = new HashMap<>();
+                      updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
+                      updatePasswordMap.put(JsonKey.PASSWORD, password);
+                      logger.info(
+                          actorMessage.getRequestContext(),
+                          "Update password value passed "
+                              + password
+                              + " --"
+                              + userMap.get(JsonKey.ID));
+                      return UserUtil.updatePassword(
+                          updatePasswordMap, actorMessage.getRequestContext());
+                    } catch (Exception e) {
+                      logger.error(
+                          actorMessage.getRequestContext(),
+                          "Error occurred during update password : " + e.getMessage(),
+                          e);
+                      return false;
+                    }
+                  },
               getContext().dispatcher());
       Future<Response> future =
-          saveUserToES(esResponse, actorMessage.getRequestContext())
+          esUtil
+              .save(
+                  ProjectUtil.EsType.user.getTypeName(),
+                  (String) esResponse.get(JsonKey.USER_ID),
+                  esResponse,
+                  actorMessage.getRequestContext())
               .zip(kcFuture)
               .map(
-                  new Mapper<Tuple2<String, Boolean>, Response>() {
-
+                  new Mapper<>() {
                     @Override
                     public Response apply(Tuple2<String, Boolean> parameter) {
                       boolean updatePassResponse = parameter._2;
@@ -200,8 +207,7 @@ public class SSUUserCreateActor extends UserBaseActor {
                   getContext().dispatcher());
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
-
-    processTelemetry(userMap, signUpType, source, userId, actorMessage.getContext());
+    generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
   }
 
   private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
@@ -357,5 +363,18 @@ public class SSUUserCreateActor extends UserBaseActor {
     userOrgMap.put(JsonKey.IS_DELETED, false);
     userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
+  }
+
+  private void cacheFrameworkFieldsConfig(RequestContext context) {
+    if (MapUtils.isEmpty(DataCacheHandler.getFrameworkFieldsConfig())) {
+      Map<String, List<String>> frameworkFieldsConfig =
+          systemSettingClient.getSystemSettingByFieldAndKey(
+              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+              JsonKey.USER_PROFILE_CONFIG,
+              JsonKey.FRAMEWORK,
+              new TypeReference<Map<String, List<String>>>() {},
+              context);
+      DataCacheHandler.setFrameworkFieldsConfig(frameworkFieldsConfig);
+    }
   }
 }
