@@ -3,7 +3,6 @@ package org.sunbird.user.actors;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
@@ -193,38 +191,6 @@ public class ManagedUserActor extends UserBaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
     generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
-  }
-
-  private void convertValidatedLocationCodesToIDs(
-      Map<String, Object> userMap, RequestContext context) {
-    if (userMap.containsKey(JsonKey.LOCATION_IDS)
-        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
-      userMap.remove(JsonKey.LOCATION_IDS);
-    }
-    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
-        && userMap.containsKey(JsonKey.LOCATION_CODES)
-        && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      List<Map<String, String>> locationIdTypeList =
-          locationService.getValidatedRelatedLocationIdAndType(
-              (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);
-      if (locationIdTypeList != null && !locationIdTypeList.isEmpty()) {
-        try {
-          userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdTypeList));
-        } catch (Exception ex) {
-          logger.error(context, "Exception occurred while mapping", ex);
-          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-        }
-
-        userMap.remove(JsonKey.LOCATION_CODES);
-      } else {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                JsonKey.LOCATION_CODES,
-                userMap.get(JsonKey.LOCATION_CODES)));
-      }
-    }
   }
 
   private void ignoreOrAcceptFrameworkData(

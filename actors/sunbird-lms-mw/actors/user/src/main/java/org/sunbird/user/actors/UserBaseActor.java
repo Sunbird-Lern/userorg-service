@@ -1,6 +1,7 @@
 package org.sunbird.user.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,8 @@ import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.Util;
+import org.sunbird.location.service.LocationService;
+import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.UserLookupService;
@@ -321,6 +324,40 @@ public abstract class UserBaseActor extends BaseActor {
       }
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
+  }
+
+  protected void convertValidatedLocationCodesToIDs(
+      Map<String, Object> userMap, RequestContext context) {
+    if (userMap.containsKey(JsonKey.LOCATION_IDS)
+        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
+      userMap.remove(JsonKey.LOCATION_IDS);
+    }
+    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
+        && userMap.containsKey(JsonKey.LOCATION_CODES)
+        && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
+      LocationService locationService = LocationServiceImpl.getInstance();
+      ObjectMapper mapper = new ObjectMapper();
+      List<Map<String, String>> locationIdTypeList =
+          locationService.getValidatedRelatedLocationIdAndType(
+              (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);
+      if (locationIdTypeList != null && !locationIdTypeList.isEmpty()) {
+        try {
+          userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdTypeList));
+        } catch (Exception ex) {
+          logger.error(context, "Exception occurred while mapping", ex);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
+
+        userMap.remove(JsonKey.LOCATION_CODES);
+      } else {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                JsonKey.LOCATION_CODES,
+                userMap.get(JsonKey.LOCATION_CODES)));
+      }
     }
   }
 }
