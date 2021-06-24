@@ -30,8 +30,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
@@ -48,8 +46,6 @@ public class ManagedUserActor extends UserBaseActor {
   private UserClient userClient = UserClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private LocationService locationService = LocationServiceImpl.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
 
   @Override
@@ -169,7 +165,7 @@ public class ManagedUserActor extends UserBaseActor {
         // user_events
         KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
       } catch (Exception ex) {
-        ex.printStackTrace();
+        logger.error("Exception occurred while writing event to kafka", ex);
       }
       sender().tell(response, self());
     } else {

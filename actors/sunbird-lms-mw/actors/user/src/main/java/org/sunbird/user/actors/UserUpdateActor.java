@@ -14,8 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -35,8 +33,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
@@ -62,10 +58,8 @@ public class UserUpdateActor extends UserBaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
-  private LocationClient locationClient = LocationClientImpl.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
-  private LocationService locationService = LocationServiceImpl.getInstance();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
 

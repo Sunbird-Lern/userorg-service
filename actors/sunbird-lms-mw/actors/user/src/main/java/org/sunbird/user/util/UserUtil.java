@@ -928,17 +928,13 @@ public class UserUtil {
       String hashTagId, List<String> frameworkIdList, RequestContext context) {
     List<String> frameworks = DataCacheHandler.getHashtagIdFrameworkIdMap().get(hashTagId);
     String frameworkId = frameworkIdList.get(0);
-    if (frameworks != null && frameworks.contains(frameworkId)) {
-      return;
-    } else {
-      Map<String, List<Map<String, String>>> frameworkDetails =
-          getFrameworkDetails(frameworkId, context);
-      if (frameworkDetails == null)
-        throw new ProjectCommonException(
-            ResponseCode.errorNoFrameworkFound.getErrorCode(),
-            ResponseCode.errorNoFrameworkFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
+    Map<String, List<Map<String, String>>> frameworkDetails =
+        getFrameworkDetails(frameworkId, context);
+    if (frameworkDetails == null)
+      throw new ProjectCommonException(
+          ResponseCode.errorNoFrameworkFound.getErrorCode(),
+          ResponseCode.errorNoFrameworkFound.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
   private static Map<String, List<Map<String, String>>> getFrameworkDetails(
