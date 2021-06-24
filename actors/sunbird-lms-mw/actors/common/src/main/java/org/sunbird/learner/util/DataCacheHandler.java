@@ -1,6 +1,8 @@
 /** */
 package org.sunbird.learner.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -200,7 +202,22 @@ public class DataCacheHandler implements Runnable {
     }
     tempConfigSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
     tempConfigSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
+    updateFrameWorkCache(tempConfigSettings.get(JsonKey.USER_PROFILE_CONFIG));
     configSettings = tempConfigSettings;
+  }
+
+  private void updateFrameWorkCache(String userProfileConfig) {
+    if (StringUtils.isNotBlank(userProfileConfig)) {
+      try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, List<String>> valueMap =
+            objectMapper.convertValue(
+                userProfileConfig, new TypeReference<Map<String, List<String>>>() {});
+        setFrameworkFieldsConfig(valueMap);
+      } catch (Exception ex) {
+        logger.error("Exception occurred while parsing framework details.", ex);
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")

@@ -15,8 +15,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.user.UserClient;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -26,7 +24,6 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
@@ -36,7 +33,6 @@ import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
@@ -44,9 +40,7 @@ import org.sunbird.location.service.LocationService;
 import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.user.service.AssociationMechanism;
-import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
 import org.sunbird.validator.user.UserRequestValidator;
@@ -59,11 +53,9 @@ import scala.concurrent.Future;
 )
 public class ManagedUserActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private LocationClient locationClient = LocationClientImpl.getInstance();
   private UserClient userClient = UserClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private LocationService locationService = LocationServiceImpl.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
@@ -95,13 +87,13 @@ public class ManagedUserActor extends UserBaseActor {
    */
   private void createManagedUser(Request actorMessage) {
     logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor:createUserV4 method called.");
+        actorMessage.getRequestContext(), "UserManagementActor:createManagedUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
-      setProfileUserTypeAndLocation(userMap);
+      populateLocationCodesFromProfileLocation(userMap);
     }
     validateLocationCodes(actorMessage);
 
@@ -120,125 +112,25 @@ public class ManagedUserActor extends UserBaseActor {
     processUserRequestV4(userMap, managedBy, actorMessage);
   }
 
-  private void setProfileUserTypeAndLocation(Map<String, Object> userMap) {
-    userMap.remove(JsonKey.LOCATION_CODES);
-    if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
-      List<Map<String, String>> profLocList =
-          (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-      List<String> locationCodes = null;
-      if (CollectionUtils.isNotEmpty(profLocList)) {
-        locationCodes =
-            profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
-        userMap.put(JsonKey.LOCATION_CODES, locationCodes);
-      }
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-    }
-  }
-
   private void validateLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    if ((locationCodes != null) && !(locationCodes instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
+    validateLocationCodesDataType(locationCodes);
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
-      // As of now locationCode can take array of only locationCodes and map of locationCodes which
-      // include type and code of the location
-      String stateCode = null;
+      List<Location> locationList = getLocationList(locationCodes, userRequest.getRequestContext());
+      String stateCode = validateAndGetStateLocationCode(locationList);
+      List<String> allowedLocationTypeList =
+          getStateLocationTypeConfig(stateCode, userRequest.getRequestContext());
       List<String> set = new ArrayList<>();
-      List<Location> locationList;
-      if (((List) locationCodes).get(0) instanceof String) {
-        List<String> locations = (List<String>) locationCodes;
-        locationList =
-            locationClient.getLocationsByCodes(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locations,
-                userRequest.getRequestContext());
-        for (Location location : locationList) {
-          if (JsonKey.STATE.equals(location.getType())) {
-            stateCode = location.getCode();
-          }
-        }
-      } else {
-        locationList = createLocationLists((List<Map<String, String>>) locationCodes);
-        for (Location location : locationList) {
-          if (JsonKey.STATE.equals(location.getType())) {
-            stateCode = location.getCode();
-          }
-        }
-      }
-      // Throw an exception if location codes update is not passed with state code
-      if (StringUtils.isBlank(stateCode)) {
-        throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-                JsonKey.LOCATION_CODES + " of type State"),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-      Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
-      if (MapUtils.isEmpty(locationTypeConfigMap)
-          || CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-        Map<String, Object> userProfileConfigMap =
-            FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
-        // If config is not available check the default profile config
-        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
-          stateCode = JsonKey.DEFAULT_PERSONA;
-          if (CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-            userProfileConfigMap =
-                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
-            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-              List<String> locationTypeList =
-                  FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-              if (CollectionUtils.isNotEmpty(locationTypeList)) {
-                locationTypeConfigMap.put(stateCode, locationTypeList);
-              }
-            }
-          }
-        } else {
-          List<String> locationTypeList =
-              FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-          if (CollectionUtils.isNotEmpty(locationTypeList)) {
-            locationTypeConfigMap.put(stateCode, locationTypeList);
-          }
-        }
-      }
-      List<String> typeList = locationTypeConfigMap.get(stateCode);
       for (Location location : locationList) {
         // for create-MUA we allow locations upto district
         if ((location.getType().equals(JsonKey.STATE))
             || (location.getType().equals(JsonKey.DISTRICT))) {
-          isValidLocationType(location.getType(), typeList);
+          isValidLocationType(location.getType(), allowedLocationTypeList);
           set.add(location.getCode());
         }
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
     }
-  }
-
-  public static boolean isValidLocationType(String type, List<String> typeList) {
-    if (null != type && !typeList.contains(type.toLowerCase())) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return true;
-  }
-
-  private List<Location> createLocationLists(List<Map<String, String>> locationCodes) {
-    List<Location> locations = new ArrayList<>();
-    for (Map<String, String> locationMap : locationCodes) {
-      Location location = new Location();
-      location.setCode(locationMap.get(JsonKey.CODE));
-      location.setType(locationMap.get(JsonKey.TYPE));
-      locations.add(location);
-    }
-    return locations;
   }
 
   private void processUserRequestV4(
@@ -312,35 +204,6 @@ public class ManagedUserActor extends UserBaseActor {
       Patterns.pipe(future, getContext().dispatcher()).to(sender());
     }
     generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
-  }
-
-  private void removeUnwanted(Map<String, Object> reqMap) {
-    reqMap.remove(JsonKey.ADDRESS);
-    reqMap.remove(JsonKey.EDUCATION);
-    reqMap.remove(JsonKey.JOB_PROFILE);
-    reqMap.remove(JsonKey.ORGANISATION);
-    reqMap.remove(JsonKey.REGISTERED_ORG);
-    reqMap.remove(JsonKey.ROOT_ORG);
-    reqMap.remove(JsonKey.IDENTIFIER);
-    reqMap.remove(JsonKey.ORGANISATIONS);
-    reqMap.remove(JsonKey.IS_DELETED);
-    reqMap.remove(JsonKey.EXTERNAL_ID);
-    reqMap.remove(JsonKey.ID_TYPE);
-    reqMap.remove(JsonKey.EXTERNAL_ID_TYPE);
-    reqMap.remove(JsonKey.PROVIDER);
-    reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
-    reqMap.remove(JsonKey.EXTERNAL_IDS);
-    reqMap.remove(JsonKey.ORGANISATION_ID);
-    reqMap.remove(JsonKey.ROLES);
-    Util.getUserDefaultValue()
-        .keySet()
-        .stream()
-        .forEach(
-            key -> {
-              if (!JsonKey.PASSWORD.equalsIgnoreCase(key)) {
-                reqMap.remove(key);
-              }
-            });
   }
 
   private void convertValidatedLocationCodesToIDs(
@@ -497,54 +360,6 @@ public class ManagedUserActor extends UserBaseActor {
       }
     }
     return userFlagValue;
-  }
-
-  private Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> lookUp = new HashMap<>();
-    if (userMap.get(JsonKey.PHONE) != null) {
-      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
-      list.add(lookUp);
-    }
-    if (userMap.get(JsonKey.EMAIL) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
-      list.add(lookUp);
-    }
-    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
-      Map<String, Object> externalId =
-          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
-              .stream()
-              .filter(
-                  x -> ((String) x.get(JsonKey.ID_TYPE)).equals((String) x.get(JsonKey.PROVIDER)))
-              .findFirst()
-              .orElse(null);
-      if (MapUtils.isNotEmpty(externalId)) {
-        lookUp = new HashMap<>();
-        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-        lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-        // provider is the orgId, not the channel
-        lookUp.put(
-            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
-        list.add(lookUp);
-      }
-    }
-    if (userMap.get(JsonKey.USERNAME) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
-      list.add(lookUp);
-    }
-    Response response = null;
-    if (CollectionUtils.isNotEmpty(list)) {
-      response = userLookupService.insertRecords(list, context);
-    }
-    return response;
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
