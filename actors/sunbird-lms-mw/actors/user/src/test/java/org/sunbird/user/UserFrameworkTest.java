@@ -5,7 +5,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.Props;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
@@ -52,42 +50,25 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+    reqObj.getRequest().remove(JsonKey.USER);
     boolean res = testScenario(reqObj, null, props);
     assertTrue(res);
   }
 
   @Test
   public void testUpdateUserFrameworkFailureInvalidGradeLevel() {
-    Request reqObj = getRequest("gradeLevel", "SomeWrongGrade");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
-    assertTrue(res);
-  }
-
-  @Test
-  public void testUpdateUserFrameworkFailureInvalidMedium() {
-    Request reqObj = getRequest("medium", "glish");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
-    assertTrue(res);
-  }
-
-  @Test
-  public void testUpdateUserFrameworkFailureInvalidBoard() {
-    Request reqObj = getRequest("board", "RBCS");
-    boolean res = testScenario(reqObj, ResponseCode.invalidParameterValue, props);
-    assertTrue(res);
-  }
-
-  @Test
-  public void testUpdateUserFrameworkFailureInvalidFrameworkId() {
-    Request reqObj = getRequest(JsonKey.ID, "invalidFrameworkId");
-    boolean res = testScenario(reqObj, ResponseCode.errorNoFrameworkFound, props);
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+    Request reqObj = getRequest(null, null);
+    boolean res = testScenario(reqObj, null, props);
     assertTrue(res);
   }
 
   @SuppressWarnings("unchecked")
   public void mockForUpdateTest() {
     mockUtilsForOrgDetails();
-    mockDataCacheHandler();
     mockContentStoreUtil();
   }
 
@@ -103,29 +84,6 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     contentMap.put(JsonKey.RESPONSE, null);
     when(ContentStoreUtil.readFramework("invalidFrameworkId", new RequestContext()))
         .thenReturn(contentMap);
-  }
-
-  private void mockDataCacheHandler() {
-    Map<String, List<String>> frameworkFieldsConfigMap = new HashMap<>();
-    List<String> frameworkFieldConfig =
-        Arrays.asList("id", "medium", "gradeLevel", "board", "subject");
-    List<String> frameworkFieldConfigMan = Arrays.asList("id", "medium", "gradeLevel", "board");
-    frameworkFieldsConfigMap.put(JsonKey.FIELDS, frameworkFieldConfig);
-    frameworkFieldsConfigMap.put(JsonKey.MANDATORY_FIELDS, frameworkFieldConfigMan);
-    Mockito.when(DataCacheHandler.getFrameworkFieldsConfig()).thenReturn(frameworkFieldsConfigMap);
-
-    Map<String, List<Map<String, String>>> frameworkCategoriesMap = new HashMap<>();
-    frameworkCategoriesMap.put("medium", getListForCategoryMap("English"));
-    frameworkCategoriesMap.put("gradeLevel", getListForCategoryMap("Grade 3"));
-    frameworkCategoriesMap.put("board", getListForCategoryMap("NCERT"));
-
-    Map<String, Map<String, List<Map<String, String>>>> frameworkCategory = new HashMap<>();
-    frameworkCategory.put("NCF", frameworkCategoriesMap);
-    when(DataCacheHandler.getFrameworkCategoriesMap()).thenReturn(frameworkCategory);
-    Map<String, List<String>> map1 = new HashMap<>();
-    List<String> list1 = Arrays.asList("NCF");
-    map1.put("someHashTagId", list1);
-    when(DataCacheHandler.getHashtagIdFrameworkIdMap()).thenReturn(map1);
   }
 
   private Request getRequest(String key, String value) {
@@ -167,7 +125,9 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     gradeLevel.add("Grade 3");
     List<String> board = new ArrayList<>();
     board.add("NCERT");
-    frameworkMap.put(JsonKey.ID, "NCF");
+    List<String> frameId = new ArrayList<>();
+    frameId.add("NCF");
+    frameworkMap.put(JsonKey.ID, frameId);
     frameworkMap.put("gradeLevel", gradeLevel);
     frameworkMap.put("board", board);
     frameworkMap.put("medium", medium);

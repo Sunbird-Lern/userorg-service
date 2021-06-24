@@ -912,9 +912,9 @@ public class UserUtil {
           userRequestMap, frameworkFields, frameworkMandatoryFields);
       Map<String, Object> rootOrgMap =
           Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
-      String hashtagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
+      String hashTagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
 
-      verifyFrameworkId(hashtagId, frameworkIdList, context);
+      verifyFrameworkId(hashTagId, frameworkIdList, context);
       Map<String, List<Map<String, String>>> frameworkCachedValue =
           getFrameworkDetails(frameworkIdList.get(0), context);
       ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK)).remove(JsonKey.ID);
